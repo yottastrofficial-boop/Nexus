@@ -1,0 +1,64 @@
+<section class="nexus-sheet-root">
+  <header class="nexus-header">
+    <div class="nexus-identity">
+      <div class="nexus-portrait"><img src="{{actor.img}}" alt="Retrato de {{actor.name}}"></div>
+      <div class="nexus-name-fields">
+        <label class="nexus-name-label">Nome do personagem<input type="text" name="name" value="{{actor.name}}" placeholder="Nome do personagem"></label>
+        <div class="nexus-identity-fields">
+          <label>Nível<input type="number" name="system.details.level" value="{{system.details.level}}" min="1"></label>
+          <label>Experiência<input type="number" name="system.details.experience" value="{{system.details.experience}}" min="0"></label>
+          <label>Linhagem<input type="text" name="system.details.lineage" value="{{system.details.lineage}}"></label>
+          <label>2ª linhagem<input type="text" name="system.details.lineage2" value="{{system.details.lineage2}}"></label>
+          <label>Legado<input type="text" name="system.details.legacy" value="{{system.details.legacy}}"></label>
+        </div>
+      </div>
+    </div>
+    <div class="nexus-header-tools"><button type="button" data-action="toggleArrange" class="nexus-arrange-button">{{#if arranging}}Concluir organização{{else}}Organizar ficha{{/if}}</button><span class="nexus-version">NEXUS · TESTE 02</span></div>
+  </header>
+  <div class="nexus-workspace">
+    <aside class="nexus-resource-sidebar">
+      <div class="nexus-sidebar-title">Recursos</div>
+      <section class="nexus-sidebar-canvas {{#if arranging}}is-arranging{{/if}}" data-canvas="sidebar" data-columns="4" data-cell-height="32">
+        <label class="nexus-resource hp" data-block="resource-hp" style="grid-column:1 / span 4;grid-row:1 / span 2"><span>PV</span><div><input type="number" name="system.resources.hp.value" value="{{system.resources.hp.value}}"><small>/</small><input type="number" name="system.resources.hp.max" value="{{system.resources.hp.max}}"></div><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></label>
+        <label class="nexus-resource" data-block="resource-mp" style="grid-column:1 / span 4;grid-row:3 / span 2"><span>PM</span><div><input type="number" name="system.resources.mp.value" value="{{system.resources.mp.value}}"><small>/</small><input type="number" name="system.resources.mp.max" value="{{system.resources.mp.max}}"></div><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></label>
+        <label class="nexus-resource" data-block="resource-ep" style="grid-column:1 / span 4;grid-row:5 / span 2"><span>PE</span><div><input type="number" name="system.resources.ep.value" value="{{system.resources.ep.value}}"><small>/</small><input type="number" name="system.resources.ep.max" value="{{system.resources.ep.max}}"></div><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></label>
+        <label class="nexus-resource" data-block="resource-temp-hp" style="grid-column:1 / span 4;grid-row:7 / span 2"><span>PV temp.</span><div><input type="number" name="system.resources.temporaryHp" value="{{system.resources.temporaryHp}}"></div><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></label>
+      </section>
+      <div class="nexus-sidebar-title">Indicadores</div>
+      <section class="nexus-sidebar-canvas {{#if arranging}}is-arranging{{/if}}" data-canvas="sidebar-derived" data-columns="4" data-cell-height="30">
+        <div class="nexus-derived" data-block="side-defense" style="grid-column:1 / span 4;grid-row:1 / span 1"><span>DEF</span><strong>{{derived.defense}}</strong><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></div>
+        <div class="nexus-derived" data-block="side-mb" style="grid-column:1 / span 4;grid-row:2 / span 1"><span>MB</span><strong>+{{derived.proficiency}}</strong><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></div>
+        <div class="nexus-derived" data-block="side-load" style="grid-column:1 / span 4;grid-row:3 / span 1"><span>Carga</span><strong>{{derived.loadCapacity}}</strong><b class="nexus-drag-grip">⠿</b><i class="nexus-resize-grip"></i></div>
+      </section>
+    </aside>
+    <main class="nexus-main-area">
+      {{#if isCharacterView}}
+        <div class="nexus-canvas-toolbar"><span>PERSONAGEM</span><small>{{#if arranging}}Arraste pela alça ⠿ para mover na grade; use o canto para redimensionar largura e altura.{{else}}Ficha padrão NEXUS{{/if}}</small></div>
+        <section class="nexus-canvas {{#if arranging}}is-arranging{{/if}}" data-canvas="character" data-columns="12" data-cell-height="30">
+          <article class="nexus-canvas-block nexus-indicators-block" data-block="indicators" style="grid-column:1 / span 12;grid-row:1 / span 3"><div class="nexus-block-head"><h3>Indicadores</h3><span class="nexus-drag-grip">⠿</span></div><div class="nexus-indicator-row">
+            <div><small>DESL.</small><strong>—</strong></div><div><small>DdR</small><strong>—</strong></div><div><small>DEF</small><strong>{{derived.defense}}</strong></div><div><small>MB</small><strong>+{{derived.proficiency}}</strong></div>
+          </div><i class="nexus-resize-grip" aria-hidden="true"></i></article>
+          <article class="nexus-canvas-block nexus-attributes-block" data-block="attributes" style="grid-column:1 / span 12;grid-row:4 / span 5"><div class="nexus-block-head"><h3>Atributos</h3><span class="nexus-drag-grip">⠿</span></div><div class="nexus-attribute-groups">
+            {{#each attributes as |attribute|}}<section class="nexus-attribute-group"><div class="nexus-attribute-title"><strong>{{attribute.label}}</strong><span>{{attribute.full}}</span><button type="button" data-action="rollAttribute" data-attribute="{{attribute.key}}" data-label="{{attribute.full}}">d20</button></div><input class="nexus-attribute-value" type="number" name="system.attributes.{{attribute.key}}.value" value="{{attribute.value}}"></section>{{/each}}
+          </div><i class="nexus-resize-grip" aria-hidden="true"></i></article>
+          <article class="nexus-canvas-block nexus-skills-block" data-block="skills" style="grid-column:1 / span 12;grid-row:9 / span 10"><div class="nexus-block-head"><h3>Perícias</h3><span class="nexus-drag-grip">⠿</span></div><div class="nexus-skills-grid">
+            {{#each attributes as |attribute|}}<section class="nexus-skill-group"><h4>{{attribute.label}} <small>{{attribute.full}}</small></h4>{{#each attribute.skills as |skill|}}<div class="nexus-skill-row"><label><input type="checkbox" name="{{skill.path}}" {{#if skill.proficient}}checked{{/if}}><span>{{skill.label}}</span></label><button type="button" data-action="rollSkill" data-group="{{attribute.key}}" data-skill="{{skill.key}}" data-label="{{skill.label}}">↗</button></div>{{/each}}</section>{{/each}}
+          </div><i class="nexus-resize-grip" aria-hidden="true"></i></article>
+          <article class="nexus-canvas-block nexus-actions-block" data-block="actions" style="grid-column:1 / span 12;grid-row:19 / span 5"><div class="nexus-block-head"><h3>Ações</h3><span class="nexus-drag-grip">⠿</span></div><div class="nexus-action-columns"><section><h4>Ataques</h4><p>Espaço para ataques.</p></section><section><h4>Ações</h4><p>Espaço para ações.</p></section><section><h4>Reações</h4><p>Espaço para reações.</p></section></div><i class="nexus-resize-grip" aria-hidden="true"></i></article>
+        </section>
+      {{else if isNotesView}}
+        <section class="nexus-panel nexus-placeholder"><h2>Anotações</h2><label>Notas do personagem<textarea name="system.notes" rows="12">{{system.notes}}</textarea></label></section>
+      {{else}}
+        <section class="nexus-panel nexus-placeholder"><h2>{{#if isInventoryView}}Inventário{{else if isFeaturesView}}Características{{else}}Efeitos{{/if}}</h2><p>Área reservada para esta categoria. A estrutura visual será conectada aos documentos e operações próprios em uma etapa posterior.</p></section>
+      {{/if}}
+    </main>
+    <nav class="nexus-icon-rail" aria-label="Navegação da ficha">
+      <button type="button" data-action="selectView" data-view="character" class="{{#if isCharacterView}}active{{/if}}" title="Personagem">★</button>
+      <button type="button" data-action="selectView" data-view="inventory" class="{{#if isInventoryView}}active{{/if}}" title="Inventário">▣</button>
+      <button type="button" data-action="selectView" data-view="features" class="{{#if isFeaturesView}}active{{/if}}" title="Características">◈</button>
+      <button type="button" data-action="selectView" data-view="effects" class="{{#if isEffectsView}}active{{/if}}" title="Efeitos">✣</button>
+      <button type="button" data-action="selectView" data-view="notes" class="{{#if isNotesView}}active{{/if}}" title="Anotações">▤</button>
+    </nav>
+  </div>
+  <footer class="nexus-sheet-footer"><span>Alterações salvas no Actor.</span><span>{{#if arranging}}Modo de organização ativo{{else}}Canvas NEXUS · modelo padrão{{/if}}</span></footer>
+</section>

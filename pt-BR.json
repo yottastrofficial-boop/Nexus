@@ -1,0 +1,7 @@
+{
+  "NEXUS": {
+    "Actor": { "PlayerCharacter": "Personagem", "NPC": "NPC" },
+    "Sheet": { "Default": "Padrão", "Config": "Configuração", "Appearance": "Aparência", "Library": "Biblioteca", "Add": "Adicionar", "Save": "Salvar layout" },
+    "Resource": { "PV": "Pontos de Vida", "PM": "Pontos de Mana", "PE": "Pontos de Energia" }
+  }
+}
