@@ -1,28 +1,138 @@
-# NEXUS RPG — Ficha Modular Foundry VTT
+# NEXUS RPG
 
-Versão **1.0.0** — reconstrução da base da ficha modular para Foundry VTT V14.
+<p align="center">
+  <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
+  Projeto em desenvolvimento · Versão 1.0.0 · Foundry VTT 14
+</p>
+
+<p align="center">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0-6750A4">
+  <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
+  <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
+  <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
+</p>
+
+O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
+
+> **Escopo desta versão:** a versão 1.0.0 é uma base funcional da implementação Foundry. Ela não representa, por si só, a conclusão de toda a visão modular planejada para o NEXUS.
+
+## Visão geral
+
+A proposta de longo prazo é separar três responsabilidades:
+
+- **Regras e módulos:** definem atributos, recursos, propriedades e comportamentos de cada experiência de RPG.
+- **Ficha e componentes:** determinam como os dados são apresentados e organizados na interface.
+- **Estilo e mídia:** controlam a aparência e os recursos visuais sem precisar alterar as mecânicas.
+
+Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+
+## O que existe na versão 1.0.0
+
+Com base no código e na documentação presentes neste repositório, a versão inclui:
+
+- Ficha Canvas modular para os tipos de Actor registrados pelo sistema.
+- Biblioteca de elementos organizada por categorias, com busca, prévia e configuração antes da inserção.
+- Componentes para informações de personagem, recursos, atributos, perícias, ações, imagens, textos e estruturas visuais.
+- Configuração visual da ficha, incluindo seletor de cores com HSV e opacidade.
+- Editor de propriedades que percorre estruturas de dados de `Actor.system`.
+- Prévia de mídia no editor de dados quando o valor vinculado corresponde a uma imagem, áudio ou vídeo reconhecível.
+- Configurações iniciais de dados para novos Actors e tokens de protótipo vinculados ao Actor.
+
+A lista descreve o escopo observado no pacote; não significa que todas as possibilidades de personalização ou todos os fluxos estejam livres de limitações.
+
+## Compatibilidade
+
+| Requisito | Versão |
+|---|---|
+| Foundry Virtual Tabletop | V14 |
+| Versão do sistema | 1.0.0 |
+| Idioma incluído | Português (Brasil) |
+
+A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
-1. Extraia a pasta `nexus` para `Data/systems/`.
-2. Confirme que o caminho final é `Data/systems/nexus/system.json`.
-3. Reinicie o Foundry VTT e selecione NEXUS RPG ao criar/editar o mundo.
+### Instalação manual
 
-## Observações da versão
+1. Abra a página do repositório: [NEXUS RPG no GitHub](https://github.com/yottastrofficial-boop/Nexus).
+2. Use **Code → Download ZIP**.
+3. Extraia o conteúdo para a pasta de sistemas do Foundry:
+   `Data/systems/nexus/`.
+4. Confirme que o arquivo `system.json` está diretamente dentro da pasta `nexus`.
+5. Reinicie o Foundry VTT e selecione **NEXUS RPG** ao criar um mundo.
 
-- Revisão da preservação de foco e rolagem dos painéis durante atualizações.
-- Navegação e foco visual limitados aos estados ativos/visíveis.
-- Seletor de cores próprio do NEXUS, com espectro HSV, opacidade e texturas opcionais para fundos.
-- Seletor de imagem do token reposicionado em Geral > Dados.
-- Prévia de mídia no editor de Dados quando a propriedade vinculada contém uma imagem, áudio ou vídeo reconhecível.
-- Descoberta recursiva de propriedades do Actor.system, incluindo campos irmãos de `value` e `max`.
-- Removidos os botões globais de restauração de tema/tipografia que estavam apresentando problemas.
+A estrutura final deve ficar semelhante a:
 
-## Limites de validação
+```text
+Data/
+└── systems/
+    └── nexus/
+        ├── system.json
+        ├── scripts/
+        ├── styles/
+        ├── templates/
+        ├── lang/
+        └── assets/
+```
 
-A versão passou por verificações estáticas de sintaxe JavaScript, JSON, integridade do pacote e consistência básica dos templates. Ela ainda precisa de teste funcional dentro de uma instalação real do Foundry VTT V14, incluindo foco entre janelas, persistência de dados, mídia e diferentes tipos de Actor.
+### Instalação por manifesto
 
+O manifesto do sistema está definido em:
 
-## Interface controls (1.0.0)
+```text
+https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/system.json
+```
 
-A interface utiliza o seletor de cores NEXUS com espectro HSV, controle de opacidade e texturas opcionais para superfícies. Os seletores de propriedades permanecem vinculados ao inspetor de origem para evitar portais duplicados durante atualizações da ficha.
+A instalação por manifesto depende de um pacote de distribuição válido e acessível. Caso o Foundry não consiga baixar o sistema, utilize a instalação manual acima.
+
+## Estrutura do repositório
+
+```text
+.
+├── assets/
+│   └── library/       # Catálogo e documentação da biblioteca
+├── docs/              # Contexto, arquitetura e planejamento
+├── lang/              # Traduções
+├── scripts/           # Inicialização e lógica da ficha
+├── styles/            # Estilos visuais
+├── templates/         # Templates Handlebars
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── README.md
+└── system.json        # Manifesto do sistema Foundry
+```
+
+## Documentação
+
+- [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)
+- [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
+- [Como contribuir](CONTRIBUTING.md)
+- [Histórico de alterações](CHANGELOG.md)
+- [Documentação da biblioteca](assets/library/README.md)
+
+## Estado e validação
+
+A versão 1.0.0 possui verificações estáticas documentadas para JavaScript, JSON, CSS, templates e integridade do pacote. Isso não substitui testes funcionais em uma instalação real do Foundry VTT.
+
+**Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
+
+Consulte o [CHANGELOG](CHANGELOG.md) para os detalhes registrados desta versão.
+
+## Princípios do projeto
+
+- Preservar identificadores e referências de dados estáveis.
+- Separar dados, comportamento e apresentação sempre que possível.
+- Preferir APIs públicas e padrões oficiais do Foundry VTT.
+- Construir funcionalidades em etapas pequenas e verificáveis.
+- Distinguir claramente recursos implementados de ideias em planejamento.
+
+## Contribuição
+
+Sugestões, relatos de problemas e melhorias são bem-vindos. Antes de propor uma alteração, leia [CONTRIBUTING.md](CONTRIBUTING.md) e descreva o comportamento esperado, o cenário em que ocorre e a versão utilizada.
+
+---
+
+<p align="center">
+  <strong>NEXUS RPG</strong><br>
+  <sub>Uma fundação flexível para experiências de RPG.</sub>
+</p>
