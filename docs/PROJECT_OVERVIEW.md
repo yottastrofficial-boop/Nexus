@@ -4,7 +4,7 @@
 
 NEXUS é um projeto de RPG com uma implementação para Foundry Virtual Tabletop. A direção arquitetural de longo prazo é oferecer uma base modular na qual diferentes módulos possam definir suas próprias propriedades, regras e conteúdos, enquanto a ficha apresenta essas informações de forma configurável.
 
-Este documento descreve a intenção arquitetural e a separa do que está comprovadamente presente no pacote 1.0.0.2 (em preparação).
+Este documento descreve a intenção arquitetural e a separa do que está comprovadamente presente no base 1.0.0.1, em atualização para 1.0.0.2.
 
 ## Três camadas conceituais
 
@@ -18,15 +18,15 @@ Os documentos mecânicos oficiais do NEXUS RPG continuam sendo a referência par
 
 A ficha deverá permitir organizar informações por meio de componentes. A intenção é que a apresentação não imponha uma disposição única e rígida para todas as experiências.
 
-O pacote 1.0.0.2 (em preparação) já contém uma ficha Canvas e uma biblioteca de elementos. Um editor visual completo, criação avançada de componentes e gerenciamento abrangente de modelos permanecem fora do escopo confirmado desta versão.
+A base 1.0.0.1 já contém uma ficha Canvas e uma biblioteca de elementos. Um editor visual completo, criação avançada de componentes e gerenciamento abrangente de modelos permanecem fora do escopo confirmado desta versão.
 
 ### 3. Estilo e mídia
 
 A direção planejada separa a função de um componente, sua forma de representação e sua aparência. Também prevê uma biblioteca de mídia e mecanismos de otimização.
 
-A versão 1.0.0.2 (em preparação) já inclui recursos de personalização visual e prévia de determinados tipos de mídia. Isso não significa que toda a infraestrutura futura de mídia, cache, carregamento sob demanda ou animações esteja concluída.
+A base 1.0.0.1 já inclui recursos de personalização visual e prévia de determinados tipos de mídia. Isso não significa que toda a infraestrutura futura de mídia, cache, carregamento sob demanda ou animações esteja concluída.
 
-## Implementação atual — versão 1.0.0.2 (em preparação)
+## Implementação herdada da versão 1.0.0.1
 
 A implementação está concentrada em:
 
