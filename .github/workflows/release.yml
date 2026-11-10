@@ -1,0 +1,93 @@
+name: Validate and publish NEXUS
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+    paths:
+      - system.json
+      - scripts/**
+      - styles/**
+      - templates/**
+      - assets/**
+      - lang/**
+      - tests/**
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module --check < scripts/nexus-v1.0.0.js
+          node --input-type=module --check < scripts/sheets/actor-sheet-v1.0.0.js
+          node --input-type=module --check < assets/library/catalog.js
+          node --check tests/validate-package.mjs
+
+      - name: Validate package structure and regressions
+        run: node tests/validate-package.mjs
+
+      - name: Build Foundry distribution ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./system.json').version")"
+          echo "NEXUS version: $VERSION"
+          zip -X -r nexus.zip system.json scripts styles templates lang assets
+          unzip -Z1 nexus.zip | grep -qx 'system.json'
+          unzip -Z1 nexus.zip | grep -qx 'scripts/nexus-v1.0.0.js'
+          unzip -Z1 nexus.zip | grep -qx 'scripts/sheets/actor-sheet-v1.0.0.js'
+          unzip -Z1 nexus.zip | grep -qx 'templates/actors/actor-sheet.hbs'
+          unzip -Z1 nexus.zip | grep -qx 'templates/actors/panel-window.hbs'
+          unzip -p nexus.zip system.json | node -e "let data=''; process.stdin.on('data', chunk => data += chunk).on('end', () => { const m = JSON.parse(data); if (m.id !== 'nexus' || m.version !== '$VERSION') process.exit(1); });"
+
+      - name: Upload ZIP backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-v${{ github.ref == 'refs/heads/main' && '1.0.0.1' || github.ref_name }}
+          path: nexus.zip
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Ensure release tag is unused
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v$(node -p "require('./system.json').version")"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists. Increment system.json before publishing." >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0.1
+          target_commitish: main
+          name: NEXUS v1.0.0.1
+          body: |
+            Pacote de instalação e atualização do NEXUS RPG para Foundry VTT V14.
+
+            O arquivo nexus.zip contém system.json diretamente na raiz.
+            Consulte CHANGELOG.md para o histórico de alterações.
+          files: nexus.zip
+          fail_on_unmatched_files: true
+          make_latest: true
