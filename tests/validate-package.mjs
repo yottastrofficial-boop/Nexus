@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
+import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -48,6 +49,51 @@ assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationSta
 const prepareContext = sheet.slice(prepareStart, migrationStart);
 assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
 assert.match(sheet, /await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
+
+
+// Exercise the legacy migration manager with a minimal Actor-like document.
+const fakeActor = {
+  flags: { nexus: {
+    activeLayout: "layout-inexistente",
+    aliases: [{ id: "alias-1", key: "old.key", targetPath: null }],
+    customData: { old: { key: 17 } }
+  }},
+  writes: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) {
+    this.flags[scope] ??= {};
+    this.flags[scope][key] = structuredClone(value);
+    this.writes++;
+  }
+};
+const getSafePath = (object, keyPath) => String(keyPath).split(".").reduce((value, key) => value?.[key], object);
+const setSafePath = (object, keyPath, value) => {
+  const parts = String(keyPath).split(".");
+  const leaf = parts.pop();
+  let target = object;
+  for (const part of parts) target = target[part] ??= {};
+  target[leaf] = value;
+};
+const normalizedAliases = [{ id: "alias-1", key: "new.key", targetPath: null }];
+const migrationDependencies = {
+  actor: fakeActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => normalizedAliases,
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key" }),
+  invalidateAliasDefinitionCache: () => {},
+  getPath: getSafePath,
+  clone: value => structuredClone(value),
+  setProperty: setSafePath
+};
+await migrateLegacyActorData(migrationDependencies);
+assert.equal(fakeActor.getFlag("nexus", "activeLayout"), "principal");
+assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "new.key"), 17);
+assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), undefined);
+assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
+const migrationWriteCount = fakeActor.writes;
+await migrateLegacyActorData(migrationDependencies);
+assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
 assert.match(sheet, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
