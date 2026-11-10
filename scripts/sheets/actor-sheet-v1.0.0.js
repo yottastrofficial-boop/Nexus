@@ -1897,6 +1897,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const inspectorNamespace = `.nexusInspector${String(this.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     this._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
+    $(window).off(inspectorNamespace);
     const positionPropertyOptions = input => {
       if (!input?.isConnected) return;
       const inspector = input.closest(".nexus-component-inspector");
@@ -3588,7 +3589,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   _onClose(options) {
     this._nexusKeyCleanup?.(); this._nexusInspectorKeyCleanup?.();
-    if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
+    if (this._nexusInspectorNamespace) {
+      $(document).off(this._nexusInspectorNamespace);
+      $(window).off(this._nexusInspectorNamespace);
+    }
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
     this._nexusPanelWindows?.clear?.();
