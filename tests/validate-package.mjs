@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
+import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
+import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -13,11 +15,11 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.1", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.2", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.1\/nexus\.zip$/);
+assert.match(manifest.download, /releases\/download\/v1\.0\.0\.2\/nexus\.zip$/);
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
   await exists(file);
@@ -35,11 +37,93 @@ const collectJavaScript = async directory => {
 };
 for (const file of [...await collectJavaScript("scripts"), ...await collectJavaScript("assets")]) {
   const source = await read(file);
-  for (const match of source.matchAll(/(?:from\\s*|import\\s*)["']([^"']+)["']/g)) {
+  for (const match of source.matchAll(/(?:from\s*|import\s*)["']([^"']+)["']/g)) {
     const specifier = match[1];
     if (specifier.startsWith(".")) await exists(path.relative(root, path.resolve(root, path.dirname(file), specifier)));
   }
 }
+
+const actorSheetStart = sheet.indexOf("class NexusActorSheet");
+const prepareStart = sheet.indexOf("async _prepareContext(options = {})", actorSheetStart);
+const migrationStart = sheet.indexOf("async _migrateLegacyActorData()", prepareStart);
+assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationStart > prepareStart, "Ciclo de preparação/migração da ficha não localizado");
+const prepareContext = sheet.slice(prepareStart, migrationStart);
+assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
+assert.match(sheet, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
+assert.match(sheet, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
+
+
+// Exercise the legacy migration manager with a minimal Actor-like document.
+const fakeActor = {
+  flags: { nexus: {
+    activeLayout: "layout-inexistente",
+    aliases: [{ id: "alias-1", key: "old.key", targetPath: null }],
+    customData: { old: { key: 17 } }
+  }},
+  writes: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) {
+    this.flags[scope] ??= {};
+    this.flags[scope][key] = structuredClone(value);
+    this.writes++;
+  }
+};
+const getSafePath = (object, keyPath) => String(keyPath).split(".").reduce((value, key) => value?.[key], object);
+const setSafePath = (object, keyPath, value) => {
+  const parts = String(keyPath).split(".");
+  const leaf = parts.pop();
+  let target = object;
+  for (const part of parts) target = target[part] ??= {};
+  target[leaf] = value;
+};
+const normalizedAliases = [{ id: "alias-1", key: "new.key", targetPath: null }];
+const migrationDependencies = {
+  actor: fakeActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => normalizedAliases,
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key" }),
+  invalidateAliasDefinitionCache: () => {},
+  getPath: getSafePath,
+  clone: value => structuredClone(value),
+  setProperty: setSafePath
+};
+const firstMigration = await migrateLegacyActorData(migrationDependencies);
+assert.equal(firstMigration.changed, true, "Primeira migração deve sinalizar alteração");
+assert.equal(fakeActor.getFlag("nexus", "activeLayout"), "principal");
+assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "new.key"), 17);
+assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), undefined);
+assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
+const migrationWriteCount = fakeActor.writes;
+const secondMigration = await migrateLegacyActorData(migrationDependencies);
+assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
+assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
+
+
+// Three-way persistence merge: preserve edits to separate components and
+// layout properties made after the original read snapshot.
+const baseLayouts = {
+  principal: {
+    id: "principal", width: 800,
+    components: [
+      { id: "component-a", x: 0, y: 0, text: "A" },
+      { id: "component-b", x: 10, y: 10, text: "B" }
+    ],
+    groups: [], links: []
+  }
+};
+const desiredLayouts = structuredClone(baseLayouts);
+desiredLayouts.principal.components[0].x = 30;
+const latestLayouts = structuredClone(baseLayouts);
+latestLayouts.principal.components[1].y = 50;
+latestLayouts.principal.width = 920;
+const mergedLayouts = mergeLayoutSnapshots(baseLayouts, desiredLayouts, latestLayouts);
+assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-a").x, 30);
+assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-b").y, 50);
+assert.equal(mergedLayouts.principal.width, 920);
+assert.match(sheet, /layoutReadSnapshots\.set\(layouts/);
+assert.match(sheet, /mergeLayoutSnapshots\(snapshot\.layouts, layouts, latest\)/);
+assert.match(sheet, /layoutWriteQueues\.get\(queueKey\)/);
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
 assert.match(sheet, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
@@ -71,7 +155,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.1/);
-assert.match(changelog, /## 1\.0\.0\.1/);
+assert.match(readme, /Versão 1\.0\.0\.2/);
+assert.match(changelog, /## 1\.0\.0\.2/);
 
-console.log("NEXUS 1.0.0.1: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.2: validações estáticas aprovadas.");

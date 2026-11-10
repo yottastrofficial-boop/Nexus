@@ -14,6 +14,8 @@ jobs:
   validate:
     name: Validate package
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +24,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Read package version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('system.json', 'utf8')).version")
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check JavaScript syntax
         shell: bash
@@ -42,7 +51,7 @@ jobs:
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-1.0.0.1
+          name: nexus-${{ steps.version.outputs.value }}
           path: nexus.zip
           if-no-files-found: error
           retention-days: 14
@@ -56,13 +65,13 @@ jobs:
       - name: Download validated package
         uses: actions/download-artifact@v4
         with:
-          name: nexus-1.0.0.1
+          name: nexus-${{ needs.validate.outputs.version }}
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0.1
-          name: NEXUS 1.0.0.1
+          tag_name: v${{ needs.validate.outputs.version }}
+          name: NEXUS ${{ needs.validate.outputs.version }}
           generate_release_notes: true
           make_latest: true
           fail_on_unmatched_files: true

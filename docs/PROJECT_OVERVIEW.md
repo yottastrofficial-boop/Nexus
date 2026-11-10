@@ -4,7 +4,7 @@
 
 NEXUS é um projeto de RPG com uma implementação para Foundry Virtual Tabletop. A direção arquitetural de longo prazo é oferecer uma base modular na qual diferentes módulos possam definir suas próprias propriedades, regras e conteúdos, enquanto a ficha apresenta essas informações de forma configurável.
 
-Este documento descreve a intenção arquitetural e a separa do que está comprovadamente presente no pacote 1.0.0.1.
+Este documento descreve a intenção arquitetural e a separa do que está comprovadamente presente no base 1.0.0.1, em atualização para 1.0.0.2.
 
 ## Três camadas conceituais
 
@@ -18,15 +18,15 @@ Os documentos mecânicos oficiais do NEXUS RPG continuam sendo a referência par
 
 A ficha deverá permitir organizar informações por meio de componentes. A intenção é que a apresentação não imponha uma disposição única e rígida para todas as experiências.
 
-O pacote 1.0.0.1 já contém uma ficha Canvas e uma biblioteca de elementos. Um editor visual completo, criação avançada de componentes e gerenciamento abrangente de modelos permanecem fora do escopo confirmado desta versão.
+A base 1.0.0.1 já contém uma ficha Canvas e uma biblioteca de elementos. Um editor visual completo, criação avançada de componentes e gerenciamento abrangente de modelos permanecem fora do escopo confirmado desta versão.
 
 ### 3. Estilo e mídia
 
 A direção planejada separa a função de um componente, sua forma de representação e sua aparência. Também prevê uma biblioteca de mídia e mecanismos de otimização.
 
-A versão 1.0.0.1 já inclui recursos de personalização visual e prévia de determinados tipos de mídia. Isso não significa que toda a infraestrutura futura de mídia, cache, carregamento sob demanda ou animações esteja concluída.
+A base 1.0.0.1 já inclui recursos de personalização visual e prévia de determinados tipos de mídia. Isso não significa que toda a infraestrutura futura de mídia, cache, carregamento sob demanda ou animações esteja concluída.
 
-## Implementação atual — versão 1.0.0.1
+## Implementação herdada da versão 1.0.0.1
 
 A implementação está concentrada em:
 
@@ -42,7 +42,7 @@ A implementação está concentrada em:
 | Caminho | Responsabilidade |
 |---|---|
 | `system.json` | Metadados, compatibilidade, documentos e arquivos carregados pelo Foundry |
-| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |
+| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |\n| `scripts/core/` | Serviços centrais extraídos incrementalmente; atualmente inclui migrações legadas |
 | `scripts/sheets/` | Lógica da ficha |
 | `templates/actors/` | Estrutura Handlebars |
 | `styles/` | Aparência e layout |
@@ -50,7 +50,7 @@ A implementação está concentrada em:
 | `lang/` | Traduções |
 | `docs/` | Documentação do projeto |
 
-## Princípios arquiteturais
+A primeira extração para `scripts/core/` é `migration-manager.js`, responsável por migrações persistentes de compatibilidade. A classe da ficha coordena sua execução fora de `_prepareContext()`.\n\nConsulte [Arquitetura técnica](ARCHITECTURE.md) para os limites de responsabilidade e a sequência de refatoração.\n\n## Princípios arquiteturais
 
 1. **Identificadores estáveis:** nomes exibidos podem mudar; referências internas devem permanecer estáveis sempre que possível.
 2. **Separação de responsabilidades:** regras, dados, interface e aparência não devem ficar desnecessariamente acoplados.

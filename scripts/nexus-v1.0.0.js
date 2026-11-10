@@ -1,7 +1,7 @@
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 
 Hooks.once("init", () => {
-  console.log("NEXUS | Inicializando sistema 1.0.0.1");
+  console.log("NEXUS | Inicializando sistema 1.0.0.2");
 
   const { DocumentSheetConfig } = foundry.applications.apps;
   DocumentSheetConfig.registerSheet(foundry.documents.Actor, "nexus", NexusActorSheet, {
@@ -12,7 +12,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log("NEXUS | Sistema 1.0.0.1 carregado. Ficha Canvas habilitada.");
+  console.log("NEXUS | Sistema 1.0.0.2 carregado. Ficha Canvas habilitada.");
 });
 
 Hooks.on("preCreateActor", (actor, data, options, userId) => {
