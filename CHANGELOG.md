@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0.1
+## 1.0.0.2 (em desenvolvimento)\n- Atualização em preparação: estabilização da persistência, migrações controladas, testes automatizados e reorganização incremental dos arquivos.\n- A lista de alterações concluídas será preenchida somente após implementação e validação.\n\n## 1.0.0.1
 - Corrigida a aplicação de arredondamento e opacidade quando o valor definido é zero.
 - A opacidade agora aceita o intervalo completo de 0% a 100%.
 - Campos de texto, campos livres e anotações sem vínculo com propriedades do Actor passam a salvar seu conteúdo na instância do componente.
