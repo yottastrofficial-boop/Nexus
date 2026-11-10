@@ -773,10 +773,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     });
 
     try {
-      await this._nexusMigrationPromise;
+      const result = await this._nexusMigrationPromise;
       this._nexusMigrationCompleted = true;
+      return !!result?.changed;
     } catch (error) {
       console.warn("NEXUS | Migração de dados legados adiada; a ficha continuará usando os dados legíveis.", error);
+      return false;
     } finally {
       this._nexusMigrationPromise = null;
     }
@@ -942,7 +944,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _onRender(context, options) {
     await super._onRender(context, options);
-    await this._migrateLegacyActorData();
+    const migrated = await this._migrateLegacyActorData();
+    if (migrated) {
+      // The first render was prepared from the legacy snapshot. Refresh once
+      // after migration so moved alias values appear without requiring a reopen.
+      queueMicrotask(() => this.render({ force: true }));
+      return;
+    }
     const form = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
     if (!form) return;
     const appWindow = form.closest(".application, .window-app");
