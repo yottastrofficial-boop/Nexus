@@ -18,10 +18,13 @@ export async function migrateLegacyActorData({
   setProperty
 }) {
   const layouts = await readLayouts();
+  let changed = false;
+  let aliasesChanged = false;
   const storedActiveId = String(actor.getFlag("nexus", "activeLayout") ?? "principal");
   const activeId = getActiveLayoutId(layouts, storedActiveId);
   if (activeId !== storedActiveId) {
     await actor.setFlag("nexus", "activeLayout", activeId);
+    changed = true;
   }
 
   const storedAliases = actor.getFlag("nexus", "aliases") ?? [];
@@ -45,10 +48,13 @@ export async function migrateLegacyActorData({
 
     if (JSON.stringify(customData) !== JSON.stringify(getCustomAliasData(actor))) {
       await actor.setFlag("nexus", "customData", customData);
+      changed = true;
     }
     await actor.setFlag("nexus", "aliases", normalizedAliases);
     invalidateAliasDefinitionCache(actor);
+    aliasesChanged = true;
+    changed = true;
   }
 
-  return { activeLayout: activeId, aliasesMigrated: true };
+  return { activeLayout: activeId, aliasesMigrated: aliasesChanged, changed };
 }
