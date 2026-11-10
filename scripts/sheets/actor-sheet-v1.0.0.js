@@ -1,4 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { migrateLegacyActorData } from "../core/migration-manager.js";
 
 const ActorSheetV2 = foundry.applications.sheets.ActorSheetV2;
 const HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
@@ -759,37 +760,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (this._nexusMigrationCompleted) return;
     if (this._nexusMigrationPromise) return this._nexusMigrationPromise;
 
-    this._nexusMigrationPromise = (async () => {
-      const layouts = await this._readLayouts();
-      const storedActiveId = String(this.actor.getFlag("nexus", "activeLayout") ?? "principal");
-      const activeId = layouts[storedActiveId] ? storedActiveId : "principal";
-      if (activeId !== storedActiveId) {
-        await this.actor.setFlag("nexus", "activeLayout", activeId);
-      }
-
-      const storedAliases = this.actor.getFlag("nexus", "aliases") ?? [];
-      const rawAliases = Array.isArray(storedAliases) ? storedAliases : [];
-      const normalizedAliases = getAliasDefinitions(this.actor);
-      if (JSON.stringify(rawAliases) !== JSON.stringify(normalizedAliases)) {
-        const customData = clone(getCustomAliasData(this.actor));
-        for (const raw of rawAliases) {
-          const normalized = normalizeAliasDefinition(raw);
-          if (!normalized || normalized.targetPath || normalized.key === raw.key) continue;
-          const oldValue = getPath(customData, raw.key);
-          if (oldValue === undefined || getPath(customData, normalized.key) !== undefined) continue;
-          foundry.utils.setProperty(customData, normalized.key, oldValue);
-          const parts = String(raw.key).split(".");
-          const leaf = parts.pop();
-          const parent = getPath(customData, parts.join("."));
-          if (parent && typeof parent === "object") delete parent[leaf];
-        }
-        if (JSON.stringify(customData) !== JSON.stringify(getCustomAliasData(this.actor))) {
-          await this.actor.setFlag("nexus", "customData", customData);
-        }
-        await this.actor.setFlag("nexus", "aliases", normalizedAliases);
-        invalidateAliasDefinitionCache(this.actor);
-      }
-    })();
+    this._nexusMigrationPromise = migrateLegacyActorData({
+      actor: this.actor,
+      readLayouts: () => this._readLayouts(),
+      getAliasDefinitions,
+      getCustomAliasData,
+      normalizeAliasDefinition,
+      invalidateAliasDefinitionCache,
+      getPath,
+      clone,
+      setProperty: foundry.utils.setProperty
+    });
 
     try {
       await this._nexusMigrationPromise;
