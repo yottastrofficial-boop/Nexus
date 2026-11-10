@@ -17,7 +17,7 @@ assert.equal(manifest.version, "1.0.0.2", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.1\/nexus\.zip$/);
+assert.match(manifest.download, /releases\\/download\\/v1\\.0\\.0\\.2\\/nexus\\.zip$/);
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
   await exists(file);
@@ -40,6 +40,14 @@ for (const file of [...await collectJavaScript("scripts"), ...await collectJavaS
     if (specifier.startsWith(".")) await exists(path.relative(root, path.resolve(root, path.dirname(file), specifier)));
   }
 }
+
+const actorSheetStart = sheet.indexOf("class NexusActorSheet");
+const prepareStart = sheet.indexOf("async _prepareContext(options = {})", actorSheetStart);
+const migrationStart = sheet.indexOf("async _migrateLegacyActorData()", prepareStart);
+assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationStart > prepareStart, "Ciclo de preparação/migração da ficha não localizado");
+const prepareContext = sheet.slice(prepareStart, migrationStart);
+assert.doesNotMatch(prepareContext, /\\.setFlag\\(|\\.update\\(/, "_prepareContext não deve gravar dados persistentes");
+assert.match(sheet, /await this\\._migrateLegacyActorData\\(\\)/, "Migração controlada não está ligada ao ciclo de renderização");
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
 assert.match(sheet, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
@@ -71,7 +79,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.1/);
-assert.match(changelog, /## 1\.0\.0\.1/);
+assert.match(readme, /Versão 1\\.0\\.0\\.2/);
+assert.match(changelog, /## 1\\.0\\.0\\.2/);
 
 console.log("NEXUS 1.0.0.2: validações estáticas aprovadas.");
