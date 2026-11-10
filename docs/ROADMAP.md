@@ -2,7 +2,7 @@
 
 Este documento reúne direções de desenvolvimento discutidas para o NEXUS. Ele não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Base atual — 1.0.0
+## Base atual — 1.0.0.1
 
 A versão atual fornece uma ficha Canvas modular, biblioteca de elementos, personalização visual, editor de propriedades e integração inicial com os tipos de documento declarados no manifesto.
 

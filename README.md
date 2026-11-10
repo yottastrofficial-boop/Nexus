@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.1 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.1-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Escopo desta versão:** a versão 1.0.0 é uma base funcional da implementação Foundry. Ela não representa, por si só, a conclusão de toda a visão modular planejada para o NEXUS.
+> **Escopo desta versão:** a versão 1.0.0.1 é uma base funcional da implementação Foundry. Ela não representa, por si só, a conclusão de toda a visão modular planejada para o NEXUS.
 
 ## Visão geral
 
@@ -26,7 +26,7 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## O que existe na versão 1.0.0
+## O que existe na versão 1.0.0.1
 
 Com base no código e na documentação presentes neste repositório, a versão inclui:
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão do sistema | 1.0.0 |
+| Versão do sistema | 1.0.0.1 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -112,7 +112,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 ## Estado e validação
 
-A versão 1.0.0 possui verificações estáticas documentadas para JavaScript, JSON, CSS, templates e integridade do pacote. Isso não substitui testes funcionais em uma instalação real do Foundry VTT.
+A versão 1.0.0.1 possui verificações estáticas documentadas para JavaScript, JSON, CSS, templates e integridade do pacote. Isso não substitui testes funcionais em uma instalação real do Foundry VTT.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
