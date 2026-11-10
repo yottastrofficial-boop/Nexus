@@ -1,4 +1,4 @@
-import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.1.js";
+import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 
 Hooks.once("init", () => {
   console.log("NEXUS | Inicializando sistema 1.0.0.1");
