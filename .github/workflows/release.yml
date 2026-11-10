@@ -60,7 +60,7 @@ jobs:
       - name: Upload ZIP backup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nexus-v${{ github.ref == 'refs/heads/main' && '1.0.0.1' || github.ref_name }}
+          name: nexus-v1.0.0.1
           path: nexus.zip
           if-no-files-found: error
           retention-days: 90
