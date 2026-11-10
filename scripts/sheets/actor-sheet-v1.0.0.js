@@ -1202,34 +1202,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-property-value]").on("change", async event => {
       const input = event.currentTarget;
-      const path = String(input.dataset.propertyPath ?? "");
-      if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
+      const path = safeAliasKey(input.dataset.propertyPath);
+      if (!path) return;
       const kind = input.dataset.propertyKind;
       let value = input.type === "checkbox" ? !!input.checked : input.value;
       if (kind === "number") { value = Number(value); if (!Number.isFinite(value)) return; }
-      const resolvedPath = resolveNexusBinding(this.actor, path);
-      const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([^{}]+?)\s*\}\}$/) : null;
       if (expression) value = resolveNexusBinding(this.actor, expression[1]).value ?? "";
-      if (path === "name") await this.actor.update({ name: String(value).slice(0, 100) });
-      else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
-        const imagePath = String(value).trim().slice(0, 2048);
-        if (targetPath === "prototypeToken.texture.src" && !imagePath) {
-          await this.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE });
-        } else if (!isMediaSource(imagePath)) {
-          globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida ou uma propriedade que contenha uma imagem.");
-          input.value = path === "img" || path === "identity.portrait.img" ? (this.actor.img ?? "") : getFoundryDefaultTokenImage(this.actor);
-          return;
-        } else {
-          await this.actor.update(targetPath === "img" ? { img: imagePath } : { [targetPath]: imagePath });
-        }
-      }
-      else if (targetPath === "prototypeToken.ring.colors.ring") {
-        const color = String(value).trim();
-        if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) return;
-        await this.actor.update({ "prototypeToken.ring.colors.ring": color });
-      }
-      else await this.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
+      const result = await writeActorProperty(this.actor, path, value);
+      if (!result) return;
       this.render({ force: true });
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; this._updateSystemValue(input); });
@@ -2222,22 +2203,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
   async _updateSystemValue(input) {
-    const path = input.dataset.systemPath, value = input.type === "number" ? Number(input.value) : input.value;
-    if (!path) return;
-    if (path === "name") return this.actor.update({ name: value });
-    if (path === "img") return this.actor.update({ img: value });
-    const alias = resolveAliasPath(this.actor, path);
-    if (alias.alias && !alias.path) {
-      const customData = clone(getCustomAliasData(this.actor));
-      foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix].filter(Boolean).join("."), value);
-      await this.actor.setFlag("nexus", "customData", customData);
+    const rawPath = input.dataset.systemPath;
+    const value = input.type === "number" ? Number(input.value) : input.value;
+    const result = await writeActorProperty(this.actor, rawPath, value);
+    if (!result) return;
+    if (result.custom) {
       this.render({ force: true });
       return;
     }
-    const writePath = alias.alias ? alias.path : path;
-    if (writePath === "img") return this.actor.update({ img: value });
-    await this.actor.update({ [`system.${writePath}`]: value });
-    if (path.includes("resources.")) {
+    if (result.path.includes("resources.")) {
       const root = this.element?.querySelector?.(".nexus-sheet");
       for (const component of this._currentLayout?.components ?? []) {
         if (component.type !== "sheet-resource") continue;
