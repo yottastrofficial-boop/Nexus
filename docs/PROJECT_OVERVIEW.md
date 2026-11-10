@@ -42,7 +42,7 @@ A implementação está concentrada em:
 | Caminho | Responsabilidade |
 |---|---|
 | `system.json` | Metadados, compatibilidade, documentos e arquivos carregados pelo Foundry |
-| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |
+| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |\n| `scripts/core/` | Serviços centrais extraídos incrementalmente; atualmente inclui migrações legadas |
 | `scripts/sheets/` | Lógica da ficha |
 | `templates/actors/` | Estrutura Handlebars |
 | `styles/` | Aparência e layout |
@@ -50,7 +50,7 @@ A implementação está concentrada em:
 | `lang/` | Traduções |
 | `docs/` | Documentação do projeto |
 
-## Princípios arquiteturais
+A primeira extração para `scripts/core/` é `migration-manager.js`, responsável por migrações persistentes de compatibilidade. A classe da ficha coordena sua execução fora de `_prepareContext()`.\n\nConsulte [Arquitetura técnica](ARCHITECTURE.md) para os limites de responsabilidade e a sequência de refatoração.\n\n## Princípios arquiteturais
 
 1. **Identificadores estáveis:** nomes exibidos podem mudar; referências internas devem permanecer estáveis sempre que possível.
 2. **Separação de responsabilidades:** regras, dados, interface e aparência não devem ficar desnecessariamente acoplados.
