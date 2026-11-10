@@ -451,6 +451,81 @@ const isMediaSource = value => {
   if (/^https?:\/\//i.test(source)) return true;
   return !/^[a-z][a-z0-9+.-]*:/i.test(source) && MEDIA_EXTENSION_PATTERN.test(source);
 };
+
+const RESERVED_SYSTEM_ROOTS = new Set([
+  "flags", "_source", "prototypeToken", "items", "effects", "ownership",
+  "folder", "sort", "id", "_id", "uuid", "parent", "apps", "sheet"
+]);
+const isSafeSystemWritePath = value => {
+  const path = safeAliasKey(value);
+  return !!path && !RESERVED_SYSTEM_ROOTS.has(path.split(".")[0]);
+};
+
+const writeActorProperty = async (actor, rawPath, value) => {
+  const path = safeAliasKey(rawPath);
+  if (!path) {
+    globalThis.ui?.notifications?.warn?.("Caminho de propriedade inválido.");
+    return null;
+  }
+
+  const alias = resolveAliasPath(actor, path);
+  if (alias.alias && !alias.path) {
+    const customPath = safeAliasKey([alias.alias.key, alias.suffix].filter(Boolean).join("."));
+    if (!customPath) return null;
+    const customData = clone(getCustomAliasData(actor));
+    foundry.utils.setProperty(customData, customPath, value);
+    await actor.setFlag("nexus", "customData", customData);
+    return { path: customPath, custom: true };
+  }
+
+  const binding = resolveNexusBinding(actor, path);
+  if (binding.readOnly) return null;
+  let targetPath = alias.alias ? alias.path : (binding.virtual ? binding.sourcePath : binding.path);
+  if (alias.alias && targetPath) {
+    const aliasBinding = resolveNexusBinding(actor, targetPath);
+    if (aliasBinding.virtual) targetPath = aliasBinding.sourcePath;
+  }
+  targetPath = safeAliasKey(targetPath);
+  if (!targetPath) return null;
+
+  if (targetPath === "name") {
+    await actor.update({ name: String(value ?? "").slice(0, 100) });
+    return { path: targetPath };
+  }
+  if (targetPath === "img") {
+    const imagePath = String(value ?? "").trim().slice(0, 2048);
+    if (imagePath && !isImageSource(imagePath)) {
+      globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida.");
+      return null;
+    }
+    await actor.update({ img: imagePath });
+    return { path: targetPath };
+  }
+  if (targetPath === "prototypeToken.texture.src") {
+    const imagePath = String(value ?? "").trim().slice(0, 2048);
+    if (imagePath && !isImageSource(imagePath)) {
+      globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida para o token.");
+      return null;
+    }
+    await actor.update({ "prototypeToken.texture.src": imagePath || DEFAULT_FOUNDRY_TOKEN_IMAGE });
+    return { path: targetPath };
+  }
+  if (targetPath === "prototypeToken.ring.colors.ring") {
+    const color = String(value ?? "").trim();
+    if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) {
+      globalThis.ui?.notifications?.warn?.("Cor da moldura inválida.");
+      return null;
+    }
+    await actor.update({ "prototypeToken.ring.colors.ring": color });
+    return { path: targetPath };
+  }
+  if (!isSafeSystemWritePath(targetPath)) {
+    globalThis.ui?.notifications?.warn?.("O caminho informado não pode ser editado por este campo.");
+    return null;
+  }
+  await actor.update({ [`system.${targetPath}`]: value });
+  return { path: targetPath };
+};
 const isVideoSource = value => VIDEO_EXTENSION_PATTERN.test(String(value ?? "")) || /^data:video\//i.test(String(value ?? ""));
 const isAudioSource = value => new RegExp(`\\.(?:${AUDIO_EXTENSIONS})(?:[?#].*)?$`, "i").test(String(value ?? "")) || /^data:audio\//i.test(String(value ?? ""));
 const isImageSource = value => isMediaSource(value) && !isVideoSource(value) && !isAudioSource(value);
