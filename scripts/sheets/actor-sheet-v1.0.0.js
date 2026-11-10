@@ -928,7 +928,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    return { ...component, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    return { ...component, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -1125,6 +1125,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
     });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
+    html.find("[data-component-local-value]").on("change", async event => {
+      const input = event.currentTarget;
+      const componentId = input.dataset.componentId;
+      if (!componentId) return;
+      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const component = layouts[active]?.components?.find(item => item.id === componentId);
+      if (!component) return;
+      this._captureHistory();
+      component.localValue = String(input.value ?? "").slice(0, 5000);
+      await this._writeLayouts(layouts, active);
+    });
     html.find("[data-property-value]").on("change", async event => {
       const input = event.currentTarget;
       const path = String(input.dataset.propertyPath ?? "");
@@ -1957,7 +1968,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if (key === "previewMax") component.previewMax=Math.max(1, Number(input.value)||1);
       else if(key==="backgroundColor" || key==="borderColor") component[key]=input.value;
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
-      else if(key==="opacity") component.opacity=clamp(Number(input.value)||100,10,100);
+      else if(key==="opacity") { const opacity=Number(input.value); component.opacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,32);
       else if(key==="fontFamily") component.fontFamily=["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)?input.value:"Inter";
       else if(key==="headingFontSize") { const size=String(input.value??"").trim(); if(size) component.headingFontSize=clamp(Number(size)||10,7,32); else delete component.headingFontSize; }
@@ -2368,7 +2379,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (type === "asset-table") { component.rows = 3; component.columns = 3; }
       if (type === "asset-notes") component.placeholder = "Escreva suas anotações…";
     }
-    const templateKeys = ["customLabel","binding","customBinding","dataPath","text","placeholder","rows","columns","cells","resourceLabel","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","attributePreset","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
+    const templateKeys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","attributePreset","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
     for (const key of templateKeys) if (Object.hasOwn(options.template ?? {}, key)) component[key] = clone(options.template[key]);
     layout.components.push(component);
     layouts[active] = layout; this._selectedIds = new Set([id]); this._selectedGroupId = null;
