@@ -42,7 +42,7 @@ A implementação está concentrada em:
 | Caminho | Responsabilidade |
 |---|---|
 | `system.json` | Metadados, compatibilidade, documentos e arquivos carregados pelo Foundry |
-| `scripts/nexus-v1.0.0.1.js` | Inicialização e registro da ficha |
+| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |
 | `scripts/sheets/` | Lógica da ficha |
 | `templates/actors/` | Estrutura Handlebars |
 | `styles/` | Aparência e layout |
