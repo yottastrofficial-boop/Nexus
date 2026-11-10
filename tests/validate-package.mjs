@@ -40,7 +40,7 @@ assert.match(template, /data-component-local-value/, "Unbound text controls must
 assert.match(sheet, /\["asset-field", "asset-notes", "text-field"\]/, "Local persistence must cover all unbound text components");
 
 const stack = [];
-const blockPattern = /\\{\\{\\s*([#/])\\s*(if|each|unless|with)\\b[^}]*\\}\\}/g;
+const blockPattern = /\{\{\s*([#/])\s*(if|each|unless|with)\b[^}]*\}\}/g;
 for (const match of template.matchAll(blockPattern)) {
   if (match[1] === "#") stack.push(match[2]);
   else {
@@ -52,7 +52,7 @@ assert.equal(stack.length, 0, `Unclosed Handlebars blocks: ${stack.join(", ")}`)
 
 const cssWithoutCommentsOrStrings = css
   .replace(/\/\*[\s\S]*?\*\//g, "")
-  .replace(/"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*'/g, "");
+  .replace(/"(?:\\.|[^"\\])*"|\u0027(?:\\.|[^\u0027\\])*\u0027/g, "");
 let braceDepth = 0;
 for (const character of cssWithoutCommentsOrStrings) {
   if (character === "{") braceDepth++;
