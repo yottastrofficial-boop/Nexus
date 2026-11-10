@@ -93,7 +93,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 │   └── library/       # Catálogo e documentação da biblioteca
 ├── docs/              # Contexto, arquitetura e planejamento
 ├── lang/              # Traduções
-├── scripts/           # Inicialização e lógica da ficha
+├── scripts/           # Inicialização e lógica da ficha\n│   └── core/          # Serviços centrais extraídos gradualmente
 ├── styles/            # Estilos visuais
 ├── templates/         # Templates Handlebars
 ├── CHANGELOG.md
@@ -104,7 +104,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 ## Documentação
 
-- [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)
+- [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)\n- [Arquitetura técnica e refatoração 1.0.0.2](docs/ARCHITECTURE.md)
 - [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Histórico de alterações](CHANGELOG.md)
