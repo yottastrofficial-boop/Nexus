@@ -13,7 +13,7 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.1", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.2", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -35,7 +35,7 @@ const collectJavaScript = async directory => {
 };
 for (const file of [...await collectJavaScript("scripts"), ...await collectJavaScript("assets")]) {
   const source = await read(file);
-  for (const match of source.matchAll(/(?:from\\s*|import\\s*)["']([^"']+)["']/g)) {
+  for (const match of source.matchAll(/(?:from\s*|import\s*)["']([^"']+)["']/g)) {
     const specifier = match[1];
     if (specifier.startsWith(".")) await exists(path.relative(root, path.resolve(root, path.dirname(file), specifier)));
   }
@@ -74,4 +74,4 @@ assert.equal(depth, 0, "CSS contém bloco não fechado");
 assert.match(readme, /Versão 1\.0\.0\.1/);
 assert.match(changelog, /## 1\.0\.0\.1/);
 
-console.log("NEXUS 1.0.0.1: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.2: validações estáticas aprovadas.");
