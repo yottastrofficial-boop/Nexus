@@ -2373,6 +2373,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
     if (type.startsWith("asset-")) {
       component.dataPath = "";
+      if (["asset-field", "asset-notes", "text-field"].includes(type)) component.localValue = "";
       if (type === "asset-text") component.text = "Novo texto";
       if (type === "asset-field") component.placeholder = "Digite aqui…";
       if (type === "asset-meter") component.format = "bar";
@@ -2397,7 +2398,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const component = layout?.components?.find(item => item.id === ids[0]);
     if (!component || !COMPONENTS[component.type]) return;
     const label = String(component.customLabel || COMPONENTS[component.type].label || "Componente").trim().slice(0, 48);
-    const keys = ["customLabel","binding","customBinding","dataPath","text","placeholder","rows","columns","cells","resourceLabel","format","w","h","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
+    const keys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","format","w","h","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
     const settings = {};
     for (const key of keys) if (component[key] !== undefined) settings[key] = clone(component[key]);
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
