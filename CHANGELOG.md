@@ -1,9 +1,11 @@
 # Changelog
 
 ## 1.0.0.2 (em desenvolvimento)
-- Separada a migração de dados legados da preparação de contexto da ficha.
-- Corrigidas as verificações de imports relativos e de versão do pacote.
-- O restante das alterações será registrado após implementação e validação.
+- Separada a migração de dados legados da preparação de contexto da ficha, mantendo `_prepareContext()` sem gravações persistentes.
+- A migração agora informa se houve alteração e a ficha atualiza a primeira renderização quando dados legados são migrados, sem exigir que o usuário feche e reabra a ficha.
+- A migração mantém proteção contra repetição e pode ser tentada novamente após falha.
+- Corrigidas as verificações de imports relativos e de versão do pacote; ampliados os testes automatizados da migração e da atualização da primeira renderização.
+- Persistência concorrente, reorganização ampla de CSS/templates e testes funcionais em Foundry VTT 14 continuam fora do escopo validado desta etapa.
 
 ## 1.0.0.1
 - Corrigida a aplicação de arredondamento e opacidade quando o valor definido é zero.
