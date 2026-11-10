@@ -1,5 +1,9 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
+import { mergeLayoutSnapshots } from "../core/layout-merge.js";
+
+const layoutReadSnapshots = new WeakMap();
+const layoutWriteQueues = new Map();
 
 const ActorSheetV2 = foundry.applications.sheets.ActorSheetV2;
 const HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
@@ -2260,31 +2264,54 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     if (!Object.keys(layouts).length) layouts.principal = clone(DEFAULT_LAYOUT);
     if (!layouts.principal) layouts.principal = clone(DEFAULT_LAYOUT);
+    layoutReadSnapshots.set(layouts, {
+      layouts: clone(layouts),
+      active: String(this.actor.getFlag("nexus", "activeLayout") ?? "principal")
+    });
     return layouts;
   }
 
   async _writeLayouts(layouts, active) {
-    const normalized = {};
-    for (const [rawId, rawLayout] of Object.entries(layouts ?? {})) {
-      if (!rawLayout || typeof rawLayout !== "object") continue;
-      const id = String(rawId || rawLayout.id || "principal");
-      const layout = clone(rawLayout);
-      layout.id = id;
-      normalized[id] = this._normalizeLayout(layout);
-    }
-    if (!normalized.principal) normalized.principal = clone(DEFAULT_LAYOUT);
-    const storedActive = this.actor.getFlag("nexus", "activeLayout");
-    const nextActive = active && normalized[active] ? active :
-      (storedActive && normalized[storedActive] ? storedActive : "principal");
+    const queueKey = this.actor.uuid ?? this.actor;
+    const previous = layoutWriteQueues.get(queueKey) ?? Promise.resolve();
+    const operation = previous.catch(() => {}).then(async () => {
+      const snapshot = layoutReadSnapshots.get(layouts);
+      // Re-read inside the queue, after earlier writes have completed. A
+      // three-way merge keeps unrelated edits made since this snapshot.
+      const latest = await this._readLayouts();
+      const merged = snapshot
+        ? mergeLayoutSnapshots(snapshot.layouts, layouts, latest)
+        : clone(layouts);
+      const normalized = {};
+      for (const [rawId, rawLayout] of Object.entries(merged ?? {})) {
+        if (!rawLayout || typeof rawLayout !== "object") continue;
+        const id = String(rawId || rawLayout.id || "principal");
+        const layout = clone(rawLayout);
+        layout.id = id;
+        normalized[id] = this._normalizeLayout(layout);
+      }
+      if (!normalized.principal) normalized.principal = clone(DEFAULT_LAYOUT);
 
-    // Foundry applies partial diffing to nested objects by default. A normal
-    // setFlag/update can therefore retain keys omitted from the new layout map.
-    // Forced replacement makes this map authoritative, including deletions.
-    await this.actor.update({
-      "flags.nexus.layouts": _replace(normalized),
-      "flags.nexus.activeLayout": nextActive
+      const storedActive = String(this.actor.getFlag("nexus", "activeLayout") ?? "principal");
+      const requestedActiveChanged = !!snapshot && String(active ?? snapshot.active) !== snapshot.active;
+      const nextActive = requestedActiveChanged && active && normalized[active]
+        ? active
+        : (normalized[storedActive] ? storedActive : "principal");
+
+      // Forced replacement ensures deleted layout keys are actually removed.
+      await this.actor.update({
+        "flags.nexus.layouts": _replace(normalized),
+        "flags.nexus.activeLayout": nextActive
+      });
+      layoutReadSnapshots.set(normalized, { layouts: clone(normalized), active: nextActive });
+      return normalized;
     });
-    return normalized;
+    layoutWriteQueues.set(queueKey, operation);
+    try {
+      return await operation;
+    } finally {
+      if (layoutWriteQueues.get(queueKey) === operation) layoutWriteQueues.delete(queueKey);
+    }
   }
 
   _activeLayoutId() { return this.actor.getFlag("nexus", "activeLayout") ?? "principal"; }
