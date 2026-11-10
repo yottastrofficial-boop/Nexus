@@ -2,7 +2,7 @@
 
 Este documento reúne direções de desenvolvimento discutidas para o NEXUS. Ele não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Base estável — 1.0.0.1\n\n## Próxima atualização — 1.0.0.2 (em preparação)\n\n- Fortalecer a persistência e separar migrações do preparo de contexto.\n- Corrigir e ampliar os testes de integridade do pacote.\n- Modularizar progressivamente a lógica da ficha, preservando os contratos existentes.\n- Reorganizar CSS e templates sem alterar o comportamento visual intencional.\n- Validar em instalação real do Foundry VTT V14 antes da publicação.\n\n## Base atual — 1.0.0.1
+## Base estável — 1.0.0.1\n\n## Próxima atualização — 1.0.0.2 (em preparação)\n\n- Fortalecer a persistência e separar migrações do preparo de contexto.\n- Corrigir e ampliar os testes de integridade do pacote.\n- Modularizar progressivamente a lógica da ficha, preservando os contratos existentes.\n- Reorganizar CSS e templates sem alterar o comportamento visual intencional.\n- Validar em instalação real do Foundry VTT V14 antes da publicação.\n\n## Base estável — 1.0.0.1
 
 A versão atual fornece uma ficha Canvas modular, biblioteca de elementos, personalização visual, editor de propriedades e integração inicial com os tipos de documento declarados no manifesto.
 
