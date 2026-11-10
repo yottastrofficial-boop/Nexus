@@ -28,7 +28,9 @@ jobs:
       - name: Read package version
         id: version
         shell: bash
-        run: echo "value=$(node -p "require('./system.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('system.json', 'utf8')).version")
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check JavaScript syntax
         shell: bash
