@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
+import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -97,6 +98,32 @@ const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
+
+
+// Three-way persistence merge: preserve edits to separate components and
+// layout properties made after the original read snapshot.
+const baseLayouts = {
+  principal: {
+    id: "principal", width: 800,
+    components: [
+      { id: "component-a", x: 0, y: 0, text: "A" },
+      { id: "component-b", x: 10, y: 10, text: "B" }
+    ],
+    groups: [], links: []
+  }
+};
+const desiredLayouts = structuredClone(baseLayouts);
+desiredLayouts.principal.components[0].x = 30;
+const latestLayouts = structuredClone(baseLayouts);
+latestLayouts.principal.components[1].y = 50;
+latestLayouts.principal.width = 920;
+const mergedLayouts = mergeLayoutSnapshots(baseLayouts, desiredLayouts, latestLayouts);
+assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-a").x, 30);
+assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-b").y, 50);
+assert.equal(mergedLayouts.principal.width, 920);
+assert.match(sheet, /layoutReadSnapshots\.set\(layouts/);
+assert.match(sheet, /mergeLayoutSnapshots\(snapshot\.layouts, layouts, latest\)/);
+assert.match(sheet, /layoutWriteQueues\.get\(queueKey\)/);
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
 assert.match(sheet, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
