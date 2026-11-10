@@ -48,7 +48,8 @@ const migrationStart = sheet.indexOf("async _migrateLegacyActorData()", prepareS
 assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationStart > prepareStart, "Ciclo de preparação/migração da ficha não localizado");
 const prepareContext = sheet.slice(prepareStart, migrationStart);
 assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
-assert.match(sheet, /await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
+assert.match(sheet, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
+assert.match(sheet, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
 
 
 // Exercise the legacy migration manager with a minimal Actor-like document.
@@ -86,13 +87,15 @@ const migrationDependencies = {
   clone: value => structuredClone(value),
   setProperty: setSafePath
 };
-await migrateLegacyActorData(migrationDependencies);
+const firstMigration = await migrateLegacyActorData(migrationDependencies);
+assert.equal(firstMigration.changed, true, "Primeira migração deve sinalizar alteração");
 assert.equal(fakeActor.getFlag("nexus", "activeLayout"), "principal");
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "new.key"), 17);
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), undefined);
 assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
 const migrationWriteCount = fakeActor.writes;
-await migrateLegacyActorData(migrationDependencies);
+const secondMigration = await migrateLegacyActorData(migrationDependencies);
+assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
