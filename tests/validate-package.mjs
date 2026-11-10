@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, access } from "node:fs/promises";
+import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -21,6 +21,24 @@ assert.match(manifest.download, /releases\/download\/v1\.0\.0\.1\/nexus\.zip$/);
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
   await exists(file);
+}
+
+const collectJavaScript = async directory => {
+  const entries = await readdir(path.join(root, directory), { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const relative = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await collectJavaScript(relative));
+    else if (entry.isFile() && entry.name.endsWith(".js")) files.push(relative);
+  }
+  return files;
+};
+for (const file of [...await collectJavaScript("scripts"), ...await collectJavaScript("assets")]) {
+  const source = await read(file);
+  for (const match of source.matchAll(/(?:from\\s*|import\\s*)["']([^"']+)["']/g)) {
+    const specifier = match[1];
+    if (specifier.startsWith(".")) await exists(path.relative(root, path.resolve(root, path.dirname(file), specifier)));
+  }
 }
 
 assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
