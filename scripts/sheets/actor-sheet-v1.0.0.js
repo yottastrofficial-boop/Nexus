@@ -954,12 +954,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   _componentContext(component) {
     const def = COMPONENTS[component.type]; if (!def) return null;
+    const hasBorderRadius = component.borderRadius !== undefined && component.borderRadius !== null &&
+      String(component.borderRadius).trim() !== "" && Number.isFinite(Number(component.borderRadius));
+    const hasOpacity = component.opacity !== undefined && component.opacity !== null &&
+      String(component.opacity).trim() !== "" && Number.isFinite(Number(component.opacity));
+    const appearanceValues = {
+      borderRadius: hasBorderRadius ? clamp(Number(component.borderRadius), 0, 32) : undefined,
+      hasBorderRadius,
+      opacity: hasOpacity ? clamp(Number(component.opacity), 0, 100) : undefined,
+      hasOpacity
+    };
     if (def.kind === "custom") {
       const binding = component.dataPath ? resolveNexusBinding(this.actor, component.dataPath) : null;
       const hasBoundValue = binding?.value !== undefined && binding?.value !== null && typeof binding.value !== "object";
       const headingLabel = String(component.customLabel ?? "").trim();
       return {
         ...component,
+        ...appearanceValues,
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
         label: headingLabel,
@@ -995,7 +1006,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const raw = sheetResource
       ? resolveNexusBinding(this.actor, currentResourcePath).value
       : (def.path === "name" || bindingPath === "name") ? this.actor.name : def.kind === "token" ? getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "") : bindingPath ? resolveNexusBinding(this.actor, bindingPath).value ?? getPath(this.actor.system, bindingPath) : def.kind === "asset-image" ? this.actor.img : null;
-    const value = sheetResource ? raw : (raw && typeof raw === "object" && "value" in raw ? raw.value : raw);
+    const boundValue = sheetResource ? raw : (raw && typeof raw === "object" && "value" in raw ? raw.value : raw);
+    const localValue = !bindingPath && ["asset-field", "asset-notes", "text-field"].includes(component.type)
+      ? (component.value ?? "") : undefined;
+    const value = boundValue ?? localValue;
     const max = sheetResource
       ? resolveNexusBinding(this.actor, maximumResourcePath).value
       : (raw && typeof raw === "object" && "max" in raw ? raw.max : (bindingPath ? resolveNexusBinding(this.actor, `${bindingPath}.max`).value : null));
@@ -1003,7 +1017,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    return { ...component, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    return { ...component, ...appearanceValues, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -1530,6 +1544,18 @@ export class NexusActorSheet extends NexusActorSheetBase {
       this._captureHistory(); component.cells ??= []; component.cells[index] = String(input.value).slice(0, 120);
       await this._writeLayouts(layouts, active);
     });
+    html.find("[data-component-local-value]").on("change", async event => {
+      const input = event.currentTarget;
+      const componentId = input.closest(".nexus-component")?.dataset.id;
+      if (!componentId) return;
+      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const component = layouts[active]?.components?.find(item => item.id === componentId);
+      if (!component || !["asset-field", "asset-notes", "text-field"].includes(component.type)) return;
+      const limit = component.type === "asset-notes" ? 10000 : 500;
+      this._captureHistory();
+      component.value = String(input.value ?? "").slice(0, limit);
+      await this._writeLayouts(layouts, active);
+    });
     html.find("[data-layout-select]").on("change", event => this._switchLayout(event.currentTarget.value));
     html.find("[data-layout-name]").on("change", event => this._updateLayoutName(event.currentTarget.value));
     html.find("[data-appearance-panel]").on("click", event => {
@@ -2013,7 +2039,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if (key === "previewMax") component.previewMax=Math.max(1, Number(input.value)||1);
       else if(key==="backgroundColor" || key==="borderColor") component[key]=input.value;
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
-      else if(key==="opacity") component.opacity=clamp(Number(input.value)||100,10,100);
+      else if(key==="opacity") {
+        const rawOpacity = String(input.value ?? "").trim();
+        const opacity = rawOpacity === "" ? 100 : Number(rawOpacity);
+        component.opacity = clamp(Number.isFinite(opacity) ? opacity : 100, 0, 100);
+      }
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,32);
       else if(key==="fontFamily") component.fontFamily=["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)?input.value:"Inter";
       else if(key==="headingFontSize") { const size=String(input.value??"").trim(); if(size) component.headingFontSize=clamp(Number(size)||10,7,32); else delete component.headingFontSize; }
