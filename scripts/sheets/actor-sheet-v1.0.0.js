@@ -2371,6 +2371,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       component.text = ({ "sheet-name": "Nome do personagem", "sheet-lineage": "Linhagem", "sheet-physiognomy": "Fisionomia", "sheet-legacy": "Legado", "sheet-section": "Nova seção", "sheet-skill": "Nova perícia", "sheet-skill-group": "Perícias" })[type] ?? (type === "sheet-level" ? "" : d.label);
       component.sheetHint = "";
     }
+    if (type === "text-field") component.localValue = "";
     if (type.startsWith("asset-")) {
       component.dataPath = "";
       if (["asset-field", "asset-notes", "text-field"].includes(type)) component.localValue = "";
