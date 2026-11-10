@@ -710,12 +710,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts = await this._readLayouts();
     const storedActiveId = String(this.actor.getFlag("nexus", "activeLayout") ?? "principal");
     const activeId = layouts[storedActiveId] ? storedActiveId : "principal";
-    if (activeId !== storedActiveId) {
-      try { await this.actor.setFlag("nexus", "activeLayout", activeId); }
-      catch (error) { console.warn("NEXUS | Não foi possível corrigir o layout ativo legado", error); }
-    }
-    const storedAliases = this.actor.getFlag("nexus", "aliases") ?? [];
-    const rawAliases = Array.isArray(storedAliases) ? storedAliases : [];
     const normalizedAliases = getAliasDefinitions(this.actor);
     const aliases = normalizedAliases.map(alias => {
       const stored = getPath(getCustomAliasData(this.actor), alias.key);
@@ -731,25 +725,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
         scalarValue: sourceValue && typeof sourceValue === "object" ? "" : sourceValue ?? "",
         percentage: Number.isFinite(max) && max > 0 && Number.isFinite(amount) ? Math.round(amount / max * 100) : 0 };
     });
-    if (JSON.stringify(rawAliases) !== JSON.stringify(normalizedAliases) && !this._aliasMigrationPending) {
-      this._aliasMigrationPending = true;
-      try {
-        const customData = clone(getCustomAliasData(this.actor));
-        for (const raw of rawAliases) {
-          const normalized = normalizeAliasDefinition(raw);
-          if (!normalized || normalized.targetPath || normalized.key === raw.key) continue;
-          const oldValue = getPath(customData, raw.key);
-          if (oldValue === undefined || getPath(customData, normalized.key) !== undefined) continue;
-          foundry.utils.setProperty(customData, normalized.key, oldValue);
-          const parts = String(raw.key).split("."), leaf = parts.pop(), parent = getPath(customData, parts.join("."));
-          if (parent && typeof parent === "object") delete parent[leaf];
-        }
-        if (JSON.stringify(customData) !== JSON.stringify(getCustomAliasData(this.actor))) await this.actor.setFlag("nexus", "customData", customData);
-        await this.actor.setFlag("nexus", "aliases", normalizedAliases);
-        invalidateAliasDefinitionCache(this.actor);
-      } catch (error) { console.warn("NEXUS | Não foi possível migrar aliases antigos", error); }
-      finally { this._aliasMigrationPending = false; }
-    }
     // Todos os layouts são normalizados em memória antes de construir a interface.
     // Isso permite abrir fichas antigas mesmo quando faltam arrays ou opções recentes.
     const layout = this._normalizeLayout(clone(layouts[activeId] ?? layouts.principal ?? DEFAULT_LAYOUT));
@@ -778,6 +753,52 @@ export class NexusActorSheet extends NexusActorSheetBase {
       isNPC: this.actor.type === "npc"
     };
     return context;
+  }
+
+  async _migrateLegacyActorData() {
+    if (this._nexusMigrationCompleted) return;
+    if (this._nexusMigrationPromise) return this._nexusMigrationPromise;
+
+    this._nexusMigrationPromise = (async () => {
+      const layouts = await this._readLayouts();
+      const storedActiveId = String(this.actor.getFlag("nexus", "activeLayout") ?? "principal");
+      const activeId = layouts[storedActiveId] ? storedActiveId : "principal";
+      if (activeId !== storedActiveId) {
+        await this.actor.setFlag("nexus", "activeLayout", activeId);
+      }
+
+      const storedAliases = this.actor.getFlag("nexus", "aliases") ?? [];
+      const rawAliases = Array.isArray(storedAliases) ? storedAliases : [];
+      const normalizedAliases = getAliasDefinitions(this.actor);
+      if (JSON.stringify(rawAliases) !== JSON.stringify(normalizedAliases)) {
+        const customData = clone(getCustomAliasData(this.actor));
+        for (const raw of rawAliases) {
+          const normalized = normalizeAliasDefinition(raw);
+          if (!normalized || normalized.targetPath || normalized.key === raw.key) continue;
+          const oldValue = getPath(customData, raw.key);
+          if (oldValue === undefined || getPath(customData, normalized.key) !== undefined) continue;
+          foundry.utils.setProperty(customData, normalized.key, oldValue);
+          const parts = String(raw.key).split(".");
+          const leaf = parts.pop();
+          const parent = getPath(customData, parts.join("."));
+          if (parent && typeof parent === "object") delete parent[leaf];
+        }
+        if (JSON.stringify(customData) !== JSON.stringify(getCustomAliasData(this.actor))) {
+          await this.actor.setFlag("nexus", "customData", customData);
+        }
+        await this.actor.setFlag("nexus", "aliases", normalizedAliases);
+        invalidateAliasDefinitionCache(this.actor);
+      }
+    })();
+
+    try {
+      await this._nexusMigrationPromise;
+      this._nexusMigrationCompleted = true;
+    } catch (error) {
+      console.warn("NEXUS | Migração de dados legados adiada; a ficha continuará usando os dados legíveis.", error);
+    } finally {
+      this._nexusMigrationPromise = null;
+    }
   }
 
   _getHeaderControls() {
@@ -940,6 +961,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _onRender(context, options) {
     await super._onRender(context, options);
+    await this._migrateLegacyActorData();
     const form = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
     if (!form) return;
     const appWindow = form.closest(".application, .window-app");
