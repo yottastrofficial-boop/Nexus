@@ -1,8 +1,8 @@
 {
   "id": "nexus",
   "title": "NEXUS RPG",
-  "description": "Sistema NEXUS RPG para Foundry Virtual Tabletop, com ficha modular Canvas.",
-  "version": "1.0.0",
+  "description": "Sistema NEXUS RPG para Foundry Virtual Tabletop, com ficha Canvas modular, componentes configuráveis e biblioteca de elementos.",
+  "version": "1.0.0.1",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
@@ -45,6 +45,8 @@
   "primaryTokenAttribute": "resources.pv",
   "url": "https://github.com/yottastrofficial-boop/Nexus",
   "manifest": "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/system.json",
-  "download": "https://github.com/yottastrofficial-boop/Nexus/releases/latest/download/nexus.zip",
-  "readme": "https://github.com/yottastrofficial-boop/Nexus/blob/main/README.md"
+  "download": "https://github.com/yottastrofficial-boop/Nexus/releases/download/v1.0.0.1/nexus.zip",
+  "readme": "https://github.com/yottastrofficial-boop/Nexus/blob/main/README.md",
+  "changelog": "https://github.com/yottastrofficial-boop/Nexus/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/yottastrofficial-boop/Nexus/issues"
 }
