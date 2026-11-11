@@ -929,7 +929,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         ...component,
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3),
-        proficiencyStages: (component.proficiencyLabels ?? ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.proficiencyLevel) || 0, 0, 3) })),
+        proficiencyStages: (component.proficiencyLabels ?? ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
         contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle),
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
@@ -2167,7 +2167,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
       else if(key==="imageFit") component.imageFit=["contain","cover","fill","none"].includes(input.value)?input.value:"contain";
       else if(key==="imagePosition") component.imagePosition=["center","top","bottom","left","right"].includes(input.value)?input.value:"center";
-      else if(key==="imageOpacity") component.imageOpacity=clamp(Number(input.value) || 100,0,100);
+      else if(key==="imageOpacity") { const opacity=Number(input.value); component.imageOpacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="actionPath") { const path=String(input.value??"").replace(/^system\./,"").trim(); if(path && (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part=>["__proto__","prototype","constructor"].includes(part)))) return; component.actionPath=path; }
       else if(/^proficiencyLabel[0-3]$/.test(key)) { const index=Number(key.slice(-1)); component.proficiencyLabels ??= ["Sem domínio","Básico","Treinado","Especialista"]; component.proficiencyLabels[index]=String(input.value??"").trim().slice(0,24)||("Nível " + index); }
       else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
@@ -2357,11 +2357,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         this._applyComponentTextStyles(componentNode, component);
       } else if (componentNode) this.render({ force: true });
       const inspector = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element).find(node => node?.querySelector(".nexus-component-inspector"))?.querySelector(".nexus-component-inspector");
-      if (inspector && kind === "typography") {
-        const fontSize = inspector.querySelector('[data-component-setting="fontSize"]'); if (fontSize) fontSize.value = layout.fontSize ?? 13;
-        const fontFamily = inspector.querySelector('[data-component-setting="fontFamily"]'); if (fontFamily) fontFamily.value = layout.fontFamily ?? "Inter";
-        const labelPosition = inspector.querySelector('[data-component-setting="labelPosition"]'); if (labelPosition) labelPosition.value = "top-left";
-      }
+      if (inspector && kind === "typography") this._syncTextToolbar(inspector, component);
     });
     html.find("[data-group-reset]").on("click", async () => {
       const groupId=this._selectedGroupId;if(!groupId)return;
