@@ -1660,9 +1660,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
         preview.className = "nexus-library-saved-group-preview";
         preview.setAttribute("aria-hidden", "true");
         const members = Array.isArray(group.components) ? group.components : [];
-        const gridMode = members.length > 8;
-        preview.classList.toggle("is-grid", gridMode);
-        const visibleMembers = gridMode ? members.slice(0, 8) : members;
         const bounds = members.length ? {
           left: Math.min(...members.map(item => Number(item.x) || 0)),
           top: Math.min(...members.map(item => Number(item.y) || 0)),
@@ -1670,6 +1667,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
           bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
         } : { left: 0, top: 0, right: 100, bottom: 60 };
         const scale = Math.min(136 / Math.max(1, bounds.right - bounds.left), 82 / Math.max(1, bounds.bottom - bounds.top));
+        const gridMode = members.length > 8 || scale < 0.18;
+        preview.classList.toggle("is-grid", gridMode);
+        const visibleMembers = gridMode ? members.slice(0, 8) : members;
         for (const member of visibleMembers) {
           const definition = COMPONENTS[member.type] ?? {};
           const code = String(member.sheetCode ?? member.sheetContent1 ?? member.resourceLabel ?? "").trim().toUpperCase();
@@ -1700,6 +1700,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
             value.textContent = String(member.text ?? member.sheetCode ?? "").trim().slice(0, 14);
             if (value.textContent) card.append(value);
           }
+          card.style.borderColor = member.borderColor || resourceColor || "var(--nexus-panel-border,#3c5067)";
           if (gridMode) preview.append(card);
           else {
             card.style.left = (3 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
@@ -1707,7 +1708,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
             card.style.width = Math.max(18, (Number(member.w) || definition.w || 100) * scale) + "px";
             card.style.height = Math.max(14, (Number(member.h) || definition.h || 60) * scale) + "px";
             card.style.background = "var(--nexus-panel-surface,#202e3e)";
-            card.style.borderColor = member.borderColor || resourceColor || "var(--nexus-panel-border,#3c5067)";
             preview.append(card);
           }
         }
@@ -4422,7 +4422,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
-    const syncGroupBounds = (componentNodes = elements()) => {
+    const syncGroupBounds = (componentNodes = elements(), updateCorners = true) => {
       const visibleNodes = componentNodes.filter(el => !el.hidden);
       for (const g of (sheet._activeGroups ?? [])) {
         const memberIds = new Set(g.componentIds ?? []);
@@ -4439,7 +4439,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           surface.style.setProperty("--nexus-group-radius",`${clamp(Number(g.borderRadius??8),0,32)}px`);
         }
       }
-      scheduleConnectedCorners();
+      if (updateCorners) scheduleConnectedCorners();
     };
     // Layout comes from the rendered context, avoiding an asynchronous race during listener setup.
     sheet._currentLayout = sheet._currentLayout ?? {groups:[]};
@@ -4779,7 +4779,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         item.el.style.top = `${item.y + dy}px`;
         keyboardMoveTouched.add(item.el.dataset.id);
       }
-      syncGroupBounds(keyboardMoveAllElements);
+      syncGroupBounds(keyboardMoveAllElements, false);
     };
     const queueKeyboardMove = (dx, dy) => {
       beginKeyboardMove();
