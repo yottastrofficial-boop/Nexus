@@ -429,7 +429,11 @@ const getNexusRollAliasEntries = actor => {
     if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
     const root = safeAliasKey(alias.targetPath || alias.key);
     if (!root) return null;
-    const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && !root.endsWith(".value") ? root + ".value" : root);
+    const raw = alias.targetPath
+      ? getPath(actor?.system ?? {}, alias.targetPath)
+      : getPath(getCustomAliasData(actor), alias.key);
+    const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
+    const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value") ? root + ".value" : root);
     return target ? { display, target, label: String(alias.label ?? display), alias } : null;
   }).filter(Boolean);
   const counts = new Map();
@@ -452,8 +456,7 @@ const getNexusRollData = actor => {
   const data = clone(actor?.getRollData?.() ?? {});
   for (const entry of getNexusRollAliasEntries(actor)) {
     if (entry.alias.targetPath) continue;
-    const suffix = ["attribute", "resource"].includes(entry.alias.type) ? ".value" : "";
-    const sourcePath = entry.alias.key + suffix;
+    const sourcePath = entry.target === entry.alias.key + ".value" ? entry.alias.key + ".value" : entry.alias.key;
     const value = resolveNexusBinding(actor, sourcePath).value;
     if (value === undefined) continue;
     const parts = entry.target.split(".");
