@@ -106,7 +106,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 ## Documentação
 
 - [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)
-- [Arquitetura técnica e refatoração 1.0.0.5](docs/ARCHITECTURE.md)
+- [Arquitetura técnica e refatoração 1.0.0.4](docs/ARCHITECTURE.md)
 - [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Histórico de alterações](CHANGELOG.md)
