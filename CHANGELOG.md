@@ -1,3 +1,17 @@
+## 1.0.0.3
+
+### Corrigido
+- Configuração do Token de Protótipo dos Actors NEXUS com vínculo ativo por padrão e imagem de fallback.
+- Criação de Tokens na cena preserva o vínculo com o Actor e utiliza a imagem do Token de Protótipo, respeitando a opção explícita de token independente.
+
+### Biblioteca
+- Catálogo inicial simplificado: somente **Indicador – Barra** (PV) permanece disponível.
+- Removidos os demais componentes e temas de demonstração do catálogo inicial.
+
+### Validação
+- Incluídas verificações estáticas para o vínculo Actor/Token e para o catálogo reduzido.
+- O teste dentro do Foundry VTT 14 continua necessário para confirmar a criação real de Actors e Tokens na cena.
+
 # Changelog
 
 ## 1.0.0.2 (em desenvolvimento)
