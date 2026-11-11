@@ -73,6 +73,12 @@
                   </div>
                   <label class="nexus-inspector-field" data-property-value-row hidden>Valor da propriedade<input type="text" data-property-value autocomplete="off"></label>
 
+                  <section class="nexus-inspector-subsection nexus-component-interaction">
+                    <h5>Interação</h5>
+                    <label class="nexus-inspector-field">Ação do componente<select data-component-setting="actionType"><option value="" {{#unless (eq component.actionType "roll")}}selected{{/unless}}>Nenhuma</option><option value="roll" {{#if (eq component.actionType "roll")}}selected{{/if}}>Executar rolagem</option></select></label>
+                    <label class="nexus-inspector-field">Fórmula da rolagem<input type="text" maxlength="120" data-component-setting="rollFormula" value="{{component.rollFormula}}" placeholder="Ex.: 1d20 + @skills.stealth.value"></label>
+                    <small class="nexus-field-hint">Se deixar vazio e o vínculo terminar em <code>.name</code>, o NEXUS procurará a fórmula na propriedade irmã <code>.roll</code>.</small>
+                  </section>
                   <label class="nexus-inspector-field" data-component-placeholder-row hidden>Texto de orientação<input type="text" maxlength="100" data-component-setting="placeholder"></label>
                   <div class="nexus-inspector-grid" data-component-table-settings hidden>
                     <label class="nexus-inspector-field">Linhas<input type="number" min="1" max="20" data-component-setting="rows"></label>
@@ -269,11 +275,11 @@
           <section class="nexus-tool-panel nexus-library-panel" data-tool-panel="library" hidden>
             <header class="nexus-library-header">
               <div><span class="nexus-library-eyebrow">ELEMENTOS</span><h3>Biblioteca de elementos</h3></div>
-              <span class="nexus-library-count" data-library-count>8 elementos</span>
+              <span class="nexus-library-count" data-library-count>1 elemento</span>
             </header>
             <div class="nexus-library-toolbar">
               <label class="nexus-library-search-wrap"><span aria-hidden="true">⌕</span><input type="search" class="nexus-library-search" placeholder="Buscar por nome, função ou tag…" data-library-search></label>
-              <select class="nexus-library-tag" data-library-tag aria-label="Filtrar por tag"><option value="all">Todas as tags</option><option value="barra">Barra</option><option value="token">Token</option><option value="anotação">Anotações</option><option value="estrutura">Estrutura</option><option value="marcador">Marcador</option><option value="imagem">Imagem</option><option value="texto">Texto</option><option value="medidor">Medidor</option></select>
+              <select class="nexus-library-tag" data-library-tag aria-label="Filtrar por tag"><option value="all">Todas as tags</option><option value="barra">Barra de vida</option></select>
             </div>
             <div class="nexus-library-workspace">
               <div class="nexus-library-main">
@@ -357,6 +363,9 @@
                 {{else if (eq component.kind "number")}}{{#if (eq nexus.mode "config")}}<input type="number" data-system-path="{{component.path}}" value="{{component.value}}">{{else}}<strong>{{component.value}}</strong>{{/if}}
                 {{else}}<input type="text" data-system-path="{{component.path}}" value="{{component.value}}">{{/if}}
               </div>
+              {{#if (eq component.actionType "roll")}}
+                {{#unless (eq nexus.mode "appearance")}}<button type="button" class="nexus-component-action" data-action="component-roll" data-component-id="{{component.id}}"><i class="fa-solid fa-dice-d20" aria-hidden="true"></i><span>Rolar</span></button>{{/unless}}
+              {{/if}}
               {{#if (eq ../nexus.mode "appearance")}}
               {{/if}}
             </article>

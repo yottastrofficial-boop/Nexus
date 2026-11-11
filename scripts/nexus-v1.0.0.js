@@ -1,7 +1,7 @@
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 
 Hooks.once("init", () => {
-  console.log("NEXUS | Inicializando sistema 1.0.0.2");
+  console.log("NEXUS | Inicializando sistema 1.0.0.3");
 
   const { DocumentSheetConfig } = foundry.applications.apps;
   DocumentSheetConfig.registerSheet(foundry.documents.Actor, "nexus", NexusActorSheet, {
@@ -12,11 +12,15 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log("NEXUS | Sistema 1.0.0.2 carregado. Ficha Canvas habilitada.");
+  console.log("NEXUS | Sistema 1.0.0.3 carregado. Ficha Canvas habilitada.");
 });
 
-Hooks.on("preCreateActor", (actor, data, options, userId) => {
-  if (!["player-character", "npc", "character"].includes(actor.type)) return;
+const NEXUS_ACTOR_TYPES = ["player-character", "npc", "character"];
+const DEFAULT_TOKEN_IMAGE = "icons/svg/mystery-man.svg";
+
+Hooks.on("preCreateActor", (actor) => {
+  if (!NEXUS_ACTOR_TYPES.includes(actor.type)) return;
+
   const defaults = {
     resources: {
       pv: { value: 10, max: 10 },
@@ -28,15 +32,44 @@ Hooks.on("preCreateActor", (actor, data, options, userId) => {
     identity: { lineage: "", legacy: "", level: 1 },
     notes: ""
   };
-  // Preserve values already supplied by the creation workflow while filling
-  // missing base fields. New prototype tokens start linked to their Actor.
   const system = foundry.utils.mergeObject(
     foundry.utils.deepClone(defaults),
     actor.system ?? {},
     { inplace: true, overwrite: true, recursive: true }
   );
-  actor.updateSource({
-    system,
-    "prototypeToken.actorLink": true
-  });
+
+  // O Token de Protótipo é a origem usada pelo Foundry ao criar tokens na cena.
+  // Mantém imagens já configuradas e usa o retrato do Actor como fallback.
+  const prototypeToken = foundry.utils.mergeObject(
+    {
+      actorLink: true,
+      texture: { src: actor.img || DEFAULT_TOKEN_IMAGE }
+    },
+    actor.prototypeToken?.toObject?.() ?? actor.prototypeToken ?? {},
+    { inplace: false, overwrite: true, recursive: true }
+  );
+  prototypeToken.actorLink = true;
+  prototypeToken.texture ??= {};
+  if (!prototypeToken.texture.src) prototypeToken.texture.src = actor.img || DEFAULT_TOKEN_IMAGE;
+
+  actor.updateSource({ system, prototypeToken });
+});
+
+// Tokens criados a partir de Actors NEXUS permanecem vinculados por padrão.
+// Depois da criação, o usuário ainda pode desvincular um Token nas configurações.
+Hooks.on("preCreateToken", (token, data) => {
+  const actor = token.actor ?? game.actors?.get(token.actorId ?? data?.actorId);
+  if (!actor || !NEXUS_ACTOR_TYPES.includes(actor.type)) return;
+
+  const prototypeImage = actor.prototypeToken?.texture?.src
+    || actor.prototypeToken?.img
+    || actor.img
+    || DEFAULT_TOKEN_IMAGE;
+  const currentImage = token.texture?.src ?? data?.texture?.src;
+  const changes = { actorLink: true };
+
+  if (!currentImage || currentImage === DEFAULT_TOKEN_IMAGE) {
+    changes.texture = { src: prototypeImage };
+  }
+  token.updateSource(changes);
 });

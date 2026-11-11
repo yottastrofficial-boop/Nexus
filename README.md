@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.2 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.3 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.2-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.3-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.2 está em desenvolvimento sobre a base funcional 1.0.0.1. A atualização ainda não foi publicada nem validada integralmente no Foundry VTT.
+> **Estado desta versão:** a 1.0.0.3 está em desenvolvimento sobre a base funcional 1.0.0.1. A atualização ainda não foi publicada nem validada integralmente no Foundry VTT.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão em preparação | 1.0.0.2 |
+| Versão em preparação | 1.0.0.3 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -104,15 +104,19 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 ## Documentação
 
-- [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)\n- [Arquitetura técnica e refatoração 1.0.0.2](docs/ARCHITECTURE.md)
+- [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)\n- [Arquitetura técnica e refatoração 1.0.0.3](docs/ARCHITECTURE.md)
 - [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Histórico de alterações](CHANGELOG.md)
 - [Documentação da biblioteca](assets/library/README.md)
 
+## Interações de componentes
+
+Componentes vinculados podem receber uma ação de rolagem. A fórmula pode ser configurada no Inspector ou lida da propriedade irmã `.roll` quando o vínculo termina em `.name`. A mecânica final de perícias ainda depende da fórmula oficial definida nos documentos de regras do NEXUS.
+
 ## Estado e validação
 
-A versão 1.0.0.2 está em preparação. As verificações estáticas e os testes de regressão estão sendo ampliados para JavaScript, JSON, CSS, templates e integridade do pacote. Isso não substitui testes funcionais em uma instalação real do Foundry VTT.
+A versão 1.0.0.3 está em preparação. As verificações estáticas e os testes de regressão estão sendo ampliados para JavaScript, JSON, CSS, templates e integridade do pacote. Isso não substitui testes funcionais em uma instalação real do Foundry VTT.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 

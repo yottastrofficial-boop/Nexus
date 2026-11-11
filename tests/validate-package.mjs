@@ -15,11 +15,30 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.2", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.3", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.2\/nexus\.zip$/);
+assert.match(manifest.download, /releases\/download\/v1\.0\.0\.3\/nexus\.zip$/);
+
+const entrypoint = await read("scripts/nexus-v1.0.0.js");
+const libraryCatalog = await read("assets/library/catalog.js");
+assert.match(entrypoint, /Hooks\.on\("preCreateActor"/, "Criação de Actor NEXUS precisa configurar o token de protótipo");
+assert.match(entrypoint, /prototypeToken\.actorLink = true/, "Tokens de protótipo NEXUS devem ser vinculados por padrão");
+assert.match(entrypoint, /texture: \{ src: actor\.img \|\| DEFAULT_TOKEN_IMAGE \}/, "O token de protótipo precisa de uma imagem utilizável");
+assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
+assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
+assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
+assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve manter o Indicador – Barra");
+assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
+assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
+assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
+assert.match(sheet, /const availableFolders = NEXUS_LIBRARY_CATALOG\.categories \?\? \[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
+assert.match(sheet, /const folders = availableFolders\.map\(/, "A Biblioteca não deve manter pastas fixas de demonstração");
+assert.doesNotMatch(sheet, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
+assert.match(template, /data-library-count>1 elemento</, "A contagem inicial da Biblioteca deve refletir o único asset");
+assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
+
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
   await exists(file);
@@ -155,7 +174,13 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.2/);
-assert.match(changelog, /## 1\.0\.0\.2/);
+assert.match(readme, /Versão 1\.0\.0\.3/);
+assert.match(changelog, /## 1\.0\.0\.3/);
+assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
+assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
+assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
+assert.match(template, /data-action="component-roll"/, "O componente deve exibir um botão de rolagem quando configurado");
+assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
+assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 
-console.log("NEXUS 1.0.0.2: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");

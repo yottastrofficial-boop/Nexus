@@ -1,3 +1,25 @@
+## 1.0.0.3
+
+### Correções
+- Configuração do Token de Protótipo dos Actors NEXUS com vínculo ativo por padrão e imagem de fallback.
+- Criação de Tokens na cena preserva o vínculo com o Actor e utiliza a imagem do Token de Protótipo; o usuário pode desvincular o Token posteriormente nas configurações do Foundry.
+
+### Biblioteca
+- Catálogo inicial simplificado: somente **Indicador – Barra** (PV) permanece disponível.
+- Removidos os demais componentes e temas de demonstração do catálogo inicial.
+
+### Componentes
+- Adicionada ação opcional de rolagem configurável no Inspector.
+- Componentes vinculados podem exibir um botão **Rolar**.
+- A fórmula pode ser definida diretamente no componente ou obtida da propriedade irmã `.roll` quando o caminho vinculado termina em `.name`.
+- A execução utiliza os dados de rolagem do Actor e publica o resultado no chat do Foundry.
+- A fórmula não é presumida pelo NEXUS: deve ser configurada conforme as regras do sistema.
+
+### Validação
+- Incluídas verificações estáticas para o vínculo Actor/Token, catálogo reduzido e ação de rolagem.
+- Sintaxe JavaScript, manifesto, templates, estilos e regressões foram aprovados no CI.
+- O teste dentro do Foundry VTT 14 continua necessário para confirmar os fluxos reais de Actors, Tokens e rolagens.
+
 # Changelog
 
 ## 1.0.0.2 (em desenvolvimento)
