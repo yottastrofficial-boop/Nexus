@@ -70,6 +70,7 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (parts[0] === "system") parts.shift();
   else if (aliases[parts[0]]) parts[0] = aliases[parts[0]];
   const path = parts.join(".");
+  const shortDisplayPath = path.endsWith(".exib") ? `${path.slice(0, -5)}.exibicao` : "";
   const virtualPaths = {
     "identity.portrait.img": { value: actor?.img ?? "", sourcePath: "img" },
     "identity.token.img": { value: getFoundryDefaultTokenImage(actor), sourcePath: "prototypeToken.texture.src" },
@@ -78,12 +79,13 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     "token.border": { value: actor?.prototypeToken?.ring?.colors?.ring ?? "", sourcePath: "prototypeToken.ring.colors.ring" }
   };
   if (virtualPaths[path]) return { value: virtualPaths[path].value, path, sourcePath: virtualPaths[path].sourcePath, virtual: true };
+  if (shortDisplayPath && getPath(actor?.system ?? {}, path) === undefined && getPath(actor?.system ?? {}, shortDisplayPath) !== undefined) return { value: getPath(actor.system, shortDisplayPath), path, sourcePath: shortDisplayPath };
   if (path === "name") return { value: actor?.name ?? "", path: "name" };
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
   const alias = resolveAliasPath(actor, path);
   let value = alias.alias
-    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix].filter(Boolean).join(".")))
+    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join(".")))
     : getPath(actor?.system ?? {}, path);
   if (alias.alias?.type === "resource" && alias.suffix === "percentage") {
     const resource = alias.path ? getPath(actor?.system ?? {}, alias.path) : getPath(getCustomAliasData(actor), alias.alias.key);
@@ -91,7 +93,7 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     value = Number.isFinite(current) && Number.isFinite(max) && max > 0 ? Math.round(current / max * 100) : 0;
   }
   value = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
-  if (alias.alias && ["name", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.label;
+  if (alias.alias && ["name", "exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.label;
   if (alias.alias?.type === "attribute" && alias.suffix === "checkbonus" && typeof value === "string" && depth < 8) {
     const calculated = evaluateAliasExpression(actor, value, depth + 1);
     if (calculated !== null) value = calculated;
@@ -1911,6 +1913,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (input) positionPropertyOptions(input);
     });
     $(document).on(`focusout${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input]", event => { const input = event.currentTarget, inspector = input.closest(".nexus-component-inspector"), list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`); setTimeout(() => { if (list && !list.contains(document.activeElement)) { list.hidden = true; list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = ""; if (list.parentElement === document.body && inspector) inspector.append(list); delete list.dataset.nexusPropertyOwner; list._nexusOwnerInspector = null; list._nexusOwnerInput = null; } }, 100); });
+
+    $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
+      const input = event.currentTarget;
+      const panelWindow = input.closest(".nexus-panel-window");
+      if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
+      const id = input.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
+      const node = id ? this.element?.querySelector(`.nexus-component[data-id="${CSS.escape(id)}"]`) : null;
+      if (!node) return;
+      const key = input.dataset.componentSetting, value = input.value;
+      const styles = { backgroundColor: "--nexus-component-bg", borderColor: "--nexus-component-border", fontSize: "--nexus-component-font-size", fontFamily: "--nexus-component-font-family", textAlign: "--nexus-component-text-align", fontWeight: "--nexus-component-font-weight", fontStyle: "--nexus-component-font-style", textTransform: "--nexus-component-text-transform", letterSpacing: "--nexus-component-letter-spacing", lineHeight: "--nexus-component-line-height" };
+      if (styles[key]) node.style.setProperty(styles[key], key === "fontSize" || key === "letterSpacing" ? `${value}${key === "fontSize" ? "px" : "px"}` : value);
+      if (key === "borderRadius") node.style.setProperty("--nexus-component-radius", `${value}px`);
+      if (key === "opacity") node.style.setProperty("--nexus-component-opacity", `${value}%`);
+      if (key === "labelPosition") node.dataset.labelPosition = value;
+      if (key === "customLabel") { const heading = node.querySelector(".nexus-component-heading"); if (heading) heading.textContent = value; }
+      if (key === "text" && node.dataset.type === "custom-card") { const content = node.querySelector(".nexus-custom-card-value"); if (content) content.textContent = value; }
+    });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", async event => {
       const panelWindow = event.currentTarget.closest(".nexus-panel-window");
       if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
@@ -1987,7 +2006,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="backgroundColor" || key==="borderColor") component[key]=input.value;
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
       else if(key==="opacity") { const opacity=Number(input.value); component.opacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
-      else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,32);
+      else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
+      else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
+      else if(key==="fontWeight") component.fontWeight=["400","500","600","700","800"].includes(String(input.value))?String(input.value):"400";
+      else if(key==="fontStyle") component.fontStyle=input.value==="italic"?"italic":"normal";
+      else if(key==="textTransform") component.textTransform=["none","uppercase","lowercase","capitalize"].includes(input.value)?input.value:"none";
+      else if(key==="letterSpacing") component.letterSpacing=clamp(Number(input.value)||0,-2,12);
+      else if(key==="lineHeight") component.lineHeight=clamp(Number(input.value)||1.35,0.8,2.4);
       else if(key==="fontFamily") component.fontFamily=["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)?input.value:"Inter";
       else if(key==="headingFontSize") { const size=String(input.value??"").trim(); if(size) component.headingFontSize=clamp(Number(size)||10,7,32); else delete component.headingFontSize; }
       else if(key==="headingFontFamily") { if(["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)) component.headingFontFamily=input.value; else delete component.headingFontFamily; }
@@ -2022,7 +2047,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         restoreEditorViewport();
         return;
       }
-      const visualOnly = ["x","y","fontSize","fontFamily","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
+      const visualOnly = ["x","y","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
       if (visualOnly) {
         const node = html[0].querySelector(`.nexus-component[data-id="${id}"]`);
         if (node) {
@@ -2034,9 +2059,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
           if (key === "opacity") node.style.setProperty("--nexus-component-opacity", `${component.opacity}%`);
           if (key === "fontSize") node.style.setProperty("--nexus-component-font-size", `${component.fontSize}px`);
           if (key === "fontFamily") node.style.setProperty("--nexus-component-font-family", component.fontFamily);
+          if (key === "textAlign") node.style.setProperty("--nexus-component-text-align", component.textAlign);
+          if (key === "fontWeight") node.style.setProperty("--nexus-component-font-weight", component.fontWeight);
+          if (key === "fontStyle") node.style.setProperty("--nexus-component-font-style", component.fontStyle);
+          if (key === "textTransform") node.style.setProperty("--nexus-component-text-transform", component.textTransform);
+          if (key === "letterSpacing") node.style.setProperty("--nexus-component-letter-spacing", `${component.letterSpacing}px`);
+          if (key === "lineHeight") node.style.setProperty("--nexus-component-line-height", component.lineHeight);
           if (key === "headingFontSize") { if (component.headingFontSize) node.style.setProperty("--nexus-component-heading-font-size", `${component.headingFontSize}px`); else node.style.removeProperty("--nexus-component-heading-font-size"); }
           if (key === "headingFontFamily") { if (component.headingFontFamily) node.style.setProperty("--nexus-component-heading-font-family", component.headingFontFamily); else node.style.removeProperty("--nexus-component-heading-font-family"); }
           if (key === "labelPosition") node.dataset.labelPosition = component.labelPosition;
+          if (key === "customLabel") { const heading=node.querySelector(".nexus-component-heading"); if(heading) heading.textContent=component.customLabel; }
         }
         const resourceSettings = { label:component.sheetContent1??"PV", icon:component.sheetContent2??"❤️", current:getPath(this.actor.system??{},component.currentPath??"resources.pv.value")??"—", max:getPath(this.actor.system??{},component.maxPath??"resources.pv.max")??"—", color:component.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor??"#080d14", orientation:component.sheetOrientation??"horizontal" };
         if (component.type === "sheet-attribute") {
