@@ -623,7 +623,7 @@ if (!customElements.get("nexus-color-picker")) {
           button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--nexus-highlight-color,#78b7e8);outline-offset:2px}
         </style>
         <button class="trigger" type="button" aria-haspopup="dialog" aria-expanded="false"><i class="swatch"><i></i></i><span>#526b89</span></button>
-        <div class="popover" popover="manual" role="dialog" aria-label="Seletor avançado de cores">
+        <div class="popover" popover="auto" role="dialog" aria-label="Seletor avançado de cores">
           <div class="spectrum" tabindex="0" aria-label="Saturação e luminosidade"><i class="thumb"></i></div>
           <div class="range-row"><label>Matiz</label><input class="hue" type="range" min="0" max="360" value="210"></div>
           <div class="range-row"><label>Opacidade</label><input class="alpha" type="range" min="0" max="100" value="100"></div>
@@ -631,6 +631,7 @@ if (!customElements.get("nexus-color-picker")) {
           <select class="texture" aria-label="Textura" hidden><option value="solid">Cor sólida</option><option value="diagonal">Listras diagonais</option><option value="stripes">Faixas</option><option value="dots">Pontos</option><option value="grid">Grade</option></select>
         </div>`;
       const q = selector => this.shadowRoot.querySelector(selector);
+      q(".popover").addEventListener("toggle", () => q(".trigger").setAttribute("aria-expanded", String(q(".popover").matches(":popover-open"))));
       q(".trigger").addEventListener("click", () => {
         const panel = q(".popover");
         if (panel.matches(":popover-open")) panel.hidePopover();
@@ -3027,7 +3028,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       components: members.map(item => { const { id, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
     });
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
-    ui.notifications?.info?.(`Grupo "${name}" salvo na Biblioteca deste personagem.`);
+    ui.notifications?.info?.(`Grupo "${name}" salvo na sua Biblioteca pessoal.`);
     this._libraryRenderSavedGroups?.();
     return true;
   }
