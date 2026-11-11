@@ -3,7 +3,7 @@
 ### Cards inteligentes e composição
 - Corrigido o movimento de múltiplos cards selecionados que pertencem a grupos.
 - A seleção é limpa ao clicar fora da ficha, sem remover o foco dos painéis do NEXUS.
-- Grupos personalizados podem ser salvos na Biblioteca do personagem e inseridos novamente como composições independentes.
+- Grupos personalizados podem ser salvos na Biblioteca pessoal do usuário e inseridos novamente como composições independentes.
 - A ação de rolagem pode ser executada clicando na área do card no modo de jogo, sem botão adicional.
 - O campo de fórmula só aparece quando a ação de rolagem está selecionada.
 - Adicionados controles de alinhamento, peso, estilo, transformação, espaçamento e altura de linha.
