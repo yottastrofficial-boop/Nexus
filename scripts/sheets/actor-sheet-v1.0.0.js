@@ -420,7 +420,9 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
 };
 
 const getNexusRollAliasEntries = actor => {
-  const candidates = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)].map(alias => {
+  const candidates = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
+    .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
+    .map(alias => {
     const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
     const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
