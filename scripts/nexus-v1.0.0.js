@@ -55,6 +55,19 @@ Hooks.on("preCreateActor", (actor) => {
   actor.updateSource({ system, prototypeToken });
 });
 
+// O retrato do Actor e a textura do Token são propriedades distintas no Foundry.
+// Ao trocar o retrato, atualiza o Token de Protótipo apenas quando ele ainda usa
+// a imagem herdada do retrato anterior (ou o fallback); tokens personalizados são preservados.
+Hooks.on("preUpdateActor", (actor, changes) => {
+  if (!NEXUS_ACTOR_TYPES.includes(actor.type)) return;
+  const nextPortrait = changes.img;
+  if (typeof nextPortrait !== "string" || !nextPortrait.trim()) return;
+  const currentTokenImage = actor.prototypeToken?.texture?.src || actor.prototypeToken?.img || "";
+  const previousPortrait = actor.img || "";
+  if (!currentTokenImage || currentTokenImage === previousPortrait || currentTokenImage === DEFAULT_TOKEN_IMAGE) {
+    changes["prototypeToken.texture.src"] = nextPortrait;
+  }
+});
 // Tokens criados a partir de Actors NEXUS permanecem vinculados por padrão.
 // Depois da criação, o usuário ainda pode desvincular um Token nas configurações.
 Hooks.on("preCreateToken", (token, data) => {
