@@ -3503,3 +3503,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-inspector-grid nexus-color-picker { width:100%; }
 .nexus-property-options { z-index: 10020 !important; pointer-events:auto; }
 .nexus-component-inspector [data-component-path-input] { position:relative; z-index:10021; }
+
+
+/* Ação funcional opcional de componentes vinculados. */
+.nexus-component-action { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:26px; margin:0 8px 7px; padding:4px 9px; border:1px solid var(--nexus-accent-color,#52647b); border-radius:5px; color:var(--nexus-text-color,#e7edf5); background:var(--nexus-button-color,#315b7d); font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+.nexus-component-action:hover { filter:brightness(1.14); }
+.nexus-component-action:focus-visible { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; }
