@@ -174,8 +174,8 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.4/);
-assert.match(changelog, /## 1\.0\.0\.4/);
+assert.match(readme, /Versão 1\.0\.0\.3/);
+assert.match(changelog, /## 1\.0\.0\.3/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
 assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
