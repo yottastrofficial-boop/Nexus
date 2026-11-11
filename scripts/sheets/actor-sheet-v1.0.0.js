@@ -2455,7 +2455,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const path = input.dataset.systemPath, value = ["number", "range"].includes(input.type) ? Number(input.value) : input.value;
     if (!path) return;
     if (path === "name") { await this.actor.update({ name: value }); this._refreshBoundComponents(); return; }
-    if (path === "img") { await this.actor.update({ img: value }); this._refreshBoundComponents(); return; }
+    if (path === "img") { await this.actor.update({ img: value });
+      const roots = [this.element, this._nexusPanelWindows?.get("component")?.panel].filter(Boolean);
+      for (const root of roots) root.querySelectorAll?.("[data-actor-portrait-preview]").forEach(image => { image.src = String(value ?? ""); });
+      this._refreshBoundComponents(); return; }
     const alias = resolveAliasPath(this.actor, path);
     if (alias.alias && !alias.path) {
       const customData = clone(getCustomAliasData(this.actor));
