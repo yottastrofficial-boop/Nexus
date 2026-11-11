@@ -689,7 +689,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const element = instance?.element;
       if (!element?.isConnected) return null;
       const active = element.contains(document.activeElement) ? document.activeElement : null;
-      const attrs = active ? ["data-component-setting","data-layout-setting","data-global-typography","data-alias-field","data-native-property-field","data-property-value","data-component-path-input","data-config-current-value","data-config-max-value","data-alias-select","data-alias-new-name","data-inspector-tab","data-floating-panel"] : [];
+      const attrs = active ? ["data-component-setting","data-layout-setting","data-global-typography","data-alias-field","data-native-property-field","data-property-value","data-component-path-input","data-config-current-value","data-config-max-value","data-alias-select","data-alias-new-name","data-inspector-tab","data-floating-panel","data-text-style-control"] : [];
       const descriptor = active ? attrs.map(attr => active.hasAttribute(attr) ? { attr, value: active.getAttribute(attr), targetId: active.dataset.componentTargetId ?? "", aliasId: active.dataset.aliasId ?? "" } : null).find(Boolean) : null;
       const scroll = [...element.querySelectorAll(".window-content,.application-content,.nexus-component-inspector,.nexus-layer-list,.nexus-alias-manager,.nexus-library-grid,.nexus-inspector-tab-panel")].map(node => ({ selector: node.classList.contains("nexus-component-inspector") ? ".nexus-component-inspector" : node.classList.contains("nexus-layer-list") ? ".nexus-layer-list" : node.classList.contains("nexus-alias-manager") ? ".nexus-alias-manager" : node.classList.contains("nexus-library-grid") ? ".nexus-library-grid" : node.classList.contains("nexus-inspector-tab-panel") ? `.nexus-inspector-tab-panel[data-inspector-tab-panel="${node.dataset.inspectorTabPanel}"]` : node.classList.contains("window-content") ? ".window-content" : ".application-content", top: node.scrollTop, left: node.scrollLeft }));
       let start = null, end = null;
@@ -959,12 +959,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    const actionType = ["roll", "proficiency", "resource-slider"].includes(component.actionType) ? component.actionType : "";
+    const actionType = ["roll", "proficiency"].includes(component.actionType) ? component.actionType : (component.actionType === "resource-slider" && (sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind)) ? "resource-slider" : "");
     const proficiencyBinding = component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : undefined;
     const proficiencyLevel = clamp(Number(proficiencyBinding ?? component.proficiencyLevel) || 0, 0, 3);
     const proficiencyLabels = (Array.isArray(component.proficiencyLabels) ? component.proficiencyLabels : ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4);
     while (proficiencyLabels.length < 4) proficiencyLabels.push("Nível " + proficiencyLabels.length);
-    const isResourceComponent = sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter"].includes(def.kind);
+    const isResourceComponent = sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind);
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
     const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
@@ -2144,7 +2144,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
       else if(key==="imageFit") component.imageFit=["contain","cover","fill","none"].includes(input.value)?input.value:"contain";
       else if(key==="imagePosition") component.imagePosition=["center","top","bottom","left","right"].includes(input.value)?input.value:"center";
-      else if(key==="imageOpacity") component.imageOpacity=clamp(Number(input.value),0,100);
+      else if(key==="imageOpacity") component.imageOpacity=clamp(Number(input.value) || 100,0,100);
       else if(key==="actionPath") { const path=String(input.value??"").replace(/^system\./,"").trim(); if(path && (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part=>["__proto__","prototype","constructor"].includes(part)))) return; component.actionPath=path; }
       else if(/^proficiencyLabel[0-3]$/.test(key)) { const index=Number(key.slice(-1)); component.proficiencyLabels ??= ["Sem domínio","Básico","Treinado","Especialista"]; component.proficiencyLabels[index]=String(input.value??"").trim().slice(0,24)||("Nível " + index); }
       else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
@@ -2383,6 +2383,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         writeInput(card, ".nexus-resource-values input:last-of-type, .nexus-resource-ring-values input:last-of-type", maximum);
         writeInput(card, ".nexus-resource-bar-values input:first-of-type", current);
         writeInput(card, ".nexus-resource-bar-values input:last-of-type", maximum);
+        writeInput(card, "[data-resource-slider]", current);
       }
       if (context.kind === "sheet-element" && context.sheetVariant === "resource") {
         const preview = card.querySelector(".nexus-sheet-resource-preview");
@@ -2424,7 +2425,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _updateSystemValue(input) {
-    const path = input.dataset.systemPath, value = input.type === "number" ? Number(input.value) : input.value;
+    const path = input.dataset.systemPath, value = ["number", "range"].includes(input.type) ? Number(input.value) : input.value;
     if (!path) return;
     if (path === "name") { await this.actor.update({ name: value }); this._refreshBoundComponents(); return; }
     if (path === "img") { await this.actor.update({ img: value }); this._refreshBoundComponents(); return; }
@@ -3473,7 +3474,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (one && inspector) inspector.querySelectorAll("[data-component-setting]").forEach(field => { field.dataset.componentTargetId = one.id; });
     if (inspector) {
       inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = !one || section.dataset.actionConfig !== (one.actionType ?? ""); });
-      const textTools = inspector.querySelector("[data-text-tools");
+      const textTools = inspector.querySelector("[data-text-tools]");
       if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
       const imageSettings = inspector.querySelector("[data-image-settings]");
       if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
