@@ -174,7 +174,13 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.2/);
-assert.match(changelog, /## 1\.0\.0\.2/);
+assert.match(readme, /Versão 1\.0\.0\.4/);
+assert.match(changelog, /## 1\.0\.0\.4/);
+assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
+assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
+assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
+assert.match(template, /data-action="component-roll"/, "O componente deve exibir um botão de rolagem quando configurado");
+assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
+assert.match(changelog, /Interação configurável de componentes/);
 
 console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");
