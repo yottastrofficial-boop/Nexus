@@ -584,7 +584,6 @@
 .nexus-library-table, .nexus-asset-table { display: grid; grid-template-columns: repeat(2,1fr); width: 82px; border-top: 1px solid #9aacc2; border-left: 1px solid #9aacc2; }
 .nexus-library-table i, .nexus-asset-table span { height: 17px; border-right: 1px solid #9aacc2; border-bottom: 1px solid #9aacc2; }
 .nexus-resource-unbound { opacity: .7; }
-.nexus-unbound-hint { color: #a9b8c9; font-size: 9px; text-align: center; }
 .nexus-component { width: 100px; height: 100px; }
 .nexus-component-content { min-width: 0; min-height: 0; }
 .nexus-component:has(.nexus-resource-ring) .nexus-resource-ring { max-width: 78px; max-height: 78px; margin: auto; }
@@ -3355,7 +3354,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* v1.31.0 — compact property binding and paired resource paths */
 .nexus-resource-path-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .nexus-data-binding [data-component-path-input] { width: 100%; }
-.nexus-field-hint { display: block; margin-top: 4px; color: var(--nexus-muted, #91a4bb); font-size: 10px; line-height: 1.4; }
 .nexus-inspector-subsection[data-custom-card-config] { display: grid; gap: 8px; }
 
 .nexus-property-options { position: relative; z-index: 30; max-height: 240px; overflow: auto; margin-top: 4px; padding: 5px; border: 1px solid var(--nexus-panel-border, #43546a); border-radius: 7px; background: var(--nexus-menu-bg, #202f40); box-shadow: 0 8px 20px #0007; }
@@ -3370,7 +3368,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* v1.31.0 — compact property binding and paired resource paths */
 .nexus-resource-path-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .nexus-data-binding [data-component-path-input] { width: 100%; }
-.nexus-field-hint { display: block; margin-top: 4px; color: var(--nexus-muted, #91a4bb); font-size: 10px; line-height: 1.4; }
 .nexus-inspector-subsection[data-custom-card-config] { display: grid; gap: 8px; }
 
 .nexus-property-options { position: relative; z-index: 30; max-height: 240px; overflow: auto; margin-top: 4px; padding: 5px; border: 1px solid var(--nexus-panel-border, #43546a); border-radius: 7px; background: var(--nexus-menu-bg, #202f40); box-shadow: 0 8px 20px #0007; }
@@ -3509,3 +3506,60 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-component-action { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:26px; margin:0 8px 7px; padding:4px 9px; border:1px solid var(--nexus-accent-color,#52647b); border-radius:5px; color:var(--nexus-text-color,#e7edf5); background:var(--nexus-button-color,#315b7d); font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
 .nexus-component-action:hover { filter:brightness(1.14); }
 .nexus-component-action:focus-visible { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; }
+
+
+/* NEXUS — cards compostos, tipografia e controles de edição. */
+.nexus-component-content {
+  text-align: var(--nexus-component-text-align, center);
+  font-weight: var(--nexus-component-font-weight, 400);
+  font-style: var(--nexus-component-font-style, normal);
+  text-transform: var(--nexus-component-text-transform, none);
+  letter-spacing: var(--nexus-component-letter-spacing, 0);
+  line-height: var(--nexus-component-line-height, 1.35);
+}
+.nexus-component.is-rollable { cursor: pointer; }
+.nexus-sheet[data-mode="play"] .nexus-component.is-rollable { cursor: pointer; }
+.nexus-sheet[data-mode="play"] .nexus-component.is-rollable:hover {
+  border-color: var(--nexus-highlight-color, #78b7e8);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nexus-highlight-color, #78b7e8) 24%, transparent), 0 4px 14px #0005;
+}
+.nexus-sheet[data-mode="play"] .nexus-component.is-rollable:focus-visible {
+  outline: 2px solid var(--nexus-highlight-color, #78b7e8);
+  outline-offset: 2px;
+}
+.nexus-component-content :is(strong, b) { font-weight: var(--nexus-component-font-weight, 700); }
+.nexus-typography-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.nexus-save-group-library {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  min-height: 36px; margin-top: 10px; padding: 7px 10px;
+  border: 1px solid var(--nexus-highlight-color, #78b7e8); border-radius: 6px;
+  color: var(--nexus-panel-text, #e7edf5); background: var(--nexus-button-color, #315b7d);
+  font: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+}
+.nexus-save-group-library:hover { filter: brightness(1.12); }
+.nexus-library-saved-section { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--nexus-panel-border, #3c5067); }
+.nexus-library-saved-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 7px; }
+.nexus-library-saved-group {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0;
+  padding: 9px; border: 1px solid var(--nexus-panel-border, #3c5067); border-radius: 7px;
+  color: var(--nexus-panel-text, #e7edf5); background: var(--nexus-panel-surface, #202e3e);
+  text-align: left; cursor: pointer;
+}
+.nexus-library-saved-group:hover, .nexus-library-saved-group.is-selected {
+  border-color: var(--nexus-highlight-color, #78b7e8);
+  background: var(--nexus-panel-hover, #2a3d52);
+}
+.nexus-library-saved-group strong { max-width: 100%; overflow-wrap: anywhere; font-size: 11px; }
+.nexus-library-saved-group small, .nexus-library-empty { color: var(--nexus-panel-muted, #9aadc2); font-size: 10px; }
+.nexus-library-detail-placeholder p, .nexus-library-details > p { color: var(--nexus-panel-muted, #9aadc2); font-size: 11px; line-height: 1.45; }
+
+/* O host do seletor não desenha um segundo painel: o botão visual fica no Shadow DOM. */
+.nexus-sheet nexus-color-picker, .nexus-panel-window nexus-color-picker {
+  display: block !important; position: relative; z-index: 1;
+  width: 100% !important; min-width: 0 !important; min-height: 38px !important; height: auto !important;
+  padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important; overflow: visible !important;
+}
+.nexus-global-color-grid nexus-color-picker {
+  width: 36px !important; min-width: 36px !important; height: 38px !important;
+}

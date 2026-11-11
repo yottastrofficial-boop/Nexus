@@ -70,6 +70,7 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (parts[0] === "system") parts.shift();
   else if (aliases[parts[0]]) parts[0] = aliases[parts[0]];
   const path = parts.join(".");
+  const shortDisplayPath = path.endsWith(".exib") ? `${path.slice(0, -5)}.exibicao` : "";
   const virtualPaths = {
     "identity.portrait.img": { value: actor?.img ?? "", sourcePath: "img" },
     "identity.token.img": { value: getFoundryDefaultTokenImage(actor), sourcePath: "prototypeToken.texture.src" },
@@ -78,12 +79,13 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     "token.border": { value: actor?.prototypeToken?.ring?.colors?.ring ?? "", sourcePath: "prototypeToken.ring.colors.ring" }
   };
   if (virtualPaths[path]) return { value: virtualPaths[path].value, path, sourcePath: virtualPaths[path].sourcePath, virtual: true };
+  if (shortDisplayPath && getPath(actor?.system ?? {}, path) === undefined && getPath(actor?.system ?? {}, shortDisplayPath) !== undefined) return { value: getPath(actor.system, shortDisplayPath), path, sourcePath: shortDisplayPath };
   if (path === "name") return { value: actor?.name ?? "", path: "name" };
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
   const alias = resolveAliasPath(actor, path);
   let value = alias.alias
-    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix].filter(Boolean).join(".")))
+    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join(".")))
     : getPath(actor?.system ?? {}, path);
   if (alias.alias?.type === "resource" && alias.suffix === "percentage") {
     const resource = alias.path ? getPath(actor?.system ?? {}, alias.path) : getPath(getCustomAliasData(actor), alias.alias.key);
@@ -91,7 +93,8 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     value = Number.isFinite(current) && Number.isFinite(max) && max > 0 ? Math.round(current / max * 100) : 0;
   }
   value = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
-  if (alias.alias && ["name", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.label;
+  if (alias.alias && alias.suffix === "name" && (value === undefined || value === null || value === "")) value = alias.alias.label;
+  if (alias.alias && ["exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.exib ?? alias.alias.label;
   if (alias.alias?.type === "attribute" && alias.suffix === "checkbonus" && typeof value === "string" && depth < 8) {
     const calculated = evaluateAliasExpression(actor, value, depth + 1);
     if (calculated !== null) value = calculated;
@@ -299,12 +302,12 @@ const collectPropertyPaths = actor => {
 };
 
 const NATIVE_PROPERTY_BASE = [
-  { id:"core.resource.pv", label:"Pontos de Vida", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
-  { id:"core.resource.pm", label:"Pontos de Mana", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
-  { id:"core.resource.pe", label:"Pontos de Energia", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
-  { id:"core.attribute.body", label:"Corpo", category:"attributes", type:"attribute", key:"attributes.body", targetPath:"attributes.body" },
-  { id:"core.attribute.mind", label:"Mente", category:"attributes", type:"attribute", key:"attributes.mind", targetPath:"attributes.mind" },
-  { id:"core.attribute.soul", label:"Alma", category:"attributes", type:"attribute", key:"attributes.soul", targetPath:"attributes.soul" },
+  { id:"core.resource.pv", label:"Pontos de Vida", exib:"PV", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
+  { id:"core.resource.pm", label:"Pontos de Mana", exib:"PM", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
+  { id:"core.resource.pe", label:"Pontos de Energia", exib:"PE", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
+  { id:"core.attribute.body", label:"Corpo", exib:"CORPO", category:"attributes", type:"attribute", key:"attributes.body", targetPath:"attributes.body" },
+  { id:"core.attribute.mind", label:"Mente", exib:"MENTE", category:"attributes", type:"attribute", key:"attributes.mind", targetPath:"attributes.mind" },
+  { id:"core.attribute.soul", label:"Alma", exib:"ALMA", category:"attributes", type:"attribute", key:"attributes.soul", targetPath:"attributes.soul" },
   { id:"core.combat.defense", label:"Defesa", category:"combat", type:"number", key:"combat.defense", targetPath:"combat.defense" },
   { id:"core.combat.movement", label:"Movimento", category:"combat", type:"number", key:"combat.movement", targetPath:"combat.movement" },
   { id:"core.combat.desl", label:"DESL", category:"combat", type:"number", key:"combat.desl", targetPath:"combat.desl" },
@@ -431,11 +434,11 @@ const resolveAliasPath = (actor, path) => {
   // (nome, bônus e fórmula) continuam pertencendo ao alias.
   if (alias.targetPath && alias.type === "attribute") {
     if (suffix === "value") targetPath = alias.targetPath;
-    else if (["name", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
+    else if (["name", "exib", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
   }
   if (alias.targetPath && alias.type === "resource") {
     if (suffix === "percentage") targetPath = alias.targetPath;
-    else if (["name", "exibicao"].includes(suffix)) targetPath = "";
+    else if (["name", "exib", "exibicao"].includes(suffix)) targetPath = "";
   }
   return { path: targetPath, alias, suffix };
 };
@@ -611,8 +614,8 @@ if (!customElements.get("nexus-color-picker")) {
           *{box-sizing:border-box}.trigger{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:5px 9px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:7px;background:var(--nexus-panel-input,#111b27);color:inherit;text-align:left;cursor:pointer}
           .swatch{width:27px;height:27px;flex:0 0 27px;border:1px solid #ffffff55;border-radius:5px;background-color:#526b89;background-image:linear-gradient(45deg,#888 25%,transparent 25%),linear-gradient(-45deg,#888 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#888 75%),linear-gradient(-45deg,transparent 75%,#888 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;overflow:hidden}
           .swatch i{display:block;width:100%;height:100%;background:#526b89}.trigger span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 11px ui-monospace,monospace}
-          .popover{position:absolute;z-index:10000;left:0;top:calc(100% + 7px);width:min(292px,calc(100vw - 28px));padding:11px;border:1px solid var(--nexus-panel-border,#52647b);border-radius:10px;background:var(--nexus-panel-bg,#182330);box-shadow:0 12px 34px #000a}
-          .popover[hidden]{display:none}.spectrum{position:relative;height:146px;border-radius:6px;cursor:crosshair;touch-action:none;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(210 100% 50%))}.thumb{position:absolute;width:13px;height:13px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #000b;transform:translate(-50%,-50%);pointer-events:none}
+          .popover{position:fixed;z-index:2147483647;left:12px;top:12px;width:min(292px,calc(100vw - 28px));max-height:calc(100vh - 24px);overflow:auto;margin:0;padding:11px;border:1px solid var(--nexus-panel-border,#52647b);border-radius:10px;background:var(--nexus-panel-bg,#182330);box-shadow:0 12px 34px #000a}
+          .popover:not(:popover-open){display:none}.spectrum{position:relative;height:146px;border-radius:6px;cursor:crosshair;touch-action:none;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(210 100% 50%))}.thumb{position:absolute;width:13px;height:13px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #000b;transform:translate(-50%,-50%);pointer-events:none}
           .range-row{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:8px;margin-top:10px}.range-row label{font-size:10px;color:var(--nexus-panel-muted,#9aadc2)}input[type=range]{width:100%;margin:0;accent-color:var(--nexus-highlight-color,#78b7e8)}
           .hue{height:12px;border-radius:10px;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);appearance:none}.alpha{height:12px;border-radius:10px;appearance:none;background:linear-gradient(90deg,transparent,var(--picked-color,#526b89)),repeating-conic-gradient(#777 0 25%,#aaa 0 50%) 0/8px 8px}
           .fields{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-top:10px}.hex{width:100%;min-width:0;height:31px;padding:5px 8px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:5px;background:var(--nexus-panel-input,#111b27);color:inherit;font:12px ui-monospace,monospace}.rgba{color:var(--nexus-panel-muted,#9aadc2);font-size:10px;white-space:nowrap}
@@ -620,7 +623,7 @@ if (!customElements.get("nexus-color-picker")) {
           button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--nexus-highlight-color,#78b7e8);outline-offset:2px}
         </style>
         <button class="trigger" type="button" aria-haspopup="dialog" aria-expanded="false"><i class="swatch"><i></i></i><span>#526b89</span></button>
-        <div class="popover" role="dialog" aria-label="Seletor avançado de cores" hidden>
+        <div class="popover" popover="auto" role="dialog" aria-label="Seletor avançado de cores">
           <div class="spectrum" tabindex="0" aria-label="Saturação e luminosidade"><i class="thumb"></i></div>
           <div class="range-row"><label>Matiz</label><input class="hue" type="range" min="0" max="360" value="210"></div>
           <div class="range-row"><label>Opacidade</label><input class="alpha" type="range" min="0" max="100" value="100"></div>
@@ -628,7 +631,20 @@ if (!customElements.get("nexus-color-picker")) {
           <select class="texture" aria-label="Textura" hidden><option value="solid">Cor sólida</option><option value="diagonal">Listras diagonais</option><option value="stripes">Faixas</option><option value="dots">Pontos</option><option value="grid">Grade</option></select>
         </div>`;
       const q = selector => this.shadowRoot.querySelector(selector);
-      q(".trigger").addEventListener("click", () => { const panel=q(".popover"); panel.hidden=!panel.hidden; q(".trigger").setAttribute("aria-expanded",String(!panel.hidden)); });
+      q(".popover").addEventListener("toggle", () => q(".trigger").setAttribute("aria-expanded", String(q(".popover").matches(":popover-open"))));
+      q(".trigger").addEventListener("click", () => {
+        const panel = q(".popover");
+        if (panel.matches(":popover-open")) panel.hidePopover();
+        else {
+          const rect = this.getBoundingClientRect(), width = Math.min(292, window.innerWidth - 28), estimatedHeight = Math.min(390, window.innerHeight - 24);
+          const left = Math.max(14, Math.min(rect.left, window.innerWidth - width - 14));
+          const below = rect.bottom + 7;
+          const top = below + estimatedHeight <= window.innerHeight - 10 ? below : Math.max(10, rect.top - estimatedHeight - 7);
+          panel.style.left = `${left}px`; panel.style.top = `${top}px`;
+          panel.showPopover();
+        }
+        q(".trigger").setAttribute("aria-expanded", String(panel.matches(":popover-open")));
+      });
       q(".spectrum").addEventListener("pointerdown", event => { q(".spectrum").setPointerCapture?.(event.pointerId); this._pickSV(event); const move=e=>this._pickSV(e); const up=()=>{q(".spectrum").removeEventListener("pointermove",move);q(".spectrum").removeEventListener("pointerup",up);this._emit("change");}; q(".spectrum").addEventListener("pointermove",move); q(".spectrum").addEventListener("pointerup",up,{once:true}); q(".spectrum").addEventListener("pointercancel",up,{once:true}); });
       q(".hue").addEventListener("input", event=>{this._h=Number(event.target.value);this._sync();this._emit("input");});
       q(".hue").addEventListener("change",()=>this._emit("change"));
@@ -639,7 +655,7 @@ if (!customElements.get("nexus-color-picker")) {
       this.shadowRoot.addEventListener("keydown", event=>{if(event.key==="Escape")this._close();});
       if(this.hasAttribute("allow-texture"))q(".texture").hidden=false;
     }
-    _close(){const panel=this.shadowRoot.querySelector(".popover");if(panel&&!panel.hidden){panel.hidden=true;this.shadowRoot.querySelector(".trigger")?.setAttribute("aria-expanded","false");}}
+    _close(){const panel=this.shadowRoot.querySelector(".popover");if(panel?.matches(":popover-open")){panel.hidePopover();this.shadowRoot.querySelector(".trigger")?.setAttribute("aria-expanded","false");}}
     _pickSV(event){const rect=this.shadowRoot.querySelector(".spectrum").getBoundingClientRect();this._s=Math.min(1,Math.max(0,(event.clientX-rect.left)/rect.width));this._v=1-Math.min(1,Math.max(0,(event.clientY-rect.top)/rect.height));this._sync();this._emit("input");}
     _readValue(value){let raw=String(value||"").trim();if(!raw)return false;const pattern=raw.includes("repeating-linear-gradient")? (raw.includes("45deg")?"diagonal":"stripes"):raw.includes("radial-gradient")?"dots":raw.includes("linear-gradient")?"grid":"solid";if(pattern!=="solid"){this._texture=pattern;const match=raw.match(/#[0-9a-f]{6,8}/i);raw=match?.[0]||"#526b89";}else this._texture="solid";
       let r,g,b,a=1;const hex=raw.match(/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i);if(hex){let h=hex[1];if(h.length===3)h=[...h].map(c=>c+c).join("");if(h.length===8)a=parseInt(h.slice(6),16)/255; r=parseInt(h.slice(0,2),16);g=parseInt(h.slice(2,4),16);b=parseInt(h.slice(4,6),16);}else{const rgb=raw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/i);if(!rgb)return false;r=+rgb[1];g=+rgb[2];b=+rgb[3];a=rgb[4]===undefined?1:Number(rgb[4]);}
@@ -899,7 +915,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         label: headingLabel,
         headingLabel,
         showCardHeading: !!headingLabel && component.showLabel !== false,
-        fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32),
+        fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48),
         fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter",
         labelPosition: component.labelPosition || "top-left",
         kind: "custom",
@@ -937,7 +953,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    return { ...component, actionType: component.actionType === "roll" ? "roll" : "", hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    return { ...component, actionType: component.actionType === "roll" ? "roll" : "", hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -1140,6 +1156,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "global-fonts-default") return this._resetGlobalAppearance("fonts");
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
       if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
+      if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
     });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
@@ -1183,7 +1200,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         await this.actor.update({ "prototypeToken.ring.colors.ring": color });
       }
       else await this.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
-      this.render({ force: true });
+      this._refreshBoundComponents();
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; this._updateSystemValue(input); });
     html.find("[data-config-component-code]").on("change", async event => {
@@ -1215,7 +1232,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!Number.isFinite(value)) return;
       this._captureHistory();
       await this.actor.update({ [`system.${path}`]: value });
-      this.render({ force: true });
+      this._refreshBoundComponents();
     });
     const persistAliases = async (aliases, focusTarget = null) => {
       const normalized = aliases.map(normalizeAliasDefinition).filter(Boolean);
@@ -1242,8 +1259,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       aliases.push({ id, key, label: String(label || "Nova propriedade").slice(0,48), category, type: finalType, source: resolvedSource, targetPath: safeTarget });
       if (resolvedSource === "custom") {
         const customData = clone(getCustomAliasData(this.actor));
-        if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
-        else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exibicao: String(label), value: 0, max: 0 });
+        if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
+        else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, max: 0 });
         else foundry.utils.setProperty(customData, key, finalType === "number" ? 0 : finalType === "boolean" ? false : "");
         await this.actor.setFlag("nexus", "customData", customData);
       }
@@ -1441,8 +1458,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const customData = clone(getCustomAliasData(this.actor));
       const original = getPath(customData, source.key);
       if (original !== undefined) foundry.utils.setProperty(customData, key, clone(original));
-      else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
-      else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exibicao: copy.label, value: 0, max: 0 });
+      else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
+      else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, max: 0 });
       else foundry.utils.setProperty(customData, key, source.type === "number" ? 0 : source.type === "boolean" ? false : "");
       await this.actor.setFlag("nexus", "customData", customData);
       await this.actor.setFlag("nexus", "aliases", aliases);
@@ -1481,8 +1498,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       if (!alias.targetPath) {
         let defaults;
-        if (alias.type === "attribute") defaults = { name: alias.label, exibicao: alias.label, value: 0, checkbonus: 0, roll: "" };
-        else if (alias.type === "resource") defaults = { name: alias.label, exibicao: alias.label, value: 0, max: 0 };
+        if (alias.type === "attribute") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, checkbonus: 0, roll: "" };
+        else if (alias.type === "resource") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, max: 0 };
         else defaults = alias.type === "number" ? 0 : alias.type === "boolean" ? false : "";
         foundry.utils.setProperty(customData, alias.key, defaults);
         await this.actor.setFlag("nexus", "customData", customData);
@@ -1526,6 +1543,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-layer-visibility]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerVisibility.split(":"); this._toggleLayerState(kind,id,"hidden"); });
     html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); this._toggleLayerState(kind,id,"locked"); });
     const libraryPanel = html[0].querySelector(".nexus-library-panel");
+    const renderSavedGroups = () => {
+      const container = libraryPanel?.querySelector("[data-library-saved-groups]");
+      if (!container) return;
+      const groups = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
+      container.replaceChildren();
+      if (!groups.length) {
+        const empty = document.createElement("p");
+        empty.className = "nexus-library-empty";
+        empty.textContent = "Nenhum grupo personalizado salvo.";
+        container.append(empty);
+        return;
+      }
+      for (const group of groups) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "nexus-library-saved-group";
+        button.dataset.librarySavedGroup = group.id;
+        const title = document.createElement("strong");
+        title.textContent = group.name || "Grupo sem nome";
+        const count = document.createElement("small");
+        count.textContent = `${group.components?.length ?? 0} elementos`;
+        button.append(title, count);
+        container.append(button);
+      }
+    };
+    this._libraryRenderSavedGroups = renderSavedGroups;
+    renderSavedGroups();
     const filterLibrary = () => {
       const query = libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
       const tag = libraryPanel?.querySelector("[data-library-tag]")?.value ?? "all";
@@ -1565,8 +1609,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       for (const alias of [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]) {
         const key = safeAliasKey(alias.key); if (!key) continue;
-        if (alias.type === "resource") paths.push(`${key}.name`, `${key}.value`, `${key}.max`, `${key}.percentage`);
-        else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exibicao`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
+        if (alias.type === "resource") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.max`, `${key}.percentage`);
+        else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
         else paths.push(key);
       }
       return [...new Set(paths)].sort((a,b) => a.localeCompare(b, "pt-BR"));
@@ -1703,10 +1747,44 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
 
+      const savedGroupCard = target?.closest("[data-library-saved-group]");
+      if (savedGroupCard && libraryPanel.contains(savedGroupCard)) {
+        event.preventDefault();
+        const saved = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === savedGroupCard.dataset.librarySavedGroup);
+        const detail = libraryPanel.querySelector("[data-library-details]");
+        if (!saved || !detail) return;
+        libraryPanel.querySelectorAll("[data-library-saved-group]").forEach(item => item.classList.toggle("is-selected", item === savedGroupCard));
+        detail.dataset.selectedGroupId = saved.id;
+        detail.dataset.selectedType = "saved-group";
+        detail.innerHTML = "";
+        const heading = document.createElement("div");
+        heading.className = "nexus-library-detail-heading";
+        const title = document.createElement("strong");
+        title.className = "nexus-library-detail-title";
+        title.textContent = saved.name || "Grupo personalizado";
+        heading.append(title);
+        const summary = document.createElement("p");
+        summary.textContent = `Composição com ${saved.components?.length ?? 0} elementos independentes.`;
+        const add = document.createElement("button");
+        add.type = "button";
+        add.dataset.libraryAddGroup = "";
+        add.textContent = "Adicionar grupo ao Canvas";
+        detail.append(heading, summary, add);
+        return;
+      }
+
       const assetCard = target?.closest("[data-library-asset]");
       if (assetCard && libraryPanel.contains(assetCard)) {
         event.preventDefault();
         if (!assetCard.dataset.libraryTheme) selectLibraryAsset(assetCard);
+        return;
+      }
+
+      const addGroupButton = target?.closest("[data-library-add-group]");
+      if (addGroupButton && libraryPanel.contains(addGroupButton)) {
+        event.preventDefault();
+        const groupId = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
+        if (groupId) await this._addSavedGroupToCanvas(groupId);
         return;
       }
 
@@ -1910,6 +1988,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (input) positionPropertyOptions(input);
     });
     $(document).on(`focusout${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input]", event => { const input = event.currentTarget, inspector = input.closest(".nexus-component-inspector"), list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`); setTimeout(() => { if (list && !list.contains(document.activeElement)) { list.hidden = true; list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = ""; if (list.parentElement === document.body && inspector) inspector.append(list); delete list.dataset.nexusPropertyOwner; list._nexusOwnerInspector = null; list._nexusOwnerInput = null; } }, 100); });
+
+    $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
+      const input = event.currentTarget;
+      const panelWindow = input.closest(".nexus-panel-window");
+      if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
+      const id = input.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
+      const node = id ? this.element?.querySelector(`.nexus-component[data-id="${CSS.escape(id)}"]`) : null;
+      if (!node) return;
+      const key = input.dataset.componentSetting, value = input.value;
+      const styles = { backgroundColor: "--nexus-component-bg", borderColor: "--nexus-component-border", fontSize: "--nexus-component-font-size", fontFamily: "--nexus-component-font-family", textAlign: "--nexus-component-text-align", fontWeight: "--nexus-component-font-weight", fontStyle: "--nexus-component-font-style", textTransform: "--nexus-component-text-transform", letterSpacing: "--nexus-component-letter-spacing", lineHeight: "--nexus-component-line-height" };
+      if (styles[key]) node.style.setProperty(styles[key], key === "fontSize" || key === "letterSpacing" ? `${value}${key === "fontSize" ? "px" : "px"}` : value);
+      if (key === "borderRadius") node.style.setProperty("--nexus-component-radius", `${value}px`);
+      if (key === "opacity") node.style.setProperty("--nexus-component-opacity", `${value}%`);
+      if (key === "labelPosition") node.dataset.labelPosition = value;
+      if (key === "customLabel") { const heading = node.querySelector(".nexus-component-heading"); if (heading) heading.textContent = value; }
+      if (key === "text" && node.dataset.type === "custom-card") { const content = node.querySelector(".nexus-custom-card-value"); if (content) content.textContent = value; }
+    });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", async event => {
       const panelWindow = event.currentTarget.closest(".nexus-panel-window");
       if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
@@ -1986,7 +2081,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="backgroundColor" || key==="borderColor") component[key]=input.value;
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
       else if(key==="opacity") { const opacity=Number(input.value); component.opacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
-      else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,32);
+      else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
+      else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
+      else if(key==="fontWeight") component.fontWeight=["400","500","600","700","800"].includes(String(input.value))?String(input.value):"400";
+      else if(key==="fontStyle") component.fontStyle=input.value==="italic"?"italic":"normal";
+      else if(key==="textTransform") component.textTransform=["none","uppercase","lowercase","capitalize"].includes(input.value)?input.value:"none";
+      else if(key==="letterSpacing") component.letterSpacing=clamp(Number(input.value)||0,-2,12);
+      else if(key==="lineHeight") component.lineHeight=clamp(Number(input.value)||1.35,0.8,2.4);
       else if(key==="fontFamily") component.fontFamily=["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)?input.value:"Inter";
       else if(key==="headingFontSize") { const size=String(input.value??"").trim(); if(size) component.headingFontSize=clamp(Number(size)||10,7,32); else delete component.headingFontSize; }
       else if(key==="headingFontFamily") { if(["Inter","Arial","Georgia","Verdana","monospace"].includes(input.value)) component.headingFontFamily=input.value; else delete component.headingFontFamily; }
@@ -2021,7 +2122,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         restoreEditorViewport();
         return;
       }
-      const visualOnly = ["x","y","fontSize","fontFamily","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
+      const visualOnly = ["x","y","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
       if (visualOnly) {
         const node = html[0].querySelector(`.nexus-component[data-id="${id}"]`);
         if (node) {
@@ -2033,9 +2134,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
           if (key === "opacity") node.style.setProperty("--nexus-component-opacity", `${component.opacity}%`);
           if (key === "fontSize") node.style.setProperty("--nexus-component-font-size", `${component.fontSize}px`);
           if (key === "fontFamily") node.style.setProperty("--nexus-component-font-family", component.fontFamily);
+          if (key === "textAlign") node.style.setProperty("--nexus-component-text-align", component.textAlign);
+          if (key === "fontWeight") node.style.setProperty("--nexus-component-font-weight", component.fontWeight);
+          if (key === "fontStyle") node.style.setProperty("--nexus-component-font-style", component.fontStyle);
+          if (key === "textTransform") node.style.setProperty("--nexus-component-text-transform", component.textTransform);
+          if (key === "letterSpacing") node.style.setProperty("--nexus-component-letter-spacing", `${component.letterSpacing}px`);
+          if (key === "lineHeight") node.style.setProperty("--nexus-component-line-height", component.lineHeight);
           if (key === "headingFontSize") { if (component.headingFontSize) node.style.setProperty("--nexus-component-heading-font-size", `${component.headingFontSize}px`); else node.style.removeProperty("--nexus-component-heading-font-size"); }
           if (key === "headingFontFamily") { if (component.headingFontFamily) node.style.setProperty("--nexus-component-heading-font-family", component.headingFontFamily); else node.style.removeProperty("--nexus-component-heading-font-family"); }
           if (key === "labelPosition") node.dataset.labelPosition = component.labelPosition;
+          if (key === "customLabel") { const heading=node.querySelector(".nexus-component-heading"); if(heading) heading.textContent=component.customLabel; }
         }
         const resourceSettings = { label:component.sheetContent1??"PV", icon:component.sheetContent2??"❤️", current:getPath(this.actor.system??{},component.currentPath??"resources.pv.value")??"—", max:getPath(this.actor.system??{},component.maxPath??"resources.pv.max")??"—", color:component.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor??"#080d14", orientation:component.sheetOrientation??"horizontal" };
         if (component.type === "sheet-attribute") {
@@ -2176,37 +2284,95 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
+
+  _refreshBoundComponents() {
+    const root = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
+    if (!root) return;
+    const writeText = (card, selector, value) => {
+      const element = card.querySelector(selector);
+      if (element && element !== document.activeElement) element.textContent = String(value ?? "—");
+    };
+    const writeInput = (card, selector, value) => {
+      const element = card.querySelector(selector);
+      if (element && element !== document.activeElement) element.value = String(value ?? "");
+    };
+    for (const component of this._currentLayout?.components ?? []) {
+      const card = root.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
+      if (!card) continue;
+      const context = this._componentContext(component);
+      if (!context) continue;
+      const current = context.value ?? "—", maximum = context.max ?? "—";
+      if (["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(context.kind)) {
+        const fill = card.querySelector(".nexus-resource-bar-fill, .nexus-asset-meter-fill");
+        if (fill) fill.style.width = `${context.percent ?? 0}%`;
+        const ring = card.querySelector(".nexus-resource-ring");
+        if (ring) ring.style.setProperty("--nexus-resource-percent", `${context.percent ?? 0}%`);
+        writeText(card, ".nexus-resource-values > strong:first-child, .nexus-resource-ring-values > strong:first-child", current);
+        writeText(card, ".nexus-resource-values > strong:last-child, .nexus-resource-ring-values > strong:last-child", maximum);
+        writeText(card, ".nexus-resource-bar-values > strong", current);
+        writeText(card, ".nexus-resource-bar-values > span", `/ ${maximum}`);
+        writeInput(card, ".nexus-resource-values input:first-of-type, .nexus-resource-ring-values input:first-of-type", current);
+        writeInput(card, ".nexus-resource-values input:last-of-type, .nexus-resource-ring-values input:last-of-type", maximum);
+        writeInput(card, ".nexus-resource-bar-values input:first-of-type", current);
+        writeInput(card, ".nexus-resource-bar-values input:last-of-type", maximum);
+      }
+      if (context.kind === "sheet-element" && context.sheetVariant === "resource") {
+        const preview = card.querySelector(".nexus-sheet-resource-preview");
+        updateSheetResourcePreview(preview, {
+          label: component.sheetContent1 ?? "PV", icon: component.sheetContent2 ?? "❤️",
+          current, max: maximum, color: component.sheetColor ?? "#d94b4b",
+          trackColor: component.sheetTrackColor ?? "#080d14", orientation: component.sheetOrientation ?? "horizontal"
+        });
+        const values = card.querySelector(".nexus-sheet-resource-values");
+        if (values?.querySelector("input")) {
+          writeInput(values, "input:first-of-type", current);
+          writeInput(values, "input:last-of-type", maximum);
+        } else if (values) values.textContent = `${current} / ${maximum}`;
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "attribute") {
+        writeText(card, ".nexus-sheet-element small", component.text ?? "Atributo");
+        writeText(card, ".nexus-sheet-element strong", current);
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "derived") {
+        writeText(card, ".nexus-sheet-element small", component.sheetCode ?? "");
+        writeText(card, ".nexus-sheet-element strong", current);
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "skill") {
+        writeText(card, ".nexus-sheet-element strong", component.text ?? "");
+        writeText(card, ".nexus-sheet-element b", current);
+      } else if (context.kind === "asset-value") writeText(card, ".nexus-asset-value", current);
+      else if (context.kind === "asset-text") writeText(card, ".nexus-asset-text", context.path ? current : component.text);
+      else if (context.kind === "custom") writeText(card, ".nexus-custom-card-value", current);
+      else if (["number", "name", "text"].includes(context.kind)) writeText(card, ".nexus-component-content strong", current);
+      if (context.kind === "sheet-element" && !["resource", "attribute", "derived", "skill"].includes(context.sheetVariant)) {
+        writeText(card, ".nexus-sheet-element strong", current);
+      }
+      if (context.kind === "token" && isMediaSource(current)) {
+        const image = card.querySelector(".nexus-token-portrait");
+        if (image && image !== document.activeElement && image.getAttribute("src") !== current) image.src = current;
+      }
+      if (context.kind === "asset-image" && isMediaSource(current)) {
+        const image = card.querySelector(".nexus-asset-image");
+        if (image && image !== document.activeElement && image.src !== current) image.src = current;
+      }
+    }
+  }
+
   async _updateSystemValue(input) {
     const path = input.dataset.systemPath, value = input.type === "number" ? Number(input.value) : input.value;
     if (!path) return;
-    if (path === "name") return this.actor.update({ name: value });
-    if (path === "img") return this.actor.update({ img: value });
+    if (path === "name") { await this.actor.update({ name: value }); this._refreshBoundComponents(); return; }
+    if (path === "img") { await this.actor.update({ img: value }); this._refreshBoundComponents(); return; }
     const alias = resolveAliasPath(this.actor, path);
     if (alias.alias && !alias.path) {
       const customData = clone(getCustomAliasData(this.actor));
-      foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix].filter(Boolean).join("."), value);
+      foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."), value);
       await this.actor.setFlag("nexus", "customData", customData);
-      this.render({ force: true });
+      this._refreshBoundComponents();
       return;
     }
     const writePath = alias.alias ? alias.path : path;
     if (writePath === "img") return this.actor.update({ img: value });
     await this.actor.update({ [`system.${writePath}`]: value });
-    if (path.includes("resources.")) {
-      const root = this.element?.querySelector?.(".nexus-sheet");
-      for (const component of this._currentLayout?.components ?? []) {
-        if (component.type !== "sheet-resource") continue;
-        const currentPath = component.currentPath ?? "resources.pv.value";
-        const maxPath = component.maxPath ?? "resources.pv.max";
-        if (path !== currentPath && path !== maxPath) continue;
-        const current = resolveNexusBinding(this.actor, currentPath).value ?? "—";
-        const maximum = resolveNexusBinding(this.actor, maxPath).value ?? "—";
-        const node = root?.querySelector(`.nexus-component[data-id="${component.id}"] .nexus-sheet-resource-preview`);
-        updateSheetResourcePreview(node, { label:component.sheetContent1 ?? "PV", icon:component.sheetContent2 ?? "❤️", current, max:maximum, color:component.sheetColor ?? ({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor ?? "#080d14", orientation:component.sheetOrientation ?? "horizontal" });
-        const values = root?.querySelector(`.nexus-component[data-id="${component.id}"] .nexus-sheet-resource-values`);
-        if (values) values.textContent = `${current} / ${maximum}`;
-      }
-    }
+    this._refreshBoundComponents();
+
   }
   async _rollComponent(componentId) {
     const layouts = await this._readLayouts();
@@ -2250,7 +2416,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const customData = clone(getCustomAliasData(this.actor));
       foundry.utils.setProperty(customData, `${alias.alias.key}.value`, value);
       await this.actor.setFlag("nexus", "customData", customData);
-      return this.render({ force: true });
+      this._refreshBoundComponents();
+      return true;
     }
     const target = alias.alias ? alias.path : path;
     return this.actor.update({ [`system.${target}.value`]: value });
@@ -2831,6 +2998,75 @@ export class NexusActorSheet extends NexusActorSheetBase {
     layout.groups = (layout.groups ?? []).filter(g => !g.componentIds?.some(id => ids.has(id)));
     layout.groups.push(group); await this._writeLayouts(layouts, active); this._selectedGroupId = group.id; this._selectedIds = new Set(memberIds); this.render({ force: true });
   }
+
+  async _saveSelectedGroupToLibrary() {
+    const layouts = await this._readLayouts();
+    const layout = layouts[this._activeLayoutId()];
+    if (!layout) return false;
+    const selected = new Set(this._selectedIds ?? []);
+    const group = (layout.groups ?? []).find(item => item.id === this._selectedGroupId)
+      ?? (layout.groups ?? []).find(item => item.componentIds?.length >= 2 && item.componentIds.every(id => selected.has(id)));
+    if (!group) {
+      ui.notifications?.warn?.("Selecione um grupo completo antes de salvá-lo na Biblioteca.");
+      return false;
+    }
+    const members = (layout.components ?? []).filter(item => group.componentIds.includes(item.id));
+    if (members.length < 2) return false;
+    const result = await foundry.applications.api.DialogV2.input({
+      window: { title: "Salvar grupo na Biblioteca" },
+      content: `<label class="nexus-library-card-content-label">Nome do grupo<input name="name" type="text" maxlength="48" value="${Handlebars.escapeExpression(String(group.name ?? "Grupo"))}"></label>`,
+      ok: { label: "Salvar" }, rejectClose: false
+    });
+    const name = String(result?.name ?? "").trim().slice(0, 48);
+    if (!name) return false;
+    const left = Math.min(...members.map(item => item.x));
+    const top = Math.min(...members.map(item => item.y));
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    saved.push({
+      id: `libgrp-${foundry.utils.randomID(8)}`, name,
+      groupSettings: { backgroundColor: group.backgroundColor ?? "", borderColor: group.borderColor ?? "", borderRadius: group.borderRadius ?? 0 },
+      components: members.map(item => { const { id, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
+    });
+    await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
+    ui.notifications?.info?.(`Grupo "${name}" salvo na sua Biblioteca pessoal.`);
+    this._libraryRenderSavedGroups?.();
+    return true;
+  }
+
+  async _addSavedGroupToCanvas(groupId) {
+    const saved = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
+    const composition = saved.find(item => item.id === groupId);
+    if (!composition?.components?.length) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    const components = composition.components.map(item => ({ ...clone(item), definition: COMPONENTS[item.type] })).filter(item => item.definition);
+    if (!components.length) return false;
+    const width = Math.max(...components.map(item => (Number(item.x) || 0) + (Number(item.w) || item.definition.w)));
+    const height = Math.max(...components.map(item => (Number(item.y) || 0) + (Number(item.h) || item.definition.h)));
+    const origin = this._findFreePosition(layout, Math.min(width, layout.width), Math.min(height, layout.height));
+    this._captureHistory();
+    const ids = [];
+    for (const item of components) {
+      const id = `cmp-${foundry.utils.randomID(8)}`;
+      const w = clamp(Number(item.w) || item.definition.w, 20, Math.min(1000, layout.width));
+      const h = clamp(Number(item.h) || item.definition.h, 20, Math.min(1000, layout.height));
+      layout.components.push({ ...clone(item), definition: undefined, id, x: clamp(origin.x + (Number(item.x) || 0), 0, layout.width - w), y: clamp(origin.y + (Number(item.y) || 0), 0, layout.height - h), w, h, z: 0, stackOrder: Math.max(-1, ...layout.components.map(existing => Number(existing.stackOrder) || 0)) + 1 });
+      ids.push(id);
+    }
+    if (ids.length > 1) {
+      layout.groups ??= [];
+      const members = layout.components.filter(item => ids.includes(item.id));
+      const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
+      const right = Math.max(...members.map(item => item.x + item.w)), bottom = Math.max(...members.map(item => item.y + item.h));
+      layout.groups.push({ ...(clone(composition.groupSettings ?? {})), id: `grp-${foundry.utils.randomID(8)}`, name: composition.name, componentIds: ids, x: left, y: top, w: right-left, h: bottom-top, z: 0 });
+    }
+    await this._writeLayouts(layouts, active);
+    this._selectedIds = new Set(ids);
+    this._selectedGroupId = layout.groups?.find(item => item.componentIds?.length === ids.length && item.componentIds.every(id => ids.includes(id)))?.id ?? null;
+    this.render({ force: true });
+    return true;
+  }
+
   async _ungroupSelection(html) {
     const ids = new Set(this._selectedIds ?? []), layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return;
@@ -3089,21 +3325,22 @@ export class NexusActorSheet extends NexusActorSheetBase {
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel=>{const active=panel.dataset.inspectorTabPanel===activeTab;panel.hidden=!active;panel.classList.toggle("active",active);});
       let effectivePath = null;
       if (one) {
-        const knownCorePaths = ["name", "identity.portrait.img", "identity.token.img", "token.img", "resources.pv", "resources.pv.value", "resources.pv.max", "resources.pm", "resources.pm.value", "resources.pm.max", "resources.pe", "resources.pe.value", "resources.pe.max", "identity.level", "identity.lineage", "identity.legacy", "attributes.body", "attributes.mind", "attributes.soul", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"];
+        const knownCorePaths = ["name", "identity.portrait.img", "identity.token.img", "token.img", "resources.pv.value", "resources.pv.max", "resources.pm.value", "resources.pm.max", "resources.pe.value", "resources.pe.max", "identity.level", "identity.lineage", "identity.legacy", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"];
         const corePaths = new Set(knownCorePaths.filter(path => path === "name" || ["identity.portrait.img", "identity.token.img", "token.img"].includes(path) || getPath(this.actor.system ?? {}, path) !== undefined));
         const systemRevision = this.actor?._stats?.modifiedTime ?? this.actor?.system;
         if (!this._nexusPropertyPathCache || this._nexusPropertyPathCache.revision !== systemRevision) {
           this._nexusPropertyPathCache = { revision: systemRevision, paths: collectPropertyPaths(this.actor) };
         }
         const allSystemPaths = this._nexusPropertyPathCache.paths;
-        const systemPaths = new Set([...allSystemPaths].filter(path => !corePaths.has(path) && ![...corePaths].some(core => path.startsWith(`${core}.`))));
+        const nativePropertyRoots = new Set(getNativePropertyDefinitions(this.actor).filter(item => ["attribute", "resource"].includes(item.type)).map(item => safeAliasKey(item.key)).filter(Boolean));
+        const systemPaths = new Set([...allSystemPaths].filter(path => !nativePropertyRoots.has(path) && !corePaths.has(path) && ![...corePaths].some(core => path.startsWith(`${core}.`))));
         const nativeAliasPaths = new Set();
         const customAliasPaths = new Set();
         const aliasLabels = new Map();
         for (const [collection, destination] of [[getNativePropertyDefinitions(this.actor), nativeAliasPaths], [getAliasDefinitions(this.actor), customAliasPaths]]) {
           for (const alias of collection) {
             const root = safeAliasKey(alias.key); if (!root) continue;
-            const suffixes = alias.type === "attribute" ? ["name", "exibicao", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exibicao", "value", "max", "percentage"] : [""];
+            const suffixes = alias.type === "attribute" ? ["name", "exib", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exib", "value", "max", "percentage"] : [""];
             for (const suffix of suffixes) {
               const path = suffix ? `${root}.${suffix}` : root;
               destination.add(path);
@@ -3970,8 +4207,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else {
         const groupId = component.dataset.groupId;
         const group = groupId ? (sheet._activeGroups ?? []).find(g => g.id === groupId) : null;
-        const wholeGroupSelected = group && (group.componentIds ?? []).every(memberId => sheet._selectedIds.has(memberId));
-        if (wholeGroupSelected || !sheet._selectedIds.has(id)) setSelection([id]);
+        if (!sheet._selectedIds.has(id)) setSelection([id]);
       }
       const selected=elements().filter(el=>sheet._selectedIds.has(el.dataset.id));
       const starts=selected.map(el=>({el,...rectOf(el)}));
@@ -4069,8 +4305,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
       canvas.style.removeProperty("cursor");
     };
     canvas.addEventListener("pointerleave", clearInteractionCursor);
-    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
+    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
     canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+    canvas.addEventListener("keydown", event => {
+      if (sheet._mode !== "play" || !["Enter", " "].includes(event.key)) return;
+      if (event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
+      const card = event.target.closest(".nexus-component[data-action-type=\"roll\"]");
+      if (!card) return;
+      event.preventDefault();
+      sheet._rollComponent(card.dataset.id);
+    });
+    canvas.addEventListener("click", event => {
+      if (sheet._mode !== "play" || performance.now() < (sheet._suppressComponentClickUntil ?? 0)) return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-action-type=\"roll\"]") : null;
+      if (!card || !canvas.contains(card) || event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
+      event.preventDefault();
+      sheet._rollComponent(card.dataset.id);
+    });
     const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
@@ -4129,7 +4380,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const insidePanel = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance.element?.contains(event.target));
       if (root.contains(event.target) || floating?.contains(event.target) || insidePanel) sheet._nexusInteractionActive = true;
-      else sheet._nexusInteractionActive = false;
+      else {
+        sheet._nexusInteractionActive = false;
+        // Cliques fora da ficha encerram a seleção visual, sem interferir nos painéis flutuantes.
+        if (sheet._selectedIds?.size || sheet._selectedGroupId) {
+          sheet._selectedIds = new Set();
+          sheet._selectedGroupId = null;
+          sheet._componentEditorTargetId = null;
+          sheet._setSelection?.($(root), []);
+        }
+      }
     };
     root.addEventListener("pointerdown",activateInteraction,true);
     document.addEventListener("pointerdown",deactivateInteraction,true);

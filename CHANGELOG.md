@@ -1,3 +1,21 @@
+## 1.0.0.4
+
+### Cards inteligentes e composição
+- Corrigido o movimento de múltiplos cards selecionados que pertencem a grupos.
+- A seleção é limpa ao clicar fora da ficha, sem remover o foco dos painéis do NEXUS.
+- Grupos personalizados podem ser salvos na Biblioteca pessoal do usuário e inseridos novamente como composições independentes.
+- A ação de rolagem pode ser executada clicando na área do card no modo de jogo, sem botão adicional.
+- O campo de fórmula só aparece quando a ação de rolagem está selecionada.
+- Adicionados controles de alinhamento, peso, estilo, transformação, espaçamento e altura de linha.
+- Alterações tipográficas e visuais recebem prévia imediata sem remontar o Canvas a cada edição.
+- O seletor de cores usa a camada superior do navegador para não ficar recortado pelo painel.
+- Removidas as hints visuais redundantes.
+- O caminho `.exib` é aceito como compatibilidade para metadados antigos `.exibicao`.
+
+### Validação
+- Adicionadas verificações estáticas para seleção em grupo, composição na Biblioteca, interação por clique, tipografia e seletor de cores.
+- Testes reais no Foundry VTT 14 ainda necessários.
+
 ## 1.0.0.3
 
 ### Correções
