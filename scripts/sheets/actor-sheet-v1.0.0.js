@@ -2214,7 +2214,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const raw = String(input.value ?? "");
       const cursor = input.selectionStart ?? raw.length;
       const tokenMatch = formulaMode ? raw.slice(0, cursor).match(/@([A-Za-z0-9_.-]*)$/) : null;
-      if (formulaMode && raw.trim() && !tokenMatch && raw.slice(0, cursor).trimEnd().endsWith("+")) {
+      if (formulaMode && raw.trim() && !tokenMatch) {
         list.hidden = true;
         return;
       }
@@ -3806,7 +3806,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
           }
         }
         const externalPaths = new Set(["uuid", "id", "_id", "img"].filter(path => path === "img" || this.actor?.[path] !== undefined));
-        const optionsList = inspector.querySelector("[data-component-path-options]");
+        const optionsList = inspector.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
+        if (optionsList?.parentElement === document.body) inspector.append(optionsList);
         const suggestions = [];
         const registeredPaths = new Set();
         for (const [label, values] of [["NEXUS · nativas", corePaths], ["NEXUS · campos derivados", nativeAliasPaths], ["Módulos externos · system", systemPaths], ["Externas · Foundry / integrações", externalPaths], ["Campos próprios", customAliasPaths]]) {
