@@ -1140,6 +1140,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "global-fonts-default") return this._resetGlobalAppearance("fonts");
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
       if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
+      if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
     });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
@@ -2831,6 +2832,74 @@ export class NexusActorSheet extends NexusActorSheetBase {
     layout.groups = (layout.groups ?? []).filter(g => !g.componentIds?.some(id => ids.has(id)));
     layout.groups.push(group); await this._writeLayouts(layouts, active); this._selectedGroupId = group.id; this._selectedIds = new Set(memberIds); this.render({ force: true });
   }
+
+  async _saveSelectedGroupToLibrary() {
+    const layouts = await this._readLayouts();
+    const layout = layouts[this._activeLayoutId()];
+    if (!layout) return false;
+    const selected = new Set(this._selectedIds ?? []);
+    const group = (layout.groups ?? []).find(item => item.id === this._selectedGroupId)
+      ?? (layout.groups ?? []).find(item => item.componentIds?.length >= 2 && item.componentIds.every(id => selected.has(id)));
+    if (!group) {
+      ui.notifications?.warn?.("Selecione um grupo completo antes de salvá-lo na Biblioteca.");
+      return false;
+    }
+    const members = (layout.components ?? []).filter(item => group.componentIds.includes(item.id));
+    if (members.length < 2) return false;
+    const result = await foundry.applications.api.DialogV2.input({
+      window: { title: "Salvar grupo na Biblioteca" },
+      content: `<label class="nexus-library-card-content-label">Nome do grupo<input name="name" type="text" maxlength="48" value="${Handlebars.escapeExpression(String(group.name ?? "Grupo"))}"></label>`,
+      ok: { label: "Salvar" }, rejectClose: false
+    });
+    const name = String(result?.name ?? "").trim().slice(0, 48);
+    if (!name) return false;
+    const left = Math.min(...members.map(item => item.x));
+    const top = Math.min(...members.map(item => item.y));
+    const saved = clone(this.actor.getFlag("nexus", "libraryGroups") ?? []);
+    saved.push({
+      id: `libgrp-${foundry.utils.randomID(8)}`, name,
+      components: members.map(item => ({ ...clone(item), id: undefined, x: item.x - left, y: item.y - top }))
+    });
+    await this.actor.setFlag("nexus", "libraryGroups", saved.slice(-100));
+    ui.notifications?.info?.(`Grupo "${name}" salvo na Biblioteca deste personagem.`);
+    this._libraryRenderSavedGroups?.();
+    return true;
+  }
+
+  async _addSavedGroupToCanvas(groupId) {
+    const saved = this.actor.getFlag("nexus", "libraryGroups") ?? [];
+    const composition = saved.find(item => item.id === groupId);
+    if (!composition?.components?.length) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    const components = composition.components.map(item => ({ ...clone(item), definition: COMPONENTS[item.type] })).filter(item => item.definition);
+    if (!components.length) return false;
+    const width = Math.max(...components.map(item => (Number(item.x) || 0) + (Number(item.w) || item.definition.w)));
+    const height = Math.max(...components.map(item => (Number(item.y) || 0) + (Number(item.h) || item.definition.h)));
+    const origin = this._findFreePosition(layout, Math.min(width, layout.width), Math.min(height, layout.height));
+    this._captureHistory();
+    const ids = [];
+    for (const item of components) {
+      const id = `cmp-${foundry.utils.randomID(8)}`;
+      const w = clamp(Number(item.w) || item.definition.w, 20, Math.min(1000, layout.width));
+      const h = clamp(Number(item.h) || item.definition.h, 20, Math.min(1000, layout.height));
+      layout.components.push({ ...clone(item), definition: undefined, id, x: clamp(origin.x + (Number(item.x) || 0), 0, layout.width - w), y: clamp(origin.y + (Number(item.y) || 0), 0, layout.height - h), w, h, z: 0, stackOrder: Math.max(-1, ...layout.components.map(existing => Number(existing.stackOrder) || 0)) + 1 });
+      ids.push(id);
+    }
+    if (ids.length > 1) {
+      layout.groups ??= [];
+      const members = layout.components.filter(item => ids.includes(item.id));
+      const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
+      const right = Math.max(...members.map(item => item.x + item.w)), bottom = Math.max(...members.map(item => item.y + item.h));
+      layout.groups.push({ id: `grp-${foundry.utils.randomID(8)}`, name: composition.name, componentIds: ids, x: left, y: top, w: right-left, h: bottom-top, z: 0 });
+    }
+    await this._writeLayouts(layouts, active);
+    this._selectedIds = new Set(ids);
+    this._selectedGroupId = layout.groups?.find(item => item.componentIds?.length === ids.length && item.componentIds.every(id => ids.includes(id)))?.id ?? null;
+    this.render({ force: true });
+    return true;
+  }
+
   async _ungroupSelection(html) {
     const ids = new Set(this._selectedIds ?? []), layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return;
@@ -3971,7 +4040,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const groupId = component.dataset.groupId;
         const group = groupId ? (sheet._activeGroups ?? []).find(g => g.id === groupId) : null;
         const wholeGroupSelected = group && (group.componentIds ?? []).every(memberId => sheet._selectedIds.has(memberId));
-        if (wholeGroupSelected || !sheet._selectedIds.has(id)) setSelection([id]);
+        if (!sheet._selectedIds.has(id)) setSelection([id]);
       }
       const selected=elements().filter(el=>sheet._selectedIds.has(el.dataset.id));
       const starts=selected.map(el=>({el,...rectOf(el)}));
@@ -4069,8 +4138,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       canvas.style.removeProperty("cursor");
     };
     canvas.addEventListener("pointerleave", clearInteractionCursor);
-    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
+    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
     canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+    canvas.addEventListener("click", event => {
+      if (sheet._mode !== "play" || performance.now() < (sheet._suppressComponentClickUntil ?? 0)) return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-action-type=\"roll\"]") : null;
+      if (!card || !canvas.contains(card) || event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
+      event.preventDefault();
+      sheet._rollComponent(card.dataset.id);
+    });
     const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
@@ -4129,7 +4205,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const insidePanel = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance.element?.contains(event.target));
       if (root.contains(event.target) || floating?.contains(event.target) || insidePanel) sheet._nexusInteractionActive = true;
-      else sheet._nexusInteractionActive = false;
+      else {
+        sheet._nexusInteractionActive = false;
+        // Cliques fora da ficha encerram a seleção visual, sem interferir nos painéis flutuantes.
+        if (sheet._selectedIds?.size) {
+          sheet._selectedIds = new Set();
+          sheet._selectedGroupId = null;
+          sheet._componentEditorTargetId = null;
+          sheet._setSelection?.($(root), []);
+        }
+      }
     };
     root.addEventListener("pointerdown",activateInteraction,true);
     document.addEventListener("pointerdown",deactivateInteraction,true);
