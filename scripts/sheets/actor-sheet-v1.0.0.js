@@ -1640,32 +1640,61 @@ export class NexusActorSheet extends NexusActorSheetBase {
         button.type = "button";
         button.className = "nexus-library-saved-group";
         button.dataset.librarySavedGroup = group.id;
+        button.title = `${group.name || "Grupo sem nome"} · ${group.components?.length ?? 0} componentes`;
         const preview = document.createElement("span");
         preview.className = "nexus-library-saved-group-preview";
         preview.setAttribute("aria-hidden", "true");
         const members = Array.isArray(group.components) ? group.components : [];
-        const visibleMembers = members.slice(0, 5);
+        const gridMode = members.length > 8;
+        preview.classList.toggle("is-grid", gridMode);
+        const visibleMembers = gridMode ? members.slice(0, 8) : members;
         const bounds = members.length ? {
           left: Math.min(...members.map(item => Number(item.x) || 0)),
           top: Math.min(...members.map(item => Number(item.y) || 0)),
-          right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || 100))),
-          bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || 60)))
+          right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || COMPONENTS[item.type]?.w || 100))),
+          bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
         } : { left: 0, top: 0, right: 100, bottom: 60 };
-        const scale = Math.min(104 / Math.max(1, bounds.right - bounds.left), 58 / Math.max(1, bounds.bottom - bounds.top), 0.9);
+        const scale = Math.min(136 / Math.max(1, bounds.right - bounds.left), 82 / Math.max(1, bounds.bottom - bounds.top));
         for (const member of visibleMembers) {
+          const definition = COMPONENTS[member.type] ?? {};
+          const code = String(member.sheetCode ?? member.sheetContent1 ?? member.resourceLabel ?? "").trim().toUpperCase();
+          const resourceColor = member.sheetColor || ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] || "";
+          const isResource = ["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","sheet-resource","resource-meter","asset-meter"].includes(member.type);
           const card = document.createElement("span");
           card.className = "nexus-library-saved-group-card";
           card.dataset.previewType = member.type || "component";
-          const definition = COMPONENTS[member.type];
-          const label = member.customLabel || member.sheetContent1 || member.sheetCode || member.text || (definition && definition.label) || "Card";
-          card.textContent = String(label).trim().slice(0, 9);
-          card.style.left = (2 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
-          card.style.top = (2 + ((Number(member.y) || 0) - bounds.top) * scale) + "px";
-          card.style.width = Math.max(13, (Number(member.w) || 100) * scale) + "px";
-          card.style.height = Math.max(10, (Number(member.h) || 60) * scale) + "px";
-          card.style.background = member.backgroundColor || (group.groupSettings && group.groupSettings.backgroundColor) || "var(--nexus-panel-surface, #202e3e)";
-          card.style.borderColor = member.borderColor || (group.groupSettings && group.groupSettings.borderColor) || "var(--nexus-panel-border, #3c5067)";
-          preview.append(card);
+          card.classList.toggle("is-resource", isResource);
+          const label = isResource
+            ? (member.sheetContent1 || member.resourceLabel || code || definition.label || "Recurso")
+            : (member.customLabel || member.text || member.sheetContent1 || definition.label || "Card");
+          const cardTitle = document.createElement("strong");
+          cardTitle.textContent = String(label).trim().slice(0, 12);
+          card.append(cardTitle);
+          if (isResource) {
+            const track = document.createElement("span");
+            track.className = "nexus-library-saved-group-track";
+            const fill = document.createElement("i");
+            const current = Number(member.previewCurrent ?? 32);
+            const maximum = Math.max(1, Number(member.previewMax ?? 40));
+            fill.style.width = `${clamp(current / maximum * 100, 0, 100)}%`;
+            fill.style.background = resourceColor || "var(--nexus-highlight-color,#78b7e8)";
+            track.append(fill);
+            card.append(track);
+          } else {
+            const value = document.createElement("small");
+            value.textContent = String(member.text ?? member.sheetCode ?? "").trim().slice(0, 14);
+            if (value.textContent) card.append(value);
+          }
+          if (gridMode) preview.append(card);
+          else {
+            card.style.left = (3 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
+            card.style.top = (3 + ((Number(member.y) || 0) - bounds.top) * scale) + "px";
+            card.style.width = Math.max(18, (Number(member.w) || definition.w || 100) * scale) + "px";
+            card.style.height = Math.max(14, (Number(member.h) || definition.h || 60) * scale) + "px";
+            card.style.background = "var(--nexus-panel-surface,#202e3e)";
+            card.style.borderColor = member.borderColor || resourceColor || "var(--nexus-panel-border,#3c5067)";
+            preview.append(card);
+          }
         }
         if (members.length > visibleMembers.length) {
           const overflow = document.createElement("span");
@@ -1676,7 +1705,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const title = document.createElement("strong");
         title.textContent = group.name || "Grupo sem nome";
         const count = document.createElement("small");
-        count.textContent = members.length + " elementos";
+        count.textContent = members.length + (members.length === 1 ? " componente" : " componentes");
         button.append(preview, title, count);
         container.append(button);
       }
