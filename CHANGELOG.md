@@ -3,7 +3,7 @@
 ### Inspector, ações e fórmulas
 - O Inspector agora restaura explicitamente a ação selecionada e o conteúdo de `rollFormula` ao reabrir as propriedades do componente.
 - O campo de fórmula aceita até 500 caracteres e compartilha o visualizador de propriedades com o campo de vínculo de dados.
-- A lista de sugestões inclui caminhos completos e atalhos de exibição registrados, como `@DES`; selecionar uma sugestão insere o token no ponto atual do cursor.
+- A lista de sugestões inclui caminhos completos e atalhos de exibição explícitos ou gerados a partir do nome da propriedade (por exemplo, Destreza → `@DES`), omitindo abreviações ambíguas; selecionar uma sugestão insere o token no ponto atual do cursor.
 - A expansão de aliases permanece anterior à avaliação do Foundry Roll, preservando a fórmula original armazenada no componente.
 
 ### Desempenho do Canvas
