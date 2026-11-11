@@ -1199,7 +1199,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         await this.actor.update({ "prototypeToken.ring.colors.ring": color });
       }
       else await this.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
-      this.render({ force: true });
+      this._refreshBoundComponents();
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; this._updateSystemValue(input); });
     html.find("[data-config-component-code]").on("change", async event => {
@@ -1231,7 +1231,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!Number.isFinite(value)) return;
       this._captureHistory();
       await this.actor.update({ [`system.${path}`]: value });
-      this.render({ force: true });
+      this._refreshBoundComponents();
     });
     const persistAliases = async (aliases, focusTarget = null) => {
       const normalized = aliases.map(normalizeAliasDefinition).filter(Boolean);
@@ -2283,22 +2283,87 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
+
+  _refreshBoundComponents() {
+    const root = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
+    if (!root) return;
+    const writeText = (card, selector, value) => {
+      const element = card.querySelector(selector);
+      if (element && element !== document.activeElement) element.textContent = String(value ?? "—");
+    };
+    const writeInput = (card, selector, value) => {
+      const element = card.querySelector(selector);
+      if (element && element !== document.activeElement) element.value = String(value ?? "");
+    };
+    for (const component of this._currentLayout?.components ?? []) {
+      const card = root.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
+      if (!card) continue;
+      const context = this._componentContext(component);
+      if (!context) continue;
+      const current = context.value ?? "—", maximum = context.max ?? "—";
+      if (["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(context.kind)) {
+        const fill = card.querySelector(".nexus-resource-bar-fill, .nexus-asset-meter-fill");
+        if (fill) fill.style.width = `${context.percent ?? 0}%`;
+        const ring = card.querySelector(".nexus-resource-ring");
+        if (ring) ring.style.setProperty("--nexus-resource-percent", `${context.percent ?? 0}%`);
+        writeText(card, ".nexus-resource-values > strong:first-child, .nexus-resource-ring-values > strong:first-child", current);
+        writeText(card, ".nexus-resource-values > strong:last-child, .nexus-resource-ring-values > strong:last-child", maximum);
+        writeText(card, ".nexus-resource-bar-values > strong, .nexus-resource-ring-values > span", current);
+        writeText(card, ".nexus-resource-bar-values > span", `/ ${maximum}`);
+        writeInput(card, ".nexus-resource-values input:first-of-type, .nexus-resource-ring-values input:first-of-type", current);
+        writeInput(card, ".nexus-resource-values input:last-of-type, .nexus-resource-ring-values input:last-of-type", maximum);
+        writeInput(card, ".nexus-resource-bar-values input:first-of-type", current);
+        writeInput(card, ".nexus-resource-bar-values input:last-of-type", maximum);
+      }
+      if (context.kind === "sheet-element" && context.sheetVariant === "resource") {
+        const preview = card.querySelector(".nexus-sheet-resource-preview");
+        updateSheetResourcePreview(preview, {
+          label: component.sheetContent1 ?? "PV", icon: component.sheetContent2 ?? "❤️",
+          current, max: maximum, color: component.sheetColor ?? "#d94b4b",
+          trackColor: component.sheetTrackColor ?? "#080d14", orientation: component.sheetOrientation ?? "horizontal"
+        });
+        const values = card.querySelector(".nexus-sheet-resource-values");
+        if (values?.querySelector("input")) {
+          writeInput(values, "input:first-of-type", current);
+          writeInput(values, "input:last-of-type", maximum);
+        } else if (values) values.textContent = `${current} / ${maximum}`;
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "attribute") {
+        writeText(card, ".nexus-sheet-element small", component.text ?? "Atributo");
+        writeText(card, ".nexus-sheet-element strong", current);
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "derived") {
+        writeText(card, ".nexus-sheet-element small", component.sheetCode ?? "");
+        writeText(card, ".nexus-sheet-element strong", current);
+      } else if (context.kind === "sheet-element" && context.sheetVariant === "skill") {
+        writeText(card, ".nexus-sheet-element strong", component.text ?? "");
+        writeText(card, ".nexus-sheet-element b", current);
+      } else if (context.kind === "asset-value") writeText(card, ".nexus-asset-value", current);
+      else if (context.kind === "asset-text") writeText(card, ".nexus-asset-text", context.path ? current : component.text);
+      else if (context.kind === "custom") writeText(card, ".nexus-custom-card-value", current);
+      else if (["number", "name", "text"].includes(context.kind)) writeText(card, ".nexus-component-content strong", current);
+      if (context.kind === "asset-image" && isMediaSource(current)) {
+        const image = card.querySelector(".nexus-asset-image");
+        if (image && image !== document.activeElement && image.src !== current) image.src = current;
+      }
+    }
+  }
+
   async _updateSystemValue(input) {
     const path = input.dataset.systemPath, value = input.type === "number" ? Number(input.value) : input.value;
     if (!path) return;
-    if (path === "name") return this.actor.update({ name: value });
-    if (path === "img") return this.actor.update({ img: value });
+    if (path === "name") { await this.actor.update({ name: value }); this._refreshBoundComponents(); return; }
+    if (path === "img") { await this.actor.update({ img: value }); this._refreshBoundComponents(); return; }
     const alias = resolveAliasPath(this.actor, path);
     if (alias.alias && !alias.path) {
       const customData = clone(getCustomAliasData(this.actor));
       foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix].filter(Boolean).join("."), value);
       await this.actor.setFlag("nexus", "customData", customData);
-      this.render({ force: true });
+      this._refreshBoundComponents();
       return;
     }
     const writePath = alias.alias ? alias.path : path;
     if (writePath === "img") return this.actor.update({ img: value });
     await this.actor.update({ [`system.${writePath}`]: value });
+    this._refreshBoundComponents();
     if (path.includes("resources.")) {
       const root = this.element?.querySelector?.(".nexus-sheet");
       for (const component of this._currentLayout?.components ?? []) {
