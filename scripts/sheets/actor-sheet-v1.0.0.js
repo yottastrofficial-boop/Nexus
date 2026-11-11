@@ -3324,21 +3324,22 @@ export class NexusActorSheet extends NexusActorSheetBase {
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel=>{const active=panel.dataset.inspectorTabPanel===activeTab;panel.hidden=!active;panel.classList.toggle("active",active);});
       let effectivePath = null;
       if (one) {
-        const knownCorePaths = ["name", "identity.portrait.img", "identity.token.img", "token.img", "resources.pv", "resources.pv.value", "resources.pv.max", "resources.pm", "resources.pm.value", "resources.pm.max", "resources.pe", "resources.pe.value", "resources.pe.max", "identity.level", "identity.lineage", "identity.legacy", "attributes.body", "attributes.mind", "attributes.soul", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"];
+        const knownCorePaths = ["name", "identity.portrait.img", "identity.token.img", "token.img", "resources.pv.value", "resources.pv.max", "resources.pm.value", "resources.pm.max", "resources.pe.value", "resources.pe.max", "identity.level", "identity.lineage", "identity.legacy", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"];
         const corePaths = new Set(knownCorePaths.filter(path => path === "name" || ["identity.portrait.img", "identity.token.img", "token.img"].includes(path) || getPath(this.actor.system ?? {}, path) !== undefined));
         const systemRevision = this.actor?._stats?.modifiedTime ?? this.actor?.system;
         if (!this._nexusPropertyPathCache || this._nexusPropertyPathCache.revision !== systemRevision) {
           this._nexusPropertyPathCache = { revision: systemRevision, paths: collectPropertyPaths(this.actor) };
         }
         const allSystemPaths = this._nexusPropertyPathCache.paths;
-        const systemPaths = new Set([...allSystemPaths].filter(path => !corePaths.has(path) && ![...corePaths].some(core => path.startsWith(`${core}.`))));
+        const nativePropertyRoots = new Set(getNativePropertyDefinitions(this.actor).filter(item => ["attribute", "resource"].includes(item.type)).map(item => safeAliasKey(item.key)).filter(Boolean));
+        const systemPaths = new Set([...allSystemPaths].filter(path => !nativePropertyRoots.has(path) && !corePaths.has(path) && ![...corePaths].some(core => path.startsWith(`${core}.`))));
         const nativeAliasPaths = new Set();
         const customAliasPaths = new Set();
         const aliasLabels = new Map();
         for (const [collection, destination] of [[getNativePropertyDefinitions(this.actor), nativeAliasPaths], [getAliasDefinitions(this.actor), customAliasPaths]]) {
           for (const alias of collection) {
             const root = safeAliasKey(alias.key); if (!root) continue;
-            const suffixes = alias.type === "attribute" ? ["name", "exibicao", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exibicao", "value", "max", "percentage"] : [""];
+            const suffixes = alias.type === "attribute" ? ["name", "exib", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exib", "value", "max", "percentage"] : [""];
             for (const suffix of suffixes) {
               const path = suffix ? `${root}.${suffix}` : root;
               destination.add(path);
