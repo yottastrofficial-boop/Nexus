@@ -893,6 +893,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const headingLabel = String(component.customLabel ?? "").trim();
       return {
         ...component,
+        actionType: component.actionType === "roll" ? "roll" : "",
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
         label: headingLabel,
@@ -936,7 +937,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    return { ...component, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    return { ...component, actionType: component.actionType === "roll" ? "roll" : "", hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 32), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -1138,6 +1139,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "global-colors-default") return this._resetGlobalAppearance("colors");
       if (action === "global-fonts-default") return this._resetGlobalAppearance("fonts");
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
+      if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
     });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
@@ -1995,6 +1997,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         component.attributePreset = input.value;
         if (presets[input.value]) { component.text = presets[input.value][0]; component.dataPath = presets[input.value][1]; }
       }
+      else if(key==="actionType") component.actionType = input.value === "roll" ? "roll" : "";
+      else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 120);
       else if(key==="dataPath") {
         const resolved = resolveNexusBinding(this.actor, input.value);
         const path = resolved.path;
@@ -2012,7 +2016,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       this._componentEditorTargetId = id;
       this._selectedIds = new Set([id]);
       restoreEditorViewport();
-      if ((key === "dataPath" && component.type !== "token") || key === "customLabel" || key === "showLabel" || (key === "text" && component.type === "custom-card")) {
+      if (["actionType", "rollFormula"].includes(key) || (key === "dataPath" && component.type !== "token") || key === "customLabel" || key === "showLabel" || (key === "text" && component.type === "custom-card")) {
         await this.render({ force: true });
         restoreEditorViewport();
         return;
@@ -2202,6 +2206,38 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const values = root?.querySelector(`.nexus-component[data-id="${component.id}"] .nexus-sheet-resource-values`);
         if (values) values.textContent = `${current} / ${maximum}`;
       }
+    }
+  }
+  async _rollComponent(componentId) {
+    const layouts = await this._readLayouts();
+    const active = this._activeLayoutId();
+    const component = layouts[active]?.components?.find(item => item.id === componentId);
+    if (!component || component.actionType !== "roll") return;
+
+    let formula = String(component.rollFormula ?? "").trim();
+    const boundPath = String(component.dataPath ?? "").replace(/^actor\./, "").replace(/^system\./, "");
+    if (!formula && boundPath.endsWith(".name")) {
+      const sibling = resolveNexusBinding(this.actor, boundPath.slice(0, -5) + ".roll");
+      formula = String(sibling.value ?? "").trim();
+    }
+    if (!formula) {
+      globalThis.ui?.notifications?.warn?.("Configure uma fórmula de rolagem no componente ou na propriedade vinculada.");
+      return;
+    }
+    if (formula.length > 120) {
+      globalThis.ui?.notifications?.warn?.("A fórmula de rolagem excede o limite de 120 caracteres.");
+      return;
+    }
+    try {
+      const roll = new Roll(formula, this.actor.getRollData?.() ?? {});
+      await roll.evaluate({ async: true });
+      await roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        flavor: component.customLabel || component.text || "Rolagem NEXUS"
+      });
+    } catch (error) {
+      console.error("NEXUS | Falha na rolagem do componente", error);
+      globalThis.ui?.notifications?.error?.("Não foi possível executar a rolagem. Verifique a fórmula configurada.");
     }
   }
   async _adjustResource(path, delta) {
