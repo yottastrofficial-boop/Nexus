@@ -448,7 +448,7 @@ const getNexusRollAliasEntries = actor => {
 
 const expandNexusRollAliases = (actor, formula) => {
   const shorthand = new Map(getNexusRollAliasEntries(actor).map(entry => [entry.display.toLocaleUpperCase("pt-BR"), entry.target]));
-  return String(formula ?? "").replace(/@([A-Za-z][A-Za-z0-9_-]*)/g, (match, token) => {
+  return String(formula ?? "").replace(/@([A-Za-z][A-Za-z0-9_-]*)(?![A-Za-z0-9_.-])/g, (match, token) => {
     const path = shorthand.get(token.toLocaleUpperCase("pt-BR"));
     return path ? "@" + path : match;
   });
