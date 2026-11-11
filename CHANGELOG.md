@@ -1,3 +1,29 @@
+## 1.0.0.7
+
+### Inspector, ações e fórmulas
+- O Inspector agora restaura explicitamente a ação selecionada e o conteúdo de `rollFormula` ao reabrir as propriedades do componente.
+- O campo de fórmula aceita até 500 caracteres e compartilha o visualizador de propriedades com o campo de vínculo de dados.
+- A lista de sugestões inclui caminhos completos e atalhos de exibição registrados, como `@DES`; selecionar uma sugestão insere o token no ponto atual do cursor.
+- A expansão de aliases permanece anterior à avaliação do Foundry Roll, preservando a fórmula original armazenada no componente.
+
+### Desempenho do Canvas
+- Movimentos repetidos por teclado acumulam deltas e aplicam alterações visuais no máximo uma vez por frame.
+- As posições iniciais e os elementos selecionados são capturados uma vez por sequência; os limites dos grupos usam a lista de elementos já capturada.
+- A persistência é realizada ao soltar a tecla ou quando a janela perde foco, em vez de disparar uma gravação a cada repetição.
+
+### Seletor de cores
+- O popover passa a usar fechamento manual com detecção explícita de clique externo, para que a interação com matiz, saturação e opacidade não seja encerrada pelo comportamento automático do navegador.
+- O ciclo de vida do componente customizado volta a registrar o detector de clique externo quando o elemento é reconectado ao DOM.
+
+### Biblioteca de grupos
+- Miniaturas preservam a composição espacial para grupos de até oito elementos e apresentam uma grade semântica para grupos maiores.
+- Barras de PV, PM, PE e outros recursos exibem rótulo e preenchimento; demais cards exibem seu título e conteúdo disponível.
+- A grade da Biblioteca utiliza melhor a largura disponível, com prévias maiores e cartões responsivos.
+
+### Validação
+- Atualizados os testes estáticos para a versão 1.0.0.7 e adicionadas verificações para restauração de ação/fórmula, sugestões de aliases, movimentação por frame, seletor manual e miniaturas semânticas.
+- Ainda são necessários testes funcionais no Foundry VTT 14 para validar a interação real, especialmente rolagens com dados de módulos e grupos com composições variadas.
+
 ## 1.0.0.6
 
 ### Desempenho e interação
