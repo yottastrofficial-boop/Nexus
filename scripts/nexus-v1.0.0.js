@@ -56,10 +56,8 @@ Hooks.on("preCreateActor", (actor) => {
 });
 
 // Tokens criados a partir de Actors NEXUS permanecem vinculados por padrão.
-// A opção explícita actorLink=false continua disponível para tokens independentes.
+// Depois da criação, o usuário ainda pode desvincular um Token nas configurações.
 Hooks.on("preCreateToken", (token, data) => {
-  if (data?.actorLink === false) return;
-
   const actor = token.actor ?? game.actors?.get(token.actorId ?? data?.actorId);
   if (!actor || !NEXUS_ACTOR_TYPES.includes(actor.type)) return;
 
