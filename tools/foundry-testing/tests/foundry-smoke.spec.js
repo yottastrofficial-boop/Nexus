@@ -8,6 +8,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.waitForFunction(
     () => Boolean(window.game?.ready && window.game?.system),
+    undefined,
     { timeout: 45_000 }
   );
 });
@@ -50,7 +51,7 @@ test("cria e renderiza uma ficha temporária NEXUS", async ({ page }) => {
         type: "player-character"
       });
       if (!actor) throw new Error("Foundry não criou o Actor temporário.");
-      await actor.sheet.render(true);
+      await actor.sheet.render({ force: true });
       return actor.id;
     }, actorName);
 
