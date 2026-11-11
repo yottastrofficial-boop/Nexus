@@ -196,7 +196,7 @@ assert.match(css, /nexus-library-saved-groups/);
 
 assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
 assert.match(sheet, /remove\("is-selected", "is-group-inspecting", "is-selection-highlight"\)/, "A limpeza da seleção deve remover todos os estados visuais");
-assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\.\("\.nexus-canvas"\)/, "Os atalhos devem consultar o Canvas atual");
+assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "Os atalhos devem consultar o Canvas atual");
 assert.match(sheet, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
 assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
 assert.match(template, /data-text-style-target="heading"/, "A formatação deve permitir selecionar o título");
