@@ -2308,7 +2308,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (ring) ring.style.setProperty("--nexus-resource-percent", `${context.percent ?? 0}%`);
         writeText(card, ".nexus-resource-values > strong:first-child, .nexus-resource-ring-values > strong:first-child", current);
         writeText(card, ".nexus-resource-values > strong:last-child, .nexus-resource-ring-values > strong:last-child", maximum);
-        writeText(card, ".nexus-resource-bar-values > strong, .nexus-resource-ring-values > span", current);
+        writeText(card, ".nexus-resource-bar-values > strong", current);
         writeText(card, ".nexus-resource-bar-values > span", `/ ${maximum}`);
         writeInput(card, ".nexus-resource-values input:first-of-type, .nexus-resource-ring-values input:first-of-type", current);
         writeInput(card, ".nexus-resource-values input:last-of-type, .nexus-resource-ring-values input:last-of-type", maximum);
@@ -2364,21 +2364,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (writePath === "img") return this.actor.update({ img: value });
     await this.actor.update({ [`system.${writePath}`]: value });
     this._refreshBoundComponents();
-    if (path.includes("resources.")) {
-      const root = this.element?.querySelector?.(".nexus-sheet");
-      for (const component of this._currentLayout?.components ?? []) {
-        if (component.type !== "sheet-resource") continue;
-        const currentPath = component.currentPath ?? "resources.pv.value";
-        const maxPath = component.maxPath ?? "resources.pv.max";
-        if (path !== currentPath && path !== maxPath) continue;
-        const current = resolveNexusBinding(this.actor, currentPath).value ?? "—";
-        const maximum = resolveNexusBinding(this.actor, maxPath).value ?? "—";
-        const node = root?.querySelector(`.nexus-component[data-id="${component.id}"] .nexus-sheet-resource-preview`);
-        updateSheetResourcePreview(node, { label:component.sheetContent1 ?? "PV", icon:component.sheetContent2 ?? "❤️", current, max:maximum, color:component.sheetColor ?? ({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor ?? "#080d14", orientation:component.sheetOrientation ?? "horizontal" });
-        const values = root?.querySelector(`.nexus-component[data-id="${component.id}"] .nexus-sheet-resource-values`);
-        if (values) values.textContent = `${current} / ${maximum}`;
-      }
-    }
+
   }
   async _rollComponent(componentId) {
     const layouts = await this._readLayouts();
@@ -2422,7 +2408,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const customData = clone(getCustomAliasData(this.actor));
       foundry.utils.setProperty(customData, `${alias.alias.key}.value`, value);
       await this.actor.setFlag("nexus", "customData", customData);
-      return this.render({ force: true });
+      this._refreshBoundComponents();
+      return true;
     }
     const target = alias.alias ? alias.path : path;
     return this.actor.update({ [`system.${target}.value`]: value });
