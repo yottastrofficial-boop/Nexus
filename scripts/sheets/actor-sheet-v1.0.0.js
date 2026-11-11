@@ -904,6 +904,21 @@ export class NexusActorSheet extends NexusActorSheetBase {
     };
   }
 
+  _normalizeTextStyle(style = {}) {
+    const fontSize = Number(style.fontSize), letterSpacing = Number(style.letterSpacing), lineHeight = Number(style.lineHeight);
+    return {
+      fontSize: Number.isFinite(fontSize) && fontSize >= 7 && fontSize <= 48 ? fontSize : undefined,
+      fontFamily: ["Inter","Arial","Georgia","Verdana","monospace"].includes(style.fontFamily) ? style.fontFamily : undefined,
+      color: /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(String(style.color ?? "")) ? style.color : undefined,
+      textAlign: ["left","center","right","justify"].includes(style.textAlign) ? style.textAlign : undefined,
+      fontWeight: ["400","500","600","700","800"].includes(String(style.fontWeight)) ? String(style.fontWeight) : undefined,
+      fontStyle: ["normal","italic"].includes(style.fontStyle) ? style.fontStyle : undefined,
+      textDecoration: ["none","underline"].includes(style.textDecoration) ? style.textDecoration : undefined,
+      textTransform: ["none","uppercase","lowercase","capitalize"].includes(style.textTransform) ? style.textTransform : undefined,
+      letterSpacing: Number.isFinite(letterSpacing) && letterSpacing >= -2 && letterSpacing <= 12 ? letterSpacing : undefined,
+      lineHeight: Number.isFinite(lineHeight) && lineHeight >= 0.8 && lineHeight <= 2.4 ? lineHeight : undefined
+    };
+  }
   _componentContext(component) {
     const def = COMPONENTS[component.type]; if (!def) return null;
     if (def.kind === "custom") {
@@ -915,7 +930,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.proficiencyLevel) || 0, 0, 3),
         proficiencyStages: (component.proficiencyLabels ?? ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.proficiencyLevel) || 0, 0, 3) })),
-        contentStyle: component.contentStyle ?? {}, headingStyle: component.headingStyle ?? {},
+        contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle),
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
         label: headingLabel,
@@ -968,7 +983,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
     const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
-    return { ...component, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: component.contentStyle ?? {}, headingStyle: component.headingStyle ?? {}, sliderPath: safeSliderPath, showResourceSlider, imageFit: component.imageFit ?? "contain", imagePosition: component.imagePosition ?? "center", imageOpacity: clamp(Number(component.imageOpacity ?? 100), 0, 100), hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    return { ...component, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover","fill","none"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: clamp(Number(component.imageOpacity ?? 100), 0, 100), hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -2319,7 +2334,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const component=layout?.components?.find(item=>item.id===id); if(!component)return;
       this._captureHistory();
       if(kind==="style") for(const key of ["backgroundColor","borderColor","borderRadius","opacity"]) delete component[key];
-      if(kind==="typography") { delete component.fontSize; delete component.fontFamily; delete component.headingFontSize; delete component.headingFontFamily; delete component.labelPosition; }
+      if(kind==="typography") { delete component.fontSize; delete component.fontFamily; delete component.headingFontSize; delete component.headingFontFamily; delete component.contentStyle; delete component.headingStyle; delete component.labelPosition; }
       if(kind==="token") { delete component.tokenImage; delete component.tokenFallback; }
       if(kind==="resource") Object.assign(component,{sheetContent1:component.sheetCode??"PV",sheetContent2:({PV:"❤️",PM:"💧",PE:"⚡"})[String(component.sheetCode??"PV").toUpperCase()]??"✦",sheetColor:({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b",REC:"#8b9bad"})[String(component.sheetCode??"PV").toUpperCase()]??"#8b9bad",sheetTrackColor:"#080d14",sheetOrientation:"horizontal",previewCurrent:32,previewMax:40});
       if(kind==="attribute") { Object.assign(component,{text:"Corpo",dataPath:"attributes.body",attributePreset:"body"}); }
@@ -2331,6 +2346,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         componentNode.style.removeProperty("--nexus-component-heading-font-size");
         componentNode.style.removeProperty("--nexus-component-heading-font-family");
         componentNode.dataset.labelPosition = "top-left";
+        this._applyComponentTextStyles(componentNode, component);
       } else if (componentNode) this.render({ force: true });
       const inspector = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element).find(node => node?.querySelector(".nexus-component-inspector"))?.querySelector(".nexus-component-inspector");
       if (inspector && kind === "typography") {
@@ -2413,7 +2429,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (context.kind === "sheet-element" && !["resource", "attribute", "derived", "skill"].includes(context.sheetVariant)) {
         writeText(card, ".nexus-sheet-element strong", current);
       }
-      if (context.kind === "token" && isMediaSource(current)) {
+      if (context.actionType === "proficiency") {
+         card.querySelectorAll("[data-proficiency-level]").forEach(button => { const active = Number(button.dataset.proficiencyLevel) === context.proficiencyLevel; button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); });
+       }
+       if (context.kind === "token" && isMediaSource(current)) {
         const image = card.querySelector(".nexus-token-portrait");
         if (image && image !== document.activeElement && image.getAttribute("src") !== current) image.src = current;
       }
@@ -2486,8 +2505,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       };
       for (const [property, value] of Object.entries(values)) element.style.setProperty(property, value === undefined || value === null || value === "" ? "" : (property === "font-size" || property === "letter-spacing" ? value + "px" : String(value)));
     };
-    apply(node.querySelector(".nexus-component-content"), component.contentStyle ?? {}, { fontSize: component.fontSize, fontFamily: component.fontFamily });
-    apply(node.querySelector(".nexus-component-heading"), component.headingStyle ?? {}, { fontSize: component.headingFontSize, fontFamily: component.headingFontFamily });
+    apply(node.querySelector(".nexus-component-content"), this._normalizeTextStyle(component.contentStyle), { fontSize: component.fontSize, fontFamily: component.fontFamily });
+    apply(node.querySelector(".nexus-component-heading"), this._normalizeTextStyle(component.headingStyle), { fontSize: component.headingFontSize, fontFamily: component.headingFontFamily });
   }
 
   async _setComponentTextStyle(componentId, target, key, value) {
@@ -2526,7 +2545,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._captureHistory();
     component.proficiencyLevel = nextLevel;
     await this._writeLayouts(layouts, active);
-    if (component.actionPath) await this._updateSystemValue({ dataset: { systemPath: component.actionPath }, type: "number", value: String(nextLevel) });
+    if (component.actionPath) {
+      const binding = resolveNexusBinding(this.actor, component.actionPath);
+      if (binding.value !== undefined && binding.value !== null && !Number.isFinite(Number(binding.value))) { ui.notifications?.warn?.("A propriedade vinculada ao marcador precisa conter um número."); return; }
+      await this._updateSystemValue({ dataset: { systemPath: component.actionPath }, type: "number", value: String(nextLevel) });
+    }
     else {
       const card = this.element?.querySelector?.(".nexus-component[data-id=\"" + CSS.escape(componentId) + "\"]");
       card?.querySelectorAll("[data-proficiency-level]").forEach(button => { const active = Number(button.dataset.proficiencyLevel) === nextLevel; button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); });
