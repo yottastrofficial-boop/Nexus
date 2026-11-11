@@ -216,3 +216,11 @@ assert.match(template, /data-sync-token-portrait/, "O Inspector deve oferecer si
 assert.match(sheet, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipografia deve alcançar conteúdo interno e valores derivados");
 assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
 console.log("NEXUS 1.0.0.5: validações estáticas aprovadas.");
+
+assert.match(sheet, /expandNexusRollAliases\(this\.actor, formula\)/, "Fórmulas devem aceitar aliases curtos de exibição como @DES");
+assert.match(sheet, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
+assert.match(sheet, /scheduleKeyboardMoveSave\(\)/, "Movimentos repetidos por teclado devem consolidar a persistência");
+assert.match(sheet, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
+assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve representar os cards membros");
+assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
+console.log("NEXUS 1.0.0.6: regressões de desempenho, aliases e prévias de grupos verificadas.");
