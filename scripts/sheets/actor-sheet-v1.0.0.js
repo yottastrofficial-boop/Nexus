@@ -448,6 +448,26 @@ const expandNexusRollAliases = (actor, formula) => {
   });
 };
 
+const getNexusRollData = actor => {
+  const data = clone(actor?.getRollData?.() ?? {});
+  for (const entry of getNexusRollAliasEntries(actor)) {
+    if (entry.alias.targetPath) continue;
+    const suffix = ["attribute", "resource"].includes(entry.alias.type) ? ".value" : "";
+    const sourcePath = entry.alias.key + suffix;
+    const value = resolveNexusBinding(actor, sourcePath).value;
+    if (value === undefined) continue;
+    const parts = entry.target.split(".");
+    if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) continue;
+    let target = data;
+    for (const part of parts.slice(0, -1)) {
+      if (!target[part] || typeof target[part] !== "object") target[part] = {};
+      target = target[part];
+    }
+    target[parts.at(-1)] = value;
+  }
+  return data;
+};
+
 const resolveAliasPath = (actor, path) => {
   const aliases = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)];
   let matchedKey = "";
@@ -2783,7 +2803,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
     try {
       formula = expandNexusRollAliases(this.actor, formula);
-      const roll = new Roll(formula, this.actor.getRollData?.() ?? {});
+      const roll = new Roll(formula, getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
