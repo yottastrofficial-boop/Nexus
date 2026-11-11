@@ -696,6 +696,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       try { start = active?.selectionStart ?? null; end = active?.selectionEnd ?? null; } catch (_) {}
       return { key, descriptor, tag: active?.tagName, value: active && "value" in active ? active.value : null, checked: active?.type === "checkbox" ? active.checked : null, start, end, left: element.style.left, top: element.style.top, scroll };
     }).filter(Boolean);
+    const activeCanvasBeforeRender = this.element?.querySelector?.(".nexus-canvas");
+    const canvasHadFocus = !!activeCanvasBeforeRender && (document.activeElement === activeCanvasBeforeRender || activeCanvasBeforeRender.contains(document.activeElement));
     const result = super.render(options);
     const restore = () => {
       for (const saved of sheetScrollState) { const node = this.element?.querySelector?.(saved.selector); if (node) { node.scrollTop = saved.top; node.scrollLeft = saved.left; } }
@@ -713,6 +715,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           if (target && canRestoreFocus) { if (state.value !== null && "value" in target) target.value = state.value; if (state.checked !== null && target.type === "checkbox") target.checked = state.checked; target.focus({ preventScroll:true }); if (state.start !== null && target.setSelectionRange) { try { target.setSelectionRange(state.start,state.end); } catch (_) {} } }
         }
       }
+      if (canvasHadFocus) this.element?.querySelector?.(".nexus-canvas")?.focus?.({ preventScroll: true });
     };
     const scheduleRestore = () => requestAnimationFrame(() => requestAnimationFrame(restore));
     if (result && typeof result.then === "function") {
@@ -3283,28 +3286,31 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._selectedIds = new Set((ids ?? []).filter(Boolean));
     if (this._selectedIds.size === 1) this._componentEditorTargetId = [...this._selectedIds][0];
     else if (this._selectedIds.size === 0) this._componentEditorTargetId = null;
-    html.find(".nexus-component").each((_, el) => el.classList.toggle("is-selected", this._selectedIds.has(el.dataset.id)));
-    const selectedGroups = (this._currentLayout?.groups ?? []).filter(group =>
-      (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id))
-    );
-    const inspectedGroups = (this._currentLayout?.groups ?? []).filter(group =>
-      (group.componentIds ?? []).length >= 2 && (group.componentIds ?? []).some(id => this._selectedIds.has(id))
-    );
+    const sheetRoot = this.element?.querySelector?.(".nexus-sheet") ?? html?.[0] ?? this.element;
+    const componentNodes = sheetRoot?.querySelectorAll?.(".nexus-component") ?? [];
+    // Limpa todas as classes visuais antes de reaplicar a seleção lógica atual.
+    for (const el of componentNodes) el.classList.remove("is-selected", "is-group-inspecting", "is-selection-highlight");
+    sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => surface.classList.remove("is-selected"));
+    const selectedGroups = (this._currentLayout?.groups ?? []).filter(group => (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id)));
+    const inspectedGroups = (this._currentLayout?.groups ?? []).filter(group => (group.componentIds ?? []).length >= 2 && (group.componentIds ?? []).some(id => this._selectedIds.has(id)));
     this._selectedGroupId = selectedGroups.length === 1 ? selectedGroups[0].id : null;
     const inspectedGroupIds = new Set(inspectedGroups.map(group => group.id));
-    html.find(".nexus-component").each((_, el) => {
+    for (const el of componentNodes) {
+      const selected = this._selectedIds.has(el.dataset.id);
       const memberSelected = !!el.dataset.groupId && inspectedGroupIds.has(el.dataset.groupId);
+      el.classList.toggle("is-selected", selected);
       el.classList.toggle("is-group-inspecting", memberSelected);
-      el.classList.toggle("is-selection-highlight", this._selectedIds.has(el.dataset.id) || memberSelected);
-    });
-    html.find(".nexus-group-surface").each((_, surface) => {
+      el.classList.toggle("is-selection-highlight", selected || memberSelected);
+    }
+    sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => {
       const group = (this._currentLayout?.groups ?? []).find(item => item.id === surface.dataset.groupId);
-      const groupActive = !!group && (group.componentIds ?? []).some(id => this._selectedIds.has(id));
-      surface.classList.toggle("is-selected", groupActive);
+      surface.classList.toggle("is-selected", !!group && (group.componentIds ?? []).some(id => this._selectedIds.has(id)));
     });
-    const layerRoot=this._nexusPanelWindows?.get("layers")?.panel ?? html[0];
-    layerRoot.querySelectorAll("[data-layer-select]").forEach(el => el.classList.toggle("active", this._selectedIds.has(el.dataset.layerSelect)));
-    layerRoot.querySelectorAll("[data-layer-group]").forEach(el => { const group=(this._currentLayout?.groups??[]).find(g=>g.id===el.dataset.layerGroup); el.classList.toggle("active", !!group && group.componentIds.every(id=>this._selectedIds.has(id))); });
+    const layerRoots = [this._nexusPanelWindows?.get("layers")?.panel, html?.[0], this.element].filter(Boolean);
+    for (const layerRoot of new Set(layerRoots)) {
+      layerRoot.querySelectorAll?.("[data-layer-select]").forEach(el => el.classList.toggle("active", this._selectedIds.has(el.dataset.layerSelect)));
+      layerRoot.querySelectorAll?.("[data-layer-group]").forEach(el => { const group = (this._currentLayout?.groups ?? []).find(g => g.id === el.dataset.layerGroup); el.classList.toggle("active", !!group && group.componentIds.every(id => this._selectedIds.has(id))); });
+    }
     const activeComponentId = this._selectedIds.size === 1 ? [...this._selectedIds][0] : null;
     const one = activeComponentId ? (this._currentLayout?.components ?? []).find(c => c.id === activeComponentId) : null;
     const selectedGroup = (this._currentLayout?.groups ?? []).find(g => g.id === this._selectedGroupId);
@@ -4327,7 +4333,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const panelWindows = [...(sheet._nexusPanelWindows?.values?.() ?? [])];
       const focusedInPanel = !!(floating?.contains(event.target) || panelWindows.some(instance => instance?.element?.contains(event.target)));
-      const focusedInCanvas = document.activeElement === canvas || canvas.contains(document.activeElement);
+      const liveCanvas = sheet.element?.querySelector?.(".nexus-canvas") ?? canvas;
+      const focusedInCanvas = !!liveCanvas && (document.activeElement === liveCanvas || liveCanvas.contains(document.activeElement));
       if (sheet._mode !== "appearance") return;
       // Não deixar Delete/Backspace escapar para o canvas de cena quando o
       // usuário está em um painel do NEXUS; nesses painéis a tecla não exclui
@@ -4372,6 +4379,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         }
         for(const el of elements().filter(el=>selected.has(el.dataset.id)&&!handled.has(el.dataset.id))){const r=rectOf(el);el.style.left=`${clamp(r.x+dx,0,l.width-r.w)}px`;el.style.top=`${clamp(r.y+dy,0,l.height-r.h)}px`;}
         renderGroups(); await saveAfterGesture([...selected]);
+         requestAnimationFrame(() => (sheet.element?.querySelector?.(".nexus-canvas") ?? canvas)?.focus?.({ preventScroll: true }));
       }
     };
     root.tabIndex=0;
@@ -4383,12 +4391,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else {
         sheet._nexusInteractionActive = false;
         // Cliques fora da ficha encerram a seleção visual, sem interferir nos painéis flutuantes.
-        if (sheet._selectedIds?.size || sheet._selectedGroupId) {
-          sheet._selectedIds = new Set();
-          sheet._selectedGroupId = null;
-          sheet._componentEditorTargetId = null;
-          sheet._setSelection?.($(root), []);
-        }
+        // Limpa sempre: classes visuais podem sobreviver mesmo com IDs vazios.
+        sheet._setSelection?.($(sheet.element ?? root), []);
+        sheet._componentEditorTargetId = null;
       }
     };
     root.addEventListener("pointerdown",activateInteraction,true);
