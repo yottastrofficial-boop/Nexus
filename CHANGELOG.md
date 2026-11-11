@@ -1,3 +1,16 @@
+## 1.0.0.4
+
+### Componentes
+- Adicionada ação opcional de rolagem configurável no Inspector.
+- Componentes vinculados podem exibir um botão **Rolar**.
+- A fórmula pode ser definida diretamente no componente ou obtida da propriedade irmã `.roll` quando o caminho vinculado termina em `.name`.
+- A execução utiliza os dados de rolagem do Actor e publica o resultado no chat do Foundry.
+- A fórmula não é presumida pelo NEXUS: deve ser configurada conforme as regras do sistema.
+
+### Validação
+- Corrigida a expectativa de versão nos testes estáticos para 1.0.0.4.
+- A validação no Foundry VTT 14 continua pendente.
+
 ## 1.0.0.3
 
 ### Corrigido
