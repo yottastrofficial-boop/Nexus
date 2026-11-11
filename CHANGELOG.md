@@ -1,3 +1,24 @@
+## 1.0.0.6
+
+### Desempenho e interação
+- Movimentação por teclas direcionais atualiza o Canvas imediatamente, compartilha um único snapshot de histórico por sequência e consolida a persistência após a interação, evitando gravações e operações de layout a cada repetição de tecla.
+- O salvamento de movimentos por teclado é concluído ao soltar a tecla, com uma pequena janela de segurança para sequências rápidas.
+- Superfícies de grupos deixam de impor dimensões mínimas artificiais e passam a respeitar os limites reais dos componentes.
+
+### Biblioteca
+- Grupos salvos passam a exibir miniaturas compostas com a posição relativa e a aparência básica dos cards membros.
+- Grupos extensos mostram uma amostra dos primeiros componentes e um indicador da quantidade restante, evitando miniaturas ilegíveis.
+
+### Fórmulas e referências
+- Fórmulas de rolagem aceitam aliases curtos definidos nas propriedades, como `@DES`, resolvendo-os para o caminho real antes de entregar a fórmula ao Foundry.
+- Referências explícitas do Foundry, como `@attributes.body.value`, continuam preservadas.
+- O seletor de cores da Biblioteca não reconstrói mais o painel a cada evento `input` durante o ajuste de matiz/opacidade; a atualização estrutural ocorre ao concluir a alteração.
+- Opções de textura deixam de ser expostas na interface do seletor por enquanto, mantendo a leitura de valores antigos para compatibilidade.
+
+### Validação
+- Adicionadas regressões estáticas para aliases de rolagem, persistência consolidada por teclado, prévias compostas de grupos e dimensões mínimas.
+- Testes funcionais no Foundry VTT 14 continuam necessários, especialmente para repetição de teclas, interação real com popovers e comportamento de grupos pequenos.
+
 ## 1.0.0.5
 
 ### Correções de interação após a integração
