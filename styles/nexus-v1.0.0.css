@@ -3628,3 +3628,66 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 
 .nexus-actor-portrait-preview { display:flex; align-items:center; justify-content:center; width:68px; height:68px; margin:0 0 7px; overflow:hidden; border:1px solid var(--nexus-panel-border,#3c5067); border-radius:8px; background:var(--nexus-panel-input,#111b27); }
 .nexus-actor-portrait-preview img { display:block; width:100%; height:100%; object-fit:cover; }
+
+
+/* Correção de cascata: o seletor de cor não recebe uma segunda moldura do Inspector. */
+.nexus-sheet .nexus-global-color-grid > label,
+.nexus-panel-window .nexus-global-color-grid > label {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 38px !important;
+  grid-template-rows:minmax(30px,auto) !important;
+  align-items:center !important;
+  gap:8px !important;
+  min-width:0 !important;
+  min-height:30px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.nexus-sheet nexus-color-picker,
+.nexus-panel-window nexus-color-picker {
+  display:block !important;
+  position:relative !important;
+  min-width:0 !important;
+  min-height:30px !important;
+  height:30px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+}
+.nexus-sheet .nexus-global-color-grid nexus-color-picker,
+.nexus-panel-window .nexus-global-color-grid nexus-color-picker {
+  grid-column:2 !important;
+  grid-row:1 !important;
+  width:36px !important;
+  min-width:36px !important;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-field > nexus-color-picker {
+  width:100% !important;
+  min-width:0 !important;
+}
+.nexus-sync-token-portrait {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:100%;
+  min-height:30px;
+  margin-top:4px;
+  padding:6px 8px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:5px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-surface,#202e3e);
+  font:600 10px/1.2 system-ui,sans-serif;
+  cursor:pointer;
+}
+.nexus-sync-token-portrait:hover {
+  border-color:var(--nexus-highlight-color,#78b7e8);
+  background:var(--nexus-panel-hover,#2a3d52);
+}

@@ -929,7 +929,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         ...component,
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3),
-        proficiencyStages: (component.proficiencyLabels ?? ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
+        proficiencyStages: (component.proficiencyLabels ?? ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
         contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle),
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
@@ -977,7 +977,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const actionType = ["roll", "proficiency"].includes(component.actionType) ? component.actionType : (component.actionType === "resource-slider" && (sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind)) ? "resource-slider" : "");
     const proficiencyBinding = component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : undefined;
     const proficiencyLevel = clamp(Number(proficiencyBinding ?? component.proficiencyLevel) || 0, 0, 3);
-    const proficiencyLabels = (Array.isArray(component.proficiencyLabels) ? component.proficiencyLabels : ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4);
+    const proficiencyLabels = (Array.isArray(component.proficiencyLabels) ? component.proficiencyLabels : ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4);
     while (proficiencyLabels.length < 4) proficiencyLabels.push("Nível " + proficiencyLabels.length);
     const isResourceComponent = sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind);
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
@@ -1196,7 +1196,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-resource-slider]").on("input", event => {
       const input = event.currentTarget, card = input.closest(".nexus-component"); if (!card) return;
       const max = Number(input.max), value = Number(input.value), percent = max > 0 ? clamp(value / max * 100, 0, 100) : 0;
-      card.querySelectorAll(".nexus-resource-bar-fill,.nexus-asset-meter-fill").forEach(fill => fill.style.width = percent + "%");
+      const vertical = !!card.querySelector(".nexus-sheet-resource-preview.is-vertical");
+      card.querySelectorAll(".nexus-resource-bar-fill,.nexus-asset-meter-fill").forEach(fill => {
+        fill.style.width = vertical ? "100%" : percent + "%";
+        fill.style.height = vertical ? percent + "%" : "100%";
+      });
       card.querySelector(".nexus-resource-ring")?.style.setProperty("--nexus-resource-percent", percent + "%");
       const resourceValues = card.querySelector(".nexus-resource-values"), ringValues = card.querySelector(".nexus-resource-ring-values"), barValues = card.querySelector(".nexus-resource-bar-values");
       for (const values of [resourceValues, ringValues]) { const current = values?.querySelector("strong"); if (current) current.textContent = String(value); }
@@ -1207,6 +1211,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
         updateSheetResourcePreview(preview, { label: component.sheetContent1 ?? "PV", icon: component.sheetContent2 ?? "❤️", current: value, max, color: component.sheetColor ?? "#d94b4b", trackColor: component.sheetTrackColor ?? "#080d14", orientation: component.sheetOrientation ?? "horizontal" });
         const values = card.querySelector(".nexus-sheet-resource-values"); if (values && !values.querySelector("input")) values.textContent = value + " / " + max;
       }
+    });
+    html.find("[data-resource-slider]").on("change", async event => {
+      const input = event.currentTarget;
+      if (!input.dataset.systemPath) return;
+      await this._updateSystemValue(input);
     });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
@@ -2003,6 +2012,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-color]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), "color", event.currentTarget.value); });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-field]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), event.currentTarget.dataset.textStyleField, event.currentTarget.value); });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => this._updateSystemValue(event.currentTarget));
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-sync-token-portrait]", async event => {
+      event.preventDefault();
+      const id = event.currentTarget.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
+      await this._syncActorPortraitFromToken(id);
+    });
 
     const positionPropertyOptions = input => {
       if (!input?.isConnected) return;
@@ -2169,7 +2183,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="imagePosition") component.imagePosition=["center","top","bottom","left","right"].includes(input.value)?input.value:"center";
       else if(key==="imageOpacity") { const opacity=Number(input.value); component.imageOpacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="actionPath") { const path=String(input.value??"").replace(/^system\./,"").trim(); if(path && (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part=>["__proto__","prototype","constructor"].includes(part)))) return; component.actionPath=path; }
-      else if(/^proficiencyLabel[0-3]$/.test(key)) { const index=Number(key.slice(-1)); component.proficiencyLabels ??= ["Sem domínio","Básico","Treinado","Especialista"]; component.proficiencyLabels[index]=String(input.value??"").trim().slice(0,24)||("Nível " + index); }
+      else if(/^proficiencyLabel[0-3]$/.test(key)) { const index=Number(key.slice(-1)); component.proficiencyLabels ??= ["Nível 0","Nível 1","Nível 2","Nível 3"]; component.proficiencyLabels[index]=String(input.value??"").trim().slice(0,24)||("Nível " + index); }
       else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
       else if(key==="fontWeight") component.fontWeight=["400","500","600","700","800"].includes(String(input.value))?String(input.value):"400";
       else if(key==="fontStyle") component.fontStyle=input.value==="italic"?"italic":"normal";
@@ -2512,7 +2526,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       };
       for (const [property, value] of Object.entries(values)) element.style.setProperty(property, value === undefined || value === null || value === "" ? "" : (property === "font-size" || property === "letter-spacing" ? value + "px" : String(value)));
     };
-    apply(node.querySelector(".nexus-component-content"), this._normalizeTextStyle(component.contentStyle), { fontSize: component.fontSize, fontFamily: component.fontFamily });
+    const content = node.querySelector(".nexus-component-content");
+    const contentStyle = this._normalizeTextStyle(component.contentStyle);
+    apply(content, contentStyle, { fontSize: component.fontSize, fontFamily: component.fontFamily });
+    content?.querySelectorAll(".nexus-asset-text,.nexus-asset-value,.nexus-resource-values,.nexus-resource-bar-values,.nexus-resource-ring-values,.nexus-sheet-element,.nexus-custom-card-value,.nexus-skill-table-heading").forEach(element => apply(element, contentStyle));
     apply(node.querySelector(".nexus-component-heading"), this._normalizeTextStyle(component.headingStyle), { fontSize: component.headingFontSize, fontFamily: component.headingFontFamily });
   }
 
@@ -2594,6 +2611,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
       globalThis.ui?.notifications?.error?.("Não foi possível executar a rolagem. Verifique a fórmula configurada.");
     }
   }
+  async _syncActorPortraitFromToken(componentId) {
+    const component = (this._currentLayout?.components ?? []).find(item => item.id === componentId);
+    if (!component || component.type !== "token") return;
+    const raw = String(component.tokenImage ?? "").trim();
+    const binding = raw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
+    const customImage = binding ? String(resolveNexusBinding(this.actor, binding[1]).value ?? "").trim() : raw;
+    const candidates = [
+      customImage,
+      String(getPath(this.actor?.system ?? {}, "identity.token.img") ?? "").trim(),
+      String(this.actor?.prototypeToken?.texture?.src ?? "").trim(),
+      String(this.actor?.prototypeToken?.img ?? "").trim()
+    ];
+    const image = candidates.find(isUsableTokenSource);
+    if (!image) {
+      globalThis.ui?.notifications?.warn?.("Não foi encontrada uma imagem de token utilizável para copiar ao retrato do Actor.");
+      return;
+    }
+    await this.actor.update({ img: image });
+    const roots = [this.element, ...[...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance?.element)].filter(Boolean);
+    for (const root of roots) {
+      root.querySelectorAll?.("[data-actor-portrait-preview]").forEach(node => { node.src = image; });
+      root.querySelectorAll?.("[data-actor-portrait]").forEach(input => { input.value = image; });
+    }
+    this._refreshBoundComponents();
+    globalThis.ui?.notifications?.info?.("Retrato do Actor atualizado com a imagem do token.");
+  }
+
   async _adjustResource(path, delta) {
     const alias = resolveAliasPath(this.actor, path);
     const resource = alias.alias ? resolveNexusBinding(this.actor, path).value : getPath(this.actor.system, path);
@@ -3477,19 +3521,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const el of componentNodes) el.classList.remove("is-selected", "is-group-inspecting", "is-selection-highlight");
     sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => surface.classList.remove("is-selected"));
     const selectedGroups = (this._currentLayout?.groups ?? []).filter(group => (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id)));
-    const inspectedGroups = (this._currentLayout?.groups ?? []).filter(group => (group.componentIds ?? []).length >= 2 && (group.componentIds ?? []).some(id => this._selectedIds.has(id)));
     this._selectedGroupId = selectedGroups.length === 1 ? selectedGroups[0].id : null;
-    const inspectedGroupIds = new Set(inspectedGroups.map(group => group.id));
+    const selectedGroupIds = new Set(selectedGroups.map(group => group.id));
     for (const el of componentNodes) {
       const selected = this._selectedIds.has(el.dataset.id);
-      const memberSelected = !!el.dataset.groupId && inspectedGroupIds.has(el.dataset.groupId);
+      const memberSelected = selected && !!el.dataset.groupId && selectedGroupIds.has(el.dataset.groupId);
       el.classList.toggle("is-selected", selected);
       el.classList.toggle("is-group-inspecting", memberSelected);
-      el.classList.toggle("is-selection-highlight", selected || memberSelected);
+      el.classList.toggle("is-selection-highlight", selected);
     }
     sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => {
-      const group = (this._currentLayout?.groups ?? []).find(item => item.id === surface.dataset.groupId);
-      surface.classList.toggle("is-selected", !!group && (group.componentIds ?? []).some(id => this._selectedIds.has(id)));
+      surface.classList.toggle("is-selected", selectedGroupIds.has(surface.dataset.groupId));
     });
     const layerRoots = [this._nexusPanelWindows?.get("layers")?.panel, html?.[0], this.element].filter(Boolean);
     for (const layerRoot of new Set(layerRoots)) {
@@ -3501,15 +3543,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const selectedGroup = (this._currentLayout?.groups ?? []).find(g => g.id === this._selectedGroupId);
     const componentRoot=this._nexusPanelWindows?.get("component")?.panel ?? html[0];
     const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
-    if (one && inspector) inspector.querySelectorAll("[data-component-setting]").forEach(field => { field.dataset.componentTargetId = one.id; });
+    if (one && inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => { field.dataset.componentTargetId = one.id; });
     if (inspector) {
       inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = !one || section.dataset.actionConfig !== (one.actionType ?? ""); });
       const textTools = inspector.querySelector("[data-text-tools]");
       if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
       const imageSettings = inspector.querySelector("[data-image-settings]");
       if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
-      const sliderOption = inspector.querySelector('[data-component-setting="actionType"] option[value="resource-slider"]');
-      if (sliderOption) sliderOption.hidden = !one || !["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","resource-meter","asset-meter","sheet-resource"].includes(one.type);
+      const actionSelect = inspector.querySelector('[data-component-setting="actionType"]');
+      const proficiencyOption = actionSelect?.querySelector('option[value="proficiency"]');
+      const rollOption = actionSelect?.querySelector('option[value="roll"]');
+      const sliderOption = actionSelect?.querySelector('option[value="resource-slider"]');
+      const resourceTypes = ["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","resource-meter","asset-meter","sheet-resource"];
+      const proficiencyTypes = ["sheet-skill","sheet-skill-group","sheet-attribute"];
+      const supportsProficiency = !!one && (proficiencyTypes.includes(one.type) || ["skill","skill-group","attribute"].includes(one.sheetVariant) || one.actionType === "proficiency");
+      const supportsRoll = !!one && (!["token","asset-image","asset-table","asset-notes","asset-link"].includes(one.type) || one.actionType === "roll");
+      const supportsSlider = !!one && (resourceTypes.includes(one.type) || one.actionType === "resource-slider");
+      if (proficiencyOption) proficiencyOption.hidden = !supportsProficiency;
+      if (rollOption) rollOption.hidden = !supportsRoll;
+      if (sliderOption) sliderOption.hidden = !supportsSlider;
       this._syncTextToolbar(inspector, one);
     }
     if (inspector) {
@@ -3577,7 +3629,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
         if (pathInput) pathInput.value = defaultPath;
         if (optionsList) optionsList.hidden = true;
-        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Sem domínio"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Básico"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Treinado"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Especialista"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
+        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Nível 0"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Nível 1"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Nível 2"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Nível 3"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
           inspector.querySelectorAll(`[data-component-setting="${key}"]`).forEach(input => { input.value = value; });
         }
         const showLabelInput = inspector.querySelector('[data-component-setting="showLabel"]');
@@ -4044,6 +4096,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
     const sheet = this, root = html[0], canvas = root.querySelector(".nexus-canvas"); if (!canvas) return;
     this._selectedIds ??= new Set();
+    sheet._nexusCanvasKeyboardFocus ??= false;
     const selectionBox = root.querySelector(".nexus-marquee"), guides = root.querySelector(".nexus-guides");
     const layoutData = () => ({ width: Number(canvas.dataset.layoutWidth) || 800, height: Number(canvas.dataset.layoutHeight) || 800, grid: Number(canvas.dataset.gridSize) || 20, snap: canvas.dataset.snap === "true", smart: canvas.dataset.guides === "true" });
     const stage = root.querySelector(".nexus-canvas-stage");
@@ -4359,12 +4412,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return true;
     };
     canvas.tabIndex = 0;
+    canvas.addEventListener("focus", () => { sheet._nexusCanvasKeyboardFocus = true; });
     canvas.addEventListener("pointerdown",event=>{
       if(sheet._mode!=="appearance")return;
       if(event.target.closest("button,input,textarea,select,[contenteditable='true']"))return;
       // O foco só vai para o Canvas quando o próprio Canvas recebe interação.
       // Cliques em inspetores e menus não passam por este listener.
       canvas.focus({ preventScroll: true });
+      sheet._nexusCanvasKeyboardFocus = true;
       sheet._nexusInteractionActive=true;
       const p=point(event), component=event.target.closest(".nexus-component"), surface=event.target.closest(".nexus-group-surface"), mod=event.ctrlKey||event.metaKey||event.shiftKey;
       if(surface && !component){const group=(sheet._activeGroups??[]).find(v=>v.id===surface.dataset.groupId);if(beginGroupMove(group,p,event))return;}
@@ -4523,13 +4578,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
       event.preventDefault();
       sheet._rollComponent(card.dataset.id);
     });
+    const restoreCanvasKeyboardFocus = () => {
+      if (!sheet._nexusCanvasKeyboardFocus) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const liveCanvas = sheet.element?.querySelector?.(".nexus-canvas");
+        const active = document.activeElement;
+        if (liveCanvas && (active === document.body || active === document.documentElement || active === canvas || !active?.isConnected)) {
+          liveCanvas.focus({ preventScroll: true });
+        }
+      }));
+    };
     const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const panelWindows = [...(sheet._nexusPanelWindows?.values?.() ?? [])];
       const focusedInPanel = !!(floating?.contains(event.target) || panelWindows.some(instance => instance?.element?.contains(event.target)));
       const liveCanvas = sheet.element?.querySelector?.(".nexus-canvas") ?? canvas;
-      const focusedInCanvas = !!liveCanvas && (document.activeElement === liveCanvas || liveCanvas.contains(document.activeElement));
+      const activeElement = document.activeElement;
+      const focusedInCanvas = !!liveCanvas && (activeElement === liveCanvas || liveCanvas.contains(activeElement)
+        || (sheet._nexusCanvasKeyboardFocus && (activeElement === document.body || activeElement === document.documentElement)));
       if (sheet._mode !== "appearance") return;
       // Não deixar Delete/Backspace escapar para o canvas de cena quando o
       // usuário está em um painel do NEXUS; nesses painéis a tecla não exclui
@@ -4537,10 +4604,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if ((event.key === "Delete" || event.key === "Backspace") && focusedInPanel && !isTypingTarget) {
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.(); return;
       }
-      if (!focusedInCanvas || isTypingTarget) return;
+      if (!focusedInCanvas || focusedInPanel || isTypingTarget) return;
       const mod=event.ctrlKey||event.metaKey;
-      if(mod&&event.key.toLowerCase()==="z"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();if(event.shiftKey)await sheet._restoreHistory(sheet._redoStack,sheet._undoStack);else await sheet._restoreHistory(sheet._undoStack,sheet._redoStack);return;}
-      if(mod&&event.key.toLowerCase()==="y"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._restoreHistory(sheet._redoStack,sheet._undoStack);return;}
+      if(mod&&event.key.toLowerCase()==="z"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();if(event.shiftKey)await sheet._restoreHistory(sheet._redoStack,sheet._undoStack);else await sheet._restoreHistory(sheet._undoStack,sheet._redoStack);restoreCanvasKeyboardFocus();return;}
+      if(mod&&event.key.toLowerCase()==="y"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._restoreHistory(sheet._redoStack,sheet._undoStack);restoreCanvasKeyboardFocus();return;}
       if(mod&&event.key.toLowerCase()==="c"){
         const ids=[...(sheet._selectedIds??[])]; if(!ids.length)return;
         event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();
@@ -4551,12 +4618,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if(mod&&event.key.toLowerCase()==="v"){
         const clip=Array.isArray(sheet._clipboard)?{components:sheet._clipboard,groups:[]}:sheet._clipboard;
         if(!clip?.components?.length)return;
-        event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();sheet._captureHistory();const layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active],offset=l.gridSize||20,idMap=new Map(clip.components.map(c=>[c.id,`cmp-${foundry.utils.randomID(8)}`]));const firstStackOrder=Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1;const copies=clip.components.map((c,index)=>({...clone(c),id:idMap.get(c.id),x:clamp(c.x+offset,0,l.width-c.w),y:clamp(c.y+offset,0,l.height-c.h),z:Number(c.z)||0,stackOrder:firstStackOrder+index}));l.components.push(...copies);l.groups??=[];const groupCopies=(clip.groups??[]).map(g=>({...clone(g),id:`grp-${foundry.utils.randomID(8)}`,componentIds:g.componentIds.filter(id=>idMap.has(id)).map(id=>idMap.get(id))})).filter(g=>g.componentIds.length>=2);l.groups.push(...groupCopies);await sheet._writeLayouts(layouts,active);sheet._selectedIds=new Set(copies.map(c=>c.id));sheet._selectedGroupId=groupCopies[0]?.id??null;sheet.render({ force: true });return;}
+        event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();sheet._captureHistory();const layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active],offset=l.gridSize||20,idMap=new Map(clip.components.map(c=>[c.id,`cmp-${foundry.utils.randomID(8)}`]));const firstStackOrder=Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1;const copies=clip.components.map((c,index)=>({...clone(c),id:idMap.get(c.id),x:clamp(c.x+offset,0,l.width-c.w),y:clamp(c.y+offset,0,l.height-c.h),z:Number(c.z)||0,stackOrder:firstStackOrder+index}));l.components.push(...copies);l.groups??=[];const groupCopies=(clip.groups??[]).map(g=>({...clone(g),id:`grp-${foundry.utils.randomID(8)}`,componentIds:g.componentIds.filter(id=>idMap.has(id)).map(id=>idMap.get(id))})).filter(g=>g.componentIds.length>=2);l.groups.push(...groupCopies);await sheet._writeLayouts(layouts,active);sheet._selectedIds=new Set(copies.map(c=>c.id));sheet._selectedGroupId=groupCopies[0]?.id??null;sheet.render({ force: true });restoreCanvasKeyboardFocus();return;}
       if(mod&&event.key.toLowerCase()==="a"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();setSelection(elements().map(el=>el.dataset.id));}
-      else if(mod&&event.key.toLowerCase()==="d"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._duplicateComponents([...sheet._selectedIds]);}
+      else if(mod&&event.key.toLowerCase()==="d"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._duplicateComponents([...sheet._selectedIds]);restoreCanvasKeyboardFocus();}
       else if(event.key==="Escape"){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();setSelection([]);sheet._selectedGroupId=null;}
       else if((event.key==="Delete"||event.key==="Backspace")&&sheet._selectedIds.size){
-        event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._deleteComponents([...sheet._selectedIds]);
+        event.preventDefault();event.stopPropagation();event.stopImmediatePropagation?.();await sheet._deleteComponents([...sheet._selectedIds]);restoreCanvasKeyboardFocus();
       }
       else if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)&&sheet._selectedIds.size){
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
@@ -4574,7 +4641,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         }
         for(const el of elements().filter(el=>selected.has(el.dataset.id)&&!handled.has(el.dataset.id))){const r=rectOf(el);el.style.left=`${clamp(r.x+dx,0,l.width-r.w)}px`;el.style.top=`${clamp(r.y+dy,0,l.height-r.h)}px`;}
         renderGroups(); await saveAfterGesture([...selected]);
-         requestAnimationFrame(() => (sheet.element?.querySelector?.(".nexus-canvas") ?? canvas)?.focus?.({ preventScroll: true }));
+         restoreCanvasKeyboardFocus();
       }
     };
     root.tabIndex=0;
@@ -4582,6 +4649,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const deactivateInteraction = event => {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const insidePanel = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance.element?.contains(event.target));
+      const insideCanvas = canvas.contains(event.target);
+      sheet._nexusCanvasKeyboardFocus = insideCanvas;
       if (root.contains(event.target) || floating?.contains(event.target) || insidePanel) sheet._nexusInteractionActive = true;
       else {
         sheet._nexusInteractionActive = false;

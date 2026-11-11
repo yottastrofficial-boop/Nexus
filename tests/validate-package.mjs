@@ -208,4 +208,11 @@ assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser edit�
 assert.match(css, /nexus-text-toolbar/);
 assert.match(css, /nexus-proficiency-control/);
 assert.match(css, /nexus-resource-slider-control/);
+assert.match(sheet, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
+assert.match(sheet, /const selectedGroupIds = new Set\(selectedGroups\.map\(group => group\.id\)\)/, "A seleção parcial não deve destacar os membros irmãos do grupo");
+assert.match(sheet, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
+assert.match(sheet, /_syncActorPortraitFromToken\(componentId\)/, "O retrato do Actor deve poder receber explicitamente a imagem do token");
+assert.match(template, /data-sync-token-portrait/, "O Inspector deve oferecer sincronização explícita do retrato");
+assert.match(sheet, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipografia deve alcançar conteúdo interno e valores derivados");
+assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
 console.log("NEXUS 1.0.0.5: validações estáticas aprovadas.");

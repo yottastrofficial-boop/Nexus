@@ -1,5 +1,16 @@
 ## 1.0.0.5
 
+### Correções de interação após a integração
+- A seleção parcial de um grupo não propaga mais o highlight aos componentes irmãos nem à superfície do grupo; somente os itens realmente selecionados recebem destaque.
+- A barra de recurso persiste o valor ao terminar o arraste, mantendo a atualização visual imediata durante o gesto.
+- Os atalhos do Canvas preservam o contexto de teclado após renderizações assíncronas; controles e painéis do Inspector não recebem atalhos de edição do Canvas.
+- A tipografia do conteúdo também alcança os elementos internos que exibem valores derivados, recursos, atributos e texto manual.
+- As opções de ação do Inspector são filtradas conforme o tipo de componente, preservando configurações já existentes.
+- O seletor de cores recebe uma única superfície visual, sem molduras adicionais herdadas do Inspector.
+- Incluído comando explícito para usar a imagem do Token como retrato do Actor, atualizando `Actor.img` (miniatura do diretório do Foundry) sem acoplar permanentemente retrato e token.
+- Os rótulos iniciais do marcador de quatro estágios passam a ser neutros e editáveis (`Nível 0` a `Nível 3`).
+
+
 ### Seleção, foco e teclado
 - A limpeza da seleção agora remove todos os estados visuais de componentes, grupos e camadas, inclusive quando o conjunto lógico de IDs já está vazio.
 - O Canvas recupera o foco após atualizações e renderizações da ficha; os atalhos consultam o Canvas atual, não uma referência DOM antiga.
