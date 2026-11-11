@@ -15,11 +15,11 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.5", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.7", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.5\/nexus\.zip$/);
+assert.match(manifest.download, /releases\/download\/v1\.0\.0\.7\/nexus\.zip$/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -174,8 +174,8 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.5/);
-assert.match(changelog, /## 1\.0\.0\.5/);
+assert.match(readme, /Versão 1\.0\.0\.7/);
+assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
 assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
@@ -215,12 +215,26 @@ assert.match(sheet, /_syncActorPortraitFromToken\(componentId\)/, "O retrato do 
 assert.match(template, /data-sync-token-portrait/, "O Inspector deve oferecer sincronização explícita do retrato");
 assert.match(sheet, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipografia deve alcançar conteúdo interno e valores derivados");
 assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
-console.log("NEXUS 1.0.0.5: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.7: validações estáticas aprovadas.");
 
 assert.match(sheet, /expandNexusRollAliases\(this\.actor, formula\)/, "Fórmulas devem aceitar aliases curtos de exibição como @DES");
 assert.match(sheet, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
-assert.match(sheet, /scheduleKeyboardMoveSave\(\)/, "Movimentos repetidos por teclado devem consolidar a persistência");
+assert.match(sheet, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
+assert.match(sheet, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
+assert.doesNotMatch(sheet, /scheduleKeyboardMoveSave/, "A movimentação não deve depender de debounce por repetição de tecla");
 assert.match(sheet, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
 assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve representar os cards membros");
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.6: regressões de desempenho, aliases e prévias de grupos verificadas.");
+
+assert.match(template, /data-roll-formula-input/, "O campo de fórmula deve abrir o visualizador de propriedades");
+assert.match(template, /maxlength="500"/, "O campo de fórmula deve aceitar expressões compostas");
+assert.match(sheet, /if \(actionSelect\) actionSelect\.value = one\?\.actionType/, "O seletor deve refletir a ação persistida no componente");
+assert.match(sheet, /\["rollFormula", one\.rollFormula \?\? ""\]/, "O Inspector deve restaurar a fórmula salva ao reabrir");
+assert.match(sheet, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
+assert.match(sheet, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
+assert.match(sheet, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
+assert.match(sheet, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
+assert.match(sheet, /is-grid/, "Grupos grandes devem usar uma miniatura em grade");
+assert.match(sheet, /nexus-library-saved-group-track/, "Pré-visualizações devem representar barras de recursos");
+console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
