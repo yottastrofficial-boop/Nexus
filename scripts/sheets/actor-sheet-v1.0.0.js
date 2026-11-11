@@ -612,13 +612,20 @@ if (!customElements.get("nexus-color-picker")) {
       this._outsideHandler = event => { if (!event.composedPath().includes(this)) this._close(); };
     }
     connectedCallback() {
-      if (this.shadowRoot.childElementCount) return;
-      this._build();
-      this._readValue(this.getAttribute("value") || this._value);
-      this._sync();
-      document.addEventListener("pointerdown", this._outsideHandler, true);
+      if (!this.shadowRoot.childElementCount) {
+        this._build();
+        this._readValue(this.getAttribute("value") || this._value);
+        this._sync();
+      }
+      if (!this._outsideAttached) {
+        document.addEventListener("pointerdown", this._outsideHandler, true);
+        this._outsideAttached = true;
+      }
     }
-    disconnectedCallback() { document.removeEventListener("pointerdown", this._outsideHandler, true); }
+    disconnectedCallback() {
+      if (this._outsideAttached) document.removeEventListener("pointerdown", this._outsideHandler, true);
+      this._outsideAttached = false;
+    }
     get value() { return this._value; }
     set value(value) { this._readValue(String(value ?? "")); this._sync(); }
     _build() {
@@ -637,7 +644,7 @@ if (!customElements.get("nexus-color-picker")) {
           button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--nexus-highlight-color,#78b7e8);outline-offset:2px}
         </style>
         <button class="trigger" type="button" aria-haspopup="dialog" aria-expanded="false"><i class="swatch"><i></i></i><span>#526b89</span></button>
-        <div class="popover" popover="auto" role="dialog" aria-label="Seletor avançado de cores">
+        <div class="popover" popover="manual" role="dialog" aria-label="Seletor avançado de cores">
           <div class="spectrum" tabindex="0" aria-label="Saturação e luminosidade"><i class="thumb"></i></div>
           <div class="range-row"><label>Matiz</label><input class="hue" type="range" min="0" max="360" value="210"></div>
           <div class="range-row"><label>Opacidade</label><input class="alpha" type="range" min="0" max="100" value="100"></div>
@@ -2098,40 +2105,81 @@ export class NexusActorSheet extends NexusActorSheetBase {
       list.style.overflowY = "auto";
     };
     const filterPropertyOptions = input => {
-      const inspector = input.closest(".nexus-component-inspector"), list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
+      const inspector = input.closest(".nexus-component-inspector");
+      const list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
       if (!list) return;
-      const query = String(input.value ?? "").trim().toLocaleLowerCase("pt-BR");
+      const formulaMode = input.hasAttribute("data-roll-formula-input");
+      const raw = String(input.value ?? "");
+      const cursor = input.selectionStart ?? raw.length;
+      const atIndex = formulaMode ? raw.lastIndexOf("@", Math.max(0, cursor - 1)) : -1;
+      const query = (formulaMode && atIndex >= 0 ? raw.slice(atIndex + 1, cursor) : (formulaMode ? "" : raw)).trim().toLocaleLowerCase("pt-BR");
       let matches = 0;
-      list.querySelectorAll(".nexus-property-option").forEach(option => { const visible = !query || option.textContent.toLocaleLowerCase("pt-BR").includes(query) || option.dataset.propertyPathOption.toLocaleLowerCase("pt-BR").includes(query); option.hidden = !visible; if (visible) matches++; });
-      list.querySelectorAll(".nexus-property-options-heading").forEach(heading => { let next = heading.nextElementSibling, visible = false; while (next && !next.classList.contains("nexus-property-options-heading")) { if (!next.hidden) visible = true; next = next.nextElementSibling; } heading.hidden = !visible; });
+      list.querySelectorAll(".nexus-property-option").forEach(option => {
+        const aliasOnly = option.dataset.rollAliasOption === "true";
+        const visible = !(aliasOnly && !formulaMode) && (!query ||
+          option.textContent.toLocaleLowerCase("pt-BR").includes(query) ||
+          String(option.dataset.propertyPathOption ?? "").toLocaleLowerCase("pt-BR").includes(query) ||
+          String(option.dataset.rollToken ?? "").toLocaleLowerCase("pt-BR").includes(query));
+        option.hidden = !visible; if (visible) matches++;
+      });
+      list.querySelectorAll(".nexus-property-options-heading").forEach(heading => {
+        let next = heading.nextElementSibling, visible = false;
+        while (next && !next.classList.contains("nexus-property-options-heading")) { if (!next.hidden) visible = true; next = next.nextElementSibling; }
+        heading.hidden = !visible;
+      });
       list.dataset.empty = matches ? "false" : "true";
       list.hidden = false;
       requestAnimationFrame(() => positionPropertyOptions(input));
     };
-    $(document).on(`focus${inspectorNamespace} input${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input]", event => filterPropertyOptions(event.currentTarget));
-    $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input]", event => filterPropertyOptions(event.currentTarget));
+    const propertyInputSelector = ".nexus-component-inspector [data-component-path-input], .nexus-component-inspector [data-roll-formula-input]";
+    $(document).on(`focus${inspectorNamespace} input${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
+    $(document).on(`input${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`, () => {
-      const input = document.activeElement?.matches?.("[data-component-path-input]") ? document.activeElement : null;
+      const input = document.activeElement?.matches?.("[data-component-path-input], [data-roll-formula-input]") ? document.activeElement : null;
       if (input) positionPropertyOptions(input);
     });
     $(document).on(`click${inspectorNamespace}`, "[data-property-path-option]", event => {
       event.preventDefault(); event.stopPropagation();
-      const button = event.currentTarget, list = button.closest("[data-component-path-options]"), inspector = list?._nexusOwnerInspector || button.closest(".nexus-component-inspector"), input = list?._nexusOwnerInput || inspector?.querySelector("[data-component-path-input]");
+      const button = event.currentTarget, list = button.closest("[data-component-path-options]");
+      const inspector = list?._nexusOwnerInspector || button.closest(".nexus-component-inspector");
+      const input = list?._nexusOwnerInput || inspector?.querySelector("[data-component-path-input], [data-roll-formula-input]");
       if (!input || !list || !inspector) return;
-      input.value = button.dataset.propertyPathOption;
-      list.hidden = true;
-      list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = "";
+      if (input.hasAttribute("data-roll-formula-input")) {
+        const value = input.value, cursor = input.selectionStart ?? value.length;
+        const atIndex = value.lastIndexOf("@", Math.max(0, cursor - 1));
+        let end = cursor;
+        if (atIndex >= 0) { end = atIndex + 1; while (end < value.length && /[A-Za-z0-9_.-]/.test(value[end])) end++; }
+        const token = button.dataset.rollToken || "@" + button.dataset.propertyPathOption;
+        const start = atIndex >= 0 ? atIndex : cursor;
+        input.value = value.slice(0, start) + token + value.slice(end);
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(start + token.length, start + token.length);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      } else {
+        input.value = button.dataset.propertyPathOption;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.blur();
+      }
+      list.hidden = true; list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = "";
       if (list.parentElement === document.body) inspector.append(list);
       delete list.dataset.nexusPropertyOwner; list._nexusOwnerInspector = null; list._nexusOwnerInput = null;
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-      input.blur();
     });
     $(document).on(`pointerdown${inspectorNamespace}`, "[data-component-path-options]", event => event.stopPropagation());
     $(document).on(`scroll${inspectorNamespace}`, ".nexus-panel-window, .nexus-component-inspector", () => {
-      const input = document.activeElement?.matches?.("[data-component-path-input]") ? document.activeElement : null;
+      const input = document.activeElement?.matches?.("[data-component-path-input], [data-roll-formula-input]") ? document.activeElement : null;
       if (input) positionPropertyOptions(input);
     });
-    $(document).on(`focusout${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input]", event => { const input = event.currentTarget, inspector = input.closest(".nexus-component-inspector"), list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`); setTimeout(() => { if (list && !list.contains(document.activeElement)) { list.hidden = true; list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = ""; if (list.parentElement === document.body && inspector) inspector.append(list); delete list.dataset.nexusPropertyOwner; list._nexusOwnerInspector = null; list._nexusOwnerInput = null; } }, 100); });
+    $(document).on(`focusout${inspectorNamespace}`, ".nexus-component-inspector [data-component-path-input], .nexus-component-inspector [data-roll-formula-input]", event => {
+      const input = event.currentTarget, inspector = input.closest(".nexus-component-inspector");
+      const list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
+      setTimeout(() => {
+        if (list && !list.contains(document.activeElement)) {
+          list.hidden = true; list.style.top = ""; list.style.left = ""; list.style.width = ""; list.style.maxHeight = "";
+          if (list.parentElement === document.body && inspector) inspector.append(list);
+          delete list.dataset.nexusPropertyOwner; list._nexusOwnerInspector = null; list._nexusOwnerInput = null;
+        }
+      }, 120);
+    });
 
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
@@ -2248,7 +2296,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (presets[input.value]) { component.text = presets[input.value][0]; component.dataPath = presets[input.value][1]; }
       }
       else if(key==="actionType") component.actionType = ["roll","proficiency","resource-slider"].includes(input.value) ? input.value : "";
-      else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 120);
+      else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
         const resolved = resolveNexusBinding(this.actor, input.value);
         const path = resolved.path;
@@ -2642,8 +2690,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       globalThis.ui?.notifications?.warn?.("Configure uma fórmula de rolagem no componente ou na propriedade vinculada.");
       return;
     }
-    if (formula.length > 120) {
-      globalThis.ui?.notifications?.warn?.("A fórmula de rolagem excede o limite de 120 caracteres.");
+    if (formula.length > 500) {
+      globalThis.ui?.notifications?.warn?.("A fórmula de rolagem excede o limite de 500 caracteres.");
       return;
     }
     try {
@@ -3599,6 +3647,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const imageSettings = inspector.querySelector("[data-image-settings]");
       if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
       const actionSelect = inspector.querySelector('[data-component-setting="actionType"]');
+      if (actionSelect) actionSelect.value = one?.actionType ?? "";
       const proficiencyOption = actionSelect?.querySelector('option[value="proficiency"]');
       const rollOption = actionSelect?.querySelector('option[value="roll"]');
       const sliderOption = actionSelect?.querySelector('option[value="resource-slider"]');
@@ -3671,13 +3720,28 @@ export class NexusActorSheet extends NexusActorSheetBase {
               button.append(title, code); fragment.append(button);
             }
           }
+          const rollAliases = [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]
+            .filter(alias => /^[A-Za-z][A-Za-z0-9_-]*$/.test(String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim()));
+          if (rollAliases.length) {
+            const heading = document.createElement("div"); heading.className = "nexus-property-options-heading"; heading.textContent = "Atalhos de exibição · Fórmulas"; fragment.append(heading);
+            for (const alias of rollAliases) {
+              const display = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName).trim();
+              const path = safeAliasKey(alias.targetPath || (["attribute", "resource"].includes(alias.type) ? alias.key + ".value" : alias.key));
+              if (!path) continue;
+              const button = document.createElement("button"); button.type = "button"; button.className = "nexus-property-option";
+              button.dataset.propertyPathOption = path; button.dataset.rollToken = "@" + display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
+              const title = document.createElement("strong"); title.textContent = alias.label || display;
+              const code = document.createElement("code"); code.textContent = "@" + display + " → " + path;
+              button.append(title, code); fragment.append(button);
+            }
+          }
           optionsList.replaceChildren(fragment);
         }
         const pathInput = inspector.querySelector("[data-component-path-input]");
         const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
         if (pathInput) pathInput.value = defaultPath;
         if (optionsList) optionsList.hidden = true;
-        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Nível 0"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Nível 1"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Nível 2"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Nível 3"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
+        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionType", one.actionType ?? ""], ["rollFormula", one.rollFormula ?? ""], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Nível 0"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Nível 1"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Nível 2"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Nível 3"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
           inspector.querySelectorAll(`[data-component-setting="${key}"]`).forEach(input => { input.value = value; });
         }
         const showLabelInput = inspector.querySelector('[data-component-setting="showLabel"]');
