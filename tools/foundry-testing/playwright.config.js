@@ -1,7 +1,8 @@
 import { defineConfig } from "@playwright/test";
 import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-const authState = new URL("./.auth/storage-state.json", import.meta.url);
+const authState = fileURLToPath(new URL("./.auth/storage-state.json", import.meta.url));
 const hasAuthState = existsSync(authState);
 
 export default defineConfig({
@@ -18,7 +19,7 @@ export default defineConfig({
     browserName: "chromium",
     headless: process.env.HEADED !== "1",
     ignoreHTTPSErrors: true,
-    ...(hasAuthState ? { storageState: authState.pathname } : {}),
+    ...(hasAuthState ? { storageState: authState } : {}),
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure"
