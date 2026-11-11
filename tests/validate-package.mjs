@@ -177,7 +177,7 @@ assert.equal(depth, 0, "CSS contém bloco não fechado");
 assert.match(readme, /Versão 1\.0\.0\.7/);
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
-assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
+assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
 assert.match(sheet, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
@@ -240,6 +240,9 @@ assert.match(sheet, /nexus-library-saved-group-track/, "Pré-visualizações dev
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
 assert.match(sheet, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
+assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "Campos próprios devem integrar os dados entregues à rolagem");
+assert.match(sheet, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
+assert.match(sheet, /tokenMatch\?\.\[1\]/, "O filtro de fórmula deve considerar somente o token @ sob o cursor");
 assert.match(sheet, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
 assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
