@@ -3202,17 +3202,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!assets || panel.dataset.libraryMounted === "true") return;
     panel.dataset.libraryMounted = "true";
     assets.replaceChildren();
-    this._libraryFolder ??= NEXUS_LIBRARY_CATALOG.assets.find(item => item.type === this._librarySelectedType)?.category ?? "core";
+    const availableFolders = NEXUS_LIBRARY_CATALOG.categories ?? [];
+    const preferredFolder = this._libraryFolder
+      ?? NEXUS_LIBRARY_CATALOG.assets.find(item => item.type === this._librarySelectedType)?.category;
+    this._libraryFolder = availableFolders.some(folder => folder.id === preferredFolder)
+      ? preferredFolder
+      : (availableFolders[0]?.id ?? "core");
     const folderNav = document.createElement("nav");
     folderNav.className = "nexus-library-folders";
     folderNav.setAttribute("aria-label", "Pastas da biblioteca");
-    const folders = [
-      ["standard", "Padrão do sistema · provisório", "fa-solid fa-box-archive"],
-      ["core", "Padrão NEXUS", "fa-solid fa-cube"],
-      ["raw", "Componentes crus", "fa-solid fa-puzzle-piece"],
-      ["premade", "Pré-montados", "fa-solid fa-layer-group"],
-      ["themes", "Temas", "fa-solid fa-palette"]
-    ];
+    const folders = availableFolders.map(({ id, label, icon }) => [id, label, icon]);
     for (const [id, label, icon] of folders) {
       const button = document.createElement("button"); button.type = "button"; button.dataset.libraryFolder = id;
       button.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${label}</span>`;
