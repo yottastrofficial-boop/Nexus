@@ -3527,6 +3527,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   outline: 2px solid var(--nexus-highlight-color, #78b7e8);
   outline-offset: 2px;
 }
+.nexus-component-content :is(strong, b) { font-weight: var(--nexus-component-font-weight, 700); }
 .nexus-typography-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .nexus-save-group-library {
   display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
