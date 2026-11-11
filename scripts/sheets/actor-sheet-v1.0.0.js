@@ -1173,6 +1173,18 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
       if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
     });
+    html.find("[data-proficiency-level]").on("click", event => {
+      event.preventDefault(); event.stopPropagation();
+      const button = event.currentTarget, card = button.closest(".nexus-component");
+      if (card) this._setProficiencyLevel(card.dataset.id, Number(button.dataset.proficiencyLevel));
+    });
+    html.find("[data-resource-slider]").on("input", event => {
+      const input = event.currentTarget, card = input.closest(".nexus-component"); if (!card) return;
+      const max = Number(input.max), value = Number(input.value), percent = max > 0 ? clamp(value / max * 100, 0, 100) : 0;
+      card.querySelectorAll(".nexus-resource-bar-fill,.nexus-asset-meter-fill").forEach(fill => fill.style.width = percent + "%");
+      const sheetFill = card.querySelector(".nexus-sheet-resource-track > i"); if (sheetFill) { sheetFill.style.width = percent + "%"; sheetFill.style.height = percent + "%"; }
+      const current = card.querySelector(".nexus-resource-bar-values strong,.nexus-sheet-resource-values"); if (current && !current.querySelector("input")) current.textContent = card.querySelector(".nexus-sheet-resource-values") ? value + " / " + max : String(value);
+    });
     html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
       const input = event.currentTarget;
@@ -1936,6 +1948,39 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const inspectorNamespace = `.nexusInspector${String(this.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     this._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
+    const getTextStyleTarget = () => this._textStyleTarget === "heading" ? "heading" : "content";
+    const getInspectorComponent = element => {
+      const inspector = element?.closest?.(".nexus-component-inspector");
+      const id = inspector?.querySelector("[data-component-setting]")?.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
+      return (this._currentLayout?.components ?? []).find(component => component.id === id) ?? null;
+    };
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-target]", event => {
+      event.preventDefault(); this._textStyleTarget = event.currentTarget.dataset.textStyleTarget;
+      const component = getInspectorComponent(event.currentTarget); this._syncTextToolbar(event.currentTarget.closest(".nexus-component-inspector"), component);
+    });
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-command]", async event => {
+      event.preventDefault(); const button = event.currentTarget, component = getInspectorComponent(button); if (!component) return;
+      const target = getTextStyleTarget(), style = component[target + "Style"] ?? {}, command = button.dataset.textStyleCommand;
+      let key = "", value;
+      if (command === "bold") { key = "fontWeight"; value = Number(style.fontWeight ?? 400) >= 600 ? "400" : "700"; }
+      else if (command === "italic") { key = "fontStyle"; value = style.fontStyle === "italic" ? "normal" : "italic"; }
+      else if (command === "underline") { key = "textDecoration"; value = style.textDecoration === "underline" ? "none" : "underline"; }
+      else if (command.startsWith("align-")) { key = "textAlign"; value = command.slice(6); }
+      else if (command === "transform") { key = "textTransform"; value = ({ none: "uppercase", uppercase: "lowercase", lowercase: "capitalize", capitalize: "none" })[style.textTransform ?? "none"]; }
+      if (key) await this._setComponentTextStyle(component.id, target, key, value);
+    });
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-menu-toggle]", event => { event.preventDefault(); const menu = event.currentTarget.closest(".nexus-text-toolbar")?.querySelector("[data-text-style-font-menu]"); if (menu) menu.hidden = !menu.hidden; });
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-font]", async event => {
+      event.preventDefault(); const component = getInspectorComponent(event.currentTarget); if (!component) return;
+      await this._setComponentTextStyle(component.id, getTextStyleTarget(), "fontFamily", event.currentTarget.dataset.textStyleFont);
+      const menu = event.currentTarget.closest("[data-text-style-font-menu]"); if (menu) menu.hidden = true;
+    });
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-advanced-toggle]", event => { event.preventDefault(); const panel = event.currentTarget.closest(".nexus-text-tools")?.querySelector("[data-text-style-advanced]"); if (panel) panel.hidden = !panel.hidden; });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-size]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), "fontSize", event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-color]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), "color", event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-field]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), event.currentTarget.dataset.textStyleField, event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => this._updateSystemValue(event.currentTarget));
+
     const positionPropertyOptions = input => {
       if (!input?.isConnected) return;
       const inspector = input.closest(".nexus-component-inspector");
