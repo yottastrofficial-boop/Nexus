@@ -1544,7 +1544,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const renderSavedGroups = () => {
       const container = libraryPanel?.querySelector("[data-library-saved-groups]");
       if (!container) return;
-      const groups = this.actor.getFlag("nexus", "libraryGroups") ?? [];
+      const groups = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
       container.replaceChildren();
       if (!groups.length) {
         const empty = document.createElement("p");
@@ -1748,7 +1748,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const savedGroupCard = target?.closest("[data-library-saved-group]");
       if (savedGroupCard && libraryPanel.contains(savedGroupCard)) {
         event.preventDefault();
-        const saved = (this.actor.getFlag("nexus", "libraryGroups") ?? []).find(item => item.id === savedGroupCard.dataset.librarySavedGroup);
+        const saved = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === savedGroupCard.dataset.librarySavedGroup);
         const detail = libraryPanel.querySelector("[data-library-details]");
         if (!saved || !detail) return;
         libraryPanel.querySelectorAll("[data-library-saved-group]").forEach(item => item.classList.toggle("is-selected", item === savedGroupCard));
@@ -2960,19 +2960,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!name) return false;
     const left = Math.min(...members.map(item => item.x));
     const top = Math.min(...members.map(item => item.y));
-    const saved = clone(this.actor.getFlag("nexus", "libraryGroups") ?? []);
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
     saved.push({
       id: `libgrp-${foundry.utils.randomID(8)}`, name,
+      groupSettings: { backgroundColor: group.backgroundColor ?? "", borderColor: group.borderColor ?? "", borderRadius: group.borderRadius ?? 0 },
       components: members.map(item => { const { id, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
     });
-    await this.actor.setFlag("nexus", "libraryGroups", saved.slice(-100));
+    await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
     ui.notifications?.info?.(`Grupo "${name}" salvo na Biblioteca deste personagem.`);
     this._libraryRenderSavedGroups?.();
     return true;
   }
 
   async _addSavedGroupToCanvas(groupId) {
-    const saved = this.actor.getFlag("nexus", "libraryGroups") ?? [];
+    const saved = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
     const composition = saved.find(item => item.id === groupId);
     if (!composition?.components?.length) return false;
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
@@ -2996,7 +2997,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const members = layout.components.filter(item => ids.includes(item.id));
       const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
       const right = Math.max(...members.map(item => item.x + item.w)), bottom = Math.max(...members.map(item => item.y + item.h));
-      layout.groups.push({ id: `grp-${foundry.utils.randomID(8)}`, name: composition.name, componentIds: ids, x: left, y: top, w: right-left, h: bottom-top, z: 0 });
+      layout.groups.push({ ...(clone(composition.groupSettings ?? {})), id: `grp-${foundry.utils.randomID(8)}`, name: composition.name, componentIds: ids, x: left, y: top, w: right-left, h: bottom-top, z: 0 });
     }
     await this._writeLayouts(layouts, active);
     this._selectedIds = new Set(ids);
@@ -4144,7 +4145,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else {
         const groupId = component.dataset.groupId;
         const group = groupId ? (sheet._activeGroups ?? []).find(g => g.id === groupId) : null;
-        const wholeGroupSelected = group && (group.componentIds ?? []).every(memberId => sheet._selectedIds.has(memberId));
         if (!sheet._selectedIds.has(id)) setSelection([id]);
       }
       const selected=elements().filter(el=>sheet._selectedIds.has(el.dataset.id));
@@ -4245,6 +4245,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     canvas.addEventListener("pointerleave", clearInteractionCursor);
     const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
     canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+    canvas.addEventListener("keydown", event => {
+      if (sheet._mode !== "play" || !["Enter", " "].includes(event.key)) return;
+      if (event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
+      const card = event.target.closest(".nexus-component[data-action-type=\"roll\"]");
+      if (!card) return;
+      event.preventDefault();
+      sheet._rollComponent(card.dataset.id);
+    });
     canvas.addEventListener("click", event => {
       if (sheet._mode !== "play" || performance.now() < (sheet._suppressComponentClickUntil ?? 0)) return;
       const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-action-type=\"roll\"]") : null;
