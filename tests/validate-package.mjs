@@ -15,11 +15,25 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.2", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.3", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
 assert.match(manifest.download, /releases\/download\/v1\.0\.0\.2\/nexus\.zip$/);
+
+const entrypoint = await read("scripts/nexus-v1.0.0.js");
+const libraryCatalog = await read("assets/library/catalog.js");
+assert.match(entrypoint, /Hooks\.on\("preCreateActor"/, "Criação de Actor NEXUS precisa configurar o token de protótipo");
+assert.match(entrypoint, /prototypeToken\.actorLink = true/, "Tokens de protótipo NEXUS devem ser vinculados por padrão");
+assert.match(entrypoint, /texture: \{ src: actor\.img \|\| DEFAULT_TOKEN_IMAGE \}/, "O token de protótipo precisa de uma imagem utilizável");
+assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
+assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
+assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
+assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve manter o Indicador – Barra");
+assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
+assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
+assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
+
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
   await exists(file);
@@ -158,4 +172,4 @@ assert.equal(depth, 0, "CSS contém bloco não fechado");
 assert.match(readme, /Versão 1\.0\.0\.2/);
 assert.match(changelog, /## 1\.0\.0\.2/);
 
-console.log("NEXUS 1.0.0.2: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");
