@@ -2,7 +2,7 @@
 
 ### Corrigido
 - Configuração do Token de Protótipo dos Actors NEXUS com vínculo ativo por padrão e imagem de fallback.
-- Criação de Tokens na cena preserva o vínculo com o Actor e utiliza a imagem do Token de Protótipo, respeitando a opção explícita de token independente.
+- Criação de Tokens na cena preserva o vínculo com o Actor e utiliza a imagem do Token de Protótipo; o usuário pode desvincular o Token posteriormente nas configurações do Foundry.
 
 ### Biblioteca
 - Catálogo inicial simplificado: somente **Indicador – Barra** (PV) permanece disponível.
