@@ -15,7 +15,7 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.3", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.4", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -179,8 +179,17 @@ assert.match(changelog, /## 1\.0\.0\.3/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
 assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
-assert.match(template, /data-action="component-roll"/, "O componente deve exibir um botão de rolagem quando configurado");
+assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
+assert.match(sheet, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
+assert.match(sheet, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
+assert.match(sheet, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
+assert.match(sheet, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
+assert.match(template, /data-component-setting="textAlign"/, "O Inspector deve oferecer alinhamento de texto");
+assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
+
 assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
+assert.match(changelog, /Cards inteligentes e composição/);
+assert.match(css, /nexus-library-saved-groups/);
 
-console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.4: validações estáticas aprovadas.");
