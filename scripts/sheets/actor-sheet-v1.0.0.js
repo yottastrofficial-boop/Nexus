@@ -419,6 +419,20 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
   try { const result = sum(); return index === tokens.length && Number.isFinite(result) ? result : null; } catch (_) { return null; }
 };
 
+const expandNexusRollAliases = (actor, formula) => {
+  const shorthand = new Map();
+  for (const alias of [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]) {
+    const display = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+    if (!display || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) continue;
+    const target = safeAliasKey(alias.targetPath || (["attribute", "resource"].includes(alias.type) ? alias.key + ".value" : alias.key));
+    if (target) shorthand.set(display.toLocaleUpperCase("pt-BR"), target);
+  }
+  return String(formula ?? "").replace(/@([A-Za-z][A-Za-z0-9_-]*)/g, (match, token) => {
+    const path = shorthand.get(token.toLocaleUpperCase("pt-BR"));
+    return path ? "@" + path : match;
+  });
+};
+
 const resolveAliasPath = (actor, path) => {
   const aliases = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)];
   let matchedKey = "";
@@ -1619,11 +1633,44 @@ export class NexusActorSheet extends NexusActorSheetBase {
         button.type = "button";
         button.className = "nexus-library-saved-group";
         button.dataset.librarySavedGroup = group.id;
+        const preview = document.createElement("span");
+        preview.className = "nexus-library-saved-group-preview";
+        preview.setAttribute("aria-hidden", "true");
+        const members = Array.isArray(group.components) ? group.components : [];
+        const visibleMembers = members.slice(0, 5);
+        const bounds = members.length ? {
+          left: Math.min(...members.map(item => Number(item.x) || 0)),
+          top: Math.min(...members.map(item => Number(item.y) || 0)),
+          right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || 100))),
+          bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || 60)))
+        } : { left: 0, top: 0, right: 100, bottom: 60 };
+        const scale = Math.min(104 / Math.max(1, bounds.right - bounds.left), 58 / Math.max(1, bounds.bottom - bounds.top), 0.9);
+        for (const member of visibleMembers) {
+          const card = document.createElement("span");
+          card.className = "nexus-library-saved-group-card";
+          card.dataset.previewType = member.type || "component";
+          const definition = COMPONENTS[member.type];
+          const label = member.customLabel || member.sheetContent1 || member.sheetCode || member.text || (definition && definition.label) || "Card";
+          card.textContent = String(label).trim().slice(0, 9);
+          card.style.left = (2 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
+          card.style.top = (2 + ((Number(member.y) || 0) - bounds.top) * scale) + "px";
+          card.style.width = Math.max(13, (Number(member.w) || 100) * scale) + "px";
+          card.style.height = Math.max(10, (Number(member.h) || 60) * scale) + "px";
+          card.style.background = member.backgroundColor || (group.groupSettings && group.groupSettings.backgroundColor) || "var(--nexus-panel-surface, #202e3e)";
+          card.style.borderColor = member.borderColor || (group.groupSettings && group.groupSettings.borderColor) || "var(--nexus-panel-border, #3c5067)";
+          preview.append(card);
+        }
+        if (members.length > visibleMembers.length) {
+          const overflow = document.createElement("span");
+          overflow.className = "nexus-library-saved-group-overflow";
+          overflow.textContent = "+" + (members.length - visibleMembers.length);
+          preview.append(overflow);
+        }
         const title = document.createElement("strong");
         title.textContent = group.name || "Grupo sem nome";
         const count = document.createElement("small");
-        count.textContent = `${group.components?.length ?? 0} elementos`;
-        button.append(title, count);
+        count.textContent = members.length + " elementos";
+        button.append(preview, title, count);
         container.append(button);
       }
     };
@@ -1782,7 +1829,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         for (const [selector, value] of Object.entries(defaults)) { const field = detail.querySelector(selector); if (field && value) field.value = value; }
       }
       detail.querySelector("[data-resource-live-preview]")?.append(createSheetResourcePreview({ showValues: true }));
-      detail.querySelectorAll("input,select,nexus-color-picker").forEach(input => input.addEventListener("input", renderLibraryDetails));
+      detail.querySelectorAll("input,select").forEach(input => input.addEventListener("input", renderLibraryDetails));
       detail.querySelectorAll("select, nexus-color-picker").forEach(input => input.addEventListener("change", renderLibraryDetails));
       renderLibraryDetails();
     };
@@ -2600,6 +2647,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return;
     }
     try {
+      formula = expandNexusRollAliases(this.actor, formula);
       const roll = new Roll(formula, this.actor.getRollData?.() ?? {});
       await roll.evaluate({ async: true });
       await roll.toMessage({
@@ -4588,6 +4636,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
         }
       }));
     };
+    let keyboardMoveSaveTimer = 0;
+    let keyboardMoveHistoryCaptured = false;
+    const keyboardMoveTouched = new Set();
+    let keyboardMovePending = false;
+    const flushKeyboardMove = async () => {
+      if (keyboardMoveSaveTimer) clearTimeout(keyboardMoveSaveTimer);
+      keyboardMoveSaveTimer = 0;
+      if (!keyboardMovePending) return;
+      keyboardMovePending = false;
+      const touched = [...keyboardMoveTouched];
+      keyboardMoveTouched.clear();
+      try { await saveAfterGesture(touched); }
+      finally { keyboardMoveHistoryCaptured = false; restoreCanvasKeyboardFocus(); }
+    };
+    const scheduleKeyboardMoveSave = () => {
+      keyboardMovePending = true;
+      if (keyboardMoveSaveTimer) clearTimeout(keyboardMoveSaveTimer);
+      keyboardMoveSaveTimer = setTimeout(() => { void flushKeyboardMove(); }, 180);
+    };
     const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
@@ -4627,7 +4694,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       else if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)&&sheet._selectedIds.size){
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
-        sheet._captureHistory();
+        if (!keyboardMoveHistoryCaptured) { sheet._captureHistory(); keyboardMoveHistoryCaptured = true; }
         const l=layoutData(),step=event.shiftKey?Math.max(1,l.grid)*5:(l.snap?Math.max(1,l.grid):10),dx=event.key==="ArrowLeft"?-step:event.key==="ArrowRight"?step:0,dy=event.key==="ArrowUp"?-step:event.key==="ArrowDown"?step:0;
         const selected=new Set(sheet._selectedIds),handled=new Set();
         for(const g of (sheet._activeGroups??[])){
@@ -4640,11 +4707,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
           }
         }
         for(const el of elements().filter(el=>selected.has(el.dataset.id)&&!handled.has(el.dataset.id))){const r=rectOf(el);el.style.left=`${clamp(r.x+dx,0,l.width-r.w)}px`;el.style.top=`${clamp(r.y+dy,0,l.height-r.h)}px`;}
-        renderGroups(); await saveAfterGesture([...selected]);
-         restoreCanvasKeyboardFocus();
+        for (const id of selected) keyboardMoveTouched.add(id);
+        syncGroupBounds();
+        scheduleKeyboardMoveSave();
       }
     };
     root.tabIndex=0;
+    root.addEventListener("keyup", event => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) void flushKeyboardMove();
+    });
     const activateInteraction = () => { sheet._nexusInteractionActive = true; };
     const deactivateInteraction = event => {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
