@@ -4382,7 +4382,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else {
         sheet._nexusInteractionActive = false;
         // Cliques fora da ficha encerram a seleção visual, sem interferir nos painéis flutuantes.
-        if (sheet._selectedIds?.size) {
+        if (sheet._selectedIds?.size || sheet._selectedGroupId) {
           sheet._selectedIds = new Set();
           sheet._selectedGroupId = null;
           sheet._componentEditorTargetId = null;
