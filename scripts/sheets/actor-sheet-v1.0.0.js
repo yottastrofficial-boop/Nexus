@@ -912,7 +912,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const headingLabel = String(component.customLabel ?? "").trim();
       return {
         ...component,
-        actionType: component.actionType === "roll" ? "roll" : "",
+        actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
+        proficiencyLevel: clamp(Number(component.proficiencyLevel) || 0, 0, 3),
+        proficiencyStages: (component.proficiencyLabels ?? ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.proficiencyLevel) || 0, 0, 3) })),
+        contentStyle: component.contentStyle ?? {}, headingStyle: component.headingStyle ?? {},
         z: Number(component.z) || 0,
         renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1,
         label: headingLabel,
@@ -956,7 +959,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const percent = numericMax > 0 ? clamp((Number(value) || 0) / numericMax * 100, 0, 100) : 0;
     const componentVariant = def.variant ?? component.sheetVariant ?? "";
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
-    return { ...component, actionType: component.actionType === "roll" ? "roll" : "", hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
+    const actionType = ["roll", "proficiency", "resource-slider"].includes(component.actionType) ? component.actionType : "";
+    const proficiencyBinding = component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : undefined;
+    const proficiencyLevel = clamp(Number(proficiencyBinding ?? component.proficiencyLevel) || 0, 0, 3);
+    const proficiencyLabels = (Array.isArray(component.proficiencyLabels) ? component.proficiencyLabels : ["Sem domínio", "Básico", "Treinado", "Especialista"]).slice(0, 4);
+    while (proficiencyLabels.length < 4) proficiencyLabels.push("Nível " + proficiencyLabels.length);
+    const isResourceComponent = sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter"].includes(def.kind);
+    const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
+    const safeSliderPath = safeResourcePath(sliderPath);
+    const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
+    return { ...component, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: component.contentStyle ?? {}, headingStyle: component.headingStyle ?? {}, sliderPath: safeSliderPath, showResourceSlider, imageFit: component.imageFit ?? "contain", imagePosition: component.imagePosition ?? "center", imageOpacity: clamp(Number(component.imageOpacity ?? 100), 0, 100), hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? (component.skillRows ?? [
       { proficiency: "—", attribute: "FOR", name: "Atletismo", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Vigor", value: "+2" }, { proficiency: "—", attribute: "FOR", name: "Combate", value: "+2" },
       { proficiency: "—", attribute: "DES", name: "Acrobacia", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Furtividade", value: "+1" }, { proficiency: "—", attribute: "DES", name: "Astúcia", value: "+1" },
       { proficiency: "—", attribute: "SAB", name: "Natureza", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Percepção", value: "+4" }, { proficiency: "—", attribute: "SAB", name: "Sobrevivência", value: "+4" },
@@ -2085,6 +2097,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
       else if(key==="opacity") { const opacity=Number(input.value); component.opacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
+      else if(key==="imageFit") component.imageFit=["contain","cover","fill","none"].includes(input.value)?input.value:"contain";
+      else if(key==="imagePosition") component.imagePosition=["center","top","bottom","left","right"].includes(input.value)?input.value:"center";
+      else if(key==="imageOpacity") component.imageOpacity=clamp(Number(input.value),0,100);
+      else if(key==="actionPath") { const path=String(input.value??"").replace(/^system\./,"").trim(); if(path && (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part=>["__proto__","prototype","constructor"].includes(part)))) return; component.actionPath=path; }
+      else if(/^proficiencyLabel[0-3]$/.test(key)) { const index=Number(key.slice(-1)); component.proficiencyLabels ??= ["Sem domínio","Básico","Treinado","Especialista"]; component.proficiencyLabels[index]=String(input.value??"").trim().slice(0,24)||("Nível " + index); }
       else if(key==="textAlign") component.textAlign=["left","center","right","justify"].includes(input.value)?input.value:"center";
       else if(key==="fontWeight") component.fontWeight=["400","500","600","700","800"].includes(String(input.value))?String(input.value):"400";
       else if(key==="fontStyle") component.fontStyle=input.value==="italic"?"italic":"normal";
@@ -2101,7 +2118,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         component.attributePreset = input.value;
         if (presets[input.value]) { component.text = presets[input.value][0]; component.dataPath = presets[input.value][1]; }
       }
-      else if(key==="actionType") component.actionType = input.value === "roll" ? "roll" : "";
+      else if(key==="actionType") component.actionType = ["roll","proficiency","resource-slider"].includes(input.value) ? input.value : "";
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 120);
       else if(key==="dataPath") {
         const resolved = resolveNexusBinding(this.actor, input.value);
@@ -2120,12 +2137,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       this._componentEditorTargetId = id;
       this._selectedIds = new Set([id]);
       restoreEditorViewport();
-      if (["actionType", "rollFormula"].includes(key) || (key === "dataPath" && component.type !== "token") || key === "customLabel" || key === "showLabel" || (key === "text" && component.type === "custom-card")) {
+      if (["actionType", "rollFormula", "actionPath", "proficiencyLabel0", "proficiencyLabel1", "proficiencyLabel2", "proficiencyLabel3"].includes(key) || (key === "dataPath" && component.type !== "token") || key === "customLabel" || key === "showLabel" || (key === "text" && component.type === "custom-card")) {
         await this.render({ force: true });
         restoreEditorViewport();
         return;
       }
-      const visualOnly = ["x","y","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
+      const visualOnly = ["x","y","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","headingFontSize","headingFontFamily","labelPosition","currentPath","maxPath","backgroundColor","borderColor","borderRadius","opacity","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","imageFit","imagePosition","imageOpacity"].includes(key) || (key === "dataPath" && component.type === "token") || (component.type === "sheet-attribute" && ["attributePreset","text","dataPath"].includes(key));
       if (visualOnly) {
         const node = html[0].querySelector(`.nexus-component[data-id="${id}"]`);
         if (node) {
@@ -2145,6 +2162,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
           if (key === "lineHeight") node.style.setProperty("--nexus-component-line-height", component.lineHeight);
           if (key === "headingFontSize") { if (component.headingFontSize) node.style.setProperty("--nexus-component-heading-font-size", `${component.headingFontSize}px`); else node.style.removeProperty("--nexus-component-heading-font-size"); }
           if (key === "headingFontFamily") { if (component.headingFontFamily) node.style.setProperty("--nexus-component-heading-font-family", component.headingFontFamily); else node.style.removeProperty("--nexus-component-heading-font-family"); }
+          if (key === "imageFit") node.querySelector(".nexus-asset-image")?.style.setProperty("object-fit", component.imageFit);
+          if (key === "imagePosition") node.querySelector(".nexus-asset-image")?.style.setProperty("object-position", component.imagePosition);
+          if (key === "imageOpacity") node.querySelector(".nexus-asset-image")?.style.setProperty("opacity", String(component.imageOpacity / 100));
           if (key === "labelPosition") node.dataset.labelPosition = component.labelPosition;
           if (key === "customLabel") { const heading=node.querySelector(".nexus-component-heading"); if(heading) heading.textContent=component.customLabel; }
         }
@@ -3318,6 +3338,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
     if (one && inspector) inspector.querySelectorAll("[data-component-setting]").forEach(field => { field.dataset.componentTargetId = one.id; });
     if (inspector) {
+      inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = !one || section.dataset.actionConfig !== (one.actionType ?? ""); });
+      const textTools = inspector.querySelector("[data-text-tools");
+      if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
+      const imageSettings = inspector.querySelector("[data-image-settings]");
+      if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
+      const sliderOption = inspector.querySelector('[data-component-setting="actionType"] option[value="resource-slider"]');
+      if (sliderOption) sliderOption.hidden = !one || !["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","resource-meter","asset-meter","sheet-resource"].includes(one.type);
+      this._syncTextToolbar(inspector, one);
+    }
+    if (inspector) {
       inspector.hidden = !one && !selectedGroup; if (empty) empty.hidden = !!one || !!selectedGroup;
       const groupInspector=inspector.querySelector("[data-group-inspector]");
       if(groupInspector){groupInspector.hidden=!selectedGroup;if(selectedGroup){for(const [key,value] of [["backgroundColor",selectedGroup.backgroundColor??"#273443"],["borderColor",selectedGroup.borderColor??"#52647b"],["borderRadius",selectedGroup.borderRadius??8]]){const field=groupInspector.querySelector(`[data-group-setting="${key}"]`);if(field)field.value=value;}}}
@@ -3382,7 +3412,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
         if (pathInput) pathInput.value = defaultPath;
         if (optionsList) optionsList.hidden = true;
-        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
+        for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Sem domínio"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Básico"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Treinado"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Especialista"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
           inspector.querySelectorAll(`[data-component-setting="${key}"]`).forEach(input => { input.value = value; });
         }
         const showLabelInput = inspector.querySelector('[data-component-setting="showLabel"]');
@@ -3468,7 +3498,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const actorNameInput = inspector.querySelector('[data-component-setting="actorName"]'); if (actorNameInput) actorNameInput.value = this.actor.name ?? "";
       const dataRow=inspector.querySelector("[data-component-data-row]"); if(dataRow)dataRow.hidden=!one || one.type === "sheet-resource";
       const dataBindingLabel=dataRow?.querySelector("[data-component-path-input]")?.closest("label"); if(dataBindingLabel){const labelText=dataBindingLabel.firstChild; if(labelText?.nodeType===Node.TEXT_NODE) labelText.textContent=one?.type==="token"?"Origem da imagem":"Propriedade relacionada";}
-      const textRow=inspector.querySelector("[data-component-text-row]"); if(textRow)textRow.hidden=!(one?.type==="asset-text" || one?.type==="custom-card");
+      const textRow=inspector.querySelector("[data-component-text-row]"); if(textRow)textRow.hidden=!(one && ["asset-text","custom-card","asset-notes","asset-field","text-field","sheet-section","sheet-attribute","sheet-skill-group"].includes(one.type));
       const tableSettings=inspector.querySelector("[data-component-table-settings]"); if(tableSettings)tableSettings.hidden=one?.type!=="asset-table";
       const placeholderRow=inspector.querySelector("[data-component-placeholder-row]"); if(placeholderRow)placeholderRow.hidden=!(["asset-field","asset-notes"].includes(one?.type));
       const contentSection=inspector.querySelector("[data-inspector-content]");
