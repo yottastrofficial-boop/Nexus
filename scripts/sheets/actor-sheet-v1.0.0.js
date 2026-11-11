@@ -419,14 +419,29 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
   try { const result = sum(); return index === tokens.length && Number.isFinite(result) ? result : null; } catch (_) { return null; }
 };
 
-const expandNexusRollAliases = (actor, formula) => {
-  const shorthand = new Map();
-  for (const alias of [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]) {
-    const display = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
-    if (!display || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) continue;
-    const target = safeAliasKey(alias.targetPath || (["attribute", "resource"].includes(alias.type) ? alias.key + ".value" : alias.key));
-    if (target) shorthand.set(display.toLocaleUpperCase("pt-BR"), target);
+const getNexusRollAliasEntries = actor => {
+  const candidates = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)].map(alias => {
+    const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+    const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
+    const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
+    const display = explicit || generated;
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
+    const root = safeAliasKey(alias.targetPath || alias.key);
+    if (!root) return null;
+    const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && !root.endsWith(".value") ? root + ".value" : root);
+    return target ? { display, target, label: String(alias.label ?? display), alias } : null;
+  }).filter(Boolean);
+  const counts = new Map();
+  for (const entry of candidates) {
+    const key = entry.display.toLocaleUpperCase("pt-BR");
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
+  return candidates.filter(entry => counts.get(entry.display.toLocaleUpperCase("pt-BR")) === 1);
+};
+
+const expandNexusRollAliases = (actor, formula) => {
+  const shorthand = new Map(getNexusRollAliasEntries(actor).map(entry => [entry.display.toLocaleUpperCase("pt-BR"), entry.target]));
   return String(formula ?? "").replace(/@([A-Za-z][A-Za-z0-9_-]*)/g, (match, token) => {
     const path = shorthand.get(token.toLocaleUpperCase("pt-BR"));
     return path ? "@" + path : match;
@@ -3749,18 +3764,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
               button.append(title, code); fragment.append(button);
             }
           }
-          const rollAliases = [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]
-            .filter(alias => /^[A-Za-z][A-Za-z0-9_-]*$/.test(String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim()));
+          const rollAliases = getNexusRollAliasEntries(this.actor);
           if (rollAliases.length) {
             const heading = document.createElement("div"); heading.className = "nexus-property-options-heading"; heading.textContent = "Atalhos de exibição · Fórmulas"; fragment.append(heading);
-            for (const alias of rollAliases) {
-              const display = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName).trim();
-              const path = safeAliasKey(alias.targetPath || (["attribute", "resource"].includes(alias.type) ? alias.key + ".value" : alias.key));
-              if (!path) continue;
+            for (const entry of rollAliases) {
               const button = document.createElement("button"); button.type = "button"; button.className = "nexus-property-option";
-              button.dataset.propertyPathOption = path; button.dataset.rollToken = "@" + display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
-              const title = document.createElement("strong"); title.textContent = alias.label || display;
-              const code = document.createElement("code"); code.textContent = "@" + display + " → " + path;
+              button.dataset.propertyPathOption = entry.target; button.dataset.rollToken = "@" + entry.display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
+              const title = document.createElement("strong"); title.textContent = entry.label || entry.display;
+              const code = document.createElement("code"); code.textContent = "@" + entry.display + " → " + entry.target;
               button.append(title, code); fragment.append(button);
             }
           }
