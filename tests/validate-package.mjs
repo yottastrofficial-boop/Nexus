@@ -225,7 +225,7 @@ assert.doesNotMatch(sheet, /scheduleKeyboardMoveSave/, "A movimentação não de
 assert.match(sheet, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
 assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve representar os cards membros");
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
-console.log("NEXUS 1.0.0.6: regressões de desempenho, aliases e prévias de grupos verificadas.");
+console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
 assert.match(template, /data-roll-formula-input/, "O campo de fórmula deve abrir o visualizador de propriedades");
 assert.match(template, /maxlength="500"/, "O campo de fórmula deve aceitar expressões compostas");
