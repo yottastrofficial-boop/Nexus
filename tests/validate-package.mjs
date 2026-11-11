@@ -15,11 +15,11 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.4", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.5", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.4\/nexus\.zip$/);
+assert.match(manifest.download, /releases\/download\/v1\.0\.0\.5\/nexus\.zip$/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -174,17 +174,17 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.4/);
-assert.match(changelog, /## 1\.0\.0\.4/);
+assert.match(readme, /Versão 1\.0\.0\.5/);
+assert.match(changelog, /## 1\.0\.0\.5/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
 assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{\}\)/, "A rolagem deve usar os dados do Actor");
-assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
+assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
 assert.match(sheet, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
 assert.match(sheet, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
 assert.match(sheet, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
 assert.match(sheet, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
-assert.match(template, /data-component-setting="textAlign"/, "O Inspector deve oferecer alinhamento de texto");
+assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
 assert.match(sheet, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
 assert.match(sheet, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
@@ -194,4 +194,18 @@ assert.match(changelog, /Adicionada ação opcional de rolagem configurável no 
 assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
 
-console.log("NEXUS 1.0.0.4: validações estáticas aprovadas.");
+assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
+assert.match(sheet, /remove\("is-selected", "is-group-inspecting", "is-selection-highlight"\)/, "A limpeza da seleção deve remover todos os estados visuais");
+assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\.\("\.nexus-canvas"\)/, "Os atalhos devem consultar o Canvas atual");
+assert.match(sheet, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
+assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
+assert.match(template, /data-text-style-target="heading"/, "A formatação deve permitir selecionar o título");
+assert.match(template, /data-action-config="proficiency"/, "A ação de marcador de domínio deve ter configuração contextual");
+assert.match(template, /data-action-config="resource-slider"/, "A ação de ajuste de recurso deve ter configuração contextual");
+assert.match(template, /data-resource-slider/, "A barra arrastável deve ser renderizada");
+assert.match(template, /data-proficiency-level/, "O marcador deve oferecer os quatro níveis");
+assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser editável separadamente");
+assert.match(css, /nexus-text-toolbar/);
+assert.match(css, /nexus-proficiency-control/);
+assert.match(css, /nexus-resource-slider-control/);
+console.log("NEXUS 1.0.0.5: validações estáticas aprovadas.");
