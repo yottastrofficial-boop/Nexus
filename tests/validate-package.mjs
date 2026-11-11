@@ -240,6 +240,6 @@ assert.match(sheet, /nexus-library-saved-group-track/, "Pré-visualizações dev
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
 assert.match(sheet, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
-assert.match(sheet, /root \+ "\\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
+assert.match(sheet, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
 assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
