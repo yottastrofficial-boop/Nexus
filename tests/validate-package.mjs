@@ -15,7 +15,7 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.4", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.3", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -183,4 +183,4 @@ assert.match(template, /data-action="component-roll"/, "O componente deve exibir
 assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 
-console.log("NEXUS 1.0.0.4: validações estáticas aprovadas.");
+console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");
