@@ -2152,11 +2152,53 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const inspector = input.closest(".nexus-component-inspector");
       const list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
       if (!list) return;
+      if (list.dataset.nexusOptionsReady !== "true") {
+        const paths = new Set(["name", ...collectPropertyPaths(this.actor)]);
+        for (const alias of [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]) {
+          const root = safeAliasKey(alias.key);
+          if (!root) continue;
+          const suffixes = alias.type === "attribute" ? ["name", "exib", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exib", "value", "max", "percentage"] : [""];
+          for (const suffix of suffixes) paths.add(suffix ? `${root}.${suffix}` : root);
+        }
+        const fragment = document.createDocumentFragment();
+        const heading = document.createElement("div");
+        heading.className = "nexus-property-options-heading";
+        heading.textContent = "Propriedades disponíveis";
+        fragment.append(heading);
+        for (const path of [...paths].sort((a,b) => a.localeCompare(b, "pt-BR"))) {
+          const button = document.createElement("button");
+          button.type = "button"; button.className = "nexus-property-option"; button.dataset.propertyPathOption = path; button.setAttribute("role", "option");
+          const title = document.createElement("strong"); title.textContent = path.split(".").at(-1);
+          const code = document.createElement("code"); code.textContent = path;
+          button.append(title, code); fragment.append(button);
+        }
+        const aliases = getNexusRollAliasEntries(this.actor);
+        if (aliases.length) {
+          const aliasHeading = document.createElement("div");
+          aliasHeading.className = "nexus-property-options-heading";
+          aliasHeading.textContent = "Atalhos de exibição · Fórmulas";
+          fragment.append(aliasHeading);
+          for (const entry of aliases) {
+            const button = document.createElement("button");
+            button.type = "button"; button.className = "nexus-property-option";
+            button.dataset.propertyPathOption = entry.target; button.dataset.rollToken = "@" + entry.display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
+            const title = document.createElement("strong"); title.textContent = entry.label;
+            const code = document.createElement("code"); code.textContent = "@" + entry.display + " → " + entry.target;
+            button.append(title, code); fragment.append(button);
+          }
+        }
+        list.replaceChildren(fragment);
+        list.dataset.nexusOptionsReady = "true";
+      }
       const formulaMode = input.hasAttribute("data-roll-formula-input");
       const raw = String(input.value ?? "");
       const cursor = input.selectionStart ?? raw.length;
-      const atIndex = formulaMode ? raw.lastIndexOf("@", Math.max(0, cursor - 1)) : -1;
-      const query = (formulaMode && atIndex >= 0 ? raw.slice(atIndex + 1, cursor) : (formulaMode ? "" : raw)).trim().toLocaleLowerCase("pt-BR");
+      const tokenMatch = formulaMode ? raw.slice(0, cursor).match(/@([A-Za-z0-9_.-]*)$/) : null;
+      if (formulaMode && raw.trim() && !tokenMatch && raw.slice(0, cursor).trimEnd().endsWith("+")) {
+        list.hidden = true;
+        return;
+      }
+      const query = (formulaMode ? (tokenMatch?.[1] ?? "") : raw).trim().toLocaleLowerCase("pt-BR");
       let matches = 0;
       list.querySelectorAll(".nexus-property-option").forEach(option => {
         const aliasOnly = option.dataset.rollAliasOption === "true";
@@ -2176,7 +2218,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       requestAnimationFrame(() => positionPropertyOptions(input));
     };
     const propertyInputSelector = ".nexus-component-inspector [data-component-path-input], .nexus-component-inspector [data-roll-formula-input]";
-    $(document).on(`focus${inspectorNamespace} input${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
+    $(document).on(`focusin${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`, () => {
       const input = document.activeElement?.matches?.("[data-component-path-input], [data-roll-formula-input]") ? document.activeElement : null;
@@ -2190,11 +2232,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!input || !list || !inspector) return;
       if (input.hasAttribute("data-roll-formula-input")) {
         const value = input.value, cursor = input.selectionStart ?? value.length;
-        const atIndex = value.lastIndexOf("@", Math.max(0, cursor - 1));
+        const before = value.slice(0, cursor);
+        const tokenMatch = before.match(/@([A-Za-z0-9_.-]*)$/);
+        const start = tokenMatch ? cursor - tokenMatch[0].length : cursor;
         let end = cursor;
-        if (atIndex >= 0) { end = atIndex + 1; while (end < value.length && /[A-Za-z0-9_.-]/.test(value[end])) end++; }
+        if (tokenMatch) while (end < value.length && /[A-Za-z0-9_.-]/.test(value[end])) end++;
         const token = button.dataset.rollToken || "@" + button.dataset.propertyPathOption;
-        const start = atIndex >= 0 ? atIndex : cursor;
         input.value = value.slice(0, start) + token + value.slice(end);
         input.focus({ preventScroll: true });
         input.setSelectionRange(start + token.length, start + token.length);
@@ -3776,6 +3819,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
             }
           }
           optionsList.replaceChildren(fragment);
+          optionsList.dataset.nexusOptionsReady = "true";
         }
         const pathInput = inspector.querySelector("[data-component-path-input]");
         const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
