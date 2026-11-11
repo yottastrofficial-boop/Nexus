@@ -611,7 +611,7 @@ if (!customElements.get("nexus-color-picker")) {
       this.shadowRoot.innerHTML = `
         <style>
           :host{display:inline-block;position:relative;box-sizing:border-box;min-width:0;width:100%;font:12px/1.35 Inter,system-ui,sans-serif;color:var(--nexus-panel-text,#e7edf5)}
-          *{box-sizing:border-box}.trigger{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:5px 9px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:7px;background:var(--nexus-panel-input,#111b27);color:inherit;text-align:left;cursor:pointer}
+          *{box-sizing:border-box}.trigger{display:flex;align-items:center;gap:7px;width:100%;min-height:30px;padding:1px 0;border:0;border-radius:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
           .swatch{width:27px;height:27px;flex:0 0 27px;border:1px solid #ffffff55;border-radius:5px;background-color:#526b89;background-image:linear-gradient(45deg,#888 25%,transparent 25%),linear-gradient(-45deg,#888 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#888 75%),linear-gradient(-45deg,transparent 75%,#888 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;overflow:hidden}
           .swatch i{display:block;width:100%;height:100%;background:#526b89}.trigger span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 11px ui-monospace,monospace}
           .popover{position:fixed;z-index:2147483647;left:12px;top:12px;width:min(292px,calc(100vw - 28px));max-height:calc(100vh - 24px);overflow:auto;margin:0;padding:11px;border:1px solid var(--nexus-panel-border,#52647b);border-radius:10px;background:var(--nexus-panel-bg,#182330);box-shadow:0 12px 34px #000a}
@@ -2515,7 +2515,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await this._writeLayouts(layouts, active);
     const node = this.element?.querySelector?.(".nexus-component[data-id=\"" + CSS.escape(componentId) + "\"]");
     this._applyComponentTextStyles(node, component);
-    const inspector = this._nexusPanelWindows?.get("component")?.panel?.querySelector?.(".nexus-component-inspector");
+    const inspector = this._nexusPanelWindows?.get("component")?.panel?.querySelector?.(".nexus-component-inspector") ?? this.element?.querySelector?.(".nexus-component-inspector");
     this._syncTextToolbar(inspector, component);
   }
 
@@ -2780,7 +2780,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (type === "asset-table") { component.rows = 3; component.columns = 3; }
       if (type === "asset-notes") component.placeholder = "Escreva suas anotações…";
     }
-    const templateKeys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","attributePreset","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
+    const templateKeys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","attributePreset","tokenImage","headingFontSize","headingFontFamily","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","labelPosition","showLabel","contentStyle","headingStyle","actionType","rollFormula","actionPath","proficiencyLevel","proficiencyLabels","imageFit","imagePosition","imageOpacity","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
     for (const key of templateKeys) if (Object.hasOwn(options.template ?? {}, key)) component[key] = clone(options.template[key]);
     layout.components.push(component);
     layouts[active] = layout; this._selectedIds = new Set([id]); this._selectedGroupId = null;
@@ -2798,7 +2798,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const component = layout?.components?.find(item => item.id === ids[0]);
     if (!component || !COMPONENTS[component.type]) return;
     const label = String(component.customLabel || COMPONENTS[component.type].label || "Componente").trim().slice(0, 48);
-    const keys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","format","w","h","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","headingFontSize","headingFontFamily","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
+    const keys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","format","w","h","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","headingFontSize","headingFontFamily","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","labelPosition","showLabel","contentStyle","headingStyle","actionType","rollFormula","actionPath","proficiencyLevel","proficiencyLabels","imageFit","imagePosition","imageOpacity","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
     const settings = {};
     for (const key of keys) if (component[key] !== undefined) settings[key] = clone(component[key]);
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
