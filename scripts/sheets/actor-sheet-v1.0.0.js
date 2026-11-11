@@ -4382,9 +4382,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
-    const syncGroupBounds = () => {
+    const syncGroupBounds = (componentNodes = elements()) => {
+      const visibleNodes = componentNodes.filter(el => !el.hidden);
       for (const g of (sheet._activeGroups ?? [])) {
-        const members = elements().filter(el => !el.hidden && (g.componentIds ?? []).includes(el.dataset.id));
+        const memberIds = new Set(g.componentIds ?? []);
+        const members = visibleNodes.filter(el => memberIds.has(el.dataset.id));
         if (!members.length) continue;
         const rs = members.map(rectOf), x = Math.min(...rs.map(r=>r.x)), y = Math.min(...rs.map(r=>r.y));
         const right = Math.max(...rs.map(r=>r.x+r.w)), bottom = Math.max(...rs.map(r=>r.y+r.h));
@@ -4700,26 +4702,78 @@ export class NexusActorSheet extends NexusActorSheetBase {
         }
       }));
     };
-    let keyboardMoveSaveTimer = 0;
     let keyboardMoveHistoryCaptured = false;
-    const keyboardMoveTouched = new Set();
+    let keyboardMoveTouched = new Set();
+    let keyboardMoveFrame = 0;
+    let keyboardMoveDeltaX = 0;
+    let keyboardMoveDeltaY = 0;
+    let keyboardMoveElements = [];
+    let keyboardMoveAllElements = [];
+    let keyboardMoveStarts = [];
+    let keyboardMoveLayout = null;
     let keyboardMovePending = false;
-    const flushKeyboardMove = async () => {
-      if (keyboardMoveSaveTimer) clearTimeout(keyboardMoveSaveTimer);
-      keyboardMoveSaveTimer = 0;
-      if (!keyboardMovePending) return;
+    const beginKeyboardMove = () => {
+      if (keyboardMoveHistoryCaptured) return;
+      sheet._captureHistory();
+      keyboardMoveHistoryCaptured = true;
+      keyboardMoveTouched = new Set();
+      keyboardMoveAllElements = elements();
+      keyboardMoveElements = keyboardMoveAllElements.filter(el => sheet._selectedIds?.has(el.dataset.id));
+      keyboardMoveStarts = keyboardMoveElements.map(el => ({ el, ...rectOf(el) }));
+      keyboardMoveLayout = layoutData();
+      keyboardMoveDeltaX = 0;
+      keyboardMoveDeltaY = 0;
+    };
+    const applyKeyboardMoveFrame = () => {
+      keyboardMoveFrame = 0;
+      if (!keyboardMoveElements.length || !keyboardMovePending) return;
       keyboardMovePending = false;
-      const touched = [...keyboardMoveTouched];
-      keyboardMoveTouched.clear();
-      try { await saveAfterGesture(touched); }
-      finally { keyboardMoveHistoryCaptured = false; restoreCanvasKeyboardFocus(); }
+      const minX = Math.min(...keyboardMoveStarts.map(item => item.x));
+      const minY = Math.min(...keyboardMoveStarts.map(item => item.y));
+      const maxX = Math.max(...keyboardMoveStarts.map(item => item.x + item.w));
+      const maxY = Math.max(...keyboardMoveStarts.map(item => item.y + item.h));
+      const dx = clamp(keyboardMoveDeltaX, -minX, keyboardMoveLayout.width - maxX);
+      const dy = clamp(keyboardMoveDeltaY, -minY, keyboardMoveLayout.height - maxY);
+      for (const item of keyboardMoveStarts) {
+        item.el.style.left = `${item.x + dx}px`;
+        item.el.style.top = `${item.y + dy}px`;
+        keyboardMoveTouched.add(item.el.dataset.id);
+      }
+      syncGroupBounds(keyboardMoveAllElements);
     };
-    const scheduleKeyboardMoveSave = () => {
+    const queueKeyboardMove = (dx, dy) => {
+      beginKeyboardMove();
+      keyboardMoveDeltaX += dx;
+      keyboardMoveDeltaY += dy;
       keyboardMovePending = true;
-      if (keyboardMoveSaveTimer) clearTimeout(keyboardMoveSaveTimer);
-      keyboardMoveSaveTimer = setTimeout(() => { void flushKeyboardMove(); }, 180);
+      if (!keyboardMoveFrame) keyboardMoveFrame = requestAnimationFrame(applyKeyboardMoveFrame);
     };
-    const keyHandler=async event=>{
+    const flushKeyboardMove = async () => {
+      if (keyboardMoveFrame) { cancelAnimationFrame(keyboardMoveFrame); applyKeyboardMoveFrame(); }
+      else if (keyboardMovePending) applyKeyboardMoveFrame();
+      if (!keyboardMoveHistoryCaptured) return;
+      const touched = [...keyboardMoveTouched];
+      keyboardMoveHistoryCaptured = false;
+      keyboardMoveTouched = new Set();
+      keyboardMoveElements = [];
+      keyboardMoveAllElements = [];
+      keyboardMoveStarts = [];
+      keyboardMoveLayout = null;
+      keyboardMovePending = false;
+      keyboardMoveDeltaX = 0;
+      keyboardMoveDeltaY = 0;
+      if (touched.length) {
+        renderGroups();
+        scheduleConnectedCorners();
+        try { await saveAfterGesture(touched); }
+        finally { restoreCanvasKeyboardFocus(); }
+      }
+    };
+    const keyboardMoveKeyUp = event => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) void flushKeyboardMove();
+    };
+    const keyboardMoveBlur = () => { void flushKeyboardMove(); };
+        const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const panelWindows = [...(sheet._nexusPanelWindows?.values?.() ?? [])];
@@ -4758,28 +4812,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       else if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)&&sheet._selectedIds.size){
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
-        if (!keyboardMoveHistoryCaptured) { sheet._captureHistory(); keyboardMoveHistoryCaptured = true; }
-        const l=layoutData(),step=event.shiftKey?Math.max(1,l.grid)*5:(l.snap?Math.max(1,l.grid):10),dx=event.key==="ArrowLeft"?-step:event.key==="ArrowRight"?step:0,dy=event.key==="ArrowUp"?-step:event.key==="ArrowDown"?step:0;
-        const selected=new Set(sheet._selectedIds),handled=new Set();
-        for(const g of (sheet._activeGroups??[])){
-          const members=(g.componentIds??[]).filter(id=>selected.has(id));
-          if(members.length===g.componentIds?.length&&members.length){
-            const rs=elements().filter(el=>members.includes(el.dataset.id)).map(rectOf);
-            const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));
-            const mx=clamp(dx,-minX,l.width-maxX),my=clamp(dy,-minY,l.height-maxY);
-            for(const el of elements().filter(el=>members.includes(el.dataset.id))){const r=rectOf(el);el.style.left=`${r.x+mx}px`;el.style.top=`${r.y+my}px`;handled.add(el.dataset.id);}
-          }
-        }
-        for(const el of elements().filter(el=>selected.has(el.dataset.id)&&!handled.has(el.dataset.id))){const r=rectOf(el);el.style.left=`${clamp(r.x+dx,0,l.width-r.w)}px`;el.style.top=`${clamp(r.y+dy,0,l.height-r.h)}px`;}
-        for (const id of selected) keyboardMoveTouched.add(id);
-        syncGroupBounds();
-        scheduleKeyboardMoveSave();
+        const l = layoutData();
+        const step = event.shiftKey ? Math.max(1, l.grid) * 5 : (l.snap ? Math.max(1, l.grid) : 10);
+        const dx = event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0;
+        const dy = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
+        queueKeyboardMove(dx, dy);
       }
     };
     root.tabIndex=0;
-    root.addEventListener("keyup", event => {
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) void flushKeyboardMove();
-    });
+    window.addEventListener("keyup", keyboardMoveKeyUp, true);
+    window.addEventListener("blur", keyboardMoveBlur);
     const activateInteraction = () => { sheet._nexusInteractionActive = true; };
     const deactivateInteraction = event => {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
@@ -4798,7 +4840,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     root.addEventListener("pointerdown",activateInteraction,true);
     document.addEventListener("pointerdown",deactivateInteraction,true);
     window.addEventListener("keydown",keyHandler,true);
-    sheet._nexusKeyCleanup = () => { window.removeEventListener("keydown",keyHandler,true); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); fitObserver?.disconnect(); if(sheet._fitNexusCanvas===fitCanvas)sheet._fitNexusCanvas=null; };
+    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); fitObserver?.disconnect(); if(sheet._fitNexusCanvas===fitCanvas)sheet._fitNexusCanvas=null; };
     root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;button.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
     canvas.addEventListener("dragover",e=>e.preventDefault());
     canvas.addEventListener("drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
