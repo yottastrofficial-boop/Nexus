@@ -181,6 +181,6 @@ assert.match(sheet, /new Roll\(formula, this\.actor\.getRollData\?\.\(\) \?\? \{
 assert.match(sheet, /component\.actionType = input\.value === "roll" \? "roll" : ""/, "A ação deve ser configurável por componente");
 assert.match(template, /data-action="component-roll"/, "O componente deve exibir um botão de rolagem quando configurado");
 assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
-assert.match(changelog, /Interação configurável de componentes/);
+assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 
 console.log("NEXUS 1.0.0.3: validações estáticas aprovadas.");
