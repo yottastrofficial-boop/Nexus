@@ -1529,6 +1529,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-layer-visibility]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerVisibility.split(":"); this._toggleLayerState(kind,id,"hidden"); });
     html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); this._toggleLayerState(kind,id,"locked"); });
     const libraryPanel = html[0].querySelector(".nexus-library-panel");
+    const renderSavedGroups = () => {
+      const container = libraryPanel?.querySelector("[data-library-saved-groups]");
+      if (!container) return;
+      const groups = this.actor.getFlag("nexus", "libraryGroups") ?? [];
+      container.replaceChildren();
+      if (!groups.length) {
+        const empty = document.createElement("p");
+        empty.className = "nexus-library-empty";
+        empty.textContent = "Nenhum grupo personalizado salvo.";
+        container.append(empty);
+        return;
+      }
+      for (const group of groups) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "nexus-library-saved-group";
+        button.dataset.librarySavedGroup = group.id;
+        const title = document.createElement("strong");
+        title.textContent = group.name || "Grupo sem nome";
+        const count = document.createElement("small");
+        count.textContent = `${group.components?.length ?? 0} elementos`;
+        button.append(title, count);
+        container.append(button);
+      }
+    };
+    this._libraryRenderSavedGroups = renderSavedGroups;
+    renderSavedGroups();
     const filterLibrary = () => {
       const query = libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
       const tag = libraryPanel?.querySelector("[data-library-tag]")?.value ?? "all";
@@ -1706,10 +1733,44 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
 
+      const savedGroupCard = target?.closest("[data-library-saved-group]");
+      if (savedGroupCard && libraryPanel.contains(savedGroupCard)) {
+        event.preventDefault();
+        const saved = (this.actor.getFlag("nexus", "libraryGroups") ?? []).find(item => item.id === savedGroupCard.dataset.librarySavedGroup);
+        const detail = libraryPanel.querySelector("[data-library-details]");
+        if (!saved || !detail) return;
+        libraryPanel.querySelectorAll("[data-library-saved-group]").forEach(item => item.classList.toggle("is-selected", item === savedGroupCard));
+        detail.dataset.selectedGroupId = saved.id;
+        detail.dataset.selectedType = "saved-group";
+        detail.innerHTML = "";
+        const heading = document.createElement("div");
+        heading.className = "nexus-library-detail-heading";
+        const title = document.createElement("strong");
+        title.className = "nexus-library-detail-title";
+        title.textContent = saved.name || "Grupo personalizado";
+        heading.append(title);
+        const summary = document.createElement("p");
+        summary.textContent = `Composição com ${saved.components?.length ?? 0} elementos independentes.`;
+        const add = document.createElement("button");
+        add.type = "button";
+        add.dataset.libraryAddGroup = "";
+        add.textContent = "Adicionar grupo ao Canvas";
+        detail.append(heading, summary, add);
+        return;
+      }
+
       const assetCard = target?.closest("[data-library-asset]");
       if (assetCard && libraryPanel.contains(assetCard)) {
         event.preventDefault();
         if (!assetCard.dataset.libraryTheme) selectLibraryAsset(assetCard);
+        return;
+      }
+
+      const addGroupButton = target?.closest("[data-library-add-group]");
+      if (addGroupButton && libraryPanel.contains(addGroupButton)) {
+        event.preventDefault();
+        const groupId = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
+        if (groupId) await this._addSavedGroupToCanvas(groupId);
         return;
       }
 
@@ -2890,7 +2951,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = clone(this.actor.getFlag("nexus", "libraryGroups") ?? []);
     saved.push({
       id: `libgrp-${foundry.utils.randomID(8)}`, name,
-      components: members.map(item => ({ ...clone(item), id: undefined, x: item.x - left, y: item.y - top }))
+      components: members.map(item => { const { id, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
     });
     await this.actor.setFlag("nexus", "libraryGroups", saved.slice(-100));
     ui.notifications?.info?.(`Grupo "${name}" salvo na Biblioteca deste personagem.`);
