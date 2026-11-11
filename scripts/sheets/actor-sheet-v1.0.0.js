@@ -93,7 +93,8 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     value = Number.isFinite(current) && Number.isFinite(max) && max > 0 ? Math.round(current / max * 100) : 0;
   }
   value = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
-  if (alias.alias && ["name", "exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.label;
+  if (alias.alias && alias.suffix === "name" && (value === undefined || value === null || value === "")) value = alias.alias.label;
+  if (alias.alias && ["exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.exib ?? alias.alias.label;
   if (alias.alias?.type === "attribute" && alias.suffix === "checkbonus" && typeof value === "string" && depth < 8) {
     const calculated = evaluateAliasExpression(actor, value, depth + 1);
     if (calculated !== null) value = calculated;
@@ -301,12 +302,12 @@ const collectPropertyPaths = actor => {
 };
 
 const NATIVE_PROPERTY_BASE = [
-  { id:"core.resource.pv", label:"Pontos de Vida", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
-  { id:"core.resource.pm", label:"Pontos de Mana", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
-  { id:"core.resource.pe", label:"Pontos de Energia", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
-  { id:"core.attribute.body", label:"Corpo", category:"attributes", type:"attribute", key:"attributes.body", targetPath:"attributes.body" },
-  { id:"core.attribute.mind", label:"Mente", category:"attributes", type:"attribute", key:"attributes.mind", targetPath:"attributes.mind" },
-  { id:"core.attribute.soul", label:"Alma", category:"attributes", type:"attribute", key:"attributes.soul", targetPath:"attributes.soul" },
+  { id:"core.resource.pv", label:"Pontos de Vida", exib:"PV", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
+  { id:"core.resource.pm", label:"Pontos de Mana", exib:"PM", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
+  { id:"core.resource.pe", label:"Pontos de Energia", exib:"PE", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
+  { id:"core.attribute.body", label:"Corpo", exib:"CORPO", category:"attributes", type:"attribute", key:"attributes.body", targetPath:"attributes.body" },
+  { id:"core.attribute.mind", label:"Mente", exib:"MENTE", category:"attributes", type:"attribute", key:"attributes.mind", targetPath:"attributes.mind" },
+  { id:"core.attribute.soul", label:"Alma", exib:"ALMA", category:"attributes", type:"attribute", key:"attributes.soul", targetPath:"attributes.soul" },
   { id:"core.combat.defense", label:"Defesa", category:"combat", type:"number", key:"combat.defense", targetPath:"combat.defense" },
   { id:"core.combat.movement", label:"Movimento", category:"combat", type:"number", key:"combat.movement", targetPath:"combat.movement" },
   { id:"core.combat.desl", label:"DESL", category:"combat", type:"number", key:"combat.desl", targetPath:"combat.desl" },
@@ -433,11 +434,11 @@ const resolveAliasPath = (actor, path) => {
   // (nome, bônus e fórmula) continuam pertencendo ao alias.
   if (alias.targetPath && alias.type === "attribute") {
     if (suffix === "value") targetPath = alias.targetPath;
-    else if (["name", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
+    else if (["name", "exib", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
   }
   if (alias.targetPath && alias.type === "resource") {
     if (suffix === "percentage") targetPath = alias.targetPath;
-    else if (["name", "exibicao"].includes(suffix)) targetPath = "";
+    else if (["name", "exib", "exibicao"].includes(suffix)) targetPath = "";
   }
   return { path: targetPath, alias, suffix };
 };
@@ -1257,8 +1258,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       aliases.push({ id, key, label: String(label || "Nova propriedade").slice(0,48), category, type: finalType, source: resolvedSource, targetPath: safeTarget });
       if (resolvedSource === "custom") {
         const customData = clone(getCustomAliasData(this.actor));
-        if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
-        else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exibicao: String(label), value: 0, max: 0 });
+        if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
+        else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, max: 0 });
         else foundry.utils.setProperty(customData, key, finalType === "number" ? 0 : finalType === "boolean" ? false : "");
         await this.actor.setFlag("nexus", "customData", customData);
       }
@@ -1456,8 +1457,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const customData = clone(getCustomAliasData(this.actor));
       const original = getPath(customData, source.key);
       if (original !== undefined) foundry.utils.setProperty(customData, key, clone(original));
-      else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
-      else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exibicao: copy.label, value: 0, max: 0 });
+      else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
+      else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, max: 0 });
       else foundry.utils.setProperty(customData, key, source.type === "number" ? 0 : source.type === "boolean" ? false : "");
       await this.actor.setFlag("nexus", "customData", customData);
       await this.actor.setFlag("nexus", "aliases", aliases);
@@ -1496,8 +1497,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       if (!alias.targetPath) {
         let defaults;
-        if (alias.type === "attribute") defaults = { name: alias.label, exibicao: alias.label, value: 0, checkbonus: 0, roll: "" };
-        else if (alias.type === "resource") defaults = { name: alias.label, exibicao: alias.label, value: 0, max: 0 };
+        if (alias.type === "attribute") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, checkbonus: 0, roll: "" };
+        else if (alias.type === "resource") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, max: 0 };
         else defaults = alias.type === "number" ? 0 : alias.type === "boolean" ? false : "";
         foundry.utils.setProperty(customData, alias.key, defaults);
         await this.actor.setFlag("nexus", "customData", customData);
@@ -1607,8 +1608,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       for (const alias of [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]) {
         const key = safeAliasKey(alias.key); if (!key) continue;
-        if (alias.type === "resource") paths.push(`${key}.name`, `${key}.value`, `${key}.max`, `${key}.percentage`);
-        else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exibicao`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
+        if (alias.type === "resource") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.max`, `${key}.percentage`);
+        else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
         else paths.push(key);
       }
       return [...new Set(paths)].sort((a,b) => a.localeCompare(b, "pt-BR"));
