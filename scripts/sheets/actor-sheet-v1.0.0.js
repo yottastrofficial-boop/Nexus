@@ -2340,6 +2340,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if (context.kind === "asset-text") writeText(card, ".nexus-asset-text", context.path ? current : component.text);
       else if (context.kind === "custom") writeText(card, ".nexus-custom-card-value", current);
       else if (["number", "name", "text"].includes(context.kind)) writeText(card, ".nexus-component-content strong", current);
+      if (context.kind === "sheet-element" && !["resource", "attribute", "derived", "skill"].includes(context.sheetVariant)) {
+        writeText(card, ".nexus-sheet-element strong", current);
+      }
+      if (context.kind === "token" && isMediaSource(current)) {
+        const image = card.querySelector(".nexus-token-portrait");
+        if (image && image !== document.activeElement && image.getAttribute("src") !== current) image.src = current;
+      }
       if (context.kind === "asset-image" && isMediaSource(current)) {
         const image = card.querySelector(".nexus-asset-image");
         if (image && image !== document.activeElement && image.src !== current) image.src = current;
@@ -2355,7 +2362,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const alias = resolveAliasPath(this.actor, path);
     if (alias.alias && !alias.path) {
       const customData = clone(getCustomAliasData(this.actor));
-      foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix].filter(Boolean).join("."), value);
+      foundry.utils.setProperty(customData, [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."), value);
       await this.actor.setFlag("nexus", "customData", customData);
       this._refreshBoundComponents();
       return;
