@@ -613,8 +613,8 @@ if (!customElements.get("nexus-color-picker")) {
           *{box-sizing:border-box}.trigger{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:5px 9px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:7px;background:var(--nexus-panel-input,#111b27);color:inherit;text-align:left;cursor:pointer}
           .swatch{width:27px;height:27px;flex:0 0 27px;border:1px solid #ffffff55;border-radius:5px;background-color:#526b89;background-image:linear-gradient(45deg,#888 25%,transparent 25%),linear-gradient(-45deg,#888 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#888 75%),linear-gradient(-45deg,transparent 75%,#888 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;overflow:hidden}
           .swatch i{display:block;width:100%;height:100%;background:#526b89}.trigger span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 11px ui-monospace,monospace}
-          .popover{position:absolute;z-index:10000;left:0;top:calc(100% + 7px);width:min(292px,calc(100vw - 28px));padding:11px;border:1px solid var(--nexus-panel-border,#52647b);border-radius:10px;background:var(--nexus-panel-bg,#182330);box-shadow:0 12px 34px #000a}
-          .popover[hidden]{display:none}.spectrum{position:relative;height:146px;border-radius:6px;cursor:crosshair;touch-action:none;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(210 100% 50%))}.thumb{position:absolute;width:13px;height:13px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #000b;transform:translate(-50%,-50%);pointer-events:none}
+          .popover{position:fixed;z-index:2147483647;left:12px;top:12px;width:min(292px,calc(100vw - 28px));max-height:calc(100vh - 24px);overflow:auto;margin:0;padding:11px;border:1px solid var(--nexus-panel-border,#52647b);border-radius:10px;background:var(--nexus-panel-bg,#182330);box-shadow:0 12px 34px #000a}
+          .popover:not(:popover-open){display:none}.spectrum{position:relative;height:146px;border-radius:6px;cursor:crosshair;touch-action:none;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(210 100% 50%))}.thumb{position:absolute;width:13px;height:13px;border:2px solid white;border-radius:50%;box-shadow:0 0 0 1px #000b;transform:translate(-50%,-50%);pointer-events:none}
           .range-row{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:8px;margin-top:10px}.range-row label{font-size:10px;color:var(--nexus-panel-muted,#9aadc2)}input[type=range]{width:100%;margin:0;accent-color:var(--nexus-highlight-color,#78b7e8)}
           .hue{height:12px;border-radius:10px;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);appearance:none}.alpha{height:12px;border-radius:10px;appearance:none;background:linear-gradient(90deg,transparent,var(--picked-color,#526b89)),repeating-conic-gradient(#777 0 25%,#aaa 0 50%) 0/8px 8px}
           .fields{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-top:10px}.hex{width:100%;min-width:0;height:31px;padding:5px 8px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:5px;background:var(--nexus-panel-input,#111b27);color:inherit;font:12px ui-monospace,monospace}.rgba{color:var(--nexus-panel-muted,#9aadc2);font-size:10px;white-space:nowrap}
@@ -622,7 +622,7 @@ if (!customElements.get("nexus-color-picker")) {
           button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--nexus-highlight-color,#78b7e8);outline-offset:2px}
         </style>
         <button class="trigger" type="button" aria-haspopup="dialog" aria-expanded="false"><i class="swatch"><i></i></i><span>#526b89</span></button>
-        <div class="popover" role="dialog" aria-label="Seletor avançado de cores" hidden>
+        <div class="popover" popover="manual" role="dialog" aria-label="Seletor avançado de cores">
           <div class="spectrum" tabindex="0" aria-label="Saturação e luminosidade"><i class="thumb"></i></div>
           <div class="range-row"><label>Matiz</label><input class="hue" type="range" min="0" max="360" value="210"></div>
           <div class="range-row"><label>Opacidade</label><input class="alpha" type="range" min="0" max="100" value="100"></div>
@@ -630,7 +630,19 @@ if (!customElements.get("nexus-color-picker")) {
           <select class="texture" aria-label="Textura" hidden><option value="solid">Cor sólida</option><option value="diagonal">Listras diagonais</option><option value="stripes">Faixas</option><option value="dots">Pontos</option><option value="grid">Grade</option></select>
         </div>`;
       const q = selector => this.shadowRoot.querySelector(selector);
-      q(".trigger").addEventListener("click", () => { const panel=q(".popover"); panel.hidden=!panel.hidden; q(".trigger").setAttribute("aria-expanded",String(!panel.hidden)); });
+      q(".trigger").addEventListener("click", () => {
+        const panel = q(".popover");
+        if (panel.matches(":popover-open")) panel.hidePopover();
+        else {
+          const rect = this.getBoundingClientRect(), width = Math.min(292, window.innerWidth - 28), estimatedHeight = Math.min(390, window.innerHeight - 24);
+          const left = Math.max(14, Math.min(rect.left, window.innerWidth - width - 14));
+          const below = rect.bottom + 7;
+          const top = below + estimatedHeight <= window.innerHeight - 10 ? below : Math.max(10, rect.top - estimatedHeight - 7);
+          panel.style.left = `${left}px`; panel.style.top = `${top}px`;
+          panel.showPopover();
+        }
+        q(".trigger").setAttribute("aria-expanded", String(panel.matches(":popover-open")));
+      });
       q(".spectrum").addEventListener("pointerdown", event => { q(".spectrum").setPointerCapture?.(event.pointerId); this._pickSV(event); const move=e=>this._pickSV(e); const up=()=>{q(".spectrum").removeEventListener("pointermove",move);q(".spectrum").removeEventListener("pointerup",up);this._emit("change");}; q(".spectrum").addEventListener("pointermove",move); q(".spectrum").addEventListener("pointerup",up,{once:true}); q(".spectrum").addEventListener("pointercancel",up,{once:true}); });
       q(".hue").addEventListener("input", event=>{this._h=Number(event.target.value);this._sync();this._emit("input");});
       q(".hue").addEventListener("change",()=>this._emit("change"));
@@ -641,7 +653,7 @@ if (!customElements.get("nexus-color-picker")) {
       this.shadowRoot.addEventListener("keydown", event=>{if(event.key==="Escape")this._close();});
       if(this.hasAttribute("allow-texture"))q(".texture").hidden=false;
     }
-    _close(){const panel=this.shadowRoot.querySelector(".popover");if(panel&&!panel.hidden){panel.hidden=true;this.shadowRoot.querySelector(".trigger")?.setAttribute("aria-expanded","false");}}
+    _close(){const panel=this.shadowRoot.querySelector(".popover");if(panel?.matches(":popover-open")){panel.hidePopover();this.shadowRoot.querySelector(".trigger")?.setAttribute("aria-expanded","false");}}
     _pickSV(event){const rect=this.shadowRoot.querySelector(".spectrum").getBoundingClientRect();this._s=Math.min(1,Math.max(0,(event.clientX-rect.left)/rect.width));this._v=1-Math.min(1,Math.max(0,(event.clientY-rect.top)/rect.height));this._sync();this._emit("input");}
     _readValue(value){let raw=String(value||"").trim();if(!raw)return false;const pattern=raw.includes("repeating-linear-gradient")? (raw.includes("45deg")?"diagonal":"stripes"):raw.includes("radial-gradient")?"dots":raw.includes("linear-gradient")?"grid":"solid";if(pattern!=="solid"){this._texture=pattern;const match=raw.match(/#[0-9a-f]{6,8}/i);raw=match?.[0]||"#526b89";}else this._texture="solid";
       let r,g,b,a=1;const hex=raw.match(/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i);if(hex){let h=hex[1];if(h.length===3)h=[...h].map(c=>c+c).join("");if(h.length===8)a=parseInt(h.slice(6),16)/255; r=parseInt(h.slice(0,2),16);g=parseInt(h.slice(2,4),16);b=parseInt(h.slice(4,6),16);}else{const rgb=raw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/i);if(!rgb)return false;r=+rgb[1];g=+rgb[2];b=+rgb[3];a=rgb[4]===undefined?1:Number(rgb[4]);}
