@@ -2397,6 +2397,95 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._refreshBoundComponents();
 
   }
+  _syncTextToolbar(inspector, component) {
+    if (!inspector) return;
+    const target = this._textStyleTarget === "heading" ? "heading" : "content";
+    const style = component?.[target + "Style"] ?? {};
+    inspector.querySelectorAll("[data-text-style-target]").forEach(button => button.classList.toggle("active", button.dataset.textStyleTarget === target));
+    const commands = inspector.querySelectorAll("[data-text-style-command]");
+    for (const button of commands) {
+      const command = button.dataset.textStyleCommand;
+      let active = false;
+      if (command === "bold") active = Number(style.fontWeight ?? (target === "heading" ? component?.headingFontWeight : component?.fontWeight) ?? 400) >= 600;
+      else if (command === "italic") active = (style.fontStyle ?? component?.fontStyle) === "italic";
+      else if (command === "underline") active = (style.textDecoration ?? "none") === "underline";
+      else if (command.startsWith("align-")) active = (style.textAlign ?? "left") === command.slice(6);
+      else if (command === "transform") active = (style.textTransform ?? "none") !== "none";
+      button.setAttribute("aria-pressed", String(active));
+      button.classList.toggle("is-active", active);
+    }
+    const size = inspector.querySelector("[data-text-style-size]");
+    if (size) size.value = style.fontSize ?? (target === "heading" ? component?.headingFontSize : component?.fontSize) ?? this._currentLayout?.fontSize ?? 13;
+    const color = inspector.querySelector("[data-text-style-color]");
+    if (color) color.value = style.color ?? "#e7edf5";
+    for (const field of inspector.querySelectorAll("[data-text-style-field]")) field.value = style[field.dataset.textStyleField] ?? (field.dataset.textStyleField === "lineHeight" ? 1.35 : 0);
+    inspector.querySelector("[data-text-style-font-menu]")?.setAttribute("hidden", "");
+  }
+
+  _applyComponentTextStyles(node, component) {
+    if (!node || !component) return;
+    const apply = (element, style, fallback = {}) => {
+      if (!element) return;
+      const values = {
+        "font-size": style.fontSize ?? fallback.fontSize,
+        "font-family": style.fontFamily ?? fallback.fontFamily,
+        color: style.color,
+        "text-align": style.textAlign,
+        "font-weight": style.fontWeight,
+        "font-style": style.fontStyle,
+        "text-decoration": style.textDecoration,
+        "text-transform": style.textTransform,
+        "letter-spacing": style.letterSpacing,
+        "line-height": style.lineHeight
+      };
+      for (const [property, value] of Object.entries(values)) element.style.setProperty(property, value === undefined || value === null || value === "" ? "" : (property === "font-size" || property === "letter-spacing" ? value + "px" : String(value)));
+    };
+    apply(node.querySelector(".nexus-component-content"), component.contentStyle ?? {}, { fontSize: component.fontSize, fontFamily: component.fontFamily });
+    apply(node.querySelector(".nexus-component-heading"), component.headingStyle ?? {}, { fontSize: component.headingFontSize, fontFamily: component.headingFontFamily });
+  }
+
+  async _setComponentTextStyle(componentId, target, key, value) {
+    if (!["content", "heading"].includes(target)) return;
+    const allowed = ["fontSize","fontFamily","color","textAlign","fontWeight","fontStyle","textDecoration","textTransform","letterSpacing","lineHeight"];
+    if (!allowed.includes(key)) return;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    const component = layout?.components?.find(item => item.id === componentId);
+    if (!component) return;
+    let normalized = value;
+    if (key === "fontSize") normalized = clamp(Number(value) || 13, 7, 48);
+    if (key === "fontFamily" && !["Inter","Arial","Georgia","Verdana","monospace"].includes(value)) return;
+    if (key === "color" && !/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(String(value))) return;
+    if (key === "textAlign" && !["left","center","right","justify"].includes(value)) return;
+    if (key === "fontWeight" && !["400","500","600","700","800"].includes(String(value))) return;
+    if (key === "fontStyle" && !["normal","italic"].includes(value)) return;
+    if (key === "textDecoration" && !["none","underline"].includes(value)) return;
+    if (key === "textTransform" && !["none","uppercase","lowercase","capitalize"].includes(value)) return;
+    if (key === "letterSpacing") normalized = clamp(Number(value) || 0, -2, 12);
+    if (key === "lineHeight") normalized = clamp(Number(value) || 1.35, 0.8, 2.4);
+    this._captureHistory();
+    component[target + "Style"] ??= {};
+    component[target + "Style"][key] = normalized;
+    this._currentLayout = layout;
+    await this._writeLayouts(layouts, active);
+    const node = this.element?.querySelector?.(".nexus-component[data-id=\"" + CSS.escape(componentId) + "\"]");
+    this._applyComponentTextStyles(node, component);
+    const inspector = this._nexusPanelWindows?.get("component")?.panel?.querySelector?.(".nexus-component-inspector");
+    this._syncTextToolbar(inspector, component);
+  }
+
+  async _setProficiencyLevel(componentId, level) {
+    const nextLevel = clamp(Math.round(Number(level) || 0), 0, 3);
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
+    if (!component || component.actionType !== "proficiency") return;
+    this._captureHistory();
+    component.proficiencyLevel = nextLevel;
+    await this._writeLayouts(layouts, active);
+    if (component.actionPath) await this._updateSystemValue({ dataset: { systemPath: component.actionPath }, type: "number", value: String(nextLevel) });
+    else {
+      const card = this.element?.querySelector?.(".nexus-component[data-id=\"" + CSS.escape(componentId) + "\"]");
+      card?.querySelectorAll("[data-proficiency-level]").forEach(button => { const active = Number(button.dataset.proficiencyLevel) === nextLevel; button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); });
+    }
+  }
   async _rollComponent(componentId) {
     const layouts = await this._readLayouts();
     const active = this._activeLayoutId();
