@@ -175,11 +175,11 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.7/);
+assert.match(readme, /Versão 1\.0\.0\.8/);
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
-assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
+assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider","toggle-component"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
 assert.match(sheet, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
 assert.match(sheet, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
