@@ -4901,14 +4901,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     canvas.addEventListener("keydown", event => {
       if (sheet._mode !== "play" || !["Enter", " "].includes(event.key)) return;
       if (event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
-      const card = event.target.closest(".nexus-component[data-action-type=\"roll\"], .nexus-component[data-action-type=\"toggle-component\"]");
+      const card = event.target.closest(".nexus-component[data-has-click-interaction=\"true\"]");
       if (!card) return;
       event.preventDefault();
       sheet._runComponentAction(card.dataset.id);
     });
     canvas.addEventListener("click", event => {
       if (sheet._mode !== "play" || performance.now() < (sheet._suppressComponentClickUntil ?? 0)) return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-action-type=\"roll\"], .nexus-component[data-action-type=\"toggle-component\"]") : null;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-has-click-interaction=\"true\"]") : null;
       if (!card || !canvas.contains(card) || event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
       event.preventDefault();
       sheet._runComponentAction(card.dataset.id);
