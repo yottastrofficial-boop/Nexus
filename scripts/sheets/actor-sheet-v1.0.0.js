@@ -322,6 +322,7 @@ const NATIVE_PROPERTY_BASE = [
 ];
 const nativePropertyDefinitionCache = new WeakMap();
 const EMPTY_NATIVE_PROPERTY_LIST = Object.freeze([]);
+const LEGACY_SKILL_PATHS = new Set(NEXUS_SKILLS.map(skill => `skills.${skill.legacyKey}`));
 const invalidateNativePropertyCache = actor => { if (actor && typeof actor === "object") nativePropertyDefinitionCache.delete(actor); };
 const getNativePropertyDefinitions = actor => {
   if (!actor || typeof actor !== "object") return NATIVE_PROPERTY_BASE.map(base => ({ ...base, defaultKey:base.key, defaultLabel:base.label, origin:"native", legacyKeys:[] }));
@@ -336,7 +337,7 @@ const getNativePropertyDefinitions = actor => {
   });
   const coreIds = new Set(value.map(item => item.targetPath));
   for (const path of collectPropertyPaths(actor)) {
-    if ([...coreIds].some(core => path === core || path.startsWith(`${core}.`)) || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+    if ([...coreIds].some(core => path === core || path.startsWith(`${core}.`)) || [...LEGACY_SKILL_PATHS].some(legacyPath => path === legacyPath || path.startsWith(`${legacyPath}.`)) || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
@@ -883,11 +884,24 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const skill of NEXUS_SKILLS) {
       const current = system.skills?.[skill.key];
       const legacy = system.skills?.[skill.legacyKey];
-      if (!current || current.proficientLevel === undefined || current.proficientLevel === null || current.proficientLevel === "") {
-        const stored = current?.proficiency ?? current?.proficient ?? legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient ?? 0;
-        const level = stored === true ? 1 : stored === false || stored === null || stored === undefined || stored === "" ? 0 : Number(stored);
+      const hasCanonicalLevel = current?.proficientLevel !== undefined
+        && current?.proficientLevel !== null
+        && current?.proficientLevel !== "";
+      if (!hasCanonicalLevel) {
+        const stored = current?.proficiency ?? current?.proficient
+          ?? legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient ?? 0;
+        const level = stored === true ? 1
+          : stored === false || stored === null || stored === undefined || stored === "" ? 0
+          : Number(stored);
         updates["system.skills." + skill.key + ".proficientLevel"] = Number.isFinite(level) ? level : 0;
       }
+      if (current && Object.hasOwn(current, "proficiency")) {
+        updates["system.skills." + skill.key + ".-=proficiency"] = null;
+      }
+      if (current && Object.hasOwn(current, "proficient")) {
+        updates["system.skills." + skill.key + ".-=proficient"] = null;
+      }
+      if (legacy) updates["system.skills.-=" + skill.legacyKey] = null;
     }
     try {
       if (Object.keys(updates).length) await this.actor.update(updates);
