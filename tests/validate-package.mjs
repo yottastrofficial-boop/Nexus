@@ -10,12 +10,13 @@ const exists = async file => access(path.join(root, file));
 const manifest = JSON.parse(await read("system.json"));
 const sheet = await read("scripts/sheets/actor-sheet-v1.0.0.js");
 const template = await read("templates/actors/actor-sheet.hbs");
+const skills = await read("scripts/core/skills.js");
 const css = await read("styles/nexus-v1.0.0.css");
 const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.7", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.8", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -246,3 +247,16 @@ assert.match(sheet, /tokenMatch\?\.\[1\]/, "O filtro de fórmula deve considerar
 assert.match(sheet, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
 assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
+
+assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
+assert.match(sheet, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
+assert.match(sheet, /async _toggleSkillProficiency\(skillKey\)/, "A proficiência binária deve ser alternável");
+assert.match(skills, /key: "atletismo"/);
+assert.match(skills, /key: "instinto"/);
+assert.equal((skills.match(/key: "[a-z]+", name:/g) ?? []).length, 18, "O catálogo deve conter 18 perícias");
+assert.match(template, /data-skill-roll/);
+assert.match(template, /data-skill-proficiency/);
+assert.match(template, /toggle-component/);
+assert.match(sheet, /_toggleTargetComponent/);
+assert.match(sheet, /setResourceFromTrack/);
+console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");

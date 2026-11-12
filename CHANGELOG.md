@@ -1,3 +1,23 @@
+## 1.0.0.8
+
+### Regras-base e ficha
+- Adicionados os seis atributos individuais (FOR, DES, SAB, INT, CAR e VON), preservando os três núcleos Corpo, Mente e Alma já existentes.
+- Criado catálogo canônico das 18 perícias do Capítulo 7 de REGRAS NEXUS, com suas descrições e atributos associados.
+- O grupo de perícias calcula o modificador com atributo relevante e MB somente quando a perícia está marcada como proficiente.
+- MB calculado conforme o livro: nível dividido por dois, arredondado para cima, limitado a +5; cards vinculados a combat.mb exibem o valor derivado.
+- Cada linha de perícia permite realizar 1d20 + modificador e alternar proficiência binária; as alterações ficam salvas no Actor.
+
+### Qualidade de vida e interação
+- Adicionada a ação de card “Alternar visibilidade de outro card”, com referência por ID estável, persistência e suporte a teclado.
+- Barras de recursos com ação de slider aceitam clique e arraste diretamente sobre a barra, além do controle deslizante.
+- Ajustes de acessibilidade e responsividade para as linhas de perícia, com botões focáveis e rótulos acessíveis.
+- Imagens em cards e prévias recebem limites de dimensão e preservação de proporção intrínseca como padrão.
+- Mantidos os três núcleos existentes e os layouts antigos; os novos caminhos de atributos e perícias são aditivos.
+
+### Validação
+- Atualizados os testes estáticos para o catálogo de 18 perícias, cálculo de proficiência, ações de cards e interação direta com barras.
+- A validação dentro do Foundry VTT 14 ainda precisa ser realizada após a instalação.
+
 ## 1.0.0.7
 
 ### Inspector, ações e fórmulas

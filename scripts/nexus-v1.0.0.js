@@ -1,7 +1,8 @@
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
+import { NEXUS_SKILLS } from "./core/skills.js";
 
 Hooks.once("init", () => {
-  console.log("NEXUS | Inicializando sistema 1.0.0.4");
+  console.log("NEXUS | Inicializando sistema 1.0.0.8");
 
   const { DocumentSheetConfig } = foundry.applications.apps;
   DocumentSheetConfig.registerSheet(foundry.documents.Actor, "nexus", NexusActorSheet, {
@@ -12,7 +13,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log("NEXUS | Sistema 1.0.0.4 carregado. Ficha Canvas habilitada.");
+  console.log("NEXUS | Sistema 1.0.0.8 carregado. Ficha Canvas habilitada.");
 });
 
 const NEXUS_ACTOR_TYPES = ["player-character", "npc", "character"];
@@ -27,7 +28,8 @@ Hooks.on("preCreateActor", (actor) => {
       pm: { value: 0, max: 0 },
       pe: { value: 0, max: 0 }
     },
-    attributes: { body: 0, mind: 0, soul: 0 },
+    attributes: { body: 0, mind: 0, soul: 0, for: 0, des: 0, sab: 0, int: 0, car: 0, von: 0 },
+    skills: Object.fromEntries(NEXUS_SKILLS.map(skill => [skill.key, { proficient: false }])),
     combat: { defense: 10, movement: 6, desl: 0, ddr: 0, mb: 0 },
     identity: { lineage: "", legacy: "", level: 1 },
     notes: ""

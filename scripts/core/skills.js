@@ -8,7 +8,7 @@ export const NEXUS_SKILLS = Object.freeze([
   { key: "combate", name: "Combate", attributeKey: "for", attribute: "FOR", attributeName: "Força", description: "Uso eficaz de força bruta em confrontos, golpes diretos, disputa corporal e impacto." },
   { key: "acrobacia", name: "Acrobacia", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Equilíbrio, cambalhotas, quedas controladas, manobras ágeis e movimentos precisos." },
   { key: "furtividade", name: "Furtividade", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Mover-se sem ser percebido, esconder-se, evitar rastreamento ou reduzir ruídos." },
-  { key: "astucia", name: "Astúcia", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Abrir fechaduras, ladinagem, desarmar armadilhas e manipular mecanismos." },
+  { key: "astucia", name: "Astúcia", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Abrir fechaduras, ladinagem, desarmar armadilhas, manipular mecanismos simples ou complexos." },
   { key: "natureza", name: "Natureza", attributeKey: "sab", attribute: "SAB", attributeName: "Sabedoria", description: "Reconhecer fauna, flora, terrenos, climas e fenômenos naturais ou mágicos ambientais." },
   { key: "percepcao", name: "Percepção", attributeKey: "sab", attribute: "SAB", attributeName: "Sabedoria", description: "Notar detalhes, armadilhas, sons, movimentos ou mudanças no ambiente ativamente." },
   { key: "sobrevivencia", name: "Sobrevivência", attributeKey: "sab", attribute: "SAB", attributeName: "Sabedoria", description: "Caçar, rastrear, encontrar abrigo, comida e água em ambientes naturais." },
