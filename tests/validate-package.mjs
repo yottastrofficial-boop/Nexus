@@ -3,6 +3,8 @@ import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
+import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
+import { getTriggeredActions, executeTriggeredActions } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -14,6 +16,7 @@ const skills = await read("scripts/core/skills.js");
 const css = await read("styles/nexus-v1.0.0.css");
 const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
+const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.8", "Versão do manifesto incorreta");
@@ -251,13 +254,60 @@ assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar par
 assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
 assert.match(sheet, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
-assert.match(sheet, /async _toggleSkillProficiency\(skillKey\)/, "A proficiência binária deve ser alternável");
-assert.match(skills, /key: "atletismo"/);
-assert.match(skills, /key: "instinto"/);
-assert.equal((skills.match(/key: "[a-z]+", name:/g) ?? []).length, 18, "O catálogo deve conter 18 perícias");
+assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\)/, "A proficiência deve aceitar níveis numéricos assinados");
+assert.match(skills, /key: "athletics", legacyKey: "atletismo"/);
+assert.match(skills, /key: "instinct", legacyKey: "instinto"/);
+assert.equal(NEXUS_SKILLS.length, 18, "O catálogo deve conter 18 perícias");
+assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves técnicas das perícias devem ser únicas");
 assert.match(template, /data-skill-roll/);
-assert.match(template, /data-skill-proficiency/);
+assert.match(template, /data-skill-proficient-level/);
+assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
+assert.match(sheet, /data-has-click-interaction/);
+assert.match(interactions, /trigger: \{ event \}/);
+assert.match(interactions, /actions\.map/);
 assert.match(template, /toggle-component/);
 assert.match(sheet, /_toggleTargetComponent/);
 assert.match(sheet, /setResourceFromTrack/);
 console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");
+
+
+// Signed proficiency levels and negative numeric properties.
+const negativeSkillActor = {
+  system: {
+    identity: { level: 4 },
+    attributes: { for: -5, des: 0 },
+    skills: {
+      athletics: { proficientLevel: 0 },
+      stealth: { proficientLevel: -3 },
+      perception: { proficientLevel: 2 }
+    }
+  }
+};
+assert.equal(getNexusSkillModifier(negativeSkillActor, "athletics").modifier, -5, "Atributos negativos devem permanecer negativos");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, -2, "Proficiência negativa deve inverter o bônus de proficiência");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Qualquer nível positivo deve conceder proficiência");
+const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficientLevel, 1, "Dados antigos devem ser lidos durante a migração");
+assert.match(sheet, /if \(kind === "number"\) \{ value = Number\(value\); if \(!Number\.isFinite\(value\)\) return; \}/, "Propriedades numéricas devem aceitar qualquer número finito, inclusive negativos");
+
+// Trigger -> Action -> Configuration pipeline.
+const legacyRollActions = getTriggeredActions({ actionType: "roll", rollFormula: "1d20 + 3" }, "click");
+assert.equal(legacyRollActions.length, 1);
+assert.equal(legacyRollActions[0].type, "roll");
+assert.equal(legacyRollActions[0].config.formula, "1d20 + 3");
+const executedActions = [];
+await executeTriggeredActions({
+  interactions: [{
+    id: "test-click",
+    trigger: { event: "click" },
+    actions: [
+      { type: "toggle", config: { targetId: "target-1" } },
+      { type: "roll", config: { formula: "1d20 + @DES" } }
+    ]
+  }]
+}, "click", async action => executedActions.push(action.type));
+assert.deepEqual(executedActions, ["toggle", "roll"], "As ações devem executar em sequência");
+assert.equal(getTriggeredActions({
+  interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
+}, "click").length, 0, "Um trigger diferente não deve executar no clique");
+console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
