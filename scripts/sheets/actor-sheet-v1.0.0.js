@@ -843,6 +843,28 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return context;
   }
 
+  async _ensureNexusRulesData() {
+    if (this._nexusRulesDataReady) return false;
+    const system = this.actor.system ?? {};
+    const updates = {};
+    for (const key of ["for", "des", "sab", "int", "car", "von"]) {
+      const value = system.attributes?.[key];
+      if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
+    }
+    for (const skill of NEXUS_SKILLS) {
+      const data = system.skills?.[skill.key];
+      if (!data || (data.proficient === undefined && data.proficiency === undefined)) updates["system.skills." + skill.key + ".proficient"] = false;
+    }
+    try {
+      if (Object.keys(updates).length) await this.actor.update(updates);
+      this._nexusRulesDataReady = true;
+      return Object.keys(updates).length > 0;
+    } catch (error) {
+      console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
+      return false;
+    }
+  }
+
   async _migrateLegacyActorData() {
     if (this._nexusMigrationCompleted) return;
     if (this._nexusMigrationPromise) return this._nexusMigrationPromise;
@@ -1056,6 +1078,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (migrated) {
       // The first render was prepared from the legacy snapshot. Refresh once
       // after migration so moved alias values appear without requiring a reopen.
+      queueMicrotask(() => this.render({ force: true }));
+      return;
+    }
+    const rulesDataMigrated = await this._ensureNexusRulesData();
+    if (rulesDataMigrated) {
       queueMicrotask(() => this.render({ force: true }));
       return;
     }

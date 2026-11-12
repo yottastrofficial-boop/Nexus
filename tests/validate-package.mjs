@@ -249,6 +249,7 @@ assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movi
 assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
 
 assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
+assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
 assert.match(sheet, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
 assert.match(sheet, /async _toggleSkillProficiency\(skillKey\)/, "A proficiência binária deve ser alternável");
 assert.match(skills, /key: "atletismo"/);

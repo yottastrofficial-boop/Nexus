@@ -13,6 +13,7 @@
 - Ajustes de acessibilidade e responsividade para as linhas de perícia, com botões focáveis e rótulos acessíveis.
 - Imagens em cards e prévias recebem limites de dimensão e preservação de proporção intrínseca como padrão.
 - Mantidos os três núcleos existentes e os layouts antigos; os novos caminhos de atributos e perícias são aditivos.
+- Ao abrir uma ficha antiga, campos ausentes dos seis atributos e das 18 perícias são inicializados sem sobrescrever valores existentes.
 
 ### Validação
 - Atualizados os testes estáticos para o catálogo de 18 perícias, cálculo de proficiência, ações de cards e interação direta com barras.
