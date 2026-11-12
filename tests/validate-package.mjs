@@ -19,11 +19,11 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.8", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.9", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.8\/nexus\.zip$/);
+assert.match(manifest.download, /releases\/download\/v1\.0\.0\.9\/nexus\.zip$/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -178,7 +178,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.8/);
+assert.match(readme, /Versão 1\.0\.0\.9/);
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -253,6 +253,10 @@ assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar par
 
 assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
+assert.match(sheet, /system\.skills\.\-=\" \+ skill\.legacyKey|system\.skills\.\-=\" \+ skill\.legacyKey/, "A migração deve remover a chave legada após consolidar o dado canônico");
+assert.match(sheet, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
+assert.doesNotMatch(template, /Digite @ para consultar|Os quatro nomes são rótulos configuráveis|Exibe uma barra arrastável|Ao clicar neste card no modo de jogo/, "Dicas instrutivas do Inspector devem ser removidas");
+assert.doesNotMatch(template, /\splaceholder=|\stitle=/, "Placeholders e tooltips instrutivos não devem permanecer na ficha");
 assert.match(sheet, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
 assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\)/, "A proficiência deve aceitar níveis numéricos assinados");
 assert.match(skills, /key: "athletics", legacyKey: "atletismo"/);
