@@ -2,6 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
+import { executeTriggeredActions, getTriggeredActions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -880,8 +881,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
     }
     for (const skill of NEXUS_SKILLS) {
-      const data = system.skills?.[skill.key];
-      if (!data || (data.proficient === undefined && data.proficiency === undefined)) updates["system.skills." + skill.key + ".proficient"] = false;
+      const current = system.skills?.[skill.key];
+      const legacy = system.skills?.[skill.legacyKey];
+      if (!current || current.proficientLevel === undefined || current.proficientLevel === null || current.proficientLevel === "") {
+        const stored = current?.proficiency ?? current?.proficient ?? legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient ?? 0;
+        const level = stored === true ? 1 : stored === false || stored === null || stored === undefined || stored === "" ? 0 : Number(stored);
+        updates["system.skills." + skill.key + ".proficientLevel"] = Number.isFinite(level) ? level : 0;
+      }
     }
     try {
       if (Object.keys(updates).length) await this.actor.update(updates);
@@ -1013,6 +1019,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const headingLabel = String(component.customLabel ?? "").trim();
       return {
         ...component,
+        hasClickInteraction: getTriggeredActions(component, "click").length > 0,
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3),
         proficiencyStages: (component.proficiencyLabels ?? ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
@@ -1069,7 +1076,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
     const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
-    return { ...component, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover","fill","none"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
+    return { ...component, hasClickInteraction: getTriggeredActions(component, "click").length > 0, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover","fill","none"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
   }
 
   async _onRender(context, options) {
@@ -1276,9 +1283,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       event.preventDefault(); event.stopPropagation();
       return this._rollSkill(event.currentTarget.dataset.skillRoll);
     });
-    html.find("[data-skill-proficiency]").on("click", event => {
-      event.preventDefault(); event.stopPropagation();
-      return this._toggleSkillProficiency(event.currentTarget.dataset.skillProficiency);
+    html.find("[data-skill-proficient-level]").on("change", event => {
+      const input = event.currentTarget;
+      return this._setSkillProficientLevel(input.dataset.skillProficientLevel, input.value);
     });
     html.find("[data-proficiency-level]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
@@ -2837,14 +2844,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _rollSkill(skillKey) {
     const result = getNexusSkillModifier(this.actor, skillKey);
     if (!result) return;
-    const { skill, proficient, modifier, baseModifier } = result;
+    const { skill, proficient, opposed, proficientLevel, modifier, baseModifier } = result;
     const formula = modifier < 0 ? "1d20 - " + Math.abs(modifier) : "1d20 + " + modifier;
     try {
       const roll = new Roll(formula);
       await roll.evaluate({ async: true });
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: skill.name + " (" + skill.attribute + ") · " + (proficient ? "Proficiente · MB +" + baseModifier : "Sem proficiência") + " · Modificador " + (modifier >= 0 ? "+" : "") + modifier
+        flavor: skill.name + " (" + skill.attribute + ") · " + (proficient ? "Proficiente · MB +" + baseModifier : opposed ? "Deficiência · MB -" + baseModifier : "Sem proficiência") + " · Nível " + proficientLevel + " · Modificador " + (modifier >= 0 ? "+" : "") + modifier
       });
     } catch (error) {
       console.error("NEXUS | Falha ao rolar perícia", error);
@@ -2852,19 +2859,21 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
   }
 
-  async _toggleSkillProficiency(skillKey) {
+  async _setSkillProficientLevel(skillKey, rawLevel) {
     if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) return;
-    const current = this.actor.system?.skills?.[skillKey]?.proficient === true;
-    await this.actor.update({ ["system.skills." + skillKey + ".proficient"]: !current });
+    const level = Number(rawLevel);
+    if (!Number.isFinite(level)) return;
+    await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: Math.trunc(level) });
     await this.render({ force: true });
   }
 
-  async _toggleTargetComponent(componentId) {
+  async _toggleTargetComponent(componentId, config = {}) {
     const layouts = await this._readLayouts();
     const active = this._activeLayoutId();
     const source = layouts[active]?.components?.find(item => item.id === componentId);
-    const target = layouts[active]?.components?.find(item => item.id === String(source?.actionTargetId ?? ""));
-    if (!source || source.actionType !== "toggle-component" || !target || target.id === source.id) {
+    const targetId = String(config.targetId ?? source?.actionTargetId ?? "");
+    const target = layouts[active]?.components?.find(item => item.id === targetId);
+    if (!source || (source.actionType !== "toggle-component" && !config.targetId) || !target || target.id === source.id) {
       globalThis.ui?.notifications?.warn?.("Configure um card de destino válido nas propriedades de interação.");
       return;
     }
@@ -2876,17 +2885,21 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   _runComponentAction(componentId) {
     const component = this._currentLayout?.components?.find(item => item.id === componentId);
-    if (component?.actionType === "roll") return this._rollComponent(componentId);
-    if (component?.actionType === "toggle-component") return this._toggleTargetComponent(componentId);
+    if (!component) return;
+    return executeTriggeredActions(component, "click", async action => {
+      if (action.type === "roll") return this._rollComponent(componentId, action.config);
+      if (action.type === "toggle") return this._toggleTargetComponent(componentId, action.config);
+      return undefined;
+    });
   }
 
-  async _rollComponent(componentId) {
+  async _rollComponent(componentId, config = {}) {
     const layouts = await this._readLayouts();
     const active = this._activeLayoutId();
     const component = layouts[active]?.components?.find(item => item.id === componentId);
-    if (!component || component.actionType !== "roll") return;
+    if (!component || (component.actionType !== "roll" && !config.formula)) return;
 
-    let formula = String(component.rollFormula ?? "").trim();
+    let formula = String(config.formula ?? component.rollFormula ?? "").trim();
     const boundPath = String(component.dataPath ?? "").replace(/^actor\./, "").replace(/^system\./, "");
     if (!formula && boundPath.endsWith(".name")) {
       const sibling = resolveNexusBinding(this.actor, boundPath.slice(0, -5) + ".roll");
