@@ -52,7 +52,7 @@ A propriedade derivada `proficient` pode ser utilizada pela interface para exibi
 
 ### Compatibilidade
 
-As chaves técnicas das 18 perícias passaram a utilizar inglês, mantendo os nomes exibidos em português. As chaves antigas em português continuam sendo reconhecidas durante a transição. A migração cria `proficientLevel` na chave nova e preserva os dados antigos, sem apagá-los.
+As chaves técnicas das 18 perícias utilizam inglês, mantendo os nomes exibidos em português. Durante a migração, o NEXUS transfere o valor para `proficientLevel` na chave canônica e remove a chave antiga em português no mesmo update do Actor. Se a migração falhar, a leitura de compatibilidade continua reconhecendo os dados antigos até uma nova tentativa.
 
 ## 2. Interações de componentes
 
@@ -128,7 +128,7 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 - Chaves técnicas em inglês para as 18 perícias.
 - Campo numérico `proficientLevel`, com valores positivos, zero e negativos.
-- Migração aditiva dos campos antigos de proficiência.
+- Migração dos campos antigos para a chave canônica, com remoção segura das chaves legadas após preparar o valor novo.
 - Preservação de modificadores e valores negativos nas rolagens.
 - Núcleo de normalização e despacho de interações por trigger.
 - Compatibilidade de leitura para ações antigas de rolagem e alternância.
@@ -138,7 +138,7 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 1. Criar o `PropertyRegistry` e o contrato completo de metadados.
 2. Migrar as propriedades existentes para identificadores e chaves canônicas sem quebrar vínculos.
-3. Substituir o seletor rígido de ação por um editor de interações com trigger, lista de ações e configuração contextual.
+3. Substituir o seletor rígido de ação por um editor de interações com trigger, lista de ações reordenável e configuração contextual.
 4. Consolidar o `Roll Dialog` universal.
 5. Implementar o mecanismo de cálculos e dependências opcionais.
 6. Evoluir a interface visual de criação de comportamentos e, depois, a API avançada segura.
