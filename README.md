@@ -119,7 +119,7 @@ As interações seguem o contrato Trigger → Action → Configuration. A implem
 
 ## Estado e validação
 
-A versão 1.0.0.9 está publicada na branch main. As verificações estáticas cobrem JavaScript, JSON, CSS, templates e integridade do pacote. O comportamento visual e interativo desta atualização ainda exige validação em uma instalação real do Foundry VTT 14.
+A versão 1.0.0.9 está preparada na branch main. A publicação depende da aprovação das verificações automatizadas de JavaScript, JSON, CSS, templates e integridade do pacote. O comportamento visual e interativo desta atualização ainda exige validação em uma instalação real do Foundry VTT 14.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
