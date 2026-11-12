@@ -1,3 +1,20 @@
+## 1.0.0.9
+
+### Migração de perícias e propriedades
+- A migração consolida os dados de perícias nas chaves técnicas canônicas em inglês e remove as chaves antigas em português somente após preparar o valor canônico no mesmo update do Actor.
+- Campos legados `proficiency` e `proficient` são convertidos para `proficientLevel`; o campo canônico já existente é preservado.
+- O scanner de propriedades nativas ignora caminhos legados de perícias, impedindo que sejam reapresentados como propriedades genéricas duplicadas.
+- A leitura de compatibilidade permanece disponível caso a migração não possa ser concluída; a ficha tenta novamente quando for aberta.
+
+### Interface
+- Removidos textos de ajuda, exemplos em placeholders e tooltips instrutivos do template da ficha.
+- Mantida a funcionalidade de aliases em fórmulas, sem exibir instruções sobre sua utilização.
+
+### Escopo e validação
+- O editor visual completo de Trigger → Actions ainda não faz parte desta atualização; o Inspector antigo permanece temporariamente enquanto a próxima etapa substitui o seletor rígido por configurações contextuais.
+- Adicionadas regressões estáticas para a migração canônica, exclusão de caminhos legados e ausência de dicas instrutivas.
+- A validação funcional em instalação real do Foundry VTT 14 continua necessária.
+
 ## Próxima atualização — em desenvolvimento
 
 ### Propriedades e perícias
