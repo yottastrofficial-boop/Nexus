@@ -253,7 +253,7 @@ assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar par
 
 assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
-assert.match(sheet, /system\.skills\.\-=\" \+ skill\.legacyKey|system\.skills\.\-=\" \+ skill\.legacyKey/, "A migração deve remover a chave legada após consolidar o dado canônico");
+assert.match(sheet, /system\.skills\.\-=\" \+ skill\.legacyKey/, "A migração deve remover a chave legada após consolidar o dado canônico");
 assert.match(sheet, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
 assert.doesNotMatch(template, /Digite @ para consultar|Os quatro nomes são rótulos configuráveis|Exibe uma barra arrastável|Ao clicar neste card no modo de jogo/, "Dicas instrutivas do Inspector devem ser removidas");
 assert.doesNotMatch(template, /\splaceholder=|\stitle=/, "Placeholders e tooltips instrutivos não devem permanecer na ficha");
