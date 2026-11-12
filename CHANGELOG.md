@@ -1,3 +1,23 @@
+## Próxima atualização — em desenvolvimento
+
+### Propriedades e perícias
+- As chaves técnicas das 18 perícias passam a utilizar inglês, mantendo os nomes da interface em português.
+- Substituído o booleano persistido de proficiência por `proficientLevel`: zero representa ausência de proficiência, valores positivos representam proficiência e valores negativos aplicam o bônus de proficiência no sentido oposto.
+- A migração é aditiva: cria os novos campos nas chaves canônicas e preserva os dados antigos em português e os campos booleanos legados.
+- A ficha permite editar o nível numérico de proficiência, incluindo valores negativos.
+- Atributos e propriedades numéricas aceitam números negativos; limites só devem ser aplicados quando definidos pela regra ou pela propriedade.
+
+### Interações
+- Criado o núcleo de interações baseado em Trigger → Action → Configuration.
+- Um trigger pode executar várias ações em sequência, cada uma com sua própria configuração.
+- Cliques de componentes passam pelo novo executor, mantendo compatibilidade com ações antigas de rolagem e alternância.
+- Documentado o contrato inicial de propriedades, cálculos opcionais e interações em `docs/PROPERTY_AND_INTERACTION_SYSTEM.md`.
+
+### Escopo ainda não concluído
+- O editor visual completo para criar triggers e encadear/configurar ações ainda será desenvolvido.
+- O PropertyRegistry, o mecanismo de dependências de cálculo e o Roll Dialog universal continuam nas próximas etapas.
+- Testes funcionais em uma instalação real do Foundry VTT 14 continuam necessários.
+
 ## 1.0.0.8
 
 ### Regras-base e ficha
