@@ -180,7 +180,7 @@ assert.equal(depth, 0, "CSS contém bloco não fechado");
 
 assert.match(readme, /Versão 1\.0\.0\.8/);
 assert.match(changelog, /## 1\.0\.0\.7/);
-assert.match(sheet, /async _rollComponent\(componentId\)/, "Componentes devem executar rolagens configuradas");
+assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider","toggle-component"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
