@@ -262,7 +262,7 @@ assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves 
 assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
 assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
-assert.match(sheet, /data-has-click-interaction/);
+assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /trigger: \{ event \}/);
 assert.match(interactions, /actions\.map/);
 assert.match(template, /toggle-component/);
