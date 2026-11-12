@@ -107,6 +107,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 - [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)
 - [Arquitetura técnica e refatoração 1.0.0.4](docs/ARCHITECTURE.md)
+- [Contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md)
 - [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Histórico de alterações](CHANGELOG.md)
@@ -114,7 +115,7 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 ## Interações de componentes
 
-Componentes vinculados podem receber uma ação de rolagem. A fórmula pode ser configurada no Inspector ou lida da propriedade irmã `.roll` quando o vínculo termina em `.name`. A mecânica final de perícias ainda depende da fórmula oficial definida nos documentos de regras do NEXUS.
+As interações seguem o contrato Trigger → Action → Configuration. A implementação inicial preserva ações antigas de rolagem e alternância e permite a execução sequencial de ações configuradas. O editor visual completo de interações ainda está planejado. Consulte [o contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md).
 
 ## Estado e validação
 
