@@ -12,9 +12,7 @@ export const INTERACTION_ACTIONS = Object.freeze([
 
 const LEGACY_ACTIONS = Object.freeze({
   roll: { event: "click", type: "roll", config: component => ({ formula: component.rollFormula ?? "" }) },
-  "toggle-component": { event: "click", type: "toggle", config: component => ({ targetId: component.actionTargetId ?? "" }) },
-  proficiency: { event: "click", type: "update", config: component => ({ path: component.actionPath ?? "", source: "proficiency" }) },
-  "resource-slider": { event: "change", type: "update", config: component => ({ path: component.dataPath ?? "", source: "resource-slider" }) }
+  "toggle-component": { event: "click", type: "toggle", config: component => ({ targetId: component.actionTargetId ?? "" }) }
 });
 
 export function normalizeInteraction(interaction) {
