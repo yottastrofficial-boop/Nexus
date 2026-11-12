@@ -2897,7 +2897,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts = await this._readLayouts();
     const active = this._activeLayoutId();
     const component = layouts[active]?.components?.find(item => item.id === componentId);
-    if (!component || (component.actionType !== "roll" && !config.formula)) return;
+    if (!component || (component.actionType !== "roll" && !config.formula && !String(component.dataPath ?? "").endsWith(".name"))) return;
 
     let formula = String(config.formula ?? component.rollFormula ?? "").trim();
     const boundPath = String(component.dataPath ?? "").replace(/^actor\./, "").replace(/^system\./, "");
