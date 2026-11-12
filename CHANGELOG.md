@@ -15,7 +15,7 @@
 - Adicionadas regressões estáticas para a migração canônica, exclusão de caminhos legados e ausência de dicas instrutivas.
 - A validação funcional em instalação real do Foundry VTT 14 continua necessária.
 
-## Próxima atualização — em desenvolvimento
+## 1.0.0.8
 
 ### Propriedades e perícias
 - As chaves técnicas das 18 perícias passam a utilizar inglês, mantendo os nomes da interface em português.
