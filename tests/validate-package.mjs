@@ -264,7 +264,7 @@ assert.match(template, /data-skill-proficient-level/);
 assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /trigger: \{ event \}/);
-assert.match(interactions, /actions\.map/);
+assert.match(interactions, /interaction\.actions/);
 assert.match(template, /toggle-component/);
 assert.match(sheet, /_toggleTargetComponent/);
 assert.match(sheet, /setResourceFromTrack/);
