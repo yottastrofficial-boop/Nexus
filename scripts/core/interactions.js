@@ -168,7 +168,7 @@ const field=(type,label,value,options=[])=>{
   wrap.append(caption,input);return {wrap,input};
 };
 const bind=(input,scope,flowId,key,extra={})=>{input.dataset.interactionField="";input.dataset.interactionScope=scope;input.dataset.interactionId=flowId;input.dataset.interactionField=key;Object.entries(extra).forEach(([k,v])=>input.dataset[k]=String(v));};
-const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interaction-button",label);b.type="button";b.dataset.interactionAction=command;b.dataset.interactionId=flowId;Object.entries(extra).forEach(([k,v])=>b.dataset[k]=String(v));return b;};
+const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interaction-button",label);b.type="button";b.dataset.interactionAction=command;b.dataset.interactionId=flowId;const accessibleLabel=label==="↑"?"Mover ação para cima":label==="↓"?"Mover ação para baixo":label;b.setAttribute("aria-label",accessibleLabel);if(accessibleLabel!==label)b.title=accessibleLabel;Object.entries(extra).forEach(([k,v])=>b.dataset[k]=String(v));return b;};
 const events=[["click","Clique"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["interact","Interação encadeada"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
@@ -278,7 +278,9 @@ export function renderInteractionEditor(container,component,components=[],librar
       const row=el("details","nexus-interaction-action");row.open=true;
       const title=el("summary","nexus-interaction-action-title",(a.type==="roll"&&a.config.mode==="skill"?"Rolagem de perícia":actions.find(([key])=>key===a.type)?.[1]??"Ação")+" · "+(i+1));
       const tools=el("div","nexus-interaction-action-tools");
-      tools.append(btn("↑","move-action",flow.id,{actionIndex:i,direction:-1}),btn("↓","move-action",flow.id,{actionIndex:i,direction:1}),btn("Remover","remove-action",flow.id,{actionIndex:i}));
+      const moveUp=btn("↑","move-action",flow.id,{actionIndex:i,direction:-1}),moveDown=btn("↓","move-action",flow.id,{actionIndex:i,direction:1});
+      moveUp.disabled=i===0;moveDown.disabled=i===flow.actions.length-1;
+      tools.append(moveUp,moveDown,btn("Remover","remove-action",flow.id,{actionIndex:i}));
       const meta=el("div","nexus-interaction-action-meta");
       const type=field("select","Tipo de ação",a.type,actions);bind(type.input,"action",flow.id,"type",{actionIndex:i});meta.append(type.wrap);
       const active=field("input","Ativo",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});meta.append(active.wrap);
