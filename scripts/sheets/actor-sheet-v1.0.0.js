@@ -4001,7 +4001,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const cardStyleSection=inspector.querySelector("[data-inspector-card-style]"); if(cardStyleSection)cardStyleSection.hidden=!!selectedGroup;
       const componentStyleSection=inspector.querySelector("[data-inspector-component-style]"); if(componentStyleSection)componentStyleSection.hidden=!!selectedGroup;
       const labelPositionRow=inspector.querySelector("[data-component-label-position]"); if(labelPositionRow)labelPositionRow.hidden=!one || ["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(one.type) || (!one.customLabel && !["level", "attribute"].includes(COMPONENTS[one.type]?.variant ?? one.sheetVariant));
-      const activeTab=selectedGroup?"card":(this._componentInspectorTab??"card");
+      const rememberedTab = this._componentInspectorTab;
+      const activeTab = selectedGroup || !["card", "appearance", "advanced"].includes(rememberedTab) ? "card" : rememberedTab;
       inspector.querySelectorAll("[data-inspector-tab]").forEach(button=>button.classList.toggle("active",button.dataset.inspectorTab===activeTab));
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel=>{const active=panel.dataset.inspectorTabPanel===activeTab;panel.hidden=!active;panel.classList.toggle("active",active);});
       let effectivePath = null;
