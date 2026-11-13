@@ -220,7 +220,7 @@ class NexusPanelWindow extends NexusPanelWindowBase {
   close(options = {}) {
     // A biblioteca monta miniaturas e detalhes; remover a animação evita que a
     // janela pareça travar durante o fechamento. ApplicationV2 V14 suporta animate.
-    return super.close({ ...options, animate: this.panelKey === "library" ? false : options.animate ?? true });
+    return super.close({ ...options, animate: ["library", "behavior"].includes(this.panelKey) ? false : options.animate ?? true });
   }
 
   _mountPanel() {
@@ -230,7 +230,7 @@ class NexusPanelWindow extends NexusPanelWindowBase {
     if (this.panel.parentElement !== content) content.replaceChildren(this.panel);
     this.panel.hidden = false;
     this.panel.classList.add("nexus-native-panel-content");
-    if (this.panelKey === "component") {
+    if (["component", "behavior"].includes(this.panelKey)) {
       const root = this.sheet?.element;
       if (root && this.sheet?._setSelection) this.sheet._setSelection($(root), [...(this.sheet._selectedIds ?? [])]);
     }
@@ -251,7 +251,7 @@ class NexusPanelWindow extends NexusPanelWindowBase {
     this._enterHandler = event => {
       const field = event.target;
       if (event.key !== "Enter" || !(field instanceof HTMLInputElement || field instanceof HTMLSelectElement) ||
-          !field.closest(".nexus-component-inspector")) return;
+          !field.closest(".nexus-component-inspector, .nexus-behavior-editor")) return;
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation?.();
@@ -1727,7 +1727,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-inspector-tab]").on("click", event => {
       const tab = event.currentTarget.dataset.inspectorTab;
       const inspector = event.currentTarget.closest(".nexus-component-inspector");
-      if (!inspector || !["card", "behavior", "appearance", "advanced"].includes(tab)) return;
+      if (!inspector || !["card", "appearance", "advanced"].includes(tab)) return;
       this._componentInspectorTab = tab;
       inspector.querySelectorAll("[data-inspector-tab]").forEach(button => button.classList.toggle("active", button.dataset.inspectorTab === tab));
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel => { const active = panel.dataset.inspectorTabPanel === tab; panel.hidden = !active; panel.classList.toggle("active", active); });
@@ -2198,7 +2198,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("component")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) { editor.dataset.componentId = componentId; renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor)); }
     };
-    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-action]", async event => {
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-action], .nexus-behavior-editor [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
       if(button.dataset.interactionAction==="add-library-flow"){
@@ -2207,7 +2207,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-view]", event => {
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-view], .nexus-behavior-editor [data-interaction-view]", event => {
       const button=event.currentTarget,editor=button.closest("[data-interaction-editor]");
       if(!editor)return;
       editor.dataset.viewMode=button.dataset.interactionView==="list"?"list":"cards";
@@ -2215,7 +2215,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const component=this._currentLayout?.components?.find(item=>item.id===componentId);
       if(component)renderInteractionEditor(editor,component,this._currentLayout?.components??[],getInteractionLibrary(this.actor));
     });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-field]", async event => {
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-field], .nexus-behavior-editor [data-interaction-field]", async event => {
       event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
     });
     const getTextStyleTarget = () => this._textStyleTarget === "heading" ? "heading" : "content";
@@ -3970,6 +3970,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
         else interactionEditor.replaceChildren();
       }
+      const behaviorPanel = this._nexusPanelWindows?.get("behavior")?.panel ?? this.element?.querySelector?.('[data-tool-panel="behavior"]');
+      const behaviorEditor = behaviorPanel?.querySelector?.("[data-interaction-editor]");
+      const behaviorEmpty = behaviorPanel?.querySelector?.("[data-behavior-empty]");
+      const behaviorTarget = behaviorPanel?.querySelector?.("[data-behavior-target]");
+      if (behaviorEditor) {
+        behaviorEditor.dataset.componentId = one?.id ?? "";
+        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        else behaviorEditor.replaceChildren();
+      }
+      if (behaviorEmpty) behaviorEmpty.hidden = !!one;
+      if (behaviorTarget) behaviorTarget.textContent = one ? (one.customLabel || one.type || "Componente") : "Selecione um componente";
       const technicalId = inspector.querySelector("[data-component-technical-id]");
       const technicalType = inspector.querySelector("[data-component-technical-type]");
       if (technicalId) technicalId.value = one?.id ?? "";
@@ -4230,9 +4241,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const leftRail = root.querySelector(".nexus-appearance-rail");
     const sourceDrawer = root.querySelector(".nexus-appearance-drawer");
     const tabs = root.querySelector(".nexus-layout-tabs");
-    const panelKeys = ["grid", "style", "component", "layers", "library", "aliases"];
-    const panelTitles = { grid: "Grade e alinhamento", style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados" };
-    const panelSizes = { grid: [330, 470], style: [340, 470], component: [360, 470], layers: [340, 470], library: [660, 640], aliases: [360, 470] };
+    const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
+    const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
+    const panelSizes = { style: [340, 470], component: [360, 470], layers: [340, 470], library: [660, 640], aliases: [360, 470], settings: [380, 500], behavior: [660, 640] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
@@ -4246,12 +4257,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     portal.innerHTML = `
       <div class="nexus-floating-left" aria-label="Ferramentas da ficha">
         <div class="nexus-floating-left-rail">
-          <button type="button" data-floating-panel="grid" title="Grade e alinhamento" aria-label="Grade e alinhamento"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="style" title="Aparência global" aria-label="Aparência global"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="library" title="Biblioteca de elementos" aria-label="Biblioteca de elementos"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-diagram-next" aria-hidden="true"></i></button>
         </div>
       </div>
       <div class="nexus-floating-right" aria-label="Navegação de páginas">
@@ -4268,6 +4280,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
       panel.classList.add("nexus-native-panel-content");
       panels.set(key, panel);
     }
+    const settingsPanel = panels.get("settings");
+    settingsPanel?.querySelectorAll("[data-settings-section]").forEach(button => button.addEventListener("click", () => {
+      const key = button.dataset.settingsSection;
+      settingsPanel.querySelectorAll("[data-settings-section]").forEach(item => item.classList.toggle("active", item === button));
+      settingsPanel.querySelectorAll("[data-settings-panel]").forEach(section => {
+        const active = section.dataset.settingsPanel === key;
+        section.hidden = !active;
+        section.classList.toggle("active", active);
+      });
+    }));
     sourceDrawer?.remove();
     leftRail?.remove();
     if (tabs) portal.querySelector(".nexus-floating-tabs").append(tabs);
