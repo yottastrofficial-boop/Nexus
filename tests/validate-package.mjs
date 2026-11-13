@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { getTriggeredActions, executeTriggeredActions } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -19,7 +19,7 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.9", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.1.0", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -315,3 +315,36 @@ assert.equal(getTriggeredActions({
   interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
 }, "click").length, 0, "Um trigger diferente não deve executar no clique");
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
+
+const multiFlowComponent = { interactions: [{
+  id: "multi", name: "Fluxo múltiplo", enabled: true,
+  triggers: [{ id: "t1", event: "click" }, { id: "t2", event: "doubleClick" }],
+  conditions: [{ id: "c1", path: "identity.level", operator: "greaterOrEqual", value: "3" }],
+  conditionJoin: "all",
+  actions: [{ id: "a1", type: "update", config: { path: "resources.pv.value", operation: "add", value: "2" } }, { id: "a2", type: "roll", config: { formula: "1d20" } }],
+  execution: { onError: "continue" }
+}] };
+const conditionActor = { system: { identity: { level: 4 } } };
+assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
+assert.equal(getTriggeredActions(multiFlowComponent, "doubleClick", { actor: conditionActor }).length, 2);
+assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: { system: { identity: { level: 1 } } } }).length, 0);
+const editorDraft = { interactions: [] };
+applyInteractionEditorCommand(editorDraft, "add-flow");
+const editableFlow = editorDraft.interactions[0];
+applyInteractionEditorCommand(editorDraft, "add-trigger", { interactionId: editableFlow.id });
+applyInteractionEditorCommand(editorDraft, "add-action", { interactionId: editableFlow.id });
+assert.equal(editableFlow.triggers.length, 2);
+assert.equal(editableFlow.actions.length, 2);
+applyInteractionEditorChange(editorDraft, { interactionId: editableFlow.id, scope: "trigger", triggerIndex: 1, field: "event" }, "rightClick");
+assert.equal(editableFlow.triggers[1].event, "rightClick");
+applyInteractionEditorCommand(editorDraft, "move-action", { interactionId: editableFlow.id, actionIndex: 0, direction: 1 });
+assert.equal(editableFlow.actions[1].type, "roll");
+assert.equal(getComponentInteractions(multiFlowComponent)[0].execution.onError, "continue");
+assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"));
+assert.ok(sheet.includes("data-interaction-action"));
+assert.ok(template.includes("data-interaction-editor"));
+assert.ok(!template.includes('data-component-setting="actionType"'));
+assert.ok(sheet.includes('addEventListener("contextmenu"'));
+assert.ok(sheet.includes('addEventListener("pointerover"'));
+assert.ok(sheet.includes("_executeComponentAction"));
+console.log("NEXUS 1.1.0: editor visual de interações validado.");
