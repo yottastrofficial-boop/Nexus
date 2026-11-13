@@ -156,6 +156,28 @@ const applyThemeTokens = (element, layout = {}) => {
     "--nexus-panel-hover": theme.hover,
     "--nexus-scroll-bg": layout.scrollColor ?? theme.scroll,
     "--nexus-scroll-thumb": layout.accentColor ?? theme.accent,
+    "--nexus-scrollbar-track": layout.scrollColor ?? theme.scroll,
+    "--nexus-scrollbar-thumb": layout.accentColor ?? theme.accent,
+    "--nexus-scrollbar-thumb-hover": layout.highlightColor ?? theme.highlight,
+    "--nexus-surface-raised": layout.cardColor ?? theme.card,
+    "--nexus-surface-sunken": theme.input,
+    "--nexus-border-subtle": `color-mix(in srgb, ${theme.border} 58%, transparent)`,
+    "--nexus-border-strong": layout.accentColor ?? theme.border,
+    "--nexus-text-primary": theme.text,
+    "--nexus-text-secondary": theme.muted,
+    "--nexus-text-disabled": `color-mix(in srgb, ${theme.muted} 58%, transparent)`,
+    "--nexus-focus-ring": layout.highlightColor ?? theme.highlight,
+    "--nexus-field-bg": theme.input,
+    "--nexus-field-text": theme.text,
+    "--nexus-field-border": theme.border,
+    "--nexus-field-focus": layout.highlightColor ?? theme.highlight,
+    "--nexus-button-primary": layout.buttonColor ?? theme.button,
+    "--nexus-button-primary-hover": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
+    "--nexus-button-primary-text": theme.text,
+    "--nexus-state-success": layout.theme === "light" ? "#247647" : "#79c99a",
+    "--nexus-state-warning": layout.theme === "light" ? "#8a5a12" : "#e6bd68",
+    "--nexus-state-danger": layout.theme === "light" ? "#a83232" : "#e58a8a",
+    "--nexus-state-info": layout.theme === "light" ? "#245f91" : "#83bce8",
     "--nexus-resource-button": theme.resourceButton,
     "--nexus-window-header": layout.windowHeaderColor ?? theme.windowHeader,
     "--nexus-window-content": layout.windowContentColor ?? theme.windowContent,
@@ -4264,7 +4286,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [560, 620], component: [560, 620], layers: [560, 620], library: [900, 640], aliases: [620, 620], settings: [560, 620], behavior: [900, 640] };
+    const panelSizes = { style: [400, 600], component: [400, 600], layers: [400, 600], library: [900, 600], aliases: [400, 600], settings: [400, 600], behavior: [900, 600] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
