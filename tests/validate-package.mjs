@@ -20,8 +20,8 @@ const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.18", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.17"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.17"), "CHANGELOG deve iniciar pela versão atual");
+assert.ok(readme.includes("Versão 1.0.0.18"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.18"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.17"));
+assert.ok(readme.includes("Versão 1.0.0.18"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
