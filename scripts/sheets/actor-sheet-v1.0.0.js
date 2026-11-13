@@ -4264,7 +4264,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [420, 620], component: [420, 620], layers: [420, 620], library: [900, 640], aliases: [520, 700], settings: [480, 620], behavior: [900, 640] };
+    const panelSizes = { style: [560, 620], component: [560, 620], layers: [560, 620], library: [900, 640], aliases: [620, 620], settings: [560, 620], behavior: [900, 640] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
@@ -4283,8 +4283,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
           <button type="button" data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="library" title="Biblioteca de elementos" aria-label="Biblioteca de elementos"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
-          <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-database" aria-hidden="true"></i></button>
-          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt" aria-hidden="true"></i></button>
         </div>
       </div>
       <div class="nexus-floating-right" aria-label="Navegação de páginas">
