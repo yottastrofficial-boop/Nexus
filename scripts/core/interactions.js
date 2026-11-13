@@ -183,7 +183,7 @@ export function renderInteractionEditor(container,component,components=[]) {
     const acts=el("section","nexus-interaction-group");acts.append(el("h6","","Actions"));
     flow.actions.forEach((a,i)=>{const row=el("div","nexus-interaction-action"),title=el("div","nexus-interaction-action-heading","Ação "+(i+1));title.append(btn("↑","move-action",flow.id,{actionIndex:i,direction:-1}),btn("↓","move-action",flow.id,{actionIndex:i,direction:1}),btn("Remover","remove-action",flow.id,{actionIndex:i}));row.append(title);
       const type=field("select","Tipo",a.type,actions);bind(type.input,"action",flow.id,"type",{actionIndex:i});row.append(type.wrap);
-      const active=field("input","Ativa",a.enabled);active.input.type="checkbox";bind(active.input,"action",flow.id,"enabled",{actionIndex:i});row.append(active.wrap);
+      const active=field("input","Ativa",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});row.append(active.wrap);
       const config=el("div","nexus-interaction-action-config");actionConfig(config,{...flow,componentId:component.id},a,i,components);row.append(config);acts.append(row);});
     acts.append(btn("＋ Action","add-action",flow.id));card.append(acts);
     const execution=el("section","nexus-interaction-execution"),error=field("select","Em caso de erro",flow.execution.onError,[["stop","Interromper fluxo"],["continue","Continuar próximas ações"]]);bind(error.input,"flow",flow.id,"onError");execution.append(error.wrap);card.append(execution);
