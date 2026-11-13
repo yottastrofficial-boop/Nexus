@@ -53,8 +53,10 @@
             <h3>Propriedades</h3>
             <section class="nexus-component-inspector" hidden>
               <nav class="nexus-inspector-tabs" data-inspector-tabs aria-label="Propriedades do componente">
-                <button type="button" class="active" data-inspector-tab="card">Geral</button>
+                <button type="button" class="active" data-inspector-tab="card">Dados</button>
+                <button type="button" data-inspector-tab="behavior">Comportamento</button>
                 <button type="button" data-inspector-tab="appearance">Aparência</button>
+                <button type="button" data-inspector-tab="advanced">Avançado</button>
               </nav>
 
               <div class="nexus-inspector-tab-panel active" data-inspector-tab-panel="card">
@@ -72,14 +74,6 @@
                   <div class="nexus-property-options" id="nexus-component-path-options-{{nexus.actor.id}}" data-component-path-options hidden role="listbox" aria-label="Propriedades e atalhos disponíveis"></div>
                   <label class="nexus-inspector-field" data-property-value-row hidden>Valor da propriedade<input type="text" data-property-value autocomplete="off"></label>
 
-                  <section class="nexus-inspector-subsection nexus-component-interaction">
-                    <h5>Interação</h5>
-                    <label class="nexus-inspector-field">Ação do componente<select data-component-setting="actionType"><option value="" {{#unless component.actionType}}selected{{/unless}}>Nenhuma</option><option value="roll" {{#if (eq component.actionType "roll")}}selected{{/if}}>Executar rolagem</option><option value="proficiency" {{#if (eq component.actionType "proficiency")}}selected{{/if}}>Marcador de domínio · 4 níveis</option><option value="resource-slider" {{#if (eq component.actionType "resource-slider")}}selected{{/if}}>Ajustar recurso por barra</option><option value="toggle-component" {{#if (eq component.actionType "toggle-component")}}selected{{/if}}>Alternar visibilidade de outro card</option></select></label>
-                    <div data-action-config="roll" hidden><label class="nexus-inspector-field">Fórmula da rolagem<input type="text" maxlength="500" data-component-setting="rollFormula" data-roll-formula-input autocomplete="off" spellcheck="false" aria-autocomplete="list" value="{{component.rollFormula}}"></label></div>
-                    <div data-action-config="proficiency" data-proficiency-config hidden><label class="nexus-inspector-field">Propriedade numérica vinculada (opcional)<input type="text" data-component-setting="actionPath" value="{{component.actionPath}}"></label><div class="nexus-proficiency-labels"><label>Nível 0<input type="text" maxlength="24" data-component-setting="proficiencyLabel0" value="Nível 0"></label><label>Nível 1<input type="text" maxlength="24" data-component-setting="proficiencyLabel1" value="Nível 1"></label><label>Nível 2<input type="text" maxlength="24" data-component-setting="proficiencyLabel2" value="Nível 2"></label><label>Nível 3<input type="text" maxlength="24" data-component-setting="proficiencyLabel3" value="Nível 3"></label></div></div>
-                    <div data-action-config="resource-slider" hidden></div><div data-action-config="toggle-component" hidden><label class="nexus-inspector-field">Card de destino<input type="text" data-component-setting="actionTargetId" value="{{component.actionTargetId}}" list="nexus-action-target-options"></label><datalist id="nexus-action-target-options" data-action-target-options></datalist></div>
-                    
-                  </section>
                   <label class="nexus-inspector-field" data-component-placeholder-row hidden>Texto de orientação<input type="text" maxlength="100" data-component-setting="placeholder"></label>
                   <div class="nexus-inspector-grid" data-component-table-settings hidden>
                     <label class="nexus-inspector-field">Linhas<input type="number" min="1" max="20" data-component-setting="rows"></label>
@@ -165,6 +159,19 @@ remove legacy typography selects                  <label class="nexus-inspector-
                   <div class="nexus-inspector-section-heading"><h4>Indicador</h4><button type="button" data-component-reset="resource">Restaurar</button></div>
                   <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Rótulo<input type="text" maxlength="24" data-component-setting="sheetContent1"></label><label class="nexus-inspector-field">Ícone<input type="text" maxlength="120" data-component-setting="sheetContent2"></label><label class="nexus-inspector-field">Preenchimento<nexus-color-picker data-component-setting="sheetColor"></nexus-color-picker></label><label class="nexus-inspector-field">Fundo da barra<nexus-color-picker data-component-setting="sheetTrackColor"></nexus-color-picker></label></div>
                   <label class="nexus-inspector-field">Orientação<select data-component-setting="sheetOrientation"><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option></select></label>
+                </section>
+              </div>
+              <div class="nexus-inspector-tab-panel" data-inspector-tab-panel="behavior" hidden>
+                <section class="nexus-inspector-section nexus-component-interaction">
+                  <h4>Comportamento</h4>
+                  <div data-interaction-editor data-component-id=""></div>
+                </section>
+              </div>
+              <div class="nexus-inspector-tab-panel" data-inspector-tab-panel="advanced" hidden>
+                <section class="nexus-inspector-section" data-component-technical>
+                  <h4>Identificação técnica</h4>
+                  <label class="nexus-inspector-field">ID do componente<input type="text" data-component-technical-id readonly></label>
+                  <label class="nexus-inspector-field">Tipo interno<input type="text" data-component-technical-type readonly></label>
                 </section>
               </div>
             </section>

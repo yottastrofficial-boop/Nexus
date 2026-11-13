@@ -1,3 +1,22 @@
+## 1.1.0
+
+### Editor visual de interações
+- Substituído o seletor rígido de ação por um editor de fluxos no Inspector.
+- Cada componente pode possuir vários fluxos independentes.
+- Cada fluxo aceita vários Triggers; qualquer Trigger configurado inicia as Actions daquele fluxo.
+- Actions podem ser adicionadas, removidas, ativadas/desativadas e reordenadas, com configuração específica por tipo.
+- Adicionadas condições por propriedade, com combinação AND/OR e operadores de comparação.
+- Definida execução sequencial, com escolha entre interromper ou continuar após falhas.
+- Implementados executores controlados para rolagem, cálculo, atualização de propriedade, abertura, alternância, interação encadeada e operações permitidas.
+- Adicionados eventos de clique, duplo clique, clique direito, hover, alteração, envio e interação encadeada.
+- Mantida a leitura de ações legadas de rolagem e alternância sem exigir migração imediata dos layouts.
+- Scripts arbitrários não são avaliados; a ação avançada utiliza uma lista explícita de operações seguras.
+
+### Compatibilidade e validação
+- Mantida a separação entre dados, comportamento e aparência dos componentes.
+- Adicionados testes de normalização, múltiplos Triggers, condições, ordenação e execução.
+- Validação automatizada do pacote executada no CI; teste funcional dentro do Foundry VTT 14 permanece necessário antes de considerar a versão estável.
+
 ## 1.0.0.9
 
 ### Migração de perícias e propriedades

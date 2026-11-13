@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { getTriggeredActions, executeTriggeredActions } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -19,11 +19,11 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.9", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.1.0", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\/download\/v1\.0\.0\.9\/nexus\.zip$/);
+assert.ok(manifest.download.endsWith("/releases/download/v1.1.0/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -178,7 +178,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.9/);
+assert.ok(readme.includes("Versão 1.1.0"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -193,7 +193,7 @@ assert.match(sheet, /exib:"PV"/, "A propriedade PV deve possuir abreviação pr�
 assert.match(sheet, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
-assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
+assert.match(template, /data-interaction-editor/, "O Inspector deve conter o editor visual de interações");
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
@@ -204,8 +204,8 @@ assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "O
 assert.match(sheet, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
 assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
 assert.match(template, /data-text-style-target="heading"/, "A formatação deve permitir selecionar o título");
-assert.match(template, /data-action-config="proficiency"/, "A ação de marcador de domínio deve ter configuração contextual");
-assert.match(template, /data-action-config="resource-slider"/, "A ação de ajuste de recurso deve ter configuração contextual");
+assert.ok(interactions.includes("INTERACTION_ACTIONS"), "Ações devem ser definidas pelo motor, não pelo seletor antigo");
+assert.ok(!template.includes("data-action-config="), "Configurações antigas do seletor rígido devem ser removidas");
 assert.match(template, /data-resource-slider/, "A barra arrastável deve ser renderizada");
 assert.match(template, /data-proficiency-level/, "O marcador deve oferecer os quatro níveis");
 assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser editável separadamente");
@@ -231,10 +231,10 @@ assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve r
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
-assert.match(template, /data-roll-formula-input/, "O campo de fórmula deve abrir o visualizador de propriedades");
-assert.match(template, /maxlength="500"/, "O campo de fórmula deve aceitar expressões compostas");
-assert.match(sheet, /if \(actionSelect\) actionSelect\.value = one\?\.actionType/, "O seletor deve refletir a ação persistida no componente");
-assert.match(sheet, /\["rollFormula", one\.rollFormula \?\? ""\]/, "O Inspector deve restaurar a fórmula salva ao reabrir");
+assert.ok(interactions.includes("formula.length>500") || sheet.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
+assert.ok(interactions.includes('"roll"'), "O motor deve oferecer a ação de rolagem");
+assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"), "O editor deve restaurar os fluxos salvos");
+assert.ok(sheet.includes("applyInteractionEditorChange"), "O Inspector deve persistir as configurações de cada ação");
 assert.match(sheet, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
 assert.match(sheet, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
 assert.match(sheet, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
@@ -265,11 +265,11 @@ assert.equal(NEXUS_SKILLS.length, 18, "O catálogo deve conter 18 perícias");
 assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves técnicas das perícias devem ser únicas");
 assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
-assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
+assert.ok(sheet.includes("executeTriggeredActions(component, eventName"), "Eventos de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
-assert.match(interactions, /trigger: \{ event \}/);
-assert.match(interactions, /interaction\.actions/);
-assert.match(template, /toggle-component/);
+assert.match(interactions, /triggers:source\.map\(normalizeTrigger\)/);
+assert.match(interactions, /flow\.actions/);
+assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheet, /_toggleTargetComponent/);
 assert.match(sheet, /setResourceFromTrack/);
 console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");
@@ -315,3 +315,40 @@ assert.equal(getTriggeredActions({
   interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
 }, "click").length, 0, "Um trigger diferente não deve executar no clique");
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
+
+const multiFlowComponent = { interactions: [{
+  id: "multi", name: "Fluxo múltiplo", enabled: true,
+  triggers: [{ id: "t1", event: "click" }, { id: "t2", event: "doubleClick" }],
+  conditions: [{ id: "c1", path: "identity.level", operator: "greaterOrEqual", value: "3" }],
+  conditionJoin: "all",
+  actions: [{ id: "a1", type: "update", config: { path: "resources.pv.value", operation: "add", value: "2" } }, { id: "a2", type: "roll", config: { formula: "1d20" } }],
+  execution: { onError: "continue" }
+}] };
+const conditionActor = { system: { identity: { level: 4 } } };
+assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
+assert.equal(getTriggeredActions(multiFlowComponent, "doubleClick", { actor: conditionActor }).length, 2);
+assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: { system: { identity: { level: 1 } } } }).length, 0);
+const editorDraft = { interactions: [] };
+applyInteractionEditorCommand(editorDraft, "add-flow");
+const flowId = editorDraft.interactions[0].id;
+applyInteractionEditorCommand(editorDraft, "add-trigger", { interactionId: flowId });
+applyInteractionEditorCommand(editorDraft, "add-action", { interactionId: flowId });
+assert.equal(editorDraft.interactions[0].triggers.length, 2);
+assert.equal(editorDraft.interactions[0].actions.length, 2);
+applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "trigger", triggerIndex: 1, field: "event" }, "rightClick");
+assert.equal(editorDraft.interactions[0].triggers[1].event, "rightClick");
+applyInteractionEditorCommand(editorDraft, "move-action", { interactionId: flowId, actionIndex: 0, direction: 1 });
+assert.equal(editorDraft.interactions[0].actions[1].type, "roll");
+assert.equal(getComponentInteractions(multiFlowComponent)[0].execution.onError, "continue");
+assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"));
+assert.ok(sheet.includes("data-interaction-action"));
+assert.ok(template.includes("data-interaction-editor"));
+assert.ok(!template.includes('data-component-setting="actionType"'));
+assert.ok(sheet.includes('addEventListener("contextmenu"'));
+assert.ok(sheet.includes('addEventListener("pointerover"'));
+assert.ok(sheet.includes("_executeComponentAction"));
+console.log("NEXUS 1.1.0: editor visual de interações validado.");
+
+assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
+assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
+assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");

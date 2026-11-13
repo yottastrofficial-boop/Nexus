@@ -3855,3 +3855,34 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-skill-proficiency-level.is-proficient { color:var(--nexus-highlight-color,#66c0f4); border-color:var(--nexus-highlight-color,#66c0f4); }
 .nexus-skill-proficiency-level.is-opposed { color:#e58a8a; border-color:#a94d4d; }
 .nexus-skill-proficiency-level:disabled { opacity:.75; cursor:default; }
+
+
+/* Editor visual de interações — múltiplos Triggers, condições e Actions. */
+.nexus-interaction-editor-heading,.nexus-interaction-flow-heading,.nexus-interaction-group-heading,.nexus-interaction-action-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.nexus-interaction-editor-heading{margin-bottom:8px}
+.nexus-interaction-flow{display:flex;flex-direction:column;gap:9px;min-width:0;margin:8px 0;padding:9px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:7px;background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 88%,transparent)}
+.nexus-interaction-flow-heading{align-items:flex-end;flex-wrap:wrap;padding-bottom:7px;border-bottom:1px solid var(--nexus-panel-border,#3c5067)}
+.nexus-interaction-flow-heading>.nexus-interaction-field:first-child{flex:1 1 130px}
+.nexus-interaction-group{display:flex;flex-direction:column;gap:6px;min-width:0}
+.nexus-interaction-group h6{margin:0;color:var(--nexus-panel-muted,#9aadc2);font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.nexus-interaction-row,.nexus-interaction-action,.nexus-interaction-condition{display:flex;flex-direction:column;gap:6px;min-width:0;padding:7px;border:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 75%,transparent);border-radius:5px;background:var(--nexus-panel-input,#111b27)}
+.nexus-interaction-condition{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.nexus-interaction-condition .nexus-interaction-field:first-child{grid-column:1/-1}
+.nexus-interaction-field{display:flex;flex-direction:column;gap:3px;min-width:0;color:var(--nexus-panel-muted,#9aadc2);font-size:9px}
+.nexus-interaction-field input:not([type=checkbox]),.nexus-interaction-field select{box-sizing:border-box;width:100%;min-width:0;min-height:27px;padding:4px 6px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:4px;color:var(--nexus-panel-text,#e7edf5);background:var(--nexus-panel-bg,#182330);font:10px/1.3 system-ui,sans-serif}
+.nexus-interaction-field input[type=checkbox]{width:14px;min-width:14px;height:14px}
+.nexus-interaction-field:has(input[type=checkbox]){flex-direction:row;align-items:center}
+.nexus-interaction-button{min-height:25px;padding:4px 7px;border:1px solid var(--nexus-panel-border,#3c5067);border-radius:4px;color:var(--nexus-panel-text,#e7edf5);background:var(--nexus-panel-hover,#2a3d52);font-size:9px;cursor:pointer}
+.nexus-interaction-button:hover{border-color:var(--nexus-highlight-color,#78b7e8)}
+.nexus-interaction-action-heading{font-size:9px;font-weight:700;color:var(--nexus-panel-text,#e7edf5)}
+.nexus-interaction-action-heading .nexus-interaction-button{min-width:25px}
+.nexus-interaction-action-config{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.nexus-interaction-execution{padding-top:7px;border-top:1px solid var(--nexus-panel-border,#3c5067)}
+.nexus-interaction-empty{margin:6px 0;color:var(--nexus-panel-muted,#9aadc2);font-size:10px}
+.nexus-interaction-group-heading .nexus-interaction-field{max-width:150px}
+@media(max-width:380px){.nexus-interaction-condition{grid-template-columns:minmax(0,1fr)}.nexus-interaction-condition .nexus-interaction-field:first-child{grid-column:auto}}
+
+/* Inspector com quatro áreas independentes. */
+.nexus-panel-window .nexus-inspector-tabs{grid-template-columns:repeat(4,minmax(0,1fr));}
+.nexus-panel-window .nexus-inspector-tabs button{min-width:0;padding-inline:4px;font-size:9px;}
+.nexus-panel-window [data-component-technical] input[readonly]{opacity:.78;cursor:text;}

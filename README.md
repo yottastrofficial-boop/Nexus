@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.9 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.1.0 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.9-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.1.0-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.9 está publicada. As validações automatizadas e a montagem do pacote ZIP foram aprovadas; os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
+> **Estado desta versão:** a 1.0.0.9 é a base desta atualização. As validações automatizadas e a montagem do pacote ZIP foram aprovadas; os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
 
 ## Visão geral
 
@@ -115,11 +115,11 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 ## Interações de componentes
 
-As interações seguem o contrato Trigger → Action → Configuration. A implementação inicial preserva ações antigas de rolagem e alternância e permite a execução sequencial de ações configuradas. O editor visual completo de interações ainda está planejado. Consulte [o contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md).
+O Inspector oferece um editor de fluxos Trigger → Conditions → Actions. Um componente pode ter vários fluxos independentes; cada fluxo aceita múltiplos Triggers, condições AND/OR e Actions configuráveis e reordenáveis. A execução é sequencial e oferece política de erro. Ações antigas de rolagem e alternância continuam legíveis. Consulte [o contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md).
 
 ## Estado e validação
 
-A versão 1.0.0.9 está preparada na branch main. A publicação depende da aprovação das verificações automatizadas de JavaScript, JSON, CSS, templates e integridade do pacote. O comportamento visual e interativo desta atualização ainda exige validação em uma instalação real do Foundry VTT 14.
+A versão 1.1.0 está em preparação na branch de funcionalidade. A publicação depende da aprovação das verificações automatizadas de JavaScript, JSON, CSS, templates e integridade do pacote. O comportamento visual e interativo desta atualização ainda exige validação em uma instalação real do Foundry VTT 14.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
