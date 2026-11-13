@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.17", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.18", "Versão do manifesto incorreta");
 assert.ok(readme.includes("Versão 1.0.0.17"), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith("## 1.0.0.17"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.17/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.18/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -383,8 +383,8 @@ assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar
 assert.ok(sheet.includes("library: [900, 640]") && sheet.includes("behavior: [900, 640]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(sheet.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
-assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-database"'), "Estrutura de dados deve ter ícone semântico");
-assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-code-branch"'), "Comportamento deve ter ícone semântico");
+assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
+assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
 assert.ok(sheet.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
 assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
 assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
@@ -422,3 +422,9 @@ assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
 assert.doesNotMatch(template,/<option value="fill">Esticar<\/option>/);
 console.log("NEXUS: biblioteca de fluxos, modelo de rolagem de perícia e proporção de assets verificados.");
+
+assert.ok(interactions.includes("nexus-interaction-action-name"), "Título das ações deve possuir contêiner flexível");
+assert.ok(interactions.includes("fa-arrow-up") && interactions.includes("fa-trash"), "Controles das ações devem usar ícones semânticos");
+assert.ok(css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter largura e quebra de linha controladas");
+assert.ok(css.includes("nexus-alias-create,") && css.includes("background:transparent !important"), "Estrutura de dados deve evitar painéis aninhados redundantes");
+assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura padronizada");
