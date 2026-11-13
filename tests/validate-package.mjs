@@ -378,6 +378,7 @@ assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
 assert.ok(sheet.includes("behavior: [820, 700]"), "Comportamento deve ter o mesmo tamanho da Biblioteca");
+assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar as dimensões de Camadas");
 assert.ok(sheet.includes("component: [520, 760]"), "Propriedades deve manter suas dimensões atuais");
 assert.ok(sheet.includes("library: [820, 700]") && sheet.includes("behavior: [820, 700]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
@@ -390,7 +391,13 @@ assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O edit
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
 assert.ok(interactions.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ter um layout dedicado");
+assert.ok(interactions.includes("data-interaction-flow-tab"), "Os fluxos devem ser navegáveis por abas");
+assert.ok(interactions.includes("data-interaction-flow-panel"), "Cada aba deve exibir apenas seu fluxo correspondente");
+assert.ok(!interactions.includes("QUANDO "+ "triggerNames"), "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
 assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ocupar uma área dimensionada no cabeçalho de condições");
+assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
+assert.ok(css.includes("width:min(420px,calc(100vw - 24px))"), "Propriedades deve ter dimensões padronizadas com Camadas");
+assert.ok(css.includes("width:min(820px,calc(100vw - 24px))"), "Comportamento deve ter largura explícita e consistente");
 const fakeLibraryActor={
   flags:{nexus:{}},
   getFlag(scope,key){return this.flags[scope]?.[key];},
