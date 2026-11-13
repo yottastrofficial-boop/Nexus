@@ -3973,12 +3973,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 }
 .nexus-interaction-action > summary::marker { color: var(--nexus-highlight-color,#78b7e8); }
 .nexus-interaction-action-config { padding-top: 7px; }
-.nexus-interaction-view-toggle { display: flex; gap: 3px; }
-.nexus-interaction-view-toggle .nexus-interaction-button.is-active {
-  border-color: var(--nexus-highlight-color,#78b7e8);
-  color: var(--nexus-panel-text,#e7edf5);
-  background: var(--nexus-panel-hover,#2a3d52);
-}
 .nexus-interaction-library-row {
   display: grid;
   grid-template-columns: minmax(0,1fr) auto;
@@ -4693,4 +4687,13 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 }
 @media(prefers-reduced-motion:reduce) {
   .nexus-behavior-editor .nexus-interaction-button { transition:none; }
+}
+
+.nexus-behavior-editor .nexus-interaction-button:disabled {
+  opacity:.38;
+  cursor:not-allowed;
+  transform:none;
+}
+.nexus-behavior-editor .nexus-interaction-action-config:has(> .nexus-interaction-field:only-child) {
+  grid-template-columns:minmax(0,1fr);
 }
