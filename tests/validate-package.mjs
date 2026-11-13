@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, createSkillRollInteraction, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.13", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.13"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.13"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.14", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.14"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.14"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.13/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.14/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.13"));
+assert.ok(readme.includes("Versão 1.0.0.14"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -203,12 +203,12 @@ assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportame
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
 assert.match(sheet, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
 assert.match(sheet, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
-assert.match(sheet, /behavior: \[660, 640\]/, "O painel Comportamento deve ter dimensões equivalentes à Biblioteca");
+assert.match(sheet, /behavior: \[1120, 820\]/, "O painel Comportamento deve aproveitar a largura disponível");
 assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
-assert.match(interactions, /guided\.open = true/, "Gatilhos e condições devem iniciar expandidos");
+assert.match(interactions, /const guided=el\("section","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
@@ -363,23 +363,27 @@ assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheet.includes('addEventListener("contextmenu"'));
 assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
-console.log("NEXUS 1.0.0.13: editor visual de interações validado.");
+console.log("NEXUS 1.0.0.14: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
 assert.ok(sheet.includes('["card", "appearance", "advanced"]'), "As três áreas restantes do Inspector devem ser navegáveis");
 
 
-// Reusable behavior library and skill-roll preset.
-const skillFlow=createSkillRollInteraction("stealth");
-assert.equal(skillFlow.actions[0].config.mode,"skill");
-assert.equal(skillFlow.actions[0].config.skillKey,"stealth");
-const skillComponent={interactions:[]};
-applyInteractionEditorCommand(skillComponent,"add-skill-roll");
-assert.equal(skillComponent.interactions[0].actions[0].config.mode,"skill");
-const templateClone=instantiateInteractionTemplate(skillFlow);
-assert.notEqual(templateClone.id,skillFlow.id);
-assert.notEqual(templateClone.actions[0].id,skillFlow.actions[0].id);
+// Reusable behavior library: cloned flows receive independent identifiers.
+const templateClone=instantiateInteractionTemplate(editorDraft.interactions[0]);
+assert.notEqual(templateClone.id,editorDraft.interactions[0].id);
+assert.notEqual(templateClone.actions[0].id,editorDraft.interactions[0].actions[0].id);
+assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer um fluxo especial de rolagem de perícia");
+assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
+assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
+assert.ok(sheet.includes("behavior: [1120, 820]"), "Comportamento deve aproveitar a largura disponível");
+assert.ok(sheet.includes("component: [520, 760]"), "Propriedades deve ter espaço adequado para seus controles");
+assert.ok(sheet.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
+assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
+assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
+assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
+assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
 const fakeLibraryActor={
   flags:{nexus:{}},
   getFlag(scope,key){return this.flags[scope]?.[key];},
@@ -390,14 +394,14 @@ globalThis.game={settings:{
   get(scope,key){return savedSettings[scope+"."+key]??[];},
   async set(scope,key,value){savedSettings[scope+"."+key]=structuredClone(value);}
 }};
-await saveInteractionToLibrary(fakeLibraryActor,skillFlow);
+await saveInteractionToLibrary(fakeLibraryActor,editorDraft.interactions[0]);
 assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
-assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.skillKey,"stealth");
+assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.formula,"1d20");
 assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
 delete globalThis.game;
 assert.match(sheet,/config\.mode === "skill"/);
 assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
-assert.match(interactions,/Gatilhos e condições/);
+assert.match(interactions,/nexus-interaction-guided/);
 assert.match(interactions,/Salvar na biblioteca/);
 assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
