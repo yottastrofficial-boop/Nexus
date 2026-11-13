@@ -377,7 +377,7 @@ assert.notEqual(templateClone.actions[0].id,editorDraft.interactions[0].actions[
 assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer um fluxo especial de rolagem de perícia");
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
-assert.ok(sheet.includes("behavior: [1120, 820]"), "Comportamento deve aproveitar a largura disponível");
+assert.ok(sheet.includes("behavior: [820, 700]"), "Comportamento deve ter o mesmo tamanho da Biblioteca");
 assert.ok(sheet.includes("component: [520, 760]"), "Propriedades deve manter suas dimensões atuais");
 assert.ok(sheet.includes("library: [820, 700]") && sheet.includes("behavior: [820, 700]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
