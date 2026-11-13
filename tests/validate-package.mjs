@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.18", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.18"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.18"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.19", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.19"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.19"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.18/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.19/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.18"));
+assert.ok(readme.includes("Versão 1.0.0.19"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -431,3 +431,10 @@ assert.ok(interactions.includes("fa-arrow-up") && interactions.includes("fa-tras
 assert.ok(css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter largura e quebra de linha controladas");
 assert.ok(css.includes("nexus-alias-create,") && css.includes("background:transparent !important"), "Estrutura de dados deve evitar painéis aninhados redundantes");
 assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura padronizada");
+
+assert.ok(css.includes(':has(.nexus-library-panel) {'), "Biblioteca deve possuir dimensionamento próprio");
+assert.ok(css.includes('grid-template-columns:minmax(0,1fr) minmax(240px,270px)'), "Biblioteca deve reservar largura estável para a prévia sem comprimir a lista");
+assert.ok(css.includes(".nexus-library-folders button.active"), "Pastas da Biblioteca devem ter navegação visual própria");
+assert.ok(css.includes("grid-template-columns:68px minmax(0,1fr)"), "Cartões da Biblioteca devem usar miniatura e conteúdo lado a lado");
+assert.doesNotMatch(css, /:has\(\.nexus-tool-panel:not\(\.nexus-behavior-editor\):not\(\.nexus-alias-manager\)\)/, "Dimensionamento compacto não pode atingir genericamente a Biblioteca");
+assert.ok(css.includes("grid-template-columns:minmax(0,132px) 26px"), "Seletor de cor nas propriedades deve evitar largura vazia excessiva");
