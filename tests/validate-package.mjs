@@ -178,7 +178,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.match(readme, /Versão 1\.0\.0\.9/);
+assert.match(readme, /Versão 1\\.1\\.0/);
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -204,8 +204,8 @@ assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "O
 assert.match(sheet, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
 assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
 assert.match(template, /data-text-style-target="heading"/, "A formatação deve permitir selecionar o título");
-assert.match(template, /data-action-config="proficiency"/, "A ação de marcador de domínio deve ter configuração contextual");
-assert.match(template, /data-action-config="resource-slider"/, "A ação de ajuste de recurso deve ter configuração contextual");
+assert.ok(interactions.includes("INTERACTION_ACTIONS"), "Ações devem ser definidas pelo motor, não pelo seletor antigo");
+assert.ok(!template.includes("data-action-config="), "Configurações antigas do seletor rígido devem ser removidas");
 assert.match(template, /data-resource-slider/, "A barra arrastável deve ser renderizada");
 assert.match(template, /data-proficiency-level/, "O marcador deve oferecer os quatro níveis");
 assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser editável separadamente");
@@ -231,8 +231,8 @@ assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve r
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
-assert.match(template, /data-roll-formula-input/, "O campo de fórmula deve abrir o visualizador de propriedades");
-assert.match(template, /maxlength="500"/, "O campo de fórmula deve aceitar expressões compostas");
+assert.ok(interactions.includes("formula.length>500") || sheet.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
+assert.ok(interactions.includes("action.type===\\"roll\\""), "A configuração contextual de rolagem deve existir no motor");
 assert.match(sheet, /if \(actionSelect\) actionSelect\.value = one\?\.actionType/, "O seletor deve refletir a ação persistida no componente");
 assert.match(sheet, /\["rollFormula", one\.rollFormula \?\? ""\]/, "O Inspector deve restaurar a fórmula salva ao reabrir");
 assert.match(sheet, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
@@ -269,7 +269,7 @@ assert.ok(sheet.includes("executeTriggeredActions(component, eventName"), "Event
 assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /trigger: \{ event \}/);
 assert.match(interactions, /interaction\.actions/);
-assert.match(template, /toggle-component/);
+assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheet, /_toggleTargetComponent/);
 assert.match(sheet, /setResourceFromTrack/);
 console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");
