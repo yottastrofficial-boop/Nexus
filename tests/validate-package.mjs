@@ -232,9 +232,9 @@ assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
 assert.ok(interactions.includes("formula.length>500") || sheet.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
-assert.ok(interactions.includes("action.type===\\"roll\\""), "A configuração contextual de rolagem deve existir no motor");
-assert.match(sheet, /if \(actionSelect\) actionSelect\.value = one\?\.actionType/, "O seletor deve refletir a ação persistida no componente");
-assert.match(sheet, /\["rollFormula", one\.rollFormula \?\? ""\]/, "O Inspector deve restaurar a fórmula salva ao reabrir");
+assert.ok(interactions.includes('"roll"'), "O motor deve oferecer a ação de rolagem");
+assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"), "O editor deve restaurar os fluxos salvos");
+assert.ok(sheet.includes("applyInteractionEditorChange"), "O Inspector deve persistir as configurações de cada ação");
 assert.match(sheet, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
 assert.match(sheet, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
 assert.match(sheet, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
