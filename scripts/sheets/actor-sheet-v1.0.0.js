@@ -3951,23 +3951,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
       const imageSettings = inspector.querySelector("[data-image-settings]");
       if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
-      const actionSelect = inspector.querySelector('[data-component-setting="actionType"]');
-      if (actionSelect) actionSelect.value = one?.actionType ?? "";
-      const proficiencyOption = actionSelect?.querySelector('option[value="proficiency"]');
-      const rollOption = actionSelect?.querySelector('option[value="roll"]');
-      const sliderOption = actionSelect?.querySelector('option[value="resource-slider"]');
-      const toggleOption = actionSelect?.querySelector('option[value="toggle-component"]');
-      const targetList = inspector.querySelector("[data-action-target-options]");
-      if (targetList) targetList.replaceChildren(...(this._currentLayout?.components ?? []).filter(target => target.id !== one?.id).map(target => { const option = document.createElement("option"); option.value = target.id; option.label = target.customLabel || COMPONENTS[target.type]?.label || target.type; return option; }));
-      const resourceTypes = ["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","resource-meter","asset-meter","sheet-resource"];
-      const proficiencyTypes = ["sheet-skill","sheet-skill-group","sheet-attribute"];
-      const supportsProficiency = !!one && (proficiencyTypes.includes(one.type) || ["skill","skill-group","attribute"].includes(one.sheetVariant) || one.actionType === "proficiency");
-      const supportsRoll = !!one && (!["token","asset-image","asset-table","asset-notes","asset-link"].includes(one.type) || one.actionType === "roll");
-      const supportsSlider = !!one && (resourceTypes.includes(one.type) || one.actionType === "resource-slider");
-      if (proficiencyOption) proficiencyOption.hidden = !supportsProficiency;
-      if (rollOption) rollOption.hidden = !supportsRoll;
-      if (sliderOption) sliderOption.hidden = !supportsSlider;
-      if (toggleOption) toggleOption.hidden = !one || one.type === "token";
       this._syncTextToolbar(inspector, one);
     }
     if (inspector) {
