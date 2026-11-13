@@ -4938,3 +4938,88 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   max-width:calc(100vw - 24px) !important;
   max-height:calc(100vh - 24px) !important;
 }
+
+
+/* 1.0.0.18 — Sistema visual unificado dos painéis e controles. */
+.nexus-panel-window:has(.nexus-component-inspector),
+.nexus-panel-window:has(.nexus-settings-panel),
+.nexus-panel-window:has(.nexus-tool-panel:not(.nexus-behavior-editor):not(.nexus-alias-manager)) {
+  width:min(560px,calc(100vw - 24px)) !important;
+  height:min(620px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-panel-window:has(.nexus-alias-manager) {
+  width:min(620px,calc(100vw - 24px)) !important;
+  height:min(620px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-interaction-editor { gap:9px !important; min-width:0; }
+.nexus-interaction-editor-heading { margin:0 !important; }
+.nexus-interaction-editor-title { display:flex; align-items:baseline; gap:8px; min-width:0; }
+.nexus-interaction-editor-title strong { font-size:13px !important; }
+.nexus-interaction-editor-title span { color:var(--nexus-panel-muted,#9aadc2); font-size:10px !important; }
+.nexus-interaction-flow { margin:0 !important; padding:0 !important; gap:12px !important; border:0 !important; border-radius:0 !important; background:transparent !important; }
+.nexus-interaction-flow-heading { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:end !important; gap:12px !important; padding:0 0 10px !important; border-bottom:1px solid var(--nexus-panel-border,#3c5067) !important; }
+.nexus-interaction-flow-actions { display:flex; align-items:center; gap:5px !important; }
+.nexus-interaction-group { min-width:0; padding:0 !important; gap:8px !important; border:0 !important; background:transparent !important; }
+.nexus-interaction-group-heading { display:flex !important; align-items:center !important; gap:8px !important; min-height:30px; }
+.nexus-interaction-group-heading h6 { flex:1 1 auto; color:var(--nexus-panel-text,#e7edf5) !important; font-size:11px !important; letter-spacing:.01em !important; text-transform:none !important; }
+.nexus-interaction-group-heading > .nexus-interaction-field { flex:0 1 220px; width:auto !important; max-width:220px !important; display:flex !important; flex-direction:row !important; align-items:center; gap:7px !important; }
+.nexus-interaction-group-heading > .nexus-interaction-field span { white-space:nowrap; }
+.nexus-interaction-group-heading > .nexus-interaction-field select { min-width:110px; }
+.nexus-interaction-row { display:grid !important; grid-template-columns:minmax(0,1fr) 30px !important; align-items:end; gap:8px !important; padding:7px 0 !important; border:0 !important; border-bottom:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 65%,transparent) !important; border-radius:0 !important; background:transparent !important; }
+.nexus-interaction-row > .nexus-interaction-field { display:grid !important; grid-template-columns:74px minmax(0,1fr) !important; align-items:center; gap:9px !important; }
+.nexus-interaction-condition { display:grid !important; grid-template-columns:minmax(0,1.6fr) minmax(120px,.9fr) minmax(100px,.8fr) 30px !important; align-items:end; gap:9px !important; padding:8px 0 !important; border:0 !important; border-bottom:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 65%,transparent) !important; border-radius:0 !important; background:transparent !important; }
+.nexus-interaction-field { min-width:0; gap:4px !important; font-size:10px !important; }
+.nexus-interaction-field input:not([type=checkbox]),.nexus-interaction-field select { min-height:32px !important; padding:5px 8px !important; font-size:11px !important; }
+.nexus-interaction-button { display:inline-flex !important; align-items:center; justify-content:center; gap:5px; min-width:0 !important; min-height:27px !important; padding:4px 8px !important; border-radius:5px !important; font-size:10px !important; line-height:1 !important; }
+.nexus-interaction-button.is-icon { width:28px !important; min-width:28px !important; height:28px !important; min-height:28px !important; padding:0 !important; font-size:11px !important; }
+.nexus-interaction-button.is-icon:disabled { opacity:.35; cursor:default; }
+.nexus-interaction-action { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:center; gap:8px 12px !important; margin:0 !important; padding:9px 0 !important; border:0 !important; border-bottom:1px solid var(--nexus-panel-border,#3c5067) !important; border-radius:0 !important; background:transparent !important; }
+.nexus-interaction-action > summary.nexus-interaction-action-title { display:flex !important; align-items:center; flex:1 1 auto; grid-column:1; grid-row:1; width:100%; min-width:0; min-height:30px; margin:0; padding:4px 0; color:var(--nexus-panel-text,#e7edf5); font-size:11px; font-weight:650; line-height:1.4; white-space:normal !important; overflow:visible !important; overflow-wrap:anywhere; word-break:normal; cursor:pointer; }
+.nexus-interaction-action-title::marker { color:var(--nexus-highlight-color,#78b7e8); }
+.nexus-interaction-action-name { display:block; min-width:0; width:100%; overflow-wrap:anywhere; }
+.nexus-interaction-action-tools { display:flex; align-items:center; justify-content:flex-end; gap:4px !important; min-width:max-content; }
+.nexus-interaction-action > .nexus-interaction-action-meta { display:grid !important; grid-column:1/-1; grid-row:2; grid-template-columns:minmax(0,1fr) auto !important; align-items:end; gap:12px !important; }
+.nexus-interaction-action-meta > .nexus-interaction-field:first-child { max-width:320px; }
+.nexus-interaction-action-meta > .nexus-interaction-field:has(input[type=checkbox]) { display:flex; flex-direction:row; align-items:center; gap:7px; white-space:nowrap; }
+.nexus-interaction-action > .nexus-interaction-action-config { display:grid !important; grid-column:1/-1; grid-row:3; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; padding:8px 0 0 !important; border-top:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 60%,transparent) !important; }
+.nexus-interaction-action-config > .nexus-interaction-field:only-child { grid-column:1/-1; }
+.nexus-interaction-execution { padding:8px 0 0 !important; border-top:1px solid var(--nexus-panel-border,#3c5067) !important; }
+.nexus-interaction-execution > summary { color:var(--nexus-panel-muted,#9aadc2); font-size:10px; }
+.nexus-panel-window .nexus-alias-manager { gap:14px !important; padding:0 2px 4px 0 !important; }
+.nexus-panel-window .nexus-data-mode { position:sticky; top:0; z-index:3; display:flex; gap:4px; padding:0 0 7px !important; border:0 !important; border-bottom:1px solid var(--nexus-panel-border,#3c5067) !important; border-radius:0 !important; background:var(--nexus-panel-bg,#1b2735) !important; }
+.nexus-panel-window .nexus-data-mode button { min-height:30px !important; padding:5px 10px !important; border:1px solid transparent !important; border-radius:5px !important; font-size:10px !important; }
+.nexus-panel-window .nexus-alias-create,
+.nexus-panel-window .nexus-alias-card { padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
+.nexus-panel-window .nexus-alias-create { padding-bottom:12px !important; border-bottom:1px solid var(--nexus-panel-border,#3c5067) !important; }
+.nexus-panel-window .nexus-alias-create > strong { font-size:12px !important; }
+.nexus-panel-window .nexus-alias-existing { gap:10px !important; }
+.nexus-panel-window .nexus-alias-existing > label { display:grid !important; grid-template-columns:minmax(110px,.65fr) minmax(0,1.35fr) !important; align-items:center; gap:10px !important; padding:0 !important; border:0 !important; background:transparent !important; }
+.nexus-panel-window .nexus-alias-card { gap:12px !important; }
+.nexus-panel-window .nexus-alias-card-grid,
+.nexus-panel-window .nexus-alias-field-grid,
+.nexus-panel-window .nexus-alias-create-grid { gap:10px !important; }
+.nexus-panel-window .nexus-alias-card label,
+.nexus-panel-window .nexus-alias-create label { gap:4px !important; font-size:10px !important; }
+.nexus-panel-window .nexus-alias-card input:not([type=checkbox]),
+.nexus-panel-window .nexus-alias-card select,
+.nexus-panel-window .nexus-alias-create input,
+.nexus-panel-window .nexus-alias-create select,
+.nexus-panel-window .nexus-alias-existing > label select { min-height:32px !important; font-size:11px !important; }
+.nexus-panel-window .nexus-alias-native-source { padding:6px 0 !important; border-radius:0 !important; background:transparent !important; border-bottom:1px solid var(--nexus-panel-border,#3c5067); }
+@media(max-width:680px){
+ .nexus-interaction-guided { grid-template-columns:minmax(0,1fr) !important; }
+ .nexus-interaction-condition { grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px !important; }
+ .nexus-interaction-condition > .nexus-interaction-field:first-child { grid-column:1/-1; }
+ .nexus-interaction-action > .nexus-interaction-action-config { grid-template-columns:minmax(0,1fr) !important; }
+}
+@media(max-width:480px){
+ .nexus-interaction-flow-heading { grid-template-columns:minmax(0,1fr) !important; }
+ .nexus-interaction-condition { grid-template-columns:minmax(0,1fr) !important; }
+ .nexus-interaction-condition > .nexus-interaction-field:first-child { grid-column:auto; }
+ .nexus-interaction-condition > .nexus-interaction-button { justify-self:end; }
+ .nexus-panel-window .nexus-alias-existing > label { grid-template-columns:minmax(0,1fr) !important; }
+}
