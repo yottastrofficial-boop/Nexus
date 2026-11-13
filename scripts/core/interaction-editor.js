@@ -99,8 +99,12 @@ export function renderInteractionEditor(root, component, onChange, targets = [])
 
   const persist = () => {
     flows = flows.map((flow, index) => normalizeInteraction(flow, index)).filter(Boolean);
+    root._nexusFlows = flows;
+    root._nexusOnChange = onChange;
     onChange?.(flows);
   };
+  root._nexusFlows = flows;
+  root._nexusOnChange = onChange;
   const toolbar = element("div", "nexus-interaction-toolbar");
   const addFlow = element("button", "nexus-interaction-add", "Adicionar fluxo");
   addFlow.type = "button";
@@ -220,6 +224,8 @@ export function renderInteractionEditor(root, component, onChange, targets = [])
   if (root.dataset.bound === "true") return;
   root.dataset.bound = "true";
   root.addEventListener("change", event => {
+    const flows = root._nexusFlows ?? [];
+    const onChange = root._nexusOnChange;
     const target = event.target;
     const card = target.closest("[data-flow-index]");
     if (!card) return;
@@ -250,6 +256,8 @@ export function renderInteractionEditor(root, component, onChange, targets = [])
   });
 
   root.addEventListener("click", event => {
+    const flows = root._nexusFlows ?? [];
+    const onChange = root._nexusOnChange;
     const button = event.target.closest("button[data-command]");
     if (!button) return;
     const card = button.closest("[data-flow-index]");
