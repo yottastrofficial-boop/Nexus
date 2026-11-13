@@ -2197,6 +2197,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (command !== "save-flow") await this._writeLayouts(layouts, active);
       const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) {
+        if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
         const scrollContainer = editor.closest(".nexus-behavior-editor");
         const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
@@ -2215,6 +2216,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
         nextControl?.focus({ preventScroll: true });
       }
     };
+    $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
+      event.preventDefault(); event.stopPropagation();
+      const tab=event.currentTarget,editor=tab.closest("[data-interaction-editor]"),flowId=tab.dataset.interactionFlowTab;
+      if(!editor||!flowId)return;
+      editor.dataset.activeInteractionId=flowId;
+      editor.querySelectorAll("[data-interaction-flow-tab]").forEach(item=>{
+        const active=item===tab;item.classList.toggle("active",active);item.setAttribute("aria-selected",String(active));
+      });
+      editor.querySelectorAll("[data-interaction-flow-panel]").forEach(panel=>{panel.hidden=panel.dataset.interactionFlowPanel!==flowId;});
+    });
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
@@ -4253,7 +4264,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [420, 620], component: [520, 760], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [820, 700] };
+    const panelSizes = { style: [420, 620], component: [420, 620], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [820, 700] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
