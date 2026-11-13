@@ -3970,17 +3970,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
         else interactionEditor.replaceChildren();
       }
-      const behaviorPanel = this._nexusPanelWindows?.get("behavior")?.panel ?? this.element?.querySelector?.('[data-tool-panel="behavior"]');
-      const behaviorEditor = behaviorPanel?.querySelector?.("[data-interaction-editor]");
-      const behaviorEmpty = behaviorPanel?.querySelector?.("[data-behavior-empty]");
-      const behaviorTarget = behaviorPanel?.querySelector?.("[data-behavior-target]");
-      if (behaviorEditor) {
-        behaviorEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
-        else behaviorEditor.replaceChildren();
-      }
-      if (behaviorEmpty) behaviorEmpty.hidden = !!one;
-      if (behaviorTarget) behaviorTarget.textContent = one ? (one.customLabel || one.type || "Componente") : "Selecione um componente";
       const technicalId = inspector.querySelector("[data-component-technical-id]");
       const technicalType = inspector.querySelector("[data-component-technical-type]");
       if (technicalId) technicalId.value = one?.id ?? "";
@@ -3992,6 +3981,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (imageSettings) imageSettings.hidden = one?.type !== "asset-image";
       this._syncTextToolbar(inspector, one);
     }
+      const behaviorPanel = this._nexusPanelWindows?.get("behavior")?.panel ?? this.element?.querySelector?.('[data-tool-panel="behavior"]');
+      const behaviorEditor = behaviorPanel?.querySelector?.("[data-interaction-editor]");
+      const behaviorEmpty = behaviorPanel?.querySelector?.("[data-behavior-empty]");
+      const behaviorTarget = behaviorPanel?.querySelector?.("[data-behavior-target]");
+      if (behaviorEditor) {
+        behaviorEditor.dataset.componentId = one?.id ?? "";
+        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        else behaviorEditor.replaceChildren();
+      }
+      if (behaviorEmpty) behaviorEmpty.hidden = !!one;
+      if (behaviorTarget) behaviorTarget.textContent = one ? (one.customLabel || one.type || "Componente") : "Selecione um componente";
     if (inspector) {
       inspector.hidden = !one && !selectedGroup; if (empty) empty.hidden = !!one || !!selectedGroup;
       const groupInspector=inspector.querySelector("[data-group-inspector]");
