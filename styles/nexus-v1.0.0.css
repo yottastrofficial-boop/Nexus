@@ -4928,3 +4928,13 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-behavior-editor .nexus-interaction-action > .nexus-interaction-action-config { grid-template-columns:minmax(0,1fr); }
   .nexus-behavior-editor .nexus-interaction-row > .nexus-interaction-field { grid-template-columns:minmax(0,1fr); }
 }
+
+
+/* 1.0.0.17 — Comportamento e Biblioteca compartilham a mesma geometria de janela. */
+.nexus-panel-window:has(.nexus-library-panel),
+.nexus-panel-window:has(.nexus-behavior-editor) {
+  width:min(900px,calc(100vw - 24px)) !important;
+  height:min(640px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
