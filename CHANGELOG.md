@@ -1,3 +1,13 @@
+## 1.0.0.17
+
+### Padronização de dimensões
+- Corrigida a diferença de tamanho entre Comportamento e Biblioteca: ambos agora compartilham a mesma largura e altura (900 × 640 px), inclusive nas regras CSS e na configuração inicial das janelas.
+- Propriedades permanece em 420 × 620 px, igual ao painel Camadas.
+
+### Validação
+- Testes de regressão atualizados para conferir a geometria compartilhada entre Comportamento e Biblioteca.
+- A validação visual no Foundry VTT 14 continua necessária.
+
 ## 1.0.0.16
 
 ### Editor de Comportamento e Propriedades
