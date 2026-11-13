@@ -209,7 +209,7 @@ export function renderInteractionEditor(container,component,components=[],librar
   head.append(el("strong","","Comportamento"),btn("＋ Novo fluxo","add-flow",""),btn("＋ Rolagem de perícia","add-skill-roll",""));
   const view=el("div","nexus-interaction-view-toggle");
   for(const [value,label] of [["cards","Cartões"],["list","Lista"]]){
-    const button=btn(label,"", "");button.dataset.interactionView=value;button.classList.toggle("is-active",value===viewMode);view.append(button);
+    const button=el("button","nexus-interaction-button",label);button.type="button";button.dataset.interactionView=value;button.classList.toggle("is-active",value===viewMode);view.append(button);
   }
   head.append(view);container.append(head);
   if(library.length){
