@@ -5006,7 +5006,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       event.preventDefault(); event.stopPropagation(); sheet._runComponentAction(card.dataset.id, "rightClick");
     });
     canvas.addEventListener("pointerover", event => {
-      if (sheet._mode !== "play" || (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget))) return;
+      if (sheet._mode !== "play" || (event.relatedTarget instanceof Node && event.target.closest(".nexus-component")?.contains(event.relatedTarget))) return;
       const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
       if (card && canvas.contains(card)) sheet._runComponentAction(card.dataset.id, "hover");
     });
