@@ -114,7 +114,7 @@ Componentes que ainda utilizam `actionType`, `rollFormula` e `actionTargetId` s�
 
 ## 2.1. Biblioteca de fluxos reutilizáveis
 
-O editor de Comportamento oferece modelos prontos e uma biblioteca pessoal por Actor. Fluxos salvos podem ser inseridos em outros componentes sem compartilhar os mesmos identificadores internos.
+O editor de Comportamento oferece modelos prontos e uma biblioteca pessoal do usuário atual no Foundry. A biblioteca fica disponível entre os Actors abertos por esse usuário e não depende de um personagem específico. Fluxos salvos podem ser inseridos em outros componentes sem compartilhar os mesmos identificadores internos.
 
 O primeiro modelo é **Rolagem de perícia**. Ele guarda a chave técnica da perícia, e a execução consulta os dados atuais do Actor por meio das regras de perícias do NEXUS: atributo relacionado, nível de proficiência, bônus de proficiência e modificador final. Assim, trocar a perícia no seletor não exige duplicar fórmulas.
 

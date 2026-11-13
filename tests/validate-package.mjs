@@ -369,9 +369,16 @@ const fakeLibraryActor={
   getFlag(scope,key){return this.flags[scope]?.[key];},
   async setFlag(scope,key,value){this.flags[scope]??={};this.flags[scope][key]=structuredClone(value);}
 };
+const savedSettings={};
+globalThis.game={settings:{
+  get(scope,key){return savedSettings[scope+"."+key]??[];},
+  async set(scope,key,value){savedSettings[scope+"."+key]=structuredClone(value);}
+}};
 await saveInteractionToLibrary(fakeLibraryActor,skillFlow);
 assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
 assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.skillKey,"stealth");
+assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
+delete globalThis.game;
 assert.match(sheet,/config\.mode === "skill"/);
 assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
 assert.match(interactions,/Regra guiada · Gatilhos e condições/);

@@ -102,15 +102,19 @@ export function instantiateInteractionTemplate(template) {
   return flow;
 }
 export function getInteractionLibrary(actor) {
-  const entries=actor?.getFlag?.("nexus","interactionLibrary");
+  let entries=[];
+  try { entries=globalThis.game?.settings?.get?.("nexus","interactionLibrary")??[]; } catch {}
+  if(!Array.isArray(entries)||!entries.length) entries=actor?.getFlag?.("nexus","interactionLibrary")??[];
   return Array.isArray(entries)?entries.filter(item=>item&&typeof item.id==="string"&&item.flow).map(item=>({id:item.id,name:String(item.name??item.flow.name??"Fluxo salvo"),flow:normalizeInteraction(item.flow)})).filter(item=>item.flow):[];
 }
 export async function saveInteractionToLibrary(actor,flow) {
-  if(!actor?.setFlag||!flow)return [];
+  if(!flow)return [];
   const entries=getInteractionLibrary(actor);
   const entry={id:newId("library-flow"),name:String(flow.name??"Fluxo salvo").slice(0,60),flow:normalizeInteraction(structuredClone(flow))};
   entries.push(entry);
-  await actor.setFlag("nexus","interactionLibrary",entries);
+  const settings=globalThis.game?.settings;
+  if(typeof settings?.set==="function") await settings.set("nexus","interactionLibrary",entries);
+  else if(actor?.setFlag) await actor.setFlag("nexus","interactionLibrary",entries);
   return entries;
 }
 export function ensureEditableInteractions(component) {

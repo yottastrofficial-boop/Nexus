@@ -2,6 +2,13 @@ import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 
 Hooks.once("init", () => {
+  game.settings.register("nexus","interactionLibrary",{
+    name:"Biblioteca de fluxos",
+    scope:"client",
+    config:false,
+    type:Array,
+    default:[]
+  });
   console.log("NEXUS | Inicializando sistema 1.0.0.8");
 
   const { DocumentSheetConfig } = foundry.applications.apps;
