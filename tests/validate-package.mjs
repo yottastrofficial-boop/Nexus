@@ -367,7 +367,7 @@ console.log("NEXUS 1.0.0.13: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
-assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");
+assert.ok(sheet.includes('["card", "appearance", "advanced"]'), "As três áreas restantes do Inspector devem ser navegáveis");
 
 
 // Reusable behavior library and skill-roll preset.
