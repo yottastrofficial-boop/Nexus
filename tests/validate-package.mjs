@@ -443,6 +443,6 @@ assert.ok(!template.includes("nexus-behavior-header"), "O cabeçalho redundante 
 assert.match(interactions,/nexus-interaction-trigger-select/, "Gatilhos devem usar seletor direto sem legenda redundante");
 assert.match(interactions,/nexus-interaction-condition-join/, "Combinação E/OU deve ter seletor próprio e compacto");
 assert.match(interactions,/nexus-interaction-action nexus-interaction-action-head/, "O estado Ativa deve ficar junto ao título da ação");
-assert.match(css,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
+assert.match(sheet,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
 assert.match(css,/--nexus-scrollbar-thumb-hover/, "Temas devem centralizar estados das barras de rolagem");
 assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"), "Color pickers devem ter distribuição previsível");
