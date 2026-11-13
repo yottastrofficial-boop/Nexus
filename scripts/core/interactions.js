@@ -93,7 +93,7 @@ export function getComponentInteractions(component) {
   const configured = Array.isArray(component?.interactions)
     ? component.interactions.map(normalizeInteraction).filter(Boolean)
     : [];
-  if (configured.length) return configured;
+  if (Array.isArray(component?.interactions)) return configured;
   const legacy = LEGACY_ACTIONS[component?.actionType];
   if (!legacy) return [];
   return [normalizeInteraction({
