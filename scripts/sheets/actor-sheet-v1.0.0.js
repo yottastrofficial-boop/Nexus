@@ -1727,7 +1727,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-inspector-tab]").on("click", event => {
       const tab = event.currentTarget.dataset.inspectorTab;
       const inspector = event.currentTarget.closest(".nexus-component-inspector");
-      if (!inspector || !["card", "appearance"].includes(tab)) return;
+      if (!inspector || !["card", "behavior", "appearance", "advanced"].includes(tab)) return;
       this._componentInspectorTab = tab;
       inspector.querySelectorAll("[data-inspector-tab]").forEach(button => button.classList.toggle("active", button.dataset.inspectorTab === tab));
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel => { const active = panel.dataset.inspectorTabPanel === tab; panel.hidden = !active; panel.classList.toggle("active", active); });
@@ -3946,6 +3946,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? []);
         else interactionEditor.replaceChildren();
       }
+      const technicalId = inspector.querySelector("[data-component-technical-id]");
+      const technicalType = inspector.querySelector("[data-component-technical-type]");
+      if (technicalId) technicalId.value = one?.id ?? "";
+      if (technicalType) technicalType.value = one?.type ?? "";
       inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = true; });
       const textTools = inspector.querySelector("[data-text-tools]");
       if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
