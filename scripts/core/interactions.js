@@ -40,7 +40,7 @@ function normalizeCondition(condition, index = 0) {
   if (!isRecord(condition)) return null;
   const path = cleanText(condition.path, 180).replace(/^(actor|system)\./, "");
   const operator = INTERACTION_OPERATORS.includes(condition.operator) ? condition.operator : "equals";
-  if (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path)) return null;
+  if (path && !/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path)) return null;
   if (path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return null;
   return {
     id: cleanText(condition.id, 80) || `condition-${index + 1}`,
