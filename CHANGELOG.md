@@ -1,3 +1,20 @@
+## 1.0.0.19
+
+### Correção da Biblioteca e distribuição de espaço
+- Corrigido conflito de cascata em que o seletor genérico de painéis compactos também redimensionava a Biblioteca para 560 px.
+- Biblioteca e Comportamento passam a ter dimensionamento explícito e independente; Biblioteca preserva 900 × 640 px.
+- Navegação de pastas recebeu layout horizontal próprio, com estados ativos claros e rolagem horizontal quando necessário.
+- Cartões da Biblioteca foram reorganizados em linhas compactas com miniatura, título e conteúdo lado a lado.
+- Área de itens, grupos salvos e prévia/configuração recebeu distribuição de espaço mais previsível.
+- Em painéis estreitos, a prévia passa abaixo da lista em vez de comprimir as colunas.
+- Seletor de cor das Propriedades deixa de ocupar uma área horizontal excessiva sem conteúdo.
+- Protótipo HTML revisado incluído em docs/prototypes/editor-ux-1.0.0.19.html.
+
+### Compatibilidade e validação
+- Sem alteração no formato dos componentes, IDs, dados salvos ou execução de interações.
+- Atualizados testes de regressão para dimensionamento específico, navegação e layout responsivo.
+- Necessária confirmação visual/funcional no Foundry VTT 14.
+
 ## 1.0.0.18
 
 ### Revisão de interface e padronização dos menus
