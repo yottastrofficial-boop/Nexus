@@ -378,8 +378,9 @@ assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
 assert.ok(sheet.includes("behavior: [900, 640]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
-assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar as dimensões de Camadas");
-assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar as dimensões de Camadas");
+assert.ok(sheet.includes("component: [560, 620]"), "Propriedades deve seguir a geometria compacta dos painéis");
+assert.ok(sheet.includes("style: [560, 620]") && sheet.includes("layers: [560, 620]") && sheet.includes("settings: [560, 620]"), "Painéis compactos devem compartilhar dimensões");
+assert.ok(sheet.includes("aliases: [620, 620]"), "Estrutura de dados deve usar dimensões quadradas padronizadas");
 assert.ok(sheet.includes("library: [900, 640]") && sheet.includes("behavior: [900, 640]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(sheet.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
@@ -396,7 +397,9 @@ assert.ok(interactions.includes("data-interaction-flow-panel"), "Cada aba deve e
 assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
 assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ocupar uma área dimensionada no cabeçalho de condições");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
-assert.ok(css.includes("width:min(420px,calc(100vw - 24px))"), "Propriedades deve ter dimensões padronizadas com Camadas");
+assert.ok(css.includes("width:min(560px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
+assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve ter largura padronizada");
+assert.ok(css.includes("nexus-interaction-action-title >") || css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter layout flexível");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.ok(css.includes("height:min(640px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
 const fakeLibraryActor={
