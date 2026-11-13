@@ -4942,8 +4942,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 
 /* 1.0.0.18 — Sistema visual unificado dos painéis e controles. */
 .nexus-panel-window:has(.nexus-component-inspector),
-.nexus-panel-window:has(.nexus-settings-panel),
-.nexus-panel-window:has(.nexus-tool-panel:not(.nexus-behavior-editor):not(.nexus-alias-manager)) {
+.nexus-panel-window:has(.nexus-settings-panel) {
   width:min(560px,calc(100vw - 24px)) !important;
   height:min(620px,calc(100vh - 24px)) !important;
   max-width:calc(100vw - 24px) !important;
@@ -5022,4 +5021,137 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
  .nexus-interaction-condition > .nexus-interaction-field:first-child { grid-column:auto; }
  .nexus-interaction-condition > .nexus-interaction-button { justify-self:end; }
  .nexus-panel-window .nexus-alias-existing > label { grid-template-columns:minmax(0,1fr) !important; }
+}
+
+
+/* 1.0.0.19 — Biblioteca responsiva e correção de conflitos de dimensionamento. */
+/* O tamanho é definido pelo tipo de ambiente, nunca por um seletor genérico de tool-panel. */
+.nexus-panel-window:has(.nexus-library-panel) {
+  width:min(900px,calc(100vw - 24px)) !important;
+  height:min(640px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-panel-window:has(.nexus-behavior-editor) {
+  width:min(900px,calc(100vw - 24px)) !important;
+  height:min(640px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-panel-window:has(.nexus-component-inspector),
+.nexus-panel-window:has(.nexus-settings-panel),
+.nexus-panel-window:has([data-tool-panel="layers"]),
+.nexus-panel-window:has([data-tool-panel="style"]) {
+  width:min(560px,calc(100vw - 24px)) !important;
+  height:min(620px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-panel-window:has(.nexus-alias-manager) {
+  width:min(620px,calc(100vw - 24px)) !important;
+  height:min(620px,calc(100vh - 24px)) !important;
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 24px) !important;
+}
+.nexus-panel-window .nexus-library-folders {
+  display:flex !important; align-items:center !important; gap:6px !important;
+  flex:0 0 auto !important; min-width:0 !important; max-width:100% !important;
+  padding:0 0 9px !important; overflow-x:auto !important; overflow-y:hidden !important;
+  border-bottom:1px solid var(--nexus-panel-border,#3c5067) !important; scrollbar-width:thin;
+}
+.nexus-panel-window .nexus-library-folders button {
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  gap:7px !important; flex:0 0 auto !important; min-width:max-content !important; min-height:31px !important;
+  padding:5px 10px !important; border:1px solid transparent !important; border-radius:5px !important;
+  color:var(--nexus-panel-muted,#9aadc2) !important; background:transparent !important;
+  font:600 10px/1.2 system-ui,sans-serif !important; white-space:nowrap !important;
+}
+.nexus-panel-window .nexus-library-folders button.active {
+  border-color:var(--nexus-highlight-color,#78b7e8) !important;
+  color:var(--nexus-panel-text,#e7edf5) !important;
+  background:color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 13%,transparent) !important;
+}
+.nexus-panel-window .nexus-library-panel { container-type:inline-size !important; gap:10px !important; padding:12px !important; }
+.nexus-panel-window .nexus-library-toolbar {
+  display:grid !important; grid-template-columns:minmax(0,1fr) minmax(130px,170px) !important;
+  gap:10px !important; width:100% !important;
+}
+.nexus-panel-window .nexus-library-search-wrap,
+.nexus-panel-window .nexus-library-tag { min-width:0 !important; width:100% !important; }
+.nexus-panel-window .nexus-library-workspace {
+  display:grid !important; grid-template-columns:minmax(0,1fr) minmax(240px,270px) !important;
+  grid-template-rows:minmax(0,1fr) !important; gap:14px !important; align-items:stretch !important;
+  flex:1 1 0 !important; min-width:0 !important; min-height:0 !important; height:auto !important; overflow:hidden !important;
+}
+.nexus-panel-window .nexus-library-main {
+  display:flex !important; flex-direction:column !important; align-items:stretch !important; gap:10px !important;
+  min-width:0 !important; min-height:0 !important; height:100% !important; padding:0 5px 8px 0 !important; overflow:auto !important;
+}
+.nexus-panel-window .nexus-library-section-heading {
+  display:flex !important; align-items:baseline !important; justify-content:space-between !important;
+  flex-wrap:wrap !important; gap:5px 12px !important; min-width:0 !important; margin:0 !important;
+}
+.nexus-panel-window .nexus-library-assets {
+  display:grid !important; grid-template-columns:repeat(auto-fill,minmax(205px,1fr)) !important;
+  align-content:start !important; align-items:stretch !important; gap:8px !important;
+  min-width:0 !important; min-height:0 !important;
+}
+.nexus-panel-window .nexus-library-asset {
+  display:grid !important; grid-template-columns:68px minmax(0,1fr) !important;
+  grid-template-rows:minmax(0,1fr) !important; align-items:center !important; align-content:center !important;
+  gap:8px !important; width:100% !important; min-width:0 !important; min-height:84px !important;
+  height:auto !important; aspect-ratio:auto !important; padding:7px !important; overflow:hidden !important;
+}
+.nexus-panel-window .nexus-library-preview-stage {
+  grid-column:1 !important; grid-row:1 !important; display:grid !important; place-items:center !important;
+  width:68px !important; min-width:68px !important; max-width:68px !important; height:68px !important;
+  min-height:68px !important; max-height:68px !important; aspect-ratio:1 !important; padding:5px !important; overflow:hidden !important;
+}
+.nexus-panel-window .nexus-library-asset-meta {
+  grid-column:2 !important; grid-row:1 !important; display:flex !important; align-items:flex-start !important;
+  justify-content:center !important; min-width:0 !important; width:100% !important; overflow:hidden !important;
+}
+.nexus-panel-window .nexus-library-asset-meta strong {
+  display:block !important; width:100% !important; overflow-wrap:anywhere !important;
+  white-space:normal !important; font-size:11px !important; line-height:1.35 !important;
+}
+.nexus-panel-window .nexus-library-saved-section {
+  display:flex !important; flex-direction:column !important; gap:9px !important;
+  margin:2px 0 0 !important; padding:12px 0 0 !important;
+}
+.nexus-panel-window .nexus-library-saved-groups {
+  display:grid !important; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)) !important;
+  align-content:start !important; align-items:stretch !important; gap:8px !important;
+}
+.nexus-panel-window .nexus-library-saved-group { min-width:0 !important; padding:7px !important; }
+.nexus-panel-window .nexus-library-saved-group-preview { height:72px !important; min-height:72px !important; }
+.nexus-panel-window .nexus-library-details {
+  position:relative !important; top:auto !important; display:flex !important; flex-direction:column !important;
+  align-self:stretch !important; min-width:0 !important; min-height:0 !important; height:100% !important;
+  max-height:none !important; padding:12px !important; overflow:auto !important;
+}
+.nexus-panel-window .nexus-library-detail-placeholder { gap:9px !important; padding:8px 0 !important; }
+.nexus-panel-window .nexus-library-detail-placeholder p { max-width:34ch; }
+.nexus-panel-window .nexus-component-inspector .nexus-field-control-row:has(> nexus-color-picker) {
+  grid-template-columns:minmax(0,132px) 26px !important; justify-content:start !important; gap:7px !important;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-field-control-row > nexus-color-picker {
+  width:132px !important; max-width:100% !important; min-width:0 !important;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-field-control-row > .nexus-field-reset {
+  width:26px !important; min-width:26px !important; height:30px !important; min-height:30px !important;
+}
+@container (max-width:760px) {
+  .nexus-panel-window .nexus-library-workspace {
+    grid-template-columns:minmax(0,1fr) !important; grid-template-rows:minmax(0,1fr) minmax(170px,230px) !important; overflow:auto !important;
+  }
+  .nexus-panel-window .nexus-library-details {
+    height:auto !important; max-height:230px !important;
+    border-left:0 !important; border-top:1px solid var(--nexus-panel-border,#3c5067) !important;
+  }
+}
+@container (max-width:540px) {
+  .nexus-panel-window .nexus-library-toolbar { grid-template-columns:minmax(0,1fr) !important; }
+  .nexus-panel-window .nexus-library-assets { grid-template-columns:repeat(auto-fill,minmax(175px,1fr)) !important; }
+  .nexus-panel-window .nexus-library-saved-groups { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important; }
 }

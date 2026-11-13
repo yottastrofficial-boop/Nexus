@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS — Protótipo de layout 1.0.0.19</title>
+<style>
+:root{color-scheme:dark;--bg:#111923;--panel:#192431;--surface:#202e3e;--surface2:#26384b;--border:#3c5067;--text:#e7edf5;--muted:#9aadc2;--accent:#78b7e8;--input:#111b27}
+*{box-sizing:border-box}body{margin:0;padding:28px;background:#10161e;color:var(--text);font:12px/1.4 Inter,system-ui,sans-serif}
+h1{font-size:18px;margin:0 0 5px}body>p{margin:0 0 24px;color:var(--muted)}
+.stage{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap}.window{background:var(--panel);border:1px solid #526982;border-radius:8px;box-shadow:0 12px 32px #0008;overflow:hidden;resize:both}
+.library{width:min(900px,calc(100vw - 56px));height:640px;display:flex;flex-direction:column;container-type:inline-size}
+.properties{width:min(560px,calc(100vw - 56px));height:620px}
+.bar{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:#223246;border-bottom:1px solid var(--border);font-weight:700}
+.actions{display:flex;gap:6px}.window-btn{border:0;border-radius:4px;background:#365b7c;color:white;width:24px;height:24px}
+.content{padding:12px;min-height:0;flex:1;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.toolbar{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:10px}
+input,select{width:100%;min-width:0;height:34px;padding:7px 9px;border:1px solid var(--border);border-radius:5px;background:var(--input);color:var(--text)}
+.folders{display:flex;gap:6px;overflow:auto;padding:0 0 9px;border-bottom:1px solid var(--border)}
+.folders button,.tab{height:31px;flex:0 0 auto;padding:5px 11px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--muted);font-weight:600}
+.folders button.active,.tab.active{border-color:var(--accent);background:#29435a;color:white}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;flex:1;min-height:0}
+.main{display:flex;flex-direction:column;gap:10px;min-width:0;overflow:auto;padding-right:5px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.section-head span{font-size:10px;color:var(--muted)}
+.assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:8px;align-content:start}
+.asset{display:grid;grid-template-columns:68px minmax(0,1fr);align-items:center;gap:9px;min-height:84px;padding:7px;border:1px solid var(--border);border-radius:7px;background:#1b2938;text-align:left;color:var(--text)}
+.preview{display:grid;place-items:center;width:68px;height:68px;border:1px solid #344e69;border-radius:5px;background:#101d2b;font-size:22px}
+.asset strong{font-size:11px;line-height:1.35}.asset small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.saved{display:flex;flex-direction:column;gap:9px;margin-top:2px;padding-top:12px;border-top:1px solid var(--border)}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:8px}
+.group{padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
+.group-preview{height:72px;border:1px solid var(--border);border-radius:5px;background:var(--input);display:grid;place-items:center;color:var(--muted)}
+.group strong{display:block;margin-top:6px;font-size:10px}
+.details{display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px;border:1px solid var(--border);border-radius:7px;background:linear-gradient(160deg,#202f40,#172330);overflow:auto}
+.details .preview{width:100%;height:110px}.details h3{margin:0;font-size:12px}.details p{margin:0;color:var(--muted);font-size:10px}.primary{margin-top:auto;height:34px;border:1px solid #657f9d;border-radius:5px;background:#344b64;color:white}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.prop-content{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.card{padding:0 0 13px;border-bottom:1px solid var(--border)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;color:var(--muted);font-size:10px}
+.color-row{display:flex;align-items:center;gap:8px;max-width:180px}
+.swatch{width:30px;height:30px;border:1px solid #789;border-radius:5px;background:#273443}
+.hex{color:var(--text);font:600 10px ui-monospace,monospace}
+.reset{width:26px;height:30px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text)}
+@container (max-width:760px){.workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(170px,220px);overflow:auto}.details{height:auto}.assets{grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}}
+@container (max-width:540px){.toolbar{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){body{padding:12px}.library,.properties{width:calc(100vw - 24px)}.grid{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<h1>NEXUS — revisão de distribuição de espaço</h1>
+<p>Protótipo estrutural 1.0.0.19 · Biblioteca em largura própria, lista compacta, prévia estável e propriedades sem controles esticados.</p>
+<div class="stage">
+<section class="window library">
+<header class="bar"><span>Biblioteca de elementos</span><div class="actions"><button class="window-btn">⋮</button><button class="window-btn">×</button></div></header>
+<div class="content">
+<div class="toolbar"><input placeholder="⌕  Buscar elementos"><select><option>Todas as tags</option></select></div>
+<nav class="folders"><button class="active">▦  Elementos</button><button>▧  Recursos</button><button>▣  Cartões</button><button>◈  Mídia</button><button>✦  Temas</button></nav>
+<div class="workspace">
+<div class="main">
+<div class="section-head"><strong>Elementos disponíveis</strong><span>6 itens</span></div>
+<div class="assets">
+<button class="asset"><span class="preview">▰</span><span><strong>Indicador — Barra</strong><small>Recurso · PV, PM, PE</small></span></button>
+<button class="asset"><span class="preview">▱</span><span><strong>Indicador — Círculo</strong><small>Recurso · progresso radial</small></span></button>
+<button class="asset"><span class="preview">▣</span><span><strong>Cartão</strong><small>Conteúdo personalizado</small></span></button>
+<button class="asset"><span class="preview">▤</span><span><strong>Seção</strong><small>Organização de conteúdo</small></span></button>
+<button class="asset"><span class="preview">◉</span><span><strong>Token</strong><small>Imagem e identificação</small></span></button>
+<button class="asset"><span class="preview">▧</span><span><strong>Imagem</strong><small>Mídia visual</small></span></button>
+</div>
+<section class="saved"><div class="section-head"><strong>Meus grupos</strong><span>Composições personalizadas</span></div><div class="groups"><div class="group"><div class="group-preview">▱　▣</div><strong>Grupo de recursos</strong></div><div class="group"><div class="group-preview">◉　▤</div><strong>Grupo de identidade</strong></div></div></section>
+</div>
+<aside class="details"><div class="preview">▰</div><span style="color:var(--muted);font-size:9px">ELEMENTO SELECIONADO</span><h3>Indicador — Barra</h3><p>Configure a propriedade vinculada e visualize o componente antes de adicioná-lo à ficha.</p><label class="field">Propriedade vinculada<select><option>resources.pv.value</option></select></label><label class="field">Orientação<select><option>Horizontal</option></select></label><button class="primary">Adicionar à ficha</button></aside>
+</div></div>
+</section>
+<section class="window properties">
+<header class="bar"><span>Propriedades</span><div class="actions"><button class="window-btn">⋮</button><button class="window-btn">×</button></div></header>
+<div class="prop-content">
+<nav class="tabs"><button class="tab">Dados</button><button class="tab active">Aparência</button><button class="tab">Avançado</button></nav>
+<section class="card"><div class="card-head"><span>CARTÃO</span><button class="reset">Restaurar</button></div><div class="grid">
+<label class="field">Fundo<div class="color-row"><span class="swatch"></span><span class="hex">#273443</span><button class="reset">↺</button></div></label>
+<label class="field">Borda<div class="color-row"><span class="swatch" style="background:#52647b"></span><span class="hex">#52647b</span><button class="reset">↺</button></div></label>
+<label class="field">Cantos<input value="7"></label><label class="field">Opacidade (%)<input value="100"></label>
+</div></section>
+<section class="card"><div class="card-head"><span>POSIÇÃO E DIMENSÕES</span></div><div class="grid">
+<label class="field">X<input value="320"></label><label class="field">Y<input value="0"></label><label class="field">Largura<input value="220"></label><label class="field">Altura<input value="120"></label>
+</div></section>
+<section class="card"><div class="card-head"><span>COMPONENTE</span><button class="reset">Restaurar tipografia</button></div><label class="field">Rótulo do cartão<input value="Card"></label></section>
+</div>
+</section>
+</div>
+</body>
+</html>
