@@ -1,3 +1,17 @@
+## 1.0.0.16
+
+### Editor de Comportamento e Propriedades
+- Fluxos do componente passam a ser exibidos em abas pelo nome; somente o fluxo selecionado fica visível, e a seleção permanece após editar seus campos.
+- Removido o resumo redundante QUANDO/SE/ENTÃO. Os blocos agora usam os títulos diretos Gatilhos, Condições e Ações.
+- Gatilhos reorganizados com rótulo de Evento alinhado ao seletor e botão Remover fora do campo.
+- Condições passam a priorizar a largura de Propriedade, mantendo Operador e Valor legíveis e o seletor Todas (E)/Qualquer (OU) em posição dedicada.
+- Cartões de ação reorganizados para separar título, ferramentas, tipo/estado e configurações.
+- Painel Propriedades reduzido para 420 × 620 px, igual a Camadas; Comportamento recebe dimensões explícitas de 820 × 700 px, como a Biblioteca.
+
+### Validação
+- Incluídos testes de regressão para abas de fluxos, remoção do resumo e dimensões dos painéis.
+- A execução no Foundry VTT 14 continua necessária para confirmar o comportamento visual e a interação real.
+
 ## 1.0.0.15
 
 ### Comportamento e interface do editor
