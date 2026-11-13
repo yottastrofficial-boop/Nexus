@@ -1,4 +1,4 @@
-## 1.1.0
+## 1.0.0.10
 
 ### Editor visual de interações
 - Substituído o seletor rígido de ação por um editor de fluxos no Inspector.
