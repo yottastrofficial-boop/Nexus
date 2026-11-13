@@ -4952,6 +4952,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       const p=point(event),l=layoutData(),dx=p.x-gesture.start.x,dy=p.y-gesture.start.y;
       if(gesture.type==="marquee"){
+        if(Math.abs(dx)+Math.abs(dy)<4)return;
+        gesture.moved=true;
+        selectionBox.hidden=false;
         const x=Math.min(p.x,gesture.start.x),y=Math.min(p.y,gesture.start.y),w=Math.abs(dx),h=Math.abs(dy);
         Object.assign(selectionBox.style,{left:`${x}px`,top:`${y}px`,width:`${w}px`,height:`${h}px`});
         const hits=elements().filter(el=>!el.hidden&&(()=>{const r=rectOf(el);return r.x<x+w&&r.x+r.w>x&&r.y<y+h&&r.y+r.h>y;})()).map(el=>el.dataset.id);
