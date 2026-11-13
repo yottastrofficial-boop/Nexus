@@ -1,3 +1,22 @@
+## 1.0.0.11
+
+### Editor híbrido e biblioteca de fluxos
+- Reorganizado o editor de interações com resumo QUANDO → SE → ENTÃO, configuração guiada recolhível e cartões de ações expansíveis.
+- Mantidas as configurações avançadas disponíveis sem ocupar a interface por padrão; adicionada alternância entre visualização em cartões e lista.
+- Adicionado o fluxo pronto de rolagem de perícia, que utiliza a rotina de rolagem existente da ficha e permite selecionar a perícia.
+- Adicionada biblioteca pessoal de fluxos, independente do Actor, para salvar, reutilizar e inserir comportamentos em outros componentes.
+- A clonagem de fluxos gera novos identificadores para evitar colisões entre instâncias.
+
+### Assets
+- Removidas as opções de ajuste que esticavam a imagem ou ignoravam seu enquadramento.
+- Padronizada a preservação da proporção como comportamento inicial; a opção de preenchimento pode recortar a imagem sem deformá-la.
+- Ajustadas as prévias da Biblioteca e a área de exibição de assets nos componentes.
+
+### Distribuição e validação
+- Atualizados manifesto, documentação e verificações para a versão 1.0.0.11 e sua URL de pacote.
+- O pacote de distribuição é gerado pelo CI e publicado automaticamente quando as validações passam.
+- Testes funcionais em uma instalação real do Foundry VTT 14 continuam necessários; a aprovação do CI não substitui essa validação.
+
 ## 1.0.0.10
 
 ### Editor visual de interações
