@@ -19,11 +19,11 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.1.0", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.10", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.1.0/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.10/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -347,7 +347,7 @@ assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheet.includes('addEventListener("contextmenu"'));
 assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
-console.log("NEXUS 1.1.0: editor visual de interações validado.");
+console.log("NEXUS 1.0.0.10: editor visual de interações validado.");
 
 assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
