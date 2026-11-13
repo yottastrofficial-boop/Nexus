@@ -235,8 +235,8 @@ export function renderInteractionEditor(container,component,components=[],librar
   flowTabs.setAttribute("role","tablist");
   flowTabs.setAttribute("aria-label","Fluxos do componente");
   for(const flow of flows){
-    const tab=btn(flow.name||"Novo fluxo","select-flow",flow.id);
-    tab.classList.add("nexus-interaction-flow-tab");
+    const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");
+    tab.type="button";
     tab.dataset.interactionFlowTab=flow.id;
     tab.setAttribute("role","tab");
     tab.setAttribute("aria-selected",String(flow.id===activeFlowId));
