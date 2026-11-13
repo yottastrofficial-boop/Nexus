@@ -4264,7 +4264,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [420, 620], component: [420, 620], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [820, 700] };
+    const panelSizes = { style: [420, 620], component: [420, 620], layers: [420, 620], library: [900, 640], aliases: [520, 700], settings: [480, 620], behavior: [900, 640] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
