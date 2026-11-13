@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, createSkillRollInteraction, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -352,3 +352,31 @@ console.log("NEXUS 1.0.0.10: editor visual de interações validado.");
 assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
 assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");
+
+
+// Reusable behavior library and skill-roll preset.
+const skillFlow=createSkillRollInteraction("stealth");
+assert.equal(skillFlow.actions[0].config.mode,"skill");
+assert.equal(skillFlow.actions[0].config.skillKey,"stealth");
+const skillComponent={interactions:[]};
+applyInteractionEditorCommand(skillComponent,"add-skill-roll");
+assert.equal(skillComponent.interactions[0].actions[0].config.mode,"skill");
+const templateClone=instantiateInteractionTemplate(skillFlow);
+assert.notEqual(templateClone.id,skillFlow.id);
+assert.notEqual(templateClone.actions[0].id,skillFlow.actions[0].id);
+const fakeLibraryActor={
+  flags:{nexus:{}},
+  getFlag(scope,key){return this.flags[scope]?.[key];},
+  async setFlag(scope,key,value){this.flags[scope]??={};this.flags[scope][key]=structuredClone(value);}
+};
+await saveInteractionToLibrary(fakeLibraryActor,skillFlow);
+assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
+assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.skillKey,"stealth");
+assert.match(sheet,/config\.mode === "skill"/);
+assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
+assert.match(interaction,/Regra guiada · Gatilhos e condições/);
+assert.match(interaction,/Salvar na biblioteca/);
+assert.match(css,/nexus-interaction-summary/);
+assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
+assert.doesNotMatch(template,/<option value="fill">Esticar<\/option>/);
+console.log("NEXUS: biblioteca de fluxos, modelo de rolagem de perícia e proporção de assets verificados.");

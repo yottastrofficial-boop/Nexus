@@ -2,7 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
-import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand } from "../core/interactions.js";
+import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -1090,7 +1090,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
     const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
-    return { ...component, hasClickInteraction: getTriggeredActions(component, "click").length > 0, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover","fill","none"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
+    return { ...component, hasClickInteraction: getTriggeredActions(component, "click").length > 0, actionType, proficiencyLevel, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
   }
 
   async _onRender(context, options) {
@@ -2183,14 +2183,37 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!component) return;
       this._captureHistory();
       const data = { interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, direction: control.dataset.direction };
-      if (command) applyInteractionEditorCommand(component, command, data);
+      if (command === "save-flow") {
+        const flow = getComponentInteractions(component).find(item => item.id === interactionId);
+        if (!flow) return;
+        await saveInteractionToLibrary(this.actor, flow);
+        ui.notifications?.info?.("Fluxo salvo na Biblioteca.");
+      } else if (command === "add-library-flow") {
+        const template = getInteractionLibrary(this.actor).find(item => item.id === control.dataset.templateId);
+        if (!template) { ui.notifications?.warn?.("Selecione um fluxo salvo na Biblioteca."); return; }
+        applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
+      } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
-      await this._writeLayouts(layouts, active);
+      if (command !== "save-flow") await this._writeLayouts(layouts, active);
       const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("component")?.panel?.querySelector("[data-interaction-editor]");
-      if (editor) { editor.dataset.componentId = componentId; renderInteractionEditor(editor, component, layouts[active]?.components ?? []); }
+      if (editor) { editor.dataset.componentId = componentId; renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor)); }
     };
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-action]", async event => {
-      event.preventDefault(); event.stopPropagation(); await persistInteractionEditor(event.currentTarget, event.currentTarget.dataset.interactionAction);
+      event.preventDefault(); event.stopPropagation();
+      const button=event.currentTarget;
+      if(button.dataset.interactionAction==="add-library-flow"){
+        const select=button.parentElement?.querySelector("[data-interaction-library-select]");
+        button.dataset.templateId=select?.value??"";
+      }
+      await persistInteractionEditor(button, button.dataset.interactionAction);
+    });
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-view]", event => {
+      const button=event.currentTarget,editor=button.closest("[data-interaction-editor]");
+      if(!editor)return;
+      editor.dataset.viewMode=button.dataset.interactionView==="list"?"list":"cards";
+      const componentId=editor.dataset.componentId;
+      const component=this._currentLayout?.components?.find(item=>item.id===componentId);
+      if(component)renderInteractionEditor(editor,component,this._currentLayout?.components??[],getInteractionLibrary(this.actor));
     });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-field]", async event => {
       event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
@@ -2478,7 +2501,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(key==="borderRadius") component.borderRadius=clamp(Number(input.value)||0,0,32);
       else if(key==="opacity") { const opacity=Number(input.value); component.opacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="fontSize") component.fontSize=clamp(Number(input.value)||13,7,48);
-      else if(key==="imageFit") component.imageFit=["contain","cover","fill","none"].includes(input.value)?input.value:"contain";
+      else if(key==="imageFit") component.imageFit=["contain","cover"].includes(input.value)?input.value:"contain";
       else if(key==="imagePosition") component.imagePosition=["center","top","bottom","left","right"].includes(input.value)?input.value:"center";
       else if(key==="imageOpacity") { const opacity=Number(input.value); component.imageOpacity=clamp(Number.isFinite(opacity)?opacity:100,0,100); }
       else if(key==="actionPath") { const path=String(input.value??"").replace(/^system\./,"").trim(); if(path && (!/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part=>["__proto__","prototype","constructor"].includes(part)))) return; component.actionPath=path; }
@@ -2977,7 +3000,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts = await this._readLayouts();
     const active = this._activeLayoutId();
     const component = layouts[active]?.components?.find(item => item.id === componentId);
-    if (!component || (component.actionType !== "roll" && !config.formula && !String(component.dataPath ?? "").endsWith(".name"))) return;
+    if (!component || (component.actionType !== "roll" && config.mode !== "skill" && !config.formula && !String(component.dataPath ?? "").endsWith(".name"))) return;
+    if (config.mode === "skill") return this._rollSkill(String(config.skillKey ?? "athletics"));
 
     let formula = String(config.formula ?? component.rollFormula ?? "").trim();
     const boundPath = String(component.dataPath ?? "").replace(/^actor\./, "").replace(/^system\./, "");
@@ -3943,7 +3967,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const interactionEditor = inspector.querySelector("[data-interaction-editor]");
       if (interactionEditor) {
         interactionEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? []);
+        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
         else interactionEditor.replaceChildren();
       }
       const technicalId = inspector.querySelector("[data-component-technical-id]");

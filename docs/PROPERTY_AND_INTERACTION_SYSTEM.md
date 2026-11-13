@@ -112,6 +112,14 @@ O editor oferece configuração contextual para os tipos listados. O executor im
 
 Componentes que ainda utilizam `actionType`, `rollFormula` e `actionTargetId` são convertidos em interações equivalentes em tempo de leitura. Os dados antigos não precisam ser regravados imediatamente.
 
+## 2.1. Biblioteca de fluxos reutilizáveis
+
+O editor de Comportamento oferece modelos prontos e uma biblioteca pessoal por Actor. Fluxos salvos podem ser inseridos em outros componentes sem compartilhar os mesmos identificadores internos.
+
+O primeiro modelo é **Rolagem de perícia**. Ele guarda a chave técnica da perícia, e a execução consulta os dados atuais do Actor por meio das regras de perícias do NEXUS: atributo relacionado, nível de proficiência, bônus de proficiência e modificador final. Assim, trocar a perícia no seletor não exige duplicar fórmulas.
+
+A biblioteca armazena uma cópia do fluxo. Ao inserir um modelo, o NEXUS gera novos IDs para o fluxo, gatilhos, condições e ações. Isso evita que editar uma instância altere o modelo salvo ou outra instância.
+
 ## 3. Cálculos e automação
 
 Cada propriedade poderá escolher seu modo de cálculo:

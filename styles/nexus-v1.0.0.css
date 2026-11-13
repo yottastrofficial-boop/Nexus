@@ -3886,3 +3886,124 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window .nexus-inspector-tabs{grid-template-columns:repeat(4,minmax(0,1fr));}
 .nexus-panel-window .nexus-inspector-tabs button{min-width:0;padding-inline:4px;font-size:9px;}
 .nexus-panel-window [data-component-technical] input[readonly]{opacity:.78;cursor:text;}
+
+
+/* 1.0.0.11 — proporção consistente para prévias da Biblioteca e assets de imagem. */
+.nexus-library-assets .nexus-library-asset {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+.nexus-library-assets .nexus-library-preview-stage {
+  box-sizing: border-box;
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  aspect-ratio: 1 / 1 !important;
+  overflow: hidden !important;
+}
+.nexus-library-assets .nexus-library-preview-stage > img,
+.nexus-library-assets .nexus-library-preview-stage .nexus-preview-image {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+.nexus-component[data-type="asset-image"] .nexus-component-content {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.nexus-component[data-type="asset-image"] .nexus-asset-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-position: center;
+}
+.nexus-interaction-summary {
+  padding: 7px 9px;
+  border-left: 2px solid var(--nexus-highlight-color,#78b7e8);
+  border-radius: 3px;
+  color: var(--nexus-panel-muted,#9aadc2);
+  background: color-mix(in srgb,var(--nexus-panel-hover,#2a3d52) 45%,transparent);
+  font-size: 9px;
+  line-height: 1.45;
+}
+.nexus-interaction-guided,
+.nexus-interaction-execution {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--nexus-panel-border,#3c5067);
+  border-radius: 6px;
+  background: color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 60%,transparent);
+}
+.nexus-interaction-guided > summary,
+.nexus-interaction-execution > summary {
+  color: var(--nexus-panel-text,#e7edf5);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.nexus-interaction-action {
+  display: block;
+  min-width: 0;
+}
+.nexus-interaction-action > summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  cursor: pointer;
+}
+.nexus-interaction-action > summary::marker { color: var(--nexus-highlight-color,#78b7e8); }
+.nexus-interaction-action-config { padding-top: 7px; }
+.nexus-interaction-view-toggle { display: flex; gap: 3px; }
+.nexus-interaction-view-toggle .nexus-interaction-button.is-active {
+  border-color: var(--nexus-highlight-color,#78b7e8);
+  color: var(--nexus-panel-text,#e7edf5);
+  background: var(--nexus-panel-hover,#2a3d52);
+}
+.nexus-interaction-library-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 6px;
+  min-width: 0;
+}
+.nexus-interaction-library-select {
+  min-width: 0;
+  width: 100%;
+  min-height: 27px;
+  padding: 4px 6px;
+  border: 1px solid var(--nexus-panel-border,#3c5067);
+  border-radius: 4px;
+  color: var(--nexus-panel-text,#e7edf5);
+  background: var(--nexus-panel-bg,#182330);
+  font: 10px system-ui,sans-serif;
+}
+.nexus-interaction-editor[data-view-mode="list"] .nexus-interaction-action {
+  border-radius: 3px;
+  padding: 4px 6px;
+}
+.nexus-interaction-editor[data-view-mode="list"] .nexus-interaction-action > summary {
+  font-size: 9px;
+}
+@media(max-width:420px) {
+  .nexus-interaction-editor-heading { flex-wrap: wrap; }
+  .nexus-interaction-library-row { grid-template-columns:minmax(0,1fr); }
+}
