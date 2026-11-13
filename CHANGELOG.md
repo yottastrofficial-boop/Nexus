@@ -1,3 +1,15 @@
+## 1.0.0.15
+
+### Comportamento e interface do editor
+- Redimensionado o painel de Comportamento para 820 × 700 px, igual à Biblioteca; o painel de Propriedades permanece em 520 × 760 px.
+- Dado um cabeçalho próprio ao seletor de combinação de condições (Todas/E e Qualquer/OU), com largura definida para evitar o controle comprimido.
+- Revisada a semântica dos ícones de navegação: Configurações, Propriedades, Biblioteca, Organização, Estrutura de dados e Comportamento agora usam símbolos distintos e coerentes; a barra de Aparência e a categoria Organização seguem o mesmo padrão.
+- O modo Configuração da ficha também recebe ícone próprio, sem reutilizar o símbolo de Propriedades.
+
+### Validação
+- Atualizados os testes de dimensões, ícones e layout do seletor E/OU.
+- A validação automatizada e o teste funcional dentro do Foundry VTT 14 serão executados antes da publicação.
+
 ## 1.0.0.14
 
 ### Editor de Comportamento
