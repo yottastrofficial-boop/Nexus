@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { getTriggeredActions, executeTriggeredActions } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, normalizeInteraction, evaluateInteractionConditions, INTERACTION_EVENTS } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -267,7 +267,7 @@ assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
 assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
-assert.match(interactions, /trigger: \{ event \}/);
+assert.match(interactions, /trigger: \{ event: triggers/);
 assert.match(interactions, /interaction\.actions/);
 assert.match(template, /toggle-component/);
 assert.match(sheet, /_toggleTargetComponent/);
@@ -315,3 +315,43 @@ assert.equal(getTriggeredActions({
   interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
 }, "click").length, 0, "Um trigger diferente não deve executar no clique");
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
+
+
+// Multi-trigger flows, conditions, ordering and failure policy.
+assert.ok(INTERACTION_EVENTS.includes("doubleClick"));
+assert.ok(INTERACTION_EVENTS.includes("propertyUpdate"));
+const multiTrigger = normalizeInteraction({
+  id: "flow-multi",
+  triggers: [{ id: "t1", event: "click" }, { id: "t2", event: "doubleClick" }],
+  conditions: [{ path: "resources.pv.value", operator: "greaterThan", value: 0 }],
+  actions: [
+    { id: "a1", type: "update", config: { path: "resources.pv.value", value: 4 } },
+    { id: "a2", type: "roll", config: { formula: "1d20" } }
+  ]
+});
+assert.equal(multiTrigger.triggers.length, 2);
+assert.equal(multiTrigger.trigger.event, "click", "A primeira trigger permanece disponível para compatibilidade");
+assert.equal(getTriggeredActions({ interactions: [multiTrigger] }, "doubleClick", {
+  resolveValue: path => path === "resources.pv.value" ? 5 : undefined
+}).length, 2, "Qualquer trigger do fluxo pode iniciar as ações");
+assert.equal(getTriggeredActions({ interactions: [multiTrigger] }, "click", {
+  resolveValue: () => 0
+}).length, 0, "Condições devem impedir a execução quando não forem satisfeitas");
+assert.equal(evaluateInteractionConditions([
+  { path: "x", operator: "greaterOrEqual", value: 3 },
+  { path: "name", operator: "contains", value: "NEXUS" }
+], path => path === "x" ? 3 : "NEXUS RPG"), true);
+const continueFlow = {
+  interactions: [{
+    id: "continue-on-error",
+    trigger: { event: "click" },
+    execution: { onError: "continue" },
+    actions: [{ type: "roll" }, { type: "update" }]
+  }]
+};
+const continueResults = await executeTriggeredActions(continueFlow, "click", async action => {
+  if (action.type === "roll") throw new Error("expected test error");
+  return action.type;
+});
+assert.equal(continueResults.length, 2, "A política continue deve permitir ações posteriores");
+assert.equal(continueResults[1], "update");
