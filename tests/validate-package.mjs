@@ -394,7 +394,7 @@ globalThis.game={settings:{
   get(scope,key){return savedSettings[scope+"."+key]??[];},
   async set(scope,key,value){savedSettings[scope+"."+key]=structuredClone(value);}
 }};
-await saveInteractionToLibrary(fakeLibraryActor,skillFlow);
+await saveInteractionToLibrary(fakeLibraryActor,editorDraft.interactions[0]);
 assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
 assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.skillKey,"stealth");
 assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
