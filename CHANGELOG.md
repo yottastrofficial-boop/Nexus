@@ -1,3 +1,10 @@
+## 1.0.0.21
+
+- Remove legendas visuais redundantes de Propriedade, Operador e Valor nas condições, mantendo nomes acessíveis.
+- Consolida a lista de ações em uma única coluna e organiza controles e configurações em linhas previsíveis.
+- Reorganiza Aparência global com alinhamento consistente entre rótulos, seletores e color pickers.
+- Padroniza as dimensões finais dos painéis compactos (400 × 600) e amplos (900 × 600).
+
 ## 1.0.0.20
 
 ### Editor de fluxos e sistema visual
