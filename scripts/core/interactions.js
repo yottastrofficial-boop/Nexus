@@ -287,12 +287,16 @@ export function renderInteractionEditor(container,component,components=[],librar
     conditions.append(conditionHeading);
     flow.conditions.forEach((co,i)=>{
       const row=el("div","nexus-interaction-condition");
-      for(const [label,key,val,opts] of [["Propriedade","path",co.path],["Operador","operator",co.operator,operators],["Valor","value",co.value]]){
-        const fieldControl=field(opts?"select":"input",label,val,opts);
-        bind(fieldControl.input,"condition",flow.id,key,{conditionIndex:i});
-        row.append(fieldControl.wrap);
-      }
-      row.append(iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));
+      const property=el("div","nexus-interaction-condition-field nexus-interaction-condition-property");
+      const propertyInput=el("input");propertyInput.type="text";propertyInput.value=co.path;propertyInput.autocomplete="off";propertyInput.spellcheck=false;propertyInput.setAttribute("aria-label","Propriedade");propertyInput.placeholder="system.propriedade";
+      bind(propertyInput,"condition",flow.id,"path",{conditionIndex:i});property.append(propertyInput);
+      const operator=el("div","nexus-interaction-condition-field nexus-interaction-condition-operator");
+      const operatorInput=el("select");for(const [value,label] of operators){const option=el("option","",label);option.value=value;operatorInput.append(option);}operatorInput.value=co.operator;operatorInput.setAttribute("aria-label","Operador");
+      bind(operatorInput,"condition",flow.id,"operator",{conditionIndex:i});operator.append(operatorInput);
+      const value=el("div","nexus-interaction-condition-field nexus-interaction-condition-value");
+      const valueInput=el("input");valueInput.type="text";valueInput.value=co.value;valueInput.setAttribute("aria-label","Valor");valueInput.placeholder="Valor";
+      bind(valueInput,"condition",flow.id,"value",{conditionIndex:i});value.append(valueInput);
+      row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));
       conditions.append(row);
     });
     guided.append(triggers,conditions);
