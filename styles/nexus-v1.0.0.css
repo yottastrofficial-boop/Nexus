@@ -3881,3 +3881,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-interaction-empty{margin:6px 0;color:var(--nexus-panel-muted,#9aadc2);font-size:10px}
 .nexus-interaction-group-heading .nexus-interaction-field{max-width:150px}
 @media(max-width:380px){.nexus-interaction-condition{grid-template-columns:minmax(0,1fr)}.nexus-interaction-condition .nexus-interaction-field:first-child{grid-column:auto}}
+
+/* Inspector com quatro áreas independentes. */
+.nexus-panel-window .nexus-inspector-tabs{grid-template-columns:repeat(4,minmax(0,1fr));}
+.nexus-panel-window .nexus-inspector-tabs button{min-width:0;padding-inline:4px;font-size:9px;}
+.nexus-panel-window [data-component-technical] input[readonly]{opacity:.78;cursor:text;}
