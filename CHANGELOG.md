@@ -1,3 +1,22 @@
+## 1.0.0.13
+
+### Reorganização do Editor de Fichas
+- Movido o editor de fluxos para um painel independente de Comportamento, com dimensões equivalentes às da Biblioteca.
+- O painel de Comportamento acompanha a seleção do Canvas e permite editar os fluxos do componente selecionado sem depender do Inspector.
+- Removida a aba Comportamento do Inspector; Dados, Aparência e Avançado permanecem no painel de Propriedades.
+- Ampliado o espaço interno do editor de fluxos, com gatilhos e condições lado a lado, campos maiores e configurações de ações em duas colunas.
+- A seção de gatilhos e condições fica expandida inicialmente para tornar a estrutura do fluxo mais visível.
+
+### Configurações do editor
+- Criado um painel independente de Configurações do editor, com navegação lateral própria.
+- Transferidas para Configurações > Organização as opções de grade, encaixe, alinhamento inteligente e dimensões da ficha.
+- Aparência permanece dedicada a temas, cores, tipografia e personalização visual.
+- Mantido o modo existente de edição dos dados do personagem, sem alterar sua finalidade.
+
+### Validação
+- Atualizados manifesto, README, changelog e testes para a versão 1.0.0.13.
+- As verificações automatizadas serão executadas no CI; a validação visual e funcional em uma instalação real do Foundry VTT 14 continua necessária.
+
 ## 1.0.0.11
 
 ### Editor híbrido e biblioteca de fluxos
