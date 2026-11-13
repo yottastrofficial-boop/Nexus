@@ -67,8 +67,11 @@ Estrutura conceitual:
 ```js
 {
   id: "interaction-1",
-  trigger: { event: "click" },
+  triggers: [{ id: "trigger-1", event: "click" }, { id: "trigger-2", event: "doubleClick" }],
+  name: "Consultar recurso",
   enabled: true,
+  conditions: [],
+  conditionJoin: "all",
   actions: [
     {
       id: "action-1",
@@ -88,7 +91,7 @@ Estrutura conceitual:
 }
 ```
 
-Uma interação pode conter várias ações. Elas são executadas na ordem em que aparecem. Cada ação mantém sua própria configuração, evitando um formulário único com campos que não se aplicam a todas as operações.
+Um fluxo pode conter vários Triggers independentes: qualquer um deles inicia suas Actions. Condições opcionais são avaliadas antes da execução e podem ser combinadas como AND (todas) ou OR (qualquer). As Actions são executadas na ordem em que aparecem e podem ser reordenadas no Inspector. Cada ação mantém sua própria configuração. A política de erro define se uma falha interrompe o fluxo ou permite continuar.
 
 ### Tipos de ação previstos
 
@@ -100,7 +103,7 @@ Uma interação pode conter várias ações. Elas são executadas na ordem em qu
 - `interact`: chamar uma interação definida por outro componente ou sistema.
 - `execute`: executar uma operação avançada por uma API controlada.
 
-O contrato aceita esses tipos, mas isso não significa que todos os executores ou controles de configuração já estejam disponíveis. Nesta etapa, o executor da ficha encaminha ações de clique de rolagem e alternância; os demais tipos dependem das próximas etapas.
+O editor oferece configuração contextual para os tipos listados. O executor implementa rolagem, cálculo, atualização de propriedades, abertura de documentos/componentes, alternância, encadeamento de interações e operações avançadas de uma lista permitida. A ação execute não interpreta JavaScript arbitrário.
 
 ### Compatibilidade com componentes antigos
 
@@ -130,9 +133,10 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 - Campo numérico `proficientLevel`, com valores positivos, zero e negativos.
 - Migração dos campos antigos para a chave canônica, com remoção segura das chaves legadas após preparar o valor novo.
 - Preservação de modificadores e valores negativos nas rolagens.
-- Núcleo de normalização e despacho de interações por trigger.
+- Motor de interações com vários Triggers por fluxo, condições AND/OR e Actions sequenciais.
+- Editor visual no Inspector para criar, configurar, ativar, remover e reordenar fluxos, Triggers e Actions.
+- Executores controlados para rolagem, cálculo, atualização, abertura, alternância, encadeamento e operações permitidas.
 - Compatibilidade de leitura para ações antigas de rolagem e alternância.
-- Execução sequencial de múltiplas ações associadas ao mesmo trigger.
 
 ### Próximas etapas
 
