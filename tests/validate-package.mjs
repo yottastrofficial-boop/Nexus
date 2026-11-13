@@ -265,7 +265,7 @@ assert.equal(NEXUS_SKILLS.length, 18, "O catálogo deve conter 18 perícias");
 assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves técnicas das perícias devem ser únicas");
 assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
-assert.match(sheet, /executeTriggeredActions\(component, "click"/, "Cliques de componentes devem passar pelo executor de interações");
+assert.match(sheet, /executeTriggeredActions\\(component, eventName/, "Eventos de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /trigger: \{ event \}/);
 assert.match(interactions, /interaction\.actions/);
