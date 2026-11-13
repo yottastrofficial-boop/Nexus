@@ -399,7 +399,7 @@ assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU d
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
 assert.ok(css.includes("width:min(560px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
 assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve ter largura padronizada");
-assert.ok(css.includes("nexus-interaction-action-title >") || css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter layout flexível");
+assert.ok(css.includes("nexus-interaction-action-title >") || css.includes("summary.nexus-interaction-action-title { display:flex"), "Título das ações deve ter layout flexível");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.ok(css.includes("height:min(640px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
 const fakeLibraryActor={
