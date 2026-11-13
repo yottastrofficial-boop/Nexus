@@ -203,7 +203,7 @@ assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportame
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
 assert.match(sheet, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
 assert.match(sheet, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
-assert.match(sheet, /behavior: \[900, 640\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
+assert.match(sheet, /behavior: \[900, 600\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
 assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
