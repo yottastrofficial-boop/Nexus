@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.1.0 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.10 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.1.0-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.10-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão em preparação | 1.0.0.9 |
+| Versão publicada | 1.0.0.9 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -119,7 +119,7 @@ O Inspector oferece um editor de fluxos Trigger → Conditions → Actions. Um c
 
 ## Estado e validação
 
-A versão 1.1.0 está em preparação na branch de funcionalidade. A publicação depende da aprovação das verificações automatizadas de JavaScript, JSON, CSS, templates e integridade do pacote. O comportamento visual e interativo desta atualização ainda exige validação em uma instalação real do Foundry VTT 14.
+A versão 1.0.0.10 reúne o editor visual de interações e as melhorias descritas no changelog. As verificações automatizadas e a montagem do pacote são executadas antes da publicação; os testes funcionais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
