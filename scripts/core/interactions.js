@@ -71,7 +71,7 @@ export function normalizeInteraction(interaction, index = 0) {
   const triggers = sourceTriggers.map(normalizeTrigger).filter(Boolean).slice(0, MAX_TRIGGERS);
   const actions = (Array.isArray(interaction.actions) ? interaction.actions : [])
     .map(normalizeAction).filter(Boolean).slice(0, MAX_ACTIONS);
-  if (!triggers.length || !actions.length) return null;
+  if (triggers.length > MAX_TRIGGERS || actions.length > MAX_ACTIONS) return null;
   const conditions = (Array.isArray(interaction.conditions) ? interaction.conditions : [])
     .map(normalizeCondition).filter(Boolean).slice(0, MAX_CONDITIONS);
   const mode = interaction.execution?.mode === "sequential" ? "sequential" : "sequential";
@@ -82,7 +82,7 @@ export function normalizeInteraction(interaction, index = 0) {
     enabled: interaction.enabled !== false,
     triggers,
     // Compatibilidade temporária para consumidores antigos do contrato.
-    trigger: { event: triggers[0].event },
+    trigger: triggers[0] ? { event: triggers[0].event } : null,
     conditions,
     actions,
     execution: { mode, onError }
