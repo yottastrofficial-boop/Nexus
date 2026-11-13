@@ -2197,11 +2197,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (command !== "save-flow") await this._writeLayouts(layouts, active);
       const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) {
-        const scrollTop = editor.scrollTop;
+        const scrollContainer = editor.closest(".nexus-behavior-editor");
+        const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
         renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor));
         editor.dataset.componentId = componentId;
-        editor.scrollTop = scrollTop;
+        if (scrollContainer) scrollContainer.scrollTop = scrollTop;
+        else editor.scrollTop = scrollTop;
         const nextControl = [...editor.querySelectorAll("[data-interaction-field]")].find(item =>
           item.dataset.interactionScope === focusData.scope &&
           item.dataset.interactionField === focusData.field &&
