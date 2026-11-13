@@ -98,10 +98,10 @@ export function renderInteractionEditor(root, component, onChange, targets = [])
   }));
 
   const persist = () => {
-    flows = flows.map((flow, index) => normalizeInteraction(flow, index)).filter(Boolean);
-    root._nexusFlows = flows;
-    root._nexusOnChange = onChange;
-    onChange?.(flows);
+    const current = (root._nexusFlows ?? flows)
+      .map((flow, index) => normalizeInteraction(flow, index)).filter(Boolean);
+    root._nexusFlows = current;
+    root._nexusOnChange?.(current);
   };
   root._nexusFlows = flows;
   root._nexusOnChange = onChange;
