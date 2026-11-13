@@ -4226,3 +4226,471 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+
+/* 1.0.0.14 — refinamento de layout, legibilidade e interação dos editores. */
+.nexus-panel-window:has(.nexus-behavior-editor) {
+  max-width:calc(100vw - 24px);
+  max-height:calc(100vh - 24px);
+}
+.nexus-panel-window:has(.nexus-behavior-editor) .window-content,
+.nexus-panel-window:has(.nexus-behavior-editor) .application-content {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+}
+.nexus-panel-window .nexus-behavior-editor {
+  box-sizing:border-box;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  gap:16px;
+  padding:20px;
+  overflow:auto;
+  scrollbar-gutter:stable;
+}
+.nexus-behavior-editor .nexus-interaction-editor {
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  gap:16px;
+}
+.nexus-behavior-editor .nexus-interaction-editor-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:0;
+}
+.nexus-interaction-editor-title {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+}
+.nexus-interaction-editor-title strong {
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:15px;
+  font-weight:700;
+}
+.nexus-interaction-editor-title span {
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:11px;
+}
+.nexus-interaction-editor-toolbar,
+.nexus-interaction-flow-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:8px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  min-width:34px;
+  min-height:36px;
+  padding:7px 12px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-hover,#2a3d52);
+  font:600 11px/1.2 system-ui,sans-serif;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:border-color .15s ease,background-color .15s ease,transform .15s ease;
+}
+.nexus-behavior-editor .nexus-interaction-button:hover {
+  border-color:var(--nexus-highlight-color,#78b7e8);
+  background:color-mix(in srgb,var(--nexus-panel-hover,#2a3d52) 75%,var(--nexus-highlight-color,#78b7e8));
+}
+.nexus-behavior-editor .nexus-interaction-button:active { transform:translateY(1px); }
+.nexus-behavior-editor .nexus-interaction-button:focus-visible {
+  outline:2px solid var(--nexus-highlight-color,#78b7e8);
+  outline-offset:2px;
+}
+.nexus-behavior-editor .nexus-interaction-editor-toolbar > .nexus-interaction-button {
+  min-height:38px;
+  padding-inline:16px;
+  border-color:var(--nexus-highlight-color,#78b7e8);
+}
+.nexus-interaction-library-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:12px;
+  padding:12px 14px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 72%,transparent);
+}
+.nexus-interaction-library-label {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+  color:var(--nexus-panel-muted,#9aadc2);
+  font:600 11px/1.3 system-ui,sans-serif;
+}
+.nexus-behavior-editor .nexus-interaction-library-select {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  padding:7px 10px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-input,#111b27);
+  font:400 12px/1.3 system-ui,sans-serif;
+}
+.nexus-interaction-empty-state {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:190px;
+  padding:28px;
+  border:1px dashed var(--nexus-panel-border,#3c5067);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 48%,transparent);
+  text-align:center;
+}
+.nexus-interaction-empty-state strong {
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:14px;
+}
+.nexus-interaction-empty-state p {
+  max-width:460px;
+  margin:0;
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:12px;
+  line-height:1.5;
+}
+.nexus-interaction-flows {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:16px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-flow {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:18px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 90%,transparent);
+  box-shadow:0 2px 8px #0002;
+}
+.nexus-behavior-editor .nexus-interaction-flow-heading {
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) auto;
+  align-items:end;
+  gap:14px;
+  padding:0 0 12px;
+  border-bottom:1px solid var(--nexus-panel-border,#3c5067);
+}
+.nexus-behavior-editor .nexus-interaction-flow-heading > .nexus-interaction-field:first-child {
+  width:100%;
+  min-width:0;
+  flex:initial;
+}
+.nexus-behavior-editor .nexus-interaction-flow-actions {
+  justify-content:flex-end;
+  gap:7px;
+}
+.nexus-behavior-editor .nexus-interaction-field {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:6px;
+  width:100%;
+  min-width:0;
+  color:var(--nexus-panel-muted,#aab8c8);
+  font:600 11px/1.3 system-ui,sans-serif;
+}
+.nexus-behavior-editor .nexus-interaction-field input:not([type=checkbox]),
+.nexus-behavior-editor .nexus-interaction-field select {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  margin:0;
+  padding:8px 10px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-input,#111b27);
+  font:400 12px/1.35 system-ui,sans-serif;
+}
+.nexus-behavior-editor .nexus-interaction-field input:not([type=checkbox]):focus,
+.nexus-behavior-editor .nexus-interaction-field select:focus {
+  border-color:var(--nexus-highlight-color,#78b7e8);
+  outline:2px solid color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 28%,transparent);
+  outline-offset:1px;
+}
+.nexus-behavior-editor .nexus-interaction-field input[type=checkbox] {
+  width:16px;
+  min-width:16px;
+  height:16px;
+  margin:0;
+  accent-color:var(--nexus-highlight-color,#78b7e8);
+}
+.nexus-behavior-editor .nexus-interaction-field:has(input[type=checkbox]) {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+  width:auto;
+  min-height:36px;
+  white-space:nowrap;
+}
+.nexus-behavior-editor .nexus-interaction-summary {
+  margin:0;
+  padding:10px 12px;
+  border-left:3px solid var(--nexus-highlight-color,#78b7e8);
+  border-radius:5px;
+  color:var(--nexus-panel-muted,#aab8c8);
+  background:color-mix(in srgb,var(--nexus-panel-input,#111b27) 72%,transparent);
+  font:500 11px/1.45 system-ui,sans-serif;
+  overflow-wrap:anywhere;
+}
+.nexus-behavior-editor .nexus-interaction-guided {
+  display:grid;
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+  align-items:start;
+  gap:16px;
+  min-width:0;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.nexus-behavior-editor .nexus-interaction-group {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
+  padding:14px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--nexus-panel-input,#111b27) 58%,transparent);
+}
+.nexus-behavior-editor .nexus-interaction-group-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-group-heading h6 {
+  margin:0;
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0;
+  text-transform:none;
+}
+.nexus-behavior-editor .nexus-interaction-group-heading > .nexus-interaction-field {
+  width:min(190px,45%);
+  flex:0 1 170px;
+}
+.nexus-behavior-editor .nexus-interaction-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:10px;
+  min-width:0;
+  padding:10px;
+  border:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 75%,transparent);
+  border-radius:7px;
+  background:var(--nexus-panel-surface,#202e3e);
+}
+.nexus-behavior-editor .nexus-interaction-condition {
+  display:grid;
+  grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto;
+  align-items:end;
+  gap:10px;
+  min-width:0;
+  padding:10px;
+  border:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 75%,transparent);
+  border-radius:7px;
+  background:var(--nexus-panel-surface,#202e3e);
+}
+.nexus-behavior-editor .nexus-interaction-condition .nexus-interaction-field:first-child {
+  grid-column:auto;
+}
+.nexus-behavior-editor .nexus-interaction-actions {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));
+  align-items:start;
+  gap:12px;
+}
+.nexus-behavior-editor .nexus-interaction-actions > .nexus-interaction-group-heading {
+  grid-column:1/-1;
+}
+.nexus-behavior-editor .nexus-interaction-action {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px 12px;
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:8px;
+  background:var(--nexus-panel-input,#111b27);
+}
+.nexus-behavior-editor .nexus-interaction-action > summary {
+  display:flex;
+  align-items:center;
+  min-width:0;
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.nexus-behavior-editor .nexus-interaction-action > summary::marker {
+  color:var(--nexus-highlight-color,#78b7e8);
+}
+.nexus-interaction-action-tools {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-action-tools .nexus-interaction-button {
+  min-width:32px;
+  min-height:30px;
+  padding:5px 8px;
+}
+.nexus-behavior-editor .nexus-interaction-action-meta,
+.nexus-behavior-editor .nexus-interaction-action-config {
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(130px,.55fr);
+  align-items:end;
+  gap:10px 14px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-action-config {
+  grid-template-columns:repeat(2,minmax(150px,1fr));
+  padding-top:10px;
+  border-top:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 72%,transparent);
+}
+.nexus-behavior-editor .nexus-interaction-execution {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+  padding:12px 14px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 64%,transparent);
+}
+.nexus-behavior-editor .nexus-interaction-execution > summary {
+  color:var(--nexus-panel-muted,#aab8c8);
+  font-size:11px;
+  font-weight:650;
+  cursor:pointer;
+}
+.nexus-behavior-editor .nexus-interaction-empty {
+  margin:0;
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:12px;
+}
+.nexus-behavior-editor .nexus-interaction-execution .nexus-interaction-field {
+  max-width:420px;
+}
+.nexus-behavior-editor .nexus-interaction-action[open] {
+  align-content:start;
+}
+.nexus-behavior-editor .nexus-interaction-action:not([open]) {
+  grid-template-columns:minmax(0,1fr);
+}
+.nexus-behavior-editor .nexus-interaction-action:not([open]) > .nexus-interaction-action-tools {
+  display:none;
+}
+.nexus-behavior-editor .nexus-interaction-action:not([open]) > :not(summary) {
+  display:none;
+}
+.nexus-panel-window:has(.nexus-component-inspector) {
+  max-width:calc(100vw - 24px);
+  max-height:calc(100vh - 24px);
+}
+.nexus-panel-window .nexus-component-inspector {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  padding:8px 10px 14px;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-section {
+  padding:14px !important;
+  gap:12px !important;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px 14px;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-field {
+  gap:6px;
+  font-size:11px;
+}
+.nexus-panel-window .nexus-component-inspector :is(input:not([type=color]):not([type=checkbox]),select,textarea) {
+  min-height:38px;
+  padding:8px 10px;
+  font-size:12px;
+}
+.nexus-panel-window .nexus-component-inspector textarea { min-height:72px; }
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-section > h4,
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-section-heading h4 {
+  font-size:11px !important;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-subsection {
+  gap:10px;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-inspector-subsection h5 {
+  font-size:10px;
+}
+.nexus-panel-window .nexus-component-inspector .nexus-field-control-row .nexus-field-reset {
+  min-height:34px !important;
+  height:34px !important;
+}
+@media(max-width:760px) {
+  .nexus-panel-window .nexus-behavior-editor { padding:14px; }
+  .nexus-behavior-editor .nexus-interaction-guided { grid-template-columns:minmax(0,1fr); }
+  .nexus-behavior-editor .nexus-interaction-actions { grid-template-columns:minmax(0,1fr); }
+  .nexus-behavior-editor .nexus-interaction-action-config { grid-template-columns:minmax(0,1fr); }
+  .nexus-behavior-editor .nexus-interaction-condition {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .nexus-behavior-editor .nexus-interaction-condition > .nexus-interaction-button { grid-column:1/-1; }
+}
+@media(max-width:520px) {
+  .nexus-behavior-editor .nexus-interaction-flow-heading { grid-template-columns:minmax(0,1fr); }
+  .nexus-behavior-editor .nexus-interaction-flow-actions { justify-content:flex-start; }
+  .nexus-behavior-editor .nexus-interaction-condition { grid-template-columns:minmax(0,1fr); }
+  .nexus-behavior-editor .nexus-interaction-condition > .nexus-interaction-button { grid-column:auto; }
+  .nexus-interaction-library-row { grid-template-columns:minmax(0,1fr); }
+  .nexus-panel-window .nexus-component-inspector .nexus-inspector-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .nexus-behavior-editor .nexus-interaction-button { transition:none; }
+}
