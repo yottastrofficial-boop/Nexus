@@ -2926,7 +2926,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!component || this._mode !== "play") return;
     const depth = Number(context.depth) || 0;
     if (depth > 8) { ui.notifications?.warn?.("O limite de encadeamento de interações foi atingido."); return; }
-    return executeTriggeredActions(component, eventName, action => this._executeComponentAction(componentId, action, { ...context, depth }), { actor: this.actor, ...context });
+    return executeTriggeredActions(component, eventName, action => this._executeComponentAction(componentId, action, { ...context, depth }), { actor: this.actor, ...context }).catch(error => { console.error("NEXUS | Falha ao executar interação", error); ui.notifications?.error?.("Falha ao executar a interação do componente."); return []; });
   }
 
   async _executeComponentAction(componentId, action, context = {}) {
