@@ -1,3 +1,28 @@
+## 1.0.0.20
+
+### Editor de fluxos e sistema visual
+- Painéis compactos padronizados em 400 × 600 px; Biblioteca e Comportamento em 900 × 600 px.
+- Removido o cabeçalho redundante do painel Comportamento; o editor de fluxos assume a identificação e a navegação.
+- Título, abas de fluxos, criação e inserção de modelos foram reunidos em uma única área de navegação.
+- Removidas contagens auxiliares e legendas redundantes; nome do fluxo passa a usar campo direto com nome acessível.
+- Gatilhos usam seletor direto sem a legenda "Evento".
+- Condições passam a ser exibidas em blocos de superfície, com seletor E/OU integrado ao cabeçalho e colunas dedicadas para propriedade, operador, valor e remoção.
+- Estado Ativa foi movido para a linha de identificação da ação; tipo e configurações permanecem abaixo.
+- Mantida a estrutura persistida dos fluxos, IDs, ações e compatibilidade com interações existentes.
+
+### Temas, cores e controles
+- Ampliados os tokens semânticos para superfícies, bordas, texto, foco, campos, botões, estados e barras de rolagem.
+- Cabeçalhos, conteúdo das janelas, campos, botões, foco e rolagem passam a consumir os mesmos papéis de tema.
+- Paletas de tema continuam definidas centralmente; alternar tema atualiza os tokens de todos os painéis abertos.
+- Color pickers reorganizados em linhas consistentes com rótulo e seletor de largura útil.
+- Estados de foco visíveis, controles desativados e hover padronizados.
+
+### Referências de design e validação
+- Aplicados princípios de Fluent 2 para papéis de cor, estados semânticos e uso moderado de cores de destaque.
+- Aplicados princípios do Atlassian Design System para tokens, escala de espaçamento, proximidade e hierarquia visual.
+- Testes de regressão atualizados para dimensões, editor, temas e distribuição de color pickers.
+- Necessária confirmação visual e funcional em instalação real do Foundry VTT 14.
+
 ## 1.0.0.19
 
 ### Correção da Biblioteca e distribuição de espaço
