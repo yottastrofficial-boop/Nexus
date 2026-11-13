@@ -365,7 +365,7 @@ assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
 console.log("NEXUS 1.0.0.13: editor visual de interações validado.");
 
-assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
+assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
 assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");
 
@@ -397,7 +397,7 @@ assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblio
 delete globalThis.game;
 assert.match(sheet,/config\.mode === "skill"/);
 assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
-assert.match(interactions,/Regra guiada · Gatilhos e condições/);
+assert.match(interactions,/Gatilhos e condições/);
 assert.match(interactions,/Salvar na biblioteca/);
 assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
