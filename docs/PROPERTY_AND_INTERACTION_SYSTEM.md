@@ -56,6 +56,8 @@ As chaves técnicas das 18 perícias utilizam inglês, mantendo os nomes exibido
 
 ## 2. Interações de componentes
 
+O Inspector separa as áreas de Dados, Comportamento, Aparência e Avançado. A área Avançado expõe identificadores técnicos do componente sem permitir editar diretamente sua identidade estável.
+
 O contrato de interação separa três responsabilidades:
 
 1. **Trigger** — evento que inicia a interação, como `click`, `change`, `submit` ou `hover`.
@@ -87,7 +89,8 @@ Estrutura conceitual:
         targetId: "component-target"
       }
     }
-  ]
+  ],
+  execution: { mode: "sequential", onError: "stop" }
 }
 ```
 
