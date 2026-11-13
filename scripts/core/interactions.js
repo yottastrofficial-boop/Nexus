@@ -88,7 +88,6 @@ export function createInteractionFlow() {
 }
 export function ensureEditableInteractions(component) {
   component.interactions=getComponentInteractions(component).map(flow=>structuredClone(flow));
-  if(!component.interactions.length)component.interactions.push(createInteractionFlow());
   return component.interactions;
 }
 export function applyInteractionEditorChange(component,data,value) {
