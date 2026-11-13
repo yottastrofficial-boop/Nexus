@@ -303,7 +303,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     actionsHeading.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));
     acts.append(actionsHeading);
     flow.actions.forEach((a,i)=>{
-      const row=el("details","nexus-interaction-action");row.open=true;
+      const row=el("details","nexus-interaction-action nexus-interaction-action-head");row.open=true;
       const actionName=(a.type==="roll"&&a.config.mode==="skill"?"Rolagem de perícia":actions.find(([key])=>key===a.type)?.[1]??"Ação")+" · "+(i+1);
       const actionTitle=el("summary","nexus-interaction-action-title");
       actionTitle.append(el("span","nexus-interaction-action-name",actionName));
@@ -313,13 +313,11 @@ export function renderInteractionEditor(container,component,components=[],librar
       moveUp.disabled=i===0;moveDown.disabled=i===flow.actions.length-1;
       tools.append(moveUp,moveDown,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
       const active=field("input","Ativo",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});
-      const actionHead=el("div","nexus-interaction-action-head");
-      actionHead.append(actionTitle,active.wrap,tools);
       const meta=el("div","nexus-interaction-action-meta");
       const type=field("select","Tipo",a.type,actions);bind(type.input,"action",flow.id,"type",{actionIndex:i});meta.append(type.wrap);
       const config=el("div","nexus-interaction-action-config");
       actionConfig(config,{...flow,componentId:component.id},a,i,components);
-      row.append(actionHead,meta,config);
+      row.append(actionTitle,active.wrap,tools,meta,config);
       acts.append(row);
     });
     card.append(acts);
