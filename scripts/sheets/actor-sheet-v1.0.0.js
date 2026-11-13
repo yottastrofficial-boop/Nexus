@@ -3,6 +3,7 @@ import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { executeTriggeredActions, getTriggeredActions } from "../core/interactions.js";
+import { renderInteractionEditor } from "../core/interaction-editor.js";
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -1723,7 +1724,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-inspector-tab]").on("click", event => {
       const tab = event.currentTarget.dataset.inspectorTab;
       const inspector = event.currentTarget.closest(".nexus-component-inspector");
-      if (!inspector || !["card", "appearance"].includes(tab)) return;
+      if (!inspector || !["card", "appearance", "behavior"].includes(tab)) return;
       this._componentInspectorTab = tab;
       inspector.querySelectorAll("[data-inspector-tab]").forEach(button => button.classList.toggle("active", button.dataset.inspectorTab === tab));
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel => { const active = panel.dataset.inspectorTabPanel === tab; panel.hidden = !active; panel.classList.toggle("active", active); });
@@ -2897,6 +2898,26 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await this.render({ force: true });
   }
 
+  async _saveComponentInteractions(componentId, interactions) {
+    if (!componentId || !Array.isArray(interactions)) return;
+    const layouts = await this._readLayouts();
+    const active = this._activeLayoutId();
+    const component = layouts[active]?.components?.find(item => item.id === componentId);
+    if (!component) return;
+    this._captureHistory();
+    component.interactions = interactions;
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layouts[active];
+    const node = this.element?.querySelector(`.nexus-component[data-id="${CSS.escape(componentId)}"]`);
+    if (node) {
+      const clickable = getTriggeredActions(component, "click").length > 0;
+      node.dataset.hasClickInteraction = String(clickable);
+      node.tabIndex = clickable ? 0 : -1;
+      if (clickable) node.setAttribute("role", "button");
+      else node.removeAttribute("role");
+    }
+  }
+
   _runComponentAction(componentId) {
     const component = this._currentLayout?.components?.find(item => item.id === componentId);
     if (!component) return;
@@ -3897,6 +3918,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (sliderOption) sliderOption.hidden = !supportsSlider;
       if (toggleOption) toggleOption.hidden = !one || one.type === "token";
       this._syncTextToolbar(inspector, one);
+      renderInteractionEditor(
+        inspector.querySelector("[data-interaction-editor]"),
+        one,
+        interactions => this._saveComponentInteractions(one?.id, interactions),
+        (this._currentLayout?.components ?? []).filter(component => component.id !== one?.id)
+      );
     }
     if (inspector) {
       inspector.hidden = !one && !selectedGroup; if (empty) empty.hidden = !!one || !!selectedGroup;
