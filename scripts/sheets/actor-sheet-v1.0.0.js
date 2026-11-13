@@ -2195,10 +2195,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
       if (command !== "save-flow") await this._writeLayouts(layouts, active);
-      const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("component")?.panel?.querySelector("[data-interaction-editor]");
-      if (editor) { editor.dataset.componentId = componentId; renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor)); }
+      const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
+      if (editor) {
+        const scrollTop = editor.scrollTop;
+        const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
+        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor));
+        editor.dataset.componentId = componentId;
+        editor.scrollTop = scrollTop;
+        const nextControl = [...editor.querySelectorAll("[data-interaction-field]")].find(item =>
+          item.dataset.interactionScope === focusData.scope &&
+          item.dataset.interactionField === focusData.field &&
+          item.dataset.interactionId === focusData.interactionId &&
+          item.dataset.triggerIndex === focusData.triggerIndex &&
+          item.dataset.conditionIndex === focusData.conditionIndex &&
+          item.dataset.actionIndex === focusData.actionIndex
+        );
+        nextControl?.focus({ preventScroll: true });
+      }
     };
-    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-action], .nexus-behavior-editor [data-interaction-action]", async event => {
+    $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
       if(button.dataset.interactionAction==="add-library-flow"){
@@ -2207,15 +2222,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-view], .nexus-behavior-editor [data-interaction-view]", event => {
-      const button=event.currentTarget,editor=button.closest("[data-interaction-editor]");
-      if(!editor)return;
-      editor.dataset.viewMode=button.dataset.interactionView==="list"?"list":"cards";
-      const componentId=editor.dataset.componentId;
-      const component=this._currentLayout?.components?.find(item=>item.id===componentId);
-      if(component)renderInteractionEditor(editor,component,this._currentLayout?.components??[],getInteractionLibrary(this.actor));
-    });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-field], .nexus-behavior-editor [data-interaction-field]", async event => {
+    $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field]", async event => {
       event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
     });
     const getTextStyleTarget = () => this._textStyleTarget === "heading" ? "heading" : "content";
@@ -4244,7 +4251,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [340, 470], component: [360, 470], layers: [340, 470], library: [660, 640], aliases: [360, 470], settings: [380, 500], behavior: [660, 640] };
+    const panelSizes = { style: [420, 620], component: [520, 760], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [1120, 820] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
@@ -4534,6 +4541,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._openAppearancePanels?.delete(key);
     if (this._activePanelWindowKey === key) this._activePanelWindowKey = null;
     document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="${key}"]`)?.classList.remove("active");
+    if (["component", "behavior"].includes(key)) {
+      const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.get(panelKey)?.rendered);
+      if (!editorPanelsOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
+    }
   }
 
   _onClose(options) {
@@ -4891,7 +4902,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if(hitGroup&&beginGroupMove(hitGroup,p,event))return;
       }
       if(component?.classList.contains("is-locked")) return;
-      if(!component){if(!mod)setSelection([]);gesture={type:"marquee",start:p,additive:mod,original:new Set(sheet._selectedIds)};selectionBox.hidden=false;Object.assign(selectionBox.style,{left:`${p.x}px`,top:`${p.y}px`,width:"0px",height:"0px"});canvas.setPointerCapture(event.pointerId);event.preventDefault();return;}
+      if(!component){gesture={type:"marquee",start:p,additive:mod,original:new Set(sheet._selectedIds)};selectionBox.hidden=true;Object.assign(selectionBox.style,{left:`${p.x}px`,top:`${p.y}px`,width:"0px",height:"0px"});canvas.setPointerCapture(event.pointerId);event.preventDefault();return;}
       const id=component.dataset.id; let edge=edgeAt(component,event);
       if (sheet._openAppearancePanels?.has("component")) {
         requestAnimationFrame(() => {
