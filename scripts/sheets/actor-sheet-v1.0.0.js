@@ -2,7 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
-import { executeTriggeredActions, getTriggeredActions } from "../core/interactions.js";
+import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -1033,7 +1033,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const headingLabel = String(component.customLabel ?? "").trim();
       return {
         ...component,
-        hasClickInteraction: getTriggeredActions(component, "click").length > 0,
+        hasClickInteraction: getTriggeredActions(component, "click", { actor: this.actor }).length > 0,
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3),
         proficiencyStages: (component.proficiencyLabels ?? ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
@@ -1207,6 +1207,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!component || event.target.closest("input,textarea,select,button,a")) return;
       event.preventDefault(); event.stopPropagation();
       const id = component.dataset.id;
+      if (this._mode === "play" && getTriggeredActions(this._currentLayout?.components?.find(item => item.id === id), "doubleClick", { actor: this.actor }).length) {
+        this._runComponentAction(id, "doubleClick");
+        return;
+      }
       this._setSelection($(root), [id]);
       const portal = document.querySelector(`[data-nexus-floating-for="${this.id}"]`);
       portal?.querySelector('[data-floating-panel="component"]')?.click();
@@ -2171,6 +2175,26 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const inspectorNamespace = `.nexusInspector${String(this.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     this._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
+    const persistInteractionEditor = async (control, command = null) => {
+      const componentId = control.dataset.componentId || control.closest("[data-interaction-editor]")?.dataset.componentId;
+      const interactionId = control.dataset.interactionId || "";
+      if (!componentId) return;
+      const layouts = await this._readLayouts(), active = this._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
+      if (!component) return;
+      this._captureHistory();
+      const data = { interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, direction: control.dataset.direction };
+      if (command) applyInteractionEditorCommand(component, command, data);
+      else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
+      await this._writeLayouts(layouts, active);
+      const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("component")?.panel?.querySelector("[data-interaction-editor]");
+      if (editor) { editor.dataset.componentId = componentId; renderInteractionEditor(editor, component, layouts[active]?.components ?? []); }
+    };
+    $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-action]", async event => {
+      event.preventDefault(); event.stopPropagation(); await persistInteractionEditor(event.currentTarget, event.currentTarget.dataset.interactionAction);
+    });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-interaction-field]", async event => {
+      event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
+    });
     const getTextStyleTarget = () => this._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {
       const inspector = element?.closest?.(".nexus-component-inspector");
@@ -2897,14 +2921,56 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await this.render({ force: true });
   }
 
-  _runComponentAction(componentId) {
+  _runComponentAction(componentId, eventName = "click", context = {}) {
     const component = this._currentLayout?.components?.find(item => item.id === componentId);
-    if (!component) return;
-    return executeTriggeredActions(component, "click", async action => {
-      if (action.type === "roll") return this._rollComponent(componentId, action.config);
-      if (action.type === "toggle") return this._toggleTargetComponent(componentId, action.config);
-      return undefined;
-    });
+    if (!component || this._mode !== "play") return;
+    const depth = Number(context.depth) || 0;
+    if (depth > 8) { ui.notifications?.warn?.("O limite de encadeamento de interações foi atingido."); return; }
+    return executeTriggeredActions(component, eventName, action => this._executeComponentAction(componentId, action, { ...context, depth }), { actor: this.actor, ...context });
+  }
+
+  async _executeComponentAction(componentId, action, context = {}) {
+    const config = action?.config ?? {};
+    if (action?.type === "roll") return this._rollComponent(componentId, config);
+    if (action?.type === "toggle") return this._toggleTargetComponent(componentId, config);
+    if (action?.type === "update") {
+      const path = String(config.path ?? "").replace(/^system\\./, "");
+      if (!/^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) throw new Error("Propriedade de destino inválida.");
+      const current = foundry.utils.getProperty(this.actor.system, path), raw = String(config.value ?? "");
+      const value = config.operation === "add" || config.operation === "subtract"
+        ? Number(current ?? 0) + (config.operation === "subtract" ? -1 : 1) * Number(raw)
+        : (raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw);
+      if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
+      return this.actor.update({ [`system.${path}`]: value });
+    }
+    if (action?.type === "calculate") {
+      const formula = String(config.formula ?? "").trim();
+      if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
+      const roll = new Roll(expandNexusRollAliases(this.actor, formula), getNexusRollData(this.actor));
+      await roll.evaluate({ async: true });
+      const target = String(config.targetPath ?? "").replace(/^system\\./, "");
+      if (target) {
+        if (!/^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(target) || target.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) throw new Error("Propriedade de destino inválida.");
+        await this.actor.update({ [`system.${target}`]: roll.total });
+      }
+      return roll.total;
+    }
+    if (action?.type === "open") {
+      if (config.uuid) { const document = await fromUuid(String(config.uuid)); if (document?.sheet) return document.sheet.render(true); }
+      if (config.targetId) {
+        this._setSelection($(this.element), [String(config.targetId)]);
+        document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="component"]`)?.click();
+      }
+      return;
+    }
+    if (action?.type === "interact") {
+      const targetId = String(config.targetId ?? "");
+      if (targetId) return this._runComponentAction(targetId, String(config.event ?? "interact"), { depth: (context.depth ?? 0) + 1, sourceComponentId: componentId });
+    }
+    if (action?.type === "execute") {
+      if (config.operation === "refresh-sheet") return this.render({ force: true });
+      if (config.operation === "notify") { const message = String(config.message ?? "").slice(0, 300); if (message) ui.notifications?.info?.(message); }
+    }
   }
 
   async _rollComponent(componentId, config = {}) {
@@ -3874,7 +3940,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
     if (one && inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => { field.dataset.componentTargetId = one.id; });
     if (inspector) {
-      inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = !one || section.dataset.actionConfig !== (one.actionType ?? ""); });
+      const interactionEditor = inspector.querySelector("[data-interaction-editor]");
+      if (interactionEditor) {
+        interactionEditor.dataset.componentId = one?.id ?? "";
+        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? []);
+        else interactionEditor.replaceChildren();
+      }
+      inspector.querySelectorAll("[data-action-config]").forEach(section => { section.hidden = true; });
       const textTools = inspector.querySelector("[data-text-tools]");
       if (textTools) textTools.hidden = !one || ["token", "asset-image"].includes(one.type);
       const imageSettings = inspector.querySelector("[data-image-settings]");
@@ -4925,7 +4997,28 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-has-click-interaction=\"true\"]") : null;
       if (!card || !canvas.contains(card) || event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
       event.preventDefault();
-      sheet._runComponentAction(card.dataset.id);
+      sheet._runComponentAction(card.dataset.id, "click");
+    });
+    canvas.addEventListener("contextmenu", event => {
+      if (sheet._mode !== "play") return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
+      if (!card || !canvas.contains(card) || !getTriggeredActions(sheet._currentLayout?.components?.find(item => item.id === card.dataset.id), "rightClick", { actor: sheet.actor }).length) return;
+      event.preventDefault(); event.stopPropagation(); sheet._runComponentAction(card.dataset.id, "rightClick");
+    });
+    canvas.addEventListener("pointerover", event => {
+      if (sheet._mode !== "play" || (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget))) return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
+      if (card && canvas.contains(card)) sheet._runComponentAction(card.dataset.id, "hover");
+    });
+    canvas.addEventListener("change", event => {
+      if (sheet._mode !== "play") return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
+      if (card) sheet._runComponentAction(card.dataset.id, "change", { fieldName: event.target.name ?? "" });
+    });
+    canvas.addEventListener("submit", event => {
+      if (sheet._mode !== "play") return;
+      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
+      if (card) sheet._runComponentAction(card.dataset.id, "submit");
     });
     const restoreCanvasKeyboardFocus = () => {
       if (!sheet._nexusCanvasKeyboardFocus) return;
