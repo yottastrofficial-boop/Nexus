@@ -4445,10 +4445,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const width = Math.min(baseWidth, window.innerWidth - 32);
       const height = Math.min(baseHeight, window.innerHeight - 48);
       const offset = panelKeys.indexOf(key) * 28;
+      const left = Math.min(Math.max(8, Math.round((window.innerWidth - width) / 2 + offset)), Math.max(8, window.innerWidth - width - 8));
+      const top = Math.min(Math.max(8, Math.round((window.innerHeight - height) / 2 + offset)), Math.max(8, window.innerHeight - height - 8));
       const instance = new NexusPanelWindow({
-        sheet: this, key, panel, title: panelTitles[key], width, height,
-        left: Math.max(8, Math.round((window.innerWidth - width) / 2 + offset)),
-        top: Math.max(8, Math.round((window.innerHeight - height) / 2 + offset))
+        sheet: this, key, panel, title: panelTitles[key], width, height, left, top
       });
       this._nexusPanelWindows.set(key, instance);
       this._openAppearancePanels.add(key);
