@@ -1,3 +1,23 @@
+## 1.0.0.14
+
+### Editor de Comportamento
+- Reorganizada a criação de fluxos em uma única interface, removendo o seletor redundante Cartões/Lista e o atalho separado de rolagem de perícia.
+- Mantidos os tipos de ação e a compatibilidade com fluxos existentes; a rolagem de perícia deixa de ser apresentada como um modelo de fluxo separado.
+- Reestruturados os cartões de fluxo, cabeçalhos, gatilhos, condições e ações para aproveitar a largura do painel.
+- Separados os controles de expandir, reordenar e remover ações do cabeçalho expansível, evitando botões interativos dentro do elemento de resumo.
+- Melhorados alinhamento, espaçamento, tamanhos de campos, áreas clicáveis, foco e comportamento responsivo.
+- Preservados foco e posição de rolagem após alterações em campos do fluxo.
+
+### Propriedades e seleção
+- Ampliado o painel de Propriedades e aprimorada a grade de controles, com campos e áreas de interação maiores.
+- Cliques simples no espaço vazio do Canvas não removem mais a seleção atual.
+- A seleção é mantida ao alternar entre Comportamento e Propriedades e é limpa quando ambos os painéis são fechados.
+- A seleção por arrasto continua disponível; pequenos movimentos acidentais não limpam a seleção.
+
+### Validação
+- Atualizados manifesto, README, changelog e testes para a versão 1.0.0.14.
+- Testes automatizados e compatibilidade de interface com Foundry VTT 14 serão verificados no CI; a validação funcional final continua necessária dentro do Foundry.
+
 ## 1.0.0.13
 
 ### Reorganização do Editor de Fichas
