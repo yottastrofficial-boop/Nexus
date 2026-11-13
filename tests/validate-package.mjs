@@ -23,7 +23,7 @@ assert.equal(manifest.version, "1.1.0", "Versão do manifesto incorreta");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.match(manifest.download, /releases\\/download\\/v1\\.1\\.0\\/nexus\\.zip$/);
+assert.ok(manifest.download.endsWith("/releases/download/v1.1.0/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -265,7 +265,7 @@ assert.equal(NEXUS_SKILLS.length, 18, "O catálogo deve conter 18 perícias");
 assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves técnicas das perícias devem ser únicas");
 assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
-assert.match(sheet, /executeTriggeredActions\\(component, eventName/, "Eventos de componentes devem passar pelo executor de interações");
+assert.ok(sheet.includes("executeTriggeredActions(component, eventName"), "Eventos de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /trigger: \{ event \}/);
 assert.match(interactions, /interaction\.actions/);
