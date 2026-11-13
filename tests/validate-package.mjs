@@ -208,7 +208,7 @@ assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As aç
 assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
-assert.match(interactions, /guided\.open = true/, "Gatilhos e condições devem iniciar expandidos");
+assert.match(interactions, /const guided=el\("section","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
