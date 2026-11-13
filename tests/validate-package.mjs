@@ -396,12 +396,12 @@ globalThis.game={settings:{
 }};
 await saveInteractionToLibrary(fakeLibraryActor,editorDraft.interactions[0]);
 assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
-assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.skillKey,"stealth");
+assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.formula,"1d20");
 assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
 delete globalThis.game;
 assert.match(sheet,/config\.mode === "skill"/);
 assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
-assert.match(interactions,/Gatilhos e condições/);
+assert.match(interactions,/nexus-interaction-guided/);
 assert.match(interactions,/Salvar na biblioteca/);
 assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
