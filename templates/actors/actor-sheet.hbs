@@ -4,15 +4,15 @@
     <aside class="nexus-sidebar nexus-sidebar-left">
       {{#if (eq nexus.mode "appearance")}}
         <nav class="nexus-appearance-rail" aria-label="Ferramentas de aparência">
-          <button type="button" data-appearance-panel="style" class="active">◈</button>
-          <button type="button" data-appearance-panel="library">▤</button>
-          <button type="button" data-appearance-panel="layers">▱</button>
-          <button type="button" data-appearance-panel="aliases">⌘</button>
+          <button type="button" data-appearance-panel="style" class="active" aria-label="Aparência"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="library" aria-label="Biblioteca"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="layers" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="aliases" aria-label="Estrutura de dados"><i class="fa-solid fa-database" aria-hidden="true"></i></button>
         </nav>
         <div class="nexus-appearance-drawer">
           <section class="nexus-tool-panel nexus-settings-panel" data-tool-panel="settings" hidden>
             <nav class="nexus-settings-rail" aria-label="Categorias de configurações">
-              <button type="button" class="active" data-settings-section="organization" aria-label="Organização">▦</button>
+              <button type="button" class="active" data-settings-section="organization" aria-label="Organização"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
             </nav>
             <div class="nexus-settings-drawer">
               <section class="nexus-settings-section active" data-settings-panel="organization">

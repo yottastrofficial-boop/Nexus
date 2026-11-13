@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.14", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.14"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.14"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.15", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.15"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.15"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.14/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.15/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.14"));
+assert.ok(readme.includes("Versão 1.0.0.15"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -203,7 +203,7 @@ assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportame
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
 assert.match(sheet, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
 assert.match(sheet, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
-assert.match(sheet, /behavior: \[1120, 820\]/, "O painel Comportamento deve aproveitar a largura disponível");
+assert.match(sheet, /behavior: \[820, 700\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
 assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
@@ -363,7 +363,7 @@ assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheet.includes('addEventListener("contextmenu"'));
 assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
-console.log("NEXUS 1.0.0.14: editor visual de interações validado.");
+console.log("NEXUS 1.0.0.15: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
@@ -377,13 +377,20 @@ assert.notEqual(templateClone.actions[0].id,editorDraft.interactions[0].actions[
 assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer um fluxo especial de rolagem de perícia");
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
-assert.ok(sheet.includes("behavior: [1120, 820]"), "Comportamento deve aproveitar a largura disponível");
-assert.ok(sheet.includes("component: [520, 760]"), "Propriedades deve ter espaço adequado para seus controles");
+assert.ok(sheet.includes("behavior: [820, 700]"), "Comportamento deve ter o mesmo tamanho da Biblioteca");
+assert.ok(sheet.includes("component: [520, 760]"), "Propriedades deve manter suas dimensões atuais");
+assert.ok(sheet.includes("library: [820, 700]") && sheet.includes("behavior: [820, 700]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
+assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
+assert.ok(sheet.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
+assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-database"'), "Estrutura de dados deve ter ícone semântico");
+assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-code-branch"'), "Comportamento deve ter ícone semântico");
 assert.ok(sheet.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
 assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
 assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
+assert.ok(interactions.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ter um layout dedicado");
+assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ocupar uma área dimensionada no cabeçalho de condições");
 const fakeLibraryActor={
   flags:{nexus:{}},
   getFlag(scope,key){return this.flags[scope]?.[key];},

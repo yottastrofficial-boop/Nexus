@@ -255,7 +255,7 @@ export function renderInteractionEditor(container,component,components=[],librar
       triggers.append(row);
     });
     const conditions=el("section","nexus-interaction-group");
-    const conditionHeading=el("div","nexus-interaction-group-heading");
+    const conditionHeading=el("div","nexus-interaction-group-heading nexus-interaction-condition-heading");
     const join=field("select","Combinar",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]]);
     bind(join.input,"flow",flow.id,"conditionJoin");
     conditionHeading.append(el("h6","","Se · Condições"),join.wrap,btn("＋ Condição","add-condition",flow.id));

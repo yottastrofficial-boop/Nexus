@@ -4697,3 +4697,48 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-behavior-editor .nexus-interaction-action-config:has(> .nexus-interaction-field:only-child) {
   grid-template-columns:minmax(0,1fr);
 }
+
+
+/* 1.0.0.15 — Comportamento dimensionado como a Biblioteca e controles sem compressão. */
+.nexus-behavior-editor .nexus-interaction-condition-heading {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(160px,220px) auto;
+  align-items:end;
+  gap:10px;
+}
+.nexus-behavior-editor .nexus-interaction-condition-heading > .nexus-interaction-field {
+  width:100%;
+  max-width:none;
+  min-width:0;
+  flex:initial;
+}
+.nexus-behavior-editor .nexus-interaction-condition-heading > .nexus-interaction-field select {
+  width:100%;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-action > summary {
+  grid-column:1;
+  grid-row:1;
+  min-height:30px;
+  overflow-wrap:anywhere;
+}
+.nexus-behavior-editor .nexus-interaction-action > .nexus-interaction-action-tools {
+  grid-column:2;
+  grid-row:1;
+}
+.nexus-behavior-editor .nexus-interaction-action > .nexus-interaction-action-meta {
+  grid-column:1/-1;
+  grid-row:2;
+}
+.nexus-behavior-editor .nexus-interaction-action > .nexus-interaction-action-config {
+  grid-column:1/-1;
+  grid-row:3;
+}
+@media(max-width:520px) {
+  .nexus-behavior-editor .nexus-interaction-condition-heading {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nexus-behavior-editor .nexus-interaction-condition-heading > .nexus-interaction-button {
+    grid-column:auto;
+  }
+}

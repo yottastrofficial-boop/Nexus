@@ -917,7 +917,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const controls = super._getHeaderControls() ?? [];
     controls.push(
       { action: "nexus-default-mode", label: "Padrão", icon: "fa-solid fa-eye", onClick: () => this._setMode("play") },
-      { action: "nexus-config-mode", label: "Configuração", icon: "fa-solid fa-sliders", onClick: () => this._setMode("config") },
+      { action: "nexus-config-mode", label: "Configuração", icon: "fa-solid fa-wrench", onClick: () => this._setMode("config") },
       { action: "nexus-appearance-mode", label: "Aparência", icon: "fa-solid fa-palette", onClick: () => this._setMode("appearance") }
     );
     return controls;
@@ -4253,7 +4253,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const tabs = root.querySelector(".nexus-layout-tabs");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [420, 620], component: [520, 760], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [1120, 820] };
+    const panelSizes = { style: [420, 620], component: [520, 760], layers: [420, 620], library: [820, 700], aliases: [520, 700], settings: [480, 620], behavior: [820, 700] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
@@ -4267,13 +4267,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     portal.innerHTML = `
       <div class="nexus-floating-left" aria-label="Ferramentas da ficha">
         <div class="nexus-floating-left-rail">
-          <button type="button" data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="style" title="Aparência global" aria-label="Aparência global"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="library" title="Biblioteca de elementos" aria-label="Biblioteca de elementos"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
-          <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
-          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-diagram-next" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-database" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></button>
         </div>
       </div>
       <div class="nexus-floating-right" aria-label="Navegação de páginas">
