@@ -208,26 +208,21 @@ export function renderInteractionEditor(container,component,components=[],librar
 
   const head=el("header","nexus-interaction-editor-heading");
   const title=el("div","nexus-interaction-editor-title");
-  title.append(el("strong","","Fluxos"),el("span","",flows.length?String(flows.length)+" configurado(s)":"Nenhum configurado"));
+  title.append(el("strong","","Fluxos"));
   const toolbar=el("div","nexus-interaction-editor-toolbar");
   toolbar.append(btn("＋ Novo fluxo","add-flow",""));
-  head.append(title,toolbar);
-  container.append(head);
-
   if(library.length){
-    const libraryRow=el("div","nexus-interaction-library-row");
-    const libraryLabel=el("label","nexus-interaction-library-label");
-    libraryLabel.append(el("span","","Modelo salvo"));
     const select=el("select","nexus-interaction-library-select");
-    const placeholder=el("option","","Selecionar fluxo…");placeholder.value="";select.append(placeholder);
+    select.setAttribute("aria-label","Selecionar fluxo salvo");
+    const placeholder=el("option","","Usar modelo salvo…");placeholder.value="";select.append(placeholder);
     for(const item of library){const option=el("option","",item.name);option.value=item.id;select.append(option);}
     select.dataset.interactionLibrarySelect="";
-    libraryLabel.append(select);
-    libraryRow.append(libraryLabel,btn("Inserir","add-library-flow",""));
-    container.append(libraryRow);
+    toolbar.append(select,btn("Inserir","add-library-flow",""));
   }
+  head.append(title,toolbar);
 
   if(!flows.length){
+    container.append(head);
     const empty=el("div","nexus-interaction-empty-state");
     empty.append(el("strong","","Nenhum fluxo neste componente"),el("p","","Adicione um fluxo para definir as interações deste componente."),btn("＋ Criar fluxo","add-flow",""));
     container.append(empty);
@@ -246,7 +241,8 @@ export function renderInteractionEditor(container,component,components=[],librar
     tab.classList.toggle("active",flow.id===activeFlowId);
     flowTabs.append(tab);
   }
-  container.append(flowTabs);
+  head.append(flowTabs);
+  container.append(head);
 
   const flowList=el("div","nexus-interaction-flows");
   for(const flow of flows){
@@ -257,7 +253,9 @@ export function renderInteractionEditor(container,component,components=[],librar
     card.setAttribute("role","tabpanel");
 
     const top=el("div","nexus-interaction-flow-heading");
-    const name=field("input","Nome",flow.name);bind(name.input,"flow",flow.id,"name");top.append(name.wrap);
+    const name=el("input","nexus-interaction-flow-name");
+    name.type="text";name.value=flow.name;name.placeholder="Nome do fluxo";name.setAttribute("aria-label","Nome do fluxo");
+    bind(name,"flow",flow.id,"name");top.append(name);
     const enabled=field("input","Ativo",flow.enabled);enabled.input.type="checkbox";bind(enabled.input,"flow",flow.id,"enabled");
     const flowActions=el("div","nexus-interaction-flow-actions");
     flowActions.append(enabled.wrap,iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));
@@ -271,17 +269,21 @@ export function renderInteractionEditor(container,component,components=[],librar
     triggers.append(triggerHeading);
     flow.triggers.forEach((tr,i)=>{
       const row=el("div","nexus-interaction-row");
-      const sel=field("select","Evento",tr.event,events);
-      bind(sel.input,"trigger",flow.id,"event",{triggerIndex:i});
-      row.append(sel.wrap,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));
+      const sel=el("select","nexus-interaction-trigger-select");
+      for(const [value,label] of events){const option=el("option","",label);option.value=value;sel.append(option);}
+      sel.value=tr.event;sel.setAttribute("aria-label","Evento do gatilho");
+      bind(sel,"trigger",flow.id,"event",{triggerIndex:i});
+      row.append(sel,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));
       triggers.append(row);
     });
 
     const conditions=el("section","nexus-interaction-group");
     const conditionHeading=el("div","nexus-interaction-group-heading nexus-interaction-condition-heading");
-    const join=field("select","Combinar condições",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]]);
-    bind(join.input,"flow",flow.id,"conditionJoin");
-    conditionHeading.append(el("h6","","Condições"),join.wrap,btn("＋ Adicionar","add-condition",flow.id));
+    const join=el("select","nexus-interaction-condition-join");
+    for(const [value,label] of [["all","Todas (E)"],["any","Qualquer (OU)"]]){const option=el("option","",label);option.value=value;join.append(option);}
+    join.value=flow.conditionJoin;join.setAttribute("aria-label","Combinar condições");
+    bind(join,"flow",flow.id,"conditionJoin");
+    conditionHeading.append(el("h6","","Condições"),join,btn("＋ Adicionar","add-condition",flow.id));
     conditions.append(conditionHeading);
     flow.conditions.forEach((co,i)=>{
       const row=el("div","nexus-interaction-condition");
@@ -310,12 +312,14 @@ export function renderInteractionEditor(container,component,components=[],librar
       const moveDown=iconBtn("Mover ação para baixo","fa-arrow-down","move-action",flow.id,{actionIndex:i,direction:1});
       moveUp.disabled=i===0;moveDown.disabled=i===flow.actions.length-1;
       tools.append(moveUp,moveDown,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
+      const active=field("input","Ativo",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});
+      const actionHead=el("div","nexus-interaction-action-head");
+      actionHead.append(actionTitle,active.wrap,tools);
       const meta=el("div","nexus-interaction-action-meta");
       const type=field("select","Tipo",a.type,actions);bind(type.input,"action",flow.id,"type",{actionIndex:i});meta.append(type.wrap);
-      const active=field("input","Ativo",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});meta.append(active.wrap);
       const config=el("div","nexus-interaction-action-config");
       actionConfig(config,{...flow,componentId:component.id},a,i,components);
-      row.append(actionTitle,tools,meta,config);
+      row.append(actionHead,meta,config);
       acts.append(row);
     });
     card.append(acts);
