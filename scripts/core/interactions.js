@@ -237,7 +237,7 @@ export function renderInteractionEditor(container,component,components=[],librar
   for(const flow of flows){
     const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");
     tab.type="button";
-    tab.dataset.interactionFlowTab=flow.id;
+    tab.setAttribute("data-interaction-flow-tab",flow.id);
     tab.setAttribute("role","tab");
     tab.setAttribute("aria-selected",String(flow.id===activeFlowId));
     tab.classList.toggle("active",flow.id===activeFlowId);
@@ -246,7 +246,7 @@ export function renderInteractionEditor(container,component,components=[],librar
   container.append(flowTabs);
   const flowList=el("div","nexus-interaction-flows");
   for(const flow of flows){
-    const card=el("section","nexus-interaction-flow");card.dataset.interactionId=flow.id;card.dataset.interactionFlowPanel=flow.id;card.hidden=flow.id!==activeFlowId;card.setAttribute("role","tabpanel");
+    const card=el("section","nexus-interaction-flow");card.dataset.interactionId=flow.id;card.setAttribute("data-interaction-flow-panel",flow.id);card.hidden=flow.id!==activeFlowId;card.setAttribute("role","tabpanel");
     const top=el("div","nexus-interaction-flow-heading");
     const name=field("input","Nome do fluxo",flow.name);bind(name.input,"flow",flow.id,"name");top.append(name.wrap);
     const enabled=field("input","Ativo",flow.enabled);enabled.input.type="checkbox";bind(enabled.input,"flow",flow.id,"enabled");
