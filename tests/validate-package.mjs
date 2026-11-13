@@ -193,7 +193,7 @@ assert.match(sheet, /exib:"PV"/, "A propriedade PV deve possuir abreviação pr�
 assert.match(sheet, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
-assert.match(template, /data-component-setting="rollFormula"/, "A fórmula deve ser configurável no Inspector");
+assert.match(template, /data-interaction-editor/, "O Inspector deve conter o editor visual de interações");
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
