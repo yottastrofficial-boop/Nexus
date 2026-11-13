@@ -20,6 +20,8 @@ const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.11", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.11"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.11"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
