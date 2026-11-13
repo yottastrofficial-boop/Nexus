@@ -234,7 +234,8 @@ export function renderInteractionEditor(container,component,components=[],librar
     const triggerNames=flow.triggers.map(item=>events.find(([key])=>key===item.event)?.[1]??item.event).join(" ou ")||"sem gatilho";
     summary.textContent="QUANDO "+triggerNames+"  ·  SE "+(flow.conditions.length?flow.conditions.length+" condição(ões)":"sem condição")+"  ·  ENTÃO "+flow.actions.length+" ação(ões)";
     card.append(summary);
-    const guided=el("details","nexus-interaction-guided"),guidedSummary=el("summary","","Regra guiada · Gatilhos e condições");
+    const guided=el("details","nexus-interaction-guided"),guidedSummary=el("summary","","Gatilhos e condições");
+    guided.open = true;
     guided.append(guidedSummary);
     const triggers=el("section","nexus-interaction-group");triggers.append(el("h6","","Gatilhos"));
     flow.triggers.forEach((tr,i)=>{const row=el("div","nexus-interaction-row"),sel=field("select","Quando",tr.event,events);bind(sel.input,"trigger",flow.id,"event",{triggerIndex:i});row.append(sel.wrap,btn("Remover","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);});

@@ -3883,7 +3883,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media(max-width:380px){.nexus-interaction-condition{grid-template-columns:minmax(0,1fr)}.nexus-interaction-condition .nexus-interaction-field:first-child{grid-column:auto}}
 
 /* Inspector com quatro áreas independentes. */
-.nexus-panel-window .nexus-inspector-tabs{grid-template-columns:repeat(4,minmax(0,1fr));}
+.nexus-panel-window .nexus-inspector-tabs{grid-template-columns:repeat(3,minmax(0,1fr));}
 .nexus-panel-window .nexus-inspector-tabs button{min-width:0;padding-inline:4px;font-size:9px;}
 .nexus-panel-window [data-component-technical] input[readonly]{opacity:.78;cursor:text;}
 
@@ -4006,4 +4006,223 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media(max-width:420px) {
   .nexus-interaction-editor-heading { flex-wrap: wrap; }
   .nexus-interaction-library-row { grid-template-columns:minmax(0,1fr); }
+}
+
+
+/* 1.0.0.13 — workspaces independentes para comportamento e configurações. */
+.nexus-settings-panel {
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr);
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.nexus-settings-rail {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  padding:12px 5px;
+  border-right:1px solid var(--nexus-panel-border,#3c5067);
+  background:var(--nexus-panel-bg,#182330);
+}
+.nexus-settings-rail button {
+  display:grid;
+  place-items:center;
+  width:32px;
+  height:32px;
+  padding:0;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  color:var(--nexus-panel-muted,#9aadc2);
+  background:var(--nexus-panel-surface,#202e3e);
+  cursor:pointer;
+  font-size:17px;
+}
+.nexus-settings-rail button.active {
+  color:var(--nexus-panel-text,#e7edf5);
+  border-color:var(--nexus-highlight-color,#78b7e8);
+  background:var(--nexus-panel-hover,#2a3d52);
+}
+.nexus-settings-drawer {
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  padding:14px;
+}
+.nexus-settings-section {
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  min-width:0;
+}
+.nexus-settings-section[hidden] { display:none !important; }
+.nexus-settings-section h3,.nexus-settings-section h4 {
+  margin:0;
+  color:var(--nexus-panel-text,#e7edf5);
+}
+.nexus-settings-section h3 { font-size:14px; }
+.nexus-settings-section h4 {
+  margin-top:7px;
+  padding-top:10px;
+  border-top:1px solid var(--nexus-panel-border,#3c5067);
+  font-size:11px;
+}
+.nexus-settings-section > label:not(.nexus-check) {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:11px;
+}
+.nexus-settings-section input:not([type=checkbox]) {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:30px;
+  padding:5px 7px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:5px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-input,#111b27);
+}
+.nexus-behavior-editor {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  padding:14px;
+  overflow:auto;
+}
+.nexus-behavior-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--nexus-panel-border,#3c5067);
+}
+.nexus-behavior-header h3 {
+  margin:3px 0 0;
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:16px;
+}
+.nexus-behavior-target {
+  max-width:48%;
+  overflow:hidden;
+  padding:5px 9px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:5px;
+  color:var(--nexus-panel-muted,#9aadc2);
+  background:var(--nexus-panel-input,#111b27);
+  font-size:10px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.nexus-behavior-empty {
+  margin:0;
+  padding:22px 14px;
+  border:1px dashed var(--nexus-panel-border,#3c5067);
+  border-radius:7px;
+  color:var(--nexus-panel-muted,#9aadc2);
+  text-align:center;
+  font-size:12px;
+}
+.nexus-behavior-empty[hidden] { display:none !important; }
+.nexus-panel-window:has(.nexus-behavior-editor) .window-content,
+.nexus-panel-window:has(.nexus-behavior-editor) .application-content {
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.nexus-behavior-editor .nexus-interaction-editor {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+}
+.nexus-behavior-editor .nexus-interaction-editor-heading {
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:0;
+}
+.nexus-behavior-editor .nexus-interaction-editor-heading > strong {
+  margin-right:auto;
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:13px;
+}
+.nexus-behavior-editor .nexus-interaction-flow {
+  gap:12px;
+  margin:0;
+  padding:14px;
+  border-radius:8px;
+}
+.nexus-behavior-editor .nexus-interaction-flow-heading {
+  align-items:center;
+  gap:9px;
+}
+.nexus-behavior-editor .nexus-interaction-field {
+  gap:5px;
+  font-size:10px;
+}
+.nexus-behavior-editor .nexus-interaction-field input:not([type=checkbox]),
+.nexus-behavior-editor .nexus-interaction-field select {
+  min-height:32px;
+  padding:6px 8px;
+  font-size:11px;
+}
+.nexus-behavior-editor .nexus-interaction-button {
+  min-height:29px;
+  padding:5px 9px;
+  font-size:10px;
+}
+.nexus-behavior-editor .nexus-interaction-summary {
+  padding:9px 11px;
+  font-size:10px;
+}
+.nexus-behavior-editor .nexus-interaction-guided[open] {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding:12px;
+}
+.nexus-behavior-editor .nexus-interaction-guided[open] > summary {
+  grid-column:1/-1;
+  margin-bottom:1px;
+}
+.nexus-behavior-editor .nexus-interaction-condition {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.nexus-behavior-editor .nexus-interaction-condition .nexus-interaction-field:first-child {
+  grid-column:auto;
+}
+.nexus-behavior-editor .nexus-interaction-action {
+  padding:10px;
+}
+.nexus-behavior-editor .nexus-interaction-action-config {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.nexus-behavior-editor .nexus-interaction-execution {
+  padding:10px 0 0;
+}
+.nexus-behavior-editor .nexus-interaction-library-row {
+  grid-template-columns:minmax(0,1fr) auto;
+}
+@media(max-width:620px) {
+  .nexus-behavior-editor .nexus-interaction-guided[open] {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nexus-behavior-editor .nexus-interaction-guided[open] > summary {
+    grid-column:auto;
+  }
+  .nexus-behavior-editor .nexus-interaction-condition,
+  .nexus-behavior-editor .nexus-interaction-action-config {
+    grid-template-columns:minmax(0,1fr);
+  }
 }

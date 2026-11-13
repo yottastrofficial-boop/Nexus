@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.11", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.11"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.11"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.13", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.13"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.13"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.11/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.13/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.11"));
+assert.ok(readme.includes("Versão 1.0.0.13"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -195,7 +195,21 @@ assert.match(sheet, /exib:"PV"/, "A propriedade PV deve possuir abreviação pr�
 assert.match(sheet, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
-assert.match(template, /data-interaction-editor/, "O Inspector deve conter o editor visual de interações");
+assert.match(template, /data-interaction-editor/, "O editor de fluxos deve existir no template");
+
+assert.match(template, /data-tool-panel="behavior"/, "Comportamento deve possuir um painel independente");
+assert.match(template, /data-tool-panel="settings"/, "Configurações deve possuir um painel independente");
+assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportamento não deve permanecer dentro do Inspector");
+assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
+assert.match(sheet, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
+assert.match(sheet, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
+assert.match(sheet, /behavior: \[660, 640\]/, "O painel Comportamento deve ter dimensões equivalentes à Biblioteca");
+assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
+assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
+assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
+assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
+assert.match(interactions, /guided\.open = true/, "Gatilhos e condições devem iniciar expandidos");
+
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
@@ -349,11 +363,11 @@ assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheet.includes('addEventListener("contextmenu"'));
 assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
-console.log("NEXUS 1.0.0.11: editor visual de interações validado.");
+console.log("NEXUS 1.0.0.13: editor visual de interações validado.");
 
-assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
+assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
-assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");
+assert.ok(sheet.includes('["card", "appearance", "advanced"]'), "As três áreas restantes do Inspector devem ser navegáveis");
 
 
 // Reusable behavior library and skill-roll preset.
@@ -383,7 +397,7 @@ assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblio
 delete globalThis.game;
 assert.match(sheet,/config\.mode === "skill"/);
 assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
-assert.match(interactions,/Regra guiada · Gatilhos e condições/);
+assert.match(interactions,/Gatilhos e condições/);
 assert.match(interactions,/Salvar na biblioteca/);
 assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);

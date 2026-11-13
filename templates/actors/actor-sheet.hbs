@@ -4,24 +4,29 @@
     <aside class="nexus-sidebar nexus-sidebar-left">
       {{#if (eq nexus.mode "appearance")}}
         <nav class="nexus-appearance-rail" aria-label="Ferramentas de aparência">
-          <button type="button" data-appearance-panel="grid" class="active">▦</button>
-          <button type="button" data-appearance-panel="style">◈</button>
+          <button type="button" data-appearance-panel="style" class="active">◈</button>
           <button type="button" data-appearance-panel="library">▤</button>
           <button type="button" data-appearance-panel="layers">▱</button>
           <button type="button" data-appearance-panel="aliases">⌘</button>
         </nav>
         <div class="nexus-appearance-drawer">
-          <section class="nexus-tool-panel active" data-tool-panel="grid">
-            <h3>Grade e alinhamento</h3>
-            <label class="nexus-check"><input type="checkbox" data-layout-setting="gridEnabled" {{#if nexus.layout.gridEnabled}}checked{{/if}}> Exibir grade</label>
-            <label class="nexus-check"><input type="checkbox" data-layout-setting="snapEnabled" {{#if nexus.layout.snapEnabled}}checked{{/if}}> Encaixar na grade</label>
-            <label>Tamanho da grade<input type="number" min="5" max="100" step="5" value="{{nexus.layout.gridSize}}" data-layout-setting="gridSize"></label>
-            <label class="nexus-check"><input type="checkbox" data-layout-setting="guidesEnabled" {{#if nexus.layout.guidesEnabled}}checked{{/if}}> Alinhamento inteligente</label>
-            <p>O encaixe e as guias podem ser ativados independentemente.</p>
-            <hr>
-            <h3>Dimensões da ficha</h3>
-            <label>Largura<input type="number" min="800" max="1000" step="10" value="{{nexus.layout.width}}" data-layout-setting="width"></label>
-            <label>Altura<input type="number" min="300" max="3000" step="10" value="{{nexus.layout.height}}" data-layout-setting="height"></label>
+          <section class="nexus-tool-panel nexus-settings-panel" data-tool-panel="settings" hidden>
+            <nav class="nexus-settings-rail" aria-label="Categorias de configurações">
+              <button type="button" class="active" data-settings-section="organization" aria-label="Organização">▦</button>
+            </nav>
+            <div class="nexus-settings-drawer">
+              <section class="nexus-settings-section active" data-settings-panel="organization">
+                <h3>Organização</h3>
+                <label class="nexus-check"><input type="checkbox" data-layout-setting="gridEnabled" {{#if nexus.layout.gridEnabled}}checked{{/if}}> Exibir grade</label>
+                <label class="nexus-check"><input type="checkbox" data-layout-setting="snapEnabled" {{#if nexus.layout.snapEnabled}}checked{{/if}}> Encaixar na grade</label>
+                <label>Tamanho da grade<input type="number" min="5" max="100" step="5" value="{{nexus.layout.gridSize}}" data-layout-setting="gridSize"></label>
+                <label class="nexus-check"><input type="checkbox" data-layout-setting="guidesEnabled" {{#if nexus.layout.guidesEnabled}}checked{{/if}}> Alinhamento inteligente</label>
+                <hr>
+                <h4>Dimensões da ficha</h4>
+                <label>Largura<input type="number" min="800" max="1000" step="10" value="{{nexus.layout.width}}" data-layout-setting="width"></label>
+                <label>Altura<input type="number" min="300" max="3000" step="10" value="{{nexus.layout.height}}" data-layout-setting="height"></label>
+              </section>
+            </div>
           </section>
           <section class="nexus-tool-panel" data-tool-panel="style" hidden>
             <h3>Aparência global</h3>
@@ -54,7 +59,6 @@
             <section class="nexus-component-inspector" hidden>
               <nav class="nexus-inspector-tabs" data-inspector-tabs aria-label="Propriedades do componente">
                 <button type="button" class="active" data-inspector-tab="card">Dados</button>
-                <button type="button" data-inspector-tab="behavior">Comportamento</button>
                 <button type="button" data-inspector-tab="appearance">Aparência</button>
                 <button type="button" data-inspector-tab="advanced">Avançado</button>
               </nav>
@@ -161,12 +165,6 @@ remove legacy typography selects                  <label class="nexus-inspector-
                   <label class="nexus-inspector-field">Orientação<select data-component-setting="sheetOrientation"><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option></select></label>
                 </section>
               </div>
-              <div class="nexus-inspector-tab-panel" data-inspector-tab-panel="behavior" hidden>
-                <section class="nexus-inspector-section nexus-component-interaction">
-                  <h4>Comportamento</h4>
-                  <div data-interaction-editor data-component-id=""></div>
-                </section>
-              </div>
               <div class="nexus-inspector-tab-panel" data-inspector-tab-panel="advanced" hidden>
                 <section class="nexus-inspector-section" data-component-technical>
                   <h4>Identificação técnica</h4>
@@ -176,6 +174,14 @@ remove legacy typography selects                  <label class="nexus-inspector-
               </div>
             </section>
             <p class="nexus-inspector-empty">Selecione um único cartão no canvas ou na lista de camadas.</p>
+          </section>
+          <section class="nexus-tool-panel nexus-behavior-editor" data-tool-panel="behavior" hidden>
+            <header class="nexus-behavior-header">
+              <div><span class="nexus-library-eyebrow">EDITOR DE FLUXOS</span><h3>Comportamento</h3></div>
+              <span class="nexus-behavior-target" data-behavior-target>Selecione um componente</span>
+            </header>
+            <p class="nexus-behavior-empty" data-behavior-empty>Selecione um componente no Canvas ou em Organização para editar seus comportamentos.</p>
+            <div data-interaction-editor data-component-id=""></div>
           </section>
           <section class="nexus-tool-panel nexus-alias-manager" data-tool-panel="aliases" hidden>
             <nav class="nexus-data-mode" aria-label="Tipo de dado">
