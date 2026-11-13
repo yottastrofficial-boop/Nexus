@@ -264,7 +264,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     top.append(flowActions);
     card.append(top);
 
-    const guided=el("div","nexus-interaction-guided");
+    const guided=el("section","nexus-interaction-guided");
     const triggers=el("section","nexus-interaction-group");
     const triggerHeading=el("div","nexus-interaction-group-heading");
     triggerHeading.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
