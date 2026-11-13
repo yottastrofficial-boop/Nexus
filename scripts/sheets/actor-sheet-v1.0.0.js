@@ -4544,7 +4544,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (this._activePanelWindowKey === key) this._activePanelWindowKey = null;
     document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="${key}"]`)?.classList.remove("active");
     if (["component", "behavior"].includes(key)) {
-      const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.get(panelKey)?.rendered);
+      const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.has(panelKey));
       if (!editorPanelsOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
     }
   }
