@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.17", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.17"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.17"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.18", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.18"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.18"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.17/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.18/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.17"));
+assert.ok(readme.includes("Versão 1.0.0.18"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -378,13 +378,14 @@ assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
 assert.ok(sheet.includes("behavior: [900, 640]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
-assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar as dimensões de Camadas");
-assert.ok(sheet.includes("component: [420, 620]"), "Propriedades deve acompanhar as dimensões de Camadas");
+assert.ok(sheet.includes("component: [560, 620]"), "Propriedades deve seguir a geometria compacta dos painéis");
+assert.ok(sheet.includes("style: [560, 620]") && sheet.includes("layers: [560, 620]") && sheet.includes("settings: [560, 620]"), "Painéis compactos devem compartilhar dimensões");
+assert.ok(sheet.includes("aliases: [620, 620]"), "Estrutura de dados deve usar dimensões quadradas padronizadas");
 assert.ok(sheet.includes("library: [900, 640]") && sheet.includes("behavior: [900, 640]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(sheet.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
-assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-database"'), "Estrutura de dados deve ter ícone semântico");
-assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-code-branch"'), "Comportamento deve ter ícone semântico");
+assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
+assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
 assert.ok(sheet.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
 assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
 assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
@@ -396,7 +397,9 @@ assert.ok(interactions.includes("data-interaction-flow-panel"), "Cada aba deve e
 assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
 assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ocupar uma área dimensionada no cabeçalho de condições");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
-assert.ok(css.includes("width:min(420px,calc(100vw - 24px))"), "Propriedades deve ter dimensões padronizadas com Camadas");
+assert.ok(css.includes("width:min(560px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
+assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve ter largura padronizada");
+assert.ok(css.includes("nexus-interaction-action-title >") || css.includes("summary.nexus-interaction-action-title { display:flex"), "Título das ações deve ter layout flexível");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.ok(css.includes("height:min(640px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
 const fakeLibraryActor={
@@ -422,3 +425,9 @@ assert.match(css,/nexus-interaction-summary/);
 assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
 assert.doesNotMatch(template,/<option value="fill">Esticar<\/option>/);
 console.log("NEXUS: biblioteca de fluxos, modelo de rolagem de perícia e proporção de assets verificados.");
+
+assert.ok(interactions.includes("nexus-interaction-action-name"), "Título das ações deve possuir contêiner flexível");
+assert.ok(interactions.includes("fa-arrow-up") && interactions.includes("fa-trash"), "Controles das ações devem usar ícones semânticos");
+assert.ok(css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter largura e quebra de linha controladas");
+assert.ok(css.includes("nexus-alias-create,") && css.includes("background:transparent !important"), "Estrutura de dados deve evitar painéis aninhados redundantes");
+assert.ok(css.includes("width:min(620px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura padronizada");

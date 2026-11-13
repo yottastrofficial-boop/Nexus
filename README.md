@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.17 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.18 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.17-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.18-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.17 mantém os painéis Comportamento e Biblioteca com geometria idêntica (900 × 640 px), corrigindo a diferença visual de tamanho observada após a 1.0.0.16. As validações automatizadas e a montagem do pacote ZIP serão executadas no CI; os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
+> **Estado desta versão:** a 1.0.0.18 reformula a hierarquia visual dos menus, compacta os controles de ações, reduz painéis aninhados e padroniza as dimensões dos ambientes de edição. O protótipo HTML está em docs/prototypes. As validações automatizadas e a montagem do pacote ZIP serão executadas no CI; os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão publicada | 1.0.0.17 |
+| Versão publicada | 1.0.0.18 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.

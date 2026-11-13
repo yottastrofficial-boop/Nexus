@@ -1,3 +1,22 @@
+## 1.0.0.18
+
+### Revisão de interface e padronização dos menus
+- Reorganizado o editor de Comportamento para reduzir superfícies aninhadas, alinhar controles e dar largura útil ao título das ações.
+- Título das ações agora tem layout flexível, quebra de linha segura e ferramentas compactas com ícones e rótulos acessíveis.
+- Botões de mover, remover, salvar e excluir fluxos passam a usar ícones compactos com rótulos acessíveis e tooltips.
+- Gatilhos, condições e ações utilizam separadores leves em vez de cartões aninhados.
+- Campos de condição distribuem a largura priorizando Propriedade; operador e valor mantêm largura legível.
+- Estrutura de dados reorganizada visualmente, com navegação plana e campos sem cartões internos redundantes.
+- Dimensões dos painéis compactos padronizadas: Propriedades, Organização e Configurações em 560 × 620 px; Estrutura de dados em 620 × 620 px. Biblioteca e Comportamento permanecem em 900 × 640 px.
+- Ícones da navegação revistos: Estrutura de dados usa diagrama de relações; Comportamento usa ação/evento.
+- Incluído protótipo HTML de referência em docs/prototypes/editor-ux-1.0.0.18.html.
+
+### Compatibilidade e validação
+- Mantidos IDs, dados persistidos e modelo de execução dos fluxos.
+- Mantida a compatibilidade com fluxos legados de rolagem de perícia.
+- Atualizados os testes de estrutura, dimensões e acessibilidade dos controles.
+- Necessária validação visual/funcional final no Foundry VTT 14.
+
 ## 1.0.0.17
 
 ### Padronização de dimensões
