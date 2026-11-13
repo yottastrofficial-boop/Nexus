@@ -348,3 +348,7 @@ assert.ok(sheet.includes('addEventListener("contextmenu"'));
 assert.ok(sheet.includes('addEventListener("pointerover"'));
 assert.ok(sheet.includes("_executeComponentAction"));
 console.log("NEXUS 1.1.0: editor visual de interações validado.");
+
+assert.ok(template.includes('data-inspector-tab="behavior"'), "O Inspector deve separar comportamento dos dados");
+assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
+assert.ok(sheet.includes('["card", "behavior", "appearance", "advanced"]'), "As quatro áreas do Inspector devem ser navegáveis");
