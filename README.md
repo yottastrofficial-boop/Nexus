@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.26 está em preparação. O seletor de propriedades foi reorganizado em categorias e níveis, com pesquisa global e sugestões de perícias calculadas. A ficha começou a ser dividida em módulos por responsabilidade, sem alterar o formato persistido dos Actors, layouts, componentes ou fluxos. A validação automatizada e a conferência funcional/visual no Foundry VTT 14 ainda precisam ser concluídas.
+> **Versão atual:** 1.0.0.26. O seletor de propriedades foi reorganizado em categorias e níveis, com pesquisa global e sugestões de perícias calculadas. A ficha foi dividida em módulos por responsabilidade, sem alterar o formato persistido dos Actors, layouts, componentes ou fluxos. A validação automatizada do pacote foi aprovada; os testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam recomendados.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão em preparação | 1.0.0.26 (não publicada) |
+| Versão atual | 1.0.0.26 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.26 está em preparação e concentra a reorganização do seletor de propriedades e a primeira etapa de modularização da ficha. A validação automatizada e os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
+A versão 1.0.0.26 concentra a reorganização do seletor de propriedades e a modularização inicial da ficha. A validação automatizada do pacote foi aprovada; testes funcionais em uma instalação real do Foundry VTT 14 continuam recomendados.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
