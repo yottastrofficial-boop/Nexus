@@ -8,6 +8,10 @@ const ROOT_LABELS = Object.freeze({
   combat: "Combate",
   identity: "Identidade",
   progression: "Progressão",
+  personality: "Personalidade",
+  recovery: "Recuperação",
+  encumbrance: "Carga",
+  conditions: "Condições",
   name: "Nome",
   img: "Imagem",
   notes: "Anotações",
@@ -51,7 +55,14 @@ const SEGMENT_LABELS = Object.freeze({
   proficient: "Proficiência",
   formatted: "Valor formatado",
   attribute: "Atributo",
-  description: "Descrição"
+  description: "Descrição",
+  meters: "Metros",
+  available: "Disponíveis",
+  capacity: "Capacidade",
+  overloaded: "Excedida",
+  spent: "Gastos",
+  bonus: "Bônus",
+  recovery: "Recuperação"
 });
 
 const DERIVED_SKILL_FIELDS = new Set([
