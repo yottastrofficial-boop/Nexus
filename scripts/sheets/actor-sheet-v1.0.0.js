@@ -5,7 +5,6 @@ import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
 import { activateCanvasInteractions } from "./canvas-interactions.js";
-import { mountLibraryView } from "./library-view.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
@@ -2593,7 +2592,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
-  _mountLibrary(panel) {
+  async _mountLibrary(panel) {
+    const { mountLibraryView } = await import("./library-view.js");
     return mountLibraryView(this, panel, { createSheetResourcePreview, fitSheetResourcePreview });
   }
 
@@ -2777,12 +2777,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
     };
 
-    const openPanel = (key, { focus = true } = {}) => {
+    const openPanel = async (key, { focus = true } = {}) => {
       const panel = panels.get(key);
       if (!panel) return;
-      // A Biblioteca só constrói os cartões e suas prévias quando solicitada.
+      // A Biblioteca só carrega seu módulo e constrói cartões/prévias quando solicitada.
       if (key === "library") {
-        this._mountLibrary(panel);
+        try {
+          await this._mountLibrary(panel);
+        } catch (error) {
+          console.error("NEXUS | Falha ao carregar a Biblioteca", error);
+          return;
+        }
         this._libraryApplyFilter?.();
         this._libraryRestoreSelection?.();
       }
@@ -2816,10 +2821,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
     };
 
-    const requestPanel = key => {
+    const requestPanel = async key => {
       if (root.dataset.mode !== "appearance") {
         this._openAppearancePanels.add(key);
-        this._setMode("appearance");
+        await this._setMode("appearance");
         return;
       }
       syncRailFocus(true);
@@ -2827,7 +2832,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (instance?.rendered) {
         focusPanelWindow(instance);
         syncRailFocus(false);
-      } else openPanel(key);
+      } else await openPanel(key);
     };
     portal.querySelectorAll("[data-floating-panel]").forEach(button => button.addEventListener("click", () => {
       if (root.dataset.mode !== "appearance") return;
