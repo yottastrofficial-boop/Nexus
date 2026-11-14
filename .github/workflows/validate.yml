@@ -1,0 +1,25 @@
+name: Validate NEXUS
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "refactor/**"
+
+permissions:
+  contents: read
+
+jobs:
+  package-validation:
+    name: Package and regression validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate package and regressions
+        run: node --experimental-default-type=module tests/validate-package.mjs

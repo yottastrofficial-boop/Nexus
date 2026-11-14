@@ -1,3 +1,34 @@
+## 1.0.0.26
+
+- Seletor de propriedades passa a navegar por categorias e níveis, com pesquisa global e sugestões progressivas; substitui a lista extensa e o controle de expandir/reduzir.
+- Catálogo de propriedades centralizado em módulo próprio, com nomes localizados para atributos, perícias, recursos, combate e identidade.
+- Perícias oferecem propriedades calculadas derivadas da regra ativa: modificador, bônus, atributo, proficiência e demais dados expostos por `getNexusSkillRows`.
+- Selecionar uma opção no menu flutuante não dispara mais a limpeza global de seleção; o alvo de edição é mantido ao limpar somente a seleção visual.
+- Menu fecha ao interagir fora dele e preserva o contexto ao clicar nas próprias opções.
+- Tema, padrões de layout, janela flutuante, visualização do seletor, catálogo, ligações de eventos e interações do Canvas foram separados em módulos por responsabilidade, mantendo a ficha como ponto de integração.
+- Barra de rolagem do portal do seletor recebe os mesmos tokens visuais das janelas NEXUS; campos focados deixam de ter seus destaques recortados pelo conteúdo do componente.
+- Mantido o formato persistido de layouts, componentes, aliases e fluxos.
+
+## Validação pendente
+
+- Executar verificações de sintaxe, testes de pacote e regressões no CI.
+- Validar no Foundry VTT 14 o seletor em Propriedades, Comportamento, fórmulas e Biblioteca; testar clique fora, seleção de área vazia, navegação hierárquica e propriedades calculadas de perícias.
+- Confirmar visualmente os destaques/foco dos campos em componentes com diferentes formatos e dimensões.
+
+## Correções em preparação para 1.0.0.25
+
+- Biblioteca: miniaturas de indicadores e componentes pessoais passam a usar uma área de visualização quadrada independente das dimensões do componente no Canvas.
+- Biblioteca: cartões personalizados salvos exibem uma prévia com título e conteúdo, em vez de apenas um glifo genérico.
+- Biblioteca: busca e filtro recebem layout responsivo sem sobreposição; as seções Assets, Fluxos e Temas e a separação Padrão NEXUS / Meus itens são mantidas.
+- Propriedades: removida a segunda montagem de opções no Inspector. A lista dinâmica passa a ter um único portal e um único fluxo de renderização, sem ser movida entre janelas.
+- Propriedades: o mesmo seletor atende campos de vínculo, condições, fórmulas e campos de texto/textarea, incluindo conteúdo de cards personalizados.
+- Propriedades: atualização da assinatura também considera aliases de rolagem; o campo proprietário é registrado antes do reposicionamento assíncrono.
+- Propriedades: a seleção insere o texto no cursor, mantém o foco e usa uma rolagem padronizada com espaço reservado para a barra.
+- Comportamento: após atualizar um campo e reconstruir o editor, o cursor e a seleção de texto são restaurados.
+- Mantida a separação entre dados do Actor, configuração dos componentes e apresentação visual.
+
+**Validação pendente:** testes de sintaxe/integração e execução funcional no Foundry VTT 14. Esta alteração ainda não deve ser tratada como release publicada.
+
 ## 1.0.0.24
 
 - Biblioteca reorganizada em áreas de Assets, Fluxos e Temas, com separação entre conteúdo padrão e itens pessoais.
