@@ -21,8 +21,8 @@ const normalizeTrigger = (t,i) => {
   return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event} : null;
 };
 const normalizeCondition = (c,i) => {
-  const path=safePath(c?.path);
-  if(!path)return null;
+  if(!c || typeof c!=="object")return null;
+  const path=safePath(c.path)??"";
   return {id:String(c.id??`condition-${i+1}`),path,operator:INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals",value:String(c.value??"")};
 };
 const normalizeAction = (a,i) => {
@@ -51,6 +51,7 @@ export function getComponentInteractions(component) {
 }
 const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
 const conditionPasses=(condition,actor)=>{
+  if(!condition?.path)return false;
   const actual=getPath(actor,condition.path), expected=condition.value, a=Number(actual), b=Number(expected);
   switch(condition.operator){
     case "notEquals":return String(actual??"")!==expected;
@@ -127,7 +128,7 @@ export function applyInteractionEditorChange(component,data,value) {
     else if(data.field==="onError")flow.execution.onError=value==="continue"?"continue":"stop";
   }else if(data.scope==="trigger"&&trigger&&data.field==="event")trigger.event=INTERACTION_EVENTS.includes(value)?value:"click";
   else if(data.scope==="condition"&&condition){
-    if(data.field==="path")condition.path=safePath(value);
+    if(data.field==="path")condition.path=safePath(value)??"";
     else if(data.field==="operator")condition.operator=INTERACTION_OPERATORS.includes(value)?value:"equals";
     else if(data.field==="value")condition.value=String(value).slice(0,120);
   }else if(data.scope==="action"&&action){
@@ -147,7 +148,7 @@ export function applyInteractionEditorCommand(component,command,data={}) {
   if(!flow)return false;
   if(command==="add-trigger")flow.triggers.push({id:newId("trigger"),event:"click"});
   else if(command==="remove-trigger")flow.triggers.splice(Number(data.triggerIndex),1);
-  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),path:"identity.level",operator:"greaterOrEqual",value:"1"});
+  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),path:"",operator:"equals",value:""});
   else if(command==="remove-condition")flow.conditions.splice(Number(data.conditionIndex),1);
   else if(command==="add-action")flow.actions.push({id:newId("action"),type:"roll",enabled:true,config:{formula:"1d20"}});
   else if(command==="remove-action")flow.actions.splice(Number(data.actionIndex),1);
@@ -190,8 +191,7 @@ export function renderInteractionEditor(container,component,components=[],librar
  const tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
  for(const flow of flows){const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");tab.type="button";tab.dataset.interactionFlowTab=flow.id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected",String(flow.id===activeId));tab.classList.toggle("active",flow.id===activeId);tabs.append(tab);}
  heading.append(tabs);container.append(heading);
- const list=el("datalist");list.id="nexus-interaction-properties-"+String(component.id).replace(/[^a-zA-Z0-9_-]/g,"");
- for(const path of collectInteractionPropertyPaths(actor)){const option=el("option");option.value=path;list.append(option);}container.append(list);
+ const list=el("div","nexus-property-options");list.id="nexus-component-path-options-"+String(component.id).replace(/[^a-zA-Z0-9_-]/g,"");list.dataset.componentPathOptions="";list.hidden=true;list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades e atalhos disponíveis");container.append(list);
  const panels=el("div","nexus-interaction-flows");
  for(const flow of flows){
   const panel=el("section","nexus-interaction-flow");panel.dataset.interactionId=flow.id;panel.dataset.interactionFlowPanel=flow.id;panel.hidden=flow.id!==activeId;panel.setAttribute("role","tabpanel");
@@ -202,8 +202,8 @@ export function renderInteractionEditor(container,component,components=[],librar
   const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");triggerHead.append(el("h6","","Gatilhos"),btn("＋","add-trigger",flow.id));triggers.append(triggerHead);
   for(const [i,tr] of flow.triggers.entries()){const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento");bind(select,"trigger",flow.id,"event",{triggerIndex:i});row.append(select,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);}
   const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
-  const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");conditionHead.append(field("",join,"flow",flow.id,"conditionJoin"),btn("＋ Adicionar","add-condition",flow.id));conditions.append(conditionHead);
-  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.setAttribute("list",list.id);property.placeholder="Escolher propriedade…";const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");property.setAttribute("aria-controls",list.id);const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);
   const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
   for(const [i,action] of flow.actions.entries()){
