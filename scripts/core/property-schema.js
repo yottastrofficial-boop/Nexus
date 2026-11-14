@@ -28,12 +28,13 @@ const PERSONALITY_FIELDS = Object.freeze([
 ]);
 
 const COMBAT_FIELDS = Object.freeze([
-  { path: "combat.defense.value", label: "Defesa", exib: "DEF", type: "number", derived: true, description: "Defesa Base: 8 + Destreza + modificadores aplicáveis." },
-  { path: "combat.initiative.value", label: "Iniciativa", exib: "INI", type: "number", derived: true, description: "Teste de Destreza usado para definir a ordem dos turnos." },
-  { path: "combat.movement.value", label: "Deslocamento", exib: "DESL", type: "number", description: "Deslocamento definido pela Ancestralidade; o valor armazenado é expresso em espaços de grade." },
-  { path: "progression.mb.value", label: "Modificador Base", exib: "MB", type: "number", derived: true, description: "MB = nível ÷ 2, arredondado para cima, limitado a +5." },
-  { path: "recovery.count.value", label: "Dados de Recuperação", exib: "DdR", type: "number", derived: true, description: "Quantidade igual ao nível do personagem." },
-  { path: "recovery.die.value", label: "Dado de Recuperação", exib: "Dado", type: "string", derived: true, description: "Evolui a cada 2 níveis: d4, d6, d8, d10 e d12." }
+  { path: "combat.defense.value", label: "Defesa", exib: "DEF", type: "number", category: "combat", derived: true, description: "Defesa Base: 8 + Destreza + modificadores aplicáveis." },
+  { path: "combat.defenseModifier", label: "Modificador de Defesa", type: "number", category: "combat", derived: false, description: "Modificador adicional aplicado à Defesa Base." },
+  { path: "combat.initiative.value", label: "Iniciativa", exib: "INI", type: "number", category: "combat", derived: true, description: "Teste de Destreza usado para definir a ordem dos turnos." },
+  { path: "combat.movement.value", label: "Deslocamento", exib: "DESL", type: "number", category: "combat", description: "Deslocamento definido pela Ancestralidade; o valor armazenado é expresso em espaços de grade." },
+  { path: "progression.mb.value", label: "Modificador Base", exib: "MB", type: "number", category: "progression", derived: true, description: "MB = nível ÷ 2, arredondado para cima, limitado a +5." },
+  { path: "recovery.count.value", label: "Dados de Recuperação", exib: "DdR", type: "number", category: "recovery", derived: true, description: "Quantidade igual ao nível do personagem." },
+  { path: "recovery.die.value", label: "Dado de Recuperação", exib: "Dado", type: "string", category: "recovery", derived: true, description: "Evolui a cada 2 níveis: d4, d6, d8, d10 e d12." }
 ]);
 
 const definitions = [
