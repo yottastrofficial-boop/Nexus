@@ -1171,7 +1171,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           resolved=binding.value == null ? "" : String(binding.value);
           forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||token) || binding.alias?.type==="image";
         }
-        const explicitUrl=wrapped && /^https?:\\/\\//i.test(token);
+        const explicitUrl=wrapped && /^https?:\/\//i.test(token);
         const resolvedIsMedia=wrapped && !explicitUrl && isMediaSource(resolved);
         const media=explicitUrl ? createMedia(token,token,false,"link") : resolvedIsMedia ? createMedia(resolved,token,forceImage) : (!wrapped ? createMedia(token,token,false,"link") : null);
         node.append(media ?? document.createTextNode(wrapped ? (resolved || match[0]) : match[0]));
