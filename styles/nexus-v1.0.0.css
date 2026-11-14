@@ -5562,3 +5562,88 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-component:has(.nexus-component-content :focus-visible) { overflow:visible!important; z-index:2147482002!important; }
 .nexus-component-content:has(:focus-visible) { overflow:visible!important; }
 .nexus-component-content :is(input,textarea,select,[contenteditable="true"]):focus-visible { position:relative; z-index:2; outline-offset:2px!important; }
+
+
+/* 1.0.0.28 — acabamento do seletor e aplicação uniforme dos tokens de tema. */
+.nexus-property-options .nexus-property-category{
+  grid-template-columns:minmax(0,1fr) 18px!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  gap:2px 8px!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.nexus-property-options .nexus-property-category>strong{
+  grid-column:1!important;grid-row:1!important;display:block!important;
+  min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  white-space:nowrap!important;font-size:11px!important;line-height:1.25!important;
+}
+.nexus-property-options .nexus-property-category>small{
+  grid-column:1!important;grid-row:2!important;display:block!important;
+  min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  white-space:nowrap!important;overflow-wrap:normal!important;font-size:9px!important;
+}
+.nexus-property-options .nexus-property-category>span{
+  grid-column:2!important;grid-row:1/3!important;justify-self:center!important;
+}
+.nexus-property-options .nexus-property-option{
+  grid-template-columns:minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:3px!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.nexus-property-options .nexus-property-option>strong{
+  display:block!important;min-width:0!important;overflow:hidden!important;
+  text-overflow:ellipsis!important;white-space:nowrap!important;
+  font-size:10px!important;line-height:1.25!important;
+}
+.nexus-property-options .nexus-property-option>code{
+  display:block!important;min-width:0!important;max-width:100%!important;
+  overflow-wrap:anywhere!important;white-space:normal!important;
+  font-size:9px!important;line-height:1.25!important;
+}
+.nexus-property-options-toolbar>strong{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+
+/* Theme aliases: keep older selectors and semantic HTML controls in sync. */
+.nexus-sheet,.nexus-floating-ui,.nexus-panel-window{
+  --nexus-panel-card:var(--nexus-surface-raised,var(--nexus-panel-surface,#273443));
+  --nexus-panel-accent:var(--nexus-accent-color,#52647b);
+  --nexus-canvas-scroll-bg:var(--nexus-scroll-bg,#111923);
+  --nexus-window-header-bg:var(--nexus-window-header,var(--nexus-panel-bg,#182330));
+  --nexus-window-content-bg:var(--nexus-window-content,var(--nexus-panel-bg,#182330));
+  --nexus-button-bg:var(--nexus-button-color,#315b7d);
+  --nexus-button-active-bg:color-mix(in srgb,var(--nexus-button-bg) 72%,var(--nexus-highlight-color,#78b7e8));
+  --nexus-button-active-border:var(--nexus-highlight-color,#78b7e8);
+  --nexus-button-active-text:var(--nexus-panel-text,#e7edf5);
+}
+.nexus-sheet .nexus-canvas-scroll,.nexus-canvas-scroll{
+  background:var(--nexus-canvas-scroll-bg,var(--nexus-scroll-bg,#111923))!important;
+  scrollbar-color:var(--nexus-scrollbar-thumb,var(--nexus-scroll-thumb,#52647b)) var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923))!important;
+}
+.nexus-panel-window .window-header{
+  color:var(--nexus-header-text,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-window-header-bg,var(--nexus-window-header,#223246))!important;
+  border-color:var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067))!important;
+}
+.nexus-panel-window .window-header :is(.window-title,button,a,.control){
+  color:var(--nexus-header-text,var(--nexus-panel-text,#e7edf5))!important;
+}
+.nexus-panel-window :is(.window-content,.application-content){
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-window-content-bg,var(--nexus-window-content,var(--nexus-panel-bg,#182330)))!important;
+}
+.nexus-sheet :is(.nexus-layout-tab.active,.nexus-inspector-tabs button.active,.nexus-library-section-tabs button.active,.nexus-library-scope-tabs button.active,.nexus-layer-list button.active),
+.nexus-floating-ui [data-floating-panel].active{
+  color:var(--nexus-button-active-text,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-button-active-bg,var(--nexus-button-color,#315b7d))!important;
+  border-color:var(--nexus-button-active-border,var(--nexus-highlight-color,#78b7e8))!important;
+}
+.nexus-panel-window :is(.nexus-inspector-tabs button.active,.nexus-library-section-tabs button.active,.nexus-library-scope-tabs button.active,.nexus-layer-list button.active){
+  color:var(--nexus-button-active-text,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-button-active-bg,var(--nexus-button-color,#315b7d))!important;
+  border-color:var(--nexus-button-active-border,var(--nexus-highlight-color,#78b7e8))!important;
+}
+.nexus-panel-window :is(button,input,select,textarea):focus-visible{
+  outline-color:var(--nexus-focus-ring,var(--nexus-highlight-color,#78b7e8))!important;
+}
