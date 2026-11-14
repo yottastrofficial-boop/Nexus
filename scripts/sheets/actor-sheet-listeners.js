@@ -308,7 +308,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (property.targetPath === "name") await sheet.actor.update({ name: String(input.value).slice(0,100) });
         else {
           const suffix = property.type === "resource" ? (field === "currentValue" ? "value" : "max") : "value";
-          const target = property.type === "resource" || property.type === "attribute" ? `${property.targetPath}.${suffix}` : property.targetPath;
+          const target = property.type === "resource" ? `${property.targetPath}.${suffix}` : property.targetPath;
           let nextValue;
           if (property.type === "boolean") nextValue = input.value === "true";
           else if (["resource", "attribute", "number"].includes(property.type)) {
@@ -774,8 +774,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (libraryFilterFrame) return;
       libraryFilterFrame = requestAnimationFrame(() => { libraryFilterFrame = 0; filterLibrary(); });
     };
-    libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", scheduleLibraryFilter);
-    libraryPanel?.querySelector("[data-library-tag]")?.addEventListener("change", scheduleLibraryFilter);
+    libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", event => {
+       sheet._librarySearchQuery = event.currentTarget.value;
+       scheduleLibraryFilter();
+     });
+    libraryPanel?.querySelector("[data-library-tag]")?.addEventListener("change", event => {
+       sheet._libraryTagFilter = event.currentTarget.value;
+       scheduleLibraryFilter();
+     });
 
     // Os controles da Biblioteca ficam dentro de uma janela ApplicationV2 separada.
     // A delegação nativa no próprio painel acompanha o nó quando ele é movido para
@@ -785,7 +791,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
-        sheet._applyThemePreset(themeCard.dataset.libraryTheme);
+        await sheet._applyThemePreset(themeCard.dataset.libraryTheme);
         return;
       }
 
@@ -1146,7 +1152,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const paths=new Set(["name",...collectPropertyPaths(sheet.actor)]);
       for(const alias of [...getNativePropertyDefinitions(sheet.actor),...getAliasDefinitions(sheet.actor)]){
         const root=safeAliasKey(alias.key);if(!root)continue;
-        const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[ "" ];
+        const suffixes=alias.type==="attribute"?["checkbonus","roll"]:alias.type==="resource"?["value","max","percentage"]:[ "" ];
         for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
       const nativeProperties=getNativePropertyDefinitions(sheet.actor),aliases=getAliasDefinitions(sheet.actor),rollAliases=getNexusRollAliasEntries(sheet.actor);
