@@ -21,6 +21,7 @@ const propertyCatalog = await read("scripts/core/property-catalog.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
@@ -31,6 +32,9 @@ assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry i
 assert.match(sheet, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /buildPropertyPickerCatalog/);
 assert.match(sheet, /renderPropertyPicker/);
+assert.match(sheet, /activateCanvasInteractions/);
+assert.match(canvasInteractions, /export function activateCanvasInteractions/);
+assert.match(canvasInteractions, /deactivateInteraction/);
 assert.match(sheet, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
 assert.match(sheetListeners, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
 assert.match(sheetListeners, /data-property-category/);
