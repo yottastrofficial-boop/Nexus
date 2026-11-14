@@ -6,6 +6,11 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
 import { buildPropertyPickerCatalog } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
+import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
+
+// Runtime smoke tests for the Canvas controller's early lifecycle guards.
+assert.doesNotThrow(() => activateCanvasInteractions({}, [], {}), "A render without a root element must exit safely");
+assert.doesNotThrow(() => activateCanvasInteractions({}, [{ querySelector: () => null }], {}), "A render without a Canvas must exit safely");
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
@@ -29,9 +34,9 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.26", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.26"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.26"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.27", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.27"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.27"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
@@ -66,7 +71,7 @@ assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.body.
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.26/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.27/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -221,7 +226,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.26"));
+assert.ok(readme.includes("Versão 1.0.0.27"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheetCode, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
