@@ -4072,74 +4072,86 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
   _mountLibrary(panel) {
-    const assets = panel.querySelector("[data-library-assets]");
-    if (!assets || panel.dataset.libraryMounted === "true") return;
-    panel.dataset.libraryMounted = "true";
-    assets.replaceChildren();
-    const availableFolders = NEXUS_LIBRARY_CATALOG.categories ?? [];
-    const preferredFolder = this._libraryFolder
-      ?? NEXUS_LIBRARY_CATALOG.assets.find(item => item.type === this._librarySelectedType)?.category;
-    this._libraryFolder = availableFolders.some(folder => folder.id === preferredFolder)
-      ? preferredFolder
-      : (availableFolders[0]?.id ?? "core");
-    const folderNav = document.createElement("nav");
-    folderNav.className = "nexus-library-folders";
-    folderNav.setAttribute("aria-label", "Pastas da biblioteca");
-    const folders = availableFolders.map(({ id, label, icon }) => [id, label, icon]);
-    for (const [id, label, icon] of folders) {
-      const button = document.createElement("button"); button.type = "button"; button.dataset.libraryFolder = id;
-      button.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${label}</span>`;
-      button.classList.toggle("active", id === (this._libraryFolder ?? "core")); folderNav.append(button);
+    const assets=panel.querySelector("[data-library-assets]");
+    if(!assets||panel.dataset.libraryMounted==="true")return;
+    panel.dataset.libraryMounted="true";assets.replaceChildren();
+    this._libraryAssetScope??="core";
+    const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
+    const preferredFolder=this._libraryFolder??NEXUS_LIBRARY_CATALOG.assets.find(item=>item.type===this._librarySelectedType)?.category;
+    this._libraryFolder=availableFolders.some(folder=>folder.id===preferredFolder)?preferredFolder:(availableFolders[0]?.id??"core");
+    const folderNav=document.createElement("nav");folderNav.className="nexus-library-folders";folderNav.setAttribute("aria-label","Categorias de assets");
+    for(const {id,label,icon} of availableFolders){
+      const button=document.createElement("button");button.type="button";button.dataset.libraryFolder=id;
+      const glyph=document.createElement("i");glyph.className=icon;glyph.setAttribute("aria-hidden","true");
+      const text=document.createElement("span");text.textContent=label;button.append(glyph,text);
+      button.classList.toggle("active",id===this._libraryFolder);folderNav.append(button);
     }
-    panel.querySelector(".nexus-library-workspace")?.before(folderNav);
-    for (const [assetIndex, asset] of NEXUS_LIBRARY_CATALOG.assets.entries()) {
-      const card = document.createElement("button");
-      card.type = "button"; card.className = "nexus-library-asset";
-      card.dataset.libraryAsset = `${asset.label} ${asset.keywords ?? ""}`.toLocaleLowerCase("pt-BR");
-      card.dataset.libraryCategory = asset.category; card.dataset.assetType = asset.type; card.dataset.assetKey = asset.key ?? `${asset.category}-${assetIndex}`;
-      const preview = document.createElement("span"); preview.className = `nexus-library-preview-stage preview-${asset.preview ?? asset.type}`;
-      if (asset.type === "sheet-resource") {
-        const code = String(asset.template?.sheetCode ?? "PV").toUpperCase();
-        const color = asset.template?.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] ?? "#d94b4b";
-        preview.append(createSheetResourcePreview({ label: asset.template?.sheetContent1 ?? code, current: 32, max: 40, color, showValues: true }));
-        fitSheetResourcePreview(preview, { w: 220, h: 58 }, 78);
+    panel.querySelector(".nexus-library-scope-tabs")?.after(folderNav);
+    for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
+      const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
+      card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
+      card.dataset.libraryCategory=asset.category;card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
+      const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
+      if(asset.type==="sheet-resource"){
+        const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
+        preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
+        fitSheetResourcePreview(preview,{w:220,h:58},78);
+      }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
+      else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
+      else if(asset.type==="custom-card"){const area=document.createElement("span");area.className="nexus-library-area-preview";area.textContent="+";preview.append(area);}
+      else if(asset.type==="sheet-section"){const marker=document.createElement("span");marker.className="nexus-library-marker-preview";marker.textContent="SEÇÃO";preview.append(marker);}
+      else if(asset.type==="asset-image"){const image=document.createElement("span");image.className="nexus-library-image-preview";image.textContent="▧";preview.append(image);}
+      else if(asset.type==="asset-meter"){const meter=document.createElement("span");meter.className="nexus-library-meter-preview";meter.innerHTML="<i></i>";preview.append(meter);}
+      else if(asset.type==="asset-text"){const text=document.createElement("span");text.className="nexus-library-text-preview";text.textContent="Texto";preview.append(text);}
+      else{const mock=document.createElement("span");mock.className="nexus-library-generic-preview";mock.textContent=asset.label.slice(0,2).toUpperCase();preview.append(mock);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=asset.label;meta.append(label);card.append(preview,meta);assets.append(card);
+    }
+    const themes=panel.querySelector("[data-library-themes]");
+    for(const theme of NEXUS_LIBRARY_CATALOG.themes??[]){
+      const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
+      card.dataset.libraryAsset=`${theme.label} ${theme.keywords??""}`.toLocaleLowerCase("pt-BR");card.dataset.libraryTheme=theme.id;
+      const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";preview.dataset.themeSwatch=theme.id;
+      for(const color of theme.colors??[]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=theme.label;meta.append(label);card.append(preview,meta);themes?.append(card);
+    }
+    const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
+    const flows=getInteractionLibrary(this.actor);
+    if(flowContainer){
+      if(!flows.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum fluxo salvo na biblioteca.";flowContainer.append(empty);}
+      for(const entry of flows){
+        const card=document.createElement("button");card.type="button";card.className="nexus-library-flow-card";card.dataset.libraryFlowId=entry.id;
+        const icon=document.createElement("i");icon.className="fa-solid fa-diagram-project";icon.setAttribute("aria-hidden","true");
+        const title=document.createElement("strong");title.textContent=entry.name||entry.flow?.name||"Fluxo salvo";
+        const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.actions?.length??0} ações`;
+        card.append(icon,title,meta);flowContainer.append(card);
       }
-      else if (asset.type === "token") { const token = document.createElement("span"); token.className = "nexus-library-token-preview"; token.textContent = "N"; preview.append(token); }
-      else if (asset.type === "asset-notes") { const note = document.createElement("span"); note.className = "nexus-library-note-preview"; note.innerHTML = "<i></i><i></i><i></i>"; preview.append(note); }
-      else if (asset.type === "custom-card") { const area = document.createElement("span"); area.className = "nexus-library-area-preview"; area.textContent = "+"; preview.append(area); }
-      else if (asset.type === "sheet-section") { const marker = document.createElement("span"); marker.className = "nexus-library-marker-preview"; marker.textContent = "SEÇÃO"; preview.append(marker); }
-      else if (asset.type === "asset-image") { const image = document.createElement("span"); image.className = "nexus-library-image-preview"; image.textContent = "▧"; preview.append(image); }
-      else if (asset.type === "asset-meter") { const meter = document.createElement("span"); meter.className = "nexus-library-meter-preview"; meter.innerHTML = "<i></i>"; preview.append(meter); }
-      else if (asset.type === "asset-text") { const text = document.createElement("span"); text.className = "nexus-library-text-preview"; text.textContent = "Texto"; preview.append(text); }
-      else { const mock = document.createElement("span"); mock.className = "nexus-library-generic-preview"; mock.textContent = asset.label.slice(0,2).toUpperCase(); preview.append(mock); }
-      const meta = document.createElement("span"); meta.className = "nexus-library-asset-meta";
-      const label = document.createElement("strong"); label.textContent = asset.label; meta.append(label); card.append(preview, meta); assets.append(card);
     }
-    for (const theme of NEXUS_LIBRARY_CATALOG.themes ?? []) {
-      const card = document.createElement("button"); card.type = "button"; card.className = "nexus-library-asset nexus-library-theme-asset";
-      card.dataset.libraryAsset = `${theme.label} ${theme.keywords ?? ""}`.toLocaleLowerCase("pt-BR"); card.dataset.libraryCategory = "themes"; card.dataset.libraryTheme = theme.id;
-      const preview = document.createElement("span"); preview.className = "nexus-library-preview-stage nexus-theme-swatch"; preview.dataset.themeSwatch = theme.id;
-      for (const color of theme.colors) { const swatch = document.createElement("i"); swatch.style.backgroundColor = color; preview.append(swatch); }
-      const meta = document.createElement("span"); meta.className = "nexus-library-asset-meta"; const label = document.createElement("strong"); label.textContent = theme.label; meta.append(label); card.append(preview,meta); assets.append(card);
-    }
-    folderNav.addEventListener("click", event => {
-      const button = event.target.closest("[data-library-folder]"); if (!button) return;
-      this._libraryFolder = button.dataset.libraryFolder;
-      folderNav.querySelectorAll("[data-library-folder]").forEach(item => item.classList.toggle("active", item === button));
-      panel.querySelectorAll("[data-library-asset]").forEach(card => card.hidden = card.dataset.libraryCategory !== this._libraryFolder);
-      const count = panel.querySelector("[data-library-count]"); const visible = [...panel.querySelectorAll("[data-library-asset]")].filter(card => !card.hidden).length;
-      if (count) count.textContent = `${visible} ${visible === 1 ? "item" : "itens"}`;
-      const search = panel.querySelector("[data-library-search]"); if (search) search.dispatchEvent(new Event("input", { bubbles: true }));
-      const details = panel.querySelector("[data-library-details]"); if (details) { details.dataset.selectedType = ""; details.innerHTML = `<div class="nexus-library-detail-placeholder"><strong>${button.querySelector("span")?.textContent ?? "Biblioteca"}</strong><p>Selecione um item para visualizar e configurar.</p></div>`; }
+    const activateSection=(key)=>{
+      panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+      panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
+      if(key==="assets")this._libraryApplyFilter?.();
+      if(key==="themes")panel.querySelector("[data-library-count]").textContent=`${(NEXUS_LIBRARY_CATALOG.themes??[]).length} temas`;
+      if(key==="flows")panel.querySelector("[data-library-count]").textContent=`${flows.length} ${flows.length===1?"fluxo":"fluxos"}`;
+    };
+    panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
+    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
+      this._libraryAssetScope=button.dataset.libraryScope;
+      panel.querySelectorAll("[data-library-scope]").forEach(item=>item.classList.toggle("active",item===button));
+      folderNav.hidden=this._libraryAssetScope!=="core";
+      this._libraryApplyFilter?.();
+    }));
+    folderNav.addEventListener("click",event=>{
+      const button=event.target.closest("[data-library-folder]");if(!button)return;
+      this._libraryFolder=button.dataset.libraryFolder;
+      folderNav.querySelectorAll("[data-library-folder]").forEach(item=>item.classList.toggle("active",item===button));
+      this._libraryApplyFilter?.();
+      const details=panel.querySelector("[data-library-details]");
+      if(details){details.dataset.selectedType="";details.innerHTML='<div class="nexus-library-detail-placeholder"><strong>Assets</strong><p>Selecione um item para visualizar e configurar.</p></div>';}
     });
-    assets.querySelectorAll("[data-library-theme]").forEach(card => card.hidden = (this._libraryFolder ?? "core") !== "themes");
-    panel.querySelectorAll("[data-library-asset]").forEach(card => card.hidden = card.dataset.libraryCategory !== (this._libraryFolder ?? "core"));
-    const count = panel.querySelector("[data-library-count]");
-    if (count) count.textContent = `${NEXUS_LIBRARY_CATALOG.assets.filter(item => item.category === (this._libraryFolder ?? "core")).length} itens`;
-    const remembered = this._librarySelectedAssetKey ? panel.querySelector(`[data-asset-key="${CSS.escape(this._librarySelectedAssetKey)}"]`) : null;
-    remembered?.classList.add("is-selected");
+    folderNav.hidden=this._libraryAssetScope!=="core";
+    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.classList.toggle("active",button.dataset.libraryScope===this._libraryAssetScope));
+    this._libraryApplyFilter?.();
   }
-
   _mountFloatingUI(html) {
     const root = html[0];
     this._nexusFloatingCleanup?.({ preserveWindows: true });
