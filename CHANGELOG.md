@@ -6,6 +6,14 @@
 - Biblioteca recupera miniaturas maiores e cartões verticais; composições personalizadas recebem área de prévia ampliada.
 - Ajustes responsivos e testes de regressão para a nova estrutura.
 
+## 1.0.0.22
+
+- Reconstrução do renderizador do editor de comportamento, preservando o motor e os dados dos fluxos existentes.
+- Gatilhos e condições passam a usar cartões alinhados e consistentes; condições oferecem sugestões dos caminhos encontrados no ator via datalist, mantendo edição manual.
+- Ações reorganizadas em cabeçalho compacto com título, ativação e ferramentas alinhados; configurações em coluna única.
+- Biblioteca recupera miniaturas maiores e cartões verticais; composições personalizadas recebem área de prévia ampliada.
+- Ajustes responsivos e testes de regressão para a nova estrutura.
+
 ## 1.0.0.21
 
 - Remove legendas visuais redundantes de Propriedade, Operador e Valor nas condições, mantendo nomes acessíveis.
