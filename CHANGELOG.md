@@ -1,3 +1,14 @@
+## 1.0.0.28
+
+- Corrigido o visualizador de propriedades: removidos textos duplicados que causavam sobreposição entre nomes, caminhos e setas.
+- Navegação por categorias agora mantém o foco no campo de origem, impedindo que o seletor feche ao abrir categorias como Recursos.
+- Seleção de propriedades preserva a interação com o campo e dispara a atualização correspondente.
+- Preservada a posição de rolagem dos painéis internos durante atualizações e renderizações do editor.
+- Ampliados os tokens semânticos dos temas para Canvas, cabeçalhos de janela, botões ativos, superfícies e estados de foco.
+- Confirmado que o asset “Indicador – Barra” continua no catálogo da Biblioteca; renderizadores de outros tipos permanecem como suporte extensível ao catálogo.
+
+**Validação:** testes automatizados e validação do pacote no GitHub Actions. A confirmação visual final ainda depende de teste manual no Foundry VTT 14.
+
 ## 1.0.0.27
 
 - Corrigida a inicialização de `activateCanvasInteractions`: os elementos raiz e Canvas agora são declarados localmente, evitando `ReferenceError` durante a renderização da ficha.
