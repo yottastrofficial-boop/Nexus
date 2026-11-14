@@ -655,7 +655,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
         else paths.push(key);
       }
-      return [...new Set(paths)].sort((a,b) => a.localeCompare(b, "pt-BR"));
+      return [...new Set(paths)].filter(path => !["attributes.body", "attributes.mind", "attributes.soul"].some(legacy => path === legacy || path.startsWith(legacy + "."))).sort((a,b) => a.localeCompare(b, "pt-BR"));
     })();
     const componentResourcePathList=html[0].querySelector("[data-resource-path-list]");
     if(componentResourcePathList) componentResourcePathList.replaceChildren(...resourcePaths.map(path=>{const option=document.createElement("option");option.value=path;return option;}));
@@ -917,7 +917,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (type === "sheet-attribute") {
           const label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Força";
           const path = detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.for";
-          const preset = detail.querySelector("[data-attribute-preset]")?.value || "custom";
+          const preset = detail.querySelector("[data-attribute-preset]")?.value || "for";
           const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === detail.dataset.selectedAssetKey);
           const template = {
             ...clone(asset?.template ?? {}), text: label, dataPath: path,
