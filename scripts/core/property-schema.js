@@ -37,6 +37,7 @@ const COMBAT_FIELDS = Object.freeze([
   { path: "recovery.count.value", label: "Dados de Recuperação", exib: "DdR", type: "number", category: "recovery", derived: true, description: "Quantidade igual ao nível do personagem." },
   { path: "recovery.die.value", label: "Dado de Recuperação", exib: "Dado", type: "string", category: "recovery", derived: true, description: "Evolui a cada 2 níveis: d4, d6, d8, d10 e d12." },
   { path: "recovery.available.value", label: "Dados de Recuperação disponíveis", exib: "DdR disp.", type: "number", category: "recovery", derived: true },
+  { path: "recovery.spent", label: "Dados de Recuperação gastos", exib: "DdR gastos", type: "number", category: "recovery", derived: false },
   { path: "resources.pe.recovery.value", label: "Recuperação de PE", exib: "PE rec.", type: "number", category: "resources", derived: true, description: "Recuperação de PE calculada como quatro vezes o MB." },
   { path: "encumbrance.base.value", label: "Carga base", exib: "Carga", type: "number", category: "encumbrance", derived: true },
   { path: "encumbrance.bonus.value", label: "Bônus de carga", exib: "Bônus", type: "number", category: "encumbrance", derived: true },
