@@ -517,7 +517,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         sizeReadout.textContent = `Tamanho: ${box.w} × ${box.h} px`; sizeReadout.hidden = false;
         sizeReadout.style.left = `${clamp(box.x + box.w - 180, 4, l.width - 184)}px`; sizeReadout.style.top = `${Math.max(4, box.y - 34)}px`;
       }
-      syncGroupBounds();
+      // Os cantos conectados são recalculados ao terminar o gesto, não a cada frame.
+      syncGroupBounds(undefined, false);
     };
     // Limita o trabalho pesado de alinhamento/seleção a no máximo um ciclo por frame.
     let pointerMoveFrame = 0;
