@@ -1157,8 +1157,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const element = card.querySelector(selector);
       if (element && element !== document.activeElement) element.value = String(value ?? "");
     };
+    // Uma única leitura do DOM substitui uma busca por componente.
+    const cardsById = new Map();
+    root.querySelectorAll(".nexus-component[data-id]").forEach(card => {
+      if (!cardsById.has(card.dataset.id)) cardsById.set(card.dataset.id, card);
+    });
     for (const component of this._currentLayout?.components ?? []) {
-      const card = root.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
+      const card = cardsById.get(component.id);
       if (!card) continue;
       const context = this._componentContext(component);
       if (!context) continue;
