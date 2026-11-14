@@ -101,7 +101,7 @@ assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveConte
 assert.match(sheet, /mountLibraryView\(this, panel/);
 assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({
-  paths: ["attributes.for", "attributes.body", "attributes.for.checkbonus", "skills.athletics.modifier", "skills.atletismo.modifier", "skills.athletics.proficient", "skills.atletismo.proficient"],
+  paths: ["attributes.for", "attributes.body", "attributes.for.checkbonus", "skills.athletics.modifier", "skills.atletismo.modifier", "skills.athletics.proficient", "skills.atletismo.proficient", "identity.name", "identity.level"],
   nativeProperties: [{ key: "attributes.body", label: "Corpo", type: "attribute" }]
 });
 assert.equal(propertyTree.root.children.get("attributes").label, "Atributos");
@@ -112,6 +112,8 @@ assert.equal(propertyTree.entries.some(entry => entry.path === "skills.athletics
 assert.equal(propertyTree.entries.some(entry => entry.path === "attributes.body.checkbonus"), false, "Configuração de núcleos legados não deve aparecer como propriedade");
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.checkbonus").label, "Bônus de teste");
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
+assert.equal(propertyTree.entries.some(entry => entry.path === "identity.name"), false, "O nome do Actor não deve duplicar identity.name");
+assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
 assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.29/nexus.zip"), "URL do pacote deve apontar para a versão atual");
