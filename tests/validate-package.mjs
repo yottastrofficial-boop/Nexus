@@ -101,14 +101,16 @@ assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveConte
 assert.match(sheet, /mountLibraryView\(this, panel/);
 assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({
-  paths: ["attributes.for", "attributes.body", "attributes.body.checkbonus", "skills.athletics.proficient", "skills.atletismo.proficient"],
+  paths: ["attributes.for", "attributes.body", "attributes.for.checkbonus", "skills.athletics.modifier", "skills.atletismo.modifier", "skills.athletics.proficient", "skills.atletismo.proficient"],
   nativeProperties: [{ key: "attributes.body", label: "Corpo", type: "attribute" }]
 });
 assert.equal(propertyTree.root.children.get("attributes").label, "Atributos");
 assert.equal(propertyTree.root.children.get("skills").label, "Perícias");
-assert.equal(propertyTree.root.children.get("skills").children.get("athletics").label, "Atletismo");
-assert.equal(propertyTree.entries.filter(entry => entry.path === "skills.athletics.proficient").length, 1, "Chaves legadas de perícia devem ser canonicalizadas sem duplicação");
-assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.body.checkbonus").label, "Bônus de teste");
+assert.equal(propertyTree.root.children.get("skills").children.get("for").children.get("athletics").label, "Atletismo");
+assert.equal(propertyTree.entries.filter(entry => entry.path === "skills.athletics.modifier").length, 1, "Chaves legadas de perícia devem ser canonicalizadas sem duplicação");
+assert.equal(propertyTree.entries.some(entry => entry.path === "skills.athletics.proficient"), false, "O booleano proficient redundante não deve ser oferecido");
+assert.equal(propertyTree.entries.some(entry => entry.path === "attributes.body.checkbonus"), false, "Configuração de núcleos legados não deve aparecer como propriedade");
+assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.checkbonus").label, "Bônus de teste");
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
