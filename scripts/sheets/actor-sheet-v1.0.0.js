@@ -104,6 +104,12 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   return { value, path, alias: alias.alias };
 };
 
+const expandNexusPropertyExpressions = formula => String(formula ?? "").replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, path) => {
+  const parts=String(path).split(".");
+  if(!parts.length||parts.some(part=>!part||["__proto__","prototype","constructor"].includes(part))) throw new Error("Referência de propriedade inválida na fórmula.");
+  return "@"+parts.join(".");
+});
+
 const getResourceValuePaths = component => {
   const resourceMap = { pv: "resources.pv", pm: "resources.pm", pe: "resources.pe" };
   let base = component?.currentPath || "";
@@ -2978,7 +2984,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "calculate") {
       const formula = String(config.formula ?? "").trim();
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
-      const roll = new Roll(expandNexusRollAliases(this.actor, formula), getNexusRollData(this.actor));
+      const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula)), getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       const target = String(config.targetPath ?? "").replace(/^system\\./, "");
       if (target) {
@@ -3027,7 +3033,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return;
     }
     try {
-      formula = expandNexusRollAliases(this.actor, formula);
+      formula = expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula));
       const roll = new Roll(formula, getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       await roll.toMessage({
