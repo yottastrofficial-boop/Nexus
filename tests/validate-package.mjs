@@ -7,6 +7,32 @@ import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexus
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
+import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
+
+// Geometry regression tests for the Canvas smart-alignment search.
+const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
+const geometryTargets = [
+  { x: 100, y: 0, w: 20, h: 20 },
+  { x: 26, y: 40, w: 20, h: 20 }
+];
+assert.deepEqual(
+  findBestAlignmentMatch([geometrySource], geometryTargets, "x", 7),
+  { delta: 6, pos: 26, distance: 20, labelAt: 30 },
+  "Smart alignment must select the nearest target anchor and preserve gap labels"
+);
+assert.equal(
+  findBestAlignmentMatch([geometrySource], [{ x: 40, y: 40, w: 20, h: 20 }], "x", 7),
+  null,
+  "Smart alignment must ignore targets outside tolerance"
+);
+assert.deepEqual(
+  findBestAlignmentMatch([{ x: 0, y: 0, w: 20, h: 20 }], [
+    { x: 26, y: 40, w: 20, h: 20 },
+    { x: 26, y: 60, w: 20, h: 20 }
+  ], "x", 7),
+  { delta: 6, pos: 26, distance: 20, labelAt: 30 },
+  "Equal alignment anchors must keep the first target's tie-breaking order"
+);
 
 // Runtime smoke tests for the Canvas controller's early lifecycle guards.
 assert.doesNotThrow(() => activateCanvasInteractions({}, [], {}), "A render without a root element must exit safely");
