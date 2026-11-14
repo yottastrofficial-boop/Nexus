@@ -208,7 +208,7 @@ assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As aç
 assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
-assert.match(interactions, /const guided=el\("section","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
+assert.match(interactions, /const guided=el\("div","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
 assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
 assert.match(changelog, /Cards inteligentes e composição/);
@@ -391,19 +391,19 @@ assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"),
 assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
-assert.ok(interactions.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ter um layout dedicado");
+assert.ok(interactions.includes("nexus-interaction-condition-group"), "Condições devem possuir grupo dedicado");
 assert.ok(interactions.includes("data-interaction-flow-tab"), "Os fluxos devem ser navegáveis por abas");
 assert.ok(interactions.includes("data-interaction-flow-panel"), "Cada aba deve exibir apenas seu fluxo correspondente");
 assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
-assert.ok(css.includes("nexus-interaction-condition-heading"), "O seletor E/OU deve ocupar uma área dimensionada no cabeçalho de condições");
+assert.ok(css.includes("nexus-interaction-condition-group .nexus-interaction-group-heading"), "O seletor E/OU deve ocupar área dimensionada no cabeçalho de condições");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura compacta padronizada");
-assert.ok(css.includes("nexus-interaction-action-title >") || css.includes("summary.nexus-interaction-action-title { display:flex"), "Título das ações deve ter layout flexível");
+assert.ok(css.includes(".nexus-interaction-action-head{display:grid"), "Cabeçalho da ação deve alinhar título, ativo e ferramentas");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
-assert.match(interactions,/nexus-interaction-condition-field nexus-interaction-condition-property/, "Condição deve renderizar propriedade sem legenda visual");
-assert.match(interactions,/setAttribute\("aria-label","Operador"\)/, "Operador deve ter nome acessível sem legenda visual");
-assert.match(interactions,/setAttribute\("aria-label","Valor"\)/, "Valor deve ter nome acessível sem legenda visual");
+assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
+assert.match(interactions,/control\("select",co\.operator,operators,"Operador"\)/, "Operador deve ter nome acessível sem legenda visual");
+assert.match(interactions,/control\("input",co\.value,\[\],"Valor"\)/, "Valor deve ter nome acessível sem legenda visual");
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
 assert.match(css,/\.nexus-panel-window \.nexus-tool-panel\[data-tool-panel="style"\] \.nexus-global-color-grid\{display:flex!important;flex-direction:column!important/, "Aparência deve manter controles de cor em lista alinhada");
 assert.ok(css.includes("height:min(600px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
@@ -431,9 +431,9 @@ assert.match(css,/nexus-library-assets \.nexus-library-preview-stage/);
 assert.doesNotMatch(template,/<option value="fill">Esticar<\/option>/);
 console.log("NEXUS: biblioteca de fluxos, modelo de rolagem de perícia e proporção de assets verificados.");
 
-assert.ok(interactions.includes("nexus-interaction-action-name"), "Título das ações deve possuir contêiner flexível");
+assert.ok(interactions.includes("nexus-interaction-action-title"), "Título das ações deve possuir contêiner próprio");
 assert.ok(interactions.includes("fa-arrow-up") && interactions.includes("fa-trash"), "Controles das ações devem usar ícones semânticos");
-assert.ok(css.includes("nexus-interaction-action-title { display:flex"), "Título das ações deve ter largura e quebra de linha controladas");
+assert.ok(css.includes(".nexus-interaction-action-title{display:block"), "Título das ações deve ter largura e quebra de linha controladas");
 assert.ok(css.includes("nexus-alias-create,") && css.includes("background:transparent !important"), "Estrutura de dados deve evitar painéis aninhados redundantes");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura compacta padronizada");
 
@@ -445,9 +445,9 @@ assert.doesNotMatch(css, /:has\(\.nexus-tool-panel:not\(\.nexus-behavior-editor\
 assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"), "Seletores de cor devem usar linhas consistentes com largura útil");
 
 assert.ok(!template.includes("nexus-behavior-header"), "O cabeçalho redundante do painel Comportamento deve ser removido");
-assert.match(interactions,/nexus-interaction-trigger-select/, "Gatilhos devem usar seletor direto sem legenda redundante");
-assert.match(interactions,/nexus-interaction-condition-join/, "Combinação E/OU deve ter seletor próprio e compacto");
-assert.match(interactions,/nexus-interaction-action nexus-interaction-action-head/, "O estado Ativa deve ficar junto ao título da ação");
+assert.match(interactions,/nexus-interaction-trigger-row/, "Gatilhos devem usar seletor direto dentro de cartão");
+assert.match(interactions,/Combinar condições/, "Combinação E/OU deve ter seletor próprio e compacto");
+assert.match(interactions,/nexus-interaction-action-active/, "O estado Ativa deve ficar junto ao título da ação");
 assert.match(sheet,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
 assert.match(css,/--nexus-scrollbar-thumb-hover/, "Temas devem centralizar estados das barras de rolagem");
 assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"), "Color pickers devem ter distribuição previsível");
