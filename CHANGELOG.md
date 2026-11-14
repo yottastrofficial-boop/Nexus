@@ -1,3 +1,14 @@
+## 1.0.0.32
+
+- Centralizado o esquema canônico de propriedades dos Actors, com versão própria e caminhos consistentes para atributos, perícias, recursos, identidade, progressão, recuperação, deslocamento, defesa, carga e condições.
+- Seletor de propriedades passa a ser gerado a partir do registro central, incluindo caminhos virtuais de perícias como nome, exibição e valor calculado.
+- Migração normaliza dados antigos e remove sobrescritas nativas obsoletas, preservando aliases e dados personalizados.
+- Documentado o contrato do esquema em `docs/actor-property-schema.md`.
+- Separados o viewport, as interações de uso e o editor visual do Canvas; o editor passa a ser importado somente ao entrar no modo de aparência.
+- Reforçadas as proteções de ciclo de vida e limpeza de listeners/observers durante a troca de módulos.
+
+**Validação:** validações automatizadas de sintaxe, manifesto, templates, estilos, regressões e build do pacote aprovadas no GitHub Actions. Testes funcionais e visuais em uma instalação real do Foundry VTT 14 ainda são necessários. A reformulação centraliza o registro e a resolução das propriedades; não representa uma substituição integral de todos os dados persistidos por um novo formato nem uma reformulação visual completa da ficha.
+
 ## 1.0.0.31
 
 - Otimizado o cálculo de alinhamento do Canvas com busca binária sobre anchors ordenados, preservando a tolerância e os critérios de desempate.

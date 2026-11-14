@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.31 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.32 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.31-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.32-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.31. Esta atualização otimiza operações do Canvas, seleção, alinhamento, salvamento e atualização de grupos, além de carregar a Biblioteca sob demanda. Também inclui as melhorias de desempenho e estrutura das versões anteriores. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+> **Versão atual:** 1.0.0.32. Esta atualização centraliza o esquema canônico de propriedades dos Actors, amplia os caminhos disponíveis no seletor/fórmulas e migra dados legados. Também separa o Canvas em módulos e carrega o editor visual sob demanda, reduzindo o código carregado no modo de uso. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.31 |
+| Versão atual | 1.0.0.32 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.31 integra a primeira fase de otimizações de desempenho para fichas completas e interações do Canvas. A validação automatizada do pacote foi aprovada; testes funcionais em uma instalação real do Foundry VTT 14 continuam recomendados.
+A versão 1.0.0.32 integra o registro canônico de propriedades dos Actors e a segunda fase de carregamento sob demanda do Canvas. A validação automatizada do pacote foi aprovada; testes funcionais em uma instalação real do Foundry VTT 14 continuam recomendados.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
