@@ -1363,8 +1363,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _setSkillProficientLevel(skillKey, rawLevel) {
     if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) return;
-    const level = normalizeNexusProficientLevel(rawLevel);
-    await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: level });
+    const proficient = normalizeNexusProficientLevel(rawLevel) > 0;
+    await this.actor.update({ ["system.skills." + skillKey + ".proficient"]: proficient });
     await this.render({ force: true });
   }
 
