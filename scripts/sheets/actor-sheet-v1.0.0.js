@@ -1988,6 +1988,34 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
 
+      const savedComponentCard=target?.closest("[data-library-saved-component]");
+      if(savedComponentCard&&libraryPanel.contains(savedComponentCard)){
+        event.preventDefault();
+        const saved=(game.user?.getFlag?.("nexus","libraryComponents")??[]).find(item=>item.id===savedComponentCard.dataset.librarySavedComponent);
+        const detail=libraryPanel.querySelector("[data-library-details]");if(!saved||!detail)return;
+        libraryPanel.querySelectorAll("[data-library-saved-component]").forEach(item=>item.classList.toggle("is-selected",item===savedComponentCard));
+        detail.dataset.selectedType="saved-component";detail.dataset.selectedComponentId=saved.id;detail.replaceChildren();
+        const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
+        const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
+        const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar ao Canvas";
+        const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir da biblioteca";
+        detail.append(heading,summary,add,remove);return;
+      }
+      const savedFlowCard=target?.closest("[data-library-flow-id]");
+      if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
+        event.preventDefault();
+        const entry=getInteractionLibrary(this.actor).find(item=>item.id===savedFlowCard.dataset.libraryFlowId);
+        const detail=libraryPanel.querySelector("[data-library-details]");if(!entry||!detail)return;
+        libraryPanel.querySelectorAll("[data-library-flow-id]").forEach(item=>item.classList.toggle("is-selected",item===savedFlowCard));
+        detail.dataset.selectedType="saved-flow";detail.dataset.selectedFlowId=entry.id;detail.replaceChildren();
+        const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
+        const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=entry.name||"Fluxo salvo";heading.append(title);
+        const summary=document.createElement("p");summary.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddFlow="";add.textContent="Adicionar ao componente selecionado";
+        detail.append(heading,summary,add);return;
+      }
+
       const savedGroupCard = target?.closest("[data-library-saved-group]");
       if (savedGroupCard && libraryPanel.contains(savedGroupCard)) {
         event.preventDefault();
@@ -2019,6 +2047,28 @@ export class NexusActorSheet extends NexusActorSheetBase {
         event.preventDefault();
         if (!assetCard.dataset.libraryTheme) selectLibraryAsset(assetCard);
         return;
+      }
+
+      const addSavedComponentButton=target?.closest("[data-library-add-saved-component]");
+      if(addSavedComponentButton&&libraryPanel.contains(addSavedComponentButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await this._addSavedLibraryComponent(id);return;
+      }
+      const deleteSavedComponentButton=target?.closest("[data-library-delete-saved-component]");
+      if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await this._deleteSavedLibraryComponent(id);return;
+      }
+      const addFlowButton=target?.closest("[data-library-add-flow]");
+      if(addFlowButton&&libraryPanel.contains(addFlowButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedFlowId;
+        const selectedId=[...(this._selectedIds??[])][0];
+        if(!id||!selectedId||this._selectedIds.size!==1){ui.notifications?.warn?.("Selecione um único componente no Canvas antes de inserir um fluxo.");return;}
+        const entry=getInteractionLibrary(this.actor).find(item=>item.id===id);if(!entry)return;
+        const layouts=await this._readLayouts(),active=this._activeLayoutId(),component=layouts[active]?.components?.find(item=>item.id===selectedId);
+        if(!component)return;
+        if(!applyInteractionEditorCommand(component,"add-library-flow",{template:entry.flow}))return;
+        await this._writeLayouts(layouts,active);await this.render({force:true});return;
       }
 
       const addGroupButton = target?.closest("[data-library-add-group]");
