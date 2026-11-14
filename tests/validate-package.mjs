@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.23", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.23"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.23"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.24", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.24"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.24"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.23/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.24/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -39,8 +39,8 @@ assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve 
 assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
 assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
-assert.match(sheet, /const availableFolders = NEXUS_LIBRARY_CATALOG\.categories \?\? \[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
-assert.match(sheet, /const folders = availableFolders\.map\(/, "A Biblioteca não deve manter pastas fixas de demonstração");
+assert.match(sheet, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
+assert.match(sheet, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheet, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>1 elemento</, "A contagem inicial da Biblioteca deve refletir o único asset");
 assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.23"));
+assert.ok(readme.includes("Versão 1.0.0.24"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -237,7 +237,7 @@ assert.match(sheet, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipog
 assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
 console.log("NEXUS 1.0.0.7: validações estáticas aprovadas.");
 
-assert.match(sheet, /expandNexusRollAliases\(this\.actor, formula\)/, "Fórmulas devem aceitar aliases curtos de exibição como @DES");
+assert.match(sheet, /expandNexusRollAliases\(this\.actor, expandNexusPropertyExpressions\(formula\)\)/, "Fórmulas devem aceitar referências {{propriedade}} e aliases curtos como @DES");
 assert.match(sheet, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
 assert.match(sheet, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
 assert.match(sheet, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
@@ -262,10 +262,10 @@ console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e b
 assert.match(sheet, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "Campos próprios devem integrar os dados entregues à rolagem");
 assert.match(sheet, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
-assert.match(sheet, /tokenMatch\?\.\[1\]/, "O filtro de fórmula deve considerar somente o token @ sob o cursor");
+assert.match(sheet, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
 assert.match(sheet, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
-assert.match(sheet, /scale < 0\.18/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
+assert.match(sheet, /scale<0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
 
 assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
@@ -461,6 +461,21 @@ assert.match(css,/nexus-library-saved-group-preview\{position:relative!important
 
 assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
 assert.match(sheet,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
-assert.ok(sheet.includes("propertyMode?null:before.match"),"Campos de texto reconhecem a abertura de expressão {{");
+assert.ok(sheet.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(sheet,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
 assert.match(sheet,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
+
+assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
+assert.match(template,/data-library-section="flows"/,"Biblioteca deve possuir área própria para Fluxos");
+assert.match(template,/data-library-section="themes"/,"Biblioteca deve possuir área própria para Temas");
+assert.match(template,/data-library-scope="personal"/,"Biblioteca deve separar itens padrão dos itens pessoais");
+assert.match(template,/data-library-saved-components/,"Biblioteca deve listar componentes salvos individualmente");
+assert.match(sheet,/data-library-save-component/,"Biblioteca deve permitir salvar o componente selecionado");
+assert.match(sheet,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos");
+assert.match(sheet,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
+assert.match(sheet,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
+assert.match(sheet,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
+assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
+assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
+assert.match(css,/nexus-library-personal-preview/,"Itens pessoais devem usar miniaturas quadradas");
+assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades deve oferecer expansão e redução");

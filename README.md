@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.23 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.24 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.23-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.24-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.23 reconstrói o editor de comportamento sem alterar o motor de execução ou os fluxos já salvos. Gatilhos e condições receberam cartões alinhados, condições sugerem propriedades encontradas no ator, ações têm cabeçalho compacto com ativação e controles na mesma linha, e a Biblioteca recupera miniaturas maiores para elementos e composições personalizadas. As validações automatizadas passaram; a conferência visual dentro do Foundry VTT 14 continua pendente.
+> **Estado desta versão:** a 1.0.0.24 reconstrói o editor de comportamento sem alterar o motor de execução ou os fluxos já salvos. Gatilhos e condições receberam cartões alinhados, condições sugerem propriedades encontradas no ator, ações têm cabeçalho compacto com ativação e controles na mesma linha, e a Biblioteca recupera miniaturas maiores para elementos e composições personalizadas. As validações automatizadas passaram; a conferência visual dentro do Foundry VTT 14 continua pendente.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão publicada | 1.0.0.23 |
+| Versão publicada | 1.0.0.24 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.

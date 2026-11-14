@@ -104,6 +104,12 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   return { value, path, alias: alias.alias };
 };
 
+const expandNexusPropertyExpressions = formula => String(formula ?? "").replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, path) => {
+  const parts=String(path).split(".");
+  if(!parts.length||parts.some(part=>!part||["__proto__","prototype","constructor"].includes(part))) throw new Error("Referência de propriedade inválida na fórmula.");
+  return "@"+parts.join(".");
+});
+
 const getResourceValuePaths = component => {
   const resourceMap = { pv: "resources.pv", pm: "resources.pm", pe: "resources.pe" };
   let base = component?.currentPath || "";
@@ -1320,6 +1326,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
       if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
       if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
+      if (action === "save-library-component") return this._saveSelectedLibraryComponent();
     });
     html.find("[data-skill-roll]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
@@ -1760,105 +1767,74 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); this._toggleLayerState(kind,id,"locked"); });
     const libraryPanel = html[0].querySelector(".nexus-library-panel");
     const renderSavedGroups = () => {
-      const container = libraryPanel?.querySelector("[data-library-saved-groups]");
-      if (!container) return;
-      const groups = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
-      container.replaceChildren();
-      if (!groups.length) {
-        const empty = document.createElement("p");
-        empty.className = "nexus-library-empty";
-        empty.textContent = "Nenhum grupo personalizado salvo.";
-        container.append(empty);
-        return;
-      }
-      for (const group of groups) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "nexus-library-saved-group";
-        button.dataset.librarySavedGroup = group.id;
-        button.title = `${group.name || "Grupo sem nome"} · ${group.components?.length ?? 0} componentes`;
-        const preview = document.createElement("span");
-        preview.className = "nexus-library-saved-group-preview";
-        preview.setAttribute("aria-hidden", "true");
-        const members = Array.isArray(group.components) ? group.components : [];
-        const bounds = members.length ? {
-          left: Math.min(...members.map(item => Number(item.x) || 0)),
-          top: Math.min(...members.map(item => Number(item.y) || 0)),
-          right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || COMPONENTS[item.type]?.w || 100))),
-          bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
-        } : { left: 0, top: 0, right: 100, bottom: 60 };
-        const scale = Math.min(220 / Math.max(1, bounds.right - bounds.left), 94 / Math.max(1, bounds.bottom - bounds.top));
-        const gridMode = members.length > 8 || scale < 0.18;
-        preview.classList.toggle("is-grid", gridMode);
-        const visibleMembers = gridMode ? members.slice(0, 8) : members;
-        for (const member of visibleMembers) {
-          const definition = COMPONENTS[member.type] ?? {};
-          const code = String(member.sheetCode ?? member.sheetContent1 ?? member.resourceLabel ?? "").trim().toUpperCase();
-          const resourceColor = member.sheetColor || ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] || "";
-          const isResource = ["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","sheet-resource","resource-meter","asset-meter"].includes(member.type);
-          const card = document.createElement("span");
-          card.className = "nexus-library-saved-group-card";
-          card.dataset.previewType = member.type || "component";
-          card.classList.toggle("is-resource", isResource);
-          const label = isResource
-            ? (member.sheetContent1 || member.resourceLabel || code || definition.label || "Recurso")
-            : (member.customLabel || member.text || member.sheetContent1 || definition.label || "Card");
-          const cardTitle = document.createElement("strong");
-          cardTitle.textContent = String(label).trim().slice(0, 12);
-          card.append(cardTitle);
-          if (isResource) {
-            const track = document.createElement("span");
-            track.className = "nexus-library-saved-group-track";
-            const fill = document.createElement("i");
-            const current = Number(member.previewCurrent ?? 32);
-            const maximum = Math.max(1, Number(member.previewMax ?? 40));
-            fill.style.width = `${clamp(current / maximum * 100, 0, 100)}%`;
-            fill.style.background = resourceColor || "var(--nexus-highlight-color,#78b7e8)";
-            track.append(fill);
-            card.append(track);
-          } else {
-            const value = document.createElement("small");
-            value.textContent = String(member.text ?? member.sheetCode ?? "").trim().slice(0, 14);
-            if (value.textContent) card.append(value);
-          }
-          card.style.borderColor = member.borderColor || resourceColor || "var(--nexus-panel-border,#3c5067)";
-          if (gridMode) preview.append(card);
-          else {
-            card.style.left = (3 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
-            card.style.top = (3 + ((Number(member.y) || 0) - bounds.top) * scale) + "px";
-            card.style.width = Math.max(18, (Number(member.w) || definition.w || 100) * scale) + "px";
-            card.style.height = Math.max(14, (Number(member.h) || definition.h || 60) * scale) + "px";
-            card.style.background = "var(--nexus-panel-surface,#202e3e)";
-            preview.append(card);
-          }
+      const container=libraryPanel?.querySelector("[data-library-saved-groups]");if(!container)return;
+      const groups=game.user?.getFlag?.("nexus","libraryGroups")??[];container.replaceChildren();
+      if(!groups.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum grupo salvo.";container.append(empty);return;}
+      for(const group of groups){
+        const button=document.createElement("button");button.type="button";button.className="nexus-library-saved-group";button.dataset.librarySavedGroup=group.id;
+        button.title=`${group.name||"Grupo sem nome"} · ${group.components?.length??0} componentes`;
+        const preview=document.createElement("span");preview.className="nexus-library-saved-group-preview";preview.setAttribute("aria-hidden","true");
+        const members=Array.isArray(group.components)?group.components:[];
+        const bounds=members.length?{left:Math.min(...members.map(x=>Number(x.x)||0)),top:Math.min(...members.map(x=>Number(x.y)||0)),right:Math.max(...members.map(x=>(Number(x.x)||0)+Math.max(20,Number(x.w)||COMPONENTS[x.type]?.w||100))),bottom:Math.max(...members.map(x=>(Number(x.y)||0)+Math.max(20,Number(x.h)||COMPONENTS[x.type]?.h||60)))}:{left:0,top:0,right:100,bottom:100};
+        const scale=Math.min(82/Math.max(1,bounds.right-bounds.left),82/Math.max(1,bounds.bottom-bounds.top));
+        const gridMode=members.length>8||scale<0.12;preview.classList.toggle("is-grid",gridMode);const visible=gridMode?members.slice(0,8):members;
+        for(const member of visible){
+          const definition=COMPONENTS[member.type]??{},code=String(member.sheetCode??member.sheetContent1??member.resourceLabel??"").trim().toUpperCase();
+          const color=member.sheetColor||({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]||"";
+          const resource=["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","sheet-resource","resource-meter","asset-meter"].includes(member.type);
+          const card=document.createElement("span");card.className="nexus-library-saved-group-card";card.dataset.previewType=member.type||"component";card.classList.toggle("is-resource",resource);
+          const title=document.createElement("strong");title.textContent=String(resource?(member.sheetContent1||member.resourceLabel||code||definition.label||"Recurso"):(member.customLabel||member.text||member.sheetContent1||definition.label||"Card")).trim().slice(0,12);card.append(title);
+          if(resource){const track=document.createElement("span");track.className="nexus-library-saved-group-track";const fill=document.createElement("i");const current=Number(member.previewCurrent??32),maximum=Math.max(1,Number(member.previewMax??40));fill.style.width=`${clamp(current/maximum*100,0,100)}%`;fill.style.background=color||"var(--nexus-highlight-color,#78b7e8)";track.append(fill);card.append(track);}
+          else{const value=document.createElement("small");value.textContent=String(member.text??member.sheetCode??"").trim().slice(0,14);if(value.textContent)card.append(value);}
+          card.style.borderColor=member.borderColor||color||"var(--nexus-panel-border,#3c5067)";
+          if(gridMode){preview.append(card);continue;}
+          card.style.left=(9+((Number(member.x)||0)-bounds.left)*scale)+"px";card.style.top=(9+((Number(member.y)||0)-bounds.top)*scale)+"px";
+          card.style.width=Math.max(10,(Number(member.w)||definition.w||100)*scale)+"px";card.style.height=Math.max(10,(Number(member.h)||definition.h||60)*scale)+"px";card.style.background="var(--nexus-panel-surface,#202e3e)";preview.append(card);
         }
-        if (members.length > visibleMembers.length) {
-          const overflow = document.createElement("span");
-          overflow.className = "nexus-library-saved-group-overflow";
-          overflow.textContent = "+" + (members.length - visibleMembers.length);
-          preview.append(overflow);
-        }
-        const title = document.createElement("strong");
-        title.textContent = group.name || "Grupo sem nome";
-        const count = document.createElement("small");
-        count.textContent = members.length + (members.length === 1 ? " componente" : " componentes");
-        button.append(preview, title, count);
-        container.append(button);
+        if(members.length>visible.length){const overflow=document.createElement("span");overflow.className="nexus-library-saved-group-overflow";overflow.textContent="+"+(members.length-visible.length);preview.append(overflow);}
+        const title=document.createElement("strong");title.textContent=group.name||"Grupo sem nome";
+        const count=document.createElement("small");count.textContent=members.length+(members.length===1?" componente":" componentes");button.append(preview,title,count);container.append(button);
       }
     };
-    this._libraryRenderSavedGroups = renderSavedGroups;
-    renderSavedGroups();
+    const renderSavedComponents = () => {
+      const container=libraryPanel?.querySelector("[data-library-saved-components]");if(!container)return;
+      const saved=game.user?.getFlag?.("nexus","libraryComponents")??[];container.replaceChildren();
+      if(!saved.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum componente salvo.";container.append(empty);return;}
+      for(const item of saved){
+        const button=document.createElement("button");button.type="button";button.className="nexus-library-personal-card";button.dataset.librarySavedComponent=item.id;
+        const stage=document.createElement("span");stage.className="nexus-library-personal-preview";const definition=COMPONENTS[item.type]??{},settings=item.settings??{};
+        if(["sheet-resource","pv","pm","pe","pv-bar","pm-bar","pe-bar"].includes(item.type)){
+          const code=String(settings.sheetCode??settings.sheetContent1??"PV").toUpperCase(),color=settings.sheetColor||({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]||"#d94b4b";
+          stage.append(createSheetResourcePreview({label:settings.sheetContent1||code,current:settings.previewCurrent??32,max:settings.previewMax??40,color,showValues:true}));
+          fitSheetResourcePreview(stage,{w:220,h:58},78);
+        }else{const glyph=document.createElement("span");glyph.className="nexus-library-personal-glyph";glyph.textContent=String(settings.customLabel||settings.text||definition.label||item.type||"N").trim().slice(0,2).toUpperCase();stage.append(glyph);}
+        const label=document.createElement("strong");label.textContent=item.label||definition.label||"Componente";button.append(stage,label);container.append(button);
+      }
+    };
+    this._libraryRenderSavedGroups=renderSavedGroups;
+    this._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
+    this._libraryRenderPersonalItems();
     const filterLibrary = () => {
-      const query = libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
-      const tag = libraryPanel?.querySelector("[data-library-tag]")?.value ?? "all";
-      let visible = 0;
-      libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card => {
-        const matchText = !query || (card.dataset.libraryAsset ?? "").includes(query);
-        const matchTag = tag === "all" || (card.dataset.libraryAsset ?? "").includes(tag);
-        const matchFolder = card.dataset.libraryCategory === (this._libraryFolder ?? "core");
-        card.hidden = !(matchText && matchTag && matchFolder); if (!card.hidden) visible++;
+      const query=libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+      const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
+      const scope=this._libraryAssetScope??"core";let visible=0;
+      libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
+        const text=card.dataset.libraryAsset??"",matchText=!query||text.includes(query),matchTag=tag==="all"||text.includes(tag);
+        const matchFolder=card.dataset.libraryCategory===(this._libraryFolder??"core");
+        card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
-      const count = libraryPanel?.querySelector("[data-library-count]"); if (count) count.textContent = `${visible} ${visible === 1 ? "elemento" : "elementos"}`;
+      const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
+      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme]")??[])];let visibleThemes=0;
+      themeCards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visibleThemes++;});
+      const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
+      flowCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleFlows++;});
+      const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
+      const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
+      const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
+      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
+      const count=libraryPanel?.querySelector("[data-library-count]");
+      if(count)count.textContent=activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
+      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
     const resourcePaths = (() => {
       const paths = [];
@@ -2025,6 +2001,36 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
 
+      const saveComponentButton=target?.closest("[data-library-save-component]");
+      if(saveComponentButton&&libraryPanel.contains(saveComponentButton)){event.preventDefault();await this._saveSelectedLibraryComponent();return;}
+      const savedComponentCard=target?.closest("[data-library-saved-component]");
+      if(savedComponentCard&&libraryPanel.contains(savedComponentCard)){
+        event.preventDefault();
+        const saved=(game.user?.getFlag?.("nexus","libraryComponents")??[]).find(item=>item.id===savedComponentCard.dataset.librarySavedComponent);
+        const detail=libraryPanel.querySelector("[data-library-details]");if(!saved||!detail)return;
+        libraryPanel.querySelectorAll("[data-library-saved-component]").forEach(item=>item.classList.toggle("is-selected",item===savedComponentCard));
+        detail.dataset.selectedType="saved-component";detail.dataset.selectedComponentId=saved.id;detail.replaceChildren();
+        const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
+        const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
+        const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar ao Canvas";
+        const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir da biblioteca";
+        detail.append(heading,summary,add,remove);return;
+      }
+      const savedFlowCard=target?.closest("[data-library-flow-id]");
+      if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
+        event.preventDefault();
+        const entry=getInteractionLibrary(this.actor).find(item=>item.id===savedFlowCard.dataset.libraryFlowId);
+        const detail=libraryPanel.querySelector("[data-library-details]");if(!entry||!detail)return;
+        libraryPanel.querySelectorAll("[data-library-flow-id]").forEach(item=>item.classList.toggle("is-selected",item===savedFlowCard));
+        detail.dataset.selectedType="saved-flow";detail.dataset.selectedFlowId=entry.id;detail.replaceChildren();
+        const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
+        const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=entry.name||"Fluxo salvo";heading.append(title);
+        const summary=document.createElement("p");summary.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddFlow="";add.textContent="Adicionar ao componente selecionado";
+        detail.append(heading,summary,add);return;
+      }
+
       const savedGroupCard = target?.closest("[data-library-saved-group]");
       if (savedGroupCard && libraryPanel.contains(savedGroupCard)) {
         event.preventDefault();
@@ -2056,6 +2062,28 @@ export class NexusActorSheet extends NexusActorSheetBase {
         event.preventDefault();
         if (!assetCard.dataset.libraryTheme) selectLibraryAsset(assetCard);
         return;
+      }
+
+      const addSavedComponentButton=target?.closest("[data-library-add-saved-component]");
+      if(addSavedComponentButton&&libraryPanel.contains(addSavedComponentButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await this._addSavedLibraryComponent(id);return;
+      }
+      const deleteSavedComponentButton=target?.closest("[data-library-delete-saved-component]");
+      if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await this._deleteSavedLibraryComponent(id);return;
+      }
+      const addFlowButton=target?.closest("[data-library-add-flow]");
+      if(addFlowButton&&libraryPanel.contains(addFlowButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedFlowId;
+        const selectedId=[...(this._selectedIds??[])][0];
+        if(!id||!selectedId||this._selectedIds.size!==1){ui.notifications?.warn?.("Selecione um único componente no Canvas antes de inserir um fluxo.");return;}
+        const entry=getInteractionLibrary(this.actor).find(item=>item.id===id);if(!entry)return;
+        const layouts=await this._readLayouts(),active=this._activeLayoutId(),component=layouts[active]?.components?.find(item=>item.id===selectedId);
+        if(!component)return;
+        if(!applyInteractionEditorCommand(component,"add-library-flow",{template:entry.flow}))return;
+        await this._writeLayouts(layouts,active);await this.render({force:true});return;
       }
 
       const addGroupButton = target?.closest("[data-library-add-group]");
@@ -2300,57 +2328,110 @@ export class NexusActorSheet extends NexusActorSheetBase {
       await this._syncActorPortraitFromToken(id);
     });
 
-    const getPropertyOptionsOwner = input => input?.closest(".nexus-component-inspector, .nexus-behavior-editor, .nexus-panel-window");
-    const ensurePropertyOptionsList = owner => {
-      if(!owner)return null;
-      let list=owner.querySelector("[data-component-path-options]");
-      if(!list){list=document.createElement("div");list.className="nexus-property-options";list.dataset.componentPathOptions="";list.hidden=true;list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades e atalhos disponíveis");owner.append(list);}
+    const propertyPickerId=`nexus-property-picker-${String(this.id).replace(/[^a-zA-Z0-9_-]/g,"")}`;
+    const getPropertyOptionsOwner=input=>input?.closest(".nexus-panel-window")??input?.closest(".nexus-component-inspector, .nexus-behavior-editor");
+    const ensurePropertyOptionsList=()=>{
+      let list=document.getElementById(propertyPickerId);
+      if(!list){
+        list=document.createElement("div");list.className="nexus-property-options";list.id=propertyPickerId;list.dataset.componentPathOptions="";list.hidden=true;
+        list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades disponíveis");
+        const header=document.createElement("div");header.className="nexus-property-options-toolbar";
+        const title=document.createElement("strong");title.textContent="Propriedades disponíveis";
+        const expand=document.createElement("button");expand.type="button";expand.dataset.propertyListExpand="";expand.setAttribute("aria-label","Expandir lista");expand.title="Expandir lista";expand.textContent="Expandir";
+        header.append(title,expand);list.append(header);document.body.append(list);
+      }
       return list;
     };
-    const positionPropertyOptions = input => {
+    const positionPropertyOptions=input=>{
       if(!input?.isConnected)return;
-      const owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
-      if(!list||!owner||list.hidden)return;
-      if(list.parentElement!==document.body){document.querySelectorAll(`[data-nexus-property-owner="${this.id}"]`).forEach(other=>{if(other!==list)other.remove();});list.dataset.nexusPropertyOwner=String(this.id);list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;document.body.append(list);}
-      else{list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;}
+      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner||list.hidden)return;
+      list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;
       const rect=input.getBoundingClientRect(),vw=document.documentElement.clientWidth||window.innerWidth,vh=document.documentElement.clientHeight||window.innerHeight,gap=6;
-      const above=Math.max(0,rect.top-gap-12),below=Math.max(0,vh-rect.bottom-gap-12),placeAbove=above>below&&above>120,maxHeight=Math.max(96,Math.min(280,placeAbove?above:below));
-      list.style.position="fixed";list.style.left=`${Math.max(12,Math.min(rect.left,vw-rect.width-12))}px`;list.style.width=`${Math.min(rect.width,vw-24)}px`;list.style.maxHeight=`${maxHeight}px`;list.style.top=placeAbove?`${Math.max(8,rect.top-Math.min(list.scrollHeight||240,maxHeight)-gap)}px`:`${Math.min(vh-maxHeight-8,rect.bottom+gap)}px`;list.style.bottom="auto";list.style.overflowY="auto";
+      const width=Math.min(Math.max(300,rect.width),Math.min(520,vw-24));
+      const above=Math.max(0,rect.top-gap-12),below=Math.max(0,vh-rect.bottom-gap-12),placeAbove=above>below&&above>140;
+      const maxHeight=Math.max(112,Math.min(list.classList.contains("is-expanded")?440:280,placeAbove?above:below));
+      list.style.position="fixed";list.style.left=`${Math.max(12,Math.min(rect.left,vw-width-12))}px`;list.style.width=`${width}px`;
+      list.style.maxHeight=`${maxHeight}px`;list.style.top=placeAbove?`${Math.max(8,rect.top-Math.min(list.scrollHeight||240,maxHeight)-gap)}px`:`${Math.min(vh-maxHeight-8,rect.bottom+gap)}px`;
+      list.style.bottom="auto";list.style.overflowY="auto";
     };
-    const filterPropertyOptions = input => {
-      const owner=getPropertyOptionsOwner(input),list=owner?ensurePropertyOptionsList(owner):null;if(!list)return;
-      if(list.dataset.nexusOptionsReady!=="true"){
-        const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
-        for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){const root=safeAliasKey(alias.key);if(!root)continue;const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[""];for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);}
-        const fragment=document.createDocumentFragment(),heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Propriedades disponíveis";fragment.append(heading);
-        for(const path of [...paths].sort((a,b)=>a.localeCompare(b,"pt-BR"))){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=path;button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=path.split(".").at(-1);const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);}
-        const aliases=getNexusRollAliasEntries(this.actor);if(aliases.length){const h=document.createElement("div");h.className="nexus-property-options-heading";h.textContent="Atalhos de exibição · Fórmulas";fragment.append(h);for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}}
-        list.replaceChildren(fragment);list.dataset.nexusOptionsReady="true";
+    const filterPropertyOptions=input=>{
+      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;
+      const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
+      for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){
+        const root=safeAliasKey(alias.key);if(!root)continue;
+        const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[ "" ];
+        for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
-      const formulaMode=input.hasAttribute("data-roll-formula-input"),propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input"),raw=String(input.value??""),cursor=input.selectionStart??raw.length,before=raw.slice(0,cursor);
-      const tokenMatch=formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):propertyMode?null:before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/);
-      if(!formulaMode&&!propertyMode&&!tokenMatch){list.hidden=true;return;}
-      const query=(formulaMode?(tokenMatch?.[1]??""):propertyMode?raw:(tokenMatch?.[1]??"")).trim().toLocaleLowerCase("pt-BR");
-      let matches=0;list.querySelectorAll(".nexus-property-option").forEach(option=>{const aliasOnly=option.dataset.rollAliasOption==="true",visible=!(aliasOnly&&!formulaMode)&&(!query||option.textContent.toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.propertyPathOption??"").toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.rollToken??"").toLocaleLowerCase("pt-BR").includes(query));option.hidden=!visible;if(visible)matches++;});
+      const sortedPaths=[...paths].sort((x,y)=>x.localeCompare(y,"pt-BR"));
+      const signature=sortedPaths.join("|");
+      if(list.dataset.optionsSignature!==signature){
+        const fragment=document.createDocumentFragment();
+        for(const path of sortedPaths){
+          const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=path;button.setAttribute("role","option");
+          const title=document.createElement("strong");title.textContent=path.split(".").at(-1);
+          const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);
+        }
+        const aliases=getNexusRollAliasEntries(this.actor);
+        if(aliases.length){const heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Atalhos de rolagem";fragment.append(heading);
+          for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");
+            const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}
+        }
+        list.querySelectorAll(".nexus-property-option,.nexus-property-options-heading").forEach(node=>node.remove());
+        list.append(fragment);list.dataset.optionsSignature=signature;
+      }
+      const formulaMode=input.hasAttribute("data-roll-formula-input");
+      const propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input");
+      const raw=String(input.value??""),cursor=input.selectionStart??raw.length,before=raw.slice(0,cursor);
+      const formulaAt= formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):null;
+      const formulaExpression=formulaMode?before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/):null;
+      const templateExpression=!formulaMode&&!propertyMode?before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/):null;
+      if(formulaMode&&!formulaAt&&!formulaExpression||!formulaMode&&!propertyMode&&!templateExpression){list.hidden=true;return;}
+      const query=(formulaAt?.[1]??formulaExpression?.[1]??templateExpression?.[1]??(propertyMode?raw:"")).trim().toLocaleLowerCase("pt-BR");
+      let matches=0;
+      list.querySelectorAll(".nexus-property-option").forEach(option=>{
+        const aliasOnly=option.dataset.rollAliasOption==="true";
+        const visible=!(aliasOnly&&!formulaMode)&&(!query||option.textContent.toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.propertyPathOption??"").toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.rollToken??"").toLocaleLowerCase("pt-BR").includes(query));
+        option.hidden=!visible;if(visible)matches++;
+      });
       list.querySelectorAll(".nexus-property-options-heading").forEach(heading=>{let next=heading.nextElementSibling,visible=false;while(next&&!next.classList.contains("nexus-property-options-heading")){if(!next.hidden)visible=true;next=next.nextElementSibling;}heading.hidden=!visible;});
       list.dataset.empty=matches?"false":"true";list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
-    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-roll-formula-input]";
-    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
+    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-interaction-property-input], .nexus-panel-window [data-roll-formula-input]";
+    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-interaction-property-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
     $(document).on(`focusin${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`,()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
+    $(document).on(`click${inspectorNamespace}`,"[data-property-list-expand]",event=>{
+      const list=event.currentTarget.closest("[data-component-path-options]");if(!list)return;
+      list.classList.toggle("is-expanded");event.currentTarget.textContent=list.classList.contains("is-expanded")?"Reduzir":"Expandir";
+      event.currentTarget.setAttribute("aria-label",list.classList.contains("is-expanded")?"Reduzir lista":"Expandir lista");
+      if(list._nexusOwnerInput)positionPropertyOptions(list._nexusOwnerInput);
+    });
     $(document).on(`click${inspectorNamespace}`,"[data-property-path-option]",event=>{
-      event.preventDefault();event.stopPropagation();const button=event.currentTarget,list=button.closest("[data-component-path-options]"),owner=list?._nexusOwnerInspector||list?.closest(".nexus-panel-window"),input=list?._nexusOwnerInput||owner?.querySelector(":focus");
-      if(!input||!list||!owner)return;
-      if(input.hasAttribute("data-roll-formula-input")){const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/@([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;const token=button.dataset.rollToken||"@"+button.dataset.propertyPathOption;input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));}
-      else if(input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input")){input.value=button.dataset.propertyPathOption;input.dispatchEvent(new Event("change",{bubbles:true}));input.blur();}
-      else{const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;const token="{{"+button.dataset.propertyPathOption+"}}";input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
-      list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;
+      event.preventDefault();event.stopPropagation();
+      const button=event.currentTarget,list=button.closest("[data-component-path-options]"),input=list?._nexusOwnerInput;
+      if(!input||!list)return;
+      const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor);
+      const formulaMode=input.hasAttribute("data-roll-formula-input");
+      const propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input");
+      const atMatch=formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):null;
+      const braceMatch=before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/);
+      let start=cursor,end=cursor,token=button.dataset.propertyPathOption;
+      if(propertyMode){start=0;end=value.length;}
+      else if(formulaMode&&atMatch){start=cursor-atMatch[0].length;while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;token=button.dataset.rollToken||"@"+token;}
+      else if(braceMatch){start=cursor-braceMatch[0].length;while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;token="{{"+token+"}}";}
+      else if(formulaMode)return;
+      input.value=value.slice(0,start)+token+value.slice(end);
+      if(propertyMode){input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      else{input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      list.hidden=true;
     });
     $(document).on(`pointerdown${inspectorNamespace}`,"[data-component-path-options]",event=>event.stopPropagation());
-    $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
-    $(document).on(`focusout${inspectorNamespace}`,".nexus-panel-window input[type='text'], .nexus-panel-window textarea",event=>{const input=event.currentTarget,owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);setTimeout(()=>{if(list&&!list.contains(document.activeElement)){list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body&&owner)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;}},120);});
+    $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const list=document.getElementById(propertyPickerId),input=list?._nexusOwnerInput;if(input?.isConnected)positionPropertyOptions(input);});
+    $(document).on(`focusout${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>{
+      const input=event.currentTarget,list=document.getElementById(propertyPickerId);
+      setTimeout(()=>{if(list&&!list.contains(document.activeElement)&&document.activeElement!==input){list.hidden=true;list.classList.remove("is-expanded");list.style.top="";list.style.left="";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}},140);
+    });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
       const panelWindow = input.closest(".nexus-panel-window");
@@ -2912,7 +2993,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "calculate") {
       const formula = String(config.formula ?? "").trim();
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
-      const roll = new Roll(expandNexusRollAliases(this.actor, formula), getNexusRollData(this.actor));
+      const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula)), getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       const target = String(config.targetPath ?? "").replace(/^system\\./, "");
       if (target) {
@@ -2961,7 +3042,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return;
     }
     try {
-      formula = expandNexusRollAliases(this.actor, formula);
+      formula = expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula));
       const roll = new Roll(formula, getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       await roll.toMessage({
@@ -3241,6 +3322,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = [...saved, { id: foundry.utils.randomID(10), label, type: component.type, settings }];
     await game.user.setFlag("nexus", "libraryComponents", next);
     ui.notifications?.info?.(`“${label}” foi salvo em Meus Componentes.`);
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryApplyFilter?.();
     this.render({ force: true });
   }
 
@@ -3257,6 +3341,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = saved.filter(item => item.id !== id);
     if (next.length === saved.length) return;
     await game.user.setFlag("nexus", "libraryComponents", next);
+    this._libraryRenderPersonalItems?.();
+    this._libraryApplyFilter?.();
     this.render({ force: true });
   }
 
@@ -4109,74 +4195,97 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
   _mountLibrary(panel) {
-    const assets = panel.querySelector("[data-library-assets]");
-    if (!assets || panel.dataset.libraryMounted === "true") return;
-    panel.dataset.libraryMounted = "true";
-    assets.replaceChildren();
-    const availableFolders = NEXUS_LIBRARY_CATALOG.categories ?? [];
-    const preferredFolder = this._libraryFolder
-      ?? NEXUS_LIBRARY_CATALOG.assets.find(item => item.type === this._librarySelectedType)?.category;
-    this._libraryFolder = availableFolders.some(folder => folder.id === preferredFolder)
-      ? preferredFolder
-      : (availableFolders[0]?.id ?? "core");
-    const folderNav = document.createElement("nav");
-    folderNav.className = "nexus-library-folders";
-    folderNav.setAttribute("aria-label", "Pastas da biblioteca");
-    const folders = availableFolders.map(({ id, label, icon }) => [id, label, icon]);
-    for (const [id, label, icon] of folders) {
-      const button = document.createElement("button"); button.type = "button"; button.dataset.libraryFolder = id;
-      button.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${label}</span>`;
-      button.classList.toggle("active", id === (this._libraryFolder ?? "core")); folderNav.append(button);
+    const assets=panel.querySelector("[data-library-assets]");
+    if(!assets||panel.dataset.libraryMounted==="true")return;
+    panel.dataset.libraryMounted="true";assets.replaceChildren();
+    this._libraryAssetScope??="core";
+    const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
+    const preferredFolder=this._libraryFolder??NEXUS_LIBRARY_CATALOG.assets.find(item=>item.type===this._librarySelectedType)?.category;
+    this._libraryFolder=availableFolders.some(folder=>folder.id===preferredFolder)?preferredFolder:(availableFolders[0]?.id??"core");
+    const folderNav=document.createElement("nav");folderNav.className="nexus-library-folders";folderNav.setAttribute("aria-label","Categorias de assets");
+    for(const {id,label,icon} of availableFolders){
+      const button=document.createElement("button");button.type="button";button.dataset.libraryFolder=id;
+      const glyph=document.createElement("i");glyph.className=icon;glyph.setAttribute("aria-hidden","true");
+      const text=document.createElement("span");text.textContent=label;button.append(glyph,text);
+      button.classList.toggle("active",id===this._libraryFolder);folderNav.append(button);
     }
-    panel.querySelector(".nexus-library-workspace")?.before(folderNav);
-    for (const [assetIndex, asset] of NEXUS_LIBRARY_CATALOG.assets.entries()) {
-      const card = document.createElement("button");
-      card.type = "button"; card.className = "nexus-library-asset";
-      card.dataset.libraryAsset = `${asset.label} ${asset.keywords ?? ""}`.toLocaleLowerCase("pt-BR");
-      card.dataset.libraryCategory = asset.category; card.dataset.assetType = asset.type; card.dataset.assetKey = asset.key ?? `${asset.category}-${assetIndex}`;
-      const preview = document.createElement("span"); preview.className = `nexus-library-preview-stage preview-${asset.preview ?? asset.type}`;
-      if (asset.type === "sheet-resource") {
-        const code = String(asset.template?.sheetCode ?? "PV").toUpperCase();
-        const color = asset.template?.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] ?? "#d94b4b";
-        preview.append(createSheetResourcePreview({ label: asset.template?.sheetContent1 ?? code, current: 32, max: 40, color, showValues: true }));
-        fitSheetResourcePreview(preview, { w: 220, h: 58 }, 120);
+    panel.querySelector(".nexus-library-scope-tabs")?.after(folderNav);
+    for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
+      const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
+      card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
+      card.dataset.libraryCategory=asset.category;card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
+      const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
+      if(asset.type==="sheet-resource"){
+        const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
+        preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
+        fitSheetResourcePreview(preview,{w:220,h:58},78);
+      }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
+      else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
+      else if(asset.type==="custom-card"){const area=document.createElement("span");area.className="nexus-library-area-preview";area.textContent="+";preview.append(area);}
+      else if(asset.type==="sheet-section"){const marker=document.createElement("span");marker.className="nexus-library-marker-preview";marker.textContent="SEÇÃO";preview.append(marker);}
+      else if(asset.type==="asset-image"){const image=document.createElement("span");image.className="nexus-library-image-preview";image.textContent="▧";preview.append(image);}
+      else if(asset.type==="asset-meter"){const meter=document.createElement("span");meter.className="nexus-library-meter-preview";meter.innerHTML="<i></i>";preview.append(meter);}
+      else if(asset.type==="asset-text"){const text=document.createElement("span");text.className="nexus-library-text-preview";text.textContent="Texto";preview.append(text);}
+      else{const mock=document.createElement("span");mock.className="nexus-library-generic-preview";mock.textContent=asset.label.slice(0,2).toUpperCase();preview.append(mock);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=asset.label;meta.append(label);card.append(preview,meta);assets.append(card);
+    }
+    const themes=panel.querySelector("[data-library-themes]");
+    const themeLabels={"nexus-dark":"NEXUS Escuro",midnight:"Meia-noite",light:"Claro",steam:"Steam",linux:"Linux",medieval:"Medieval","pixel-art":"Pixel Art"};
+    for(const [id,palette] of Object.entries(THEME_PALETTES)){
+      const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
+      const labelText=themeLabels[id]??id;card.dataset.libraryAsset=labelText.toLocaleLowerCase("pt-BR");card.dataset.libraryTheme=id;
+      const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";preview.dataset.themeSwatch=id;
+      for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
+    }
+    const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
+    const flows=getInteractionLibrary(this.actor);
+    if(flowContainer){
+      if(!flows.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum fluxo salvo na biblioteca.";flowContainer.append(empty);}
+      for(const entry of flows){
+        const card=document.createElement("button");card.type="button";card.className="nexus-library-flow-card";card.dataset.libraryFlowId=entry.id;
+        const icon=document.createElement("i");icon.className="fa-solid fa-diagram-project";icon.setAttribute("aria-hidden","true");
+        const title=document.createElement("strong");title.textContent=entry.name||entry.flow?.name||"Fluxo salvo";
+        const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.actions?.length??0} ações`;
+        card.append(icon,title,meta);flowContainer.append(card);
       }
-      else if (asset.type === "token") { const token = document.createElement("span"); token.className = "nexus-library-token-preview"; token.textContent = "N"; preview.append(token); }
-      else if (asset.type === "asset-notes") { const note = document.createElement("span"); note.className = "nexus-library-note-preview"; note.innerHTML = "<i></i><i></i><i></i>"; preview.append(note); }
-      else if (asset.type === "custom-card") { const area = document.createElement("span"); area.className = "nexus-library-area-preview"; area.textContent = "+"; preview.append(area); }
-      else if (asset.type === "sheet-section") { const marker = document.createElement("span"); marker.className = "nexus-library-marker-preview"; marker.textContent = "SEÇÃO"; preview.append(marker); }
-      else if (asset.type === "asset-image") { const image = document.createElement("span"); image.className = "nexus-library-image-preview"; image.textContent = "▧"; preview.append(image); }
-      else if (asset.type === "asset-meter") { const meter = document.createElement("span"); meter.className = "nexus-library-meter-preview"; meter.innerHTML = "<i></i>"; preview.append(meter); }
-      else if (asset.type === "asset-text") { const text = document.createElement("span"); text.className = "nexus-library-text-preview"; text.textContent = "Texto"; preview.append(text); }
-      else { const mock = document.createElement("span"); mock.className = "nexus-library-generic-preview"; mock.textContent = asset.label.slice(0,2).toUpperCase(); preview.append(mock); }
-      const meta = document.createElement("span"); meta.className = "nexus-library-asset-meta";
-      const label = document.createElement("strong"); label.textContent = asset.label; meta.append(label); card.append(preview, meta); assets.append(card);
     }
-    for (const theme of NEXUS_LIBRARY_CATALOG.themes ?? []) {
-      const card = document.createElement("button"); card.type = "button"; card.className = "nexus-library-asset nexus-library-theme-asset";
-      card.dataset.libraryAsset = `${theme.label} ${theme.keywords ?? ""}`.toLocaleLowerCase("pt-BR"); card.dataset.libraryCategory = "themes"; card.dataset.libraryTheme = theme.id;
-      const preview = document.createElement("span"); preview.className = "nexus-library-preview-stage nexus-theme-swatch"; preview.dataset.themeSwatch = theme.id;
-      for (const color of theme.colors) { const swatch = document.createElement("i"); swatch.style.backgroundColor = color; preview.append(swatch); }
-      const meta = document.createElement("span"); meta.className = "nexus-library-asset-meta"; const label = document.createElement("strong"); label.textContent = theme.label; meta.append(label); card.append(preview,meta); assets.append(card);
-    }
-    folderNav.addEventListener("click", event => {
-      const button = event.target.closest("[data-library-folder]"); if (!button) return;
-      this._libraryFolder = button.dataset.libraryFolder;
-      folderNav.querySelectorAll("[data-library-folder]").forEach(item => item.classList.toggle("active", item === button));
-      panel.querySelectorAll("[data-library-asset]").forEach(card => card.hidden = card.dataset.libraryCategory !== this._libraryFolder);
-      const count = panel.querySelector("[data-library-count]"); const visible = [...panel.querySelectorAll("[data-library-asset]")].filter(card => !card.hidden).length;
-      if (count) count.textContent = `${visible} ${visible === 1 ? "item" : "itens"}`;
-      const search = panel.querySelector("[data-library-search]"); if (search) search.dispatchEvent(new Event("input", { bubbles: true }));
-      const details = panel.querySelector("[data-library-details]"); if (details) { details.dataset.selectedType = ""; details.innerHTML = `<div class="nexus-library-detail-placeholder"><strong>${button.querySelector("span")?.textContent ?? "Biblioteca"}</strong><p>Selecione um item para visualizar e configurar.</p></div>`; }
+    const activateSection=(key)=>{
+      panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+      panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
+      if(key==="assets")this._libraryApplyFilter?.();
+      if(key==="themes"){
+        const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+        const cards=[...panel.querySelectorAll("[data-library-theme]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visible++;});
+        panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"tema":"temas"}`;
+      }
+      if(key==="flows"){
+        const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+        const cards=[...panel.querySelectorAll("[data-library-flow-id]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visible++;});
+        panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"fluxo":"fluxos"}`;
+      }
+    };
+    panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
+    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
+      this._libraryAssetScope=button.dataset.libraryScope;
+      panel.querySelectorAll("[data-library-scope]").forEach(item=>item.classList.toggle("active",item===button));
+      folderNav.hidden=this._libraryAssetScope!=="core";
+      this._libraryApplyFilter?.();
+    }));
+    folderNav.addEventListener("click",event=>{
+      const button=event.target.closest("[data-library-folder]");if(!button)return;
+      this._libraryFolder=button.dataset.libraryFolder;
+      folderNav.querySelectorAll("[data-library-folder]").forEach(item=>item.classList.toggle("active",item===button));
+      this._libraryApplyFilter?.();
+      const details=panel.querySelector("[data-library-details]");
+      if(details){details.dataset.selectedType="";details.innerHTML='<div class="nexus-library-detail-placeholder"><strong>Assets</strong><p>Selecione um item para visualizar e configurar.</p></div>';}
     });
-    assets.querySelectorAll("[data-library-theme]").forEach(card => card.hidden = (this._libraryFolder ?? "core") !== "themes");
-    panel.querySelectorAll("[data-library-asset]").forEach(card => card.hidden = card.dataset.libraryCategory !== (this._libraryFolder ?? "core"));
-    const count = panel.querySelector("[data-library-count]");
-    if (count) count.textContent = `${NEXUS_LIBRARY_CATALOG.assets.filter(item => item.category === (this._libraryFolder ?? "core")).length} itens`;
-    const remembered = this._librarySelectedAssetKey ? panel.querySelector(`[data-asset-key="${CSS.escape(this._librarySelectedAssetKey)}"]`) : null;
-    remembered?.classList.add("is-selected");
+    folderNav.hidden=this._libraryAssetScope!=="core";
+    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.classList.toggle("active",button.dataset.libraryScope===this._libraryAssetScope));
+    this._libraryApplyFilter?.();
   }
-
   _mountFloatingUI(html) {
     const root = html[0];
     this._nexusFloatingCleanup?.({ preserveWindows: true });

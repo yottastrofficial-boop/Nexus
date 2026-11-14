@@ -1,10 +1,15 @@
-## 1.0.0.23
+## 1.0.0.24
 
-- Condições novas começam vazias, sem `identity.level` ou valor `1` predefinidos.
-- Campo de propriedade das condições integrado ao buscador padrão do NEXUS.
-- Cabeçalho de condições simplificado com seletor E/OU compacto e botão +.
-- Sugestões de propriedades em campos de texto ao digitar `{{`, com inserção automática do caminho completo.
-- Expressões `{{caminho.da.propriedade}}` exibem o valor resolvido como texto; URLs explícitas `{{https://...}}` viram links externos seguros.
+- Biblioteca reorganizada em áreas de Assets, Fluxos e Temas, com separação entre conteúdo padrão e itens pessoais.
+- Componentes individuais podem ser salvos e reutilizados pela Biblioteca; grupos mantêm prévias quadradas e independentes da proporção total do Canvas.
+- Miniaturas de assets usam uma área quadrada fixa e ajustam o conteúdo interno sem deformar a proporção do componente.
+- Biblioteca de Fluxos permite consultar comportamentos salvos e inserir um fluxo no componente selecionado.
+- Temas integrados passam a ser apresentados diretamente na área Temas da Biblioteca.
+- Busca da Biblioteca consolidada em um único campo, com filtragem entre assets, itens pessoais, fluxos e temas.
+- Buscador de propriedades centralizado em uma única lista reutilizada nos painéis; inclui expansão/redução, posicionamento responsivo e atualização de opções.
+- Campos de propriedade do editor de Comportamento passam a usar explicitamente o mesmo buscador.
+- Fórmulas de rolagem e cálculo aceitam sugestões `{{propriedade}}`, resolvidas como referências de dados antes da avaliação da fórmula.
+- CSS final padroniza miniaturas, cartões pessoais, fluxos, abas, busca e lista de propriedades, reduzindo conflitos de regras anteriores.
 
 ## 1.0.0.22
 

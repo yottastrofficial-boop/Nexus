@@ -298,23 +298,45 @@ remove legacy typography selects                  <label class="nexus-inspector-
           </section>
           <section class="nexus-tool-panel nexus-library-panel" data-tool-panel="library" hidden>
             <header class="nexus-library-header">
-              <div><span class="nexus-library-eyebrow">ELEMENTOS</span><h3>Biblioteca de elementos</h3></div>
-              <span class="nexus-library-count" data-library-count>1 elemento</span>
+              <div><span class="nexus-library-eyebrow">BIBLIOTECA</span><h3>Elementos e recursos</h3></div>
+              <div class="nexus-library-header-actions"><span class="nexus-library-count" data-library-count>1 elemento</span><button type="button" data-library-save-component="" aria-label="Salvar componente selecionado na biblioteca"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></button></div>
             </header>
             <div class="nexus-library-toolbar">
               <label class="nexus-library-search-wrap"><span aria-hidden="true">⌕</span><input type="search" class="nexus-library-search" data-library-search></label>
               <select class="nexus-library-tag" data-library-tag aria-label="Filtrar por tag"><option value="all">Todas as tags</option><option value="barra">Barra de vida</option></select>
             </div>
-            <div class="nexus-library-workspace">
-              <div class="nexus-library-main">
-                <div class="nexus-library-section-heading"><strong>Elementos disponíveis</strong><span>Selecione para visualizar</span></div>
-                <div class="nexus-library-assets" data-library-assets></div>
-                <section class="nexus-library-saved-section"><div class="nexus-library-section-heading"><strong>Meus grupos</strong><span>Composições personalizadas</span></div><div class="nexus-library-saved-groups" data-library-saved-groups></div></section>
+            <nav class="nexus-library-section-tabs" aria-label="Categorias da biblioteca">
+              <button type="button" class="active" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i> Assets</button>
+              <button type="button" data-library-section="flows"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Fluxos</button>
+              <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i> Temas</button>
+            </nav>
+            <section class="nexus-library-section-panel" data-library-section-panel="assets">
+              <nav class="nexus-library-scope-tabs" aria-label="Origem dos assets">
+                <button type="button" class="active" data-library-scope="core">Padrão NEXUS</button>
+                <button type="button" data-library-scope="personal">Meus itens</button>
+              </nav>
+              <div class="nexus-library-workspace">
+                <div class="nexus-library-main">
+                  <div class="nexus-library-section-heading"><strong data-library-list-heading>Assets disponíveis</strong><span data-library-list-count></span></div>
+                  <div class="nexus-library-assets" data-library-assets></div>
+                  <section class="nexus-library-personal" data-library-personal hidden>
+                    <div class="nexus-library-personal-group"><div class="nexus-library-section-heading"><strong>Componentes</strong><span>Itens salvos individualmente</span></div><div class="nexus-library-personal-grid" data-library-saved-components></div></div>
+                    <div class="nexus-library-personal-group"><div class="nexus-library-section-heading"><strong>Grupos</strong><span>Composições salvas</span></div><div class="nexus-library-saved-groups" data-library-saved-groups></div></div>
+                  </section>
+                </div>
+                <aside class="nexus-library-details" data-library-details>
+                  <div class="nexus-library-detail-placeholder"><span>▦</span><strong>Prévia e configuração</strong><p>Selecione um asset para visualizar e configurar.</p></div>
+                </aside>
               </div>
-              <aside class="nexus-library-details" data-library-details>
-                <div class="nexus-library-detail-placeholder"><span>▦</span><strong>Prévia e configuração</strong><p>Selecione o Indicador – Barra para editar seus dados e visualizar o resultado.</p></div>
-              </aside>
-            </div>
+            </section>
+            <section class="nexus-library-section-panel" data-library-section-panel="flows" hidden>
+              <div class="nexus-library-section-heading"><strong>Fluxos salvos</strong><span>Reutilize comportamentos em outros componentes</span></div>
+              <div class="nexus-library-flow-grid" data-library-flows></div>
+            </section>
+            <section class="nexus-library-section-panel" data-library-section-panel="themes" hidden>
+              <div class="nexus-library-section-heading"><strong>Temas disponíveis</strong><span>Pré-visualizações e estilos</span></div>
+              <div class="nexus-library-assets nexus-library-theme-grid" data-library-themes></div>
+            </section>
           </section>
         </div>
       {{else if (eq nexus.mode "config")}}
