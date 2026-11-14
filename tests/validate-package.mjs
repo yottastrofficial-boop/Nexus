@@ -19,13 +19,13 @@ const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.22", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.22"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.22"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.23", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.23"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.23"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.22/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.23/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +180,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.22"));
+assert.ok(readme.includes("Versão 1.0.0.23"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -458,3 +458,9 @@ assert.match(interactions,/nexus-interaction-action-active/, "Estado ativo deve 
 assert.match(interactions,/nexus-interaction-condition-row/, "Condições devem usar linha sem rótulos redundantes");
 assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-items:center!important;width:100%!important/, "Miniaturas da Biblioteca devem usar área ampliada");
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
+
+assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
+assert.match(sheet,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
+assert.ok(sheet.includes("propertyMode?null:before.match"),"Campos de texto reconhecem a abertura de expressão {{");
+assert.match(sheet,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
+assert.match(sheet,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");

@@ -1,3 +1,11 @@
+## 1.0.0.23
+
+- Condições novas começam vazias, sem `identity.level` ou valor `1` predefinidos.
+- Campo de propriedade das condições integrado ao buscador padrão do NEXUS.
+- Cabeçalho de condições simplificado com seletor E/OU compacto e botão +.
+- Sugestões de propriedades em campos de texto ao digitar `{{`, com inserção automática do caminho completo.
+- Expressões `{{caminho.da.propriedade}}` exibem o valor resolvido como texto; URLs explícitas `{{https://...}}` viram links externos seguros.
+
 ## 1.0.0.22
 
 - Reconstrução do renderizador do editor de comportamento, preservando o motor e os dados dos fluxos existentes.
