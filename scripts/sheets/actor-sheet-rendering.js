@@ -36,9 +36,14 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       }
       if(cursor<source.length) node.append(document.createTextNode(source.slice(cursor)));
     };
+    const componentById = new Map();
+    for (const component of sheet._currentLayout?.components ?? []) {
+      if (!componentById.has(component.id)) componentById.set(component.id, component);
+    }
     root.querySelectorAll(".nexus-asset-text").forEach(node => {
-      const card=node.closest(".nexus-component"), component=(sheet._currentLayout?.components??[]).find(item=>item.id===card?.dataset.id);
-      renderExpressionText(node,!component?.dataPath);
+      const card = node.closest(".nexus-component");
+      const component = componentById.get(card?.dataset.id);
+      renderExpressionText(node, !component?.dataPath);
     });
     root.querySelectorAll(".nexus-component-content, .nexus-component-heading").forEach(container => {
       const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT); const nodes=[];
@@ -65,9 +70,12 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
       else {node.href=safe;node.target="_blank";node.rel="noopener noreferrer";node.textContent=label||value;}
       return node;
     });
-    const components=sheet._currentLayout?.components ?? [];
+    const componentById = new Map();
+    for (const component of sheet._currentLayout?.components ?? []) {
+      if (!componentById.has(component.id)) componentById.set(component.id, component);
+    }
     root.querySelectorAll(".nexus-component[data-id]").forEach(card=>{
-      const component=components.find(item=>item.id===card.dataset.id); if(!component || component.type==="token" || component.type==="asset-image") return;
+      const component=componentById.get(card.dataset.id); if(!component || component.type==="token" || component.type==="asset-image") return;
       const definition=COMPONENTS[component.type] ?? {};
       const rawPath=String(component.dataPath ?? definition.path ?? "").trim(); if(!rawPath) return;
       const binding=resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;

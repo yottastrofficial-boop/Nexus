@@ -42,7 +42,10 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     applyThemeTokens(canvas, layout);
     const appWindow=root.closest(".application, .window-app"); appWindow?.style.setProperty("--nexus-font-family",`"${layout.fontFamily ?? "Inter"}", sans-serif`); appWindow?.style.setProperty("--nexus-highlight-color",layout.highlightColor??"#78b7e8"); appWindow?.style.setProperty("--nexus-button-color",layout.buttonColor??"#315b7d");
     const point = e => { const r = canvas.getBoundingClientRect(), l = layoutData(); return { x: (e.clientX-r.left)*(l.width/r.width), y: (e.clientY-r.top)*(l.height/r.height) }; };
-    const elements = () => [...canvas.querySelectorAll(".nexus-component")];
+    // Os nós dos componentes permanecem os mesmos durante esta ativação do Canvas.
+    // Reaproveitar a lista evita querySelectorAll repetido durante gestos e seleção.
+    const componentElements = [...canvas.querySelectorAll(".nexus-component")];
+    const elements = () => componentElements;
     const rectOf = el => ({ x: parseFloat(el.style.left)||0, y: parseFloat(el.style.top)||0, w: parseFloat(el.style.width)||el.offsetWidth, h: parseFloat(el.style.height)||el.offsetHeight });
     const clampBox = (b,l) => { b.w=Math.max(20,Math.min(b.w,l.width-b.x)); b.h=Math.max(20,Math.min(b.h,l.height-b.y)); b.x=clamp(b.x,0,l.width-b.w); b.y=clamp(b.y,0,l.height-b.h); return b; };
     const clearGuides = () => { if (guides) guides.replaceChildren(); };
@@ -61,8 +64,29 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     };
     const anchors = (r,axis) => axis==="x" ? [r.x,r.x+r.w/2,r.x+r.w] : [r.y,r.y+r.h/2,r.y+r.h];
     const otherRects = excluded => {
-      const out=elements().filter(el=>!el.hidden&&!excluded.has(el.dataset.id)).map(rectOf);
-      for(const g of (sheet._activeGroups ?? [])) { const ids=(g.componentIds??[]).filter(id=>!excluded.has(id)); if(ids.length){const rs=elements().filter(el=>!el.hidden&&ids.includes(el.dataset.id)).map(rectOf); if(rs.length){const x=Number.isFinite(g.x)?g.x:Math.min(...rs.map(r=>r.x)),y=Number.isFinite(g.y)?g.y:Math.min(...rs.map(r=>r.y)),R=Math.max(Number.isFinite(g.w)?x+g.w:0,...rs.map(r=>r.x+r.w)),B=Math.max(Number.isFinite(g.h)?y+g.h:0,...rs.map(r=>r.y+r.h));out.push({x,y,w:R-x,h:B-y});}} }
+      const out = [];
+      const rectsById = new Map();
+      for (const element of elements()) {
+        if (element.hidden) continue;
+        const id = element.dataset.id;
+        const rect = rectOf(element);
+        rectsById.set(id, rect);
+        if (!excluded.has(id)) out.push(rect);
+      }
+      for (const group of sheet._activeGroups ?? []) {
+        const members = [];
+        for (const id of group.componentIds ?? []) {
+          if (excluded.has(id)) continue;
+          const rect = rectsById.get(id);
+          if (rect) members.push(rect);
+        }
+        if (!members.length) continue;
+        const x = Number.isFinite(group.x) ? group.x : Math.min(...members.map(rect => rect.x));
+        const y = Number.isFinite(group.y) ? group.y : Math.min(...members.map(rect => rect.y));
+        const right = Math.max(Number.isFinite(group.w) ? x + group.w : 0, ...members.map(rect => rect.x + rect.w));
+        const bottom = Math.max(Number.isFinite(group.h) ? y + group.h : 0, ...members.map(rect => rect.y + rect.h));
+        out.push({ x, y, w: right - x, h: bottom - y });
+      }
       return out;
     };
     // Cada caixa usa nove pontos de referência. A grade é aplicada primeiro; o guia inteligente faz o ajuste fino depois.
@@ -106,6 +130,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const n=y<=t,s=y>=r.height-t,w=x<=t, east=x>=r.width-t;
       return `${n?"n":s?"s":""}${w?"w":east?"e":""}` || null;
     };
+    // Índices reutilizados durante os gestos; são reconstruídos quando a estrutura dos grupos muda.
+    let membersByGroupId = new Map();
+    let groupsById = new Map();
     // Renderiza superfícies de grupo sem transformar os membros em um único bloco de dados.
     const renderGroups = () => {
       // Desmonta os contêineres anteriores sem perder os componentes; a reconstrução
@@ -114,38 +141,66 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         container.querySelectorAll(".nexus-component").forEach(component => canvas.append(component));
         container.remove();
       });
-      canvas.querySelectorAll(".nexus-group-surface").forEach(e=>e.remove());
-      elements().forEach(el => {
-        delete el.dataset.groupId;
-        el.classList.remove("is-group-member", "is-group-inspecting");
-        el.style.removeProperty("--nexus-group-bg");
-        el.style.removeProperty("--nexus-group-border");
-        el.style.removeProperty("--nexus-group-radius");
-      });
-      const layouts=sheet._currentLayout?.groups ?? [];
-      sheet._activeGroups=layouts;
-      for(const g of layouts){const members=elements().filter(el=>!el.hidden&&(g.componentIds??[]).includes(el.dataset.id)); if(!members.length)continue;
-        const rs=members.map(rectOf),contentX=Math.min(...rs.map(r=>r.x)),contentY=Math.min(...rs.map(r=>r.y)),contentR=Math.max(...rs.map(r=>r.x+r.w)),contentB=Math.max(...rs.map(r=>r.y+r.h));
-        // A superfície do grupo coincide exatamente com a caixa envolvente dos filhos: sem padding invisível.
-        const x=contentX,y=contentY,R=contentR,B=contentB;
-        g.x=x;g.y=y;g.w=R-x;g.h=B-y;
-        const container=document.createElement("div");container.className="nexus-group-container";container.dataset.groupContainer=g.id;
-        const surface=document.createElement("div");surface.className=`nexus-group-surface${g.hidden?" is-layer-hidden":""}${g.locked?" is-locked":""}`;surface.dataset.groupId=g.id;surface.hidden=!!g.hidden;
-        const baseZ = Math.min(...members.map(el => Number(el.style.zIndex) || 1));
-        Object.assign(surface.style,{
-          left:`${x}px`,top:`${y}px`,width:`${R-x}px`,height:`${B-y}px`,
-          zIndex:String(Math.max(0, baseZ - 1))
+      canvas.querySelectorAll(".nexus-group-surface").forEach(element => element.remove());
+      for (const element of elements()) {
+        delete element.dataset.groupId;
+        element.classList.remove("is-group-member", "is-group-inspecting");
+        element.style.removeProperty("--nexus-group-bg");
+        element.style.removeProperty("--nexus-group-border");
+        element.style.removeProperty("--nexus-group-radius");
+      }
+
+      const layouts = sheet._currentLayout?.groups ?? [];
+      sheet._activeGroups = layouts;
+      groupsById = new Map(layouts.map(group => [group.id, group]));
+      const groupIdsByComponentId = new Map();
+      membersByGroupId = new Map(layouts.map(group => [group.id, []]));
+      for (const group of layouts) {
+        for (const id of new Set(group.componentIds ?? [])) {
+          let memberships = groupIdsByComponentId.get(id);
+          if (!memberships) groupIdsByComponentId.set(id, memberships = []);
+          memberships.push(group.id);
+        }
+      }
+      for (const element of elements()) {
+        for (const groupId of groupIdsByComponentId.get(element.dataset.id) ?? []) {
+          membersByGroupId.get(groupId)?.push(element);
+        }
+      }
+
+      for (const group of layouts) {
+        const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
+        if (!members.length) continue;
+        const rects = members.map(rectOf);
+        const x = Math.min(...rects.map(rect => rect.x));
+        const y = Math.min(...rects.map(rect => rect.y));
+        const right = Math.max(...rects.map(rect => rect.x + rect.w));
+        const bottom = Math.max(...rects.map(rect => rect.y + rect.h));
+        // A superfície do grupo coincide exatamente com a caixa envolvente dos filhos.
+        group.x = x; group.y = y; group.w = right - x; group.h = bottom - y;
+
+        const container = document.createElement("div");
+        container.className = "nexus-group-container";
+        container.dataset.groupContainer = group.id;
+        const surface = document.createElement("div");
+        surface.className = `nexus-group-surface${group.hidden ? " is-layer-hidden" : ""}${group.locked ? " is-locked" : ""}`;
+        surface.dataset.groupId = group.id;
+        surface.hidden = !!group.hidden;
+        const baseZ = Math.min(...members.map(element => Number(element.style.zIndex) || 1));
+        Object.assign(surface.style, {
+          left: `${x}px`, top: `${y}px`, width: `${right - x}px`, height: `${bottom - y}px`,
+          zIndex: String(Math.max(0, baseZ - 1))
         });
-        surface.style.setProperty("--nexus-group-bg",g.backgroundColor??sheet._currentLayout?.cardColor??"#273443");
-        surface.style.setProperty("--nexus-group-border",g.borderColor??"#52647b");
-        surface.style.setProperty("--nexus-group-radius",`${clamp(Number(g.borderRadius??8),0,32)}px`);
+        surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
+        surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
+        surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8), 0, 32)}px`);
         container.append(surface);
-        members.forEach(el=>{
-          el.dataset.groupId=g.id;
-          el.classList.add("is-group-member");
-          container.append(el);
-        });
-        canvas.insertBefore(container,canvas.firstChild);
+        for (const element of members) {
+          element.dataset.groupId = group.id;
+          element.classList.add("is-group-member");
+          container.append(element);
+        }
+        canvas.insertBefore(container, canvas.firstChild);
       }
     };
     const updateConnectedCorners = () => {
@@ -171,7 +226,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
           if(prefix==="nexus-component" && (a.node.dataset.groupId||null)!==(b.node.dataset.groupId||null)) continue;
           if(prefix==="nexus-component" && (a.node.dataset.groupId||null)===(b.node.dataset.groupId||null) && a.node.dataset.groupId) {
             const groupId=a.node.dataset.groupId;
-            const group=(sheet._activeGroups??[]).find(item=>item.id===groupId);
+            const group = groupsById.get(groupId);
             const groupSelected=!!group && (group.componentIds??[]).some(id=>sheet._selectedIds?.has(id));
             if(!groupSelected && !sheet._nexusInteractionActive) continue;
           }
@@ -188,11 +243,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
-    const syncGroupBounds = (componentNodes = elements(), updateCorners = true) => {
-      const visibleNodes = componentNodes.filter(el => !el.hidden);
+    const syncGroupBounds = (updateCorners = true) => {
       for (const g of (sheet._activeGroups ?? [])) {
-        const memberIds = new Set(g.componentIds ?? []);
-        const members = visibleNodes.filter(el => memberIds.has(el.dataset.id));
+        const members = (membersByGroupId.get(g.id) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
         const rs = members.map(rectOf), x = Math.min(...rs.map(r=>r.x)), y = Math.min(...rs.map(r=>r.y));
         const right = Math.max(...rs.map(r=>r.x+r.w)), bottom = Math.max(...rs.map(r=>r.y+r.h));
@@ -244,7 +297,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const component=event.target.closest(".nexus-component");
       const groupSurface=event.target.closest(".nexus-group-surface");
       if(component && !sheet._selectedIds.has(component.dataset.id)) setSelection([component.dataset.id]);
-      else if(groupSurface){const group=(sheet._activeGroups??[]).find(item=>item.id===groupSurface.dataset.groupId);if(group)setSelection(group.componentIds??[]);}
+      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group)setSelection(group.componentIds??[]);}
       const count=sheet._selectedIds?.size??0;
       contextMenu.querySelector('[data-context-action="group"]').disabled=count<2;
       contextMenu.querySelector('[data-context-action="link"]').disabled=count<2;
@@ -318,7 +371,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (!group || group.locked || (group.componentIds ?? []).some(id => sheet._currentLayout?.components?.find(component => component.id === id)?.locked)) return false;
       setSelection(group.componentIds ?? []);
       sheet._selectedGroupId = group.id;
-      const starts = elements().filter(el => (group.componentIds ?? []).includes(el.dataset.id)).map(el => ({ el, ...rectOf(el) }));
+      const starts = (membersByGroupId.get(group.id) ?? []).map(el => ({ el, ...rectOf(el) }));
       if (!starts.length) return false;
       const bounds = {
         x: Math.min(...starts.map(item => item.x)),
@@ -342,12 +395,12 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       sheet._nexusCanvasKeyboardFocus = true;
       sheet._nexusInteractionActive=true;
       const p=point(event), component=event.target.closest(".nexus-component"), surface=event.target.closest(".nexus-group-surface"), mod=event.ctrlKey||event.metaKey||event.shiftKey;
-      if(surface && !component){const group=(sheet._activeGroups??[]).find(v=>v.id===surface.dataset.groupId);if(beginGroupMove(group,p,event))return;}
+      if(surface && !component){const group = groupsById.get(surface.dataset.groupId);if(beginGroupMove(group,p,event))return;}
       if(!component && !surface){
         // A superfície visível pode ficar coberta pelos componentes do grupo;
         // detectar o vazio pela caixa geométrica garante que o grupo continue arrastável.
         const hitGroup=[...(sheet._activeGroups??[])].reverse().find(group=>{
-          const members=elements().filter(el=>!el.hidden&&(group.componentIds??[]).includes(el.dataset.id));
+          const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
           if(!members.length)return false;
           const rs=members.map(rectOf),left=Math.min(...rs.map(r=>r.x)),top=Math.min(...rs.map(r=>r.y));
           const right=Math.max(...rs.map(r=>r.x+r.w)),bottom=Math.max(...rs.map(r=>r.y+r.h));
@@ -463,7 +516,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         sizeReadout.textContent = `Tamanho: ${box.w} × ${box.h} px`; sizeReadout.hidden = false;
         sizeReadout.style.left = `${clamp(box.x + box.w - 180, 4, l.width - 184)}px`; sizeReadout.style.top = `${Math.max(4, box.y - 34)}px`;
       }
-      syncGroupBounds();
+      // Os cantos conectados são recalculados ao terminar o gesto, não a cada frame.
+      syncGroupBounds(false);
     };
     // Limita o trabalho pesado de alinhamento/seleção a no máximo um ciclo por frame.
     let pointerMoveFrame = 0;
@@ -569,7 +623,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         item.el.style.top = `${item.y + dy}px`;
         keyboardMoveTouched.add(item.el.dataset.id);
       }
-      syncGroupBounds(keyboardMoveAllElements, false);
+      syncGroupBounds(false);
     };
     const queueKeyboardMove = (dx, dy) => {
       beginKeyboardMove();
