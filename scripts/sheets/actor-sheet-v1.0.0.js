@@ -1823,12 +1823,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const matchFolder=card.dataset.libraryCategory===(this._libraryFolder??"core");
         card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
+      const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
+      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme]")??[])];let visibleThemes=0;
+      themeCards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visibleThemes++;});
+      const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
+      flowCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleFlows++;});
       const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
       const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
       libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
       const count=libraryPanel?.querySelector("[data-library-count]");
-      if(count)count.textContent=scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
+      if(count)count.textContent=activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
       const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
     const resourcePaths = (() => {
