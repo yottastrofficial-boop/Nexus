@@ -163,14 +163,13 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         }
       }
       for (const element of elements()) {
-        if (element.hidden) continue;
         for (const groupId of groupIdsByComponentId.get(element.dataset.id) ?? []) {
           membersByGroupId.get(groupId)?.push(element);
         }
       }
 
       for (const group of layouts) {
-        const members = membersByGroupId.get(group.id) ?? [];
+        const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
         const rects = members.map(rectOf);
         const x = Math.min(...rects.map(rect => rect.x));
@@ -246,7 +245,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     };
     const syncGroupBounds = (componentNodes = elements(), updateCorners = true) => {
       for (const g of (sheet._activeGroups ?? [])) {
-        const members = membersByGroupId.get(g.id) ?? [];
+        const members = (membersByGroupId.get(g.id) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
         const rs = members.map(rectOf), x = Math.min(...rs.map(r=>r.x)), y = Math.min(...rs.map(r=>r.y));
         const right = Math.max(...rs.map(r=>r.x+r.w)), bottom = Math.max(...rs.map(r=>r.y+r.h));
@@ -401,7 +400,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         // A superfície visível pode ficar coberta pelos componentes do grupo;
         // detectar o vazio pela caixa geométrica garante que o grupo continue arrastável.
         const hitGroup=[...(sheet._activeGroups??[])].reverse().find(group=>{
-          const members = membersByGroupId.get(group.id) ?? [];
+          const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
           if(!members.length)return false;
           const rs=members.map(rectOf),left=Math.min(...rs.map(r=>r.x)),top=Math.min(...rs.map(r=>r.y));
           const right=Math.max(...rs.map(r=>r.x+r.w)),bottom=Math.max(...rs.map(r=>r.y+r.h));
