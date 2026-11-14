@@ -46,7 +46,7 @@ assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do s
 assert.match(sheetListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);
 assert.match(propertyCatalog, /modifier/);
-assert.match(propertyPickerView, /data-property-category/);
+assert.match(propertyPickerView, /propertyCategory/, "O seletor hierárquico deve marcar as opções de categoria");
 assert.match(panelWindow, /export class NexusPanelWindow/);
 assert.match(themeModule, /export const applyThemeTokens/);
 assert.match(libraryView, /export function mountLibraryView/);
