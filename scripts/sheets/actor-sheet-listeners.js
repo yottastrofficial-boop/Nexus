@@ -182,11 +182,24 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
       let value = input.type === "checkbox" ? !!input.checked : input.value;
-      if (kind === "number") { value = Number(value); if (!Number.isFinite(value)) return; }
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([^{}]+?)\s*\}\}$/) : null;
-      if (expression) value = resolveNexusBinding(sheet.actor, expression[1]).value ?? "";
+      if (expression) {
+        const binding = resolveNexusBinding(sheet.actor, expression[1]);
+        if (binding.value === undefined || binding.value === null || binding.readOnly) {
+          globalThis.ui?.notifications?.warn?.("A referência informada não corresponde a uma propriedade disponível.");
+          return;
+        }
+        value = binding.value;
+      }
+      if (kind === "number") {
+        if (value === "" || typeof value === "boolean" || !Number.isFinite(Number(value))) {
+          globalThis.ui?.notifications?.warn?.("Informe um número válido ou uma propriedade numérica.");
+          return;
+        }
+        value = Number(value);
+      }
       if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
         const imagePath = String(value).trim().slice(0, 2048);
