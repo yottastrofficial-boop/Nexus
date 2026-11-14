@@ -7,7 +7,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
 
     const currentRoot = html?.[0];
     // Remove detached property-option portals left by a previous ApplicationV2 render.
-    document.querySelectorAll(`[data-nexus-property-owner="${this.id}"]`).forEach(list => {
+    document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
       if (!list._nexusOwnerInspector?.isConnected) list.remove();
     });
     const renderDataEditorPreservingState = async (preferredElement = null) => {
@@ -31,9 +31,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       } : null;
       const scrollState = [".nexus-alias-manager", ".nexus-appearance-drawer", ".nexus-canvas-scroll", ".nexus-library-grid", ".nexus-layer-list", ".nexus-component-inspector", ".window-content", ".application-content"]
         .map(selector => { const node = root?.querySelector?.(selector); return node ? { selector, top: node.scrollTop, left: node.scrollLeft } : null; }).filter(Boolean);
-      await this.render({ force: true });
+      await sheet.render({ force: true });
       const restore = () => {
-        const currentRoot = this.element?.querySelector?.(".nexus-sheet") ?? this.element ?? document;
+        const currentRoot = sheet.element?.querySelector?.(".nexus-sheet") ?? sheet.element ?? document;
         for (const state of scrollState) {
           const node = currentRoot.querySelector?.(state.selector);
           if (node) { node.scrollTop = state.top; node.scrollLeft = state.left; }
@@ -57,49 +57,49 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     };
     html.find("[data-action]").on("click", async event => {
       const button = event.currentTarget, action = button.dataset.action;
-      if (action === "mode") return this._setMode(button.dataset.mode);
+      if (action === "mode") return sheet._setMode(button.dataset.mode);
       if (action === "add-component") {
-        try { return await this._addComponent(button.dataset.type); }
+        try { return await sheet._addComponent(button.dataset.type); }
         catch (error) {
           console.error("NEXUS | Falha ao adicionar componente", error);
           ui.notifications?.error?.("Não foi possível adicionar o componente. Consulte o console para detalhes.");
           return;
         }
       }
-      if (action === "save-layout") return this._saveCanvas(html);
-      if (action === "new-layout") return this._newLayout();
-      if (action === "switch-layout") return this._switchLayout(button.dataset.layoutId);
-      if (action === "select-all") return this._selectAll(html);
-      if (action === "clear-selection") return this._setSelection(html, []);
-      if (action === "group-selection") return this._groupSelection(html);
-      if (action === "ungroup-selection") return this._ungroupSelection(html);
-      if (action === "duplicate-selection") return this._duplicateComponents([...this._selectedIds ?? []]);
-      if (action === "layer-front") return this._changeLayer("front");
-      if (action === "layer-forward") return this._changeLayer("forward");
-      if (action === "layer-backward") return this._changeLayer("backward");
-      if (action === "layer-back") return this._changeLayer("back");
-      if (action === "global-colors-default") return this._resetGlobalAppearance("colors");
-      if (action === "global-fonts-default") return this._resetGlobalAppearance("fonts");
-      if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
-      if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
-      if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
-      if (action === "save-library-component") return this._saveSelectedLibraryComponent();
+      if (action === "save-layout") return sheet._saveCanvas(html);
+      if (action === "new-layout") return sheet._newLayout();
+      if (action === "switch-layout") return sheet._switchLayout(button.dataset.layoutId);
+      if (action === "select-all") return sheet._selectAll(html);
+      if (action === "clear-selection") return sheet._setSelection(html, []);
+      if (action === "group-selection") return sheet._groupSelection(html);
+      if (action === "ungroup-selection") return sheet._ungroupSelection(html);
+      if (action === "duplicate-selection") return sheet._duplicateComponents([...sheet._selectedIds ?? []]);
+      if (action === "layer-front") return sheet._changeLayer("front");
+      if (action === "layer-forward") return sheet._changeLayer("forward");
+      if (action === "layer-backward") return sheet._changeLayer("backward");
+      if (action === "layer-back") return sheet._changeLayer("back");
+      if (action === "global-colors-default") return sheet._resetGlobalAppearance("colors");
+      if (action === "global-fonts-default") return sheet._resetGlobalAppearance("fonts");
+      if (action === "resource-adjust") return sheet._adjustResource(button.dataset.path, Number(button.dataset.delta));
+      if (action === "component-roll") return sheet._rollComponent(button.dataset.componentId);
+      if (action === "save-group-library") return sheet._saveSelectedGroupToLibrary();
+      if (action === "save-library-component") return sheet._saveSelectedLibraryComponent();
     });
     html.find("[data-skill-roll]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
-      return this._rollSkill(event.currentTarget.dataset.skillRoll);
+      return sheet._rollSkill(event.currentTarget.dataset.skillRoll);
     });
     html.find("[data-skill-proficient-level]").on("change", event => {
       const input = event.currentTarget;
-      return this._setSkillProficientLevel(input.dataset.skillProficientLevel, input.value);
+      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, input.value);
     });
     html.find("[data-proficiency-level]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
       const button = event.currentTarget, card = button.closest(".nexus-component");
-      if (card) this._setProficiencyLevel(card.dataset.id, Number(button.dataset.proficiencyLevel));
+      if (card) sheet._setProficiencyLevel(card.dataset.id, Number(button.dataset.proficiencyLevel));
     });
     const setResourceFromTrack = (track, event) => {
-      if (this._mode !== "play") return;
+      if (sheet._mode !== "play") return;
       const card = track.closest(".nexus-component");
       const slider = card?.querySelector("[data-resource-slider]");
       if (!slider) return;
@@ -111,7 +111,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       slider.dispatchEvent(new Event("input", { bubbles: true }));
     };
     html.find(".nexus-component[data-action-type='resource-slider'] .nexus-resource-bar, .nexus-component[data-action-type='resource-slider'] .nexus-sheet-resource-track, .nexus-component[data-action-type='resource-slider'] .nexus-asset-meter-track")
-      .on("pointerdown", event => { if (event.button !== 0 || this._mode !== "play") return; event.preventDefault(); const track = event.currentTarget; track.setPointerCapture?.(event.pointerId); setResourceFromTrack(track, event); })
+      .on("pointerdown", event => { if (event.button !== 0 || sheet._mode !== "play") return; event.preventDefault(); const track = event.currentTarget; track.setPointerCapture?.(event.pointerId); setResourceFromTrack(track, event); })
       .on("pointermove", event => { if (event.buttons === 1) setResourceFromTrack(event.currentTarget, event); })
       .on("pointerup", event => { const track = event.currentTarget; setResourceFromTrack(track, event); track.closest(".nexus-component")?.querySelector("[data-resource-slider]")?.dispatchEvent(new Event("change", { bubbles: true })); });
     html.find("[data-resource-slider]").on("input", event => {
@@ -126,7 +126,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const resourceValues = card.querySelector(".nexus-resource-values"), ringValues = card.querySelector(".nexus-resource-ring-values"), barValues = card.querySelector(".nexus-resource-bar-values");
       for (const values of [resourceValues, ringValues]) { const current = values?.querySelector("strong"); if (current) current.textContent = String(value); }
       const barCurrent = barValues?.querySelector("strong"); if (barCurrent) barCurrent.textContent = String(value);
-      const component = (this._currentLayout?.components ?? []).find(item => item.id === card.dataset.id);
+      const component = (sheet._currentLayout?.components ?? []).find(item => item.id === card.dataset.id);
       if (component?.type === "sheet-resource") {
         const preview = card.querySelector(".nexus-sheet-resource-preview");
         updateSheetResourcePreview(preview, { label: component.sheetContent1 ?? "PV", icon: component.sheetContent2 ?? "❤️", current: value, max, color: component.sheetColor ?? "#d94b4b", trackColor: component.sheetTrackColor ?? "#080d14", orientation: component.sheetOrientation ?? "horizontal" });
@@ -136,19 +136,19 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     html.find("[data-resource-slider]").on("change", async event => {
       const input = event.currentTarget;
       if (!input.dataset.systemPath) return;
-      await this._updateSystemValue(input);
+      await sheet._updateSystemValue(input);
     });
-    html.find("[data-system-path]").on("change", event => this._updateSystemValue(event.currentTarget));
+    html.find("[data-system-path]").on("change", event => sheet._updateSystemValue(event.currentTarget));
     html.find("[data-component-local-value]").on("change", async event => {
       const input = event.currentTarget;
       const componentId = input.dataset.componentId;
       if (!componentId) return;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId();
       const component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
-      this._captureHistory();
+      sheet._captureHistory();
       component.localValue = String(input.value ?? "").slice(0, 5000);
-      await this._writeLayouts(layouts, active);
+      await sheet._writeLayouts(layouts, active);
     });
     html.find("[data-property-value]").on("change", async event => {
       const input = event.currentTarget;
@@ -157,52 +157,52 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const kind = input.dataset.propertyKind;
       let value = input.type === "checkbox" ? !!input.checked : input.value;
       if (kind === "number") { value = Number(value); if (!Number.isFinite(value)) return; }
-      const resolvedPath = resolveNexusBinding(this.actor, path);
+      const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([^{}]+?)\s*\}\}$/) : null;
-      if (expression) value = resolveNexusBinding(this.actor, expression[1]).value ?? "";
-      if (path === "name") await this.actor.update({ name: String(value).slice(0, 100) });
+      if (expression) value = resolveNexusBinding(sheet.actor, expression[1]).value ?? "";
+      if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
         const imagePath = String(value).trim().slice(0, 2048);
         if (targetPath === "prototypeToken.texture.src" && !imagePath) {
-          await this.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE });
+          await sheet.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE });
         } else if (!isMediaSource(imagePath)) {
           globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida ou uma propriedade que contenha uma imagem.");
-          input.value = path === "img" || path === "identity.portrait.img" ? (this.actor.img ?? "") : getFoundryDefaultTokenImage(this.actor);
+          input.value = path === "img" || path === "identity.portrait.img" ? (sheet.actor.img ?? "") : getFoundryDefaultTokenImage(sheet.actor);
           return;
         } else {
-          await this.actor.update(targetPath === "img" ? { img: imagePath } : { [targetPath]: imagePath });
+          await sheet.actor.update(targetPath === "img" ? { img: imagePath } : { [targetPath]: imagePath });
         }
       }
       else if (targetPath === "prototypeToken.ring.colors.ring") {
         const color = String(value).trim();
         if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) return;
-        await this.actor.update({ "prototypeToken.ring.colors.ring": color });
+        await sheet.actor.update({ "prototypeToken.ring.colors.ring": color });
       }
-      else await this.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
-      this._refreshBoundComponents();
+      else await sheet.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
+      sheet._refreshBoundComponents();
     });
-    html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; this._updateSystemValue(input); });
+    html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; sheet._updateSystemValue(input); });
     html.find("[data-config-component-code]").on("change", async event => {
       const input = event.currentTarget, id = input.dataset.componentId;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId();
       const component = layouts[active]?.components?.find(item => item.id === id);
       if (!component) return;
-      this._captureHistory(); component.sheetCode = String(input.value ?? "").slice(0, 24);
-      await this._writeLayouts(layouts, active);
+      sheet._captureHistory(); component.sheetCode = String(input.value ?? "").slice(0, 24);
+      await sheet._writeLayouts(layouts, active);
     });
     html.find("[data-config-component-text]").on("change", async event => {
       const input = event.currentTarget, id = input.dataset.componentId;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId();
       const component = layouts[active]?.components?.find(item => item.id === id);
       if (!component) return;
-      this._captureHistory(); component.text = String(input.value ?? "").slice(0, 500);
-      await this._writeLayouts(layouts, active);
+      sheet._captureHistory(); component.text = String(input.value ?? "").slice(0, 500);
+      await sheet._writeLayouts(layouts, active);
     });
     html.find("[data-config-current-value], [data-config-max-value]").on("change", async event => {
-      const input = event.currentTarget, id = [...(this._selectedIds ?? [])][0];
+      const input = event.currentTarget, id = [...(sheet._selectedIds ?? [])][0];
       if (!id) return;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId();
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId();
       const component = layouts[active]?.components?.find(item => item.id === id);
       if (!component) return;
       const paths = getResourceValuePaths(component);
@@ -210,43 +210,43 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!path) return;
       const value = Number(input.value);
       if (!Number.isFinite(value)) return;
-      this._captureHistory();
-      await this.actor.update({ [`system.${path}`]: value });
-      this._refreshBoundComponents();
+      sheet._captureHistory();
+      await sheet.actor.update({ [`system.${path}`]: value });
+      sheet._refreshBoundComponents();
     });
     const persistAliases = async (aliases, focusTarget = null) => {
       const normalized = aliases.map(normalizeAliasDefinition).filter(Boolean);
-      await this.actor.setFlag("nexus", "aliases", normalized);
-      invalidateAliasDefinitionCache(this.actor);
+      await sheet.actor.setFlag("nexus", "aliases", normalized);
+      invalidateAliasDefinitionCache(sheet.actor);
       await renderDataEditorPreservingState(focusTarget);
     };
     const slugifyAlias = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "novo";
     const createAlias = async (label, type, valueType, source, targetPath, focusTarget = null) => {
-      const aliases = getAliasDefinitions(this.actor).map(normalizeAliasDefinition).filter(Boolean);
+      const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const category = type === "attribute" ? "attributes" : type === "resource" ? "resources" : type === "combat" ? "combat" : type === "identity" ? "identity" : "custom";
       const base = slugifyAlias(label);
       let suffix = base, index = 2, key = `${category}.${suffix}`;
-      const reservedKeys = getNativePropertyDefinitions(this.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
+      const reservedKeys = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
       while (aliases.some(item => item.key === key) || reservedKeys.includes(key)) key = `${category}.${base}_${index++}`;
       const id = foundry.utils.randomID();
       const resolvedSource = source === "actor" ? "actor" : "custom";
       const safeTarget = resolvedSource === "actor" ? safeAliasKey(targetPath) : "";
-      if (resolvedSource === "actor" && (!safeTarget || resolveNexusBinding(this.actor, safeTarget).value === undefined)) {
+      if (resolvedSource === "actor" && (!safeTarget || resolveNexusBinding(sheet.actor, safeTarget).value === undefined)) {
         ui.notifications?.warn?.("Informe um caminho que já exista em Actor.system.");
         return false;
       }
       const finalType = type === "custom" || type === "identity" ? (type === "identity" ? "text" : valueType || "text") : type === "combat" ? "number" : type;
       aliases.push({ id, key, label: String(label || "Nova propriedade").slice(0,48), category, type: finalType, source: resolvedSource, targetPath: safeTarget });
       if (resolvedSource === "custom") {
-        const customData = clone(getCustomAliasData(this.actor));
+        const customData = clone(getCustomAliasData(sheet.actor));
         if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
         else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, max: 0 });
         else foundry.utils.setProperty(customData, key, finalType === "number" ? 0 : finalType === "boolean" ? false : "");
-        await this.actor.setFlag("nexus", "customData", customData);
+        await sheet.actor.setFlag("nexus", "customData", customData);
       }
-      await this.actor.setFlag("nexus", "aliases", aliases);
-      invalidateAliasDefinitionCache(this.actor);
-      this._selectedAliasId = id;
+      await sheet.actor.setFlag("nexus", "aliases", aliases);
+      invalidateAliasDefinitionCache(sheet.actor);
+      sheet._selectedAliasId = id;
       await renderDataEditorPreservingState(focusTarget);
       return true;
     };
@@ -262,24 +262,24 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const created = await createAlias(label, type, valueType, source, targetPath, event.currentTarget);
       if (created) { const name = panel?.querySelector("[data-alias-new-name]"); if (name) name.value = ""; }
     });
-    html.find("[data-alias-select]").on("change", event => { this._selectedAliasId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
-    html.find("[data-alias-mode]").on("click", event => { this._aliasEditorMode = event.currentTarget.dataset.aliasMode === "native" ? "native" : "custom"; renderDataEditorPreservingState(event.currentTarget); });
-    html.find("[data-native-property-select]").on("change", event => { this._selectedNativePropertyId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
+    html.find("[data-alias-select]").on("change", event => { sheet._selectedAliasId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
+    html.find("[data-alias-mode]").on("click", event => { sheet._aliasEditorMode = event.currentTarget.dataset.aliasMode === "native" ? "native" : "custom"; renderDataEditorPreservingState(event.currentTarget); });
+    html.find("[data-native-property-select]").on("change", event => { sheet._selectedNativePropertyId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
     html.find("[data-native-property-field]").on("change", async event => {
       const input = event.currentTarget, id = input.closest("[data-native-property-row]")?.dataset.nativePropertyRow;
-      const definitions = getNativePropertyDefinitions(this.actor), property = definitions.find(item => item.id === id); if (!property) return;
-      const saved = clone(this.actor.getFlag("nexus", "nativeProperties") ?? []);
+      const definitions = getNativePropertyDefinitions(sheet.actor), property = definitions.find(item => item.id === id); if (!property) return;
+      const saved = clone(sheet.actor.getFlag("nexus", "nativeProperties") ?? []);
       let override = saved.find(item => item.id === id);
       if (!override) { override = { id }; saved.push(override); }
       const field = input.dataset.nativePropertyField;
       if (field === "label") override.label = String(input.value).trim().slice(0,48) || property.defaultLabel;
       if (["checkbonus", "roll"].includes(field)) {
-        const customData = clone(getCustomAliasData(this.actor));
+        const customData = clone(getCustomAliasData(sheet.actor));
         foundry.utils.setProperty(customData, `${property.key}.${field}`, String(input.value).slice(0,240));
-        await this.actor.setFlag("nexus", "customData", customData);
+        await sheet.actor.setFlag("nexus", "customData", customData);
       }
       if (["currentValue", "maxValue"].includes(field)) {
-        if (property.targetPath === "name") await this.actor.update({ name: String(input.value).slice(0,100) });
+        if (property.targetPath === "name") await sheet.actor.update({ name: String(input.value).slice(0,100) });
         else {
           const suffix = property.type === "resource" ? (field === "currentValue" ? "value" : "max") : "value";
           const target = property.type === "resource" || property.type === "attribute" ? `${property.targetPath}.${suffix}` : property.targetPath;
@@ -289,46 +289,46 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
             nextValue = Number(input.value);
             if (!Number.isFinite(nextValue)) { ui.notifications?.warn?.("Informe um valor numérico válido."); return; }
           } else nextValue = String(input.value).slice(0, 500);
-          await this.actor.update({ [`system.${target}`]: nextValue });
+          await sheet.actor.update({ [`system.${target}`]: nextValue });
         }
       }
       if (field === "keySuffix") {
         const suffix = slugifyAlias(input.value);
         const nextKey = `${property.category}.${suffix}`;
-        const collision = [...getAliasDefinitions(this.actor), ...definitions.filter(item => item.id !== id)].some(item => [item.key, ...(item.legacyKeys ?? [])].includes(nextKey));
+        const collision = [...getAliasDefinitions(sheet.actor), ...definitions.filter(item => item.id !== id)].some(item => [item.key, ...(item.legacyKeys ?? [])].includes(nextKey));
         if (!suffix || collision) { ui.notifications?.warn?.("Esse identificador já está em uso ou é inválido."); input.value = property.key.split(".").at(-1); return; }
         const previousKey = property.key;
         override.key = nextKey;
         override.legacyKeys = [...new Set([...(property.legacyKeys ?? []), previousKey])];
-        const customData = clone(getCustomAliasData(this.actor));
+        const customData = clone(getCustomAliasData(sheet.actor));
         const previousMeta = getPath(customData, previousKey);
         if (previousMeta && typeof previousMeta === "object") {
           foundry.utils.setProperty(customData, nextKey, previousMeta);
           const parts = previousKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join(".")); if (parent) delete parent[leaf];
-          await this.actor.setFlag("nexus", "customData", customData);
+          await sheet.actor.setFlag("nexus", "customData", customData);
         }
-        const layouts = await this._readLayouts();
+        const layouts = await sheet._readLayouts();
         replaceLayoutBindingPaths(layouts, previousKey, nextKey);
         replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), nextKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
-        await this._writeLayouts(layouts, this._activeLayoutId());
+        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
       }
-      await this.actor.setFlag("nexus", "nativeProperties", saved);
-      invalidateNativePropertyCache(this.actor);
-      this._selectedNativePropertyId = id; renderDataEditorPreservingState(event.currentTarget);
+      await sheet.actor.setFlag("nexus", "nativeProperties", saved);
+      invalidateNativePropertyCache(sheet.actor);
+      sheet._selectedNativePropertyId = id; renderDataEditorPreservingState(event.currentTarget);
     });
     html.find("[data-native-property-reset]").on("click", async event => {
       const id = event.currentTarget.closest("[data-native-property-row]")?.dataset.nativePropertyRow;
-      const property = getNativePropertyDefinitions(this.actor).find(item => item.id === id); if (!property) return;
+      const property = getNativePropertyDefinitions(sheet.actor).find(item => item.id === id); if (!property) return;
       const confirmed = await foundry.applications.api.DialogV2.confirm({ window:{title:"Restaurar dado nativo"}, content:`<p>Restaurar <strong>${Handlebars.escapeExpression(property.defaultLabel)}</strong> ao identificador original?</p>`, yes:{label:"Restaurar"}, no:{label:"Cancelar"}, rejectClose:false });
       if (!confirmed) return;
-      const saved = clone(this.actor.getFlag("nexus", "nativeProperties") ?? []);
+      const saved = clone(sheet.actor.getFlag("nexus", "nativeProperties") ?? []);
       const override = saved.find(item => item.id === id);
       const oldKey = property.key;
       if (override) {
         override.legacyKeys = [...new Set([...(override.legacyKeys ?? []), oldKey])];
         override.key = property.defaultKey; override.label = property.defaultLabel;
       }
-      const customData = clone(getCustomAliasData(this.actor));
+      const customData = clone(getCustomAliasData(sheet.actor));
       const previousMeta = getPath(customData, oldKey);
       if (previousMeta && typeof previousMeta === "object" && oldKey !== property.defaultKey) {
         foundry.utils.setProperty(customData, property.defaultKey, previousMeta);
@@ -336,15 +336,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const defaultMeta = getPath(customData, property.defaultKey);
       if (defaultMeta && typeof defaultMeta === "object") { delete defaultMeta.checkbonus; delete defaultMeta.roll; }
-      await this.actor.setFlag("nexus", "customData", customData);
+      await sheet.actor.setFlag("nexus", "customData", customData);
       if (oldKey !== property.defaultKey) {
-        const layouts = await this._readLayouts();
+        const layouts = await sheet._readLayouts();
         replaceLayoutBindingPaths(layouts, oldKey, property.defaultKey);
         replaceLayoutBindingPaths(layouts, oldKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), property.defaultKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
-        await this._writeLayouts(layouts, this._activeLayoutId());
+        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
       }
-      await this.actor.setFlag("nexus", "nativeProperties", saved);
-      invalidateNativePropertyCache(this.actor);
+      await sheet.actor.setFlag("nexus", "nativeProperties", saved);
+      invalidateNativePropertyCache(sheet.actor);
       renderDataEditorPreservingState(event.currentTarget);
     });
     html.find("[data-alias-new-type], [data-alias-source]").on("change", event => {
@@ -356,20 +356,20 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     html.find("[data-alias-field]").on("change", async event => {
       const input = event.currentTarget, row = input.closest("[data-alias-row]"), id = row?.dataset.aliasRow;
-      const aliases = getAliasDefinitions(this.actor).map(normalizeAliasDefinition).filter(Boolean);
+      const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const alias = aliases.find(item => item.id === id); if (!alias) return;
       const field = input.dataset.aliasField;
       if (field === "name") {
         alias.label = String(input.value).slice(0,48);
         if (["attribute", "resource"].includes(alias.type) && alias.source !== "actor") {
-          const customData = clone(getCustomAliasData(this.actor));
+          const customData = clone(getCustomAliasData(sheet.actor));
           foundry.utils.setProperty(customData, `${alias.key}.name`, alias.label);
-          await this.actor.setFlag("nexus", "customData", customData);
+          await sheet.actor.setFlag("nexus", "customData", customData);
         }
       }
       else if (field === "targetPath") {
         const nextPath = safeAliasKey(input.value);
-        if (input.value.trim() && (!nextPath || resolveNexusBinding(this.actor, nextPath).value === undefined)) {
+        if (input.value.trim() && (!nextPath || resolveNexusBinding(sheet.actor, nextPath).value === undefined)) {
           ui.notifications?.warn?.("O caminho precisa existir em Actor.system."); input.value = alias.targetPath; return;
         }
         alias.targetPath = nextPath;
@@ -386,26 +386,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if (field === "keySuffix") {
         const suffix = slugifyAlias(input.value);
         const next = `${alias.category}.${suffix}`;
-        const reserved = getNativePropertyDefinitions(this.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
+        const reserved = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
         if (aliases.some(item => item !== alias && [item.key, ...(item.legacyKeys ?? [])].includes(next)) || reserved.includes(next)) { input.value = alias.key.split(".").at(-1); return; }
         const previousKey = alias.key;
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
-        const customData = clone(getCustomAliasData(this.actor));
+        const customData = clone(getCustomAliasData(sheet.actor));
         if (!alias.targetPath) {
           const previous = getPath(customData, previousKey);
           if (previous !== undefined) {
             foundry.utils.setProperty(customData, next, previous);
             const parts = previousKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join("."));
             if (parent) delete parent[leaf];
-            await this.actor.setFlag("nexus", "customData", customData);
+            await sheet.actor.setFlag("nexus", "customData", customData);
           }
         }
         // Migra referências de componentes para que a troca do identificador
         // não deixe cartões apontando para o caminho antigo.
-        const layouts = await this._readLayouts();
+        const layouts = await sheet._readLayouts();
         replaceLayoutBindingPaths(layouts, previousKey, next);
         replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), next.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
-        await this._writeLayouts(layouts, this._activeLayoutId());
+        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
         alias.key = next;
       }
       else if (["exibicao", "value", "max", "checkbonus", "roll"].includes(field)) {
@@ -415,39 +415,39 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const writeToTarget = alias.source === "actor" && alias.targetPath && (field === "value" || (alias.type === "resource" && field === "max"));
         if (writeToTarget) {
           const target = alias.type === "resource" ? `${alias.targetPath}.${field}` : alias.targetPath;
-          const resolvedTarget = resolveNexusBinding(this.actor, target);
+          const resolvedTarget = resolveNexusBinding(sheet.actor, target);
           const updatePath = resolvedTarget.virtual ? resolvedTarget.sourcePath : `system.${target}`;
-          await this.actor.update({ [updatePath]: value });
+          await sheet.actor.update({ [updatePath]: value });
         }
-        else { const customData = clone(getCustomAliasData(this.actor)); if (["number", "text", "url", "image", "boolean"].includes(alias.type) && field === "value") foundry.utils.setProperty(customData, alias.key, value); else foundry.utils.setProperty(customData, path, value); await this.actor.setFlag("nexus", "customData", customData); }
+        else { const customData = clone(getCustomAliasData(sheet.actor)); if (["number", "text", "url", "image", "boolean"].includes(alias.type) && field === "value") foundry.utils.setProperty(customData, alias.key, value); else foundry.utils.setProperty(customData, path, value); await sheet.actor.setFlag("nexus", "customData", customData); }
       }
-      await this.actor.setFlag("nexus", "aliases", aliases);
-      invalidateAliasDefinitionCache(this.actor);
+      await sheet.actor.setFlag("nexus", "aliases", aliases);
+      invalidateAliasDefinitionCache(sheet.actor);
       renderDataEditorPreservingState(event.currentTarget);
     });
     html.find("[data-alias-copy]").on("click", async event => {
       const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
-      const aliases = getAliasDefinitions(this.actor).map(normalizeAliasDefinition).filter(Boolean);
+      const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const source = aliases.find(item => item.id === id); if (!source) return;
       const base = `${source.key.split(".").at(-1)}_copy`;
       let suffix = base, index = 2, key = `${source.category}.${suffix}`;
-      const reserved = getNativePropertyDefinitions(this.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
+      const reserved = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
       while (aliases.some(item => item.key === key) || reserved.includes(key)) key = `${source.category}.${base}_${index++}`;
       const copy = { ...clone(source), id: foundry.utils.randomID(), key, label: `${source.label} (cópia)`.slice(0,48), source: "custom", targetPath: "" };
       aliases.push(copy);
-      const customData = clone(getCustomAliasData(this.actor));
+      const customData = clone(getCustomAliasData(sheet.actor));
       const original = getPath(customData, source.key);
       if (original !== undefined) foundry.utils.setProperty(customData, key, clone(original));
       else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
       else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, max: 0 });
       else foundry.utils.setProperty(customData, key, source.type === "number" ? 0 : source.type === "boolean" ? false : "");
-      await this.actor.setFlag("nexus", "customData", customData);
-      await this.actor.setFlag("nexus", "aliases", aliases);
-      invalidateAliasDefinitionCache(this.actor); this._selectedAliasId = copy.id; renderDataEditorPreservingState(event.currentTarget);
+      await sheet.actor.setFlag("nexus", "customData", customData);
+      await sheet.actor.setFlag("nexus", "aliases", aliases);
+      invalidateAliasDefinitionCache(sheet.actor); sheet._selectedAliasId = copy.id; renderDataEditorPreservingState(event.currentTarget);
     });
     html.find("[data-alias-reset]").on("click", async event => {
       const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
-      const aliases = getAliasDefinitions(this.actor).map(normalizeAliasDefinition).filter(Boolean);
+      const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const alias = aliases.find(item => item.id === id); if (!alias) return;
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         window: { title: "Restaurar propriedade" },
@@ -455,7 +455,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         yes: { label: "Restaurar" }, no: { label: "Cancelar" }, rejectClose: false
       });
       if (!confirmed) return;
-      const customData = clone(getCustomAliasData(this.actor));
+      const customData = clone(getCustomAliasData(sheet.actor));
       const defaultSuffix = slugifyAlias(alias.label);
       let defaultKey = `${alias.category}.${defaultSuffix}`, collision = 2;
       while (aliases.some(item => item !== alias && item.key === defaultKey)) defaultKey = `${alias.category}.${defaultSuffix}_${collision++}`;
@@ -470,10 +470,10 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
             if (parent) delete parent[leaf];
           }
         }
-        const layouts = await this._readLayouts();
+        const layouts = await sheet._readLayouts();
         replaceLayoutBindingPaths(layouts, previousKey, defaultKey);
         replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), defaultKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
-        await this._writeLayouts(layouts, this._activeLayoutId());
+        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
         alias.key = defaultKey;
       }
       if (!alias.targetPath) {
@@ -482,46 +482,46 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         else if (alias.type === "resource") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, max: 0 };
         else defaults = alias.type === "number" ? 0 : alias.type === "boolean" ? false : "";
         foundry.utils.setProperty(customData, alias.key, defaults);
-        await this.actor.setFlag("nexus", "customData", customData);
+        await sheet.actor.setFlag("nexus", "customData", customData);
       }
-      await this.actor.setFlag("nexus", "aliases", aliases);
-      invalidateAliasDefinitionCache(this.actor); renderDataEditorPreservingState(event.currentTarget);
+      await sheet.actor.setFlag("nexus", "aliases", aliases);
+      invalidateAliasDefinitionCache(sheet.actor); renderDataEditorPreservingState(event.currentTarget);
     });
     html.find("[data-alias-delete]").on("click", async event => {
       const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
-      await persistAliases(getAliasDefinitions(this.actor).filter(item => item.id !== id), event.currentTarget);
+      await persistAliases(getAliasDefinitions(sheet.actor).filter(item => item.id !== id), event.currentTarget);
     });
     html.find("[data-table-cell]").on("change", async event => {
       const input = event.currentTarget, componentId = input.closest(".nexus-component")?.dataset.id, index = Number(input.dataset.tableCell);
       if (!componentId || !Number.isInteger(index) || index < 0) return;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), layout = layouts[active];
       const component = layout?.components?.find(item => item.id === componentId); if (!component) return;
-      this._captureHistory(); component.cells ??= []; component.cells[index] = String(input.value).slice(0, 120);
-      await this._writeLayouts(layouts, active);
+      sheet._captureHistory(); component.cells ??= []; component.cells[index] = String(input.value).slice(0, 120);
+      await sheet._writeLayouts(layouts, active);
     });
-    html.find("[data-layout-select]").on("change", event => this._switchLayout(event.currentTarget.value));
-    html.find("[data-layout-name]").on("change", event => this._updateLayoutName(event.currentTarget.value));
+    html.find("[data-layout-select]").on("change", event => sheet._switchLayout(event.currentTarget.value));
+    html.find("[data-layout-name]").on("change", event => sheet._updateLayoutName(event.currentTarget.value));
     html.find("[data-appearance-panel]").on("click", event => {
       const key = event.currentTarget.dataset.appearancePanel;
       html.find("[data-appearance-panel]").removeClass("active"); html.find("[data-tool-panel]").prop("hidden", true).removeClass("active");
       event.currentTarget.classList.add("active"); html.find(`[data-tool-panel="${key}"]`).prop("hidden", false).addClass("active");
       if (key === "library") {
         const panel = html[0].querySelector(".nexus-library-panel");
-        if (panel) { this._mountLibrary(panel); this._libraryApplyFilter?.(); }
+        if (panel) { sheet._mountLibrary(panel); sheet._libraryApplyFilter?.(); }
       }
     });
-    html.find("[data-layout-setting]").on("change", event => this._updateLayoutSetting(event.currentTarget));
-    html.find("[data-global-typography]").on("change", event => this._updateGlobalTypography(event.currentTarget));
+    html.find("[data-layout-setting]").on("change", event => sheet._updateLayoutSetting(event.currentTarget));
+    html.find("[data-global-typography]").on("change", event => sheet._updateGlobalTypography(event.currentTarget));
     html.find("[data-inspector-tab]").on("click", event => {
       const tab = event.currentTarget.dataset.inspectorTab;
       const inspector = event.currentTarget.closest(".nexus-component-inspector");
       if (!inspector || !["card", "appearance", "advanced"].includes(tab)) return;
-      this._componentInspectorTab = tab;
+      sheet._componentInspectorTab = tab;
       inspector.querySelectorAll("[data-inspector-tab]").forEach(button => button.classList.toggle("active", button.dataset.inspectorTab === tab));
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel => { const active = panel.dataset.inspectorTabPanel === tab; panel.hidden = !active; panel.classList.toggle("active", active); });
     });
-    html.find("[data-layer-visibility]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerVisibility.split(":"); this._toggleLayerState(kind,id,"hidden"); });
-    html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); this._toggleLayerState(kind,id,"locked"); });
+    html.find("[data-layer-visibility]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerVisibility.split(":"); sheet._toggleLayerState(kind,id,"hidden"); });
+    html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); sheet._toggleLayerState(kind,id,"locked"); });
     const libraryPanel = html[0].querySelector(".nexus-library-panel");
     const renderSavedGroups = () => {
       const container=libraryPanel?.querySelector("[data-library-saved-groups]");if(!container)return;
@@ -573,16 +573,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const label=document.createElement("strong");label.textContent=item.label||definition.label||"Componente";button.append(stage,label);container.append(button);
       }
     };
-    this._libraryRenderSavedGroups=renderSavedGroups;
-    this._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
-    this._libraryRenderPersonalItems();
+    sheet._libraryRenderSavedGroups=renderSavedGroups;
+    sheet._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
+    sheet._libraryRenderPersonalItems();
     const filterLibrary = () => {
       const query=libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
       const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
-      const scope=this._libraryAssetScope??"core";let visible=0;
+      const scope=sheet._libraryAssetScope??"core";let visible=0;
       libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
         const text=card.dataset.libraryAsset??"",matchText=!query||text.includes(query),matchTag=tag==="all"||text.includes(tag);
-        const matchFolder=card.dataset.libraryCategory===(this._libraryFolder??"core");
+        const matchFolder=card.dataset.libraryCategory===(sheet._libraryFolder??"core");
         card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
@@ -613,17 +613,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           }
         }
       };
-      walk(this.actor.system ?? {});
+      walk(sheet.actor.system ?? {});
       // Recursos NEXUS são caminhos importantes mesmo quando a ficha ainda não
       // possui valores numéricos inicializados no ator.
       for (const resource of ["pv", "pm", "pe"]) {
-        if (getPath(this.actor.system ?? {}, `resources.${resource}`) === undefined) continue;
-        for (const suffix of ["value", "max"]) if (getPath(this.actor.system ?? {}, `resources.${resource}.${suffix}`) !== undefined) paths.push(`resources.${resource}.${suffix}`);
+        if (getPath(sheet.actor.system ?? {}, `resources.${resource}`) === undefined) continue;
+        for (const suffix of ["value", "max"]) if (getPath(sheet.actor.system ?? {}, `resources.${resource}.${suffix}`) !== undefined) paths.push(`resources.${resource}.${suffix}`);
       }
       for (const path of ["attributes.body", "attributes.mind", "attributes.soul", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb", "identity.level"]) {
         paths.push(path);
       }
-      for (const alias of [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]) {
+      for (const alias of [...getNativePropertyDefinitions(sheet.actor), ...getAliasDefinitions(sheet.actor)]) {
         const key = safeAliasKey(alias.key); if (!key) continue;
         if (alias.type === "resource") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.max`, `${key}.percentage`);
         else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
@@ -639,8 +639,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const settings = {
         label: detail.querySelector("[data-resource-content1]")?.value ?? "PV",
         icon: detail.querySelector("[data-resource-content2]")?.value ?? "❤️",
-        current: resolveNexusBinding(this.actor, detail.querySelector("[data-resource-current]")?.value || "resources.pv.value").value ?? "—",
-        max: resolveNexusBinding(this.actor, detail.querySelector("[data-resource-max]")?.value || "resources.pv.max").value ?? "—",
+        current: resolveNexusBinding(sheet.actor, detail.querySelector("[data-resource-current]")?.value || "resources.pv.value").value ?? "—",
+        max: resolveNexusBinding(sheet.actor, detail.querySelector("[data-resource-max]")?.value || "resources.pv.max").value ?? "—",
         color: detail.querySelector("[data-resource-color]")?.value || ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(detail.querySelector("[data-resource-content1]")?.value || "PV").toUpperCase()] || "#d94b4b",
         trackColor: detail.querySelector("[data-resource-track-color]")?.value || "#080d14",
         orientation: detail.querySelector("[data-resource-orientation]")?.value || "horizontal"
@@ -651,8 +651,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     };
     const selectLibraryAsset = card => {
       if (!card) return;
-      this._librarySelectedType = card.dataset.assetType || null;
-      this._librarySelectedAssetKey = card.dataset.assetKey || null;
+      sheet._librarySelectedType = card.dataset.assetType || null;
+      sheet._librarySelectedAssetKey = card.dataset.assetKey || null;
       libraryPanel.querySelectorAll("[data-library-asset]").forEach(item => item.classList.toggle("is-selected", item === card));
       const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => (item.key ?? `${item.category}-${NEXUS_LIBRARY_CATALOG.assets.indexOf(item)}`) === card.dataset.assetKey) ?? NEXUS_LIBRARY_CATALOG.assets.find(item => item.type === card.dataset.assetType);
       const detail = libraryPanel.querySelector("[data-library-details]");
@@ -759,12 +759,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
-        this._applyThemePreset(themeCard.dataset.libraryTheme);
+        sheet._applyThemePreset(themeCard.dataset.libraryTheme);
         return;
       }
 
       const saveComponentButton=target?.closest("[data-library-save-component]");
-      if(saveComponentButton&&libraryPanel.contains(saveComponentButton)){event.preventDefault();await this._saveSelectedLibraryComponent();return;}
+      if(saveComponentButton&&libraryPanel.contains(saveComponentButton)){event.preventDefault();await sheet._saveSelectedLibraryComponent();return;}
       const savedComponentCard=target?.closest("[data-library-saved-component]");
       if(savedComponentCard&&libraryPanel.contains(savedComponentCard)){
         event.preventDefault();
@@ -782,7 +782,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const savedFlowCard=target?.closest("[data-library-flow-id]");
       if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
         event.preventDefault();
-        const entry=getInteractionLibrary(this.actor).find(item=>item.id===savedFlowCard.dataset.libraryFlowId);
+        const entry=getInteractionLibrary(sheet.actor).find(item=>item.id===savedFlowCard.dataset.libraryFlowId);
         const detail=libraryPanel.querySelector("[data-library-details]");if(!entry||!detail)return;
         libraryPanel.querySelectorAll("[data-library-flow-id]").forEach(item=>item.classList.toggle("is-selected",item===savedFlowCard));
         detail.dataset.selectedType="saved-flow";detail.dataset.selectedFlowId=entry.id;detail.replaceChildren();
@@ -829,30 +829,30 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const addSavedComponentButton=target?.closest("[data-library-add-saved-component]");
       if(addSavedComponentButton&&libraryPanel.contains(addSavedComponentButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
-        if(id)await this._addSavedLibraryComponent(id);return;
+        if(id)await sheet._addSavedLibraryComponent(id);return;
       }
       const deleteSavedComponentButton=target?.closest("[data-library-delete-saved-component]");
       if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
-        if(id)await this._deleteSavedLibraryComponent(id);return;
+        if(id)await sheet._deleteSavedLibraryComponent(id);return;
       }
       const addFlowButton=target?.closest("[data-library-add-flow]");
       if(addFlowButton&&libraryPanel.contains(addFlowButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedFlowId;
-        const selectedId=[...(this._selectedIds??[])][0];
-        if(!id||!selectedId||this._selectedIds.size!==1){ui.notifications?.warn?.("Selecione um único componente no Canvas antes de inserir um fluxo.");return;}
-        const entry=getInteractionLibrary(this.actor).find(item=>item.id===id);if(!entry)return;
-        const layouts=await this._readLayouts(),active=this._activeLayoutId(),component=layouts[active]?.components?.find(item=>item.id===selectedId);
+        const selectedId=[...(sheet._selectedIds??[])][0];
+        if(!id||!selectedId||sheet._selectedIds.size!==1){ui.notifications?.warn?.("Selecione um único componente no Canvas antes de inserir um fluxo.");return;}
+        const entry=getInteractionLibrary(sheet.actor).find(item=>item.id===id);if(!entry)return;
+        const layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),component=layouts[active]?.components?.find(item=>item.id===selectedId);
         if(!component)return;
         if(!applyInteractionEditorCommand(component,"add-library-flow",{template:entry.flow}))return;
-        await this._writeLayouts(layouts,active);await this.render({force:true});return;
+        await sheet._writeLayouts(layouts,active);await sheet.render({force:true});return;
       }
 
       const addGroupButton = target?.closest("[data-library-add-group]");
       if (addGroupButton && libraryPanel.contains(addGroupButton)) {
         event.preventDefault();
         const groupId = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
-        if (groupId) await this._addSavedGroupToCanvas(groupId);
+        if (groupId) await sheet._addSavedGroupToCanvas(groupId);
         return;
       }
 
@@ -864,7 +864,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (!COMPONENTS[type]) {
           throw new Error(`Tipo de componente não registrado: ${String(type)}`);
         }
-        await this._addComponent(type, options);
+        await sheet._addComponent(type, options);
       };
       try {
         const detail = libraryPanel.querySelector("[data-library-details]");
@@ -930,24 +930,24 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
     });
 
-    this._libraryApplyFilter = filterLibrary;
-    this._libraryRestoreSelection = () => {
-      if (!libraryPanel || !this._librarySelectedType) return;
-      const previousAsset = this._librarySelectedAssetKey
-        ? libraryPanel.querySelector(`[data-asset-key="${CSS.escape(this._librarySelectedAssetKey)}"]`)
+    sheet._libraryApplyFilter = filterLibrary;
+    sheet._libraryRestoreSelection = () => {
+      if (!libraryPanel || !sheet._librarySelectedType) return;
+      const previousAsset = sheet._librarySelectedAssetKey
+        ? libraryPanel.querySelector(`[data-asset-key="${CSS.escape(sheet._librarySelectedAssetKey)}"]`)
         : null;
-      const fallbackAsset = previousAsset ?? libraryPanel.querySelector(`[data-asset-type="${CSS.escape(this._librarySelectedType)}"]`);
+      const fallbackAsset = previousAsset ?? libraryPanel.querySelector(`[data-asset-type="${CSS.escape(sheet._librarySelectedType)}"]`);
       if (fallbackAsset) selectLibraryAsset(fallbackAsset);
     };
     filterLibrary();
     html.find("[data-layer-group]").on("click", event => {
       if(event.target.closest("[data-layer-disclosure]")){
-        event.preventDefault();event.stopPropagation();const id=event.currentTarget.dataset.layerGroup;this._collapsedLayerGroups??=new Set();
-        if(this._collapsedLayerGroups.has(id))this._collapsedLayerGroups.delete(id);else this._collapsedLayerGroups.add(id);
+        event.preventDefault();event.stopPropagation();const id=event.currentTarget.dataset.layerGroup;sheet._collapsedLayerGroups??=new Set();
+        if(sheet._collapsedLayerGroups.has(id))sheet._collapsedLayerGroups.delete(id);else sheet._collapsedLayerGroups.add(id);
         const folder=event.currentTarget.closest(".nexus-layer-folder"),children=folder?.querySelector(".nexus-layer-children"),icon=event.currentTarget.querySelector("[data-layer-disclosure]");
-        if(children)children.hidden=this._collapsedLayerGroups.has(id);if(icon)icon.textContent=children?.hidden?"▸":"▾";return;
+        if(children)children.hidden=sheet._collapsedLayerGroups.has(id);if(icon)icon.textContent=children?.hidden?"▸":"▾";return;
       }
-      this._nexusInteractionActive = false; const group=(this._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); this._setSelection(html,group?.componentIds??[]); this._selectedGroupId=group?.id??null;
+      sheet._nexusInteractionActive = false; const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); sheet._setSelection(html,group?.componentIds??[]); sheet._selectedGroupId=group?.id??null;
     });
     // Renomear pelo duplo clique no nome, sem abrir o editor de componentes.
     html.find(".nexus-layer-list").on("dblclick", ".nexus-layer-name", event => {
@@ -956,15 +956,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(!row) return;
       const id=row.dataset.layerGroup || row.dataset.layerSelect;
       const kind=row.dataset.layerGroup ? "group" : "component";
-      this._beginLayerRename(nameNode, kind, id);
+      sheet._beginLayerRename(nameNode, kind, id);
     });
     html.find("[data-layer-select], [data-layer-group]").on("dblclick", event => {
       if (event.target.closest(".nexus-layer-name")) return;
       event.preventDefault();
       const row=event.currentTarget, groupId=row.dataset.layerGroup;
-      if(groupId){const group=(this._currentLayout?.groups??[]).find(item=>item.id===groupId);this._setSelection(html,group?.componentIds??[]);this._selectedGroupId=groupId;}
-      else this._setSelection(html,[row.dataset.layerSelect]);
-      const portal=document.querySelector(`[data-nexus-floating-for="${this.id}"]`);portal?.querySelector('[data-floating-panel="component"]')?.click();
+      if(groupId){const group=(sheet._currentLayout?.groups??[]).find(item=>item.id===groupId);sheet._setSelection(html,group?.componentIds??[]);sheet._selectedGroupId=groupId;}
+      else sheet._setSelection(html,[row.dataset.layerSelect]);
+      const portal=document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);portal?.querySelector('[data-floating-panel="component"]')?.click();
     });
     html.find("[data-layer-select], [data-layer-group]").attr("draggable", "true").on("dragstart", event => {
       const row=event.currentTarget, id=row.dataset.layerSelect || row.dataset.layerGroup;
@@ -984,38 +984,38 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const rect=row.getBoundingClientRect(), ratio=(event.originalEvent.clientY-rect.top)/Math.max(1,rect.height);
         const placement=row.dataset.layerGroup && ratio>.25 && ratio<.75 ? "inside" : ratio<.5 ? "before" : "after";
         row.classList.remove("drop-before","drop-after","drop-inside");
-        if(!source || source===target) return; await this._reorderLayer(source,target,placement);
+        if(!source || source===target) return; await sheet._reorderLayer(source,target,placement);
       });
-    const inspectorNamespace = `.nexusInspector${String(this.id).replace(/[^a-zA-Z0-9]/g, "")}`;
-    this._nexusInspectorNamespace = inspectorNamespace;
+    const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
+    sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
     const persistInteractionEditor = async (control, command = null) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
       if (!componentId) return;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
-      this._captureHistory();
+      sheet._captureHistory();
       const data = { interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, direction: control.dataset.direction };
       if (command === "save-flow") {
         const flow = getComponentInteractions(component).find(item => item.id === interactionId);
         if (!flow) return;
-        await saveInteractionToLibrary(this.actor, flow);
+        await saveInteractionToLibrary(sheet.actor, flow);
         ui.notifications?.info?.("Fluxo salvo na Biblioteca.");
       } else if (command === "add-library-flow") {
-        const template = getInteractionLibrary(this.actor).find(item => item.id === control.dataset.templateId);
+        const template = getInteractionLibrary(sheet.actor).find(item => item.id === control.dataset.templateId);
         if (!template) { ui.notifications?.warn?.("Selecione um fluxo salvo na Biblioteca."); return; }
         applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
-      if (command !== "save-flow") await this._writeLayouts(layouts, active);
-      const editor = control.closest("[data-interaction-editor]") || this._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
+      if (command !== "save-flow") await sheet._writeLayouts(layouts, active);
+      const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) {
         if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
         const scrollContainer = editor.closest(".nexus-behavior-editor");
         const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, selectionStart: typeof control.selectionStart === "number" ? control.selectionStart : null, selectionEnd: typeof control.selectionEnd === "number" ? control.selectionEnd : null, selectionDirection: control.selectionDirection ?? "none" };
-        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor), this.actor);
+        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(sheet.actor), sheet.actor);
         editor.dataset.componentId = componentId;
         if (scrollContainer) scrollContainer.scrollTop = scrollTop;
         else editor.scrollTop = scrollTop;
@@ -1053,15 +1053,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field]", async event => {
       event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
     });
-    const getTextStyleTarget = () => this._textStyleTarget === "heading" ? "heading" : "content";
+    const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {
       const inspector = element?.closest?.(".nexus-component-inspector");
-      const id = inspector?.querySelector("[data-component-setting]")?.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
-      return (this._currentLayout?.components ?? []).find(component => component.id === id) ?? null;
+      const id = inspector?.querySelector("[data-component-setting]")?.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      return (sheet._currentLayout?.components ?? []).find(component => component.id === id) ?? null;
     };
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-target]", event => {
-      event.preventDefault(); this._textStyleTarget = event.currentTarget.dataset.textStyleTarget;
-      const component = getInspectorComponent(event.currentTarget); this._syncTextToolbar(event.currentTarget.closest(".nexus-component-inspector"), component);
+      event.preventDefault(); sheet._textStyleTarget = event.currentTarget.dataset.textStyleTarget;
+      const component = getInspectorComponent(event.currentTarget); sheet._syncTextToolbar(event.currentTarget.closest(".nexus-component-inspector"), component);
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-command]", async event => {
       event.preventDefault(); const button = event.currentTarget, component = getInspectorComponent(button); if (!component) return;
@@ -1072,31 +1072,31 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if (command === "underline") { key = "textDecoration"; value = style.textDecoration === "underline" ? "none" : "underline"; }
       else if (command.startsWith("align-")) { key = "textAlign"; value = command.slice(6); }
       else if (command === "transform") { key = "textTransform"; value = ({ none: "uppercase", uppercase: "lowercase", lowercase: "capitalize", capitalize: "none" })[style.textTransform ?? "none"]; }
-      if (key) await this._setComponentTextStyle(component.id, target, key, value);
+      if (key) await sheet._setComponentTextStyle(component.id, target, key, value);
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-menu-toggle]", event => { event.preventDefault(); const menu = event.currentTarget.closest(".nexus-text-toolbar")?.querySelector("[data-text-style-font-menu]"); if (menu) menu.hidden = !menu.hidden; });
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-font]", async event => {
       event.preventDefault(); const component = getInspectorComponent(event.currentTarget); if (!component) return;
-      await this._setComponentTextStyle(component.id, getTextStyleTarget(), "fontFamily", event.currentTarget.dataset.textStyleFont);
+      await sheet._setComponentTextStyle(component.id, getTextStyleTarget(), "fontFamily", event.currentTarget.dataset.textStyleFont);
       const menu = event.currentTarget.closest("[data-text-style-font-menu]"); if (menu) menu.hidden = true;
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-advanced-toggle]", event => { event.preventDefault(); const panel = event.currentTarget.closest(".nexus-text-tools")?.querySelector("[data-text-style-advanced]"); if (panel) panel.hidden = !panel.hidden; });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-size]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), "fontSize", event.currentTarget.value); });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-color]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), "color", event.currentTarget.value); });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-field]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await this._setComponentTextStyle(component.id, getTextStyleTarget(), event.currentTarget.dataset.textStyleField, event.currentTarget.value); });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => this._updateSystemValue(event.currentTarget));
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-size]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await sheet._setComponentTextStyle(component.id, getTextStyleTarget(), "fontSize", event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-color]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await sheet._setComponentTextStyle(component.id, getTextStyleTarget(), "color", event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-field]", async event => { const component = getInspectorComponent(event.currentTarget); if (component) await sheet._setComponentTextStyle(component.id, getTextStyleTarget(), event.currentTarget.dataset.textStyleField, event.currentTarget.value); });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => sheet._updateSystemValue(event.currentTarget));
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-sync-token-portrait]", async event => {
       event.preventDefault();
-      const id = event.currentTarget.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
-      await this._syncActorPortraitFromToken(id);
+      const id = event.currentTarget.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      await sheet._syncActorPortraitFromToken(id);
     });
 
-    const propertyPickerId=`nexus-property-picker-${String(this.id).replace(/[^a-zA-Z0-9_-]/g,"")}`;
+    const propertyPickerId=`nexus-property-picker-${String(sheet.id).replace(/[^a-zA-Z0-9_-]/g,"")}`;
     const getPropertyOptionsOwner=input=>input?.closest(".nexus-panel-window, .nexus-library-panel, .nexus-component-inspector, .nexus-behavior-editor");
     const ensurePropertyOptionsList=()=>{
       let list=document.getElementById(propertyPickerId);
       if(!list){
-        list=document.createElement("div");list.className="nexus-property-options";list.id=propertyPickerId;list.dataset.componentPathOptions="";list.dataset.nexusPropertyOwner=String(this.id);list.hidden=true;
+        list=document.createElement("div");list.className="nexus-property-options";list.id=propertyPickerId;list.dataset.componentPathOptions="";list.dataset.nexusPropertyOwner=String(sheet.id);list.hidden=true;
         list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades disponíveis");document.body.append(list);
       }
       return list;
@@ -1117,13 +1117,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;
       if(list._nexusOwnerInput!==input)list.dataset.categoryPath="";
       list._nexusOwnerInput=input;list._nexusOwnerInspector=owner;
-      const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
-      for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){
+      const paths=new Set(["name",...collectPropertyPaths(sheet.actor)]);
+      for(const alias of [...getNativePropertyDefinitions(sheet.actor),...getAliasDefinitions(sheet.actor)]){
         const root=safeAliasKey(alias.key);if(!root)continue;
         const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[ "" ];
         for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
-      const nativeProperties=getNativePropertyDefinitions(this.actor),aliases=getAliasDefinitions(this.actor),rollAliases=getNexusRollAliasEntries(this.actor);
+      const nativeProperties=getNativePropertyDefinitions(sheet.actor),aliases=getAliasDefinitions(sheet.actor),rollAliases=getNexusRollAliasEntries(sheet.actor);
       const signature=JSON.stringify({paths:[...paths].sort(),native:nativeProperties.map(item=>[item.id,item.key,item.label]),aliases:aliases.map(item=>[item.key,item.label,item.targetPath]),rollAliases:rollAliases.map(entry=>[entry.target,entry.display,entry.label])});
       if(list.dataset.optionsSignature!==signature){
         list._nexusCatalog=buildPropertyPickerCatalog({paths:[...paths],nativeProperties,aliases,rollAliases});
@@ -1192,9 +1192,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
       const panelWindow = input.closest(".nexus-panel-window");
-      if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
-      const id = input.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
-      const node = id ? this.element?.querySelector(`.nexus-component[data-id="${CSS.escape(id)}"]`) : null;
+      if (panelWindow && panelWindow.id !== `nexus-${sheet.id}-component`) return;
+      const id = input.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      const node = id ? sheet.element?.querySelector(`.nexus-component[data-id="${CSS.escape(id)}"]`) : null;
       if (!node) return;
       const key = input.dataset.componentSetting, value = input.value;
       const styles = { backgroundColor: "--nexus-component-bg", borderColor: "--nexus-component-border", fontSize: "--nexus-component-font-size", fontFamily: "--nexus-component-font-family", textAlign: "--nexus-component-text-align", fontWeight: "--nexus-component-font-weight", fontStyle: "--nexus-component-font-style", textTransform: "--nexus-component-text-transform", letterSpacing: "--nexus-component-letter-spacing", lineHeight: "--nexus-component-line-height" };
@@ -1207,12 +1207,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", async event => {
       const panelWindow = event.currentTarget.closest(".nexus-panel-window");
-      if (panelWindow && panelWindow.id !== `nexus-${this.id}-component`) return;
-      const input=event.currentTarget, key=input.dataset.componentSetting, id=input.dataset.componentTargetId || this._componentEditorTargetId || [...(this._selectedIds ?? [])][0];
+      if (panelWindow && panelWindow.id !== `nexus-${sheet.id}-component`) return;
+      const input=event.currentTarget, key=input.dataset.componentSetting, id=input.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
       const shouldRestoreInputFocus = document.activeElement === input;
       if(!id) return;
       const panelWindowElement = input.closest(".nexus-panel-window");
-      const panelInstance = this._nexusPanelWindows?.get("component");
+      const panelInstance = sheet._nexusPanelWindows?.get("component");
       const panelLeft = panelWindowElement?.style.left ?? "";
       const panelTop = panelWindowElement?.style.top ?? "";
       const panelTransform = panelWindowElement?.style.transform ?? "";
@@ -1220,7 +1220,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         .map(selector => ({ selector, top: panelWindowElement?.querySelector(selector)?.scrollTop ?? 0, left: panelWindowElement?.querySelector(selector)?.scrollLeft ?? 0 }));
       const restoreEditorViewport = ({ focus = false, target: focusTarget = null } = {}) => {
         const restore = () => {
-          const currentWindow = this._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
+          const currentWindow = sheet._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
           if (!currentWindow) return;
           if (panelLeft) currentWindow.style.setProperty("left", panelLeft, "important");
           if (panelTop) currentWindow.style.setProperty("top", panelTop, "important");
@@ -1229,13 +1229,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
             const target = currentWindow.querySelector(state.selector);
             if (target) { target.scrollTop = state.top; target.scrollLeft = state.left; }
           }
-          if (focus && this._componentEditorTargetId === id) {
+          if (focus && sheet._componentEditorTargetId === id) {
             const currentInput = focusTarget?.isConnected ? focusTarget : (currentWindow.querySelector(`[data-component-setting="${CSS.escape(key)}"][data-component-target-id="${CSS.escape(id)}"]`) ?? currentWindow.querySelector(`[data-component-setting="${CSS.escape(key)}"]`));
             currentInput?.focus({ preventScroll: true });
           }
         };
         requestAnimationFrame(() => requestAnimationFrame(() => {
-          const currentWindow = this._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
+          const currentWindow = sheet._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
           const activeNow = document.activeElement;
           const target = currentWindow?.querySelector(`[data-component-setting="${CSS.escape(key)}"][data-component-target-id="${CSS.escape(id)}"]`);
           const mayRestoreFocus = shouldRestoreInputFocus && (!activeNow || activeNow === document.body || activeNow === document.documentElement || activeNow === input || !currentWindow?.contains(activeNow));
@@ -1243,16 +1243,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }));
       };
       // O alvo de edição é persistente e independente do foco/seleção momentânea.
-      this._componentEditorTargetId = id;
-      const layouts=await this._readLayouts(), active=this._activeLayoutId(), layout=layouts[active];
+      sheet._componentEditorTargetId = id;
+      const layouts=await sheet._readLayouts(), active=sheet._activeLayoutId(), layout=layouts[active];
       const component=layout?.components?.find(item=>item.id===id); if(!component) return;
       if (key === "actorName") {
         const name = String(input.value ?? "").trim().slice(0, 100);
-        if (name) await this.actor.update({ name });
+        if (name) await sheet.actor.update({ name });
         return;
       }
-      if (key === "updateSource") { component.updateSource = !!input.checked; await this._writeLayouts(layouts,active); this.render({force:true}); return; }
-      this._captureHistory();
+      if (key === "updateSource") { component.updateSource = !!input.checked; await sheet._writeLayouts(layouts,active); sheet.render({force:true}); return; }
+      sheet._captureHistory();
       if(key==="width") component.w=clamp(Number(input.value)||component.w,20,layout.width);
       else if(key==="height") component.h=clamp(Number(input.value)||component.h,20,layout.height);
       else if(key==="x") component.x=clamp(Number(input.value)||0,0,layout.width-component.w);
@@ -1268,7 +1268,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if (key === "tokenImage") {
         const source=String(input.value ?? "").trim().slice(0,2048);
         const expression=source.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
-        const resolved=expression ? resolveNexusBinding(this.actor,expression[1]) : null;
+        const resolved=expression ? resolveNexusBinding(sheet.actor,expression[1]) : null;
         if (source && (expression ? (!resolved?.path || !(isImageSource(resolved.value) || isVideoSource(resolved.value))) : !(isImageSource(source) || isVideoSource(source)))) { ui.notifications?.warn?.("Não foi possível reconhecer a imagem. Informe uma imagem ou uma propriedade de imagem válida."); input.value=component.tokenImage??""; return; }
         if (source) component.tokenImage=expression ? `{{${resolved.path}}}` : source; else delete component.tokenImage;
       }
@@ -1307,7 +1307,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="actionTargetId") component.actionTargetId = String(input.value ?? "").trim().slice(0,100);
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
-        const resolved = resolveNexusBinding(this.actor, input.value);
+        const resolved = resolveNexusBinding(sheet.actor, input.value);
         const path = resolved.path;
         if (String(input.value).trim() && (!path || !/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path))) return;
         component.dataPath = path;
@@ -1319,12 +1319,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="rows") component.rows=clamp(Number(input.value)||3,1,20);
       else if(key==="columns") component.columns=clamp(Number(input.value)||3,1,12);
       else if(key==="placeholder") component.placeholder=String(input.value).slice(0,100);
-      await this._writeLayouts(layouts,active);
-      this._componentEditorTargetId = id;
-      this._selectedIds = new Set([id]);
+      await sheet._writeLayouts(layouts,active);
+      sheet._componentEditorTargetId = id;
+      sheet._selectedIds = new Set([id]);
       restoreEditorViewport();
       if (["actionType", "actionTargetId", "rollFormula", "actionPath", "proficiencyLabel0", "proficiencyLabel1", "proficiencyLabel2", "proficiencyLabel3"].includes(key) || (key === "dataPath" && component.type !== "token") || key === "customLabel" || key === "showLabel" || (key === "text" && component.type === "custom-card")) {
-        await this.render({ force: true });
+        await sheet.render({ force: true });
         restoreEditorViewport();
         return;
       }
@@ -1354,19 +1354,19 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           if (key === "labelPosition") node.dataset.labelPosition = component.labelPosition;
           if (key === "customLabel") { const heading=node.querySelector(".nexus-component-heading"); if(heading) heading.textContent=component.customLabel; }
         }
-        const resourceSettings = { label:component.sheetContent1??"PV", icon:component.sheetContent2??"❤️", current:getPath(this.actor.system??{},component.currentPath??"resources.pv.value")??"—", max:getPath(this.actor.system??{},component.maxPath??"resources.pv.max")??"—", color:component.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor??"#080d14", orientation:component.sheetOrientation??"horizontal" };
+        const resourceSettings = { label:component.sheetContent1??"PV", icon:component.sheetContent2??"❤️", current:getPath(sheet.actor.system??{},component.currentPath??"resources.pv.value")??"—", max:getPath(sheet.actor.system??{},component.maxPath??"resources.pv.max")??"—", color:component.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor??"#080d14", orientation:component.sheetOrientation??"horizontal" };
         if (component.type === "sheet-attribute") {
-          const value = getPath(this.actor.system ?? {}, component.dataPath ?? "") ?? 0;
+          const value = getPath(sheet.actor.system ?? {}, component.dataPath ?? "") ?? 0;
           if (node) { const small=node.querySelector("small"), strong=node.querySelector("strong"); if(small)small.textContent=String(component.text??"Atributo"); if(strong)strong.textContent=String(value); }
         }
         if (component.type === "token") {
-          const editorPanel = this._nexusPanelWindows?.get("component")?.panel ?? html[0];
+          const editorPanel = sheet._nexusPanelWindows?.get("component")?.panel ?? html[0];
           const tokenRoots = [node?.querySelector(".nexus-token-subcanvas"), editorPanel?.querySelector("[data-token-preview]")].filter(Boolean);
           for (const tokenRoot of tokenRoots) {
             let image = tokenRoot.querySelector(".nexus-token-portrait");
             const frame = tokenRoot.querySelector(".nexus-token-frame");
             const overlay = tokenRoot.querySelector(".nexus-token-overlay");
-            const imageSource = getTokenImageSource(this.actor, component, component.dataPath ? resolveNexusBinding(this.actor, component.dataPath).value : "");
+            const imageSource = getTokenImageSource(sheet.actor, component, component.dataPath ? resolveNexusBinding(sheet.actor, component.dataPath).value : "");
             const videoImage = isVideoSource(imageSource);
             if (image && (videoImage !== (image.tagName === "VIDEO"))) {
               const replacement = document.createElement(videoImage ? "video" : "img");
@@ -1410,12 +1410,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           liveNode.style.width = `${component.w}px`;
           liveNode.style.height = `${component.h}px`;
           if (component.type === "sheet-resource") {
-            const current = getPath(this.actor.system ?? {}, component.currentPath ?? "resources.pv.value") ?? "—";
-            const maximum = getPath(this.actor.system ?? {}, component.maxPath ?? "resources.pv.max") ?? "—";
+            const current = getPath(sheet.actor.system ?? {}, component.currentPath ?? "resources.pv.value") ?? "—";
+            const maximum = getPath(sheet.actor.system ?? {}, component.maxPath ?? "resources.pv.max") ?? "—";
             const previewSettings = { label:component.sheetContent1 ?? "PV", icon:component.sheetContent2 ?? "❤️", current, max:maximum, color:component.sheetColor ?? ({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(component.sheetCode??component.sheetContent1??"PV").toUpperCase()]??"#d94b4b", trackColor:component.sheetTrackColor ?? "#080d14", orientation:component.sheetOrientation ?? "horizontal" };
             updateSheetResourcePreview(liveNode.querySelector(".nexus-sheet-resource-preview"), previewSettings);
           } else if (component.type === "sheet-attribute") {
-            const value = getPath(this.actor.system ?? {}, component.dataPath ?? "") ?? 0;
+            const value = getPath(sheet.actor.system ?? {}, component.dataPath ?? "") ?? 0;
             const small = liveNode.querySelector("small"), strong = liveNode.querySelector("strong");
             if (small) small.textContent = component.text ?? "Atributo";
             if (strong) strong.textContent = String(value);
@@ -1424,67 +1424,67 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
             if (textNode && !textNode.querySelector("input,textarea")) textNode.textContent = component.text;
           }
         }
-        this._componentEditorTargetId = id;
-        this._selectedIds = new Set([id]);
+        sheet._componentEditorTargetId = id;
+        sheet._selectedIds = new Set([id]);
       }
     });
     html.find("[data-group-setting]").on("change", async event => {
       const input = event.currentTarget;
-      const groupId = this._selectedGroupId;
+      const groupId = sheet._selectedGroupId;
       if (!groupId) return;
-      const layouts = await this._readLayouts();
-      const active = this._activeLayoutId();
+      const layouts = await sheet._readLayouts();
+      const active = sheet._activeLayoutId();
       const layout = layouts[active];
       const group = layout?.groups?.find(item => item.id === groupId);
       if (!group) return;
-      this._captureHistory();
+      sheet._captureHistory();
       const key = input.dataset.groupSetting;
       if (key === "borderRadius") group.borderRadius = clamp(Number(input.value) || 0, 0, 32);
       else if (key === "backgroundColor" || key === "borderColor") group[key] = input.value;
-      await this._writeLayouts(layouts, active);
+      await sheet._writeLayouts(layouts, active);
       const groupNode = html[0].querySelector(`.nexus-group-surface[data-group-id="${groupId}"]`);
       const cssKey = key === "backgroundColor" ? "--nexus-group-bg" : key === "borderColor" ? "--nexus-group-border" : "--nexus-group-radius";
       const cssValue = key === "borderRadius" ? `${group.borderRadius}px` : group[key];
       if (groupNode) groupNode.style.setProperty(cssKey, cssValue);
     });
     html.find("[data-component-setting-reset]").on("click", async event => {
-      const id = [...(this._selectedIds ?? [])][0]; if (!id) return;
+      const id = [...(sheet._selectedIds ?? [])][0]; if (!id) return;
       const key = event.currentTarget.dataset.componentSettingReset;
-      const layouts = await this._readLayouts(), active = this._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === id); if (!component) return;
-      this._captureHistory(); delete component[key]; await this._writeLayouts(layouts, active); this.render({ force: true });
+      const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === id); if (!component) return;
+      sheet._captureHistory(); delete component[key]; await sheet._writeLayouts(layouts, active); sheet.render({ force: true });
     });
     html.find("[data-component-reset]").on("click", async event => {
-      const id=[...(this._selectedIds??[])][0]; if(!id)return;
+      const id=[...(sheet._selectedIds??[])][0]; if(!id)return;
       const kind=event.currentTarget.dataset.componentReset;
-      const layouts=await this._readLayouts(), active=this._activeLayoutId(), layout=layouts[active];
+      const layouts=await sheet._readLayouts(), active=sheet._activeLayoutId(), layout=layouts[active];
       const component=layout?.components?.find(item=>item.id===id); if(!component)return;
-      this._captureHistory();
+      sheet._captureHistory();
       if(kind==="style") for(const key of ["backgroundColor","borderColor","borderRadius","opacity"]) delete component[key];
       if(kind==="typography") { delete component.fontSize; delete component.fontFamily; delete component.headingFontSize; delete component.headingFontFamily; delete component.contentStyle; delete component.headingStyle; delete component.labelPosition; }
       if(kind==="token") { delete component.tokenImage; delete component.tokenFallback; }
       if(kind==="resource") Object.assign(component,{sheetContent1:component.sheetCode??"PV",sheetContent2:({PV:"❤️",PM:"💧",PE:"⚡"})[String(component.sheetCode??"PV").toUpperCase()]??"✦",sheetColor:({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b",REC:"#8b9bad"})[String(component.sheetCode??"PV").toUpperCase()]??"#8b9bad",sheetTrackColor:"#080d14",sheetOrientation:"horizontal",previewCurrent:32,previewMax:40});
       if(kind==="attribute") { Object.assign(component,{text:"Corpo",dataPath:"attributes.body",attributePreset:"body"}); }
-      await this._writeLayouts(layouts,active); this._currentLayout = layout;
-      const componentNode = this.element?.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
+      await sheet._writeLayouts(layouts,active); sheet._currentLayout = layout;
+      const componentNode = sheet.element?.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
       if (componentNode && kind === "typography") {
         componentNode.style.setProperty("--nexus-component-font-size", `${layout.fontSize ?? 13}px`);
         componentNode.style.setProperty("--nexus-component-font-family", layout.fontFamily ?? "Inter");
         componentNode.style.removeProperty("--nexus-component-heading-font-size");
         componentNode.style.removeProperty("--nexus-component-heading-font-family");
         componentNode.dataset.labelPosition = "top-left";
-        this._applyComponentTextStyles(componentNode, component);
-      } else if (componentNode) this.render({ force: true });
-      const inspector = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element).find(node => node?.querySelector(".nexus-component-inspector"))?.querySelector(".nexus-component-inspector");
-      if (inspector && kind === "typography") this._syncTextToolbar(inspector, component);
+        sheet._applyComponentTextStyles(componentNode, component);
+      } else if (componentNode) sheet.render({ force: true });
+      const inspector = [...(sheet._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element).find(node => node?.querySelector(".nexus-component-inspector"))?.querySelector(".nexus-component-inspector");
+      if (inspector && kind === "typography") sheet._syncTextToolbar(inspector, component);
     });
     html.find("[data-group-reset]").on("click", async () => {
-      const groupId=this._selectedGroupId;if(!groupId)return;
-      const layouts=await this._readLayouts(),active=this._activeLayoutId(),group=layouts[active]?.groups?.find(item=>item.id===groupId);if(!group)return;
-      this._captureHistory(); delete group.backgroundColor; delete group.borderColor; delete group.borderRadius;
-      await this._writeLayouts(layouts,active); this.render({force:true});
+      const groupId=sheet._selectedGroupId;if(!groupId)return;
+      const layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),group=layouts[active]?.groups?.find(item=>item.id===groupId);if(!group)return;
+      sheet._captureHistory(); delete group.backgroundColor; delete group.borderColor; delete group.borderRadius;
+      await sheet._writeLayouts(layouts,active); sheet.render({force:true});
     });
     const appWindow = html[0].closest(".application, .window-app");
-    if (appWindow) { appWindow.classList.add("nexus-window"); appWindow.style.setProperty("--nexus-window-accent", this._currentLayout?.accentColor ?? "#52647b"); }
-    this._activateCanvas(html);
-    this._mountFloatingUI(html);
+    if (appWindow) { appWindow.classList.add("nexus-window"); appWindow.style.setProperty("--nexus-window-accent", sheet._currentLayout?.accentColor ?? "#52647b"); }
+    sheet._activateCanvas(html);
+    sheet._mountFloatingUI(html);
 }
