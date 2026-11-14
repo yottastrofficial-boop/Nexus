@@ -9,7 +9,7 @@ import { mountLibraryView } from "./library-view.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
-import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
+import { NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
@@ -58,10 +58,9 @@ const COMPONENTS = {
   desl: { label: "DESL", namespace: "core.combat.desl", w: 120, h: 85, path: "combat.desl", kind: "number" },
   ddr: { label: "DdR", namespace: "core.combat.ddr", w: 120, h: 85, path: "combat.ddr", kind: "number" },
   mb: { label: "MB", namespace: "core.combat.mb", w: 120, h: 85, path: "combat.mb", kind: "number" },
-  // Deprecated scalar nucleus components remain registered only for old saved layouts.
-  body: { label: "Corpo (legado)", namespace: "core.legacy.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number", deprecated: true },
-  mind: { label: "Mente (legado)", namespace: "core.legacy.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number", deprecated: true },
-  soul: { label: "Alma (legado)", namespace: "core.legacy.attributes.soul", w: 130, h: 90, path: "attributes.soul", kind: "number", deprecated: true },
+  body: { label: "Corpo", namespace: "core.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number" },
+  mind: { label: "Mente", namespace: "core.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number" },
+  soul: { label: "Alma", namespace: "core.attributes.soul", w: 130, h: 90, path: "attributes.soul", kind: "number" },
   name: { label: "Nome", namespace: "core.identity.name", w: 210, h: 75, path: "name", kind: "name" },
   level: { label: "Nível", namespace: "core.progression.level", w: 110, h: 75, path: "identity.level", kind: "number" },
   lineage: { label: "Linhagem", namespace: "core.identity.lineage", w: 170, h: 75, path: "identity.lineage", kind: "text" },
@@ -180,15 +179,9 @@ const NATIVE_PROPERTY_BASE = [
   { id:"core.resource.pv", label:"Pontos de Vida", exib:"PV", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
   { id:"core.resource.pm", label:"Pontos de Mana", exib:"PM", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
   { id:"core.resource.pe", label:"Pontos de Energia", exib:"PE", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
-  ...NEXUS_ATTRIBUTES.map(attribute => ({
-    id: "core.attribute." + attribute.key,
-    label: attribute.name,
-    exib: attribute.code,
-    category: "attributes",
-    type: "attribute",
-    key: "attributes." + attribute.key,
-    targetPath: "attributes." + attribute.key
-  })),
+  { id:"core.attribute.body", label:"Corpo", exib:"CORPO", category:"attributes", type:"attribute", key:"attributes.body", targetPath:"attributes.body" },
+  { id:"core.attribute.mind", label:"Mente", exib:"MENTE", category:"attributes", type:"attribute", key:"attributes.mind", targetPath:"attributes.mind" },
+  { id:"core.attribute.soul", label:"Alma", exib:"ALMA", category:"attributes", type:"attribute", key:"attributes.soul", targetPath:"attributes.soul" },
   { id:"core.combat.defense", label:"Defesa", category:"combat", type:"number", key:"combat.defense", targetPath:"combat.defense" },
   { id:"core.combat.movement", label:"Movimento", category:"combat", type:"number", key:"combat.movement", targetPath:"combat.movement" },
   { id:"core.combat.desl", label:"DESL", category:"combat", type:"number", key:"combat.desl", targetPath:"combat.desl" },
@@ -216,10 +209,7 @@ const getNativePropertyDefinitions = actor => {
   });
   const coreIds = new Set(value.map(item => item.targetPath));
   for (const path of collectPropertyPaths(actor)) {
-    if ([...coreIds].some(core => path === core || path.startsWith(`${core}.`))
-      || [...LEGACY_SKILL_PATHS].some(legacyPath => path === legacyPath || path.startsWith(`${legacyPath}.`))
-      || ["attributes.body", "attributes.mind", "attributes.soul"].some(legacy => path === legacy || path.startsWith(legacy + "."))
-      || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+    if ([...coreIds].some(core => path === core || path.startsWith(`${core}.`)) || [...LEGACY_SKILL_PATHS].some(legacyPath => path === legacyPath || path.startsWith(`${legacyPath}.`)) || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
@@ -631,7 +621,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   render(options = {}) {
     const panel = document.querySelector(`[data-tool-panel="aliases"]`) ?? this.element?.querySelector?.('[data-tool-panel="aliases"]');
     if (panel && !panel.hidden) this._pendingAliasScrollTop = panel.scrollTop;
-    const sheetScrollSelectors = [".nexus-appearance-drawer", ".nexus-settings-drawer", ".nexus-behavior-editor", ".nexus-canvas-scroll", ".nexus-sidebar-left", ".nexus-sidebar-right", ".nexus-tool-panel[data-tool-panel='aliases']", ".nexus-library-grid", ".nexus-layer-list", ".nexus-component-inspector", ".nexus-inspector-tab-panel[data-inspector-tab-panel='card']", ".nexus-inspector-tab-panel[data-inspector-tab-panel='appearance']"];
+    const sheetScrollSelectors = [".nexus-appearance-drawer", ".nexus-settings-drawer", ".nexus-behavior-editor", ".nexus-canvas-scroll", ".nexus-sidebar-left", ".nexus-sidebar-right", ".nexus-tool-panel[data-tool-panel='aliases']", ".nexus-library-grid", ".nexus-layer-list", ".nexus-component-inspector", ".nexus-inspector-tab-panel[data-inspector-tab-panel='card']", ".nexus-inspector-tab-panel[data-inspector-tab-panel='appearance']", ".nexus-library-panel", ".nexus-library-details", ".nexus-library-assets", ".nexus-library-flow-grid"];
     const sheetScrollState = sheetScrollSelectors.map(selector => { const node = this.element?.querySelector?.(selector); return node ? { selector, top: node.scrollTop, left: node.scrollLeft } : null; }).filter(Boolean);
     const states = [...(this._nexusPanelWindows?.entries?.() ?? [])].map(([key, instance]) => {
       const element = instance?.element;
@@ -639,7 +629,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const active = element.contains(document.activeElement) ? document.activeElement : null;
       const attrs = active ? ["data-component-setting","data-layout-setting","data-global-typography","data-alias-field","data-native-property-field","data-property-value","data-component-path-input","data-config-current-value","data-config-max-value","data-alias-select","data-alias-new-name","data-inspector-tab","data-floating-panel","data-text-style-control"] : [];
       const descriptor = active ? attrs.map(attr => active.hasAttribute(attr) ? { attr, value: active.getAttribute(attr), targetId: active.dataset.componentTargetId ?? "", aliasId: active.dataset.aliasId ?? "" } : null).find(Boolean) : null;
-      const scroll = [...element.querySelectorAll(".window-content,.application-content,.nexus-component-inspector,.nexus-layer-list,.nexus-alias-manager,.nexus-library-grid,.nexus-settings-drawer,.nexus-behavior-editor,.nexus-inspector-tab-panel")].map(node => ({ selector: node.classList.contains("nexus-component-inspector") ? ".nexus-component-inspector" : node.classList.contains("nexus-layer-list") ? ".nexus-layer-list" : node.classList.contains("nexus-alias-manager") ? ".nexus-alias-manager" : node.classList.contains("nexus-library-grid") ? ".nexus-library-grid" : node.classList.contains("nexus-settings-drawer") ? ".nexus-settings-drawer" : node.classList.contains("nexus-behavior-editor") ? ".nexus-behavior-editor" : node.classList.contains("nexus-inspector-tab-panel") ? `.nexus-inspector-tab-panel[data-inspector-tab-panel="${node.dataset.inspectorTabPanel}"]` : node.classList.contains("window-content") ? ".window-content" : ".application-content", top: node.scrollTop, left: node.scrollLeft }));
+      const scroll = [...element.querySelectorAll(".window-content,.application-content,.nexus-component-inspector,.nexus-layer-list,.nexus-alias-manager,.nexus-library-grid,.nexus-library-panel,.nexus-library-section-panel:not([hidden]),.nexus-library-details,.nexus-library-assets,.nexus-library-flow-grid,.nexus-settings-drawer,.nexus-behavior-editor,.nexus-inspector-tab-panel")].map(node => ({ selector: node.classList.contains("nexus-component-inspector") ? ".nexus-component-inspector" : node.classList.contains("nexus-layer-list") ? ".nexus-layer-list" : node.classList.contains("nexus-alias-manager") ? ".nexus-alias-manager" : node.classList.contains("nexus-library-grid") ? ".nexus-library-grid" : node.classList.contains("nexus-library-panel") ? ".nexus-library-panel" : node.classList.contains("nexus-library-section-panel") ? `.nexus-library-section-panel[data-library-section-panel="${node.dataset.librarySectionPanel}"]` : node.classList.contains("nexus-library-details") ? ".nexus-library-details" : node.classList.contains("nexus-library-assets") ? ".nexus-library-assets" : node.classList.contains("nexus-library-flow-grid") ? ".nexus-library-flow-grid" : node.classList.contains("nexus-settings-drawer") ? ".nexus-settings-drawer" : node.classList.contains("nexus-behavior-editor") ? ".nexus-behavior-editor" : node.classList.contains("nexus-inspector-tab-panel") ? `.nexus-inspector-tab-panel[data-inspector-tab-panel="${node.dataset.inspectorTabPanel}"]` : node.classList.contains("window-content") ? ".window-content" : ".application-content", top: node.scrollTop, left: node.scrollLeft }));
       let start = null, end = null;
       try { start = active?.selectionStart ?? null; end = active?.selectionEnd ?? null; } catch (_) {}
       return { key, descriptor, tag: active?.tagName, value: active && "value" in active ? active.value : null, checked: active?.type === "checkbox" ? active.checked : null, start, end, left: element.style.left, top: element.style.top, scroll };
@@ -697,23 +687,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
         scalarValue: sourceValue && typeof sourceValue === "object" ? "" : sourceValue ?? "",
         percentage: Number.isFinite(max) && max > 0 && Number.isFinite(amount) ? Math.round(amount / max * 100) : 0 };
     });
-    const nativeProperties = getNativePropertyDefinitions(this.actor).map(item => {
-      const data = getCustomAliasData(this.actor);
-      const raw = item.targetPath === "name" ? this.actor.name : getPath(this.actor.system ?? {}, item.targetPath);
-      const currentValue = item.type === "resource"
-        ? (raw?.value ?? "")
-        : item.type === "attribute" && raw && typeof raw === "object"
-          ? (raw.value ?? "")
-          : raw ?? "";
-      return {
-        ...item,
-        shortKey: item.key.split(".").at(-1),
-        currentValue,
-        maxValue: item.type === "resource" ? (raw?.max ?? "") : "",
-        checkbonus: getPath(data, `${item.key}.checkbonus`) ?? "",
-        roll: getPath(data, `${item.key}.roll`) ?? ""
-      };
-    });
     // Todos os layouts são normalizados em memória antes de construir a interface.
     // Isso permite abrir fichas antigas mesmo quando faltam arrays ou opções recentes.
     const layout = this._normalizeLayout(clone(layouts[activeId] ?? layouts.principal ?? DEFAULT_LAYOUT));
@@ -736,8 +709,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       rendered: layout.components.map(c => { const group=(layout.groups??[]).find(g=>(g.componentIds??[]).includes(c.id)); return this._componentContext({ ...c, hidden: !!c.hidden || !!group?.hidden, locked: !!c.locked || !!group?.locked, groupId: group?.id ?? "" }); }).filter(Boolean),
       aliases,
       selectedAlias: aliases.find(alias => alias.id === this._selectedAliasId) ?? aliases[0] ?? null,
-      nativeProperties,
-      selectedNativeProperty: this._selectedNativePropertyId ? (nativeProperties.find(item => item.id === this._selectedNativePropertyId) ?? null) : null,
+      nativeProperties: getNativePropertyDefinitions(this.actor).map(item => { const data = getCustomAliasData(this.actor); const raw = item.targetPath === "name" ? this.actor.name : getPath(this.actor.system ?? {}, item.targetPath); return { ...item, shortKey:item.key.split(".").at(-1), currentValue: item.type === "resource" || item.type === "attribute" ? (raw?.value ?? "") : raw ?? "", maxValue: item.type === "resource" ? (raw?.max ?? "") : "", checkbonus:getPath(data, `${item.key}.checkbonus`) ?? "", roll:getPath(data, `${item.key}.roll`) ?? "" }; }),
+      selectedNativeProperty: (() => { const items = getNativePropertyDefinitions(this.actor).map(item => { const data = getCustomAliasData(this.actor); const raw = item.targetPath === "name" ? this.actor.name : getPath(this.actor.system ?? {}, item.targetPath); return { ...item, shortKey:item.key.split(".").at(-1), currentValue: item.type === "resource" || item.type === "attribute" ? (raw?.value ?? "") : raw ?? "", maxValue: item.type === "resource" ? (raw?.max ?? "") : "", checkbonus:getPath(data, `${item.key}.checkbonus`) ?? "", roll:getPath(data, `${item.key}.roll`) ?? "" }; }); return this._selectedNativePropertyId ? (items.find(item => item.id === this._selectedNativePropertyId) ?? null) : null; })(),
       aliasEditorMode: this._aliasEditorMode ?? "custom",
       isNPC: this.actor.type === "npc"
     };
@@ -789,21 +762,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!hasCanonicalLevel) {
         const stored = current?.proficiency ?? current?.proficient
           ?? legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient ?? 0;
-        updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
-      } else {
-        const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
-        if (typeof current.proficientLevel !== "number" || current.proficientLevel !== normalizedLevel) {
-          updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
-        }
+        const level = stored === true ? 1
+          : stored === false || stored === null || stored === undefined || stored === "" ? 0
+          : Number(stored);
+        updates["system.skills." + skill.key + ".proficientLevel"] = Number.isFinite(level) ? level : 0;
       }
       if (current && Object.hasOwn(current, "proficiency")) {
         updates["system.skills." + skill.key + ".-=proficiency"] = null;
       }
       if (current && Object.hasOwn(current, "proficient")) {
         updates["system.skills." + skill.key + ".-=proficient"] = null;
-      }
-      if (current && Object.hasOwn(current, "opposed")) {
-        updates["system.skills." + skill.key + ".-=opposed"] = null;
       }
       if (legacy) updates["system.skills.-=" + skill.legacyKey] = null;
     }
@@ -1251,14 +1219,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _rollSkill(skillKey) {
     const result = getNexusSkillModifier(this.actor, skillKey);
     if (!result) return;
-    const { skill, proficient, proficientLevel, modifier, baseModifier } = result;
+    const { skill, proficient, opposed, proficientLevel, modifier, baseModifier } = result;
     const formula = modifier < 0 ? "1d20 - " + Math.abs(modifier) : "1d20 + " + modifier;
     try {
       const roll = new Roll(formula);
       await roll.evaluate({ async: true });
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: skill.name + " (" + skill.attribute + ") · " + (proficientLevel > 0 ? "Proficiente · MB +" + baseModifier : proficientLevel < 0 ? "Proficiência negativa · MB -" + baseModifier : "Sem proficiência") + " · Proficiência " + (proficientLevel > 0 ? "+" : "") + proficientLevel + " · Modificador " + (modifier >= 0 ? "+" : "") + modifier
+        flavor: skill.name + " (" + skill.attribute + ") · " + (proficient ? "Proficiente · MB +" + baseModifier : opposed ? "Deficiência · MB -" + baseModifier : "Sem proficiência") + " · Nível " + proficientLevel + " · Modificador " + (modifier >= 0 ? "+" : "") + modifier
       });
     } catch (error) {
       console.error("NEXUS | Falha ao rolar perícia", error);
@@ -1268,8 +1236,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _setSkillProficientLevel(skillKey, rawLevel) {
     if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) return;
-    const level = normalizeNexusProficientLevel(rawLevel);
-    await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: level });
+    const level = Number(rawLevel);
+    if (!Number.isFinite(level)) return;
+    await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: Math.trunc(level) });
     await this.render({ force: true });
   }
 
@@ -1889,12 +1858,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _applyThemePreset(themeId) {
-    if (!THEME_PALETTES[themeId]) return false;
-    return this._updateLayoutSetting({
-      dataset: { layoutSetting: "theme" },
-      value: themeId,
-      closest: () => null
-    });
+    if (!THEME_PALETTES[themeId]) return;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return;
+    this._captureHistory();
+    layout.theme = themeId;
+    Object.assign(layout, clone(THEME_PALETTES[themeId]));
+    layout.fontFamily = THEME_TOKENS[themeId]?.fontFamily ?? "Inter";
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    this.render({ force: true });
   }
 
   async _updateLayoutSetting(input) {
@@ -1912,24 +1885,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     } else layout[key] = input.checked;
     await this._writeLayouts(layouts, active);
     this._currentLayout = layout;
-    const panelRoots = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance?.element).filter(Boolean);
-    const themeRoots = [this.element, ...panelRoots].filter(Boolean);
     if (key === "theme") {
-      const synchronizedSettings = ["theme","canvasColor","cardColor","accentColor","highlightColor","buttonColor","scrollColor","windowHeaderColor","windowContentColor","menuColor","placeholderColor","fontFamily"];
-      for (const root of themeRoots) {
-        for (const settingKey of synchronizedSettings) {
-          root.querySelectorAll?.(`[data-layout-setting="${settingKey}"]`).forEach(field => { field.value = settingKey === "theme" ? layout.theme : layout[settingKey]; });
-        }
-        root.querySelectorAll?.("[data-library-theme]").forEach(card => {
-          const selected = card.dataset.libraryTheme === layout.theme;
-          card.classList.toggle("is-selected", selected);
-          card.setAttribute("aria-pressed", String(selected));
-        });
-      }
+      for (const colorKey of ["canvasColor","cardColor","accentColor","highlightColor","buttonColor","scrollColor","windowHeaderColor","windowContentColor","menuColor","placeholderColor","fontFamily"]) { const field=input.closest(".nexus-panel-window")?.querySelector(`[data-layout-setting="${colorKey}"]`) ?? this.element?.querySelector(`[data-layout-setting="${colorKey}"]`); if(field)field.value=layout[colorKey]; }
     }
     const portalRoot = document.querySelector(`[data-nexus-floating-for="${this.id}"]`);
-    const themeTargets = [portalRoot, this.element?.querySelector(".nexus-sheet"), this.element?.closest(".application, .window-app"), ...panelRoots];
-    for (const target of new Set(themeTargets.filter(Boolean))) applyThemeTokens(target, layout);
+    applyThemeTokens(portalRoot, layout);
+    applyThemeTokens(this.element?.querySelector(".nexus-sheet"), layout);
+    applyThemeTokens(this.element?.closest(".application, .window-app"), layout);
+    for (const instance of this._nexusPanelWindows?.values?.() ?? []) applyThemeTokens(instance.element, layout);
     if (["width", "height"].includes(key)) {
       const appWidth = clamp(layout.width + 40, 800, Math.max(800, window.innerWidth - 24));
       const appHeight = clamp(Math.min(layout.height + 100, window.innerHeight - 24), 500, Math.max(500, window.innerHeight - 24));
