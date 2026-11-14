@@ -680,26 +680,35 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const context = await super._prepareContext(options);
     context.actor = this.actor;
     context.system = this.actor.system ?? {};
+
     const layouts = await this._readLayouts();
     const storedActiveId = String(this.actor.getFlag("nexus", "activeLayout") ?? "principal");
     const activeId = layouts[storedActiveId] ? storedActiveId : "principal";
+    const customAliasData = getCustomAliasData(this.actor);
+
     const normalizedAliases = getAliasDefinitions(this.actor);
     const aliases = normalizedAliases.map(alias => {
-      const stored = getPath(getCustomAliasData(this.actor), alias.key);
+      const stored = getPath(customAliasData, alias.key);
       const external = alias.targetPath ? resolveNexusBinding(this.actor, alias.targetPath).value : undefined;
       const sourceValue = alias.targetPath ? external : stored;
-      const current = sourceValue && typeof sourceValue === "object" ? { ...(stored && typeof stored === "object" ? stored : {}), ...sourceValue } : { ...(stored && typeof stored === "object" ? stored : {}), value: sourceValue };
+      const current = sourceValue && typeof sourceValue === "object"
+        ? { ...(stored && typeof stored === "object" ? stored : {}), ...sourceValue }
+        : { ...(stored && typeof stored === "object" ? stored : {}), value: sourceValue };
       if (["attribute", "resource"].includes(alias.type)) {
         current.name ??= alias.label;
         current.exibicao ??= alias.label;
       }
       const max = Number(current.max), amount = Number(current.value);
-      return { ...alias, shortKey: alias.key.split(".").at(-1), value: current,
+      return {
+        ...alias,
+        shortKey: alias.key.split(".").at(-1),
+        value: current,
         scalarValue: sourceValue && typeof sourceValue === "object" ? "" : sourceValue ?? "",
-        percentage: Number.isFinite(max) && max > 0 && Number.isFinite(amount) ? Math.round(amount / max * 100) : 0 };
+        percentage: Number.isFinite(max) && max > 0 && Number.isFinite(amount) ? Math.round(amount / max * 100) : 0
+      };
     });
+
     const nativeProperties = getNativePropertyDefinitions(this.actor).map(item => {
-      const data = getCustomAliasData(this.actor);
       const raw = item.targetPath === "name" ? this.actor.name : getPath(this.actor.system ?? {}, item.targetPath);
       const currentValue = item.type === "resource"
         ? (raw?.value ?? "")
@@ -711,34 +720,113 @@ export class NexusActorSheet extends NexusActorSheetBase {
         shortKey: item.key.split(".").at(-1),
         currentValue,
         maxValue: item.type === "resource" ? (raw?.max ?? "") : "",
-        checkbonus: getPath(data, `${item.key}.checkbonus`) ?? "",
-        roll: getPath(data, `${item.key}.roll`) ?? ""
+        checkbonus: getPath(customAliasData, `${item.key}.checkbonus`) ?? "",
+        roll: getPath(customAliasData, `${item.key}.roll`) ?? ""
       };
     });
-    // Todos os layouts são normalizados em memória antes de construir a interface.
-    // Isso permite abrir fichas antigas mesmo quando faltam arrays ou opções recentes.
+
+    // Normaliza uma cópia do layout ativo para não mutar o snapshot lido do Actor.
     const layout = this._normalizeLayout(clone(layouts[activeId] ?? layouts.principal ?? DEFAULT_LAYOUT));
     this._currentLayout = layout;
+
+    // Índices locais evitam procurar o grupo de cada componente repetidamente.
+    // A ordem original dos componentes e a associação ao primeiro grupo são preservadas.
+    const groups = layout.groups ?? [];
+    const components = layout.components ?? [];
+    const groupedIds = new Set();
+    const groupByComponentId = new Map();
+    const groupIdsByComponentId = new Map();
+    const componentLayerById = new Map();
+
+    for (const group of groups) {
+      for (const id of group.componentIds ?? []) {
+        groupedIds.add(id);
+        if (!groupByComponentId.has(id)) groupByComponentId.set(id, group);
+        let memberships = groupIdsByComponentId.get(id);
+        if (!memberships) groupIdsByComponentId.set(id, memberships = []);
+        memberships.push(group.id);
+      }
+    }
+
+    const componentLayer = component => ({
+      id: component.id,
+      label: component.customLabel || COMPONENTS[component.type]?.label || component.type,
+      icon: String(component.layerIcon ?? ""),
+      image: isImageSource(component.layerImage) ? component.layerImage : "",
+      z: Number(component.z) || 0,
+      stackOrder: Number(component.stackOrder) || 0,
+      kind: "component",
+      hidden: !!component.hidden,
+      locked: !!component.locked
+    });
+
+    for (const component of components) {
+      componentLayerById.set(component.id, componentLayer(component));
+    }
+
+    const childrenByGroupId = new Map(groups.map(group => [group.id, []]));
+    for (const component of components) {
+      const memberships = groupIdsByComponentId.get(component.id);
+      if (!memberships) continue;
+      for (const groupId of memberships) {
+        childrenByGroupId.get(groupId)?.push(component);
+      }
+    }
+
+    const layers = [
+      ...groups.map(group => {
+        const children = (childrenByGroupId.get(group.id) ?? [])
+          .map(component => ({
+            ...componentLayerById.get(component.id),
+            hidden: !!component.hidden || !!group.hidden,
+            locked: !!component.locked || !!group.locked
+          }))
+          .sort((a, b) => b.z - a.z || b.stackOrder - a.stackOrder);
+        return {
+          id: group.id,
+          icon: String(group.layerIcon ?? ""),
+          image: isImageSource(group.layerImage) ? group.layerImage : "",
+          collapsed: !!this._collapsedLayerGroups?.has(group.id),
+          label: group.name ?? "Grupo",
+          z: children.length ? Math.min(...children.map(child => child.z)) : 0,
+          stackOrder: children.length ? Math.min(...children.map(child => child.stackOrder)) : 0,
+          kind: "group",
+          hidden: !!group.hidden,
+          locked: !!group.locked,
+          componentIds: group.componentIds,
+          children
+        };
+      }),
+      ...components.filter(component => !groupedIds.has(component.id)).map(component => componentLayerById.get(component.id))
+    ].sort((a, b) => b.z - a.z || b.stackOrder - a.stackOrder);
+
+    const rendered = components
+      .map(component => {
+        const group = groupByComponentId.get(component.id);
+        return this._componentContext({
+          ...component,
+          hidden: !!component.hidden || !!group?.hidden,
+          locked: !!component.locked || !!group?.locked,
+          groupId: group?.id ?? ""
+        });
+      })
+      .filter(Boolean);
+
     context.nexus = {
-      actor: this.actor, system: this.actor.system ?? {}, mode: this._mode ?? "play", layout,
-      layouts: Object.values(layouts).map(item => ({ ...item, ...this._layoutTabPresentation(item) })), components: COMPONENTS,
-      layers: (() => {
-        const groups = layout.groups ?? [];
-        const groupedIds = new Set(groups.flatMap(group => group.componentIds ?? []));
-        const componentLayer = component => ({ id: component.id, label: component.customLabel || COMPONENTS[component.type]?.label || component.type, icon: String(component.layerIcon ?? ""), image: isImageSource(component.layerImage) ? component.layerImage : "", z: Number(component.z) || 0, stackOrder: Number(component.stackOrder) || 0, kind: "component", hidden: !!component.hidden, locked: !!component.locked });
-        return [
-          ...groups.map(group => {
-            const children = layout.components.filter(component => (group.componentIds ?? []).includes(component.id)).map(component => ({...componentLayer(component), hidden:!!component.hidden || !!group.hidden, locked:!!component.locked || !!group.locked})).sort((a,b) => b.z-a.z || b.stackOrder-a.stackOrder);
-            return { id: group.id, icon: String(group.layerIcon ?? ""), image: isImageSource(group.layerImage) ? group.layerImage : "", collapsed: !!this._collapsedLayerGroups?.has(group.id), label: group.name ?? "Grupo", z: children.length ? Math.min(...children.map(child => child.z)) : 0, stackOrder: children.length ? Math.min(...children.map(child => child.stackOrder)) : 0, kind: "group", hidden: !!group.hidden, locked: !!group.locked, componentIds: group.componentIds, children };
-          }),
-          ...layout.components.filter(component => !groupedIds.has(component.id)).map(componentLayer)
-        ].sort((a,b) => b.z-a.z || b.stackOrder-a.stackOrder);
-      })(),
-      rendered: layout.components.map(c => { const group=(layout.groups??[]).find(g=>(g.componentIds??[]).includes(c.id)); return this._componentContext({ ...c, hidden: !!c.hidden || !!group?.hidden, locked: !!c.locked || !!group?.locked, groupId: group?.id ?? "" }); }).filter(Boolean),
+      actor: this.actor,
+      system: this.actor.system ?? {},
+      mode: this._mode ?? "play",
+      layout,
+      layouts: Object.values(layouts).map(item => ({ ...item, ...this._layoutTabPresentation(item) })),
+      components: COMPONENTS,
+      layers,
+      rendered,
       aliases,
       selectedAlias: aliases.find(alias => alias.id === this._selectedAliasId) ?? aliases[0] ?? null,
       nativeProperties,
-      selectedNativeProperty: this._selectedNativePropertyId ? (nativeProperties.find(item => item.id === this._selectedNativePropertyId) ?? null) : null,
+      selectedNativeProperty: this._selectedNativePropertyId
+        ? (nativeProperties.find(item => item.id === this._selectedNativePropertyId) ?? null)
+        : null,
       aliasEditorMode: this._aliasEditorMode ?? "custom",
       isNPC: this.actor.type === "npc"
     };
