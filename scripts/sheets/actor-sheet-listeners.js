@@ -279,7 +279,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     html.find("[data-alias-create]").on("click", async event => {
       const panel = event.currentTarget.closest(".nexus-alias-manager");
       const label = panel?.querySelector("[data-alias-new-name]")?.value.trim();
-      const type = panel?.querySelector("[data-alias-new-type]")?.value || "custom";
+      const type = panel?.querySelector("[data-alias-new-type]")?.value || "for";
       const valueType = panel?.querySelector("[data-alias-value-type]")?.value || "text";
       const source = panel?.querySelector("[data-alias-source]")?.value || "custom";
       const targetPath = panel?.querySelector("[data-alias-target]")?.value.trim() || "";
@@ -308,7 +308,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (property.targetPath === "name") await sheet.actor.update({ name: String(input.value).slice(0,100) });
         else {
           const suffix = property.type === "resource" ? (field === "currentValue" ? "value" : "max") : "value";
-          const target = property.type === "resource" || property.type === "attribute" ? `${property.targetPath}.${suffix}` : property.targetPath;
+          const target = property.type === "resource" ? `${property.targetPath}.${suffix}` : property.targetPath;
           let nextValue;
           if (property.type === "boolean") nextValue = input.value === "true";
           else if (["resource", "attribute", "number"].includes(property.type)) {
@@ -646,7 +646,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (getPath(sheet.actor.system ?? {}, `resources.${resource}`) === undefined) continue;
         for (const suffix of ["value", "max"]) if (getPath(sheet.actor.system ?? {}, `resources.${resource}.${suffix}`) !== undefined) paths.push(`resources.${resource}.${suffix}`);
       }
-      for (const path of ["attributes.body", "attributes.mind", "attributes.soul", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb", "identity.level"]) {
+      for (const path of ["attributes.for", "attributes.des", "attributes.sab", "attributes.int", "attributes.car", "attributes.von", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb", "identity.level"]) {
         paths.push(path);
       }
       for (const alias of [...getNativePropertyDefinitions(sheet.actor), ...getAliasDefinitions(sheet.actor)]) {
@@ -655,7 +655,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         else if (alias.type === "attribute") paths.push(`${key}.name`, `${key}.exib`, `${key}.value`, `${key}.checkbonus`, `${key}.roll`);
         else paths.push(key);
       }
-      return [...new Set(paths)].sort((a,b) => a.localeCompare(b, "pt-BR"));
+      return [...new Set(paths)].filter(path => !["attributes.body", "attributes.mind", "attributes.soul", "identity.name"].some(legacy => path === legacy || path.startsWith(legacy + "."))).sort((a,b) => a.localeCompare(b, "pt-BR"));
     })();
     const componentResourcePathList=html[0].querySelector("[data-resource-path-list]");
     if(componentResourcePathList) componentResourcePathList.replaceChildren(...resourcePaths.map(path=>{const option=document.createElement("option");option.value=path;return option;}));
@@ -700,11 +700,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (asset.type === "sheet-attribute") {
         detail.innerHTML = `<div class="nexus-library-live-preview is-sheet-attribute"><div class="nexus-sheet-element is-attribute" data-attribute-preview-card><small data-attribute-preview-label>CORPO</small><strong data-attribute-preview-value>3</strong></div></div>
           <div class="nexus-library-config-section"><strong>Atributo</strong>
-            <label>Selecionar atributo<select data-attribute-preset><option value="body">Corpo</option><option value="mind">Mente</option><option value="soul">Alma</option><option value="custom">Personalizado</option></select></label>
+            <label>Selecionar atributo<select data-attribute-preset><option value="for">Força</option><option value="des">Destreza</option><option value="sab">Sabedoria</option><option value="int">Inteligência</option><option value="car">Carisma</option><option value="von">Vontade</option><option value="custom">Personalizado</option></select></label>
             <label>Nome exibido<input type="text" value="Corpo" data-attribute-label></label>
             <label>Valor de prévia<input type="number" value="3" data-attribute-preview></label>
           </div>
-          <div class="nexus-library-content-picker"><label>Propriedade vinculada<input type="text" value="attributes.body" data-attribute-path list="nexus-attribute-paths"></label><datalist id="nexus-attribute-paths">${pathOptions}</datalist></div>
+          <div class="nexus-library-content-picker"><label>Propriedade vinculada<input type="text" value="attributes.for" data-attribute-path list="nexus-attribute-paths"></label><datalist id="nexus-attribute-paths">${pathOptions}</datalist></div>
           <button type="button" data-library-add>Adicionar ao Canvas</button>`;
         const preset = detail.querySelector("[data-attribute-preset]");
         const name = detail.querySelector("[data-attribute-label]");
@@ -715,12 +715,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           detail.querySelector("[data-attribute-preview-value]").textContent = detail.querySelector("[data-attribute-preview]").value || "0";
         };
         preset.addEventListener("change", () => {
-          const map = { body: ["Corpo", "attributes.body"], mind: ["Mente", "attributes.mind"], soul: ["Alma", "attributes.soul"] };
+          const map = { for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
           if (map[preset.value]) { name.value = map[preset.value][0]; path.value = map[preset.value][1]; }
           update();
         });
         path.addEventListener("input", () => {
-          const expected = { body: "attributes.body", mind: "attributes.mind", soul: "attributes.soul" };
+          const expected = { for: "attributes.for", des: "attributes.des", sab: "attributes.sab", int: "attributes.int", car: "attributes.car", von: "attributes.von" };
           if (path.value !== expected[preset.value]) preset.value = "custom";
         });
         detail.querySelectorAll("input, nexus-color-picker").forEach(input => input.addEventListener("input", update));
@@ -774,8 +774,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (libraryFilterFrame) return;
       libraryFilterFrame = requestAnimationFrame(() => { libraryFilterFrame = 0; filterLibrary(); });
     };
-    libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", scheduleLibraryFilter);
-    libraryPanel?.querySelector("[data-library-tag]")?.addEventListener("change", scheduleLibraryFilter);
+    libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", event => {
+       sheet._librarySearchQuery = event.currentTarget.value;
+       scheduleLibraryFilter();
+     });
+    libraryPanel?.querySelector("[data-library-tag]")?.addEventListener("change", event => {
+       sheet._libraryTagFilter = event.currentTarget.value;
+       scheduleLibraryFilter();
+     });
 
     // Os controles da Biblioteca ficam dentro de uma janela ApplicationV2 separada.
     // A delegação nativa no próprio painel acompanha o nó quando ele é movido para
@@ -785,7 +791,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
-        sheet._applyThemePreset(themeCard.dataset.libraryTheme);
+        await sheet._applyThemePreset(themeCard.dataset.libraryTheme);
         return;
       }
 
@@ -909,9 +915,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
 
         if (type === "sheet-attribute") {
-          const label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Corpo";
-          const path = detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.body";
-          const preset = detail.querySelector("[data-attribute-preset]")?.value || "custom";
+          const label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Força";
+          const path = detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.for";
+          const preset = detail.querySelector("[data-attribute-preset]")?.value || "for";
           const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === detail.dataset.selectedAssetKey);
           const template = {
             ...clone(asset?.template ?? {}), text: label, dataPath: path,
@@ -1146,7 +1152,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const paths=new Set(["name",...collectPropertyPaths(sheet.actor)]);
       for(const alias of [...getNativePropertyDefinitions(sheet.actor),...getAliasDefinitions(sheet.actor)]){
         const root=safeAliasKey(alias.key);if(!root)continue;
-        const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[ "" ];
+        const suffixes=alias.type==="attribute"?["checkbonus","roll"]:alias.type==="resource"?["value","max","percentage"]:[ "" ];
         for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
       const nativeProperties=getNativePropertyDefinitions(sheet.actor),aliases=getAliasDefinitions(sheet.actor),rollAliases=getNexusRollAliasEntries(sheet.actor);
@@ -1331,7 +1337,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="labelPosition") component.labelPosition=["top-left","top-center","side-left"].includes(input.value)?input.value:"top-left";
       else if(key==="format") { component.format=input.value; }
       else if(key==="attributePreset") {
-        const presets = { body: ["Corpo", "attributes.body"], mind: ["Mente", "attributes.mind"], soul: ["Alma", "attributes.soul"], for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
+        const presets = { for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
         component.attributePreset = input.value;
         if (presets[input.value]) { component.text = presets[input.value][0]; component.dataPath = presets[input.value][1]; }
       }
@@ -1495,7 +1501,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(kind==="typography") { delete component.fontSize; delete component.fontFamily; delete component.headingFontSize; delete component.headingFontFamily; delete component.contentStyle; delete component.headingStyle; delete component.labelPosition; }
       if(kind==="token") { delete component.tokenImage; delete component.tokenFallback; }
       if(kind==="resource") Object.assign(component,{sheetContent1:component.sheetCode??"PV",sheetContent2:({PV:"❤️",PM:"💧",PE:"⚡"})[String(component.sheetCode??"PV").toUpperCase()]??"✦",sheetColor:({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b",REC:"#8b9bad"})[String(component.sheetCode??"PV").toUpperCase()]??"#8b9bad",sheetTrackColor:"#080d14",sheetOrientation:"horizontal",previewCurrent:32,previewMax:40});
-      if(kind==="attribute") { Object.assign(component,{text:"Corpo",dataPath:"attributes.body",attributePreset:"body"}); }
+      if(kind==="attribute") { Object.assign(component,{text:"Força",dataPath:"attributes.for",attributePreset:"for"}); }
       await sheet._writeLayouts(layouts,active); sheet._currentLayout = layout;
       const componentNode = sheet.element?.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
       if (componentNode && kind === "typography") {

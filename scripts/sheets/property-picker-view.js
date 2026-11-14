@@ -49,10 +49,9 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
   const normalizedQuery = String(query ?? "").trim().toLocaleLowerCase("pt-BR");
   if (normalizedQuery) {
     const matches = catalog.entries.filter(entry =>
-      entry.label.toLocaleLowerCase("pt-BR").includes(normalizedQuery)
-      || entry.path.toLocaleLowerCase("pt-BR").includes(normalizedQuery)
+      [entry.label, entry.searchLabel, entry.path].some(value => String(value ?? "").toLocaleLowerCase("pt-BR").includes(normalizedQuery))
     );
-    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry);
+    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry, entry.searchLabel ?? entry.label);
     if (formulaMode) {
       const aliases = catalog.rollAliases.filter(entry =>
         (entry.label + " " + entry.display + " " + entry.target).toLocaleLowerCase("pt-BR").includes(normalizedQuery)

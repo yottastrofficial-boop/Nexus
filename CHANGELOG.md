@@ -1,3 +1,16 @@
+## 1.0.0.29
+
+- Reorganizado o catálogo de propriedades: Corpo, Mente e Alma são grupos; Força, Destreza, Sabedoria, Inteligência, Carisma e Vontade são as seis propriedades numéricas reais.
+- Removidos do catálogo os antigos caminhos escalares `attributes.body`, `attributes.mind` e `attributes.soul`, preservando-os apenas para compatibilidade com fichas e layouts antigos.
+- Perícias agora são agrupadas pelo atributo relacionado e expõem somente o modificador total e o nível de proficiência como propriedades principais.
+- Proficiência normalizada para três estados: -1, 0 e +1. O estado legado `opposed` é convertido para -1 e removido; níveis antigos fora do intervalo são normalizados.
+- Removida a apresentação separada de oposição/deficiência: o próprio valor numérico assinado representa a proficiência.
+- Componentes de atributo, listas de caminhos e opções do Inspector alinhados aos seis atributos oficiais.
+- Biblioteca e Aparência global agora compartilham o mesmo fluxo de aplicação de tema; mudar o tema atualiza os controles de ambas as áreas sem recriar a ficha.
+- Estado da Biblioteca (seção, busca, filtro e rolagem) preservado entre renderizações.
+
+**Validação:** regressões de catálogo, agrupamento, compatibilidade de proficiência e sincronização de temas adicionadas. A confirmação visual final ainda depende de teste manual no Foundry VTT 14.
+
 ## 1.0.0.28
 
 - Corrigido o visualizador de propriedades: removidos textos duplicados que causavam sobreposição entre nomes, caminhos e setas.
