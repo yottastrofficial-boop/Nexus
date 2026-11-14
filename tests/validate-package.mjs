@@ -26,7 +26,7 @@ const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
 const libraryView = await read("scripts/sheets/library-view.js");
 const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js");
-const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering].join("\n");
+const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.26", "Versão do manifesto incorreta");
