@@ -24,6 +24,8 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
+const libraryView = await read("scripts/sheets/library-view.js");
+const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js");
 const sheetCode = [sheet, sheetListeners, canvasInteractions].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
@@ -47,6 +49,11 @@ assert.match(propertyCatalog, /modifier/);
 assert.match(propertyPickerView, /data-property-category/);
 assert.match(panelWindow, /export class NexusPanelWindow/);
 assert.match(themeModule, /export const applyThemeTokens/);
+assert.match(libraryView, /export function mountLibraryView/);
+assert.match(actorSheetRendering, /export function renderActorSheetRichMedia/);
+assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveContent/);
+assert.match(sheet, /mountLibraryView\(this, panel/);
+assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({
   paths: ["attributes.for", "attributes.body", "attributes.body.checkbonus", "skills.athletics.proficient", "skills.atletismo.proficient"],
   nativeProperties: [{ key: "attributes.body", label: "Corpo", type: "attribute" }]
@@ -512,4 +519,4 @@ assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolve
 assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
 assert.match(css,/nexus-library-personal-preview/,"Itens pessoais devem usar miniaturas quadradas");
-assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades deve oferecer expansão e redução");
+assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades deve oferecer navegação hierárquica e pesquisa");
