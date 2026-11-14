@@ -6,7 +6,7 @@
 export const NEXUS_SKILLS = Object.freeze([
   { key: "athletics", legacyKey: "atletismo", name: "Atletismo", exib: "ATL", attributeKey: "for", attribute: "FOR", attributeName: "Força", description: "Esforços físicos intensos como correr, escalar, nadar, saltar, empurrar ou levantar peso." },
   { key: "endurance", legacyKey: "vigor", name: "Vigor", exib: "VIG", attributeKey: "for", attribute: "FOR", attributeName: "Força", description: "Suportar fadiga, dor, esforço prolongado e continuar agindo mesmo sob desgaste físico." },
-  { key: "combat", legacyKey: "combate", name: "Combate", exib: "COM", attributeKey: "for", attribute: "FOR", attributeName: "Força", description: "Uso eficaz de força bruta em confrontos, golpes diretos, disputa corporal e impacto." },
+  { key: "combat", legacyKey: "combate", name: "Combate", exib: "COM", attributeKey: "for", attribute: "FOR", attributeName: "Força", description: "Competência geral para testes de Combate definidos pelas regras do NEXUS." },
   { key: "acrobatics", legacyKey: "acrobacia", name: "Acrobacia", exib: "ACR", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Equilíbrio, cambalhotas, quedas controladas, manobras ágeis e movimentos precisos." },
   { key: "stealth", legacyKey: "furtividade", name: "Furtividade", exib: "FUR", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Mover-se sem ser percebido, esconder-se, evitar rastreamento ou reduzir ruídos." },
   { key: "sleight_of_hand", legacyKey: "astucia", name: "Astúcia", exib: "AST", attributeKey: "des", attribute: "DES", attributeName: "Destreza", description: "Abrir fechaduras, ladinagem, desarmar armadilhas, manipular mecanismos simples ou complexos." },
@@ -25,8 +25,8 @@ export const NEXUS_SKILLS = Object.freeze([
 ]);
 
 export const NEXUS_ATTRIBUTES = Object.freeze([
-  { key: "for", code: "FOR", exib: "FOR", name: "Força", nucleus: "body", description: "Poder físico; dano corpo a corpo, levantar ou quebrar objetos e resistir a esforços físicos." },
-  { key: "des", code: "DES", exib: "DES", name: "Destreza", nucleus: "body", description: "Agilidade, coordenação e reflexos; esquiva, precisão, furtividade e ações rápidas." },
+  { key: "for", code: "FOR", exib: "FOR", name: "Força", nucleus: "body", description: "Força física e capacidade de sustentar esforços, levantar ou mover objetos." },
+  { key: "des", code: "DES", exib: "DES", name: "Destreza", nucleus: "body", description: "Agilidade, coordenação, reflexos e precisão em ações delicadas ou rápidas." },
   { key: "sab", code: "SAB", exib: "SAB", name: "Sabedoria", nucleus: "mind", description: "Consciência prática e leitura do ambiente; percepção, bom senso e resistência a enganos." },
   { key: "int", code: "INT", exib: "INT", name: "Inteligência", nucleus: "mind", description: "Raciocínio, memória e conhecimento; enigmas, aprendizado, idiomas e estratégias." },
   { key: "car", code: "CAR", exib: "CAR", name: "Carisma", nucleus: "soul", description: "Presença, expressão e influência social; persuasão, liderança, negociação e conexões." },
