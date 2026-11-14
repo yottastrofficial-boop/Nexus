@@ -3,8 +3,8 @@ import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
-import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { buildPropertyPickerCatalog } from "../scripts/core/property-catalog.js";
+import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
+import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 
@@ -34,9 +34,9 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.28", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.28"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.28"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.29", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.29"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.29"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
@@ -58,6 +58,39 @@ assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar na
 assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
+assert.match(sheet, /NEXUS_ATTRIBUTES\.map/);
+assert.match(sheet, /normalizeNexusProficientLevel/);
+assert.match(sheet, /synchronizedSettings/);
+assert.match(sheet, /this\._updateLayoutSetting\(\{/);
+assert.match(libraryView, /sheet\._librarySection=key/);
+assert.match(libraryView, /sheet\._librarySearchQuery/);
+assert.match(sheetListeners, /await sheet\._applyThemePreset/);
+assert.match(template, /min="-1" max="1" step="1"/);
+assert.doesNotMatch(template, /skill\.opposed/);
+assert.doesNotMatch(css, /is-opposed/);
+
+assert.equal(NEXUS_ATTRIBUTES.length, 6, "O sistema deve ter seis atributos-base");
+assert.deepEqual(
+  NEXUS_ATTRIBUTES.map(attribute => attribute.nucleus),
+  ["body", "body", "mind", "mind", "soul", "soul"],
+  "Os seis atributos devem permanecer agrupados em Corpo, Mente e Alma"
+);
+const groupedProperties = buildPropertyPickerCatalog({
+  paths: [
+    "attributes.body", "attributes.mind", "attributes.soul",
+    "attributes.for", "attributes.des", "attributes.car",
+    "skills.athletics.opposed", "skills.athletics.proficientLevel", "skills.athletics.modifier"
+  ]
+});
+const attributeRoot = findPropertyPickerNode(groupedProperties, "attributes");
+assert.deepEqual([...attributeRoot.children.keys()].sort(), ["body", "mind", "soul"], "Atributos devem exibir somente os três núcleos no primeiro nível");
+const soulGroup = findPropertyPickerNode(groupedProperties, "attributes.soul");
+assert.equal(soulGroup.entry, null, "Alma deve ser um grupo, não um atributo numérico independente");
+assert.ok(soulGroup.children.has("car") && soulGroup.children.has("von"), "Carisma e Vontade devem ficar dentro de Alma");
+assert.ok(!groupedProperties.entries.some(entry => entry.path === "attributes.soul"), "O antigo caminho agregado de Alma não deve ser sugerido");
+const athleticsGroup = findPropertyPickerNode(groupedProperties, "skills.for.athletics");
+assert.ok(athleticsGroup.children.has("modifier") && athleticsGroup.children.has("proficientLevel"), "Perícias devem agrupar modificador e proficiência sob a perícia correta");
+assert.ok(!groupedProperties.entries.some(entry => entry.path === "skills.athletics.opposed"), "O estado opposed não deve ser oferecido como propriedade");
 assert.match(css, /\.nexus-panel-window \.window-header/);
 assert.match(css, /\.nexus-sheet \.nexus-canvas-scroll/);
 assert.match(panelWindow, /export class NexusPanelWindow/);
@@ -79,7 +112,7 @@ assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.body.
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.28/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.29/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -234,7 +267,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.28"));
+assert.ok(readme.includes("Versão 1.0.0.29"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheetCode, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -360,6 +393,14 @@ const negativeSkillActor = {
 assert.equal(getNexusSkillModifier(negativeSkillActor, "athletics").modifier, -5, "Atributos negativos devem permanecer negativos");
 assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, -2, "Proficiência negativa deve inverter o bônus de proficiência");
 assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Qualquer nível positivo deve conceder proficiência");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").proficientLevel, -1, "Níveis negativos legados devem ser normalizados para -1");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").proficientLevel, 1, "Níveis positivos legados devem ser normalizados para +1");
+assert.equal(normalizeNexusProficientLevel(-9), -1);
+assert.equal(normalizeNexusProficientLevel(9), 1);
+assert.equal(normalizeNexusProficientLevel(0), 0);
+assert.equal(Object.hasOwn(getNexusSkillModifier(negativeSkillActor, "stealth"), "opposed"), false, "O cálculo não deve manter estado opposed separado");
+const opposedLegacyRows = getNexusSkillRows({ system: { skills: { furtividade: { opposed: true } } } });
+assert.equal(opposedLegacyRows.find(skill => skill.key === "stealth").proficientLevel, -1, "O estado opposed antigo deve migrar para proficiência negativa");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficientLevel, 1, "Dados antigos devem ser lidos durante a migração");
 assert.match(sheetCode, /if \(kind === "number"\) \{ value = Number\(value\); if \(!Number\.isFinite\(value\)\) return; \}/, "Propriedades numéricas devem aceitar qualquer número finito, inclusive negativos");
