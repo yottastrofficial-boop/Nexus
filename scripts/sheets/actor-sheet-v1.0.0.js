@@ -10,7 +10,7 @@ import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./ac
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
-import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusResourceDefinition } from "../core/property-schema.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
@@ -95,75 +95,16 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (path === "name") return { value: actor?.name ?? "", path: "name" };
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
-  if (path === "identity.name") return { value: actor?.name ?? "", path, sourcePath: "name", virtual: true };
-  const attributeMatch = path.match(/^attributes\.([^.]+)\.(name|exib|value|description)$/);
-  if (attributeMatch) {
-    const definition = NEXUS_ATTRIBUTES.find(attribute => attribute.key === attributeMatch[1]);
-    if (definition) {
-      const member = attributeMatch[2];
-      const value = member === "name" ? definition.name
-        : member === "exib" ? definition.exib
-        : member === "description" ? definition.description
-        : Number(actor?.system?.attributes?.[definition.key]) || 0;
-      return { value, path, virtual: true, attribute: definition };
-    }
+  const rulebookProperty = getNexusRulebookPropertyValue(actor, path);
+  if (rulebookProperty.matched) {
+    return {
+      value: rulebookProperty.value,
+      path,
+      sourcePath: rulebookProperty.sourcePath,
+      virtual: true,
+      readOnly: rulebookProperty.readOnly ?? false
+    };
   }
-  const skillMatch = path.match(/^skills\.([^.]+)(?:\.(.+))?$/);
-  if (skillMatch) {
-    const definition = NEXUS_SKILLS.find(skill => skill.key === skillMatch[1] || skill.legacyKey === skillMatch[1]);
-    const row = definition ? getNexusSkillRows(actor).find(skill => skill.key === definition.key) : null;
-    const member = skillMatch[2];
-    if (row && (!member || Object.hasOwn(row, member))) {
-      const value = member ? row[member] : row;
-      return { value, path, virtual: true, skill: definition };
-    }
-  }
-  const resourceMatch = path.match(/^resources\.(pv|pm|pe)\.(name|exib)$/);
-  if (resourceMatch) {
-    const definition = getNexusResourceDefinition(resourceMatch[1]);
-    if (definition) return { value: resourceMatch[2] === "name" ? definition.name : definition.exib, path, virtual: true };
-  }
-  const system = actor?.system ?? {};
-  const level = Math.max(1, Number(system.identity?.level) || 1);
-  if (["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path)) {
-    return { value: getNexusBaseModifier(system), path, virtual: true, readOnly: true };
-  }
-  if (["combat.defense", "combat.defense.value"].includes(path)) {
-    const dexterity = Number(system.attributes?.des) || 0;
-    const modifier = Number(system.combat?.defenseModifier) || 0;
-    return { value: 8 + dexterity + modifier, path, virtual: true, readOnly: true };
-  }
-  if (path === "combat.initiative.value") {
-    return { value: Number(system.attributes?.des) || 0, path, virtual: true, readOnly: true };
-  }
-  if (["combat.movement", "combat.movement.value", "combat.desl"].includes(path)) {
-    return { value: Number(system.combat?.movement ?? system.combat?.desl) || 0, path, virtual: true };
-  }
-  if (path === "combat.movement.meters") {
-    return { value: (Number(system.combat?.movement ?? system.combat?.desl) || 0) * 1.5, path, virtual: true, readOnly: true };
-  }
-  if (["recovery.count.value", "combat.ddr"].includes(path)) {
-    return { value: level, path, virtual: true, readOnly: true };
-  }
-  if (path === "recovery.die.value") {
-    const die = [4, 6, 8, 10, 12][Math.min(4, Math.floor((level - 1) / 2))];
-    return { value: "d" + die, path, virtual: true, readOnly: true };
-  }
-  if (path === "recovery.available.value") {
-    return { value: Math.max(0, level - (Number(system.recovery?.spent) || 0)), path, virtual: true, readOnly: true };
-  }
-  if (path === "resources.pe.recovery.value") {
-    return { value: getNexusBaseModifier(system) * 4, path, virtual: true, readOnly: true };
-  }
-  const strength = Number(system.attributes?.for) || 0;
-  const loadBase = 5;
-  const loadBonus = strength * 2;
-  const loadCapacity = loadBase + loadBonus;
-  if (path === "encumbrance.base.value") return { value: loadBase, path, virtual: true, readOnly: true };
-  if (path === "encumbrance.bonus.value") return { value: loadBonus, path, virtual: true, readOnly: true };
-  if (path === "encumbrance.capacity.value") return { value: loadCapacity, path, virtual: true, readOnly: true };
-  if (path === "encumbrance.current.value") return { value: Number(system.encumbrance?.current) || 0, path, virtual: true };
-  if (path === "encumbrance.overloaded.value") return { value: (Number(system.encumbrance?.current) || 0) > loadCapacity, path, virtual: true, readOnly: true };
   const alias = resolveAliasPath(actor, path);
   const resolvedAliasTarget = alias.path && alias.path !== path && depth < 8
     ? resolveNexusBinding(actor, alias.path, depth + 1).value
