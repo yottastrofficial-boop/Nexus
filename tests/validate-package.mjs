@@ -6,6 +6,11 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
 import { buildPropertyPickerCatalog } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
+import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
+
+// Runtime smoke tests for the Canvas controller's early lifecycle guards.
+assert.doesNotThrow(() => activateCanvasInteractions({}, [], {}), "A render without a root element must exit safely");
+assert.doesNotThrow(() => activateCanvasInteractions({}, [{ querySelector: () => null }], {}), "A render without a Canvas must exit safely");
 
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
