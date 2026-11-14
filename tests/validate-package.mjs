@@ -17,15 +17,31 @@ const css = await read("styles/nexus-v1.0.0.css");
 const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
+const propertyCatalog = await read("scripts/core/property-catalog.js");
+const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
+const panelWindow = await read("scripts/sheets/panel-window.js");
+const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const themeModule = await read("scripts/core/theme.js");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.24", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.24"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.24"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.26", "Versão do manifesto incorreta");
+assert.ok(readme.includes("Versão 1.0.0.26"), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith("## 1.0.0.26"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
+assert.match(sheet, /activateActorSheetListeners\(this, html/);
+assert.match(sheet, /buildPropertyPickerCatalog/);
+assert.match(sheet, /renderPropertyPicker/);
+assert.match(sheet, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
+assert.match(sheetListeners, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
+assert.match(sheetListeners, /data-property-category/);
+assert.match(propertyCatalog, /NEXUS_SKILLS/);
+assert.match(propertyCatalog, /modifier/);
+assert.match(propertyPickerView, /data-property-category/);
+assert.match(panelWindow, /export class NexusPanelWindow/);
+assert.match(themeModule, /export const applyThemeTokens/);
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.24/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.26/nexus.zip"), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -180,7 +196,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.24"));
+assert.ok(readme.includes("Versão 1.0.0.26"));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
