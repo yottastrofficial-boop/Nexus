@@ -24,19 +24,22 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
+const sheetCode = [sheet, sheetListeners, canvasInteractions].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.26", "Versão do manifesto incorreta");
 assert.ok(readme.includes("Versão 1.0.0.26"), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith("## 1.0.0.26"), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
-assert.match(sheet, /activateActorSheetListeners\(this, html/);
-assert.match(sheet, /buildPropertyPickerCatalog/);
-assert.match(sheet, /renderPropertyPicker/);
-assert.match(sheet, /activateCanvasInteractions/);
+assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
+assert.match(sheetCode, /buildPropertyPickerCatalog/);
+assert.match(sheetCode, /renderPropertyPicker/);
+assert.match(sheetCode, /activateCanvasInteractions/);
+assert.ok(sheet.length < 300000, "A ficha principal deve permanecer como fachada modular, não como arquivo monolítico");
+assert.doesNotMatch(sheetCode, /data-property-list-expand|propertyListExpand/, "O controle antigo de expandir/reduzir deve ser removido");
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
 assert.match(canvasInteractions, /deactivateInteraction/);
-assert.match(sheet, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
+assert.match(sheetCode, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
 assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
 assert.match(sheetListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);
@@ -70,9 +73,9 @@ assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve 
 assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
 assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
-assert.match(sheet, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
-assert.match(sheet, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
-assert.doesNotMatch(sheet, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
+assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
+assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
+assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>1 elemento</, "A contagem inicial da Biblioteca deve refletir o único asset");
 assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
 
@@ -105,8 +108,8 @@ const migrationStart = sheet.indexOf("async _migrateLegacyActorData()", prepareS
 assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationStart > prepareStart, "Ciclo de preparação/migração da ficha não localizado");
 const prepareContext = sheet.slice(prepareStart, migrationStart);
 assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
-assert.match(sheet, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
-assert.match(sheet, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
+assert.match(sheetCode, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
+assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
 
 
 // Exercise the legacy migration manager with a minimal Actor-like document.
@@ -177,26 +180,26 @@ const mergedLayouts = mergeLayoutSnapshots(baseLayouts, desiredLayouts, latestLa
 assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-a").x, 30);
 assert.equal(mergedLayouts.principal.components.find(item => item.id === "component-b").y, 50);
 assert.equal(mergedLayouts.principal.width, 920);
-assert.match(sheet, /layoutReadSnapshots\.set\(layouts/);
-assert.match(sheet, /mergeLayoutSnapshots\(snapshot\.layouts, layouts, latest\)/);
-assert.match(sheet, /layoutWriteQueues\.get\(queueKey\)/);
+assert.match(sheetCode, /layoutReadSnapshots\.set\(layouts/);
+assert.match(sheetCode, /mergeLayoutSnapshots\(snapshot\.layouts, layouts, latest\)/);
+assert.match(sheetCode, /layoutWriteQueues\.get\(queueKey\)/);
 
-assert.match(sheet, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
-assert.match(sheet, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
+assert.match(sheetCode, /hasBorderRadius: component\.borderRadius !== undefined && component\.borderRadius !== null/);
+assert.match(sheetCode, /hasOpacity: component\.opacity !== undefined && component\.opacity !== null/);
 assert.match(template, /#if component\.hasBorderRadius/);
 assert.match(template, /#if component\.hasOpacity/);
 assert.match(template, /min="0" max="100" data-component-setting="opacity"/);
-assert.match(sheet, /component\.opacity=clamp\(Number\.isFinite\(opacity\)\?opacity:100,0,100\)/);
+assert.match(sheetCode, /component\.opacity=clamp\(Number\.isFinite\(opacity\)\?opacity:100,0,100\)/);
 
-assert.match(sheet, /\[data-component-local-value\]/);
-assert.match(sheet, /component\.localValue = String\(input\.value/);
-assert.match(sheet, /"text","localValue","placeholder"/);
+assert.match(sheetCode, /\[data-component-local-value\]/);
+assert.match(sheetCode, /component\.localValue = String\(input\.value/);
+assert.match(sheetCode, /"text","localValue","placeholder"/);
 assert.match(template, /data-component-local-value data-component-id="{{component\.id}}"/);
 assert.match(template, /{{component\.localValue}}/);
 
-assert.match(sheet, /\[data-table-cell\]/);
-assert.match(sheet, /component\.cells\[index\] = String\(input\.value\)/);
-assert.match(sheet, /querySelectorAll\("\[data-component-custom-binding\]"\)/);
+assert.match(sheetCode, /\[data-table-cell\]/);
+assert.match(sheetCode, /component\.cells\[index\] = String\(input\.value\)/);
+assert.match(sheetCode, /querySelectorAll\("\[data-component-custom-binding\]"\)/);
 assert.equal((template.match(/data-component-custom-binding/g) ?? []).length, 2);
 
 const blockOpen = (template.match(/\{\{#(?:if|unless|each|with)\b/g) ?? []).length;
@@ -213,17 +216,17 @@ assert.equal(depth, 0, "CSS contém bloco não fechado");
 
 assert.ok(readme.includes("Versão 1.0.0.26"));
 assert.match(changelog, /## 1\.0\.0\.7/);
-assert.match(sheet, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
-assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
-assert.match(sheet, /component\.actionType = \["roll","proficiency","resource-slider","toggle-component"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
+assert.match(sheetCode, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
+assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
+assert.match(sheetCode, /component\.actionType = \["roll","proficiency","resource-slider","toggle-component"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
-assert.match(sheet, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
-assert.match(sheet, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
-assert.match(sheet, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
-assert.match(sheet, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
+assert.match(sheetCode, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
+assert.match(sheetCode, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
+assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
+assert.match(sheetCode, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
 assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
-assert.match(sheet, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
-assert.match(sheet, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
+assert.match(sheetCode, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
+assert.match(sheetCode, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
 assert.match(template, /data-interaction-editor/, "O editor de fluxos deve existir no template");
@@ -232,11 +235,11 @@ assert.match(template, /data-tool-panel="behavior"/, "Comportamento deve possuir
 assert.match(template, /data-tool-panel="settings"/, "Configurações deve possuir um painel independente");
 assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportamento não deve permanecer dentro do Inspector");
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
-assert.match(sheet, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
-assert.match(sheet, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
-assert.match(sheet, /behavior: \[900, 600\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
-assert.match(sheet, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
-assert.match(sheet, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
+assert.match(sheetCode, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
+assert.match(sheetCode, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
+assert.match(sheetCode, /behavior: \[900, 600\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
+assert.match(sheetCode, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
+assert.match(sheetCode, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
 assert.match(interactions, /const guided=el\("div","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
@@ -246,9 +249,9 @@ assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
 
 assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
-assert.match(sheet, /remove\("is-selected", "is-group-inspecting", "is-selection-highlight"\)/, "A limpeza da seleção deve remover todos os estados visuais");
-assert.match(sheet, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "Os atalhos devem consultar o Canvas atual");
-assert.match(sheet, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
+assert.match(sheetCode, /remove\("is-selected", "is-group-inspecting", "is-selection-highlight"\)/, "A limpeza da seleção deve remover todos os estados visuais");
+assert.match(sheetCode, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "Os atalhos devem consultar o Canvas atual");
+assert.match(sheetCode, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
 assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
 assert.match(template, /data-text-style-target="heading"/, "A formatação deve permitir selecionar o título");
 assert.ok(interactions.includes("INTERACTION_ACTIONS"), "Ações devem ser definidas pelo motor, não pelo seletor antigo");
@@ -259,66 +262,66 @@ assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser edit�
 assert.match(css, /nexus-text-toolbar/);
 assert.match(css, /nexus-proficiency-control/);
 assert.match(css, /nexus-resource-slider-control/);
-assert.match(sheet, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
-assert.match(sheet, /const selectedGroupIds = new Set\(selectedGroups\.map\(group => group\.id\)\)/, "A seleção parcial não deve destacar os membros irmãos do grupo");
-assert.match(sheet, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
-assert.match(sheet, /_syncActorPortraitFromToken\(componentId\)/, "O retrato do Actor deve poder receber explicitamente a imagem do token");
+assert.match(sheetCode, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
+assert.match(sheetCode, /const selectedGroupIds = new Set\(selectedGroups\.map\(group => group\.id\)\)/, "A seleção parcial não deve destacar os membros irmãos do grupo");
+assert.match(sheetCode, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
+assert.match(sheetCode, /_syncActorPortraitFromToken\(componentId\)/, "O retrato do Actor deve poder receber explicitamente a imagem do token");
 assert.match(template, /data-sync-token-portrait/, "O Inspector deve oferecer sincronização explícita do retrato");
-assert.match(sheet, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipografia deve alcançar conteúdo interno e valores derivados");
+assert.match(sheetCode, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A tipografia deve alcançar conteúdo interno e valores derivados");
 assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
 console.log("NEXUS 1.0.0.7: validações estáticas aprovadas.");
 
-assert.match(sheet, /expandNexusRollAliases\(this\.actor, expandNexusPropertyExpressions\(formula\)\)/, "Fórmulas devem aceitar referências {{propriedade}} e aliases curtos como @DES");
-assert.match(sheet, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
-assert.match(sheet, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
-assert.match(sheet, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
-assert.doesNotMatch(sheet, /scheduleKeyboardMoveSave/, "A movimentação não deve depender de debounce por repetição de tecla");
-assert.match(sheet, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
+assert.match(sheetCode, /expandNexusRollAliases\(this\.actor, expandNexusPropertyExpressions\(formula\)\)/, "Fórmulas devem aceitar referências {{propriedade}} e aliases curtos como @DES");
+assert.match(sheetCode, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
+assert.match(sheetCode, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
+assert.match(sheetCode, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
+assert.doesNotMatch(sheetCode, /scheduleKeyboardMoveSave/, "A movimentação não deve depender de debounce por repetição de tecla");
+assert.match(sheetCode, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
 assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve representar os cards membros");
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
 assert.ok(interactions.includes("formula.length>500") || sheet.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
 assert.ok(interactions.includes('"roll"'), "O motor deve oferecer a ação de rolagem");
-assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"), "O editor deve restaurar os fluxos salvos");
-assert.ok(sheet.includes("applyInteractionEditorChange"), "O Inspector deve persistir as configurações de cada ação");
-assert.match(sheet, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
-assert.match(sheet, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
-assert.match(sheet, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
-assert.match(sheet, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
-assert.match(sheet, /is-grid/, "Grupos grandes devem usar uma miniatura em grade");
-assert.match(sheet, /nexus-library-saved-group-track/, "Pré-visualizações devem representar barras de recursos");
+assert.ok(sheetCode.includes("renderInteractionEditor(interactionEditor, one"), "O editor deve restaurar os fluxos salvos");
+assert.ok(sheetCode.includes("applyInteractionEditorChange"), "O Inspector deve persistir as configurações de cada ação");
+assert.match(sheetCode, /rollAliases/, "As sugestões devem incluir aliases curtos de exibição");
+assert.match(sheetCode, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
+assert.match(sheetCode, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
+assert.match(sheetCode, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
+assert.match(sheetCode, /is-grid/, "Grupos grandes devem usar uma miniatura em grade");
+assert.match(sheetCode, /nexus-library-saved-group-track/, "Pré-visualizações devem representar barras de recursos");
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
-assert.match(sheet, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
-assert.match(sheet, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "Campos próprios devem integrar os dados entregues à rolagem");
-assert.match(sheet, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
-assert.match(sheet, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
-assert.match(sheet, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
-assert.match(sheet, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
-assert.match(sheet, /scale<0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
+assert.match(sheetCode, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
+assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "Campos próprios devem integrar os dados entregues à rolagem");
+assert.match(sheetCode, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
+assert.match(sheetCode, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
+assert.match(sheetCode, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
+assert.match(sheetCode, /syncGroupBounds\(keyboardMoveAllElements, false\)/, "O movimento por teclado não deve recalcular conexões de cantos a cada frame");
+assert.match(sheetCode, /scale<0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
 
-assert.match(sheet, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
-assert.match(sheet, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
-assert.match(sheet, /system\.skills\.\-=\" \+ skill\.legacyKey/, "A migração deve remover a chave legada após consolidar o dado canônico");
-assert.match(sheet, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
+assert.match(sheetCode, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
+assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
+assert.match(sheetCode, /system\.skills\.\-=\" \+ skill\.legacyKey/, "A migração deve remover a chave legada após consolidar o dado canônico");
+assert.match(sheetCode, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
 assert.doesNotMatch(template, /Digite @ para consultar|Os quatro nomes são rótulos configuráveis|Exibe uma barra arrastável|Ao clicar neste card no modo de jogo/, "Dicas instrutivas do Inspector devem ser removidas");
 assert.doesNotMatch(template, /\splaceholder=|\stitle=/, "Placeholders e tooltips instrutivos não devem permanecer na ficha");
-assert.match(sheet, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
-assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\)/, "A proficiência deve aceitar níveis numéricos assinados");
+assert.match(sheetCode, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
+assert.match(sheetCode, /async _setSkillProficientLevel\(skillKey, rawLevel\)/, "A proficiência deve aceitar níveis numéricos assinados");
 assert.match(skills, /key: "athletics", legacyKey: "atletismo"/);
 assert.match(skills, /key: "instinct", legacyKey: "instinto"/);
 assert.equal(NEXUS_SKILLS.length, 18, "O catálogo deve conter 18 perícias");
 assert.equal(new Set(NEXUS_SKILLS.map(skill => skill.key)).size, 18, "As chaves técnicas das perícias devem ser únicas");
 assert.match(template, /data-skill-roll/);
 assert.match(template, /data-skill-proficient-level/);
-assert.ok(sheet.includes("executeTriggeredActions(component, eventName"), "Eventos de componentes devem passar pelo executor de interações");
+assert.ok(sheetCode.includes("executeTriggeredActions(component, eventName"), "Eventos de componentes devem passar pelo executor de interações");
 assert.match(template, /data-has-click-interaction/);
 assert.match(interactions, /triggers:source\.map\(normalizeTrigger\)/);
 assert.match(interactions, /flow\.actions/);
 assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
-assert.match(sheet, /_toggleTargetComponent/);
-assert.match(sheet, /setResourceFromTrack/);
+assert.match(sheetCode, /_toggleTargetComponent/);
+assert.match(sheetCode, /setResourceFromTrack/);
 console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");
 
 
@@ -339,7 +342,7 @@ assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, -2, 
 assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Qualquer nível positivo deve conceder proficiência");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficientLevel, 1, "Dados antigos devem ser lidos durante a migração");
-assert.match(sheet, /if \(kind === "number"\) \{ value = Number\(value\); if \(!Number\.isFinite\(value\)\) return; \}/, "Propriedades numéricas devem aceitar qualquer número finito, inclusive negativos");
+assert.match(sheetCode, /if \(kind === "number"\) \{ value = Number\(value\); if \(!Number\.isFinite\(value\)\) return; \}/, "Propriedades numéricas devem aceitar qualquer número finito, inclusive negativos");
 
 // Trigger -> Action -> Configuration pipeline.
 const legacyRollActions = getTriggeredActions({ actionType: "roll", rollFormula: "1d20 + 3" }, "click");
@@ -387,18 +390,18 @@ assert.equal(editorDraft.interactions[0].triggers[1].event, "rightClick");
 applyInteractionEditorCommand(editorDraft, "move-action", { interactionId: flowId, actionIndex: 0, direction: 1 });
 assert.equal(editorDraft.interactions[0].actions[1].type, "roll");
 assert.equal(getComponentInteractions(multiFlowComponent)[0].execution.onError, "continue");
-assert.ok(sheet.includes("renderInteractionEditor(interactionEditor, one"));
-assert.ok(sheet.includes("data-interaction-action"));
+assert.ok(sheetCode.includes("renderInteractionEditor(interactionEditor, one"));
+assert.ok(sheetCode.includes("data-interaction-action"));
 assert.ok(template.includes("data-interaction-editor"));
 assert.ok(!template.includes('data-component-setting="actionType"'));
-assert.ok(sheet.includes('addEventListener("contextmenu"'));
-assert.ok(sheet.includes('addEventListener("pointerover"'));
-assert.ok(sheet.includes("_executeComponentAction"));
+assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
+assert.ok(sheetCode.includes('addEventListener("pointerover"'));
+assert.ok(sheetCode.includes("_executeComponentAction"));
 console.log("NEXUS 1.0.0.15: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
 assert.ok(template.includes('data-inspector-tab="advanced"'), "O Inspector deve expor a área avançada");
-assert.ok(sheet.includes('["card", "appearance", "advanced"]'), "As três áreas restantes do Inspector devem ser navegáveis");
+assert.ok(sheetCode.includes('["card", "appearance", "advanced"]'), "As três áreas restantes do Inspector devem ser navegáveis");
 
 
 // Reusable behavior library: cloned flows receive independent identifiers.
@@ -408,18 +411,18 @@ assert.notEqual(templateClone.actions[0].id,editorDraft.interactions[0].actions[
 assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer um fluxo especial de rolagem de perícia");
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
-assert.ok(sheet.includes("behavior: [900, 600]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
-assert.ok(sheet.includes("component: [400, 600]"), "Propriedades deve seguir a geometria compacta dos painéis");
-assert.ok(sheet.includes("style: [400, 600]") && sheet.includes("layers: [400, 600]") && sheet.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
-assert.ok(sheet.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
-assert.ok(sheet.includes("library: [900, 600]") && sheet.includes("behavior: [900, 600]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
-assert.ok(sheet.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
-assert.ok(sheet.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
-assert.ok(sheet.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
-assert.ok(sheet.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
-assert.ok(sheet.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
-assert.ok(sheet.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
-assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
+assert.ok(sheetCode.includes("behavior: [900, 600]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
+assert.ok(sheetCode.includes("component: [400, 600]"), "Propriedades deve seguir a geometria compacta dos painéis");
+assert.ok(sheetCode.includes("style: [400, 600]") && sheet.includes("layers: [400, 600]") && sheet.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
+assert.ok(sheetCode.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
+assert.ok(sheetCode.includes("library: [900, 600]") && sheet.includes("behavior: [900, 600]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
+assert.ok(sheetCode.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
+assert.ok(sheetCode.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
+assert.ok(sheetCode.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
+assert.ok(sheetCode.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
+assert.ok(sheetCode.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
+assert.ok(sheetCode.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
+assert.ok(sheetCode.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
 assert.ok(interactions.includes("nexus-interaction-condition-group"), "Condições devem possuir grupo dedicado");
@@ -453,8 +456,8 @@ assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
 assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.formula,"1d20");
 assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
 delete globalThis.game;
-assert.match(sheet,/config\.mode === "skill"/);
-assert.match(sheet,/getInteractionLibrary\(this\.actor\)/);
+assert.match(sheetCode,/config\.mode === "skill"/);
+assert.match(sheetCode,/getInteractionLibrary\(this\.actor\)/);
 assert.match(interactions,/nexus-interaction-guided/);
 assert.match(interactions,/Salvar na biblioteca/);
 assert.match(css,/nexus-interaction-summary/);
@@ -479,7 +482,7 @@ assert.ok(!template.includes("nexus-behavior-header"), "O cabeçalho redundante 
 assert.match(interactions,/nexus-interaction-trigger-row/, "Gatilhos devem usar seletor direto dentro de cartão");
 assert.match(interactions,/Combinar condições/, "Combinação E/OU deve ter seletor próprio e compacto");
 assert.match(interactions,/nexus-interaction-action-active/, "O estado Ativa deve ficar junto ao título da ação");
-assert.match(sheet,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
+assert.match(sheetCode,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
 assert.match(css,/--nexus-scrollbar-thumb-hover/, "Temas devem centralizar estados das barras de rolagem");
 assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"), "Color pickers devem ter distribuição previsível");
 
@@ -491,21 +494,21 @@ assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-item
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
 assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
-assert.match(sheet,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
-assert.ok(sheet.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
-assert.match(sheet,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
-assert.match(sheet,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
+assert.match(sheetCode,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
+assert.ok(sheetCode.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
+assert.match(sheetCode,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
+assert.match(sheetCode,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
 
 assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
 assert.match(template,/data-library-section="flows"/,"Biblioteca deve possuir área própria para Fluxos");
 assert.match(template,/data-library-section="themes"/,"Biblioteca deve possuir área própria para Temas");
 assert.match(template,/data-library-scope="personal"/,"Biblioteca deve separar itens padrão dos itens pessoais");
 assert.match(template,/data-library-saved-components/,"Biblioteca deve listar componentes salvos individualmente");
-assert.match(sheet,/data-library-save-component/,"Biblioteca deve permitir salvar o componente selecionado");
-assert.match(sheet,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos");
-assert.match(sheet,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
-assert.match(sheet,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
-assert.match(sheet,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
+assert.match(sheetCode,/data-library-save-component/,"Biblioteca deve permitir salvar o componente selecionado");
+assert.match(sheetCode,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos");
+assert.match(sheetCode,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
+assert.match(sheetCode,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
+assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
 assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
 assert.match(css,/nexus-library-personal-preview/,"Itens pessoais devem usar miniaturas quadradas");
