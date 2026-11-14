@@ -1,3 +1,5 @@
+import { findBestAlignmentMatch } from "../core/canvas-geometry.js";
+
 /**
  * Canvas gestures, selection visuals, pointer interactions and keyboard controls.
  * The Actor Sheet remains responsible for invoking this controller.
@@ -89,21 +91,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       }
       return out;
     };
-    // Cada caixa usa nove pontos de referência. A grade é aplicada primeiro; o guia inteligente faz o ajuste fino depois.
-    const bestMatch = (sources, targets, axis, tolerance=7) => {
-      let best=null;
-      for(const source of sources) for(const own of anchors(source,axis)) for(const target of targets) for(const other of anchors(target,axis)) {
-        const delta = other - own;
-        if (Math.abs(delta) <= tolerance && (!best || Math.abs(delta) < Math.abs(best.delta))) {
-          const gapX = Math.max(0, target.x - (source.x + source.w), source.x - (target.x + target.w));
-          const gapY = Math.max(0, target.y - (source.y + source.h), source.y - (target.y + target.h));
-          const labelY = source.y + source.h <= target.y ? (source.y + source.h + target.y) / 2 : target.y + target.h <= source.y ? (target.y + target.h + source.y) / 2 : (Math.max(source.y, target.y) + Math.min(source.y + source.h, target.y + target.h)) / 2;
-          const labelX = source.x + source.w <= target.x ? (source.x + source.w + target.x) / 2 : target.x + target.w <= source.x ? (target.x + target.w + source.x) / 2 : (Math.max(source.x, target.x) + Math.min(source.x + source.w, target.x + target.w)) / 2;
-          best = { delta, pos: other, distance: axis === "x" ? gapY : gapX, labelAt: axis === "x" ? labelY : labelX };
-        }
-      }
-      return best;
-    };
+    // A busca binária preserva o critério de desempate anterior sem comparar todos os pares.
+    const bestMatch = (sources, targets, axis, tolerance = 7) =>
+      findBestAlignmentMatch(sources, targets, axis, tolerance);
     const alignMove = (starts, dx, dy, targets) => {
       const moved=starts.map(s=>({x:s.x+dx,y:s.y+dy,w:s.w,h:s.h}));
       const mx=bestMatch(moved,targets,"x"),my=bestMatch(moved,targets,"y");
