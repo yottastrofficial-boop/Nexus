@@ -5484,3 +5484,82 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-panel-window .nexus-library-tag,
   .nexus-library-panel .nexus-library-tag{flex:1 1 auto!important;width:100%!important}
 }
+
+
+/* 1.0.0.26 — seletor hierárquico e foco sem recorte. */
+.nexus-property-options {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  padding:5px!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:var(--nexus-scrollbar-thumb,var(--nexus-scroll-thumb,#52647b)) var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923))!important;
+  overscroll-behavior:contain;
+}
+.nexus-property-options::-webkit-scrollbar { width:9px; height:9px; }
+.nexus-property-options::-webkit-scrollbar-track { background:var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923)); border-radius:8px; }
+.nexus-property-options::-webkit-scrollbar-thumb { background:var(--nexus-scrollbar-thumb,var(--nexus-scroll-thumb,#52647b)); border:2px solid var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923)); border-radius:8px; }
+.nexus-property-options::-webkit-scrollbar-thumb:hover { background:var(--nexus-scrollbar-thumb-hover,var(--nexus-highlight-color,#78b7e8)); }
+.nexus-property-options-toolbar {
+  position:sticky!important;
+  top:-5px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:-5px -5px 5px!important;
+  padding:8px!important;
+  border-bottom:1px solid var(--nexus-panel-border,#43546a)!important;
+  background:var(--nexus-menu-bg,#202f40)!important;
+}
+.nexus-property-options-toolbar>strong { flex:1 1 auto; min-width:0; font-size:10px; }
+.nexus-property-options-toolbar .nexus-property-back {
+  flex:0 0 26px;
+  width:26px;
+  min-width:26px;
+  min-height:26px;
+  padding:0;
+  border:1px solid var(--nexus-panel-border,#43546a);
+  border-radius:5px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-card,#273443);
+  font-size:18px;
+  line-height:1;
+}
+.nexus-property-options-content { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.nexus-property-options .nexus-property-category {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  gap:2px 8px!important;
+  width:100%!important;
+  min-height:38px!important;
+  padding:7px 9px!important;
+  border:1px solid transparent!important;
+  border-radius:6px!important;
+  color:var(--nexus-panel-text,#e7edf5)!important;
+  background:transparent!important;
+  text-align:left!important;
+}
+.nexus-property-options .nexus-property-category:hover,
+.nexus-property-options .nexus-property-category:focus-visible {
+  border-color:var(--nexus-panel-accent,#78b7e8)!important;
+  background:color-mix(in srgb,var(--nexus-panel-accent,#78b7e8) 12%,transparent)!important;
+  outline:0!important;
+}
+.nexus-property-options .nexus-property-category>small {
+  grid-column:1;
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:9px;
+  overflow-wrap:anywhere;
+}
+.nexus-property-options .nexus-property-category>span { grid-column:2; grid-row:1/3; font-size:18px; color:var(--nexus-panel-muted,#9aadc2); }
+.nexus-property-options .nexus-property-option { min-height:34px!important; }
+.nexus-property-options-heading { padding:8px 8px 3px; color:var(--nexus-panel-muted,#9aadc2); font-size:9px; font-weight:700; }
+.nexus-property-options-empty { padding:12px 8px; color:var(--nexus-panel-muted,#9aadc2); font-size:10px; text-align:center; }
+.nexus-component:has(.nexus-component-content :focus-visible) { overflow:visible!important; z-index:2147482002!important; }
+.nexus-component-content:has(:focus-visible) { overflow:visible!important; }
+.nexus-component-content :is(input,textarea,select,[contenteditable="true"]):focus-visible { position:relative; z-index:2; outline-offset:2px!important; }
