@@ -123,6 +123,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     // Índices reutilizados durante os gestos; são reconstruídos quando a estrutura dos grupos muda.
     let membersByGroupId = new Map();
     let groupsById = new Map();
+    let groupSurfacesById = new Map();
     // Renderiza superfícies de grupo sem transformar os membros em um único bloco de dados.
     const renderGroups = () => {
       // Desmonta os contêineres anteriores sem perder os componentes; a reconstrução
@@ -143,6 +144,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const layouts = sheet._currentLayout?.groups ?? [];
       sheet._activeGroups = layouts;
       groupsById = new Map(layouts.map(group => [group.id, group]));
+      groupSurfacesById = new Map();
       const groupIdsByComponentId = new Map();
       membersByGroupId = new Map(layouts.map(group => [group.id, []]));
       for (const group of layouts) {
@@ -185,6 +187,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
         surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8), 0, 32)}px`);
         container.append(surface);
+        groupSurfacesById.set(group.id, surface);
         for (const element of members) {
           element.dataset.groupId = group.id;
           element.classList.add("is-group-member");
@@ -194,39 +197,70 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       }
     };
     const updateConnectedCorners = () => {
-      const corners = [
-        ["tl", r => ({x:r.left,y:r.top})], ["tr", r => ({x:r.right,y:r.top})],
-        ["br", r => ({x:r.right,y:r.bottom})], ["bl", r => ({x:r.left,y:r.bottom})]
-      ];
+      const cornerNames = ["tl", "tr", "br", "bl"];
       const apply = (nodes, prefix) => {
-        const squareClasses = corners.map(([name]) => `${prefix}-corner-square-${name}`);
+        const squareClasses = cornerNames.map(name => `${prefix}-corner-square-${name}`);
         nodes.forEach(node => node.classList.remove(...squareClasses));
-        const rects = nodes.filter(node => !node.hidden).map(node => ({node,rect:node.getBoundingClientRect()}));
+        const rects = nodes.filter(node => !node.hidden).map(node => {
+          const rect = node.getBoundingClientRect();
+          return {
+            node,
+            rect,
+            corners: [
+              { name: "tl", x: rect.left, y: rect.top },
+              { name: "tr", x: rect.right, y: rect.top },
+              { name: "br", x: rect.right, y: rect.bottom },
+              { name: "bl", x: rect.left, y: rect.bottom }
+            ]
+          };
+        });
         const tolerance = 2.5;
         const pointTouchesBorder = (point, rect) => {
-          const onHorizontal = (Math.abs(point.y-rect.top)<=tolerance || Math.abs(point.y-rect.bottom)<=tolerance) && point.x>=rect.left-tolerance && point.x<=rect.right+tolerance;
-          const onVertical = (Math.abs(point.x-rect.left)<=tolerance || Math.abs(point.x-rect.right)<=tolerance) && point.y>=rect.top-tolerance && point.y<=rect.bottom+tolerance;
+          const onHorizontal = (Math.abs(point.y - rect.top) <= tolerance || Math.abs(point.y - rect.bottom) <= tolerance)
+            && point.x >= rect.left - tolerance && point.x <= rect.right + tolerance;
+          const onVertical = (Math.abs(point.x - rect.left) <= tolerance || Math.abs(point.x - rect.right) <= tolerance)
+            && point.y >= rect.top - tolerance && point.y <= rect.bottom + tolerance;
           return onHorizontal || onVertical;
         };
-        for (let i=0;i<rects.length;i++) for (let j=0;j<rects.length;j++) {
-          if(i===j) continue;
-          const a=rects[i],b=rects[j];
-          // Componentes interagem apenas com componentes soltos ou do mesmo grupo.
-          // Superfícies de grupo interagem apenas com outras superfícies de grupo.
-          if(prefix==="nexus-component" && (a.node.dataset.groupId||null)!==(b.node.dataset.groupId||null)) continue;
-          if(prefix==="nexus-component" && (a.node.dataset.groupId||null)===(b.node.dataset.groupId||null) && a.node.dataset.groupId) {
-            const groupId=a.node.dataset.groupId;
-            const group = groupsById.get(groupId);
-            const groupSelected=!!group && (group.componentIds??[]).some(id=>sheet._selectedIds?.has(id));
-            if(!groupSelected && !sheet._nexusInteractionActive) continue;
+
+        const batches = [];
+        if (prefix === "nexus-component") {
+          const selectedIds = sheet._selectedIds ?? new Set();
+          const activeGroups = new Set();
+          if (!sheet._nexusInteractionActive) {
+            for (const [groupId, group] of groupsById) {
+              if ((group.componentIds ?? []).some(id => selectedIds.has(id))) activeGroups.add(groupId);
+            }
           }
-          for(const [name,getPoint] of corners){
-            if(pointTouchesBorder(getPoint(a.rect),b.rect)) a.node.classList.add(`${prefix}-corner-square-${name}`);
+          const byGroup = new Map();
+          for (const entry of rects) {
+            const groupId = entry.node.dataset.groupId || null;
+            if (groupId && !sheet._nexusInteractionActive && !activeGroups.has(groupId)) continue;
+            let batch = byGroup.get(groupId);
+            if (!batch) byGroup.set(groupId, batch = []);
+            batch.push(entry);
+          }
+          batches.push(...byGroup.values());
+        } else {
+          batches.push(rects);
+        }
+
+        for (const batch of batches) {
+          for (let i = 0; i < batch.length; i++) {
+            for (let j = i + 1; j < batch.length; j++) {
+              const a = batch[i], b = batch[j];
+              for (const corner of a.corners) {
+                if (pointTouchesBorder(corner, b.rect)) a.node.classList.add(`${prefix}-corner-square-${corner.name}`);
+              }
+              for (const corner of b.corners) {
+                if (pointTouchesBorder(corner, a.rect)) b.node.classList.add(`${prefix}-corner-square-${corner.name}`);
+              }
+            }
           }
         }
       };
-      apply(elements(),"nexus-component");
-      apply([...canvas.querySelectorAll(".nexus-group-surface")],"nexus-group");
+      apply(elements(), "nexus-component");
+      apply([...groupSurfacesById.values()], "nexus-group");
     };
     let cornerFrame = 0;
     const scheduleConnectedCorners = () => {
@@ -240,7 +274,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         const rs = members.map(rectOf), x = Math.min(...rs.map(r=>r.x)), y = Math.min(...rs.map(r=>r.y));
         const right = Math.max(...rs.map(r=>r.x+r.w)), bottom = Math.max(...rs.map(r=>r.y+r.h));
         Object.assign(g,{x,y,w:right-x,h:bottom-y});
-        const surface = canvas.querySelector(`.nexus-group-surface[data-group-id="${g.id}"]`);
+        const surface = groupSurfacesById.get(g.id);
         if (surface) {
           Object.assign(surface.style,{left:`${x}px`,top:`${y}px`,width:`${right-x}px`,height:`${bottom-y}px`});
           surface.style.setProperty("--nexus-group-bg",g.backgroundColor??sheet._currentLayout?.cardColor??"#273443");
@@ -303,11 +337,11 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const selectedIds = Array.from(ids ?? []).filter(Boolean);
       sheet._setSelection($(root), selectedIds);
       scheduleConnectedCorners();
-      canvas.querySelectorAll(".nexus-group-surface").forEach(surface => {
+      for (const surface of groupSurfacesById.values()) {
         const group = (sheet._activeGroups ?? []).find(item => item.id === surface.dataset.groupId);
         const hasSelectedMember = !!group && (group.componentIds ?? []).some(id => sheet._selectedIds?.has(id));
         surface.classList.toggle("is-selected", surface.dataset.groupId === sheet._selectedGroupId || hasSelectedMember);
-      });
+      }
     };
     setSelection([...sheet._selectedIds]);
     let lastComponentPointerDown = { id: null, at: 0 };
