@@ -41,6 +41,7 @@ Hooks.on("preCreateActor", (actor) => {
     identity: { concept: "", ancestry: "", lineage: "", legacy: "", talent: "", class: "", archetype: "", function: "", level: 1 },
     personality: { appearance: "", traits: "", flaws: "", bonds: "", ideals: "", motivation: "", alignment: { order: "", morality: "" } },
     recovery: { spent: 0 },
+    encumbrance: { current: 0 },
     conditions: [],
     notes: ""
   };
