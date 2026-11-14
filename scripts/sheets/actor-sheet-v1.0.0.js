@@ -1995,6 +1995,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
 
+      const saveComponentButton=target?.closest("[data-library-save-component]");
+      if(saveComponentButton&&libraryPanel.contains(saveComponentButton)){event.preventDefault();await this._saveSelectedLibraryComponent();return;}
       const savedComponentCard=target?.closest("[data-library-saved-component]");
       if(savedComponentCard&&libraryPanel.contains(savedComponentCard)){
         event.preventDefault();
