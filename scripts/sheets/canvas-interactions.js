@@ -667,8 +667,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       else {
         sheet._nexusInteractionActive = false;
         // Cliques fora de toda a interface encerram a seleção e o alvo de edição.
-        sheet._setSelection?.($(sheet.element ?? root), []);
         sheet._componentEditorTargetId = null;
+        sheet._setSelection?.($(sheet.element ?? root), []);
       }
     };
     root.addEventListener("pointerdown",activateInteraction,true);
