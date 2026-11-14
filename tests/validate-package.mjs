@@ -40,7 +40,7 @@ assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
 assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
 assert.match(sheet, /const availableFolders = NEXUS_LIBRARY_CATALOG\.categories \?\? \[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
-assert.match(sheet, /const folders = availableFolders\.map\(/, "A Biblioteca não deve manter pastas fixas de demonstração");
+assert.match(sheet, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheet, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>1 elemento</, "A contagem inicial da Biblioteca deve refletir o único asset");
 assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
