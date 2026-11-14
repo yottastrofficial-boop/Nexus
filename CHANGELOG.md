@@ -4,7 +4,7 @@
 - Adicionadas regressões de execução para renderizações sem elemento raiz e sem Canvas.
 - Atualizada a versão do pacote e o manifesto de download.
 
-**Validação:** a sintaxe JavaScript e os testes automatizados do pacote devem passar no CI antes da publicação. A validação de interface em uma instalação real do Foundry VTT 14 permanece necessária.
+**Validação:** verificação de sintaxe JavaScript e testes automatizados do pacote aprovados no GitHub Actions. A validação de interface em uma instalação real do Foundry VTT 14 permanece necessária.
 
 ## 1.0.0.26
 
