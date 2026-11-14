@@ -139,6 +139,9 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (["combat.movement", "combat.movement.value", "combat.desl"].includes(path)) {
     return { value: Number(system.combat?.movement ?? system.combat?.desl) || 0, path, virtual: true };
   }
+  if (path === "combat.movement.meters") {
+    return { value: (Number(system.combat?.movement ?? system.combat?.desl) || 0) * 1.5, path, virtual: true, readOnly: true };
+  }
   if (["recovery.count.value", "combat.ddr"].includes(path)) {
     return { value: level, path, virtual: true, readOnly: true };
   }
@@ -146,6 +149,21 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     const die = [4, 6, 8, 10, 12][Math.min(4, Math.floor((level - 1) / 2))];
     return { value: "d" + die, path, virtual: true, readOnly: true };
   }
+  if (path === "recovery.available.value") {
+    return { value: Math.max(0, level - (Number(system.recovery?.spent) || 0)), path, virtual: true, readOnly: true };
+  }
+  if (path === "resources.pe.recovery.value") {
+    return { value: getNexusBaseModifier(system) * 4, path, virtual: true, readOnly: true };
+  }
+  const strength = Number(system.attributes?.for) || 0;
+  const loadBase = 5;
+  const loadBonus = strength * 2;
+  const loadCapacity = loadBase + loadBonus;
+  if (path === "encumbrance.base.value") return { value: loadBase, path, virtual: true, readOnly: true };
+  if (path === "encumbrance.bonus.value") return { value: loadBonus, path, virtual: true, readOnly: true };
+  if (path === "encumbrance.capacity.value") return { value: loadCapacity, path, virtual: true, readOnly: true };
+  if (path === "encumbrance.current.value") return { value: Number(system.encumbrance?.current) || 0, path, virtual: true };
+  if (path === "encumbrance.overloaded.value") return { value: (Number(system.encumbrance?.current) || 0) > loadCapacity, path, virtual: true, readOnly: true };
   const alias = resolveAliasPath(actor, path);
   const resolvedAliasTarget = alias.path && alias.path !== path && depth < 8
     ? resolveNexusBinding(actor, alias.path, depth + 1).value
@@ -256,7 +274,7 @@ const getNativePropertyDefinitions = actor => {
       || NEXUS_SKILLS.some(skill => path === `skills.${skill.key}.proficientLevel` || path === `skills.${skill.key}.opposed`)
       || NEXUS_ATTRIBUTES.some(attribute => path === `attributes.${attribute.key}`)
       || ["combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"].includes(path)
-      || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+      || path === "encumbrance.current" || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
