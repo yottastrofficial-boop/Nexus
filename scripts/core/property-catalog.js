@@ -25,7 +25,7 @@ const NUCLEUS_LABELS = Object.freeze({ body: "Corpo", mind: "Mente", soul: "Alma
 const SEGMENT_LABELS = Object.freeze({
   pv: "Pontos de Vida",
   pm: "Pontos de Mana",
-  pe: "Pontos de Energia",
+  pe: "Pontos de Esforço",
   defense: "Defesa",
   movement: "Movimento",
   desl: "DESL",
