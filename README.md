@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.24 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.26 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.24-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.26-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Estado desta versão:** a 1.0.0.24 reconstrói o editor de comportamento sem alterar o motor de execução ou os fluxos já salvos. Gatilhos e condições receberam cartões alinhados, condições sugerem propriedades encontradas no ator, ações têm cabeçalho compacto com ativação e controles na mesma linha, e a Biblioteca recupera miniaturas maiores para elementos e composições personalizadas. As validações automatizadas passaram; a conferência visual dentro do Foundry VTT 14 continua pendente.
+> **Estado desta versão:** a 1.0.0.26 reconstrói o editor de comportamento sem alterar o motor de execução ou os fluxos já salvos. Gatilhos e condições receberam cartões alinhados, condições sugerem propriedades encontradas no ator, ações têm cabeçalho compacto com ativação e controles na mesma linha, e a Biblioteca recupera miniaturas maiores para elementos e composições personalizadas. As validações automatizadas passaram; a conferência visual dentro do Foundry VTT 14 continua pendente.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão publicada | 1.0.0.24 |
+| Versão publicada | 1.0.0.26 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -143,3 +143,16 @@ Sugestões, relatos de problemas e melhorias são bem-vindos. Antes de propor um
   <strong>NEXUS RPG</strong><br>
   <sub>Uma fundação flexível para experiências de RPG.</sub>
 </p>
+
+
+## Organização modular do código
+
+A ficha continua sendo a fachada que integra o Foundry VTT, mas suas responsabilidades estão sendo extraídas gradualmente para módulos menores. A primeira etapa separa:
+
+- `scripts/core/theme.js`: padrões de layout, tokens e aplicação de temas.
+- `scripts/core/property-catalog.js`: catálogo, nomes e árvore hierárquica de propriedades.
+- `scripts/sheets/panel-window.js`: janela flutuante dos painéis.
+- `scripts/sheets/property-picker-view.js`: renderização da navegação e das sugestões do seletor.
+- `scripts/core/skills.js`: fonte das perícias e dos valores derivados.
+
+A separação preserva os contratos entre módulos e o formato de dados já salvo nos Actors. Ela melhora a manutenção e permite testar cada domínio isoladamente; dividir arquivos, por si só, não reduz o trabalho executado pelo navegador. Otimizações de carregamento sob demanda serão avaliadas depois, com medições e sem comprometer a inicialização do Foundry.
