@@ -4,7 +4,8 @@ import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
-import { activateCanvasInteractions } from "./canvas-interactions.js";
+import { activateCanvasViewport } from "./canvas-viewport.js";
+import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
@@ -2909,7 +2910,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _onClose(options) {
-    this._nexusKeyCleanup?.(); this._nexusInspectorKeyCleanup?.();
+    this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
+    this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
+    this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
+    this._nexusViewportCleanup?.(); this._nexusViewportCleanup = null;
+    this._nexusInspectorKeyCleanup?.();
     if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
@@ -2918,6 +2923,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _activateCanvas(html) {
-    return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
+    const generation = this._nexusCanvasEditorGeneration;
+    this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
+    this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
+    this._nexusViewportCleanup?.(); this._nexusViewportCleanup = null;
+
+    const root = html?.[0];
+    if (!root) return;
+    activateCanvasViewport(this, html);
+    activateCanvasPlayInteractions(this, html);
+    if (this._mode !== "appearance") return;
+
+    return import("./canvas-interactions.js").then(({ activateCanvasInteractions }) => {
+      const liveRoot = this.element;
+      if (generation !== this._nexusCanvasEditorGeneration || this._mode !== "appearance" || !root.isConnected) return;
+      if (liveRoot && liveRoot !== root && !liveRoot.contains?.(root)) return;
+      return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    }).catch(error => console.error("NEXUS | Falha ao carregar o editor Canvas:", error));
   }
 }
