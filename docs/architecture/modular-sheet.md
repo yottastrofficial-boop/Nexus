@@ -29,7 +29,7 @@ scripts/
     actor-sheet-listeners.js  # Ligações de eventos e delegação
     panel-window.js           # Janela dos painéis flutuantes
     property-picker-view.js   # Renderização da navegação de propriedades
-    canvas-interactions.js    # Futuro: seleção, gestos, alinhamento e teclado
+    canvas-interactions.js    # Seleção, gestos, alinhamento e teclado
     library-view.js           # Futuro: Biblioteca e pré-visualizações
     inspector-view.js         # Futuro: Propriedades e Comportamento
     rendering.js              # Futuro: montagem e renderização dos componentes
@@ -44,6 +44,7 @@ scripts/
 - Catálogo hierárquico movido para `core/property-catalog.js`.
 - Renderização do seletor movida para `sheets/property-picker-view.js`.
 - Ligações de eventos da ficha movidas para `sheets/actor-sheet-listeners.js`.
+- Gestos, seleção, alinhamento, atalhos e interações do Canvas movidos para `sheets/canvas-interactions.js`.
 
 ### Próximas extrações
 
