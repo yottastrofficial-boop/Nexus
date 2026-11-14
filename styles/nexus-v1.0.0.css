@@ -5343,7 +5343,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-property-options .nexus-property-option strong{font-size:10px;font-weight:650}
 .nexus-property-options .nexus-property-option code{font-size:9px;color:var(--nexus-panel-muted,#9aadc2);overflow-wrap:anywhere}
 .nexus-property-options .nexus-property-option[hidden],.nexus-property-options-heading[hidden]{display:none!important}
-.nexus-property-options.is-expanded{max-height:440px!important}
 @media(max-width:700px){
  .nexus-panel-window .nexus-library-toolbar{grid-template-columns:minmax(0,1fr)!important}
  .nexus-library-workspace{grid-template-columns:minmax(0,1fr)!important}
