@@ -49,13 +49,9 @@ export function getNexusBaseModifier(actorOrSystem) {
 function getStoredProficientLevel(system, skill) {
   const current = system.skills?.[skill.key];
   const legacy = system.skills?.[skill.legacyKey];
-  const stored = current?.proficientLevel
-    ?? current?.proficiency
-    ?? current?.proficient
-    ?? legacy?.proficientLevel
-    ?? legacy?.proficiency
-    ?? legacy?.proficient
-    ?? 0;
+  const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
+  const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
+  const stored = current?.proficientLevel ?? currentLegacyLevel ?? legacyLevel ?? 0;
   return normalizeNexusProficientLevel(stored);
 }
 
