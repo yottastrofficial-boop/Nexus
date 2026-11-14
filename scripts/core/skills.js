@@ -33,6 +33,13 @@ export const NEXUS_ATTRIBUTES = Object.freeze([
   { key: "von", code: "VON", name: "Vontade", nucleus: "soul" }
 ]);
 
+export function normalizeNexusProficientLevel(rawLevel) {
+  if (rawLevel === true) return 1;
+  if (rawLevel === false || rawLevel === null || rawLevel === undefined || rawLevel === "") return 0;
+  const value = Number(rawLevel);
+  return Number.isFinite(value) ? Math.max(-1, Math.min(1, Math.round(value))) : 0;
+}
+
 export function getNexusBaseModifier(actorOrSystem) {
   const system = actorOrSystem?.system ?? actorOrSystem ?? {};
   const level = Math.max(1, Number(system.identity?.level) || 1);
@@ -49,10 +56,7 @@ function getStoredProficientLevel(system, skill) {
     ?? legacy?.proficiency
     ?? legacy?.proficient
     ?? 0;
-  if (stored === true) return 1;
-  if (stored === false || stored === null || stored === undefined || stored === "") return 0;
-  const value = Number(stored);
-  return Number.isFinite(value) ? value : 0;
+  return normalizeNexusProficientLevel(stored);
 }
 
 export function getNexusSkillRows(actor) {
@@ -62,18 +66,14 @@ export function getNexusSkillRows(actor) {
     const rawAttribute = Number(system.attributes?.[skill.attributeKey]);
     const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
     const proficientLevel = getStoredProficientLevel(system, skill);
-    const proficiencySign = Math.sign(proficientLevel);
-    const bonus = proficiencySign * baseModifier;
+    const bonus = proficientLevel * baseModifier;
     const modifier = attributeValue + bonus;
     const proficient = proficientLevel > 0;
-    const opposed = proficientLevel < 0;
     return {
       ...skill,
       attributeValue,
       proficientLevel,
       proficient,
-      opposed,
-      proficiency: proficient ? "P" : opposed ? "−P" : "—",
       modifier,
       value: modifier >= 0 ? "+" + modifier : String(modifier),
       bonus
@@ -89,12 +89,11 @@ export function getNexusSkillModifier(actor, skillKey) {
   const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
   const proficientLevel = getStoredProficientLevel(system, skill);
   const baseModifier = getNexusBaseModifier(system);
-  const bonus = Math.sign(proficientLevel) * baseModifier;
+  const bonus = proficientLevel * baseModifier;
   return {
     skill,
     proficientLevel,
     proficient: proficientLevel > 0,
-    opposed: proficientLevel < 0,
     attributeValue,
     baseModifier,
     bonus,
