@@ -76,9 +76,17 @@ export async function migrateLegacyActorData({
     if (!Array.isArray(system.conditions)) updates["system.conditions"] = [];
     if (!system.recovery || typeof system.recovery !== "object") updates["system.recovery"] = { spent: 0 };
     else if (system.recovery.spent === undefined) updates["system.recovery"] = { ...system.recovery, spent: 0 };
+    if (!system.encumbrance || typeof system.encumbrance !== "object") updates["system.encumbrance"] = { current: 0 };
+    else if (system.encumbrance.current === undefined) updates["system.encumbrance"] = { ...system.encumbrance, current: 0 };
 
     if (Object.keys(updates).length) {
       await actor.update(updates);
+      propertiesMigrated = true;
+      changed = true;
+    }
+    const legacyNativeProperties = actor.getFlag("nexus", "nativeProperties");
+    if (Array.isArray(legacyNativeProperties) && legacyNativeProperties.length) {
+      await actor.setFlag("nexus", "nativeProperties", []);
       propertiesMigrated = true;
       changed = true;
     }
