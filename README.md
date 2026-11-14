@@ -153,6 +153,8 @@ A ficha continua sendo a fachada que integra o Foundry VTT, mas suas responsabil
 - `scripts/core/property-catalog.js`: catálogo, nomes e árvore hierárquica de propriedades.
 - `scripts/sheets/panel-window.js`: janela flutuante dos painéis.
 - `scripts/sheets/property-picker-view.js`: renderização da navegação e das sugestões do seletor.
+- `scripts/sheets/actor-sheet-listeners.js`: ligações de eventos separadas da classe principal.
+- `scripts/sheets/canvas-interactions.js`: gestos, seleção, teclado e interações do Canvas.
 - `scripts/core/skills.js`: fonte das perícias e dos valores derivados.
 
 A separação preserva os contratos entre módulos e o formato de dados já salvo nos Actors. Ela melhora a manutenção e permite testar cada domínio isoladamente; dividir arquivos, por si só, não reduz o trabalho executado pelo navegador. Otimizações de carregamento sob demanda serão avaliadas depois, com medições e sem comprometer a inicialização do Foundry.
