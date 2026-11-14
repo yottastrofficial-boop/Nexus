@@ -35,8 +35,8 @@ Hooks.on("preCreateActor", (actor) => {
       pm: { value: 0, max: 0 },
       pe: { value: 0, max: 0 }
     },
-    attributes: { body: 0, mind: 0, soul: 0, for: 0, des: 0, sab: 0, int: 0, car: 0, von: 0 },
-    skills: Object.fromEntries(NEXUS_SKILLS.map(skill => [skill.key, { proficient: false }])),
+    attributes: { for: 0, des: 0, sab: 0, int: 0, car: 0, von: 0 },
+    skills: Object.fromEntries(NEXUS_SKILLS.map(skill => [skill.key, { proficientLevel: 0 }])),
     combat: { defense: 10, movement: 6, desl: 0, ddr: 0, mb: 0 },
     identity: { lineage: "", legacy: "", level: 1 },
     notes: ""
