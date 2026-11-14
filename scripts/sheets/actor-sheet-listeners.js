@@ -279,7 +279,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     html.find("[data-alias-create]").on("click", async event => {
       const panel = event.currentTarget.closest(".nexus-alias-manager");
       const label = panel?.querySelector("[data-alias-new-name]")?.value.trim();
-      const type = panel?.querySelector("[data-alias-new-type]")?.value || "custom";
+      const type = panel?.querySelector("[data-alias-new-type]")?.value || "for";
       const valueType = panel?.querySelector("[data-alias-value-type]")?.value || "text";
       const source = panel?.querySelector("[data-alias-source]")?.value || "custom";
       const targetPath = panel?.querySelector("[data-alias-target]")?.value.trim() || "";
@@ -915,8 +915,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
 
         if (type === "sheet-attribute") {
-          const label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Corpo";
-          const path = detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.body";
+          const label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Força";
+          const path = detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.for";
           const preset = detail.querySelector("[data-attribute-preset]")?.value || "custom";
           const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === detail.dataset.selectedAssetKey);
           const template = {
@@ -1337,7 +1337,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="labelPosition") component.labelPosition=["top-left","top-center","side-left"].includes(input.value)?input.value:"top-left";
       else if(key==="format") { component.format=input.value; }
       else if(key==="attributePreset") {
-        const presets = { body: ["Corpo", "attributes.body"], mind: ["Mente", "attributes.mind"], soul: ["Alma", "attributes.soul"], for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
+        const presets = { for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
         component.attributePreset = input.value;
         if (presets[input.value]) { component.text = presets[input.value][0]; component.dataPath = presets[input.value][1]; }
       }
@@ -1501,7 +1501,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(kind==="typography") { delete component.fontSize; delete component.fontFamily; delete component.headingFontSize; delete component.headingFontFamily; delete component.contentStyle; delete component.headingStyle; delete component.labelPosition; }
       if(kind==="token") { delete component.tokenImage; delete component.tokenFallback; }
       if(kind==="resource") Object.assign(component,{sheetContent1:component.sheetCode??"PV",sheetContent2:({PV:"❤️",PM:"💧",PE:"⚡"})[String(component.sheetCode??"PV").toUpperCase()]??"✦",sheetColor:({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b",REC:"#8b9bad"})[String(component.sheetCode??"PV").toUpperCase()]??"#8b9bad",sheetTrackColor:"#080d14",sheetOrientation:"horizontal",previewCurrent:32,previewMax:40});
-      if(kind==="attribute") { Object.assign(component,{text:"Corpo",dataPath:"attributes.body",attributePreset:"body"}); }
+      if(kind==="attribute") { Object.assign(component,{text:"Força",dataPath:"attributes.for",attributePreset:"for"}); }
       await sheet._writeLayouts(layouts,active); sheet._currentLayout = layout;
       const componentNode = sheet.element?.querySelector(`.nexus-component[data-id="${CSS.escape(component.id)}"]`);
       if (componentNode && kind === "typography") {
