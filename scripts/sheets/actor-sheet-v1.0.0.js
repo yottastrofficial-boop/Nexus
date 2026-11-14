@@ -4222,12 +4222,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=asset.label;meta.append(label);card.append(preview,meta);assets.append(card);
     }
     const themes=panel.querySelector("[data-library-themes]");
-    for(const theme of NEXUS_LIBRARY_CATALOG.themes??[]){
+    const themeLabels={"nexus-dark":"NEXUS Escuro",midnight:"Meia-noite",light:"Claro",steam:"Steam",linux:"Linux",medieval:"Medieval","pixel-art":"Pixel Art"};
+    for(const [id,palette] of Object.entries(THEME_PALETTES)){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
-      card.dataset.libraryAsset=`${theme.label} ${theme.keywords??""}`.toLocaleLowerCase("pt-BR");card.dataset.libraryTheme=theme.id;
-      const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";preview.dataset.themeSwatch=theme.id;
-      for(const color of theme.colors??[]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
-      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=theme.label;meta.append(label);card.append(preview,meta);themes?.append(card);
+      const labelText=themeLabels[id]??id;card.dataset.libraryAsset=labelText.toLocaleLowerCase("pt-BR");card.dataset.libraryTheme=id;
+      const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";preview.dataset.themeSwatch=id;
+      for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
     }
     const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
     const flows=getInteractionLibrary(this.actor);
@@ -4245,7 +4246,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
       if(key==="assets")this._libraryApplyFilter?.();
-      if(key==="themes")panel.querySelector("[data-library-count]").textContent=`${(NEXUS_LIBRARY_CATALOG.themes??[]).length} temas`;
+      if(key==="themes")panel.querySelector("[data-library-count]").textContent=`${Object.keys(THEME_PALETTES).length} temas`;
       if(key==="flows")panel.querySelector("[data-library-count]").textContent=`${flows.length} ${flows.length===1?"fluxo":"fluxos"}`;
     };
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
