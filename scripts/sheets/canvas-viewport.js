@@ -2,6 +2,8 @@
  * Lightweight Canvas sizing for every sheet mode.
  * The editor controller is loaded only when appearance mode is opened.
  */
+import { applyThemeTokens } from "../core/theme.js";
+
 export function activateCanvasViewport(sheet, html) {
   sheet._nexusViewportCleanup?.();
   sheet._nexusViewportCleanup = null;
@@ -10,6 +12,22 @@ export function activateCanvasViewport(sheet, html) {
   const canvas = root?.querySelector?.(".nexus-canvas");
   const stage = root?.querySelector?.(".nexus-canvas-stage");
   if (!canvas || !stage) return;
+
+  const layout = sheet._currentLayout ?? {};
+  applyThemeTokens(root.querySelector(".nexus-sheet"), layout);
+  canvas.style.setProperty("--nexus-font-size", `${layout.fontSize ?? 13}px`);
+  canvas.style.setProperty("--nexus-secondary-font-size", `${layout.secondaryFontSize ?? 11}px`);
+  canvas.style.setProperty("--nexus-value-font-size", `${layout.valueFontSize ?? 20}px`);
+  canvas.style.setProperty("--nexus-canvas-color", layout.canvasColor ?? "#171f2a");
+  canvas.style.setProperty("--nexus-card-color", layout.cardColor ?? "#273443");
+  canvas.style.setProperty("--nexus-accent-color", layout.accentColor ?? "#52647b");
+  canvas.style.setProperty("--nexus-highlight-color", layout.highlightColor ?? "#78b7e8");
+  canvas.style.setProperty("--nexus-button-color", layout.buttonColor ?? "#315b7d");
+  applyThemeTokens(canvas, layout);
+  const appWindow = root.closest(".application, .window-app");
+  appWindow?.style.setProperty("--nexus-font-family", `"${layout.fontFamily ?? "Inter"}", sans-serif`);
+  appWindow?.style.setProperty("--nexus-highlight-color", layout.highlightColor ?? "#78b7e8");
+  appWindow?.style.setProperty("--nexus-button-color", layout.buttonColor ?? "#315b7d");
 
   const fitCanvas = () => {
     if (!stage.isConnected || !canvas.isConnected) return;
