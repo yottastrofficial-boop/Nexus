@@ -4,6 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
@@ -50,14 +51,17 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 const propertyCatalog = await read("scripts/core/property-catalog.js");
+const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
+const canvasViewport = await read("scripts/sheets/canvas-viewport.js");
+const canvasPlayInteractions = await read("scripts/sheets/canvas-play-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
 const libraryView = await read("scripts/sheets/library-view.js");
 const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js");
-const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
+const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.31", "Versão do manifesto incorreta");
@@ -86,14 +90,54 @@ assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar na
 assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
-assert.match(sheet, /NEXUS_ATTRIBUTES\.map/);
+assert.match(sheet, /NEXUS_RULEBOOK_PROPERTY_DEFINITIONS/);
+assert.equal(NEXUS_PROPERTY_SCHEMA_VERSION, 2);
+assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.name"));
+// Canonical property values and derived data.
+const rulebookActor = {
+  name: "Ayla",
+  system: {
+    identity: { level: 5 },
+    attributes: { for: 2, des: 1, sab: 0, int: 0, car: 0, von: 0 },
+    skills: { stealth: { proficient: true } },
+    resources: { pv: { value: 12, max: 15, temporary: 2 }, pm: { value: 4, max: 8, temporary: 0 }, pe: { value: 6, max: 10, temporary: 0 } },
+    combat: { defenseModifier: 1, movement: 6 },
+    recovery: { spent: 2 },
+    encumbrance: { current: 8 }
+  }
+};
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.name").value, "Furtividade");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.exib").value, "FUR");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.value").value, 4);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.proficient").value, true);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").value, 2);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.current.value").value, 8);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "identity.name").value, "Ayla");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").matched, false);
+
+assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.exib"));
+assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.value"));
+assert.ok(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.some(definition => definition.path === "combat.defense.value" && definition.derived));
 assert.match(sheet, /normalizeNexusProficientLevel/);
 assert.match(sheet, /synchronizedSettings/);
 assert.match(sheet, /this\._updateLayoutSetting\(\{/);
 assert.match(libraryView, /sheet\._librarySection=key/);
 assert.match(libraryView, /sheet\._librarySearchQuery/);
 assert.match(sheetListeners, /await sheet\._applyThemePreset/);
-assert.match(template, /min="-1" max="1" step="1"/);
+assert.match(template, /type="checkbox"[^>]*data-skill-proficient-level/);
 assert.doesNotMatch(template, /skill\.opposed/);
 assert.doesNotMatch(css, /is-opposed/);
 
@@ -105,9 +149,9 @@ assert.deepEqual(
 );
 const groupedProperties = buildPropertyPickerCatalog({
   paths: [
-    "attributes.body", "attributes.mind", "attributes.soul",
     "attributes.for", "attributes.des", "attributes.car",
-    "skills.athletics.opposed", "skills.athletics.proficientLevel", "skills.athletics.modifier"
+    "skills.athletics.name", "skills.athletics.exib", "skills.athletics.value",
+    "skills.athletics.proficient", "skills.athletics.opposed", "skills.athletics.proficientLevel"
   ]
 });
 const attributeRoot = findPropertyPickerNode(groupedProperties, "attributes");
@@ -117,7 +161,8 @@ assert.equal(soulGroup.entry, null, "Alma deve ser um grupo, não um atributo nu
 assert.ok(soulGroup.children.has("car") && soulGroup.children.has("von"), "Carisma e Vontade devem ficar dentro de Alma");
 assert.ok(!groupedProperties.entries.some(entry => entry.path === "attributes.soul"), "O antigo caminho agregado de Alma não deve ser sugerido");
 const athleticsGroup = findPropertyPickerNode(groupedProperties, "skills.for.athletics");
-assert.ok(athleticsGroup.children.has("modifier") && athleticsGroup.children.has("proficientLevel"), "Perícias devem agrupar modificador e proficiência sob a perícia correta");
+assert.ok(["name", "exib", "value", "proficient"].every(field => athleticsGroup.children.has(field)), "Perícias devem expor identificação, valor calculado e proficiência sob a perícia correta");
+assert.ok(!athleticsGroup.children.has("opposed") && !athleticsGroup.children.has("proficientLevel"), "Estados antigos de proficiência não devem aparecer");
 assert.ok(!groupedProperties.entries.some(entry => entry.path === "skills.athletics.opposed"), "O estado opposed não deve ser oferecido como propriedade");
 assert.match(css, /\.nexus-panel-window \.window-header/);
 assert.match(css, /\.nexus-sheet \.nexus-canvas-scroll/);
@@ -129,17 +174,17 @@ assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveConte
 assert.match(sheet, /mountLibraryView\(this, panel/);
 assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({
-  paths: ["attributes.for", "attributes.body", "attributes.for.checkbonus", "skills.athletics.modifier", "skills.atletismo.modifier", "skills.athletics.proficient", "skills.atletismo.proficient", "identity.name", "identity.level"],
-  nativeProperties: [{ key: "attributes.body", label: "Corpo", type: "attribute" }]
+  paths: ["attributes.for", "attributes.for.value", "attributes.for.name", "attributes.body", "attributes.for.checkbonus", "skills.athletics.value", "skills.atletismo.value", "skills.athletics.proficient", "skills.atletismo.proficient", "identity.name", "identity.level"]
 });
 assert.equal(propertyTree.root.children.get("attributes").label, "Atributos");
 assert.equal(propertyTree.root.children.get("skills").label, "Perícias");
 assert.equal(propertyTree.root.children.get("skills").children.get("for").children.get("athletics").label, "Atletismo");
-assert.equal(propertyTree.entries.filter(entry => entry.path === "skills.athletics.modifier").length, 1, "Chaves legadas de perícia devem ser canonicalizadas sem duplicação");
-assert.equal(propertyTree.entries.some(entry => entry.path === "skills.athletics.proficient"), false, "O booleano proficient redundante não deve ser oferecido");
+assert.equal(propertyTree.entries.filter(entry => entry.path === "skills.athletics.value").length, 1, "Chaves legadas de perícia devem ser canonicalizadas sem duplicação");
+assert.equal(propertyTree.entries.some(entry => entry.path === "skills.athletics.name"), true, "Metadados de perícia devem ser propriedades selecionáveis");
+assert.equal(propertyTree.entries.some(entry => entry.path === "skills.athletics.proficient"), true, "Proficiência binária deve ser uma propriedade selecionável");
 assert.equal(propertyTree.entries.some(entry => entry.path === "attributes.body.checkbonus"), false, "Configuração de núcleos legados não deve aparecer como propriedade");
-assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.checkbonus").label, "Bônus de teste");
-assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
+assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.value").label, "Valor");
+assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.name").label, "Nome");
 assert.equal(propertyTree.entries.some(entry => entry.path === "identity.name"), false, "O nome do Actor não deve duplicar identity.name");
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
@@ -241,7 +286,72 @@ assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
 const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
+
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
+
+// Rulebook property migration: signed proficiency and stored derived combat
+// values are normalized once, while custom final values are preserved as modifiers.
+const legacyPropertyActor = {
+  system: {
+    identity: { level: 4 },
+    attributes: { des: 1 },
+    skills: {
+      athletics: { proficientLevel: 1 },
+      furtividade: { opposed: true }
+    },
+    combat: { defense: 15, movement: 6, mb: 2, ddr: 4, desl: 5 },
+    resources: { pv: { value: 12, max: 12 } }
+  },
+  flags: { nexus: { activeLayout: "principal", aliases: [], customData: {}, nativeProperties: [{ id: "core.resource.pv", label: "PV antigo" }] } },
+  updateCount: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) {
+    this.flags[scope] ??= {};
+    this.flags[scope][key] = structuredClone(value);
+  },
+  async update(changes) {
+    for (const [path, value] of Object.entries(changes)) {
+      const parts = path.split(".");
+      const leaf = parts.pop();
+      let target = this;
+      for (const part of parts) target = target[part] ??= {};
+      target[leaf] = structuredClone(value);
+    }
+    this.updateCount++;
+  }
+};
+const propertyMigrationDependencies = {
+  actor: legacyPropertyActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => [],
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => raw,
+  invalidateAliasDefinitionCache: () => {},
+  getPath: getSafePath,
+  clone: value => structuredClone(value),
+  setProperty: setSafePath
+};
+const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
+assert.equal(propertyMigration.propertiesMigrated, true);
+assert.equal(legacyPropertyActor.system.skills.athletics.proficient, true);
+assert.equal(legacyPropertyActor.system.skills.athletics.proficientLevel, undefined);
+assert.equal(legacyPropertyActor.system.skills.stealth.proficient, false);
+assert.equal(legacyPropertyActor.system.skills.furtividade, undefined);
+assert.equal(legacyPropertyActor.system.combat.defenseModifier, 6);
+assert.equal(legacyPropertyActor.system.combat.defense, undefined);
+assert.equal(legacyPropertyActor.system.combat.mb, undefined);
+assert.equal(legacyPropertyActor.system.combat.ddr, undefined);
+assert.equal(legacyPropertyActor.system.combat.desl, undefined);
+assert.equal(legacyPropertyActor.system.combat.movement, 6);
+assert.equal(legacyPropertyActor.system.resources.pv.temporary, 0);
+assert.deepEqual(legacyPropertyActor.system.conditions, []);
+assert.deepEqual(legacyPropertyActor.system.recovery, { spent: 0 });
+assert.deepEqual(legacyPropertyActor.system.encumbrance, { current: 0 });
+assert.deepEqual(legacyPropertyActor.flags.nexus.nativeProperties, [], "Definições nativas antigas devem ser substituídas pelo registro canônico");
+const propertyMigrationWrites = legacyPropertyActor.updateCount;
+const repeatedPropertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
+assert.equal(repeatedPropertyMigration.propertiesMigrated, false);
+assert.equal(legacyPropertyActor.updateCount, propertyMigrationWrites, "Migração de propriedades não deve regravar dados canônicos");
 
 
 // Three-way persistence merge: preserve edits to separate components and
@@ -310,8 +420,8 @@ assert.match(sheetCode, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder s
 assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
 assert.match(sheetCode, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
 assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
-assert.match(sheetCode, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
-assert.match(sheet, /NEXUS_ATTRIBUTES\.map/, "Os seis atributos reais devem gerar propriedades nativas com abreviações próprias");
+assert.match(propertySchema, /exib: "PV"/, "A propriedade PV deve possuir abreviação própria");
+assert.match(propertySchema, /NEXUS_ATTRIBUTES\.flatMap/, "Os seis atributos reais devem gerar propriedades nativas com abreviações próprias");
 assert.doesNotMatch(sheetCode, /exib:"CORPO"/, "Corpo deve ser grupo, não propriedade numérica independente");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
@@ -412,31 +522,32 @@ assert.match(sheetCode, /setResourceFromTrack/);
 console.log(`NEXUS ${manifest.version}: catálogo canônico, proficiência assinada e sincronização de temas verificados.`);
 
 
-// Signed proficiency levels and negative numeric properties.
+// Rulebook proficiency is binary; the attribute modifier always remains active.
 const negativeSkillActor = {
   system: {
     identity: { level: 4 },
-    attributes: { for: -5, des: 0 },
+    attributes: { for: -5, des: 0, sab: 0 },
     skills: {
-      athletics: { proficientLevel: 0 },
+      athletics: { proficient: false },
       stealth: { proficientLevel: -3 },
       perception: { proficientLevel: 2 }
     }
   }
 };
 assert.equal(getNexusSkillModifier(negativeSkillActor, "athletics").modifier, -5, "Atributos negativos devem permanecer negativos");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, -2, "Proficiência negativa deve inverter o bônus de proficiência");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Qualquer nível positivo deve conceder proficiência");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").proficientLevel, -1, "Níveis negativos legados devem ser normalizados para -1");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").proficientLevel, 1, "Níveis positivos legados devem ser normalizados para +1");
-assert.equal(normalizeNexusProficientLevel(-9), -1);
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, 0, "Ausência de proficiência não deve criar penalidade extra");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Níveis positivos antigos devem converter para proficiência");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").proficientLevel, 0);
+assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").proficientLevel, 1);
+assert.equal(normalizeNexusProficientLevel(-9), 0);
 assert.equal(normalizeNexusProficientLevel(9), 1);
 assert.equal(normalizeNexusProficientLevel(0), 0);
-assert.equal(Object.hasOwn(getNexusSkillModifier(negativeSkillActor, "stealth"), "opposed"), false, "O cálculo não deve manter estado opposed separado");
-const opposedLegacyRows = getNexusSkillRows({ system: { skills: { furtividade: { opposed: true } } } });
-assert.equal(opposedLegacyRows.find(skill => skill.key === "stealth").proficientLevel, -1, "O estado opposed antigo deve migrar para proficiência negativa");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").value, 0);
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").exib, "FUR");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
-assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficientLevel, 1, "Dados antigos devem ser lidos durante a migração");
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient, true, "Dados antigos devem ser lidos durante a migração");
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 1);
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
 assert.match(sheetListeners, /if \(kind === "number"\) \{\s*if \(value === "" \|\| typeof value === "boolean" \|\| !Number\.isFinite\(Number\(value\)\)\) \{[\s\S]*?\}\s*value = Number\(value\);\s*\}/, "Propriedades numéricas devem rejeitar valores vazios e não numéricos, aceitando números finitos inclusive negativos");
 
 // Trigger -> Action -> Configuration pipeline.

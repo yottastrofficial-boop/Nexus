@@ -4,11 +4,13 @@ import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
-import { activateCanvasInteractions } from "./canvas-interactions.js";
+import { activateCanvasViewport } from "./canvas-viewport.js";
+import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
@@ -52,11 +54,11 @@ const COMPONENTS = {
   "pm-bar": { label: "PM · Barra", namespace: "core.resources.mana", w: 250, h: 82, path: "resources.pm", kind: "resource-bar" },
   pe: { label: "PE · Clássico", namespace: "core.resources.energy", w: 150, h: 100, path: "resources.pe", kind: "resource" },
   "pe-bar": { label: "PE · Barra", namespace: "core.resources.energy", w: 250, h: 82, path: "resources.pe", kind: "resource-bar" },
-  defense: { label: "Defesa", namespace: "core.combat.defense", w: 150, h: 90, path: "combat.defense", kind: "number" },
-  movement: { label: "Movimento", namespace: "core.combat.movement", w: 150, h: 90, path: "combat.movement", kind: "number" },
-  desl: { label: "DESL", namespace: "core.combat.desl", w: 120, h: 85, path: "combat.desl", kind: "number" },
-  ddr: { label: "DdR", namespace: "core.combat.ddr", w: 120, h: 85, path: "combat.ddr", kind: "number" },
-  mb: { label: "MB", namespace: "core.combat.mb", w: 120, h: 85, path: "combat.mb", kind: "number" },
+  defense: { label: "Defesa", namespace: "core.combat.defense", w: 150, h: 90, path: "combat.defense.value", kind: "number" },
+  movement: { label: "Movimento", namespace: "core.combat.movement", w: 150, h: 90, path: "combat.movement.value", kind: "number" },
+  desl: { label: "DESL", namespace: "core.combat.desl", w: 120, h: 85, path: "combat.movement.value", kind: "number" },
+  ddr: { label: "DdR", namespace: "core.combat.ddr", w: 120, h: 85, path: "recovery.count.value", kind: "number" },
+  mb: { label: "MB", namespace: "core.combat.mb", w: 120, h: 85, path: "progression.mb.value", kind: "number" },
   // Deprecated scalar nucleus components remain registered only for old saved layouts.
   body: { label: "Corpo (legado)", namespace: "core.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number", deprecated: true },
   mind: { label: "Mente (legado)", namespace: "core.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number", deprecated: true },
@@ -93,19 +95,22 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (path === "name") return { value: actor?.name ?? "", path: "name" };
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
-  const skillMatch = path.match(/^skills\.([^.]+)(?:\.(.+))?$/);
-  if (skillMatch) {
-    const definition = NEXUS_SKILLS.find(skill => skill.key === skillMatch[1] || skill.legacyKey === skillMatch[1]);
-    const row = definition ? getNexusSkillRows(actor).find(skill => skill.key === definition.key) : null;
-    const member = skillMatch[2];
-    if (row && (!member || Object.hasOwn(row, member))) {
-      const value = member ? row[member] : row;
-      return { value, path, virtual: true, skill: definition };
-    }
+  const rulebookProperty = getNexusRulebookPropertyValue(actor, path);
+  if (rulebookProperty.matched) {
+    return {
+      value: rulebookProperty.value,
+      path,
+      sourcePath: rulebookProperty.sourcePath,
+      virtual: true,
+      readOnly: rulebookProperty.readOnly ?? false
+    };
   }
   const alias = resolveAliasPath(actor, path);
+  const resolvedAliasTarget = alias.path && alias.path !== path && depth < 8
+    ? resolveNexusBinding(actor, alias.path, depth + 1).value
+    : undefined;
   let value = alias.alias
-    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : (alias.alias?.[alias.suffix] !== undefined ? alias.alias[alias.suffix] : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."))))
+    ? (alias.path ? (resolvedAliasTarget ?? virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : (alias.alias?.[alias.suffix] !== undefined ? alias.alias[alias.suffix] : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."))))
     : getPath(actor?.system ?? {}, path);
   if (alias.alias?.type === "resource" && alias.suffix === "percentage") {
     const resource = alias.path ? getPath(actor?.system ?? {}, alias.path) : getPath(getCustomAliasData(actor), alias.alias.key);
@@ -169,35 +174,24 @@ const collectPropertyPaths = actor => {
     }
   };
   visit(source);
+  for (const path of NEXUS_RULEBOOK_PROPERTY_PATHS) paths.add(path);
   // Propriedades virtuais estáveis: separam retrato, arte do token e moldura
   // sem duplicar URLs em componentes. São resolvidas para campos reais do Foundry.
   for (const path of ["identity.portrait.img", "identity.token.img", "identity.token.border", "token.img", "token.border"]) paths.add(path);
   return paths;
 };
 
-const NATIVE_PROPERTY_BASE = [
-  { id:"core.resource.pv", label:"Pontos de Vida", exib:"PV", category:"resources", type:"resource", key:"resources.pv", targetPath:"resources.pv" },
-  { id:"core.resource.pm", label:"Pontos de Mana", exib:"PM", category:"resources", type:"resource", key:"resources.pm", targetPath:"resources.pm" },
-  { id:"core.resource.pe", label:"Pontos de Energia", exib:"PE", category:"resources", type:"resource", key:"resources.pe", targetPath:"resources.pe" },
-  ...NEXUS_ATTRIBUTES.map(attribute => ({
-    id: "core.attribute." + attribute.key,
-    label: attribute.name,
-    exib: attribute.code,
-    category: "attributes",
-    type: "attribute",
-    key: "attributes." + attribute.key,
-    targetPath: "attributes." + attribute.key
-  })),
-  { id:"core.combat.defense", label:"Defesa", category:"combat", type:"number", key:"combat.defense", targetPath:"combat.defense" },
-  { id:"core.combat.movement", label:"Movimento", category:"combat", type:"number", key:"combat.movement", targetPath:"combat.movement" },
-  { id:"core.combat.desl", label:"DESL", category:"combat", type:"number", key:"combat.desl", targetPath:"combat.desl" },
-  { id:"core.combat.ddr", label:"DdR", category:"combat", type:"number", key:"combat.ddr", targetPath:"combat.ddr" },
-  { id:"core.combat.mb", label:"MB", category:"combat", type:"number", key:"combat.mb", targetPath:"combat.mb" },
-  { id:"core.identity.level", label:"Nível", category:"progression", type:"number", key:"identity.level", targetPath:"identity.level" },
-  { id:"core.identity.lineage", label:"Linhagem", category:"identity", type:"text", key:"identity.lineage", targetPath:"identity.lineage" },
-  { id:"core.identity.legacy", label:"Legado", category:"identity", type:"text", key:"identity.legacy", targetPath:"identity.legacy" },
-  { id:"core.identity.name", label:"Nome do personagem", category:"identity", type:"text", key:"identity.name", targetPath:"name" }
-];
+const NATIVE_PROPERTY_BASE = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS
+  .filter(definition => definition.type !== "array")
+  .map(definition => ({
+    id: "core.rulebook." + definition.path.replaceAll(".", "-"),
+    label: definition.label,
+    exib: definition.exib ?? "",
+    category: definition.category ?? "general",
+    type: definition.type === "number" ? "number" : definition.type === "boolean" ? "boolean" : "text",
+    key: definition.path,
+    targetPath: definition.path
+  }));
 const nativePropertyDefinitionCache = new WeakMap();
 const EMPTY_NATIVE_PROPERTY_LIST = Object.freeze([]);
 const LEGACY_SKILL_PATHS = new Set(NEXUS_SKILLS.map(skill => `skills.${skill.legacyKey}`));
@@ -218,8 +212,10 @@ const getNativePropertyDefinitions = actor => {
     if ([...coreIds].some(core => path === core || path.startsWith(`${core}.`))
       || [...LEGACY_SKILL_PATHS].some(legacyPath => path === legacyPath || path.startsWith(`${legacyPath}.`))
       || ["attributes.body", "attributes.mind", "attributes.soul"].some(legacy => path === legacy || path.startsWith(legacy + "."))
-      || NEXUS_SKILLS.some(skill => path === `skills.${skill.key}.proficientLevel`)
-      || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+      || NEXUS_SKILLS.some(skill => path === `skills.${skill.key}.proficientLevel` || path === `skills.${skill.key}.opposed`)
+      || NEXUS_ATTRIBUTES.some(attribute => path === `attributes.${attribute.key}`)
+      || ["combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"].includes(path)
+      || path === "encumbrance.current" || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
@@ -1140,7 +1136,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -1362,8 +1358,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _setSkillProficientLevel(skillKey, rawLevel) {
     if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) return;
-    const level = normalizeNexusProficientLevel(rawLevel);
-    await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: level });
+    const proficient = normalizeNexusProficientLevel(rawLevel) > 0;
+    await this.actor.update({ ["system.skills." + skillKey + ".proficient"]: proficient });
     await this.render({ force: true });
   }
 
@@ -2909,7 +2905,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _onClose(options) {
-    this._nexusKeyCleanup?.(); this._nexusInspectorKeyCleanup?.();
+    this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
+    this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
+    this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
+    this._nexusViewportCleanup?.(); this._nexusViewportCleanup = null;
+    this._nexusInspectorKeyCleanup?.();
     if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
@@ -2918,6 +2918,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _activateCanvas(html) {
-    return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
+    const generation = this._nexusCanvasEditorGeneration;
+    this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
+    this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
+    this._nexusViewportCleanup?.(); this._nexusViewportCleanup = null;
+
+    const root = html?.[0];
+    if (!root) return;
+    activateCanvasViewport(this, html);
+    activateCanvasPlayInteractions(this, html);
+    if (this._mode !== "appearance") return;
+
+    return import("./canvas-interactions.js").then(({ activateCanvasInteractions }) => {
+      const liveRoot = this.element;
+      if (generation !== this._nexusCanvasEditorGeneration || this._mode !== "appearance" || !root.isConnected) return;
+      if (liveRoot && liveRoot !== root && !liveRoot.contains?.(root)) return;
+      return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    }).catch(error => console.error("NEXUS | Falha ao carregar o editor Canvas:", error));
   }
 }

@@ -1,4 +1,5 @@
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES } from "./skills.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS } from "./property-schema.js";
 
 const ROOT_LABELS = Object.freeze({
   attributes: "Atributos",
@@ -7,6 +8,10 @@ const ROOT_LABELS = Object.freeze({
   combat: "Combate",
   identity: "Identidade",
   progression: "Progressão",
+  personality: "Personalidade",
+  recovery: "Recuperação",
+  encumbrance: "Carga",
+  conditions: "Condições",
   name: "Nome",
   img: "Imagem",
   notes: "Anotações",
@@ -20,7 +25,7 @@ const NUCLEUS_LABELS = Object.freeze({ body: "Corpo", mind: "Mente", soul: "Alma
 const SEGMENT_LABELS = Object.freeze({
   pv: "Pontos de Vida",
   pm: "Pontos de Mana",
-  pe: "Pontos de Energia",
+  pe: "Pontos de Esforço",
   defense: "Defesa",
   movement: "Movimento",
   desl: "DESL",
@@ -47,12 +52,22 @@ const SEGMENT_LABELS = Object.freeze({
   roll: "Rolagem",
   modifier: "Modificador total",
   proficientLevel: "Proficiência",
-  description: "Descrição"
+  proficient: "Proficiência",
+  formatted: "Valor formatado",
+  attribute: "Atributo",
+  description: "Descrição",
+  meters: "Metros",
+  available: "Disponíveis",
+  capacity: "Capacidade",
+  overloaded: "Excedida",
+  spent: "Gastos",
+  bonus: "Bônus",
+  recovery: "Recuperação"
 });
 
 const DERIVED_SKILL_FIELDS = new Set([
   "name", "attribute", "attributeName", "attributeKey", "attributeValue",
-  "description", "proficient", "opposed", "proficiency", "bonus", "value"
+  "description", "proficient", "proficientLevel", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao"
 ]);
 const LEGACY_NUCLEUS_PATHS = ["attributes.body", "attributes.mind", "attributes.soul"];
 const DUPLICATE_PATHS = ["identity.name"];
@@ -84,7 +99,7 @@ const isLegacyNucleusPath = path => LEGACY_NUCLEUS_PATHS.some(legacy => path ===
 const isDuplicatePath = path => DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
 
 export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], aliases = [], rollAliases = [] } = {}) {
-  const labels = new Map();
+  const labels = new Map(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => [definition.path, definition.label]));
   for (const alias of [...nativeProperties, ...aliases]) {
     const key = String(alias?.key ?? "").replace(/^system\./, "");
     if (key && alias?.label) labels.set(key, String(alias.label));
@@ -99,24 +114,28 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
   // Atributos são seis propriedades numéricas agrupadas em três núcleos.
   // Corpo, Mente e Alma são categorias, não valores independentes.
   for (const attribute of NEXUS_ATTRIBUTES) {
-    const path = "attributes." + attribute.key;
-    const label = labels.get(path) ?? attribute.name;
-    addEntry({
-      path,
-      label,
-      searchLabel: label + " · " + (NUCLEUS_LABELS[attribute.nucleus] ?? attribute.nucleus),
-      segments: path.split("."),
-      groupPath: "attributes." + attribute.nucleus,
-      groupLabels: {
-        attributes: "Atributos",
-        ["attributes." + attribute.nucleus]: NUCLEUS_LABELS[attribute.nucleus] ?? humanize(attribute.nucleus)
-      },
-      displaySegment: attribute.key
-    });
+    const groupPath = "attributes." + attribute.nucleus + "." + attribute.key;
+    const groupLabels = {
+      attributes: "Atributos",
+      ["attributes." + attribute.nucleus]: NUCLEUS_LABELS[attribute.nucleus] ?? humanize(attribute.nucleus),
+      [groupPath]: attribute.name
+    };
+    for (const [field, label] of [["name", "Nome"], ["exib", "Exibição"], ["value", "Valor"]]) {
+      const path = "attributes." + attribute.key + "." + field;
+      addEntry({
+        path,
+        label,
+        searchLabel: attribute.name + " · " + label,
+        segments: path.split("."),
+        groupPath,
+        groupLabels,
+        displaySegment: field
+      });
+    }
   }
 
-  // Perícias expõem somente dados úteis: modificador calculado e proficiência.
-  // Metadados de apresentação e estados redundantes não viram propriedades.
+  // Perícias seguem o modelo do livro-base: metadados de identificação,
+  // valor calculado e proficiência binária.
   for (const skill of NEXUS_SKILLS) {
     const groupPath = "skills." + skill.attributeKey + "." + skill.key;
     const groupLabels = {
@@ -124,7 +143,10 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
       ["skills." + skill.attributeKey]: skill.attributeName,
       [groupPath]: skill.name
     };
-    for (const [field, label] of [["modifier", "Modificador total"], ["proficientLevel", "Proficiência"]]) {
+    for (const [field, label] of [
+      ["name", "Nome"], ["exib", "Exibição"], ["value", "Valor"],
+      ["proficient", "Proficiência"], ["attribute", "Atributo"], ["description", "Descrição"]
+    ]) {
       const path = "skills." + skill.key + "." + field;
       addEntry({
         path,
@@ -138,7 +160,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
     }
   }
 
-  const allPaths = new Set(paths);
+  const allPaths = new Set([...paths, ...NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => definition.path)]);
   for (const rawPath of allPaths) {
     const path = canonicalizeSkillPath(rawPath);
     if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) continue;

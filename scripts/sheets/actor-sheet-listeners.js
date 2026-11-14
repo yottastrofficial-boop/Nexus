@@ -117,7 +117,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     html.find("[data-skill-proficient-level]").on("change", event => {
       const input = event.currentTarget;
-      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, input.value);
+      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, input.checked);
     });
     html.find("[data-proficiency-level]").on("click", event => {
       event.preventDefault(); event.stopPropagation();

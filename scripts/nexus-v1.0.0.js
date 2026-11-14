@@ -31,14 +31,18 @@ Hooks.on("preCreateActor", (actor) => {
 
   const defaults = {
     resources: {
-      pv: { value: 10, max: 10 },
-      pm: { value: 0, max: 0 },
-      pe: { value: 0, max: 0 }
+      pv: { value: 2, max: 2, temporary: 0 },
+      pm: { value: 2, max: 2, temporary: 0 },
+      pe: { value: 2, max: 2, temporary: 0 }
     },
     attributes: { for: 0, des: 0, sab: 0, int: 0, car: 0, von: 0 },
-    skills: Object.fromEntries(NEXUS_SKILLS.map(skill => [skill.key, { proficientLevel: 0 }])),
-    combat: { defense: 10, movement: 6, desl: 0, ddr: 0, mb: 0 },
-    identity: { lineage: "", legacy: "", level: 1 },
+    skills: Object.fromEntries(NEXUS_SKILLS.map(skill => [skill.key, { proficient: false }])),
+    combat: { defenseModifier: 0, movement: 0 },
+    identity: { concept: "", ancestry: "", lineage: "", legacy: "", talent: "", class: "", archetype: "", function: "", level: 1 },
+    personality: { appearance: "", traits: "", flaws: "", bonds: "", ideals: "", motivation: "", alignment: { order: "", morality: "" } },
+    recovery: { spent: 0 },
+    encumbrance: { current: 0 },
+    conditions: [],
     notes: ""
   };
   const system = foundry.utils.mergeObject(
