@@ -19,18 +19,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     sheet._nexusCanvasKeyboardFocus ??= false;
     const selectionBox = root.querySelector(".nexus-marquee"), guides = root.querySelector(".nexus-guides");
     const layoutData = () => ({ width: Number(canvas.dataset.layoutWidth) || 800, height: Number(canvas.dataset.layoutHeight) || 800, grid: Number(canvas.dataset.gridSize) || 20, snap: canvas.dataset.snap === "true", smart: canvas.dataset.guides === "true" });
-    const layout = sheet._currentLayout ?? {};
-    applyThemeTokens(root.querySelector(".nexus-sheet"), layout);
-    canvas.style.setProperty("--nexus-font-size", `${layout.fontSize ?? 13}px`);
-    canvas.style.setProperty("--nexus-secondary-font-size", `${layout.secondaryFontSize ?? 11}px`);
-    canvas.style.setProperty("--nexus-value-font-size", `${layout.valueFontSize ?? 20}px`);
-    canvas.style.setProperty("--nexus-canvas-color", layout.canvasColor ?? "#171f2a");
-    canvas.style.setProperty("--nexus-card-color", layout.cardColor ?? "#273443");
-    canvas.style.setProperty("--nexus-accent-color", layout.accentColor ?? "#52647b");
-    canvas.style.setProperty("--nexus-highlight-color", layout.highlightColor ?? "#78b7e8");
-    canvas.style.setProperty("--nexus-button-color", layout.buttonColor ?? "#315b7d");
-    applyThemeTokens(canvas, layout);
-    const appWindow=root.closest(".application, .window-app"); appWindow?.style.setProperty("--nexus-font-family",`"${layout.fontFamily ?? "Inter"}", sans-serif`); appWindow?.style.setProperty("--nexus-highlight-color",layout.highlightColor??"#78b7e8"); appWindow?.style.setProperty("--nexus-button-color",layout.buttonColor??"#315b7d");
     const point = e => { const r = canvas.getBoundingClientRect(), l = layoutData(); return { x: (e.clientX-r.left)*(l.width/r.width), y: (e.clientY-r.top)*(l.height/r.height) }; };
     // Os nós dos componentes permanecem os mesmos durante esta ativação do Canvas.
     // Reaproveitar a lista evita querySelectorAll repetido durante gestos e seleção.
