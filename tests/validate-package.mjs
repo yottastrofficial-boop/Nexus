@@ -392,8 +392,8 @@ assert.ok(sheet.includes("nextControl?.focus({ preventScroll: true })"), "O edit
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
 assert.ok(interactions.includes("nexus-interaction-condition-group"), "Condições devem possuir grupo dedicado");
-assert.ok(interactions.includes("data-interaction-flow-tab"), "Os fluxos devem ser navegáveis por abas");
-assert.ok(interactions.includes("data-interaction-flow-panel"), "Cada aba deve exibir apenas seu fluxo correspondente");
+assert.ok(interactions.includes("tab.dataset.interactionFlowTab"), "Os fluxos devem ser navegáveis por abas");
+assert.ok(interactions.includes("panel.dataset.interactionFlowPanel"), "Cada aba deve exibir apenas seu fluxo correspondente");
 assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
 assert.ok(css.includes("nexus-interaction-condition-group .nexus-interaction-group-heading"), "O seletor E/OU deve ocupar área dimensionada no cabeçalho de condições");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
