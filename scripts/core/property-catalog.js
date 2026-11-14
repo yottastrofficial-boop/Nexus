@@ -143,7 +143,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
     if (isLegacyNucleusPath(path) || entriesByPath.has(path)) continue;
 
     const parts = path.split(".");
-    if (parts[0] === "attributes" && ATTRIBUTE_BY_KEY.has(parts[1])) continue;
+    if (parts[0] === "attributes" && ATTRIBUTE_BY_KEY.has(parts[1]) && parts.length === 2) continue;
     if (parts[0] === "skills" && parts.length > 2 && DERIVED_SKILL_FIELDS.has(parts[2])) continue;
 
     const skill = parts[0] === "skills" ? SKILL_BY_KEY.get(parts[1]) : null;
