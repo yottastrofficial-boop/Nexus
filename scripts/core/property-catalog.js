@@ -55,6 +55,7 @@ const DERIVED_SKILL_FIELDS = new Set([
   "description", "proficient", "opposed", "proficiency", "bonus", "value"
 ]);
 const LEGACY_NUCLEUS_PATHS = ["attributes.body", "attributes.mind", "attributes.soul"];
+const DUPLICATE_PATHS = ["identity.name"];
 const SKILL_BY_KEY = new Map(NEXUS_SKILLS.flatMap(skill => [[skill.key, skill], [skill.legacyKey, skill]]));
 const ATTRIBUTE_BY_KEY = new Map(NEXUS_ATTRIBUTES.map(attribute => [attribute.key, attribute]));
 
@@ -80,6 +81,7 @@ function getSegmentLabel(segment, parent = "") {
 }
 
 const isLegacyNucleusPath = path => LEGACY_NUCLEUS_PATHS.some(legacy => path === legacy || path.startsWith(legacy + "."));
+const isDuplicatePath = path => DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
 
 export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], aliases = [], rollAliases = [] } = {}) {
   const labels = new Map();
@@ -90,7 +92,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
 
   const entriesByPath = new Map();
   const addEntry = entry => {
-    if (!entry?.path || isLegacyNucleusPath(entry.path)) return;
+    if (!entry?.path || isLegacyNucleusPath(entry.path) || isDuplicatePath(entry.path)) return;
     entriesByPath.set(entry.path, entry);
   };
 
@@ -140,7 +142,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
   for (const rawPath of allPaths) {
     const path = canonicalizeSkillPath(rawPath);
     if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) continue;
-    if (isLegacyNucleusPath(path) || entriesByPath.has(path)) continue;
+    if (isLegacyNucleusPath(path) || isDuplicatePath(path) || entriesByPath.has(path)) continue;
 
     const parts = path.split(".");
     if (parts[0] === "attributes" && ATTRIBUTE_BY_KEY.has(parts[1]) && parts.length === 2) continue;
@@ -148,6 +150,10 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
 
     const skill = parts[0] === "skills" ? SKILL_BY_KEY.get(parts[1]) : null;
     const attribute = parts[0] === "attributes" ? ATTRIBUTE_BY_KEY.get(parts[1]) : null;
+    if (path === "identity.level") {
+      entriesByPath.set(path, { path, label: "Nível", searchLabel: "Nível · Progressão", segments: parts, groupPath: "progression", displaySegment: "level", groupLabels: { progression: "Progressão" } });
+      continue;
+    }
     const aliasLabel = labels.get(path);
     const label = aliasLabel || getSegmentLabel(parts.at(-1), parts.at(-2) ?? "");
     if (attribute && parts.length > 2) {
