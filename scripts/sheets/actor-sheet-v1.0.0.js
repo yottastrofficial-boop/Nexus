@@ -788,8 +788,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
         && current?.proficientLevel !== null
         && current?.proficientLevel !== "";
       if (!hasCanonicalLevel) {
-        const stored = current?.proficiency ?? current?.proficient
-          ?? legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient ?? 0;
+        const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
+        const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
+        const stored = currentLegacyLevel ?? legacyLevel ?? 0;
         updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
       } else {
         const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
