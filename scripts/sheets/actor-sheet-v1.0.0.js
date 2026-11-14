@@ -1785,7 +1785,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || COMPONENTS[item.type]?.w || 100))),
           bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
         } : { left: 0, top: 0, right: 100, bottom: 60 };
-        const scale = Math.min(136 / Math.max(1, bounds.right - bounds.left), 82 / Math.max(1, bounds.bottom - bounds.top));
+        const scale = Math.min(220 / Math.max(1, bounds.right - bounds.left), 94 / Math.max(1, bounds.bottom - bounds.top));
         const gridMode = members.length > 8 || scale < 0.18;
         preview.classList.toggle("is-grid", gridMode);
         const visibleMembers = gridMode ? members.slice(0, 8) : members;
@@ -2223,7 +2223,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const scrollContainer = editor.closest(".nexus-behavior-editor");
         const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
-        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor));
+        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         editor.dataset.componentId = componentId;
         if (scrollContainer) scrollContainer.scrollTop = scrollTop;
         else editor.scrollTop = scrollTop;
@@ -4009,7 +4009,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const interactionEditor = inspector.querySelector("[data-interaction-editor]");
       if (interactionEditor) {
         interactionEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         else interactionEditor.replaceChildren();
       }
       const technicalId = inspector.querySelector("[data-component-technical-id]");
@@ -4029,7 +4029,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const behaviorTarget = behaviorPanel?.querySelector?.("[data-behavior-target]");
       if (behaviorEditor) {
         behaviorEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         else behaviorEditor.replaceChildren();
       }
       if (behaviorEmpty) behaviorEmpty.hidden = !!one;

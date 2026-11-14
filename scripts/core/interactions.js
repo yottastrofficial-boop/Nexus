@@ -158,181 +158,64 @@ export function applyInteractionEditorCommand(component,command,data={}) {
   }else return false;
   return true;
 }
-const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
-const field=(type,label,value,options=[])=>{
-  const wrap=el("label","nexus-interaction-field"),caption=el("span","",label),input=el(type);
-  if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}
-  else if(type==="input"&&label==="Ativo")input.type="checkbox";
-  else if(type==="input")input.type="text";
-  if(input.type==="checkbox")input.checked=!!value;else input.value=String(value??"");
-  wrap.append(caption,input);return {wrap,input};
-};
+const el=(tag,cls,txt)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;};
 const bind=(input,scope,flowId,key,extra={})=>{input.dataset.interactionField="";input.dataset.interactionScope=scope;input.dataset.interactionId=flowId;input.dataset.interactionField=key;Object.entries(extra).forEach(([k,v])=>input.dataset[k]=String(v));};
-const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interaction-button",label);b.type="button";b.dataset.interactionAction=command;b.dataset.interactionId=flowId;const accessibleLabel=label==="↑"?"Mover ação para cima":label==="↓"?"Mover ação para baixo":label;b.setAttribute("aria-label",accessibleLabel);if(accessibleLabel!==label)b.title=accessibleLabel;Object.entries(extra).forEach(([k,v])=>b.dataset[k]=String(v));return b;};
-const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flowId,extra);b.classList.add("is-icon");b.setAttribute("aria-label",label);b.title=label;const glyph=el("i",`fa-solid ${icon}`);glyph.setAttribute("aria-hidden","true");b.append(glyph);return b;};
+const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interaction-button",label);b.type="button";b.dataset.interactionAction=command;b.dataset.interactionId=flowId;b.setAttribute("aria-label",label);Object.entries(extra).forEach(([k,v])=>b.dataset[k]=String(v));return b;};
+const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flowId,extra);b.classList.add("is-icon");b.title=label;const glyph=el("i","fa-solid "+icon);glyph.setAttribute("aria-hidden","true");b.append(glyph);return b;};
+const control=(type,value,options=[],aria="")=>{const input=el(type);if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}if(type==="checkbox")input.checked=!!value;else input.value=String(value??"");if(aria)input.setAttribute("aria-label",aria);return input;};
+const field=(label,input,scope,id,key,extra={})=>{const wrap=el("label","nexus-interaction-field");if(label)wrap.append(el("span","",label));bind(input,scope,id,key,extra);wrap.append(input);return wrap;};
 const events=[["click","Clique"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["interact","Interação encadeada"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
-function actionConfig(parent,flow,action,index,components){
-  const add=(label,key,value)=>{const f=field("input",label,value);bind(f.input,"action",flow.id,"config."+key,{actionIndex:index});parent.append(f.wrap);};
-  if(action.type==="roll"){
-    if(action.config.mode==="skill"){
-      const skill=field("select","Perícia",action.config.skillKey??"athletics",NEXUS_SKILLS.map(item=>[item.key,item.name]));
-      bind(skill.input,"action",flow.id,"config.skillKey",{actionIndex:index});parent.append(skill.wrap);
-    }else add("Fórmula","formula",action.config.formula??"1d20");
+const buildActionConfig=(parent,flow,action,index,components)=>{
+ const add=(label,key,value,opts=null)=>{const input=control(opts?"select":"input",value,opts??[],label);parent.append(field(label,input,"action",flow.id,"config."+key,{actionIndex:index}));};
+ if(action.type==="roll"){if(action.config.mode==="skill")add("Perícia","skillKey",action.config.skillKey??"athletics",NEXUS_SKILLS.map(x=>[x.key,x.name]));else add("Fórmula","formula",action.config.formula??"1d20");}
+ if(action.type==="calculate"){add("Fórmula","formula",action.config.formula??"");add("Salvar resultado em","targetPath",action.config.targetPath??"");}
+ if(action.type==="update"){add("Propriedade","path",action.config.path??"");add("Operação","operation",action.config.operation??"set",[["set","Definir"],["add","Somar"],["subtract","Subtrair"]]);add("Valor","value",action.config.value??"0");}
+ if(["open","toggle","interact"].includes(action.type)){add("Componente de destino","targetId",action.config.targetId??"",[["","Selecione"],...components.filter(x=>x.id!==flow.componentId).map(x=>[x.id,x.customLabel||x.type||x.id])]);if(action.type==="interact")add("Evento de destino","event",action.config.event??"interact",events);if(action.type==="open")add("UUID do documento (opcional)","uuid",action.config.uuid??"");}
+ if(action.type==="execute"){add("Operação","operation",action.config.operation??"refresh-sheet",[["refresh-sheet","Atualizar ficha"],["notify","Notificação"]]);if(action.config.operation==="notify")add("Mensagem","message",action.config.message??"");}
+};
+const collectInteractionPropertyPaths=actor=>{
+ const paths=new Set(["name","identity.level","identity.lineage","identity.legacy","resources.pv.value","resources.pv.max","resources.pm.value","resources.pm.max","resources.pe.value","resources.pe.max","combat.defense","combat.movement","combat.desl","combat.ddr","combat.mb","attributes.body","attributes.mind","attributes.soul"]);
+ const walk=(value,prefix="",depth=0)=>{if(!value||typeof value!=="object"||depth>6)return;for(const [key,child] of Object.entries(value)){if(["__proto__","prototype","constructor"].includes(key))continue;const path=prefix?prefix+"."+key:key;if(["number","string","boolean"].includes(typeof child))paths.add(path);else if(child&&typeof child==="object"){if(Object.hasOwn(child,"value"))paths.add(path+".value");if(Object.hasOwn(child,"max"))paths.add(path+".max");walk(child,path,depth+1);}}};
+ walk(actor?.system??{});return [...paths].filter(p=>/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(p)).sort((a,b)=>a.localeCompare(b,"pt-BR"));
+};
+export function renderInteractionEditor(container,component,components=[],library=[],actor=null){
+ if(!container)return;const previous=container.dataset.activeInteractionId??"",flows=getComponentInteractions(component),activeId=flows.some(x=>x.id===previous)?previous:(flows[0]?.id??"");
+ container.replaceChildren();container.dataset.activeInteractionId=activeId;
+ const heading=el("div","nexus-interaction-editor-heading"),title=el("strong","nexus-interaction-editor-title","Fluxos"),toolbar=el("div","nexus-interaction-editor-toolbar");
+ if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";toolbar.append(select,btn("Inserir","add-library-flow",""));}
+ toolbar.append(btn("＋ Novo fluxo","add-flow",""));heading.append(title,toolbar);
+ if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(heading,empty);return;}
+ const tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
+ for(const flow of flows){const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");tab.type="button";tab.dataset.interactionFlowTab=flow.id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected",String(flow.id===activeId));tab.classList.toggle("active",flow.id===activeId);tabs.append(tab);}
+ heading.append(tabs);container.append(heading);
+ const list=el("datalist");list.id="nexus-interaction-properties-"+String(component.id).replace(/[^a-zA-Z0-9_-]/g,"");
+ for(const path of collectInteractionPropertyPaths(actor)){const option=el("option");option.value=path;list.append(option);}container.append(list);
+ const panels=el("div","nexus-interaction-flows");
+ for(const flow of flows){
+  const panel=el("section","nexus-interaction-flow");panel.dataset.interactionId=flow.id;panel.dataset.interactionFlowPanel=flow.id;panel.hidden=flow.id!==activeId;panel.setAttribute("role","tabpanel");
+  const flowHead=el("div","nexus-interaction-flow-heading"),name=control("input",flow.name,[],"Nome do fluxo");name.className="nexus-interaction-flow-name";name.placeholder="Nome do fluxo";bind(name,"flow",flow.id,"name");flowHead.append(name);
+  const flowEnabled=control("checkbox",flow.enabled,[],"Ativar fluxo");flowHead.append(field("Ativo",flowEnabled,"flow",flow.id,"enabled"));
+  const flowTools=el("div","nexus-interaction-flow-actions");flowTools.append(iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));flowHead.append(flowTools);panel.append(flowHead);
+  const guided=el("div","nexus-interaction-guided");
+  const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");triggerHead.append(el("h6","","Gatilhos"),btn("＋","add-trigger",flow.id));triggers.append(triggerHead);
+  for(const [i,tr] of flow.triggers.entries()){const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento");bind(select,"trigger",flow.id,"event",{triggerIndex:i});row.append(select,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);}
+  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
+  const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");conditionHead.append(field("",join,"flow",flow.id,"conditionJoin"),btn("＋ Adicionar","add-condition",flow.id));conditions.append(conditionHead);
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.setAttribute("list",list.id);property.placeholder="Escolher propriedade…";const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  guided.append(triggers,conditions);panel.append(guided);
+  const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
+  for(const [i,action] of flow.actions.entries()){
+   const card=el("article","nexus-interaction-action"),head=el("div","nexus-interaction-action-head"),actionTitle=el("strong","nexus-interaction-action-title",(actions.find(x=>x[0]===action.type)?.[1]??"Ação")+" · "+String(i+1).padStart(2,"0"));
+   const active=control("checkbox",action.enabled!==false,[],"Ativar ação"),activeLabel=el("label","nexus-interaction-action-active");activeLabel.append(active,el("span","","Ativo"));bind(active,"action",flow.id,"enabled",{actionIndex:i});
+   const tools=el("div","nexus-interaction-action-tools"),up=iconBtn("Mover ação para cima","fa-arrow-up","move-action",flow.id,{actionIndex:i,direction:-1}),down=iconBtn("Mover ação para baixo","fa-arrow-down","move-action",flow.id,{actionIndex:i,direction:1});up.disabled=i===0;down.disabled=i===flow.actions.length-1;tools.append(up,down,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
+   head.append(actionTitle,activeLabel,tools);card.append(head);
+   const type=control("select",action.type,actions,"Tipo de ação");card.append(field("Tipo",type,"action",flow.id,"type",{actionIndex:i}));
+   const config=el("div","nexus-interaction-action-config");buildActionConfig(config,{...flow,componentId:component.id},action,i,components);card.append(config);actionGroup.append(card);
   }
-  if(action.type==="calculate"){add("Fórmula","formula",action.config.formula??"");add("Salvar resultado em","targetPath",action.config.targetPath??"");}
-  if(action.type==="update"){
-    add("Propriedade","path",action.config.path??"");
-    const op=field("select","Operação",action.config.operation??"set",[["set","Definir"],["add","Somar"],["subtract","Subtrair"]]);bind(op.input,"action",flow.id,"config.operation",{actionIndex:index});parent.append(op.wrap);
-    add("Valor","value",action.config.value??"0");
-  }
-  if(["open","toggle","interact"].includes(action.type)){
-    const target=field("select","Componente de destino",action.config.targetId??"",[["","Selecione"],...components.filter(c=>c.id!==flow.componentId).map(c=>[c.id,c.customLabel||c.type||c.id])]);
-    bind(target.input,"action",flow.id,"config.targetId",{actionIndex:index});parent.append(target.wrap);
-    if(action.type==="interact"){const ev=field("select","Evento de destino",action.config.event??"interact",events);bind(ev.input,"action",flow.id,"config.event",{actionIndex:index});parent.append(ev.wrap);}
-    if(action.type==="open")add("UUID do documento (opcional)","uuid",action.config.uuid??"");
-  }
-  if(action.type==="execute"){
-    const op=field("select","Operação",action.config.operation??"refresh-sheet",[["refresh-sheet","Atualizar ficha"],["notify","Notificação"]]);bind(op.input,"action",flow.id,"config.operation",{actionIndex:index});parent.append(op.wrap);
-    if(action.config.operation==="notify")add("Mensagem","message",action.config.message??"");
-  }
-}
-export function renderInteractionEditor(container,component,components=[],library=[]) {
-  if(!container)return;
-  const previousFlowId=container.dataset.activeInteractionId??"";
-  container.replaceChildren();
-  const flows=getComponentInteractions(component);
-  const activeFlowId=flows.some(flow=>flow.id===previousFlowId)?previousFlowId:(flows[0]?.id??"");
-  container.dataset.activeInteractionId=activeFlowId;
-
-  const head=el("header","nexus-interaction-editor-heading");
-  const title=el("div","nexus-interaction-editor-title");
-  title.append(el("strong","","Fluxos"));
-  const toolbar=el("div","nexus-interaction-editor-toolbar");
-  toolbar.append(btn("＋ Novo fluxo","add-flow",""));
-  if(library.length){
-    const select=el("select","nexus-interaction-library-select");
-    select.setAttribute("aria-label","Selecionar fluxo salvo");
-    const placeholder=el("option","","Usar modelo salvo…");placeholder.value="";select.append(placeholder);
-    for(const item of library){const option=el("option","",item.name);option.value=item.id;select.append(option);}
-    select.dataset.interactionLibrarySelect="";
-    toolbar.append(select,btn("Inserir","add-library-flow",""));
-  }
-  head.append(title,toolbar);
-
-  if(!flows.length){
-    container.append(head);
-    const empty=el("div","nexus-interaction-empty-state");
-    empty.append(el("strong","","Nenhum fluxo neste componente"),el("p","","Adicione um fluxo para definir as interações deste componente."),btn("＋ Criar fluxo","add-flow",""));
-    container.append(empty);
-    return;
-  }
-
-  const flowTabs=el("nav","nexus-interaction-flow-tabs");
-  flowTabs.setAttribute("role","tablist");
-  flowTabs.setAttribute("aria-label","Fluxos do componente");
-  for(const flow of flows){
-    const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");
-    tab.type="button";
-    tab.setAttribute("data-interaction-flow-tab",flow.id);
-    tab.setAttribute("role","tab");
-    tab.setAttribute("aria-selected",String(flow.id===activeFlowId));
-    tab.classList.toggle("active",flow.id===activeFlowId);
-    flowTabs.append(tab);
-  }
-  head.append(flowTabs);
-  container.append(head);
-
-  const flowList=el("div","nexus-interaction-flows");
-  for(const flow of flows){
-    const card=el("section","nexus-interaction-flow");
-    card.dataset.interactionId=flow.id;
-    card.setAttribute("data-interaction-flow-panel",flow.id);
-    card.hidden=flow.id!==activeFlowId;
-    card.setAttribute("role","tabpanel");
-
-    const top=el("div","nexus-interaction-flow-heading");
-    const name=el("input","nexus-interaction-flow-name");
-    name.type="text";name.value=flow.name;name.placeholder="Nome do fluxo";name.setAttribute("aria-label","Nome do fluxo");
-    bind(name,"flow",flow.id,"name");top.append(name);
-    const enabled=field("input","Ativo",flow.enabled);enabled.input.type="checkbox";bind(enabled.input,"flow",flow.id,"enabled");
-    const flowActions=el("div","nexus-interaction-flow-actions");
-    flowActions.append(enabled.wrap,iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));
-    top.append(flowActions);
-    card.append(top);
-
-    const guided=el("section","nexus-interaction-guided");
-    const triggers=el("section","nexus-interaction-group");
-    const triggerHeading=el("div","nexus-interaction-group-heading");
-    triggerHeading.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
-    triggers.append(triggerHeading);
-    flow.triggers.forEach((tr,i)=>{
-      const row=el("div","nexus-interaction-row");
-      const sel=el("select","nexus-interaction-trigger-select");
-      for(const [value,label] of events){const option=el("option","",label);option.value=value;sel.append(option);}
-      sel.value=tr.event;sel.setAttribute("aria-label","Evento do gatilho");
-      bind(sel,"trigger",flow.id,"event",{triggerIndex:i});
-      row.append(sel,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));
-      triggers.append(row);
-    });
-
-    const conditions=el("section","nexus-interaction-group");
-    const conditionHeading=el("div","nexus-interaction-group-heading nexus-interaction-condition-heading");
-    const join=el("select","nexus-interaction-condition-join");
-    for(const [value,label] of [["all","Todas (E)"],["any","Qualquer (OU)"]]){const option=el("option","",label);option.value=value;join.append(option);}
-    join.value=flow.conditionJoin;join.setAttribute("aria-label","Combinar condições");
-    bind(join,"flow",flow.id,"conditionJoin");
-    conditionHeading.append(el("h6","","Condições"),join,btn("＋ Adicionar","add-condition",flow.id));
-    conditions.append(conditionHeading);
-    flow.conditions.forEach((co,i)=>{
-      const row=el("div","nexus-interaction-condition");
-      const property=el("div","nexus-interaction-condition-field nexus-interaction-condition-property");
-      const propertyInput=el("input");propertyInput.type="text";propertyInput.value=co.path;propertyInput.autocomplete="off";propertyInput.spellcheck=false;propertyInput.setAttribute("aria-label","Propriedade");propertyInput.placeholder="system.propriedade";
-      bind(propertyInput,"condition",flow.id,"path",{conditionIndex:i});property.append(propertyInput);
-      const operator=el("div","nexus-interaction-condition-field nexus-interaction-condition-operator");
-      const operatorInput=el("select");for(const [value,label] of operators){const option=el("option","",label);option.value=value;operatorInput.append(option);}operatorInput.value=co.operator;operatorInput.setAttribute("aria-label","Operador");
-      bind(operatorInput,"condition",flow.id,"operator",{conditionIndex:i});operator.append(operatorInput);
-      const value=el("div","nexus-interaction-condition-field nexus-interaction-condition-value");
-      const valueInput=el("input");valueInput.type="text";valueInput.value=co.value;valueInput.setAttribute("aria-label","Valor");valueInput.placeholder="Valor";
-      bind(valueInput,"condition",flow.id,"value",{conditionIndex:i});value.append(valueInput);
-      row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));
-      conditions.append(row);
-    });
-    guided.append(triggers,conditions);
-    card.append(guided);
-
-    const acts=el("section","nexus-interaction-group nexus-interaction-actions");
-    const actionsHeading=el("div","nexus-interaction-group-heading");
-    actionsHeading.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));
-    acts.append(actionsHeading);
-    flow.actions.forEach((a,i)=>{
-      const row=el("details","nexus-interaction-action nexus-interaction-action-head");row.open=true;
-      const actionName=(a.type==="roll"&&a.config.mode==="skill"?"Rolagem de perícia":actions.find(([key])=>key===a.type)?.[1]??"Ação")+" · "+(i+1);
-      const actionTitle=el("summary","nexus-interaction-action-title");
-      actionTitle.append(el("span","nexus-interaction-action-name",actionName));
-      const tools=el("div","nexus-interaction-action-tools");
-      const moveUp=iconBtn("Mover ação para cima","fa-arrow-up","move-action",flow.id,{actionIndex:i,direction:-1});
-      const moveDown=iconBtn("Mover ação para baixo","fa-arrow-down","move-action",flow.id,{actionIndex:i,direction:1});
-      moveUp.disabled=i===0;moveDown.disabled=i===flow.actions.length-1;
-      tools.append(moveUp,moveDown,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
-      const active=field("input","Ativo",a.enabled);active.input.type="checkbox";active.input.checked=a.enabled!==false;bind(active.input,"action",flow.id,"enabled",{actionIndex:i});
-      const meta=el("div","nexus-interaction-action-meta");
-      const type=field("select","Tipo",a.type,actions);bind(type.input,"action",flow.id,"type",{actionIndex:i});meta.append(type.wrap);
-      const config=el("div","nexus-interaction-action-config");
-      actionConfig(config,{...flow,componentId:component.id},a,i,components);
-      row.append(actionTitle,active.wrap,tools,meta,config);
-      acts.append(row);
-    });
-    card.append(acts);
-
-    const advanced=el("details","nexus-interaction-execution");
-    const advancedSummary=el("summary","","Execução avançada");
-    const error=field("select","Se uma ação falhar",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]]);
-    bind(error.input,"flow",flow.id,"onError");
-    advanced.append(advancedSummary,error.wrap);
-    card.append(advanced);
-    flowList.append(card);
-  }
-  container.append(flowList);
+  panel.append(actionGroup);
+  const advanced=el("details","nexus-interaction-execution"),summary=el("summary","","Execução avançada"),error=control("select",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]],"Se uma ação falhar");advanced.append(summary,field("Se uma ação falhar",error,"flow",flow.id,"onError"));panel.append(advanced);panels.append(panel);
+ }
+ container.append(panels);
 }
