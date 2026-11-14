@@ -5,13 +5,15 @@ const ROOT_LABELS = Object.freeze({
   skills: "Perícias", skill: "Perícias",
   resources: "Recursos", resource: "Recursos",
   combat: "Combate", identity: "Identidade",
-  name: "Nome", img: "Imagem", notes: "Anotações"
+  name: "Nome", img: "Imagem", notes: "Anotações",
+  custom: "Personalizadas", external: "Externas", system: "Dados do sistema", flags: "Dados do módulo"
 });
 const SEGMENT_LABELS = Object.freeze({
   body: "Corpo", mind: "Mente", soul: "Alma",
   pv: "Pontos de Vida", pm: "Pontos de Mana", pe: "Pontos de Energia",
   defense: "Defesa", movement: "Movimento", desl: "DESL", ddr: "DdR", mb: "MB",
-  level: "Nível", lineage: "Linhagem", legacy: "Legado",
+  level: "Nível", lineage: "Linhagem", lineage2: "Linhagem secundária", legacy: "Legado",
+  current: "Atual", currentValue: "Valor atual", maximum: "Máximo", base: "Base", total: "Total", enabled: "Ativo", active: "Ativo",
   value: "Valor", max: "Máximo", percentage: "Percentual",
   name: "Nome", exib: "Exibição", exibicao: "Exibição",
   checkbonus: "Bônus de teste", roll: "Rolagem",
