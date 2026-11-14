@@ -1326,6 +1326,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (action === "resource-adjust") return this._adjustResource(button.dataset.path, Number(button.dataset.delta));
       if (action === "component-roll") return this._rollComponent(button.dataset.componentId);
       if (action === "save-group-library") return this._saveSelectedGroupToLibrary();
+      if (action === "save-library-component") return this._saveSelectedLibraryComponent();
     });
     html.find("[data-skill-roll]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
@@ -3313,6 +3314,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = [...saved, { id: foundry.utils.randomID(10), label, type: component.type, settings }];
     await game.user.setFlag("nexus", "libraryComponents", next);
     ui.notifications?.info?.(`“${label}” foi salvo em Meus Componentes.`);
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryApplyFilter?.();
     this.render({ force: true });
   }
 
@@ -3329,6 +3333,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = saved.filter(item => item.id !== id);
     if (next.length === saved.length) return;
     await game.user.setFlag("nexus", "libraryComponents", next);
+    this._libraryRenderPersonalItems?.();
+    this._libraryApplyFilter?.();
     this.render({ force: true });
   }
 
