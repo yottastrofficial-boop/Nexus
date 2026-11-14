@@ -1825,8 +1825,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
       const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
       const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
-      const count=libraryPanel?.querySelector("[data-library-count]");
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
+      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
+      const count=libraryPanel?.querySelector("[data-library-count]");
       if(count)count.textContent=scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
       const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
@@ -4248,8 +4249,18 @@ export class NexusActorSheet extends NexusActorSheetBase {
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
       if(key==="assets")this._libraryApplyFilter?.();
-      if(key==="themes")panel.querySelector("[data-library-count]").textContent=`${Object.keys(THEME_PALETTES).length} temas`;
-      if(key==="flows")panel.querySelector("[data-library-count]").textContent=`${flows.length} ${flows.length===1?"fluxo":"fluxos"}`;
+      if(key==="themes"){
+        const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+        const cards=[...panel.querySelectorAll("[data-library-theme]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visible++;});
+        panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"tema":"temas"}`;
+      }
+      if(key==="flows"){
+        const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+        const cards=[...panel.querySelectorAll("[data-library-flow-id]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visible++;});
+        panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"fluxo":"fluxos"}`;
+      }
     };
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
     panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
