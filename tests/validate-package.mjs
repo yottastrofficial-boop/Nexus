@@ -68,6 +68,8 @@ assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
 assert.match(sheetCode, /renderPropertyPicker/);
 assert.match(sheetCode, /activateCanvasInteractions/);
+assert.match(sheet, /await import\("\.\/library-view\.js"\)/, "A Biblioteca deve carregar seu módulo somente quando aberta");
+assert.doesNotMatch(sheet, /import \{ mountLibraryView \} from "\.\/library-view\.js"/, "A Biblioteca não deve ser carregada estaticamente na inicialização");
 assert.ok(sheet.length < 300000, "A ficha principal deve permanecer como fachada modular, não como arquivo monolítico");
 assert.doesNotMatch(sheetCode, /data-property-list-expand|propertyListExpand/, "O controle antigo de expandir/reduzir deve ser removido");
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
