@@ -54,7 +54,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
   const allPaths = new Set(paths);
   for (const skill of NEXUS_SKILLS) {
     for (const field of [
-      "attribute", "attributeName", "attributeKey", "attributeValue",
+      "name", "attribute", "attributeName", "attributeKey", "attributeValue",
       "description", "proficientLevel", "proficient", "opposed",
       "proficiency", "modifier", "value", "bonus"
     ]) allPaths.add("skills." + skill.key + "." + field);
