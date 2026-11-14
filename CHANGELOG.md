@@ -1,3 +1,20 @@
+## 1.0.0.26
+
+- Seletor de propriedades passa a navegar por categorias e níveis, com pesquisa global e sugestões progressivas; substitui a lista extensa e o controle de expandir/reduzir.
+- Catálogo de propriedades centralizado em módulo próprio, com nomes localizados para atributos, perícias, recursos, combate e identidade.
+- Perícias oferecem propriedades calculadas derivadas da regra ativa: modificador, bônus, atributo, proficiência e demais dados expostos por `getNexusSkillRows`.
+- Selecionar uma opção no menu flutuante não dispara mais a limpeza global de seleção; o alvo de edição é mantido ao limpar somente a seleção visual.
+- Menu fecha ao interagir fora dele e preserva o contexto ao clicar nas próprias opções.
+- Tema, padrões de layout, janela flutuante, visualização do seletor e catálogo foram separados em módulos por responsabilidade, mantendo a ficha como ponto de integração.
+- Barra de rolagem do portal do seletor recebe os mesmos tokens visuais das janelas NEXUS; campos focados deixam de ter seus destaques recortados pelo conteúdo do componente.
+- Mantido o formato persistido de layouts, componentes, aliases e fluxos.
+
+## Validação pendente
+
+- Executar verificações de sintaxe, testes de pacote e regressões no CI.
+- Validar no Foundry VTT 14 o seletor em Propriedades, Comportamento, fórmulas e Biblioteca; testar clique fora, seleção de área vazia, navegação hierárquica e propriedades calculadas de perícias.
+- Confirmar visualmente os destaques/foco dos campos em componentes com diferentes formatos e dimensões.
+
 ## Correções em preparação para 1.0.0.25
 
 - Biblioteca: miniaturas de indicadores e componentes pessoais passam a usar uma área de visualização quadrada independente das dimensões do componente no Canvas.
