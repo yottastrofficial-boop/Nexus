@@ -7,6 +7,10 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     const assets=panel.querySelector("[data-library-assets]");
     if(!assets||panel.dataset.libraryMounted==="true")return;
     panel.dataset.libraryMounted="true";assets.replaceChildren();
+    const searchInput = panel.querySelector("[data-library-search]");
+    if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
+    const tagFilter = panel.querySelector("[data-library-tag]");
+    if (tagFilter) tagFilter.value = sheet._libraryTagFilter ?? "all";
     sheet._libraryAssetScope??="core";
     const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
     const preferredFolder=sheet._libraryFolder??NEXUS_LIBRARY_CATALOG.assets.find(item=>item.type===sheet._librarySelectedType)?.category;
@@ -43,6 +47,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     for(const [id,palette] of Object.entries(THEME_PALETTES)){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
       const labelText=themeLabels[id]??id;card.dataset.libraryAsset=labelText.toLocaleLowerCase("pt-BR");card.dataset.libraryTheme=id;
+      const selected=id===(sheet._currentLayout?.theme??"nexus-dark");card.classList.toggle("is-selected",selected);card.setAttribute("aria-pressed",String(selected));
       const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";preview.dataset.themeSwatch=id;
       for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
       const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
@@ -60,6 +65,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
     }
     const activateSection=(key)=>{
+      sheet._librarySection=key;
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
       if(key==="assets")sheet._libraryApplyFilter?.();
@@ -77,6 +83,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
     };
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
+    activateSection(sheet._librarySection ?? "assets");
     panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
       sheet._libraryAssetScope=button.dataset.libraryScope;
       panel.querySelectorAll("[data-library-scope]").forEach(item=>item.classList.toggle("active",item===button));
