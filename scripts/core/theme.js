@@ -27,6 +27,18 @@ export const applyThemeTokens = (element, layout = {}) => {
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
   const values = {
     "--nexus-panel-bg": theme.panel,
+    "--nexus-panel-card": layout.cardColor ?? theme.card,
+    "--nexus-panel-accent": layout.accentColor ?? theme.accent,
+    "--nexus-canvas-scroll-bg": layout.scrollColor ?? theme.scroll,
+    "--nexus-window-header-bg": layout.windowHeaderColor ?? theme.windowHeader,
+    "--nexus-window-content-bg": layout.windowContentColor ?? theme.windowContent,
+    "--nexus-button-bg": layout.buttonColor ?? theme.button,
+    "--nexus-button-border": layout.accentColor ?? theme.border,
+    "--nexus-button-hover-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
+    "--nexus-button-active-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 72%, ${layout.highlightColor ?? theme.highlight})`,
+    "--nexus-button-active-border": layout.highlightColor ?? theme.highlight,
+    "--nexus-button-active-text": theme.text,
+    "--nexus-button-active": layout.highlightColor ?? theme.highlight,
     "--nexus-panel-surface": theme.surface,
     "--nexus-panel-input": theme.input,
     "--nexus-panel-border": theme.border,

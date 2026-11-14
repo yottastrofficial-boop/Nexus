@@ -12,7 +12,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     const renderDataEditorPreservingState = async (preferredElement = null) => {
       const root = html?.[0];
-      const panel = root?.querySelector?.(".nexus-alias-manager");
+      const panelEntries = [...(sheet._nexusPanelWindows?.entries?.() ?? [])]
+        .map(([key, instance]) => ({ key, root: instance?.element }))
+        .filter(entry => entry.root?.isConnected);
+      const aliasEntry = panelEntries.find(entry => entry.key === "aliases");
+      const panel = aliasEntry?.root?.querySelector?.(".nexus-alias-manager")
+        ?? root?.querySelector?.(".nexus-alias-manager");
       const active = preferredElement && panel?.contains(preferredElement) ? preferredElement : document.activeElement;
       const focusDescriptor = panel?.contains(active) ? {
         field: active.dataset?.nativePropertyField ? ["data-native-property-field", active.dataset.nativePropertyField] :
@@ -29,23 +34,44 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         start: typeof active.selectionStart === "number" ? active.selectionStart : null,
         end: typeof active.selectionEnd === "number" ? active.selectionEnd : null
       } : null;
-      const scrollState = [".nexus-alias-manager", ".nexus-appearance-drawer", ".nexus-canvas-scroll", ".nexus-library-grid", ".nexus-layer-list", ".nexus-component-inspector", ".window-content", ".application-content"]
-        .map(selector => { const node = root?.querySelector?.(selector); return node ? { selector, top: node.scrollTop, left: node.scrollLeft } : null; }).filter(Boolean);
+      const scrollSelectors = [
+        ".window-content", ".application-content", ".nexus-native-panel-content",
+        ".nexus-tool-panel", ".nexus-alias-manager", ".nexus-component-inspector",
+        ".nexus-behavior-editor", ".nexus-library-grid", ".nexus-layer-list",
+        ".nexus-canvas-scroll", ".nexus-appearance-drawer"
+      ];
+      const scrollState = [];
+      const captureScroll = (ownerKey, ownerRoot) => {
+        const seen = new Set();
+        for (const selector of scrollSelectors) {
+          const node = ownerRoot?.matches?.(selector) ? ownerRoot : ownerRoot?.querySelector?.(selector);
+          if (!node || seen.has(node)) continue;
+          seen.add(node);
+          if (node.scrollTop || node.scrollLeft || node.scrollHeight > node.clientHeight + 2 || node.scrollWidth > node.clientWidth + 2) {
+            scrollState.push({ ownerKey, selector, top: node.scrollTop, left: node.scrollLeft });
+          }
+        }
+      };
+      captureScroll(null, root);
+      for (const entry of panelEntries) captureScroll(entry.key, entry.root);
       await sheet.render({ force: true });
       const restore = () => {
-        const currentRoot = sheet.element?.querySelector?.(".nexus-sheet") ?? sheet.element ?? document;
         for (const state of scrollState) {
-          const node = currentRoot.querySelector?.(state.selector);
+          const ownerRoot = state.ownerKey
+            ? sheet._nexusPanelWindows?.get(state.ownerKey)?.element
+            : sheet.element?.querySelector?.(".nexus-sheet") ?? sheet.element ?? document;
+          const node = ownerRoot?.matches?.(state.selector) ? ownerRoot : ownerRoot?.querySelector?.(state.selector);
           if (node) { node.scrollTop = state.top; node.scrollLeft = state.left; }
         }
         if (!focusDescriptor?.field) return;
+        const currentPanel = sheet._nexusPanelWindows?.get("aliases")?.element
+          ?? sheet.element?.querySelector?.(".nexus-alias-manager")?.parentElement
+          ?? document;
         const activeNow = document.activeElement;
         const [attribute, value] = focusDescriptor.field;
         const escaped = value ? CSS.escape(value) : "";
         const selector = value ? `[${attribute}="${escaped}"]` : `[${attribute}]`;
-        const target = currentRoot.querySelector?.(`.nexus-alias-manager ${selector}`);
-        // Só recupera foco quando a renderização o deixou no body. Se o usuário
-        // já escolheu outro controle, respeita essa escolha.
+        const target = currentPanel.querySelector?.(`.nexus-alias-manager ${selector}`);
         if (activeNow && activeNow !== document.body && activeNow !== document.documentElement && activeNow !== target) return;
         if (!target) return;
         target.focus({ preventScroll: true });
@@ -1146,6 +1172,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`focusin${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`,()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
+    $(document).on(`pointerdown${inspectorNamespace}`,"[data-property-category], [data-property-back], [data-property-path-option]",event=>{
+      // Keep focus on the source field; focusout would otherwise close the portal
+      // before the category can be opened or an option can be selected.
+      event.preventDefault();
+      event.stopPropagation();
+    });
     $(document).on(`click${inspectorNamespace}`,"[data-property-category]",event=>{
       event.preventDefault();event.stopPropagation();
       const list=event.currentTarget.closest("[data-component-path-options]"),input=list?._nexusOwnerInput;
@@ -1216,7 +1248,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const panelLeft = panelWindowElement?.style.left ?? "";
       const panelTop = panelWindowElement?.style.top ?? "";
       const panelTransform = panelWindowElement?.style.transform ?? "";
-      const scrollSnapshot = [".window-content", ".application-content", ".nexus-component-inspector"]
+      const scrollSnapshot = [".window-content", ".application-content", ".nexus-native-panel-content", ".nexus-tool-panel", ".nexus-component-inspector", ".nexus-behavior-editor"]
         .map(selector => ({ selector, top: panelWindowElement?.querySelector(selector)?.scrollTop ?? 0, left: panelWindowElement?.querySelector(selector)?.scrollLeft ?? 0 }));
       const restoreEditorViewport = ({ focus = false, target: focusTarget = null } = {}) => {
         const restore = () => {
