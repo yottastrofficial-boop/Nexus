@@ -460,7 +460,7 @@ assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-item
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
 assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
-assert.match(interactions,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
+assert.match(sheet,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
 assert.match(sheet,/before\.match\(\/\\\{\\\{\\s\*\(\[A-Za-z0-9_.-\]\*\)\//,"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(sheet,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
 assert.match(sheet,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
