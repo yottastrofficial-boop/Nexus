@@ -51,6 +51,7 @@ const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
 const propertyCatalog = await read("scripts/core/property-catalog.js");
+const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
@@ -419,7 +420,7 @@ assert.match(sheetCode, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder s
 assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
 assert.match(sheetCode, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
 assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
-assert.match(sheetCode, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
+assert.match(propertySchema, /exib: "PV"/, "A propriedade PV deve possuir abreviação própria");
 assert.match(sheet, /NEXUS_ATTRIBUTES\.map/, "Os seis atributos reais devem gerar propriedades nativas com abreviações próprias");
 assert.doesNotMatch(sheetCode, /exib:"CORPO"/, "Corpo deve ser grupo, não propriedade numérica independente");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
