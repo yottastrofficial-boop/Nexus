@@ -5647,3 +5647,24 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window :is(button,input,select,textarea):focus-visible{
   outline-color:var(--nexus-focus-ring,var(--nexus-highlight-color,#78b7e8))!important;
 }
+
+
+/* Override decorative legacy theme skins where they conflict with selected palette values. */
+.nexus-sheet[data-theme] :is(.nexus-canvas-stage,.nexus-canvas-scroll){
+  background:var(--nexus-canvas-scroll-bg,var(--nexus-scroll-bg,#111923))!important;
+}
+:is(.nexus-window,.nexus-panel-window)[data-theme] .window-header{
+  color:var(--nexus-header-text,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-window-header-bg,var(--nexus-window-header,#223246))!important;
+  border-color:var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067))!important;
+}
+:is(.nexus-window,.nexus-panel-window)[data-theme] :is(.window-content,.application-content){
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-window-content-bg,var(--nexus-window-content,var(--nexus-panel-bg,#182330)))!important;
+}
+.nexus-panel-window[data-theme] .nexus-native-panel-content :is(button.active,[aria-selected="true"]),
+.nexus-window[data-theme] .nexus-sheet :is(button.active,[aria-selected="true"]){
+  color:var(--nexus-button-active-text,var(--nexus-panel-text,#e7edf5))!important;
+  background:var(--nexus-button-active-bg,var(--nexus-button-color,#315b7d))!important;
+  border-color:var(--nexus-button-active-border,var(--nexus-highlight-color,#78b7e8))!important;
+}
