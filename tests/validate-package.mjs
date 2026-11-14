@@ -283,7 +283,8 @@ assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos deve
 assert.match(sheetCode, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
 assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
 assert.match(sheetCode, /exib:"PV"/, "A propriedade PV deve possuir abreviação própria");
-assert.match(sheetCode, /exib:"CORPO"/, "A propriedade Corpo deve possuir abreviação própria");
+assert.match(sheet, /NEXUS_ATTRIBUTES\.map/, "Os seis atributos reais devem gerar propriedades nativas com abreviações próprias");
+assert.doesNotMatch(sheetCode, /exib:"CORPO"/, "Corpo deve ser grupo, não propriedade numérica independente");
 assert.doesNotMatch(template, /nexus-field-hint/, "Hints redundantes devem ser removidas");
 
 assert.match(template, /data-interaction-editor/, "O editor de fluxos deve existir no template");
