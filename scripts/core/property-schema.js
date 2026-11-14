@@ -100,7 +100,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const key = String(path ?? "").replace(/^system\./, "");
   const level = Math.max(1, Number(system.identity?.level) || 1);
 
-  if (key === "identity.name") return { matched: true, value: actor.name ?? "", readOnly: true };
+  if (key === "identity.name") return { matched: true, value: actor.name ?? "", readOnly: true, sourcePath: "name" };
   const attributeMatch = key.match(/^attributes\.([^.]+)\.(name|exib|value|description)$/);
   if (attributeMatch) {
     const definition = NEXUS_ATTRIBUTES.find(attribute => attribute.key === attributeMatch[1]);
@@ -110,7 +110,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
       : member === "exib" ? definition.exib
       : member === "description" ? definition.description
       : Number(system.attributes?.[definition.key]) || 0;
-    return { matched: true, value, readOnly: true };
+    return { matched: true, value, readOnly: member !== "value", sourcePath: member === "value" ? `attributes.${definition.key}` : undefined };
   }
 
   const skillMatch = key.match(/^skills\.([^.]+)(?:\.(.+))?$/);
@@ -119,7 +119,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     const row = definition ? getNexusSkillRows(actor).find(skill => skill.key === definition.key) : null;
     const member = skillMatch[2];
     if (row && (!member || Object.hasOwn(row, member))) {
-      return { matched: true, value: member ? row[member] : row, readOnly: member !== "proficient" };
+      return { matched: true, value: member ? row[member] : row, readOnly: member !== "proficient", sourcePath: member === "proficient" ? `skills.${definition.key}.proficient` : undefined };
     }
   }
 
@@ -139,7 +139,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     return { matched: true, value: Number(system.attributes?.des) || 0, readOnly: true };
   }
   if (["combat.movement", "combat.movement.value", "combat.desl"].includes(key)) {
-    return { matched: true, value: Number(system.combat?.movement ?? system.combat?.desl) || 0 };
+    return { matched: true, value: Number(system.combat?.movement ?? system.combat?.desl) || 0, sourcePath: "combat.movement" };
   }
   if (key === "combat.movement.meters") {
     return { matched: true, value: (Number(system.combat?.movement ?? system.combat?.desl) || 0) * 1.5, readOnly: true };
@@ -165,7 +165,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   if (key === "encumbrance.base.value") return { matched: true, value: base, readOnly: true };
   if (key === "encumbrance.bonus.value") return { matched: true, value: bonus, readOnly: true };
   if (key === "encumbrance.capacity.value") return { matched: true, value: capacity, readOnly: true };
-  if (key === "encumbrance.current.value") return { matched: true, value: Number(system.encumbrance?.current) || 0 };
+  if (key === "encumbrance.current.value") return { matched: true, value: Number(system.encumbrance?.current) || 0, sourcePath: "encumbrance.current" };
   if (key === "encumbrance.overloaded.value") return { matched: true, value: (Number(system.encumbrance?.current) || 0) > capacity, readOnly: true };
 
   return { matched: false };
