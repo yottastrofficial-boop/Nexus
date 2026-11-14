@@ -7,7 +7,7 @@
 - Ampliados os tokens semânticos dos temas para Canvas, cabeçalhos de janela, botões ativos, superfícies e estados de foco.
 - Confirmado que o asset “Indicador – Barra” continua no catálogo da Biblioteca; renderizadores de outros tipos permanecem como suporte extensível ao catálogo.
 
-**Validação:** testes automatizados e validação do pacote no GitHub Actions. A confirmação visual final ainda depende de teste manual no Foundry VTT 14.
+**Validação:** testes automatizados e validação do pacote no GitHub Actions. Pacote preparado para distribuição no Foundry VTT 14; a confirmação visual final ainda depende de teste manual no Foundry.
 
 ## 1.0.0.27
 
