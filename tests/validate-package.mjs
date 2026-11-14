@@ -34,9 +34,9 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.29", "Versão do manifesto incorreta");
-assert.ok(readme.includes("Versão 1.0.0.29"), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith("## 1.0.0.29"), "CHANGELOG deve iniciar pela versão atual");
+assert.equal(manifest.version, "1.0.0.30", "Versão do manifesto incorreta");
+assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
+assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
@@ -116,7 +116,7 @@ assert.equal(propertyTree.entries.some(entry => entry.path === "identity.name"),
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.29/nexus.zip"), "URL do pacote deve apontar para a versão atual");
+assert.ok(manifest.download.endsWith(`/releases/download/v${manifest.version}/nexus.zip`), "URL do pacote deve apontar para a versão atual");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
@@ -271,7 +271,7 @@ for (const char of css) {
 }
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
-assert.ok(readme.includes("Versão 1.0.0.29"));
+assert.ok(readme.includes(`Versão ${manifest.version}`));
 assert.match(changelog, /## 1\.0\.0\.7/);
 assert.match(sheetCode, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
@@ -380,7 +380,7 @@ assert.match(interactions, /flow\.actions/);
 assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheetCode, /_toggleTargetComponent/);
 assert.match(sheetCode, /setResourceFromTrack/);
-console.log("NEXUS 1.0.0.29: catálogo canônico, proficiência assinada e sincronização de temas verificados.");
+console.log(`NEXUS ${manifest.version}: catálogo canônico, proficiência assinada e sincronização de temas verificados.`);
 
 
 // Signed proficiency levels and negative numeric properties.
