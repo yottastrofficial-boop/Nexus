@@ -7,6 +7,32 @@ import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexus
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
+import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
+
+// Geometry regression tests for the Canvas smart-alignment search.
+const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
+const geometryTargets = [
+  { x: 100, y: 0, w: 20, h: 20 },
+  { x: 26, y: 40, w: 20, h: 20 }
+];
+assert.deepEqual(
+  findBestAlignmentMatch([geometrySource], geometryTargets, "x", 7),
+  { delta: 6, pos: 26, distance: 20, labelAt: 30 },
+  "Smart alignment must select the nearest target anchor and preserve gap labels"
+);
+assert.equal(
+  findBestAlignmentMatch([geometrySource], [{ x: 40, y: 40, w: 20, h: 20 }], "x", 7),
+  null,
+  "Smart alignment must ignore targets outside tolerance"
+);
+assert.deepEqual(
+  findBestAlignmentMatch([{ x: 0, y: 0, w: 20, h: 20 }], [
+    { x: 26, y: 40, w: 20, h: 20 },
+    { x: 26, y: 60, w: 20, h: 20 }
+  ], "x", 7),
+  { delta: 6, pos: 26, distance: 20, labelAt: 30 },
+  "Equal alignment anchors must keep the first target's tie-breaking order"
+);
 
 // Runtime smoke tests for the Canvas controller's early lifecycle guards.
 assert.doesNotThrow(() => activateCanvasInteractions({}, [], {}), "A render without a root element must exit safely");
@@ -42,6 +68,8 @@ assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
 assert.match(sheetCode, /renderPropertyPicker/);
 assert.match(sheetCode, /activateCanvasInteractions/);
+assert.match(sheet, /await import\("\.\/library-view\.js"\)/, "A Biblioteca deve carregar seu módulo somente quando aberta");
+assert.doesNotMatch(sheet, /import \{ mountLibraryView \} from "\.\/library-view\.js"/, "A Biblioteca não deve ser carregada estaticamente na inicialização");
 assert.ok(sheet.length < 300000, "A ficha principal deve permanecer como fachada modular, não como arquivo monolítico");
 assert.doesNotMatch(sheetCode, /data-property-list-expand|propertyListExpand/, "O controle antigo de expandir/reduzir deve ser removido");
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
@@ -307,7 +335,8 @@ assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
 
 assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
-assert.match(sheetCode, /remove\("is-selected", "is-group-inspecting", "is-selection-highlight"\)/, "A limpeza da seleção deve remover todos os estados visuais");
+assert.match(sheetCode, /classList\.toggle\("is-selected", selected\)/, "A seleção deve aplicar diretamente o estado visual final");
+assert.match(sheetCode, /classList\.toggle\("is-group-inspecting", memberSelected\)/, "A inspeção de grupos deve acompanhar o estado final da seleção");
 assert.match(sheetCode, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "Os atalhos devem consultar o Canvas atual");
 assert.match(sheetCode, /_setComponentTextStyle\(componentId, target, key, value\)/, "A formatação deve ser aplicada ao conteúdo e ao título");
 assert.match(template, /data-text-style-target="content"/, "A formatação deve permitir selecionar o conteúdo");
