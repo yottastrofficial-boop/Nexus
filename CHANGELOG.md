@@ -1,3 +1,17 @@
+## Correções em preparação para 1.0.0.25
+
+- Biblioteca: miniaturas de indicadores e componentes pessoais passam a usar uma área de visualização quadrada independente das dimensões do componente no Canvas.
+- Biblioteca: cartões personalizados salvos exibem uma prévia com título e conteúdo, em vez de apenas um glifo genérico.
+- Biblioteca: busca e filtro recebem layout responsivo sem sobreposição; as seções Assets, Fluxos e Temas e a separação Padrão NEXUS / Meus itens são mantidas.
+- Propriedades: removida a segunda montagem de opções no Inspector. A lista dinâmica passa a ter um único portal e um único fluxo de renderização, sem ser movida entre janelas.
+- Propriedades: o mesmo seletor atende campos de vínculo, condições, fórmulas e campos de texto/textarea, incluindo conteúdo de cards personalizados.
+- Propriedades: atualização da assinatura também considera aliases de rolagem; o campo proprietário é registrado antes do reposicionamento assíncrono.
+- Propriedades: a seleção insere o texto no cursor, mantém o foco e usa uma rolagem padronizada com espaço reservado para a barra.
+- Comportamento: após atualizar um campo e reconstruir o editor, o cursor e a seleção de texto são restaurados.
+- Mantida a separação entre dados do Actor, configuração dos componentes e apresentação visual.
+
+**Validação pendente:** testes de sintaxe/integração e execução funcional no Foundry VTT 14. Esta alteração ainda não deve ser tratada como release publicada.
+
 ## 1.0.0.24
 
 - Biblioteca reorganizada em áreas de Assets, Fluxos e Temas, com separação entre conteúdo padrão e itens pessoais.
