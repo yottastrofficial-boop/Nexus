@@ -9,7 +9,7 @@
 - Biblioteca e Aparência global agora compartilham o mesmo fluxo de aplicação de tema; mudar o tema atualiza os controles de ambas as áreas sem recriar a ficha.
 - Estado da Biblioteca (seção, busca, filtro e rolagem) preservado entre renderizações.
 
-**Validação:** regressões de catálogo, agrupamento, compatibilidade de proficiência e sincronização de temas adicionadas. A confirmação visual final ainda depende de teste manual no Foundry VTT 14.
+**Validação:** regressões de catálogo, agrupamento, compatibilidade de proficiência e sincronização de temas adicionadas. Pacote automatizado validado; a confirmação visual final ainda depende de teste manual no Foundry VTT 14.
 
 ## 1.0.0.28
 
