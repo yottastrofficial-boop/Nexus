@@ -243,7 +243,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
-    const syncGroupBounds = (componentNodes = elements(), updateCorners = true) => {
+    const syncGroupBounds = (updateCorners = true) => {
       for (const g of (sheet._activeGroups ?? [])) {
         const members = (membersByGroupId.get(g.id) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
@@ -517,7 +517,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         sizeReadout.style.left = `${clamp(box.x + box.w - 180, 4, l.width - 184)}px`; sizeReadout.style.top = `${Math.max(4, box.y - 34)}px`;
       }
       // Os cantos conectados são recalculados ao terminar o gesto, não a cada frame.
-      syncGroupBounds(undefined, false);
+      syncGroupBounds(false);
     };
     // Limita o trabalho pesado de alinhamento/seleção a no máximo um ciclo por frame.
     let pointerMoveFrame = 0;
@@ -623,7 +623,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         item.el.style.top = `${item.y + dy}px`;
         keyboardMoveTouched.add(item.el.dataset.id);
       }
-      syncGroupBounds(keyboardMoveAllElements, false);
+      syncGroupBounds(false);
     };
     const queueKeyboardMove = (dx, dy) => {
       beginKeyboardMove();
