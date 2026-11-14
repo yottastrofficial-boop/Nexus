@@ -36,7 +36,7 @@ assert.match(sheet, /activateCanvasInteractions/);
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
 assert.match(canvasInteractions, /deactivateInteraction/);
 assert.match(sheet, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
-assert.match(sheetListeners, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
+assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
 assert.match(sheetListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);
 assert.match(propertyCatalog, /modifier/);
