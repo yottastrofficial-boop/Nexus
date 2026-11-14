@@ -475,7 +475,7 @@ assert.match(sheet,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos"
 assert.match(sheet,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
 assert.match(sheet,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
 assert.match(sheet,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
-assert.match(interactions,/data-roll-formula-input/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
+assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
 assert.match(css,/nexus-library-personal-preview/,"Itens pessoais devem usar miniaturas quadradas");
 assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades deve oferecer expansão e redução");
