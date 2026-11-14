@@ -147,15 +147,40 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
     if (parts[0] === "skills" && parts.length > 2 && DERIVED_SKILL_FIELDS.has(parts[2])) continue;
 
     const skill = parts[0] === "skills" ? SKILL_BY_KEY.get(parts[1]) : null;
+    const attribute = parts[0] === "attributes" ? ATTRIBUTE_BY_KEY.get(parts[1]) : null;
     const aliasLabel = labels.get(path);
     const label = aliasLabel || getSegmentLabel(parts.at(-1), parts.at(-2) ?? "");
-    entriesByPath.set(path, { path, label, searchLabel: label, segments: parts });
+    if (attribute && parts.length > 2) {
+      const groupPath = "attributes." + attribute.nucleus + "." + attribute.key;
+      entriesByPath.set(path, {
+        path, label, searchLabel: attribute.name + " · " + label, segments: parts,
+        groupPath, displaySuffix: parts.slice(2),
+        groupLabels: {
+          attributes: "Atributos",
+          ["attributes." + attribute.nucleus]: NUCLEUS_LABELS[attribute.nucleus],
+          [groupPath]: attribute.name
+        }
+      });
+    } else if (skill && parts.length > 2) {
+      const groupPath = "skills." + skill.attributeKey + "." + skill.key;
+      entriesByPath.set(path, {
+        path, label, searchLabel: skill.name + " · " + label, segments: parts,
+        groupPath, displaySuffix: parts.slice(2),
+        groupLabels: {
+          skills: "Perícias",
+          ["skills." + skill.attributeKey]: skill.attributeName,
+          [groupPath]: skill.name
+        }
+      });
+    } else {
+      entriesByPath.set(path, { path, label, searchLabel: label, segments: parts });
+    }
   }
 
   const root = { path: "", label: "Propriedades", children: new Map(), entry: null };
   for (const entry of entriesByPath.values()) {
     const displaySegments = entry.groupPath
-      ? [...entry.groupPath.split("."), entry.displaySegment ?? entry.segments.at(-1)]
+      ? [...entry.groupPath.split("."), ...(entry.displaySuffix ?? [entry.displaySegment ?? entry.segments.at(-1)])]
       : entry.segments;
     let node = root;
     let parentPath = "";
