@@ -3,9 +3,6 @@ import { DEFAULT_LAYOUT, applyThemeTokens } from "../core/theme.js";
 const ApplicationV2 = foundry.applications.api.ApplicationV2;
 const NexusPanelWindowBase = foundry.applications.api.HandlebarsApplicationMixin(ApplicationV2);
 
-const ApplicationV2 = foundry.applications.api.ApplicationV2;
-const NexusPanelWindowBase = HandlebarsApplicationMixin(ApplicationV2);
-
 export class NexusPanelWindow extends NexusPanelWindowBase {
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ApplicationV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "nexus-panel-window"],
