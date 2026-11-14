@@ -250,7 +250,70 @@ assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
 const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
+
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
+
+// Rulebook property migration: signed proficiency and stored derived combat
+// values are normalized once, while custom final values are preserved as modifiers.
+const legacyPropertyActor = {
+  system: {
+    identity: { level: 4 },
+    attributes: { des: 1 },
+    skills: {
+      athletics: { proficientLevel: 1 },
+      furtividade: { opposed: true }
+    },
+    combat: { defense: 15, movement: 6, mb: 2, ddr: 4, desl: 5 },
+    resources: { pv: { value: 12, max: 12 } }
+  },
+  flags: { nexus: { activeLayout: "principal", aliases: [], customData: {} } },
+  updateCount: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) {
+    this.flags[scope] ??= {};
+    this.flags[scope][key] = structuredClone(value);
+  },
+  async update(changes) {
+    for (const [path, value] of Object.entries(changes)) {
+      const parts = path.split(".");
+      const leaf = parts.pop();
+      let target = this;
+      for (const part of parts) target = target[part] ??= {};
+      target[leaf] = structuredClone(value);
+    }
+    this.updateCount++;
+  }
+};
+const propertyMigrationDependencies = {
+  actor: legacyPropertyActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => [],
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => raw,
+  invalidateAliasDefinitionCache: () => {},
+  getPath: getSafePath,
+  clone: value => structuredClone(value),
+  setProperty: setSafePath
+};
+const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
+assert.equal(propertyMigration.propertiesMigrated, true);
+assert.equal(legacyPropertyActor.system.skills.athletics.proficient, true);
+assert.equal(legacyPropertyActor.system.skills.athletics.proficientLevel, undefined);
+assert.equal(legacyPropertyActor.system.skills.stealth.proficient, false);
+assert.equal(legacyPropertyActor.system.skills.furtividade, undefined);
+assert.equal(legacyPropertyActor.system.combat.defenseModifier, 6);
+assert.equal(legacyPropertyActor.system.combat.defense, undefined);
+assert.equal(legacyPropertyActor.system.combat.mb, undefined);
+assert.equal(legacyPropertyActor.system.combat.ddr, undefined);
+assert.equal(legacyPropertyActor.system.combat.desl, undefined);
+assert.equal(legacyPropertyActor.system.combat.movement, 6);
+assert.equal(legacyPropertyActor.system.resources.pv.temporary, 0);
+assert.deepEqual(legacyPropertyActor.system.conditions, []);
+assert.deepEqual(legacyPropertyActor.system.recovery, { spent: 0 });
+const propertyMigrationWrites = legacyPropertyActor.updateCount;
+const repeatedPropertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
+assert.equal(repeatedPropertyMigration.propertiesMigrated, false);
+assert.equal(legacyPropertyActor.updateCount, propertyMigrationWrites, "Migração de propriedades não deve regravar dados canônicos");
 
 
 // Three-way persistence merge: preserve edits to separate components and
@@ -445,7 +508,7 @@ assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").value, 0);
 assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").exib, "FUR");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient, true, "Dados antigos devem ser lidos durante a migração");
-assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 2);
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 1);
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
 assert.match(sheetListeners, /if \(kind === "number"\) \{\s*if \(value === "" \|\| typeof value === "boolean" \|\| !Number\.isFinite\(Number\(value\)\)\) \{[\s\S]*?\}\s*value = Number\(value\);\s*\}/, "Propriedades numéricas devem rejeitar valores vazios e não numéricos, aceitando números finitos inclusive negativos");
 
