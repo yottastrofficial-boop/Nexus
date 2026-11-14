@@ -2313,57 +2313,110 @@ export class NexusActorSheet extends NexusActorSheetBase {
       await this._syncActorPortraitFromToken(id);
     });
 
-    const getPropertyOptionsOwner = input => input?.closest(".nexus-component-inspector, .nexus-behavior-editor, .nexus-panel-window");
-    const ensurePropertyOptionsList = owner => {
-      if(!owner)return null;
-      let list=owner.querySelector("[data-component-path-options]");
-      if(!list){list=document.createElement("div");list.className="nexus-property-options";list.dataset.componentPathOptions="";list.hidden=true;list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades e atalhos disponíveis");owner.append(list);}
+    const propertyPickerId=`nexus-property-picker-${String(this.id).replace(/[^a-zA-Z0-9_-]/g,"")}`;
+    const getPropertyOptionsOwner=input=>input?.closest(".nexus-panel-window")??input?.closest(".nexus-component-inspector, .nexus-behavior-editor");
+    const ensurePropertyOptionsList=()=>{
+      let list=document.getElementById(propertyPickerId);
+      if(!list){
+        list=document.createElement("div");list.className="nexus-property-options";list.id=propertyPickerId;list.dataset.componentPathOptions="";list.hidden=true;
+        list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades disponíveis");
+        const header=document.createElement("div");header.className="nexus-property-options-toolbar";
+        const title=document.createElement("strong");title.textContent="Propriedades disponíveis";
+        const expand=document.createElement("button");expand.type="button";expand.dataset.propertyListExpand="";expand.setAttribute("aria-label","Expandir lista");expand.title="Expandir lista";expand.textContent="Expandir";
+        header.append(title,expand);list.append(header);document.body.append(list);
+      }
       return list;
     };
-    const positionPropertyOptions = input => {
+    const positionPropertyOptions=input=>{
       if(!input?.isConnected)return;
-      const owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
-      if(!list||!owner||list.hidden)return;
-      if(list.parentElement!==document.body){document.querySelectorAll(`[data-nexus-property-owner="${this.id}"]`).forEach(other=>{if(other!==list)other.remove();});list.dataset.nexusPropertyOwner=String(this.id);list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;document.body.append(list);}
-      else{list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;}
+      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner||list.hidden)return;
+      list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;
       const rect=input.getBoundingClientRect(),vw=document.documentElement.clientWidth||window.innerWidth,vh=document.documentElement.clientHeight||window.innerHeight,gap=6;
-      const above=Math.max(0,rect.top-gap-12),below=Math.max(0,vh-rect.bottom-gap-12),placeAbove=above>below&&above>120,maxHeight=Math.max(96,Math.min(280,placeAbove?above:below));
-      list.style.position="fixed";list.style.left=`${Math.max(12,Math.min(rect.left,vw-rect.width-12))}px`;list.style.width=`${Math.min(rect.width,vw-24)}px`;list.style.maxHeight=`${maxHeight}px`;list.style.top=placeAbove?`${Math.max(8,rect.top-Math.min(list.scrollHeight||240,maxHeight)-gap)}px`:`${Math.min(vh-maxHeight-8,rect.bottom+gap)}px`;list.style.bottom="auto";list.style.overflowY="auto";
+      const width=Math.min(Math.max(300,rect.width),Math.min(520,vw-24));
+      const above=Math.max(0,rect.top-gap-12),below=Math.max(0,vh-rect.bottom-gap-12),placeAbove=above>below&&above>140;
+      const maxHeight=Math.max(112,Math.min(list.classList.contains("is-expanded")?440:280,placeAbove?above:below));
+      list.style.position="fixed";list.style.left=`${Math.max(12,Math.min(rect.left,vw-width-12))}px`;list.style.width=`${width}px`;
+      list.style.maxHeight=`${maxHeight}px`;list.style.top=placeAbove?`${Math.max(8,rect.top-Math.min(list.scrollHeight||240,maxHeight)-gap)}px`:`${Math.min(vh-maxHeight-8,rect.bottom+gap)}px`;
+      list.style.bottom="auto";list.style.overflowY="auto";
     };
-    const filterPropertyOptions = input => {
-      const owner=getPropertyOptionsOwner(input),list=owner?ensurePropertyOptionsList(owner):null;if(!list)return;
-      if(list.dataset.nexusOptionsReady!=="true"){
-        const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
-        for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){const root=safeAliasKey(alias.key);if(!root)continue;const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[""];for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);}
-        const fragment=document.createDocumentFragment(),heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Propriedades disponíveis";fragment.append(heading);
-        for(const path of [...paths].sort((a,b)=>a.localeCompare(b,"pt-BR"))){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=path;button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=path.split(".").at(-1);const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);}
-        const aliases=getNexusRollAliasEntries(this.actor);if(aliases.length){const h=document.createElement("div");h.className="nexus-property-options-heading";h.textContent="Atalhos de exibição · Fórmulas";fragment.append(h);for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}}
-        list.replaceChildren(fragment);list.dataset.nexusOptionsReady="true";
+    const filterPropertyOptions=input=>{
+      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;
+      const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
+      for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){
+        const root=safeAliasKey(alias.key);if(!root)continue;
+        const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[ "" ];
+        for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
-      const formulaMode=input.hasAttribute("data-roll-formula-input"),propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input"),raw=String(input.value??""),cursor=input.selectionStart??raw.length,before=raw.slice(0,cursor);
-      const tokenMatch=formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):propertyMode?null:before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/);
-      if(!formulaMode&&!propertyMode&&!tokenMatch){list.hidden=true;return;}
-      const query=(formulaMode?(tokenMatch?.[1]??""):propertyMode?raw:(tokenMatch?.[1]??"")).trim().toLocaleLowerCase("pt-BR");
-      let matches=0;list.querySelectorAll(".nexus-property-option").forEach(option=>{const aliasOnly=option.dataset.rollAliasOption==="true",visible=!(aliasOnly&&!formulaMode)&&(!query||option.textContent.toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.propertyPathOption??"").toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.rollToken??"").toLocaleLowerCase("pt-BR").includes(query));option.hidden=!visible;if(visible)matches++;});
+      const sortedPaths=[...paths].sort((x,y)=>x.localeCompare(y,"pt-BR"));
+      const signature=sortedPaths.join("|");
+      if(list.dataset.optionsSignature!==signature){
+        const fragment=document.createDocumentFragment();
+        for(const path of sortedPaths){
+          const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=path;button.setAttribute("role","option");
+          const title=document.createElement("strong");title.textContent=path.split(".").at(-1);
+          const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);
+        }
+        const aliases=getNexusRollAliasEntries(this.actor);
+        if(aliases.length){const heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Atalhos de rolagem";fragment.append(heading);
+          for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");
+            const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}
+        }
+        list.querySelectorAll(".nexus-property-option,.nexus-property-options-heading").forEach(node=>node.remove());
+        list.append(fragment);list.dataset.optionsSignature=signature;
+      }
+      const formulaMode=input.hasAttribute("data-roll-formula-input");
+      const propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input");
+      const raw=String(input.value??""),cursor=input.selectionStart??raw.length,before=raw.slice(0,cursor);
+      const formulaAt= formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):null;
+      const formulaExpression=formulaMode?before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/):null;
+      const templateExpression=!formulaMode&&!propertyMode?before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/):null;
+      if(formulaMode&&!formulaAt&&!formulaExpression||!formulaMode&&!propertyMode&&!templateExpression){list.hidden=true;return;}
+      const query=(formulaAt?.[1]??formulaExpression?.[1]??templateExpression?.[1]??(propertyMode?raw:"")).trim().toLocaleLowerCase("pt-BR");
+      let matches=0;
+      list.querySelectorAll(".nexus-property-option").forEach(option=>{
+        const aliasOnly=option.dataset.rollAliasOption==="true";
+        const visible=!(aliasOnly&&!formulaMode)&&(!query||option.textContent.toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.propertyPathOption??"").toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.rollToken??"").toLocaleLowerCase("pt-BR").includes(query));
+        option.hidden=!visible;if(visible)matches++;
+      });
       list.querySelectorAll(".nexus-property-options-heading").forEach(heading=>{let next=heading.nextElementSibling,visible=false;while(next&&!next.classList.contains("nexus-property-options-heading")){if(!next.hidden)visible=true;next=next.nextElementSibling;}heading.hidden=!visible;});
       list.dataset.empty=matches?"false":"true";list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
-    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-roll-formula-input]";
-    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
+    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-interaction-property-input], .nexus-panel-window [data-roll-formula-input]";
+    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-interaction-property-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
     $(document).on(`focusin${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`,()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
+    $(document).on(`click${inspectorNamespace}`,"[data-property-list-expand]",event=>{
+      const list=event.currentTarget.closest("[data-component-path-options]");if(!list)return;
+      list.classList.toggle("is-expanded");event.currentTarget.textContent=list.classList.contains("is-expanded")?"Reduzir":"Expandir";
+      event.currentTarget.setAttribute("aria-label",list.classList.contains("is-expanded")?"Reduzir lista":"Expandir lista");
+      if(list._nexusOwnerInput)positionPropertyOptions(list._nexusOwnerInput);
+    });
     $(document).on(`click${inspectorNamespace}`,"[data-property-path-option]",event=>{
-      event.preventDefault();event.stopPropagation();const button=event.currentTarget,list=button.closest("[data-component-path-options]"),owner=list?._nexusOwnerInspector||list?.closest(".nexus-panel-window"),input=list?._nexusOwnerInput||owner?.querySelector(":focus");
-      if(!input||!list||!owner)return;
-      if(input.hasAttribute("data-roll-formula-input")){const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/@([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;const token=button.dataset.rollToken||"@"+button.dataset.propertyPathOption;input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));}
-      else if(input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input")){input.value=button.dataset.propertyPathOption;input.dispatchEvent(new Event("change",{bubbles:true}));input.blur();}
-      else{const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;const token="{{"+button.dataset.propertyPathOption+"}}";input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
-      list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;
+      event.preventDefault();event.stopPropagation();
+      const button=event.currentTarget,list=button.closest("[data-component-path-options]"),input=list?._nexusOwnerInput;
+      if(!input||!list)return;
+      const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor);
+      const formulaMode=input.hasAttribute("data-roll-formula-input");
+      const propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input");
+      const atMatch=formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):null;
+      const braceMatch=before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/);
+      let start=cursor,end=cursor,token=button.dataset.propertyPathOption;
+      if(propertyMode){start=0;end=value.length;}
+      else if(formulaMode&&atMatch){start=cursor-atMatch[0].length;while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;token=button.dataset.rollToken||"@"+token;}
+      else if(braceMatch){start=cursor-braceMatch[0].length;while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;token="{{"+token+"}}";}
+      else if(formulaMode)return;
+      input.value=value.slice(0,start)+token+value.slice(end);
+      if(propertyMode){input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      else{input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      list.hidden=true;
     });
     $(document).on(`pointerdown${inspectorNamespace}`,"[data-component-path-options]",event=>event.stopPropagation());
-    $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
-    $(document).on(`focusout${inspectorNamespace}`,".nexus-panel-window input[type='text'], .nexus-panel-window textarea",event=>{const input=event.currentTarget,owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);setTimeout(()=>{if(list&&!list.contains(document.activeElement)){list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body&&owner)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;}},120);});
+    $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const list=document.getElementById(propertyPickerId),input=list?._nexusOwnerInput;if(input?.isConnected)positionPropertyOptions(input);});
+    $(document).on(`focusout${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>{
+      const input=event.currentTarget,list=document.getElementById(propertyPickerId);
+      setTimeout(()=>{if(list&&!list.contains(document.activeElement)&&document.activeElement!==input){list.hidden=true;list.classList.remove("is-expanded");list.style.top="";list.style.left="";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}},140);
+    });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
       const panelWindow = input.closest(".nexus-panel-window");
