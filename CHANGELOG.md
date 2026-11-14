@@ -5,7 +5,7 @@
 - Perícias oferecem propriedades calculadas derivadas da regra ativa: modificador, bônus, atributo, proficiência e demais dados expostos por `getNexusSkillRows`.
 - Selecionar uma opção no menu flutuante não dispara mais a limpeza global de seleção; o alvo de edição é mantido ao limpar somente a seleção visual.
 - Menu fecha ao interagir fora dele e preserva o contexto ao clicar nas próprias opções.
-- Tema, padrões de layout, janela flutuante, visualização do seletor e catálogo foram separados em módulos por responsabilidade, mantendo a ficha como ponto de integração.
+- Tema, padrões de layout, janela flutuante, visualização do seletor, catálogo, ligações de eventos e interações do Canvas foram separados em módulos por responsabilidade, mantendo a ficha como ponto de integração.
 - Barra de rolagem do portal do seletor recebe os mesmos tokens visuais das janelas NEXUS; campos focados deixam de ter seus destaques recortados pelo conteúdo do componente.
 - Mantido o formato persistido de layouts, componentes, aliases e fluxos.
 
