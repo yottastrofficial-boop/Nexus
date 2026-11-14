@@ -1,4 +1,4 @@
-import { NEXUS_ATTRIBUTES, NEXUS_SKILLS } from "./skills.js";
+import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows } from "./skills.js";
 
 /**
  * Canonical property registry for the NEXUS core rules.
@@ -88,6 +88,87 @@ export function getNexusRulebookPropertyDefinition(path) {
 
 export function getNexusRulebookPropertyPaths() {
   return NEXUS_RULEBOOK_PROPERTY_PATHS;
+}
+
+/**
+ * Resolve computed and metadata-only properties from the canonical registry.
+ * Returns matched:false for ordinary stored Actor.system paths.
+ */
+export function getNexusRulebookPropertyValue(actorOrSystem, path) {
+  const actor = actorOrSystem?.system ? actorOrSystem : { system: actorOrSystem ?? {} };
+  const system = actor.system ?? {};
+  const key = String(path ?? "").replace(/^system\./, "");
+  const level = Math.max(1, Number(system.identity?.level) || 1);
+
+  if (key === "identity.name") return { matched: true, value: actor.name ?? "", readOnly: true };
+  const attributeMatch = key.match(/^attributes\.([^.]+)\.(name|exib|value|description)$/);
+  if (attributeMatch) {
+    const definition = NEXUS_ATTRIBUTES.find(attribute => attribute.key === attributeMatch[1]);
+    if (!definition) return { matched: false };
+    const member = attributeMatch[2];
+    const value = member === "name" ? definition.name
+      : member === "exib" ? definition.exib
+      : member === "description" ? definition.description
+      : Number(system.attributes?.[definition.key]) || 0;
+    return { matched: true, value, readOnly: true };
+  }
+
+  const skillMatch = key.match(/^skills\.([^.]+)(?:\.(.+))?$/);
+  if (skillMatch) {
+    const definition = NEXUS_SKILLS.find(skill => skill.key === skillMatch[1] || skill.legacyKey === skillMatch[1]);
+    const row = definition ? getNexusSkillRows(actor).find(skill => skill.key === definition.key) : null;
+    const member = skillMatch[2];
+    if (row && (!member || Object.hasOwn(row, member))) {
+      return { matched: true, value: member ? row[member] : row, readOnly: member !== "proficient" };
+    }
+  }
+
+  const resourceMatch = key.match(/^resources\.(pv|pm|pe)\.(name|exib)$/);
+  if (resourceMatch) {
+    const resource = RESOURCE_DEFINITIONS.find(item => item.key === resourceMatch[1]);
+    if (resource) return { matched: true, value: resourceMatch[2] === "name" ? resource.name : resource.exib, readOnly: true };
+  }
+
+  if (["progression.mb.value", "combat.mb", "combat.mb.value"].includes(key)) {
+    return { matched: true, value: getNexusBaseModifier(system), readOnly: true };
+  }
+  if (["combat.defense", "combat.defense.value"].includes(key)) {
+    return { matched: true, value: 8 + (Number(system.attributes?.des) || 0) + (Number(system.combat?.defenseModifier) || 0), readOnly: true };
+  }
+  if (key === "combat.initiative.value") {
+    return { matched: true, value: Number(system.attributes?.des) || 0, readOnly: true };
+  }
+  if (["combat.movement", "combat.movement.value", "combat.desl"].includes(key)) {
+    return { matched: true, value: Number(system.combat?.movement ?? system.combat?.desl) || 0 };
+  }
+  if (key === "combat.movement.meters") {
+    return { matched: true, value: (Number(system.combat?.movement ?? system.combat?.desl) || 0) * 1.5, readOnly: true };
+  }
+  if (["recovery.count.value", "combat.ddr"].includes(key)) {
+    return { matched: true, value: level, readOnly: true };
+  }
+  if (key === "recovery.die.value") {
+    const die = [4, 6, 8, 10, 12][Math.min(4, Math.floor((level - 1) / 2))];
+    return { matched: true, value: "d" + die, readOnly: true };
+  }
+  if (key === "recovery.available.value") {
+    return { matched: true, value: Math.max(0, level - (Number(system.recovery?.spent) || 0)), readOnly: true };
+  }
+  if (key === "resources.pe.recovery.value") {
+    return { matched: true, value: getNexusBaseModifier(system) * 4, readOnly: true };
+  }
+
+  const strength = Number(system.attributes?.for) || 0;
+  const base = 5;
+  const bonus = strength * 2;
+  const capacity = base + bonus;
+  if (key === "encumbrance.base.value") return { matched: true, value: base, readOnly: true };
+  if (key === "encumbrance.bonus.value") return { matched: true, value: bonus, readOnly: true };
+  if (key === "encumbrance.capacity.value") return { matched: true, value: capacity, readOnly: true };
+  if (key === "encumbrance.current.value") return { matched: true, value: Number(system.encumbrance?.current) || 0 };
+  if (key === "encumbrance.overloaded.value") return { matched: true, value: (Number(system.encumbrance?.current) || 0) > capacity, readOnly: true };
+
+  return { matched: false };
 }
 
 export function getNexusResourceDefinition(key) {
