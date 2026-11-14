@@ -1806,7 +1806,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if(["sheet-resource","pv","pm","pe","pv-bar","pm-bar","pe-bar"].includes(item.type)){
           const code=String(settings.sheetCode??settings.sheetContent1??"PV").toUpperCase(),color=settings.sheetColor||({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]||"#d94b4b";
           stage.append(createSheetResourcePreview({label:settings.sheetContent1||code,current:settings.previewCurrent??32,max:settings.previewMax??40,color,showValues:true}));
-          fitSheetResourcePreview(stage,{w:220,h:58},78);
+          fitSheetResourcePreview(stage,{w:78,h:78},78);
+        }else if(item.type==="custom-card"){
+          const cardPreview=document.createElement("span");cardPreview.className="nexus-library-personal-card-preview";
+          const heading=document.createElement("strong");heading.textContent=String(settings.customLabel||"Card").slice(0,24);
+          const body=document.createElement("small");body.textContent=String(settings.text??"").slice(0,90);
+          cardPreview.append(heading,body);stage.append(cardPreview);
         }else{const glyph=document.createElement("span");glyph.className="nexus-library-personal-glyph";glyph.textContent=String(settings.customLabel||settings.text||definition.label||item.type||"N").trim().slice(0,2).toUpperCase();stage.append(glyph);}
         const label=document.createElement("strong");label.textContent=item.label||definition.label||"Componente";button.append(stage,label);container.append(button);
       }
@@ -2252,7 +2257,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
         const scrollContainer = editor.closest(".nexus-behavior-editor");
         const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
-        const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
+        const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, selectionStart: typeof control.selectionStart === "number" ? control.selectionStart : null, selectionEnd: typeof control.selectionEnd === "number" ? control.selectionEnd : null, selectionDirection: control.selectionDirection ?? "none" };
         renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         editor.dataset.componentId = componentId;
         if (scrollContainer) scrollContainer.scrollTop = scrollTop;
@@ -2266,6 +2271,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           item.dataset.actionIndex === focusData.actionIndex
         );
         nextControl?.focus({ preventScroll: true });
+        if(nextControl && focusData.selectionStart !== null && typeof nextControl.setSelectionRange === "function") nextControl.setSelectionRange(focusData.selectionStart, focusData.selectionEnd ?? focusData.selectionStart, focusData.selectionDirection);
       }
     };
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
@@ -2329,7 +2335,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     });
 
     const propertyPickerId=`nexus-property-picker-${String(this.id).replace(/[^a-zA-Z0-9_-]/g,"")}`;
-    const getPropertyOptionsOwner=input=>input?.closest(".nexus-panel-window")??input?.closest(".nexus-component-inspector, .nexus-behavior-editor");
+    const getPropertyOptionsOwner=input=>input?.closest(".nexus-panel-window, .nexus-library-panel, .nexus-component-inspector, .nexus-behavior-editor");
     const ensurePropertyOptionsList=()=>{
       let list=document.getElementById(propertyPickerId);
       if(!list){
@@ -2355,7 +2361,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       list.style.bottom="auto";list.style.overflowY="auto";
     };
     const filterPropertyOptions=input=>{
-      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;
+      const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;list._nexusOwnerInput=input;list._nexusOwnerInspector=owner;
       const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
       for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){
         const root=safeAliasKey(alias.key);if(!root)continue;
@@ -2363,7 +2369,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);
       }
       const sortedPaths=[...paths].sort((x,y)=>x.localeCompare(y,"pt-BR"));
-      const signature=sortedPaths.join("|");
+      const rollAliases=getNexusRollAliasEntries(this.actor);
+      const signature=JSON.stringify({paths:sortedPaths,rollAliases:rollAliases.map(entry=>[entry.target,entry.display,entry.label])});
       if(list.dataset.optionsSignature!==signature){
         const fragment=document.createDocumentFragment();
         for(const path of sortedPaths){
@@ -2371,9 +2378,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const title=document.createElement("strong");title.textContent=path.split(".").at(-1);
           const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);
         }
-        const aliases=getNexusRollAliasEntries(this.actor);
-        if(aliases.length){const heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Atalhos de rolagem";fragment.append(heading);
-          for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");
+        if(rollAliases.length){const heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Atalhos de rolagem";fragment.append(heading);
+          for(const entry of rollAliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");
             const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}
         }
         list.querySelectorAll(".nexus-property-option,.nexus-property-options-heading").forEach(node=>node.remove());
@@ -2396,8 +2402,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       list.querySelectorAll(".nexus-property-options-heading").forEach(heading=>{let next=heading.nextElementSibling,visible=false;while(next&&!next.classList.contains("nexus-property-options-heading")){if(!next.hidden)visible=true;next=next.nextElementSibling;}heading.hidden=!visible;});
       list.dataset.empty=matches?"false":"true";list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
-    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-interaction-property-input], .nexus-panel-window [data-roll-formula-input]";
-    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-interaction-property-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
+    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-interaction-property-input], .nexus-panel-window [data-roll-formula-input], .nexus-library-panel [data-component-path-input], .nexus-library-panel [data-interaction-property-input], .nexus-library-panel [data-roll-formula-input]";
+    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-interaction-property-input]):not([data-roll-formula-input]), .nexus-panel-window input[type='search']:not([data-library-search]), .nexus-panel-window textarea, .nexus-library-panel input[type='text']:not([data-component-path-input]):not([data-interaction-property-input]):not([data-roll-formula-input]), .nexus-library-panel textarea";
     $(document).on(`focusin${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
     $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`,()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
@@ -2422,8 +2428,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else if(braceMatch){start=cursor-braceMatch[0].length;while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;token="{{"+token+"}}";}
       else if(formulaMode)return;
       input.value=value.slice(0,start)+token+value.slice(end);
-      if(propertyMode){input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
-      else{input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      input.focus({preventScroll:true});
+      if(typeof input.setSelectionRange==="function")input.setSelectionRange(start+token.length,start+token.length);
+      input.dispatchEvent(new Event("input",{bubbles:true}));
+      input.dispatchEvent(new Event("change",{bubbles:true}));
       list.hidden=true;
     });
     $(document).on(`pointerdown${inspectorNamespace}`,"[data-component-path-options]",event=>event.stopPropagation());
@@ -4036,66 +4044,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       inspector.querySelectorAll("[data-inspector-tab-panel]").forEach(panel=>{const active=panel.dataset.inspectorTabPanel===activeTab;panel.hidden=!active;panel.classList.toggle("active",active);});
       let effectivePath = null;
       if (one) {
-        const knownCorePaths = ["name", "identity.portrait.img", "identity.token.img", "token.img", "resources.pv.value", "resources.pv.max", "resources.pm.value", "resources.pm.max", "resources.pe.value", "resources.pe.max", "identity.level", "identity.lineage", "identity.legacy", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"];
-        const corePaths = new Set(knownCorePaths.filter(path => path === "name" || ["identity.portrait.img", "identity.token.img", "token.img"].includes(path) || getPath(this.actor.system ?? {}, path) !== undefined));
-        const systemRevision = this.actor?._stats?.modifiedTime ?? this.actor?.system;
-        if (!this._nexusPropertyPathCache || this._nexusPropertyPathCache.revision !== systemRevision) {
-          this._nexusPropertyPathCache = { revision: systemRevision, paths: collectPropertyPaths(this.actor) };
-        }
-        const allSystemPaths = this._nexusPropertyPathCache.paths;
-        const nativePropertyRoots = new Set(getNativePropertyDefinitions(this.actor).filter(item => ["attribute", "resource"].includes(item.type)).map(item => safeAliasKey(item.key)).filter(Boolean));
-        const systemPaths = new Set([...allSystemPaths].filter(path => !nativePropertyRoots.has(path) && !corePaths.has(path) && ![...corePaths].some(core => path.startsWith(`${core}.`))));
-        const nativeAliasPaths = new Set();
-        const customAliasPaths = new Set();
-        const aliasLabels = new Map();
-        for (const [collection, destination] of [[getNativePropertyDefinitions(this.actor), nativeAliasPaths], [getAliasDefinitions(this.actor), customAliasPaths]]) {
-          for (const alias of collection) {
-            const root = safeAliasKey(alias.key); if (!root) continue;
-            const suffixes = alias.type === "attribute" ? ["name", "exib", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exib", "value", "max", "percentage"] : [""];
-            for (const suffix of suffixes) {
-              const path = suffix ? `${root}.${suffix}` : root;
-              destination.add(path);
-              aliasLabels.set(path, suffix ? `${alias.label} · ${suffix}` : alias.label);
-            }
-          }
-        }
-        const externalPaths = new Set(["uuid", "id", "_id", "img"].filter(path => path === "img" || this.actor?.[path] !== undefined));
-        const optionsList = inspector.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
-        if (optionsList?.parentElement === document.body) inspector.append(optionsList);
-        const suggestions = [];
-        const registeredPaths = new Set();
-        for (const [label, values] of [["NEXUS · nativas", corePaths], ["NEXUS · campos derivados", nativeAliasPaths], ["Módulos externos · system", systemPaths], ["Externas · Foundry / integrações", externalPaths], ["Campos próprios", customAliasPaths]]) {
-          const paths = [...values]
-            .filter(path => one.type !== "token" || /(?:^img$|\.img$)/i.test(path))
-            .filter(path => { if (registeredPaths.has(path)) return false; registeredPaths.add(path); return true; })
-            .sort((a,b) => a.localeCompare(b, "pt-BR"));
-          if (paths.length) suggestions.push({ label, paths });
-        }
-        if (optionsList) {
-          const fragment = document.createDocumentFragment();
-          for (const group of suggestions) {
-            const heading = document.createElement("div"); heading.className = "nexus-property-options-heading"; heading.textContent = group.label; fragment.append(heading);
-            for (const path of group.paths) {
-              const button = document.createElement("button"); button.type = "button"; button.className = "nexus-property-option"; button.dataset.propertyPathOption = path; button.setAttribute("role", "option");
-              const title = document.createElement("strong"); title.textContent = aliasLabels.get(path) ?? path;
-              const code = document.createElement("code"); code.textContent = path;
-              button.append(title, code); fragment.append(button);
-            }
-          }
-          const rollAliases = getNexusRollAliasEntries(this.actor);
-          if (rollAliases.length) {
-            const heading = document.createElement("div"); heading.className = "nexus-property-options-heading"; heading.textContent = "Atalhos de exibição · Fórmulas"; fragment.append(heading);
-            for (const entry of rollAliases) {
-              const button = document.createElement("button"); button.type = "button"; button.className = "nexus-property-option";
-              button.dataset.propertyPathOption = entry.target; button.dataset.rollToken = "@" + entry.display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
-              const title = document.createElement("strong"); title.textContent = entry.label || entry.display;
-              const code = document.createElement("code"); code.textContent = "@" + entry.display + " → " + entry.target;
-              button.append(title, code); fragment.append(button);
-            }
-          }
-          optionsList.replaceChildren(fragment);
-          optionsList.dataset.nexusOptionsReady = "true";
-        }
+        // Single property picker portal: options are built only by the shared picker.
+        const optionsList = document.getElementById("nexus-property-picker-" + String(this.id).replace(/[^a-zA-Z0-9_-]/g, ""));
         const pathInput = inspector.querySelector("[data-component-path-input]");
         const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
         if (pathInput) pathInput.value = defaultPath;
@@ -4218,7 +4168,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if(asset.type==="sheet-resource"){
         const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
         preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
-        fitSheetResourcePreview(preview,{w:220,h:58},78);
+        fitSheetResourcePreview(preview,{w:78,h:78},78);
       }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
       else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
       else if(asset.type==="custom-card"){const area=document.createElement("span");area.className="nexus-library-area-preview";area.textContent="+";preview.append(area);}
