@@ -103,7 +103,7 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   }
   const alias = resolveAliasPath(actor, path);
   let value = alias.alias
-    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join(".")))
+    ? (alias.path ? (virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : (alias.alias?.[alias.suffix] !== undefined ? alias.alias[alias.suffix] : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."))))
     : getPath(actor?.system ?? {}, path);
   if (alias.alias?.type === "resource" && alias.suffix === "percentage") {
     const resource = alias.path ? getPath(actor?.system ?? {}, alias.path) : getPath(getCustomAliasData(actor), alias.alias.key);
