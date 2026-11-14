@@ -1,3 +1,14 @@
+## 1.0.0.30
+
+- Otimizada a preparação da ficha: dados de aliases personalizados são obtidos uma vez e reutilizados durante a montagem do contexto.
+- Substituídas buscas repetidas de componentes e grupos por índices em memória (Map e Set), preservando a ordem original e a associação dos componentes aos grupos.
+- Otimizadas as atualizações de componentes vinculados, evitando consultas individuais repetidas ao DOM.
+- Renderizadores de mídia adaptativa e rich media agora indexam componentes por ID em vez de percorrer a lista para cada elemento.
+- Canvas passa a reutilizar a lista de elementos e índices de grupos durante a ativação, reduzindo consultas ao DOM e trabalho repetido nas operações de agrupamento.
+- Verificação de cantos conectados é adiada durante o arraste de grupos e recalculada ao término do gesto, reduzindo o trabalho por quadro.
+
+**Validação:** alterações integradas pelo PR #29. A validação funcional e visual em uma instalação real do Foundry VTT 14 permanece necessária; indicadores de cantos conectados durante o arraste são atualizados ao final do gesto.
+
 ## 1.0.0.29
 
 - Reorganizado o catálogo de propriedades: Corpo, Mente e Alma são grupos; Força, Destreza, Sabedoria, Inteligência, Carisma e Vontade são as seis propriedades numéricas reais.
