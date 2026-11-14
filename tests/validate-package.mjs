@@ -4,6 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
+import { buildPropertyPickerCatalog } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 
 const root = process.cwd();
@@ -43,6 +44,16 @@ assert.match(propertyCatalog, /modifier/);
 assert.match(propertyPickerView, /data-property-category/);
 assert.match(panelWindow, /export class NexusPanelWindow/);
 assert.match(themeModule, /export const applyThemeTokens/);
+const propertyTree = buildPropertyPickerCatalog({
+  paths: ["attributes.for", "attributes.body", "attributes.body.checkbonus", "skills.athletics.proficient", "skills.atletismo.proficient"],
+  nativeProperties: [{ key: "attributes.body", label: "Corpo", type: "attribute" }]
+});
+assert.equal(propertyTree.root.children.get("attributes").label, "Atributos");
+assert.equal(propertyTree.root.children.get("skills").label, "Perícias");
+assert.equal(propertyTree.root.children.get("skills").children.get("athletics").label, "Atletismo");
+assert.equal(propertyTree.entries.filter(entry => entry.path === "skills.athletics.proficient").length, 1, "Chaves legadas de perícia devem ser canonicalizadas sem duplicação");
+assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.body.checkbonus").label, "Bônus de teste");
+assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for").label, "Força");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
 assert.ok(manifest.download.endsWith("/releases/download/v1.0.0.26/nexus.zip"), "URL do pacote deve apontar para a versão atual");
