@@ -88,7 +88,7 @@ const isLegacyNucleusPath = path => LEGACY_NUCLEUS_PATHS.some(legacy => path ===
 const isDuplicatePath = path => DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
 
 export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], aliases = [], rollAliases = [] } = {}) {
-  const labels = new Map();
+  const labels = new Map(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => [definition.path, definition.label]));
   for (const alias of [...nativeProperties, ...aliases]) {
     const key = String(alias?.key ?? "").replace(/^system\./, "");
     if (key && alias?.label) labels.set(key, String(alias.label));
