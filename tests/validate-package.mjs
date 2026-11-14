@@ -281,7 +281,7 @@ assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve r
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
 
-assert.ok(interactions.includes("formula.length>500") || sheet.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
+assert.ok(interactions.includes("formula.length>500") || sheetCode.includes("formula.length > 500"), "Fórmulas devem ter limite de tamanho");
 assert.ok(interactions.includes('"roll"'), "O motor deve oferecer a ação de rolagem");
 assert.ok(sheetCode.includes("renderInteractionEditor(interactionEditor, one"), "O editor deve restaurar os fluxos salvos");
 assert.ok(sheetCode.includes("applyInteractionEditorChange"), "O Inspector deve persistir as configurações de cada ação");
@@ -413,9 +413,9 @@ assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve mant
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
 assert.ok(sheetCode.includes("behavior: [900, 600]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
 assert.ok(sheetCode.includes("component: [400, 600]"), "Propriedades deve seguir a geometria compacta dos painéis");
-assert.ok(sheetCode.includes("style: [400, 600]") && sheet.includes("layers: [400, 600]") && sheet.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
+assert.ok(sheetCode.includes("style: [400, 600]") && sheetCode.includes("layers: [400, 600]") && sheetCode.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
 assert.ok(sheetCode.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
-assert.ok(sheetCode.includes("library: [900, 600]") && sheet.includes("behavior: [900, 600]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
+assert.ok(sheetCode.includes("library: [900, 600]") && sheetCode.includes("behavior: [900, 600]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
 assert.ok(sheetCode.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(sheetCode.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
 assert.ok(sheetCode.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
