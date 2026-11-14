@@ -2223,7 +2223,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const scrollContainer = editor.closest(".nexus-behavior-editor");
         const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex };
-        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor));
+        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         editor.dataset.componentId = componentId;
         if (scrollContainer) scrollContainer.scrollTop = scrollTop;
         else editor.scrollTop = scrollTop;
@@ -4009,7 +4009,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const interactionEditor = inspector.querySelector("[data-interaction-editor]");
       if (interactionEditor) {
         interactionEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         else interactionEditor.replaceChildren();
       }
       const technicalId = inspector.querySelector("[data-component-technical-id]");
@@ -4029,7 +4029,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const behaviorTarget = behaviorPanel?.querySelector?.("[data-behavior-target]");
       if (behaviorEditor) {
         behaviorEditor.dataset.componentId = one?.id ?? "";
-        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor));
+        if (one) renderInteractionEditor(behaviorEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         else behaviorEditor.replaceChildren();
       }
       if (behaviorEmpty) behaviorEmpty.hidden = !!one;
