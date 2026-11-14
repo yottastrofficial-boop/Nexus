@@ -1,3 +1,18 @@
+## Unreleased
+
+### Propriedades
+- Centralizado o registro de propriedades do Actor em `scripts/core/property-schema.js`, alinhado ao livro-base do NEXUS.
+- Padronizados caminhos de atributos e perícias com metadados `name`, `exib` e valores numéricos em `value`.
+- Convertida a proficiência das perícias para o modelo binário do livro-base.
+- Incluídas propriedades derivadas de progressão, recursos, deslocamento, recuperação e capacidade de carga.
+- Adicionada migração dos dados antigos, preservando aliases personalizados e normalizando os campos nativos.
+- Documentado o contrato em `docs/actor-property-schema.md`.
+
+### Performance
+- Separados o viewport do Canvas e os eventos do modo de jogo em módulos leves.
+- O editor visual do Canvas agora é importado sob demanda, somente no modo de aparência.
+- Adicionadas proteções contra importações atrasadas e limpeza do ciclo de vida de listeners e observers.
+
 ## 1.0.0.31
 
 - Otimizado o cálculo de alinhamento do Canvas com busca binária sobre anchors ordenados, preservando a tolerância e os critérios de desempate.
