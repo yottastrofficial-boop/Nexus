@@ -379,7 +379,7 @@ assert.match(interactions, /flow\.actions/);
 assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheetCode, /_toggleTargetComponent/);
 assert.match(sheetCode, /setResourceFromTrack/);
-console.log("NEXUS 1.0.0.8: perícias oficiais, ações entre cards e controle direto de recursos verificados.");
+console.log("NEXUS 1.0.0.29: catálogo canônico, proficiência assinada e sincronização de temas verificados.");
 
 
 // Signed proficiency levels and negative numeric properties.
