@@ -1808,16 +1808,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
     this._libraryRenderPersonalItems();
     const filterLibrary = () => {
-      const query = libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
-      const tag = libraryPanel?.querySelector("[data-library-tag]")?.value ?? "all";
-      let visible = 0;
-      libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card => {
-        const matchText = !query || (card.dataset.libraryAsset ?? "").includes(query);
-        const matchTag = tag === "all" || (card.dataset.libraryAsset ?? "").includes(tag);
-        const matchFolder = card.dataset.libraryCategory === (this._libraryFolder ?? "core");
-        card.hidden = !(matchText && matchTag && matchFolder); if (!card.hidden) visible++;
+      const query=libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
+      const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
+      const scope=this._libraryAssetScope??"core";let visible=0;
+      libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
+        const text=card.dataset.libraryAsset??"",matchText=!query||text.includes(query),matchTag=tag==="all"||text.includes(tag);
+        const matchFolder=card.dataset.libraryCategory===(this._libraryFolder??"core");
+        card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
-      const count = libraryPanel?.querySelector("[data-library-count]"); if (count) count.textContent = `${visible} ${visible === 1 ? "elemento" : "elementos"}`;
+      const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
+      const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
+      const count=libraryPanel?.querySelector("[data-library-count]");
+      const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
+      if(count)count.textContent=scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
+      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
     const resourcePaths = (() => {
       const paths = [];
@@ -4098,7 +4102,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const code = String(asset.template?.sheetCode ?? "PV").toUpperCase();
         const color = asset.template?.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] ?? "#d94b4b";
         preview.append(createSheetResourcePreview({ label: asset.template?.sheetContent1 ?? code, current: 32, max: 40, color, showValues: true }));
-        fitSheetResourcePreview(preview, { w: 220, h: 58 }, 120);
+        fitSheetResourcePreview(preview, { w: 220, h: 58 }, 78);
       }
       else if (asset.type === "token") { const token = document.createElement("span"); token.className = "nexus-library-token-preview"; token.textContent = "N"; preview.append(token); }
       else if (asset.type === "asset-notes") { const note = document.createElement("span"); note.className = "nexus-library-note-preview"; note.innerHTML = "<i></i><i></i><i></i>"; preview.append(note); }
