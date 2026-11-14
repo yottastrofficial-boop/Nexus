@@ -646,7 +646,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (getPath(sheet.actor.system ?? {}, `resources.${resource}`) === undefined) continue;
         for (const suffix of ["value", "max"]) if (getPath(sheet.actor.system ?? {}, `resources.${resource}.${suffix}`) !== undefined) paths.push(`resources.${resource}.${suffix}`);
       }
-      for (const path of ["attributes.body", "attributes.mind", "attributes.soul", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb", "identity.level"]) {
+      for (const path of ["attributes.for", "attributes.des", "attributes.sab", "attributes.int", "attributes.car", "attributes.von", "combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb", "identity.level"]) {
         paths.push(path);
       }
       for (const alias of [...getNativePropertyDefinitions(sheet.actor), ...getAliasDefinitions(sheet.actor)]) {
@@ -700,11 +700,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (asset.type === "sheet-attribute") {
         detail.innerHTML = `<div class="nexus-library-live-preview is-sheet-attribute"><div class="nexus-sheet-element is-attribute" data-attribute-preview-card><small data-attribute-preview-label>CORPO</small><strong data-attribute-preview-value>3</strong></div></div>
           <div class="nexus-library-config-section"><strong>Atributo</strong>
-            <label>Selecionar atributo<select data-attribute-preset><option value="body">Corpo</option><option value="mind">Mente</option><option value="soul">Alma</option><option value="custom">Personalizado</option></select></label>
+            <label>Selecionar atributo<select data-attribute-preset><option value="for">Força</option><option value="des">Destreza</option><option value="sab">Sabedoria</option><option value="int">Inteligência</option><option value="car">Carisma</option><option value="von">Vontade</option><option value="custom">Personalizado</option></select></label>
             <label>Nome exibido<input type="text" value="Corpo" data-attribute-label></label>
             <label>Valor de prévia<input type="number" value="3" data-attribute-preview></label>
           </div>
-          <div class="nexus-library-content-picker"><label>Propriedade vinculada<input type="text" value="attributes.body" data-attribute-path list="nexus-attribute-paths"></label><datalist id="nexus-attribute-paths">${pathOptions}</datalist></div>
+          <div class="nexus-library-content-picker"><label>Propriedade vinculada<input type="text" value="attributes.for" data-attribute-path list="nexus-attribute-paths"></label><datalist id="nexus-attribute-paths">${pathOptions}</datalist></div>
           <button type="button" data-library-add>Adicionar ao Canvas</button>`;
         const preset = detail.querySelector("[data-attribute-preset]");
         const name = detail.querySelector("[data-attribute-label]");
@@ -715,12 +715,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           detail.querySelector("[data-attribute-preview-value]").textContent = detail.querySelector("[data-attribute-preview]").value || "0";
         };
         preset.addEventListener("change", () => {
-          const map = { body: ["Corpo", "attributes.body"], mind: ["Mente", "attributes.mind"], soul: ["Alma", "attributes.soul"] };
+          const map = { for: ["Força", "attributes.for"], des: ["Destreza", "attributes.des"], sab: ["Sabedoria", "attributes.sab"], int: ["Inteligência", "attributes.int"], car: ["Carisma", "attributes.car"], von: ["Vontade", "attributes.von"] };
           if (map[preset.value]) { name.value = map[preset.value][0]; path.value = map[preset.value][1]; }
           update();
         });
         path.addEventListener("input", () => {
-          const expected = { body: "attributes.body", mind: "attributes.mind", soul: "attributes.soul" };
+          const expected = { for: "attributes.for", des: "attributes.des", sab: "attributes.sab", int: "attributes.int", car: "attributes.car", von: "attributes.von" };
           if (path.value !== expected[preset.value]) preset.value = "custom";
         });
         detail.querySelectorAll("input, nexus-color-picker").forEach(input => input.addEventListener("input", update));
