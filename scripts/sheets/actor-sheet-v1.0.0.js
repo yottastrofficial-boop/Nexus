@@ -739,7 +739,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const componentLayerById = new Map();
 
     for (const group of groups) {
-      for (const id of group.componentIds ?? []) {
+      for (const id of new Set(group.componentIds ?? [])) {
         groupedIds.add(id);
         if (!groupByComponentId.has(id)) groupByComponentId.set(id, group);
         let memberships = groupIdsByComponentId.get(id);
