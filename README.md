@@ -94,7 +94,8 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 ├── docs/              # Contexto, arquitetura e planejamento
 ├── lang/              # Traduções
 ├── scripts/           # Inicialização e lógica da ficha
-│   └── core/          # Serviços centrais extraídos gradualmente
+│   ├── core/          # Serviços centrais extraídos gradualmente
+│   └── sheets/        # Fachadas e controladores da ficha
 ├── styles/            # Estilos visuais
 ├── templates/         # Templates Handlebars
 ├── CHANGELOG.md
@@ -119,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.15 melhora a organização e a usabilidade dos editores de Comportamento e Propriedades, mantendo a arquitetura de fluxos e a biblioteca reutilizável. As verificações automatizadas e a montagem do pacote são executadas antes da publicação; os testes funcionais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.26 está em preparação e concentra a reorganização do seletor de propriedades e a primeira etapa de modularização da ficha. A validação automatizada e os testes funcionais em uma instalação real do Foundry VTT 14 continuam pendentes.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
