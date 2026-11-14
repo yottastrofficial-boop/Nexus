@@ -1,3 +1,11 @@
+## 1.0.0.27
+
+- Corrigida a inicialização de `activateCanvasInteractions`: os elementos raiz e Canvas agora são declarados localmente, evitando `ReferenceError` durante a renderização da ficha.
+- Adicionadas regressões de execução para renderizações sem elemento raiz e sem Canvas.
+- Atualizada a versão do pacote e o manifesto de download.
+
+**Validação:** a sintaxe JavaScript e os testes automatizados do pacote devem passar no CI antes da publicação. A validação de interface em uma instalação real do Foundry VTT 14 permanece necessária.
+
 ## 1.0.0.26
 
 - Seletor de propriedades passa a navegar por categorias e níveis, com pesquisa global e sugestões progressivas; substitui a lista extensa e o controle de expandir/reduzir.
