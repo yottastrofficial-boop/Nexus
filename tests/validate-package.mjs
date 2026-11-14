@@ -408,7 +408,7 @@ const opposedLegacyRows = getNexusSkillRows({ system: { skills: { furtividade: {
 assert.equal(opposedLegacyRows.find(skill => skill.key === "stealth").proficientLevel, -1, "O estado opposed antigo deve migrar para proficiência negativa");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficientLevel, 1, "Dados antigos devem ser lidos durante a migração");
-assert.match(sheetCode, /if \(kind === "number"\) \{ value = Number\(value\); if \(!Number\.isFinite\(value\)\) return; \}/, "Propriedades numéricas devem aceitar qualquer número finito, inclusive negativos");
+assert.match(sheetListeners, /if \(kind === "number"\) \{\s*if \(value === "" \|\| typeof value === "boolean" \|\| !Number\.isFinite\(Number\(value\)\)\) \{[\s\S]*?\}\s*value = Number\(value\);\s*\}/, "Propriedades numéricas devem rejeitar valores vazios e não numéricos, aceitando números finitos inclusive negativos");
 
 // Trigger -> Action -> Configuration pipeline.
 const legacyRollActions = getTriggeredActions({ actionType: "roll", rollFormula: "1d20 + 3" }, "click");
