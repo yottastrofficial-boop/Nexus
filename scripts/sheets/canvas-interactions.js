@@ -19,18 +19,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     sheet._nexusCanvasKeyboardFocus ??= false;
     const selectionBox = root.querySelector(".nexus-marquee"), guides = root.querySelector(".nexus-guides");
     const layoutData = () => ({ width: Number(canvas.dataset.layoutWidth) || 800, height: Number(canvas.dataset.layoutHeight) || 800, grid: Number(canvas.dataset.gridSize) || 20, snap: canvas.dataset.snap === "true", smart: canvas.dataset.guides === "true" });
-    const stage = root.querySelector(".nexus-canvas-stage");
-    const fitCanvas = () => {
-      if (!stage) return;
-      const l = layoutData();
-      const sx = Math.max(1, stage.clientWidth - 24) / l.width;
-      const sy = Math.max(1, stage.clientHeight - 24) / l.height;
-      const scale = clamp(Math.min(sx, sy), 0.25, 1.5);
-      canvas.style.zoom = String(Number(scale.toFixed(4)));
-    };
-    sheet._fitNexusCanvas = fitCanvas;
-    const fitObserver = stage && typeof ResizeObserver !== "undefined" ? new ResizeObserver(fitCanvas) : null;
-    fitObserver?.observe(stage); requestAnimationFrame(fitCanvas);
     const layout = sheet._currentLayout ?? {};
     applyThemeTokens(root.querySelector(".nexus-sheet"), layout);
     canvas.style.setProperty("--nexus-font-size", `${layout.fontSize ?? 13}px`);
@@ -564,42 +552,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     canvas.addEventListener("pointerleave", clearInteractionCursor);
     const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave)await saveAfterGesture(touchedIds);};
     canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
-    canvas.addEventListener("keydown", event => {
-      if (sheet._mode !== "play" || !["Enter", " "].includes(event.key)) return;
-      if (event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
-      const card = event.target.closest(".nexus-component[data-has-click-interaction=\"true\"]");
-      if (!card) return;
-      event.preventDefault();
-      sheet._runComponentAction(card.dataset.id);
-    });
-    canvas.addEventListener("click", event => {
-      if (sheet._mode !== "play" || performance.now() < (sheet._suppressComponentClickUntil ?? 0)) return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component[data-has-click-interaction=\"true\"]") : null;
-      if (!card || !canvas.contains(card) || event.target.closest("input,textarea,select,button,a,[contenteditable=\"true\"]")) return;
-      event.preventDefault();
-      sheet._runComponentAction(card.dataset.id, "click");
-    });
-    canvas.addEventListener("contextmenu", event => {
-      if (sheet._mode !== "play") return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
-      if (!card || !canvas.contains(card) || !getTriggeredActions(sheet._currentLayout?.components?.find(item => item.id === card.dataset.id), "rightClick", { actor: sheet.actor }).length) return;
-      event.preventDefault(); event.stopPropagation(); sheet._runComponentAction(card.dataset.id, "rightClick");
-    });
-    canvas.addEventListener("pointerover", event => {
-      if (sheet._mode !== "play" || (event.relatedTarget instanceof Node && event.target.closest(".nexus-component")?.contains(event.relatedTarget))) return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
-      if (card && canvas.contains(card)) sheet._runComponentAction(card.dataset.id, "hover");
-    });
-    canvas.addEventListener("change", event => {
-      if (sheet._mode !== "play") return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
-      if (card) sheet._runComponentAction(card.dataset.id, "change", { fieldName: event.target.name ?? "" });
-    });
-    canvas.addEventListener("submit", event => {
-      if (sheet._mode !== "play") return;
-      const card = event.target instanceof Element ? event.target.closest(".nexus-component") : null;
-      if (card) sheet._runComponentAction(card.dataset.id, "submit");
-    });
     const restoreCanvasKeyboardFocus = () => {
       if (!sheet._nexusCanvasKeyboardFocus) return;
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -758,7 +710,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     root.addEventListener("pointerdown",activateInteraction,true);
     document.addEventListener("pointerdown",deactivateInteraction,true);
     window.addEventListener("keydown",keyHandler,true);
-    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); fitObserver?.disconnect(); if(sheet._fitNexusCanvas===fitCanvas)sheet._fitNexusCanvas=null; };
+    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
     root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;button.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
     canvas.addEventListener("dragover",e=>e.preventDefault());
     canvas.addEventListener("drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
