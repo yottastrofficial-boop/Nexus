@@ -5,7 +5,6 @@ import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
 import { activateCanvasInteractions } from "./canvas-interactions.js";
-import { mountLibraryView } from "./library-view.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
@@ -2361,26 +2360,47 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _saveCanvas(html, touchedIds = []) {
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active]; if (!layout) return;
+    const componentsById = new Map();
+    for (const component of layout.components) {
+      if (!componentsById.has(component.id)) componentsById.set(component.id, component);
+    }
     html.find(".nexus-component").each((_, el) => {
-      const c = layout.components.find(x => x.id === el.dataset.id); if (!c) return;
+      const c = componentsById.get(el.dataset.id); if (!c) return;
       c.x = Math.round(parseFloat(el.style.left) || 0); c.y = Math.round(parseFloat(el.style.top) || 0);
       c.w = Math.max(20, Math.round(parseFloat(el.style.width) || c.w)); c.h = Math.max(20, Math.round(parseFloat(el.style.height) || c.h));
     });
-    layout.groups = clone(this._currentLayout?.groups ?? layout.groups ?? []);
-    const validIds = new Set(layout.components.map(c => c.id));
-    layout.groups = layout.groups.map(g => ({...g, componentIds:(g.componentIds ?? []).filter(id => validIds.has(id))})).filter(g => g.componentIds.length >= 2);
-    for (const g of layout.groups) {
-      const members = layout.components.filter(c => g.componentIds?.includes(c.id));
+
+    const sourceGroups = clone(this._currentLayout?.groups ?? layout.groups ?? []);
+    const validIds = new Set(componentsById.keys());
+    layout.groups = [];
+    for (const group of sourceGroups) {
+      const componentIds = (group.componentIds ?? []).filter(id => validIds.has(id));
+      if (componentIds.length < 2) continue;
+      const members = [], seenMembers = new Set();
+      for (const id of componentIds) {
+        if (seenMembers.has(id)) continue;
+        seenMembers.add(id);
+        const component = componentsById.get(id);
+        if (component) members.push(component);
+      }
       if (!members.length) continue;
-      g.z = Math.min(...members.map(c => Number(c.z) || 0));
-      const minX = Math.min(...members.map(c => c.x)), minY = Math.min(...members.map(c => c.y));
-      const maxX = Math.max(...members.map(c => c.x + c.w)), maxY = Math.max(...members.map(c => c.y + c.h));
-      if (g.x == null) g.x = minX; if (g.y == null) g.y = minY;
-      g.x = minX; g.y = minY; g.w = maxX - minX; g.h = maxY - minY;
+
+      let minZ = Infinity, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const component of members) {
+        minZ = Math.min(minZ, Number(component.z) || 0);
+        minX = Math.min(minX, component.x);
+        minY = Math.min(minY, component.y);
+        maxX = Math.max(maxX, component.x + component.w);
+        maxY = Math.max(maxY, component.y + component.h);
+      }
+      layout.groups.push({ ...group, componentIds, z: minZ, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
     }
+
     const touched = new Set((touchedIds ?? []).filter(Boolean));
     if (touched.size) {
-      let nextOrder = Math.max(-1, ...layout.components.map(component => Number(component.stackOrder) || 0)) + 1;
+      let nextOrder = -1;
+      for (const component of layout.components) nextOrder = Math.max(nextOrder, Number(component.stackOrder) || 0);
+      nextOrder++;
       for (const component of layout.components) if (touched.has(component.id)) component.stackOrder = nextOrder++;
     }
     this._currentLayout = layout;
@@ -2393,12 +2413,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (this._selectedIds.size === 1) this._componentEditorTargetId = [...this._selectedIds][0];
     const sheetRoot = this.element?.querySelector?.(".nexus-sheet") ?? html?.[0] ?? this.element;
     const componentNodes = sheetRoot?.querySelectorAll?.(".nexus-component") ?? [];
-    // Limpa todas as classes visuais antes de reaplicar a seleção lógica atual.
-    for (const el of componentNodes) el.classList.remove("is-selected", "is-group-inspecting", "is-selection-highlight");
-    sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => surface.classList.remove("is-selected"));
-    const selectedGroups = (this._currentLayout?.groups ?? []).filter(group => (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id)));
+    const groups = this._currentLayout?.groups ?? [];
+    const components = this._currentLayout?.components ?? [];
+    const groupsById = new Map(groups.map(group => [group.id, group]));
+    const componentsById = new Map(components.map(component => [component.id, component]));
+    const selectedGroups = groups.filter(group => (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id)));
     this._selectedGroupId = selectedGroups.length === 1 ? selectedGroups[0].id : null;
     const selectedGroupIds = new Set(selectedGroups.map(group => group.id));
+
+    // Aplica diretamente o estado final, evitando limpar e reescrever as mesmas classes.
     for (const el of componentNodes) {
       const selected = this._selectedIds.has(el.dataset.id);
       const memberSelected = selected && !!el.dataset.groupId && selectedGroupIds.has(el.dataset.groupId);
@@ -2412,13 +2435,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layerRoots = [this._nexusPanelWindows?.get("layers")?.panel, html?.[0], this.element].filter(Boolean);
     for (const layerRoot of new Set(layerRoots)) {
       layerRoot.querySelectorAll?.("[data-layer-select]").forEach(el => el.classList.toggle("active", this._selectedIds.has(el.dataset.layerSelect)));
-      layerRoot.querySelectorAll?.("[data-layer-group]").forEach(el => { const group = (this._currentLayout?.groups ?? []).find(g => g.id === el.dataset.layerGroup); el.classList.toggle("active", !!group && group.componentIds.every(id => this._selectedIds.has(id))); });
+      layerRoot.querySelectorAll?.("[data-layer-group]").forEach(el => {
+        const group = groupsById.get(el.dataset.layerGroup);
+        el.classList.toggle("active", !!group && group.componentIds.every(id => this._selectedIds.has(id)));
+      });
     }
     const selectedComponentId = this._selectedIds.size === 1 ? [...this._selectedIds][0] : null;
     const activeComponentId = selectedComponentId ?? (this._selectedIds.size === 0 ? this._componentEditorTargetId : null);
-    const one = activeComponentId ? (this._currentLayout?.components ?? []).find(c => c.id === activeComponentId) : null;
+    const one = activeComponentId ? componentsById.get(activeComponentId) ?? null : null;
     if (!one && this._selectedIds.size === 0) this._componentEditorTargetId = null;
-    const selectedGroup = (this._currentLayout?.groups ?? []).find(g => g.id === this._selectedGroupId);
+    const selectedGroup = groupsById.get(this._selectedGroupId);
     const componentRoot=this._nexusPanelWindows?.get("component")?.panel ?? html[0];
     const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
     if (one && inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => { field.dataset.componentTargetId = one.id; });
@@ -2566,7 +2592,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
-  _mountLibrary(panel) {
+  async _mountLibrary(panel) {
+    const { mountLibraryView } = await import("./library-view.js");
     return mountLibraryView(this, panel, { createSheetResourcePreview, fitSheetResourcePreview });
   }
 
@@ -2750,12 +2777,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
     };
 
-    const openPanel = (key, { focus = true } = {}) => {
+    const openPanel = async (key, { focus = true } = {}) => {
       const panel = panels.get(key);
       if (!panel) return;
-      // A Biblioteca só constrói os cartões e suas prévias quando solicitada.
+      // A Biblioteca só carrega seu módulo e constrói cartões/prévias quando solicitada.
       if (key === "library") {
-        this._mountLibrary(panel);
+        try {
+          await this._mountLibrary(panel);
+        } catch (error) {
+          console.error("NEXUS | Falha ao carregar a Biblioteca", error);
+          return;
+        }
         this._libraryApplyFilter?.();
         this._libraryRestoreSelection?.();
       }
@@ -2789,10 +2821,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
     };
 
-    const requestPanel = key => {
+    const requestPanel = async key => {
       if (root.dataset.mode !== "appearance") {
         this._openAppearancePanels.add(key);
-        this._setMode("appearance");
+        await this._setMode("appearance");
         return;
       }
       syncRailFocus(true);
@@ -2800,7 +2832,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (instance?.rendered) {
         focusPanelWindow(instance);
         syncRailFocus(false);
-      } else openPanel(key);
+      } else await openPanel(key);
     };
     portal.querySelectorAll("[data-floating-panel]").forEach(button => button.addEventListener("click", () => {
       if (root.dataset.mode !== "appearance") return;

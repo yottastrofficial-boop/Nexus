@@ -1,3 +1,14 @@
+## 1.0.0.31
+
+- Otimizado o cálculo de alinhamento do Canvas com busca binária sobre anchors ordenados, preservando a tolerância e os critérios de desempate.
+- Reduzidas buscas repetidas de componentes e grupos durante salvamento e atualização da seleção, com índices em memória.
+- Otimizada a atualização de cantos conectados, agrupando comparações por grupo e pré-calculando retângulos e cantos.
+- Indexadas as superfícies dos grupos para evitar consultas DOM repetidas durante sincronização e seleção.
+- Biblioteca passa a ser carregada sob demanda, somente quando o painel é aberto.
+- Adicionados testes de regressão para geometria de alinhamento, seleção e carregamento sob demanda.
+
+**Validação:** verificações automatizadas de sintaxe, manifesto, pacote, build Foundry e regressões aprovadas no GitHub Actions. Testes funcionais dentro do Foundry VTT 14 ainda são necessários, especialmente seleção, alinhamento, movimentação, redimensionamento, grupos e salvamento em layouts grandes.
+
 ## 1.0.0.30
 
 - Otimizada a preparação da ficha: dados de aliases personalizados são obtidos uma vez e reutilizados durante a montagem do contexto.
