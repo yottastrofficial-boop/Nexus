@@ -194,7 +194,7 @@ const NATIVE_PROPERTY_BASE = [
   { id:"core.combat.desl", label:"DESL", category:"combat", type:"number", key:"combat.desl", targetPath:"combat.desl" },
   { id:"core.combat.ddr", label:"DdR", category:"combat", type:"number", key:"combat.ddr", targetPath:"combat.ddr" },
   { id:"core.combat.mb", label:"MB", category:"combat", type:"number", key:"combat.mb", targetPath:"combat.mb" },
-  { id:"core.identity.level", label:"Nível", category:"identity", type:"number", key:"identity.level", targetPath:"identity.level" },
+  { id:"core.identity.level", label:"Nível", category:"progression", type:"number", key:"identity.level", targetPath:"identity.level" },
   { id:"core.identity.lineage", label:"Linhagem", category:"identity", type:"text", key:"identity.lineage", targetPath:"identity.lineage" },
   { id:"core.identity.legacy", label:"Legado", category:"identity", type:"text", key:"identity.legacy", targetPath:"identity.legacy" },
   { id:"core.identity.name", label:"Nome do personagem", category:"identity", type:"text", key:"identity.name", targetPath:"name" }
@@ -220,7 +220,7 @@ const getNativePropertyDefinitions = actor => {
       || [...LEGACY_SKILL_PATHS].some(legacyPath => path === legacyPath || path.startsWith(`${legacyPath}.`))
       || ["attributes.body", "attributes.mind", "attributes.soul"].some(legacy => path === legacy || path.startsWith(legacy + "."))
       || NEXUS_SKILLS.some(skill => path === `skills.${skill.key}.proficientLevel`)
-      || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+      || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
