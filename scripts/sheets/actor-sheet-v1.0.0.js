@@ -1171,7 +1171,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
           resolved=binding.value == null ? "" : String(binding.value);
           forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||token) || binding.alias?.type==="image";
         }
-        const media=wrapped ? createMedia(resolved,token,forceImage) : createMedia(token,token,false,"link");
+        const explicitUrl=wrapped && /^https?:\\/\\//i.test(token);
+        const resolvedIsMedia=wrapped && !explicitUrl && isMediaSource(resolved);
+        const media=explicitUrl ? createMedia(token,token,false,"link") : resolvedIsMedia ? createMedia(resolved,token,forceImage) : (!wrapped ? createMedia(token,token,false,"link") : null);
         node.append(media ?? document.createTextNode(wrapped ? (resolved || match[0]) : match[0]));
         cursor=pattern.lastIndex;
       }
@@ -2298,107 +2300,57 @@ export class NexusActorSheet extends NexusActorSheetBase {
       await this._syncActorPortraitFromToken(id);
     });
 
+    const getPropertyOptionsOwner = input => input?.closest(".nexus-component-inspector, .nexus-behavior-editor, .nexus-panel-window");
+    const ensurePropertyOptionsList = owner => {
+      if(!owner)return null;
+      let list=owner.querySelector("[data-component-path-options]");
+      if(!list){list=document.createElement("div");list.className="nexus-property-options";list.dataset.componentPathOptions="";list.hidden=true;list.setAttribute("role","listbox");list.setAttribute("aria-label","Propriedades e atalhos disponíveis");owner.append(list);}
+      return list;
+    };
     const positionPropertyOptions = input => {
-      if (!input?.isConnected) return;
-      const inspector = input.closest(".nexus-component-inspector");
-      const list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
-      if (!list || !inspector || list.hidden) return;
-      if (list.parentElement !== document.body) {
-        // A single detached portal avoids clipping inside the scrollable inspector.
-        document.querySelectorAll(`[data-nexus-property-owner="${this.id}"]`).forEach(other => { if (other !== list) other.remove(); });
-        list.dataset.nexusPropertyOwner = String(this.id);
-        list._nexusOwnerInspector = inspector;
-        list._nexusOwnerInput = input;
-        document.body.append(list);
-      } else {
-        list._nexusOwnerInspector = inspector;
-        list._nexusOwnerInput = input;
-      }
-      const rect = input.getBoundingClientRect();
-      const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-      const gap = 6;
-      const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
-      const availableAbove = Math.max(0, rect.top - gap - 12);
-      const availableBelow = Math.max(0, viewportHeight - rect.bottom - gap - 12);
-      const placeAbove = availableAbove >= Math.min(180, availableBelow) && availableAbove > availableBelow;
-      const maxHeight = Math.max(96, Math.min(280, placeAbove ? availableAbove : availableBelow));
-      list.style.position = "fixed";
-      list.style.left = `${Math.max(12, Math.min(rect.left, viewportWidth - rect.width - 12))}px`;
-      list.style.width = `${Math.min(rect.width, viewportWidth - 24)}px`;
-      list.style.maxHeight = `${maxHeight}px`;
-      list.style.top = placeAbove ? `${Math.max(8, rect.top - Math.min(list.scrollHeight || 240, maxHeight) - gap)}px` : `${Math.min(viewportHeight - maxHeight - 8, rect.bottom + gap)}px`;
-      list.style.bottom = "auto";
-      list.style.overflowY = "auto";
+      if(!input?.isConnected)return;
+      const owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
+      if(!list||!owner||list.hidden)return;
+      if(list.parentElement!==document.body){document.querySelectorAll(`[data-nexus-property-owner="${this.id}"]`).forEach(other=>{if(other!==list)other.remove();});list.dataset.nexusPropertyOwner=String(this.id);list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;document.body.append(list);}
+      else{list._nexusOwnerInspector=owner;list._nexusOwnerInput=input;}
+      const rect=input.getBoundingClientRect(),vw=document.documentElement.clientWidth||window.innerWidth,vh=document.documentElement.clientHeight||window.innerHeight,gap=6;
+      const above=Math.max(0,rect.top-gap-12),below=Math.max(0,vh-rect.bottom-gap-12),placeAbove=above>below&&above>120,maxHeight=Math.max(96,Math.min(280,placeAbove?above:below));
+      list.style.position="fixed";list.style.left=`${Math.max(12,Math.min(rect.left,vw-rect.width-12))}px`;list.style.width=`${Math.min(rect.width,vw-24)}px`;list.style.maxHeight=`${maxHeight}px`;list.style.top=placeAbove?`${Math.max(8,rect.top-Math.min(list.scrollHeight||240,maxHeight)-gap)}px`:`${Math.min(vh-maxHeight-8,rect.bottom+gap)}px`;list.style.bottom="auto";list.style.overflowY="auto";
     };
     const filterPropertyOptions = input => {
-      const inspector = input.closest(".nexus-component-inspector");
-      const list = inspector?.querySelector("[data-component-path-options]") || document.querySelector(`[data-nexus-property-owner="${this.id}"]`);
-      if (!list) return;
-      if (list.dataset.nexusOptionsReady !== "true") {
-        const paths = new Set(["name", ...collectPropertyPaths(this.actor)]);
-        for (const alias of [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]) {
-          const root = safeAliasKey(alias.key);
-          if (!root) continue;
-          const suffixes = alias.type === "attribute" ? ["name", "exib", "value", "checkbonus", "roll"] : alias.type === "resource" ? ["name", "exib", "value", "max", "percentage"] : [""];
-          for (const suffix of suffixes) paths.add(suffix ? `${root}.${suffix}` : root);
-        }
-        const fragment = document.createDocumentFragment();
-        const heading = document.createElement("div");
-        heading.className = "nexus-property-options-heading";
-        heading.textContent = "Propriedades disponíveis";
-        fragment.append(heading);
-        for (const path of [...paths].sort((a,b) => a.localeCompare(b, "pt-BR"))) {
-          const button = document.createElement("button");
-          button.type = "button"; button.className = "nexus-property-option"; button.dataset.propertyPathOption = path; button.setAttribute("role", "option");
-          const title = document.createElement("strong"); title.textContent = path.split(".").at(-1);
-          const code = document.createElement("code"); code.textContent = path;
-          button.append(title, code); fragment.append(button);
-        }
-        const aliases = getNexusRollAliasEntries(this.actor);
-        if (aliases.length) {
-          const aliasHeading = document.createElement("div");
-          aliasHeading.className = "nexus-property-options-heading";
-          aliasHeading.textContent = "Atalhos de exibição · Fórmulas";
-          fragment.append(aliasHeading);
-          for (const entry of aliases) {
-            const button = document.createElement("button");
-            button.type = "button"; button.className = "nexus-property-option";
-            button.dataset.propertyPathOption = entry.target; button.dataset.rollToken = "@" + entry.display; button.dataset.rollAliasOption = "true"; button.setAttribute("role", "option");
-            const title = document.createElement("strong"); title.textContent = entry.label;
-            const code = document.createElement("code"); code.textContent = "@" + entry.display + " → " + entry.target;
-            button.append(title, code); fragment.append(button);
-          }
-        }
-        list.replaceChildren(fragment);
-        list.dataset.nexusOptionsReady = "true";
+      const owner=getPropertyOptionsOwner(input),list=owner?ensurePropertyOptionsList(owner):null;if(!list)return;
+      if(list.dataset.nexusOptionsReady!=="true"){
+        const paths=new Set(["name",...collectPropertyPaths(this.actor)]);
+        for(const alias of [...getNativePropertyDefinitions(this.actor),...getAliasDefinitions(this.actor)]){const root=safeAliasKey(alias.key);if(!root)continue;const suffixes=alias.type==="attribute"?["name","exib","value","checkbonus","roll"]:alias.type==="resource"?["name","exib","value","max","percentage"]:[""];for(const suffix of suffixes)paths.add(suffix?`${root}.${suffix}`:root);}
+        const fragment=document.createDocumentFragment(),heading=document.createElement("div");heading.className="nexus-property-options-heading";heading.textContent="Propriedades disponíveis";fragment.append(heading);
+        for(const path of [...paths].sort((a,b)=>a.localeCompare(b,"pt-BR"))){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=path;button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=path.split(".").at(-1);const code=document.createElement("code");code.textContent=path;button.append(title,code);fragment.append(button);}
+        const aliases=getNexusRollAliasEntries(this.actor);if(aliases.length){const h=document.createElement("div");h.className="nexus-property-options-heading";h.textContent="Atalhos de exibição · Fórmulas";fragment.append(h);for(const entry of aliases){const button=document.createElement("button");button.type="button";button.className="nexus-property-option";button.dataset.propertyPathOption=entry.target;button.dataset.rollToken="@"+entry.display;button.dataset.rollAliasOption="true";button.setAttribute("role","option");const title=document.createElement("strong");title.textContent=entry.label;const code=document.createElement("code");code.textContent="@"+entry.display+" → "+entry.target;button.append(title,code);fragment.append(button);}}
+        list.replaceChildren(fragment);list.dataset.nexusOptionsReady="true";
       }
-      const formulaMode = input.hasAttribute("data-roll-formula-input");
-      const raw = String(input.value ?? "");
-      const cursor = input.selectionStart ?? raw.length;
-      const tokenMatch = formulaMode ? raw.slice(0, cursor).match(/@([A-Za-z0-9_.-]*)$/) : null;
-      if (formulaMode && raw.trim() && !tokenMatch) {
-        list.hidden = true;
-        return;
-      }
-      const query = (formulaMode ? (tokenMatch?.[1] ?? "") : raw).trim().toLocaleLowerCase("pt-BR");
-      let matches = 0;
-      list.querySelectorAll(".nexus-property-option").forEach(option => {
-        const aliasOnly = option.dataset.rollAliasOption === "true";
-        const visible = !(aliasOnly && !formulaMode) && (!query ||
-          option.textContent.toLocaleLowerCase("pt-BR").includes(query) ||
-          String(option.dataset.propertyPathOption ?? "").toLocaleLowerCase("pt-BR").includes(query) ||
-          String(option.dataset.rollToken ?? "").toLocaleLowerCase("pt-BR").includes(query));
-        option.hidden = !visible; if (visible) matches++;
-      });
-      list.querySelectorAll(".nexus-property-options-heading").forEach(heading => {
-        let next = heading.nextElementSibling, visible = false;
-        while (next && !next.classList.contains("nexus-property-options-heading")) { if (!next.hidden) visible = true; next = next.nextElementSibling; }
-        heading.hidden = !visible;
-      });
-      list.dataset.empty = matches ? "false" : "true";
-      list.hidden = false;
-      requestAnimationFrame(() => positionPropertyOptions(input));
+      const formulaMode=input.hasAttribute("data-roll-formula-input"),propertyMode=input.hasAttribute("data-component-path-input")||input.hasAttribute("data-interaction-property-input"),raw=String(input.value??""),cursor=input.selectionStart??raw.length,before=raw.slice(0,cursor);
+      const tokenMatch=formulaMode?before.match(/@([A-Za-z0-9_.-]*)$/):propertyMode?null:before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/);
+      if(!formulaMode&&!propertyMode&&!tokenMatch){list.hidden=true;return;}
+      const query=(formulaMode?(tokenMatch?.[1]??""):propertyMode?raw:(tokenMatch?.[1]??"")).trim().toLocaleLowerCase("pt-BR");
+      let matches=0;list.querySelectorAll(".nexus-property-option").forEach(option=>{const aliasOnly=option.dataset.rollAliasOption==="true",visible=!(aliasOnly&&!formulaMode)&&(!query||option.textContent.toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.propertyPathOption??"").toLocaleLowerCase("pt-BR").includes(query)||String(option.dataset.rollToken??"").toLocaleLowerCase("pt-BR").includes(query));option.hidden=!visible;if(visible)matches++;});
+      list.querySelectorAll(".nexus-property-options-heading").forEach(heading=>{let next=heading.nextElementSibling,visible=false;while(next&&!next.classList.contains("nexus-property-options-heading")){if(!next.hidden)visible=true;next=next.nextElementSibling;}heading.hidden=!visible;});
+      list.dataset.empty=matches?"false":"true";list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
+    const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-roll-formula-input]";
+    const templateInputSelector=".nexus-panel-window input[type='text']:not([data-component-path-input]):not([data-roll-formula-input]), .nexus-panel-window textarea";
+    $(document).on(`focusin${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
+    $(document).on(`input${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>filterPropertyOptions(event.currentTarget));
+    $(window).on(`resize${inspectorNamespace} scroll${inspectorNamespace}`,()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
+    $(document).on(`click${inspectorNamespace}`,"[data-property-path-option]",event=>{
+      event.preventDefault();event.stopPropagation();const button=event.currentTarget,list=button.closest("[data-component-path-options]"),owner=list?._nexusOwnerInspector||list?.closest(".nexus-panel-window"),input=list?._nexusOwnerInput||owner?.querySelector(":focus");
+      if(!input||!list||!owner)return;
+      if(input.hasAttribute("data-roll-formula-input")){const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/@([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;const token=button.dataset.rollToken||"@"+button.dataset.propertyPathOption;input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));}
+      else if(input.hasAttribute("data-component-path-input")){input.value=button.dataset.propertyPathOption;input.dispatchEvent(new Event("change",{bubbles:true}));input.blur();}
+      else{const value=input.value,cursor=input.selectionStart??value.length,before=value.slice(0,cursor),match=before.match(/\{\{\s*([A-Za-z0-9_.-]*)$/),start=match?cursor-match[0].length:cursor;let end=cursor;if(match)while(end<value.length&&/[A-Za-z0-9_.-]/.test(value[end]))end++;if(value.slice(end,end+2)==="}}")end+=2;const token="{{"+button.dataset.propertyPathOption+"}}";input.value=value.slice(0,start)+token+value.slice(end);input.focus({preventScroll:true});input.setSelectionRange(start+token.length,start+token.length);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}));}
+      list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;
+    });
+    $(document).on(`pointerdown${inspectorNamespace}`,"[data-component-path-options]",event=>event.stopPropagation());
+    $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const input=document.activeElement?.matches?.(propertyInputSelector+", "+templateInputSelector)?document.activeElement:null;if(input)positionPropertyOptions(input);});
+    $(document).on(`focusout${inspectorNamespace}`,".nexus-panel-window input[type='text'], .nexus-panel-window textarea",event=>{const input=event.currentTarget,owner=getPropertyOptionsOwner(input),list=owner?.querySelector("[data-component-path-options]")||document.querySelector(`[data-nexus-property-owner="${this.id}"]`);setTimeout(()=>{if(list&&!list.contains(document.activeElement)){list.hidden=true;list.style.top="";list.style.left="";list.style.width="";list.style.maxHeight="";if(list.parentElement===document.body&&owner)owner.append(list);delete list.dataset.nexusPropertyOwner;list._nexusOwnerInspector=null;list._nexusOwnerInput=null;}},120);});
     const propertyInputSelector = ".nexus-component-inspector [data-component-path-input], .nexus-component-inspector [data-roll-formula-input]";
     $(document).on(`focusin${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
     $(document).on(`input${inspectorNamespace}`, propertyInputSelector, event => filterPropertyOptions(event.currentTarget));
