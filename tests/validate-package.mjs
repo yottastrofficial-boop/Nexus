@@ -4,7 +4,7 @@ import path from "node:path";
 import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
-import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION } from "../scripts/core/property-schema.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
@@ -92,6 +92,41 @@ assert.match(themeModule, /--nexus-canvas-scroll-bg/);
 assert.match(sheet, /NEXUS_RULEBOOK_PROPERTY_DEFINITIONS/);
 assert.equal(NEXUS_PROPERTY_SCHEMA_VERSION, 2);
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.name"));
+// Canonical property values and derived data.
+const rulebookActor = {
+  name: "Ayla",
+  system: {
+    identity: { level: 5 },
+    attributes: { for: 2, des: 1, sab: 0, int: 0, car: 0, von: 0 },
+    skills: { stealth: { proficient: true } },
+    resources: { pv: { value: 12, max: 15, temporary: 2 }, pm: { value: 4, max: 8, temporary: 0 }, pe: { value: 6, max: 10, temporary: 0 } },
+    combat: { defenseModifier: 1, movement: 6 },
+    recovery: { spent: 2 },
+    encumbrance: { current: 8 }
+  }
+};
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.name").value, "Furtividade");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.exib").value, "FUR");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.value").value, 4);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.proficient").value, true);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").value, 2);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.current.value").value, 8);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "identity.name").value, "Ayla");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").matched, false);
+
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.exib"));
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.value"));
 assert.ok(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.some(definition => definition.path === "combat.defense.value" && definition.derived));
@@ -266,7 +301,7 @@ const legacyPropertyActor = {
     combat: { defense: 15, movement: 6, mb: 2, ddr: 4, desl: 5 },
     resources: { pv: { value: 12, max: 12 } }
   },
-  flags: { nexus: { activeLayout: "principal", aliases: [], customData: {} } },
+  flags: { nexus: { activeLayout: "principal", aliases: [], customData: {}, nativeProperties: [{ id: "core.resource.pv", label: "PV antigo" }] } },
   updateCount: 0,
   getFlag(scope, key) { return this.flags[scope]?.[key]; },
   async setFlag(scope, key, value) {
@@ -310,6 +345,8 @@ assert.equal(legacyPropertyActor.system.combat.movement, 6);
 assert.equal(legacyPropertyActor.system.resources.pv.temporary, 0);
 assert.deepEqual(legacyPropertyActor.system.conditions, []);
 assert.deepEqual(legacyPropertyActor.system.recovery, { spent: 0 });
+assert.deepEqual(legacyPropertyActor.system.encumbrance, { current: 0 });
+assert.deepEqual(legacyPropertyActor.flags.nexus.nativeProperties, [], "Definições nativas antigas devem ser substituídas pelo registro canônico");
 const propertyMigrationWrites = legacyPropertyActor.updateCount;
 const repeatedPropertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
 assert.equal(repeatedPropertyMigration.propertiesMigrated, false);
