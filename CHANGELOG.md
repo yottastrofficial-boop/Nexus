@@ -9,9 +9,10 @@
 - Barra de rolagem do portal do seletor recebe os mesmos tokens visuais das janelas NEXUS; campos focados deixam de ter seus destaques recortados pelo conteúdo do componente.
 - Mantido o formato persistido de layouts, componentes, aliases e fluxos.
 
-## Validação pendente
+## Validação
 
-- Executar verificações de sintaxe, testes de pacote e regressões no CI.
+- Verificações automatizadas de sintaxe, manifesto, integridade do pacote e regressões aprovadas no GitHub Actions.
+- ZIP de distribuição será publicado como asset da release `v1.0.0.26`, no caminho declarado pelo manifesto.
 - Validar no Foundry VTT 14 o seletor em Propriedades, Comportamento, fórmulas e Biblioteca; testar clique fora, seleção de área vazia, navegação hierárquica e propriedades calculadas de perícias.
 - Confirmar visualmente os destaques/foco dos campos em componentes com diferentes formatos e dimensões.
 
