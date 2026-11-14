@@ -10,7 +10,7 @@ function createButton(label, className, attributes = {}) {
 }
 
 function appendPropertyOption(container, entry, label = entry.label, rollAlias = null) {
-  const button = createButton(label, "nexus-property-option", { propertyPathOption: entry.path });
+  const button = createButton("", "nexus-property-option", { propertyPathOption: entry.path });
   button.setAttribute("role", "option");
   const title = document.createElement("strong");
   title.textContent = label;
@@ -82,12 +82,15 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
     children.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
     for (const child of children) {
       if (child.children.size) {
-        const category = createButton(child.label, "nexus-property-category", { propertyCategory: child.path });
+        const category = createButton("", "nexus-property-category", { propertyCategory: child.path });
+        const heading = document.createElement("strong");
+        heading.textContent = child.label;
         const description = document.createElement("small");
         description.textContent = child.path;
         const arrow = document.createElement("span");
+        arrow.setAttribute("aria-hidden", "true");
         arrow.textContent = "›";
-        category.append(description, arrow);
+        category.append(heading, description, arrow);
         content.append(category);
         if (child.entry) appendPropertyOption(content, child.entry, child.label + " · valor");
       } else if (child.entry) {
