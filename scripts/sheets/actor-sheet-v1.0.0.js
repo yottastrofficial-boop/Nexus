@@ -1760,94 +1760,53 @@ export class NexusActorSheet extends NexusActorSheetBase {
     html.find("[data-layer-lock]").on("click", event => { event.preventDefault(); event.stopPropagation(); const [kind,id] = event.currentTarget.dataset.layerLock.split(":"); this._toggleLayerState(kind,id,"locked"); });
     const libraryPanel = html[0].querySelector(".nexus-library-panel");
     const renderSavedGroups = () => {
-      const container = libraryPanel?.querySelector("[data-library-saved-groups]");
-      if (!container) return;
-      const groups = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
-      container.replaceChildren();
-      if (!groups.length) {
-        const empty = document.createElement("p");
-        empty.className = "nexus-library-empty";
-        empty.textContent = "Nenhum grupo personalizado salvo.";
-        container.append(empty);
-        return;
-      }
-      for (const group of groups) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "nexus-library-saved-group";
-        button.dataset.librarySavedGroup = group.id;
-        button.title = `${group.name || "Grupo sem nome"} · ${group.components?.length ?? 0} componentes`;
-        const preview = document.createElement("span");
-        preview.className = "nexus-library-saved-group-preview";
-        preview.setAttribute("aria-hidden", "true");
-        const members = Array.isArray(group.components) ? group.components : [];
-        const bounds = members.length ? {
-          left: Math.min(...members.map(item => Number(item.x) || 0)),
-          top: Math.min(...members.map(item => Number(item.y) || 0)),
-          right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || COMPONENTS[item.type]?.w || 100))),
-          bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
-        } : { left: 0, top: 0, right: 100, bottom: 60 };
-        const scale = Math.min(220 / Math.max(1, bounds.right - bounds.left), 94 / Math.max(1, bounds.bottom - bounds.top));
-        const gridMode = members.length > 8 || scale < 0.18;
-        preview.classList.toggle("is-grid", gridMode);
-        const visibleMembers = gridMode ? members.slice(0, 8) : members;
-        for (const member of visibleMembers) {
-          const definition = COMPONENTS[member.type] ?? {};
-          const code = String(member.sheetCode ?? member.sheetContent1 ?? member.resourceLabel ?? "").trim().toUpperCase();
-          const resourceColor = member.sheetColor || ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[code] || "";
-          const isResource = ["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","sheet-resource","resource-meter","asset-meter"].includes(member.type);
-          const card = document.createElement("span");
-          card.className = "nexus-library-saved-group-card";
-          card.dataset.previewType = member.type || "component";
-          card.classList.toggle("is-resource", isResource);
-          const label = isResource
-            ? (member.sheetContent1 || member.resourceLabel || code || definition.label || "Recurso")
-            : (member.customLabel || member.text || member.sheetContent1 || definition.label || "Card");
-          const cardTitle = document.createElement("strong");
-          cardTitle.textContent = String(label).trim().slice(0, 12);
-          card.append(cardTitle);
-          if (isResource) {
-            const track = document.createElement("span");
-            track.className = "nexus-library-saved-group-track";
-            const fill = document.createElement("i");
-            const current = Number(member.previewCurrent ?? 32);
-            const maximum = Math.max(1, Number(member.previewMax ?? 40));
-            fill.style.width = `${clamp(current / maximum * 100, 0, 100)}%`;
-            fill.style.background = resourceColor || "var(--nexus-highlight-color,#78b7e8)";
-            track.append(fill);
-            card.append(track);
-          } else {
-            const value = document.createElement("small");
-            value.textContent = String(member.text ?? member.sheetCode ?? "").trim().slice(0, 14);
-            if (value.textContent) card.append(value);
-          }
-          card.style.borderColor = member.borderColor || resourceColor || "var(--nexus-panel-border,#3c5067)";
-          if (gridMode) preview.append(card);
-          else {
-            card.style.left = (3 + ((Number(member.x) || 0) - bounds.left) * scale) + "px";
-            card.style.top = (3 + ((Number(member.y) || 0) - bounds.top) * scale) + "px";
-            card.style.width = Math.max(18, (Number(member.w) || definition.w || 100) * scale) + "px";
-            card.style.height = Math.max(14, (Number(member.h) || definition.h || 60) * scale) + "px";
-            card.style.background = "var(--nexus-panel-surface,#202e3e)";
-            preview.append(card);
-          }
+      const container=libraryPanel?.querySelector("[data-library-saved-groups]");if(!container)return;
+      const groups=game.user?.getFlag?.("nexus","libraryGroups")??[];container.replaceChildren();
+      if(!groups.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum grupo salvo.";container.append(empty);return;}
+      for(const group of groups){
+        const button=document.createElement("button");button.type="button";button.className="nexus-library-saved-group";button.dataset.librarySavedGroup=group.id;
+        button.title=`${group.name||"Grupo sem nome"} · ${group.components?.length??0} componentes`;
+        const preview=document.createElement("span");preview.className="nexus-library-saved-group-preview";preview.setAttribute("aria-hidden","true");
+        const members=Array.isArray(group.components)?group.components:[];
+        const bounds=members.length?{left:Math.min(...members.map(x=>Number(x.x)||0)),top:Math.min(...members.map(x=>Number(x.y)||0)),right:Math.max(...members.map(x=>(Number(x.x)||0)+Math.max(20,Number(x.w)||COMPONENTS[x.type]?.w||100))),bottom:Math.max(...members.map(x=>(Number(x.y)||0)+Math.max(20,Number(x.h)||COMPONENTS[x.type]?.h||60)))}:{left:0,top:0,right:100,bottom:100};
+        const scale=Math.min(82/Math.max(1,bounds.right-bounds.left),82/Math.max(1,bounds.bottom-bounds.top));
+        const gridMode=members.length>8||scale<0.12;preview.classList.toggle("is-grid",gridMode);const visible=gridMode?members.slice(0,8):members;
+        for(const member of visible){
+          const definition=COMPONENTS[member.type]??{},code=String(member.sheetCode??member.sheetContent1??member.resourceLabel??"").trim().toUpperCase();
+          const color=member.sheetColor||({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]||"";
+          const resource=["pv","pm","pe","pv-bar","pm-bar","pe-bar","pv-ring","sheet-resource","resource-meter","asset-meter"].includes(member.type);
+          const card=document.createElement("span");card.className="nexus-library-saved-group-card";card.dataset.previewType=member.type||"component";card.classList.toggle("is-resource",resource);
+          const title=document.createElement("strong");title.textContent=String(resource?(member.sheetContent1||member.resourceLabel||code||definition.label||"Recurso"):(member.customLabel||member.text||member.sheetContent1||definition.label||"Card")).trim().slice(0,12);card.append(title);
+          if(resource){const track=document.createElement("span");track.className="nexus-library-saved-group-track";const fill=document.createElement("i");const current=Number(member.previewCurrent??32),maximum=Math.max(1,Number(member.previewMax??40));fill.style.width=`${clamp(current/maximum*100,0,100)}%`;fill.style.background=color||"var(--nexus-highlight-color,#78b7e8)";track.append(fill);card.append(track);}
+          else{const value=document.createElement("small");value.textContent=String(member.text??member.sheetCode??"").trim().slice(0,14);if(value.textContent)card.append(value);}
+          card.style.borderColor=member.borderColor||color||"var(--nexus-panel-border,#3c5067)";
+          if(gridMode){preview.append(card);continue;}
+          card.style.left=(9+((Number(member.x)||0)-bounds.left)*scale)+"px";card.style.top=(9+((Number(member.y)||0)-bounds.top)*scale)+"px";
+          card.style.width=Math.max(10,(Number(member.w)||definition.w||100)*scale)+"px";card.style.height=Math.max(10,(Number(member.h)||definition.h||60)*scale)+"px";card.style.background="var(--nexus-panel-surface,#202e3e)";preview.append(card);
         }
-        if (members.length > visibleMembers.length) {
-          const overflow = document.createElement("span");
-          overflow.className = "nexus-library-saved-group-overflow";
-          overflow.textContent = "+" + (members.length - visibleMembers.length);
-          preview.append(overflow);
-        }
-        const title = document.createElement("strong");
-        title.textContent = group.name || "Grupo sem nome";
-        const count = document.createElement("small");
-        count.textContent = members.length + (members.length === 1 ? " componente" : " componentes");
-        button.append(preview, title, count);
-        container.append(button);
+        if(members.length>visible.length){const overflow=document.createElement("span");overflow.className="nexus-library-saved-group-overflow";overflow.textContent="+"+(members.length-visible.length);preview.append(overflow);}
+        const title=document.createElement("strong");title.textContent=group.name||"Grupo sem nome";
+        const count=document.createElement("small");count.textContent=members.length+(members.length===1?" componente":" componentes");button.append(preview,title,count);container.append(button);
       }
     };
-    this._libraryRenderSavedGroups = renderSavedGroups;
-    renderSavedGroups();
+    const renderSavedComponents = () => {
+      const container=libraryPanel?.querySelector("[data-library-saved-components]");if(!container)return;
+      const saved=game.user?.getFlag?.("nexus","libraryComponents")??[];container.replaceChildren();
+      if(!saved.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum componente salvo.";container.append(empty);return;}
+      for(const item of saved){
+        const button=document.createElement("button");button.type="button";button.className="nexus-library-personal-card";button.dataset.librarySavedComponent=item.id;
+        const stage=document.createElement("span");stage.className="nexus-library-personal-preview";const definition=COMPONENTS[item.type]??{},settings=item.settings??{};
+        if(["sheet-resource","pv","pm","pe","pv-bar","pm-bar","pe-bar"].includes(item.type)){
+          const code=String(settings.sheetCode??settings.sheetContent1??"PV").toUpperCase(),color=settings.sheetColor||({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]||"#d94b4b";
+          stage.append(createSheetResourcePreview({label:settings.sheetContent1||code,current:settings.previewCurrent??32,max:settings.previewMax??40,color,showValues:true}));
+          fitSheetResourcePreview(stage,{w:220,h:58},78);
+        }else{const glyph=document.createElement("span");glyph.className="nexus-library-personal-glyph";glyph.textContent=String(settings.customLabel||settings.text||definition.label||item.type||"N").trim().slice(0,2).toUpperCase();stage.append(glyph);}
+        const label=document.createElement("strong");label.textContent=item.label||definition.label||"Componente";button.append(stage,label);container.append(button);
+      }
+    };
+    this._libraryRenderSavedGroups=renderSavedGroups;
+    this._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
+    this._libraryRenderPersonalItems();
     const filterLibrary = () => {
       const query = libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
       const tag = libraryPanel?.querySelector("[data-library-tag]")?.value ?? "all";
