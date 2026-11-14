@@ -1785,7 +1785,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           right: Math.max(...members.map(item => (Number(item.x) || 0) + Math.max(20, Number(item.w) || COMPONENTS[item.type]?.w || 100))),
           bottom: Math.max(...members.map(item => (Number(item.y) || 0) + Math.max(20, Number(item.h) || COMPONENTS[item.type]?.h || 60)))
         } : { left: 0, top: 0, right: 100, bottom: 60 };
-        const scale = Math.min(136 / Math.max(1, bounds.right - bounds.left), 82 / Math.max(1, bounds.bottom - bounds.top));
+        const scale = Math.min(220 / Math.max(1, bounds.right - bounds.left), 94 / Math.max(1, bounds.bottom - bounds.top));
         const gridMode = members.length > 8 || scale < 0.18;
         preview.classList.toggle("is-grid", gridMode);
         const visibleMembers = gridMode ? members.slice(0, 8) : members;
