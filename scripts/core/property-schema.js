@@ -48,7 +48,7 @@ const COMBAT_FIELDS = Object.freeze([
 
 const definitions = [
   ...NEXUS_ATTRIBUTES.flatMap(attribute => [
-    { path: `attributes.${attribute.key}.name`, label: attribute.name, exib: attribute.code, type: "string", category: "attributes", derived: true },
+    { path: `attributes.${attribute.key}.name`, label: `${attribute.name} · Nome`, exib: attribute.code, type: "string", category: "attributes", derived: true },
     { path: `attributes.${attribute.key}.exib`, label: `${attribute.name} · Exibição`, exib: attribute.code, type: "string", category: "attributes", derived: true },
     { path: `attributes.${attribute.key}.value`, label: `${attribute.name} · Valor`, exib: attribute.code, type: "number", category: "attributes", derived: true }
   ]),
