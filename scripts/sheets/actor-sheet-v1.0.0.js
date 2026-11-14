@@ -59,9 +59,9 @@ const COMPONENTS = {
   ddr: { label: "DdR", namespace: "core.combat.ddr", w: 120, h: 85, path: "combat.ddr", kind: "number" },
   mb: { label: "MB", namespace: "core.combat.mb", w: 120, h: 85, path: "combat.mb", kind: "number" },
   // Deprecated scalar nucleus components remain registered only for old saved layouts.
-  body: { label: "Corpo (legado)", namespace: "core.legacy.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number", deprecated: true },
-  mind: { label: "Mente (legado)", namespace: "core.legacy.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number", deprecated: true },
-  soul: { label: "Alma (legado)", namespace: "core.legacy.attributes.soul", w: 130, h: 90, path: "attributes.soul", kind: "number", deprecated: true },
+  body: { label: "Corpo (legado)", namespace: "core.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number", deprecated: true },
+  mind: { label: "Mente (legado)", namespace: "core.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number", deprecated: true },
+  soul: { label: "Alma (legado)", namespace: "core.attributes.soul", w: 130, h: 90, path: "attributes.soul", kind: "number", deprecated: true },
   name: { label: "Nome", namespace: "core.identity.name", w: 210, h: 75, path: "name", kind: "name" },
   level: { label: "Nível", namespace: "core.progression.level", w: 110, h: 75, path: "identity.level", kind: "number" },
   lineage: { label: "Linhagem", namespace: "core.identity.lineage", w: 170, h: 75, path: "identity.lineage", kind: "text" },
@@ -1253,7 +1253,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _rollSkill(skillKey) {
     const result = getNexusSkillModifier(this.actor, skillKey);
     if (!result) return;
-    const { skill, proficient, proficientLevel, modifier, baseModifier } = result;
+    const { skill, proficientLevel, modifier, baseModifier } = result;
     const formula = modifier < 0 ? "1d20 - " + Math.abs(modifier) : "1d20 + " + modifier;
     try {
       const roll = new Roll(formula);
