@@ -2605,26 +2605,41 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else presentationEditor?.replaceChildren();
       const aliasWarning = inspector.querySelector("[data-property-alias-conflicts]");
       if (aliasWarning) {
+        // Use the same abbreviation rules as roll formulas. Ordinary metadata
+        // fields (name, description, proficient, etc.) are not roll aliases.
         const candidates = [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]
-          .map(item => {
-            const label = String(item.label ?? item.key ?? "Propriedade");
-            const parts = String(item.key ?? "").split(".");
-            const baseKey = parts.at(-1) === "value" ? parts.at(-2) : parts.at(-1);
-            const key = String(baseKey ?? "").toLocaleLowerCase("pt-BR");
-            const abbreviation = key.normalize("NFD").replace(/[^a-z0-9]/g, "").slice(0, 3);
-            return { keys: [key, abbreviation].filter((value, index, values) => value.length >= 3 && values.indexOf(value) === index), label, path: String(item.targetPath || item.key || "") };
-          }).filter(item => item.path);
+          .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
+          .map(alias => {
+            const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+            const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
+            const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
+            const display = explicit || generated;
+            if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
+            const root = safeAliasKey(alias.targetPath || alias.key);
+            if (!root) return null;
+            const raw = alias.targetPath
+              ? getPath(this.actor?.system ?? {}, alias.targetPath)
+              : getPath(getCustomAliasData(this.actor), alias.key);
+            const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
+            const path = safeAliasKey(
+              ["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value")
+                ? root + ".value"
+                : root
+            );
+            return path ? { display, label: String(alias.label ?? display), path } : null;
+          }).filter(Boolean);
         const byKey = new Map();
         for (const item of candidates) {
-          for (const key of item.keys) {
-            if (["val","nom","max","cur","exi","ati","typ"].includes(key)) continue;
-            if (!byKey.has(key)) byKey.set(key, new Map());
-            byKey.get(key).set(item.path, item);
-          }
+          const key = item.display.toLocaleUpperCase("pt-BR");
+          if (!byKey.has(key)) byKey.set(key, new Map());
+          byKey.get(key).set(item.path, item);
         }
         const conflicts = [...byKey.entries()].filter(([, values]) => values.size > 1)
           .map(([key, values]) => key + " → " + [...values.values()].map(item => item.label).join(" / "));
-        aliasWarning.textContent = conflicts.length ? "Abreviações ambíguas: " + conflicts.join("; ") + ". Use @caminho.completo para evitar conflitos." : "";
+        aliasWarning.textContent = conflicts.length
+          ? "Abreviações de rolagem ambíguas: " + conflicts.join("; ") + ". Use @caminho.completo para evitar conflitos."
+          : "";
         aliasWarning.hidden = !conflicts.length;
       }
       const technicalId = inspector.querySelector("[data-component-technical-id]");
