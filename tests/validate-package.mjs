@@ -6,7 +6,7 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula, evaluateNexusCondition } from "../scripts/core/formula-engine.js";
@@ -67,7 +67,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.38", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.39", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -787,6 +787,8 @@ const resolveExpressionValue = key => expressionValues[key];
 assert.equal(evaluateNexusFormula("level % 2", resolveExpressionValue), 1, "O operador módulo deve calcular o resto");
 assert.equal(evaluateNexusFormula("@level + @mb", resolveExpressionValue), 8, "Referências com @ devem funcionar nas fórmulas do editor");
 assert.equal(evaluateNexusCondition("@level > @mb", resolveExpressionValue), true, "Referências com @ devem funcionar nas condições");
+assert.equal(evaluateNexusCondition("{{@level}} >= 5", resolveExpressionValue), true, "Referências entre chaves devem funcionar dentro de comparações");
+assert.equal(evaluateNexusCondition("{{@level >= 5}}", resolveExpressionValue), true, "Expressões completas entre chaves devem funcionar nas condições");
 assert.equal(evaluateNexusCondition("level > mb", resolveExpressionValue), true, "Condições devem aceitar comparações numéricas");
 assert.equal(evaluateNexusCondition("(level + mb) >= 8", resolveExpressionValue), true, "Comparações devem respeitar parênteses e precedência");
 assert.equal(evaluateNexusCondition("level < mb", resolveExpressionValue), false);
@@ -805,6 +807,17 @@ assert.equal(representationResult.active, true);
 assert.equal(representationResult.sourceValue, 5);
 assert.equal(representationResult.value, 8);
 assert.equal(representationResult.icon, "✦");
+assert.equal(normalizeComponentRepresentation({ rules: [{}] }).rules[0].name, "Regra 1");
+const mixedRepresentation = evaluateComponentRepresentation({
+  enabled: true, sourcePath: "identity.level",
+  rules: [{ name: "Nível avançado", condition: "{{@level}} >= 5", content: "Nível {{@level}} (@level) · total {{@level + @mb}}" }]
+}, resolveExpressionValue);
+assert.equal(mixedRepresentation?.content, "Nível 5 (5) · total 8", "O conteúdo deve aceitar referências com chaves, @ simples e fórmulas");
+const truthyRepresentation = evaluateComponentRepresentation({
+  enabled: true, sourcePath: "identity.level",
+  rules: [{ condition: "@level", content: "Ativo" }]
+}, resolveExpressionValue);
+assert.equal(truthyRepresentation?.content, "Ativo", "Uma referência direta pode ser usada como condição de presença");
 assert.equal(evaluateComponentRepresentation({ ...representationComponent.representation, rules: [{ condition: "level < mb" }] }, resolveExpressionValue), null, "Sem regra compatível, a apresentação original deve permanecer");
 
 const representationDraft = { id: "representation-editor", representation: { enabled: false, sourcePath: "", rules: [] }, interactions: [] };
@@ -817,6 +830,12 @@ applyInteractionEditorChange(representationDraft, { scope: "representationRule",
 assert.equal(representationDraft.representation.enabled, true);
 assert.equal(representationDraft.representation.sourcePath, "identity.level");
 assert.equal(representationDraft.representation.rules[0].condition, "level > mb");
+assert.equal(representationDraft.representation.rules[0].name, "Regra 1");
+applyInteractionEditorChange(representationDraft, { scope: "propertyPresentationRule", ruleIndex: 0, field: "name" }, "Minha regra");
+assert.equal(representationDraft.representation.rules[0].name, "Minha regra");
+applyInteractionEditorCommand(representationDraft, "add-property-rule", { sourcePath: "identity.level" });
+applyInteractionEditorCommand(representationDraft, "move-property-rule", { ruleIndex: 1, direction: -1 });
+assert.equal(representationDraft.propertyPresentation.rules[0].name, "Regra 2", "A ordem das regras deve ser editável e persistida");
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
 assert.match(interactions, /renderPropertyPresentationEditor/, "As regras de apresentação devem integrar o painel Propriedades");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
@@ -837,3 +856,12 @@ assert.match(sheetCode, /representationContent/, "Rendering must use a single mi
 assert.match(template, /data-property-presentation-editor/, "The editor must be mounted in the Properties panel");
 assert.match(template, /data-property-alias-conflicts/, "The Properties panel must expose ambiguity warnings");
 assert.match(css, /nexus-component\.is-group-member,\.nexus-component\.is-group-member:hover/, "Grouped cards must share one rounded surface");
+assert.ok(css.includes('.nexus-sheet[data-mode="play"] .nexus-component:not(.is-group-member)'), "A borda padrão deve permanecer visível fora do modo de aparência");
+assert.ok(css.includes('border:1px solid var(--nexus-component-border,#52647b) !important;'), "A borda deve respeitar a cor personalizada e um fallback visível");
+assert.ok(interactions.includes('nexus-property-presentation-rule-name'), "As regras devem permitir nomes próprios");
+assert.ok(interactions.includes('move-property-rule'), "A ordem das regras deve ser editável");
+const propertyEditorStart = interactions.indexOf("export function renderPropertyPresentationEditor(");
+const propertyEditorEnd = interactions.indexOf("\n}", propertyEditorStart);
+const propertyEditorSource = interactions.slice(propertyEditorStart, propertyEditorEnd);
+assert.ok(!propertyEditorSource.includes("placeholder"), "O editor de regras não deve exibir placeholders");
+assert.ok(sheetCode.includes('const presentation = component.propertyPresentation ?? component.representation'), "A atualização reativa deve observar as regras novas e legadas");
