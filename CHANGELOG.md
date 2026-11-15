@@ -8,7 +8,7 @@
 ### Compatibilidade com Foundry VTT 14
 - Substitui a sintaxe legada de exclusão de propriedades de perícias pelo operador `foundry.data.operators.ForcedDeletion`.
 - Remove o aviso de compatibilidade associado à exclusão de `proficient`, `proficiency`, `opposed` e entradas antigas de perícia.
-- Acrescenta testes de regressão para o modo compacto por largura e altura, reavaliação das regras após redimensionamento e contato parcial entre cantos. [release]
+- Acrescenta testes de regressão para o modo compacto por largura e altura, reavaliação das regras após redimensionamento e contato parcial entre cantos. [release] [release]
 
 ## 1.0.0.41
 
