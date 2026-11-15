@@ -68,7 +68,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.40", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.41", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -912,3 +912,16 @@ assert.match(interactions,/barePath \? "@" \+ barePath/,"A abreviação @ deve p
 assert.match(interactions,/Condição/);
 
 assert.match(css,/nexus-sheet:is\(\[data-mode="play"\],\[data-mode="config"\],\[data-mode="appearance"\]\)/,"Cantos devem ser recalculados em todos os modos");
+
+assert.doesNotMatch(css,/\\.nexus-component\\.nexus-component-touching-(?:top|right|bottom|left)\\s*\\{/,"Contato em uma aresta não deve achatar automaticamente os dois cantos daquele lado");
+assert.doesNotMatch(css,/\\.nexus-group-surface\\.nexus-group-touching-(?:top|right|bottom|left)\\s*\\{/,"Superfícies de grupo também devem usar arredondamento individual por canto");
+assert.match(sheetListeners,/input\\$\\{inspectorNamespace\\}/,"As regras devem ser salvas durante a digitação, sem depender apenas do evento change");
+assert.match(sheetListeners,/render:\\s*false,\\s*captureHistory:\\s*false/,"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
+
+const cornerOnlyA=surface40(0,0,100,100),cornerOnlyB=surface40(100,100,100,100);
+const cornerOnlyCanvas={querySelectorAll(selector){if(selector===".nexus-component:not(.is-group-member)")return[cornerOnlyA,cornerOnlyB];if(selector===".nexus-group-surface")return[];return[];}};
+updateCanvasConnectedCorners(cornerOnlyCanvas);
+assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-br"),true,"Contato canto a canto deve achatar somente o canto inferior direito do primeiro componente");
+assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-tl"),true,"Contato canto a canto deve achatar somente o canto superior esquerdo do segundo componente");
+for(const corner of ["tl","tr","bl"]) assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do primeiro componente devem permanecer arredondados");
+for(const corner of ["tr","br","bl"]) assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do segundo componente devem permanecer arredondados");
