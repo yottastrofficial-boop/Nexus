@@ -1,4 +1,5 @@
 import { findBestAlignmentMatch } from "../core/canvas-geometry.js";
+import { updateCanvasConnectedCorners } from "./canvas-connected-corners.js";
 
 /**
  * Canvas gestures, selection visuals, pointer interactions and keyboard controls.
@@ -172,83 +173,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         canvas.insertBefore(container, canvas.firstChild);
       }
     };
-    const updateConnectedCorners = () => {
-      const cornerNames = ["tl", "tr", "br", "bl"];
-      const apply = (nodes, prefix) => {
-        const squareClasses = cornerNames.map(name => `${prefix}-corner-square-${name}`);
-        const touchingClasses = ["top", "right", "bottom", "left"].map(side => `${prefix}-touching-${side}`);
-        nodes.forEach(node => node.classList.remove(...squareClasses, ...touchingClasses));
-        const rects = nodes.filter(node => !node.hidden).map(node => {
-          const rect = node.getBoundingClientRect();
-          return {
-            node,
-            rect,
-            corners: [
-              { name: "tl", x: rect.left, y: rect.top },
-              { name: "tr", x: rect.right, y: rect.top },
-              { name: "br", x: rect.right, y: rect.bottom },
-              { name: "bl", x: rect.left, y: rect.bottom }
-            ]
-          };
-        });
-        const tolerance = 2.5;
-        const pointTouchesBorder = (point, rect) => {
-          const onHorizontal = (Math.abs(point.y - rect.top) <= tolerance || Math.abs(point.y - rect.bottom) <= tolerance)
-            && point.x >= rect.left - tolerance && point.x <= rect.right + tolerance;
-          const onVertical = (Math.abs(point.x - rect.left) <= tolerance || Math.abs(point.x - rect.right) <= tolerance)
-            && point.y >= rect.top - tolerance && point.y <= rect.bottom + tolerance;
-          return onHorizontal || onVertical;
-        };
-
-        const batches = [];
-        if (prefix === "nexus-component") {
-          const selectedIds = sheet._selectedIds ?? new Set();
-          const activeGroups = new Set();
-          if (!sheet._nexusInteractionActive) {
-            for (const [groupId, group] of groupsById) {
-              if ((group.componentIds ?? []).some(id => selectedIds.has(id))) activeGroups.add(groupId);
-            }
-          }
-          const byGroup = new Map();
-          for (const entry of rects) {
-            const groupId = entry.node.dataset.groupId || null;
-            if (groupId && !sheet._nexusInteractionActive && !activeGroups.has(groupId)) continue;
-            let batch = byGroup.get(groupId);
-            if (!batch) byGroup.set(groupId, batch = []);
-            batch.push(entry);
-          }
-          batches.push(...byGroup.values());
-        } else {
-          batches.push(rects);
-        }
-
-        for (const batch of batches) {
-          for (let i = 0; i < batch.length; i++) {
-            for (let j = i + 1; j < batch.length; j++) {
-              const a = batch[i], b = batch[j];
-              for (const corner of a.corners) {
-                if (pointTouchesBorder(corner, b.rect)) a.node.classList.add(`${prefix}-corner-square-${corner.name}`);
-              }
-              for (const corner of b.corners) {
-                if (pointTouchesBorder(corner, a.rect)) b.node.classList.add(`${prefix}-corner-square-${corner.name}`);
-              }
-              const overlapX = Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left);
-              const overlapY = Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top);
-              if (overlapX > tolerance) {
-                if (Math.abs(a.rect.bottom - b.rect.top) <= tolerance) { a.node.classList.add(`${prefix}-touching-bottom`); b.node.classList.add(`${prefix}-touching-top`); }
-                if (Math.abs(a.rect.top - b.rect.bottom) <= tolerance) { a.node.classList.add(`${prefix}-touching-top`); b.node.classList.add(`${prefix}-touching-bottom`); }
-              }
-              if (overlapY > tolerance) {
-                if (Math.abs(a.rect.right - b.rect.left) <= tolerance) { a.node.classList.add(`${prefix}-touching-right`); b.node.classList.add(`${prefix}-touching-left`); }
-                if (Math.abs(a.rect.left - b.rect.right) <= tolerance) { a.node.classList.add(`${prefix}-touching-left`); b.node.classList.add(`${prefix}-touching-right`); }
-              }
-            }
-          }
-        }
-      };
-      apply(elements(), "nexus-component");
-      apply([...groupSurfacesById.values()], "nexus-group");
-    };
+    const updateConnectedCorners = () => updateCanvasConnectedCorners(canvas);
     let cornerFrame = 0;
     const scheduleConnectedCorners = () => {
       if (cornerFrame) return;
