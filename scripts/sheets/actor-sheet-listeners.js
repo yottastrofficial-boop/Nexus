@@ -1191,7 +1191,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         );
         next?.focus({ preventScroll: true });
       }
-      const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
+      const editor = options.render === false ? null : (control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]"));
       if (editor) {
         if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
         const scrollContainer = editor.closest(".nexus-behavior-editor");
