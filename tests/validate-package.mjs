@@ -832,7 +832,7 @@ assert.equal(representationDraft.representation.sourcePath, "identity.level");
 assert.equal(representationDraft.representation.rules[0].condition, "level > mb");
 assert.equal(representationDraft.representation.rules[0].name, "Regra 1");
 applyInteractionEditorChange(representationDraft, { scope: "propertyPresentationRule", ruleIndex: 0, field: "name" }, "Minha regra");
-assert.equal(representationDraft.representation.rules[0].name, "Minha regra");
+assert.equal(representationDraft.propertyPresentation.rules[0].name, "Minha regra");
 applyInteractionEditorCommand(representationDraft, "add-property-rule", { sourcePath: "identity.level" });
 applyInteractionEditorCommand(representationDraft, "move-property-rule", { ruleIndex: 1, direction: -1 });
 assert.equal(representationDraft.propertyPresentation.rules[0].name, "Regra 2", "A ordem das regras deve ser editável e persistida");
