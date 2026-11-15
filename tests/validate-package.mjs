@@ -908,6 +908,7 @@ assert.equal(b40.classList.contains("nexus-component-touching-right"),true);
 assert.equal(g40.classList.contains("nexus-group-touching-left"),true);
 assert.match(canvasGroups,/updateCanvasConnectedCorners/);
 assert.match(interactions,/Conteúdo exibido/);
+assert.match(interactions,/barePath \? "@" \+ barePath/,"A abreviação @ deve preservar o prefixo para resolver o valor de exibição");
 assert.match(interactions,/Condição/);
 
 assert.match(css,/nexus-sheet:is\(\[data-mode="play"\],\[data-mode="config"\],\[data-mode="appearance"\]\)/,"Cantos devem ser recalculados em todos os modos");
