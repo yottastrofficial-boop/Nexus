@@ -1,3 +1,21 @@
+## 1.0.0.40
+
+### Bordas e geometria
+- Centralizada a detecção de contatos em um módulo compartilhado, executado nos modos Padrão, Configuração e Aparência.
+- Componentes independentes e superfícies de grupos agora participam da mesma verificação, incluindo contatos entre grupos e componentes externos.
+- A detecção acompanha alterações dimensionais por ResizeObserver e o editor de Aparência reutiliza o mesmo cálculo.
+
+### Regras de apresentação e expressões
+- Rótulos “Condição” e “Conteúdo exibido” posicionados acima dos respectivos campos.
+- Padronizadas as referências: `@atalho` solicita o valor apresentado; `{{caminho.direto}}` lê o caminho de dados; `{{@atalho}}` permanece compatível.
+- O avaliador diferencia soma numérica de concatenação textual: `2 + 2 + 2` resulta em `6`; `"2" + "2" + "2"` resulta em `222`.
+- Comparadores `=`, `==`, `!=`, `>`, `>=`, `<` e `<=` revisados e cobertos por testes; igualdade também aceita strings.
+- Tokens de imagem resolvem referências, por exemplo `{{image:@retrato}}`, mantendo mídia separada de texto e operações.
+
+### Validação
+- Incluídos testes de geometria entre componentes e grupos, expressões, strings, comparadores e referências diretas/de exibição.
+- A validação automatizada ocorre no GitHub Actions; confirmação visual em Foundry VTT 14 continua necessária.
+
 ## 1.0.0.39
 
 ### Apresentação de propriedades
