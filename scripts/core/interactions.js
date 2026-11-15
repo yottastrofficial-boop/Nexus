@@ -345,26 +345,32 @@ export function renderPropertyPresentationEditor(container, component, propertyP
   config.sourcePath = selectedPath;
   container.replaceChildren();
   container.dataset.componentId = String(component?.id ?? "");
-  const heading = document.createElement("div"); heading.className = "nexus-property-presentation-heading";
-  const title = document.createElement("strong"); title.textContent = "Apresentação da propriedade";
-  const enabledLabel = document.createElement("label"); enabledLabel.className = "nexus-property-presentation-toggle";
-  const enabled = document.createElement("input"); enabled.type = "checkbox"; enabled.checked = config.enabled;
-  enabled.dataset.interactionScope = "propertyPresentation"; enabled.dataset.interactionField = "enabled"; enabled.dataset.componentId = String(component?.id ?? "");
-  const enabledText = document.createElement("span"); enabledText.textContent = "Ativa"; enabledLabel.append(enabled, enabledText); heading.append(title, enabledLabel); container.append(heading);
-  const property = document.createElement("code"); property.className = "nexus-property-presentation-path"; property.textContent = selectedPath || "Selecione uma propriedade no campo acima"; container.append(property);
-  const help = document.createElement("p"); help.className = "nexus-property-presentation-help"; help.textContent = "A primeira condição verdadeira é usada. Sem correspondência, o visual padrão permanece."; container.append(help);
-  const rules = document.createElement("div"); rules.className = "nexus-property-presentation-rules";
-  config.rules.forEach((rule, index) => {
-    const row = document.createElement("article"); row.className = "nexus-property-presentation-rule";
-    const head = document.createElement("div"); head.className = "nexus-property-presentation-rule-head";
-    const label = document.createElement("strong"); label.textContent = "Regra " + (index + 1);
-    const remove = document.createElement("button"); remove.type = "button"; remove.className = "nexus-icon-button"; remove.textContent = "×"; remove.title = "Remover regra"; remove.dataset.interactionAction = "remove-property-rule"; remove.dataset.componentId = String(component?.id ?? ""); remove.dataset.ruleIndex = String(index); head.append(label, remove);
-    const conditionLabel = document.createElement("label"); conditionLabel.textContent = "Se";
-    const condition = document.createElement("input"); condition.type = "text"; condition.value = rule.condition; condition.placeholder = "@identity.level >= 5"; condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition"; condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? ""); conditionLabel.append(condition);
-    const contentLabel = document.createElement("label"); contentLabel.textContent = "Conteúdo";
-    const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : ""); content.placeholder = "{{icon:fa-solid fa-fire}} Fúria: {{@attributes.for.value}}"; content.dataset.interactionScope = "propertyPresentationRule"; content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? ""); contentLabel.append(content);
-    row.append(head, conditionLabel, contentLabel); rules.append(row);
-  });
-  container.append(rules);
-  const add = document.createElement("button"); add.type = "button"; add.className = "nexus-property-presentation-add"; add.textContent = "＋ Adicionar regra"; add.dataset.interactionAction = "add-property-rule"; add.dataset.componentId = String(component?.id ?? ""); add.dataset.sourcePath = selectedPath; container.append(add);
+
+  // Keep the empty editor intentionally minimal: adding a rule is the only
+  // action needed before its condition and output fields become relevant.
+  if (config.rules.length) {
+    const rules = document.createElement("div");
+    rules.className = "nexus-property-presentation-rules";
+    config.rules.forEach((rule, index) => {
+      const row = document.createElement("article"); row.className = "nexus-property-presentation-rule";
+      const head = document.createElement("div"); head.className = "nexus-property-presentation-rule-head";
+      const label = document.createElement("strong"); label.textContent = "Regra " + (index + 1);
+      const remove = document.createElement("button"); remove.type = "button"; remove.className = "nexus-icon-button"; remove.textContent = "×"; remove.title = "Remover regra"; remove.dataset.interactionAction = "remove-property-rule"; remove.dataset.componentId = String(component?.id ?? ""); remove.dataset.ruleIndex = String(index); head.append(label, remove);
+      const conditionLabel = document.createElement("label"); conditionLabel.textContent = "Se";
+      const condition = document.createElement("input"); condition.type = "text"; condition.value = rule.condition; condition.placeholder = "@identity.level >= 5"; condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition"; condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? ""); conditionLabel.append(condition);
+      const contentLabel = document.createElement("label"); contentLabel.textContent = "Conteúdo";
+      const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : ""); content.placeholder = "{{icon:fa-solid fa-fire}} Fúria: {{@attributes.for.value}}"; content.dataset.interactionScope = "propertyPresentationRule"; content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? ""); contentLabel.append(content);
+      row.append(head, conditionLabel, contentLabel); rules.append(row);
+    });
+    container.append(rules);
+  }
+
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "nexus-property-presentation-add";
+  add.textContent = "＋ Adicionar regra";
+  add.dataset.interactionAction = "add-property-rule";
+  add.dataset.componentId = String(component?.id ?? "");
+  add.dataset.sourcePath = selectedPath;
+  container.append(add);
 }
