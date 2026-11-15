@@ -51,7 +51,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       let cursor=0,match;
       while ((match=pattern.exec(source))) {
         if(match.index>cursor) node.append(document.createTextNode(source.slice(cursor,match.index)));
-        const wrapped=match[1]!==undefined, token=(match[1]??match[0]).replace(/[),.!?;]+$/,"").trim();
+        const wrapped=match[1]!==undefined, token=wrapped ? String(match[1]).trim() : String(match[0]).replace(/[),.!?;]+$/,"").trim();
         let resolved=token, forceImage=false;
         if (wrapped && !/^https?:\/\//i.test(token)) {
           const binding=resolveNexusBinding(sheet.actor,token);

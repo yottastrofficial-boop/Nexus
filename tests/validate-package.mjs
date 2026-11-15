@@ -9,6 +9,7 @@ import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/c
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
+import { evaluateNexusFormula } from "../scripts/core/formula-engine.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
 const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
@@ -477,7 +478,7 @@ assert.match(sheetCode, /content\?\.querySelectorAll\("\.nexus-asset-text/, "A t
 assert.match(css, /nexus-sync-token-portrait/, "O comando de sincronização do retrato deve ter estilo próprio");
 console.log("NEXUS 1.0.0.7: validações estáticas aprovadas.");
 
-assert.match(sheetCode, /expandNexusRollAliases\(this\.actor, expandNexusPropertyExpressions\(formula\)\)/, "Fórmulas devem aceitar referências {{propriedade}} e aliases curtos como @DES");
+assert.match(sheetCode, /expandNexusRollAliases\(this\.actor, expandNexusPropertyExpressions\(formula, this\.actor\)\)/, "Fórmulas devem aceitar referências {{propriedade}} e aliases curtos como @DES");
 assert.match(sheetCode, /keyboardMoveHistoryCaptured/, "Movimentos por setas devem compartilhar um único snapshot de histórico");
 assert.match(sheetCode, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
 assert.match(sheetCode, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
@@ -745,3 +746,11 @@ assert.match(sheetCode,/renderCanvasGroups\(this, form\)/,"Grupos devem ser rend
 assert.match(canvasGroups,/nexus-group-surface/,"O renderizador compartilhado deve criar a superfície visual do grupo");
 assert.match(canvasGroups,/is-group-member/,"O renderizador compartilhado deve marcar os componentes pertencentes a grupos");
 assert.ok(css.includes(".nexus-group-surface.is-static"),"Superfícies de grupo no Modo Padrão não devem bloquear controles");
+
+
+assert.equal(evaluateNexusFormula("(nivel + mb) * 2", key => ({ nivel: 3, mb: 2 })[key]), 10, "Fórmulas devem respeitar parênteses e precedência aritmética");
+assert.equal(evaluateNexusFormula("des + mb", key => ({ des: 4, mb: 2 })[key]), 6, "Fórmulas devem resolver propriedades numéricas");
+assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null, "Divisão por zero deve ser rejeitada");
+assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
+assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
+assert.match(sheetCode, /evaluateNexusFormula\\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");

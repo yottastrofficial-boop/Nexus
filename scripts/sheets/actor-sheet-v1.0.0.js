@@ -12,7 +12,18 @@ import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
+import { evaluateNexusFormula } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions } from "../core/interactions.js";
+
+const NEXUS_PROPERTY_SHORTCUTS = Object.freeze({
+  nivel: "identity.level", level: "identity.level", mb: "combat.mb",
+  for: "attributes.for.value", des: "attributes.des.value", sab: "attributes.sab.value",
+  int: "attributes.int.value", car: "attributes.car.value", von: "attributes.von.value",
+  pv: "resources.pv.value", pm: "resources.pm.value", pe: "resources.pe.value",
+  def: "combat.defense.value", defesa: "combat.defense.value",
+  desl: "combat.movement.value", movimento: "combat.movement.value", ddr: "recovery.count.value"
+});
+const resolveFormulaIdentifier = identifier => NEXUS_PROPERTY_SHORTCUTS[String(identifier).toLocaleLowerCase("pt-BR")] ?? identifier;
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -74,8 +85,17 @@ const COMPONENTS = {
 
 const resolveNexusBinding = (actor, expression, depth = 0) => {
   const raw = String(expression ?? "").trim();
+  if (depth > 8) return { value: "", path: "" };
+  const wrapped = raw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
+  const formulaSource = wrapped ? wrapped[1].trim() : raw;
+  if (/[()+*/]|\s[+-]\s/.test(formulaSource)) {
+    const calculated = evaluateNexusFormula(formulaSource, identifier =>
+      resolveNexusBinding(actor, resolveFormulaIdentifier(identifier), depth + 1).value
+    );
+    if (calculated !== null) return { value: calculated, path: "", readOnly: true, virtual: true, expression: true };
+  }
   const match = raw.match(/^\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}$/);
-  const source = match ? match[1] : raw;
+  const source = resolveFormulaIdentifier(match ? match[1] : raw);
   if (!source || source.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return { value: "", path: "" };
   const aliases = { attribute: "attributes", resource: "resources", identity: "identity", combat: "combat", skill: "skills" };
   const parts = source.split(".");
@@ -128,10 +148,21 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   return { value, path, alias: alias.alias };
 };
 
-const expandNexusPropertyExpressions = formula => String(formula ?? "").replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, path) => {
-  const parts=String(path).split(".");
-  if(!parts.length||parts.some(part=>!part||["__proto__","prototype","constructor"].includes(part))) throw new Error("Referência de propriedade inválida na fórmula.");
-  return "@"+parts.join(".");
+const expandNexusPropertyExpressions = (formula, actor) => String(formula ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (_match, expression) => {
+  const source = String(expression).trim();
+  if (/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(source)) {
+    const binding = resolveNexusBinding(actor, resolveFormulaIdentifier(source));
+    if (binding.value === undefined || binding.value === null) throw new Error("A propriedade informada não existe.");
+    if (binding.virtual || binding.expression) return String(binding.value);
+    const path = safeAliasKey(binding.path || resolveFormulaIdentifier(source));
+    if (!path) throw new Error("Referência de propriedade inválida na fórmula.");
+    return "@" + path;
+  }
+  const value = evaluateNexusFormula(source, identifier =>
+    resolveNexusBinding(actor, resolveFormulaIdentifier(identifier)).value
+  );
+  if (value === null) throw new Error("A expressão contém uma propriedade inválida ou não numérica.");
+  return String(value);
 });
 
 const getResourceValuePaths = component => {
@@ -273,32 +304,10 @@ const safeAliasKey = value => {
   return /^[a-zA-Z][a-zA-Z0-9_-]*(?:\.[a-zA-Z][a-zA-Z0-9_-]*)*$/.test(key) && !key.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part)) ? key : "";
 };
 const evaluateAliasExpression = (actor, expression, depth = 0) => {
-  if (depth > 8 || typeof expression !== "string" || !expression.trim()) return null;
-  const source = expression.trim();
-  const tokens = [];
-  const pattern = /\s*([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*|(?:\d+(?:\.\d*)?|\.\d+)|[()+*/-])\s*/gy;
-  let cursor = 0;
-  while (cursor < source.length) {
-    pattern.lastIndex = cursor; const match = pattern.exec(source);
-    if (!match) return null;
-    tokens.push(match[1]); cursor = pattern.lastIndex;
-  }
-  let index = 0;
-  const primary = () => {
-    const token = tokens[index++];
-    if (token === "(") { const value = sum(); if (tokens[index++] !== ")") throw new Error("parenthesis"); return value; }
-    if (token === "+") return primary();
-    if (token === "-") return -primary();
-    if (token === undefined) throw new Error("missing");
-    if (/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token)) return Number(token);
-    const resolved = resolveNexusBinding(actor, token, depth + 1).value;
-    const number = Number(resolved);
-    if (!Number.isFinite(number)) throw new Error("not numeric");
-    return number;
-  };
-  const product = () => { let value = primary(); while (["*", "/"].includes(tokens[index])) { const op = tokens[index++], right = primary(); value = op === "*" ? value * right : value / right; } return value; };
-  const sum = () => { let value = product(); while (["+", "-"].includes(tokens[index])) { const op = tokens[index++], right = product(); value = op === "+" ? value + right : value - right; } return value; };
-  try { const result = sum(); return index === tokens.length && Number.isFinite(result) ? result : null; } catch (_) { return null; }
+  if (depth > 8) return null;
+  return evaluateNexusFormula(expression, identifier =>
+    resolveNexusBinding(actor, resolveFormulaIdentifier(identifier), depth + 1).value
+  );
 };
 
 const getNexusRollAliasEntries = actor => {
@@ -1406,7 +1415,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "calculate") {
       const formula = String(config.formula ?? "").trim();
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
-      const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula)), getNexusRollData(this.actor));
+      const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor)), getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       const target = String(config.targetPath ?? "").replace(/^system\\./, "");
       if (target) {
@@ -1455,7 +1464,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return;
     }
     try {
-      formula = expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula));
+      formula = expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor));
       const roll = new Roll(formula, getNexusRollData(this.actor));
       await roll.evaluate({ async: true });
       await roll.toMessage({
