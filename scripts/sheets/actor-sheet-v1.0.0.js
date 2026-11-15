@@ -930,16 +930,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
           updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
         }
       }
+      const forcedDeletion = () => new foundry.data.operators.ForcedDeletion();
       if (current && Object.hasOwn(current, "proficiency")) {
-        updates["system.skills." + skill.key + ".-=proficiency"] = null;
+        updates["system.skills." + skill.key + ".proficiency"] = forcedDeletion();
       }
       if (current && Object.hasOwn(current, "proficient")) {
-        updates["system.skills." + skill.key + ".-=proficient"] = null;
+        updates["system.skills." + skill.key + ".proficient"] = forcedDeletion();
       }
       if (current && Object.hasOwn(current, "opposed")) {
-        updates["system.skills." + skill.key + ".-=opposed"] = null;
+        updates["system.skills." + skill.key + ".opposed"] = forcedDeletion();
       }
-      if (legacy) updates["system.skills.-=" + skill.legacyKey] = null;
+      if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
     }
     try {
       if (Object.keys(updates).length) await this.actor.update(updates);
