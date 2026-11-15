@@ -14,8 +14,9 @@ export function updateCanvasConnectedCorners(canvas, tolerance = 2.5) {
   if (!canvas?.querySelectorAll) return { surfaces: 0, contacts: 0 };
   const allComponents = [...canvas.querySelectorAll(".nexus-component")];
   for (const node of allComponents) {
-    const width = Number.parseFloat(node.style?.width) || node.offsetWidth || 0;
-    const height = Number.parseFloat(node.style?.height) || node.offsetHeight || 0;
+    const rect = getRect(node);
+    const width = Number.parseFloat(node.style?.width) || node.offsetWidth || rect.width;
+    const height = Number.parseFloat(node.style?.height) || node.offsetHeight || rect.height;
     if (width < 100 || height < 100) node.classList.add("is-compact");
     else node.classList.remove("is-compact");
   }
