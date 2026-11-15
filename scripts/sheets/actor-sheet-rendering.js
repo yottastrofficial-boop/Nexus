@@ -1,5 +1,35 @@
 export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, isMediaSource, COMPONENTS } = {}) {
 
+    sheet._nexusMediaObserver?.disconnect();
+    sheet._nexusMediaObserver = null;
+    sheet._queueNexusMediaSource = (node, source, preload = "metadata") => {
+      const observer = sheet._nexusMediaObserver;
+      if (!observer) { node.src = source; node.preload = preload; return true; }
+      node.dataset.nexusLazyMediaSrc = source;
+      node.dataset.nexusLazyMediaPreload = preload;
+      node.preload = "none";
+      observer.observe(node);
+      return true;
+    };
+    if (typeof IntersectionObserver === "function") {
+      const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const node = entry.target;
+          const source = node.dataset.nexusLazyMediaSrc;
+          if (source && node.isConnected) {
+            node.src = source;
+            node.preload = node.dataset.nexusLazyMediaPreload ?? "metadata";
+            node.load?.();
+          }
+          delete node.dataset.nexusLazyMediaSrc;
+          delete node.dataset.nexusLazyMediaPreload;
+          observer.unobserve(node);
+        }
+      }, { rootMargin: "180px 0px", threshold: 0.01 });
+      sheet._nexusMediaObserver = observer;
+    }
+
     const safeUrl = value => { try { const url = new URL(value, window.location.href); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } };
     const createMedia = (value, label = "", forceImage = false, displayMode = "auto") => {
       const safe = safeUrl(value); if (!safe || displayMode === "text") return null;
@@ -8,8 +38,8 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       const audio = displayMode === "audio" || (displayMode === "auto" && (/\.(?:mp3|ogg|wav|m4a|aac|flac|opus)$/.test(clean) || /^data:audio\//i.test(safe)));
       const video = displayMode === "video" || (displayMode === "auto" && (/\.(?:mp4|webm|ogv|mov|m4v|mkv|avi|mpeg|mpg|3gp)$/.test(clean) || /^data:video\//i.test(safe)));
       if (image) { const n=document.createElement("img"); n.src=safe; n.alt=label||"Mídia incorporada"; n.loading="lazy"; n.className="nexus-rich-image nexus-adaptive-image"; return n; }
-      if (audio) { const n=document.createElement("audio"); n.src=safe; n.controls=true; n.preload="none"; n.className="nexus-rich-audio nexus-adaptive-audio"; return n; }
-      if (video) { const n=document.createElement("video"); n.src=safe; n.controls=true; n.preload="metadata"; n.className="nexus-rich-video nexus-adaptive-video"; return n; }
+      if (audio) { const n=document.createElement("audio"); n.controls=true; n.preload="none"; n.className="nexus-rich-audio nexus-adaptive-audio"; if(!sheet._queueNexusMediaSource?.(n,safe,"none")) n.src=safe; return n; }
+      if (video) { const n=document.createElement("video"); n.controls=true; n.preload="metadata"; n.className="nexus-rich-video nexus-adaptive-video"; if(!sheet._queueNexusMediaSource?.(n,safe,"metadata")) n.src=safe; return n; }
       const a=document.createElement("a"); a.href=safe; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=label||value; a.className="nexus-rich-link"; return a;
     };
     const renderExpressionText = (node, allowPlainUrls = false) => {

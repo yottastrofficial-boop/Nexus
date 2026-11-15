@@ -114,6 +114,18 @@ export async function saveInteractionToLibrary(actor,flow) {
   else if(actor?.setFlag) await actor.setFlag("nexus","interactionLibrary",entries);
   return entries;
 }
+export async function deleteInteractionFromLibrary(actor, id) {
+  if (!id) return getInteractionLibrary(actor);
+  const entries = getInteractionLibrary(actor);
+  const next = entries.filter(entry => entry.id !== id);
+  if (next.length === entries.length) return entries;
+  const settings = globalThis.game?.settings;
+  if (typeof settings?.set === "function") await settings.set("nexus", "interactionLibrary", next);
+  const actorEntries = actor?.getFlag?.("nexus", "interactionLibrary");
+  if (Array.isArray(actorEntries) && actor?.setFlag) await actor.setFlag("nexus", "interactionLibrary", actorEntries.filter(entry => entry.id !== id));
+  if (typeof settings?.set !== "function" && !Array.isArray(actorEntries) && actor?.setFlag) await actor.setFlag("nexus", "interactionLibrary", next);
+  return next;
+}
 export function ensureEditableInteractions(component) {
   component.interactions=getComponentInteractions(component).map(flow=>structuredClone(flow));
   return component.interactions;

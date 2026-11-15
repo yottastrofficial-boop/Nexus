@@ -11,7 +11,7 @@ import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
-import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions } from "../core/interactions.js";
+import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions } from "../core/interactions.js";
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -177,7 +177,7 @@ const collectPropertyPaths = actor => {
   for (const path of NEXUS_RULEBOOK_PROPERTY_PATHS) paths.add(path);
   // Propriedades virtuais estáveis: separam retrato, arte do token e moldura
   // sem duplicar URLs em componentes. São resolvidas para campos reais do Foundry.
-  for (const path of ["identity.portrait.img", "identity.token.img", "identity.token.border", "token.img", "token.border"]) paths.add(path);
+  for (const path of ["identity.portrait.img", "identity.token.img", "identity.token.border"]) paths.add(path);
   return paths;
 };
 
@@ -215,7 +215,7 @@ const getNativePropertyDefinitions = actor => {
       || NEXUS_SKILLS.some(skill => path === `skills.${skill.key}.proficientLevel` || path === `skills.${skill.key}.opposed`)
       || NEXUS_ATTRIBUTES.some(attribute => path === `attributes.${attribute.key}`)
       || ["combat.defense", "combat.movement", "combat.desl", "combat.ddr", "combat.mb"].includes(path)
-      || path === "encumbrance.current" || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
+      || path === "encumbrance.current" || path === "token.img" || path === "token.border" || path === "identity.name" || path.startsWith("identity.portrait.") || path.startsWith("identity.token.")) continue;
     const raw = getPath(actor.system ?? {}, path);
     if (raw === undefined || raw === null || typeof raw === "object") continue;
     const id = `system.${path}`;
@@ -1136,7 +1136,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -2134,6 +2134,19 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
     ui.notifications?.info?.(`Grupo "${name}" salvo na sua Biblioteca pessoal.`);
     this._libraryRenderSavedGroups?.();
+    this._libraryApplyFilter?.();
+    return true;
+  }
+
+  async _deleteSavedLibraryGroup(groupId) {
+    if (!groupId) return false;
+    const saved = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
+    const next = saved.filter(item => item.id !== groupId);
+    if (next.length === saved.length) return false;
+    await game.user.setFlag("nexus", "libraryGroups", next);
+    this._libraryRenderSavedGroups?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.("Grupo removido da Biblioteca pessoal.");
     return true;
   }
 
@@ -2586,6 +2599,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const contentSection=inspector.querySelector("[data-inspector-content]");
       if(contentSection)contentSection.hidden=!Array.from(contentSection.children).some(child=>child.tagName!=="H4"&&!child.hidden);
     }
+    sheetRoot?.querySelector?.(".nexus-canvas")?.dispatchEvent(new Event("nexus:selectionchange"));
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
   async _mountLibrary(panel) {
@@ -2707,9 +2721,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const syncRailFocus = (focused = false) => {
       if (!portal.isConnected) return;
       const z = Number.parseInt(app.style.zIndex || getComputedStyle(app).zIndex, 10);
-      // O portal acompanha a ficha: fica logo acima dela, mas abaixo de qualquer
-      // ApplicationV2 que tenha recebido foco depois da ficha.
-      portal.style.setProperty("z-index", String(Math.max(1, (Number.isFinite(z) ? z : 100) - 1)), "important");
+      // Em foco, as rails ficam acima da ficha; fora de foco, cedem a pilha a outras aplicações.
+      const baseZ = Number.isFinite(z) ? z : 100;
+      portal.style.setProperty("z-index", String(Math.max(1, baseZ + (focused ? 2 : -1))), "important");
       portal.classList.toggle("is-sheet-focused", focused);
     };
     const positionRails = () => {
@@ -2752,6 +2766,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         setActivePanel(panelKey);
       } else if (app.contains(event.target)) {
         setActivePanel(null);
+        syncRailFocus(true);
       }
     };
     document.addEventListener("focusin", onDocumentFocusIn, true);
@@ -2910,6 +2925,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
     this._nexusViewportCleanup?.(); this._nexusViewportCleanup = null;
     this._nexusInspectorKeyCleanup?.();
+    this._nexusMediaObserver?.disconnect(); this._nexusMediaObserver = null; this._queueNexusMediaSource = null;
     if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();

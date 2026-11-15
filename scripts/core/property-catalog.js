@@ -70,7 +70,8 @@ const DERIVED_SKILL_FIELDS = new Set([
   "description", "proficient", "proficientLevel", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao"
 ]);
 const LEGACY_NUCLEUS_PATHS = ["attributes.body", "attributes.mind", "attributes.soul"];
-const DUPLICATE_PATHS = ["identity.name"];
+const DUPLICATE_PATHS = ["identity.name", "token.img", "token.border"];
+const ENCUMBRANCE_FIELD_LABELS = Object.freeze({ base: "Base", bonus: "Bônus", capacity: "Capacidade", current: "Atual", overloaded: "Excedida" });
 const SKILL_BY_KEY = new Map(NEXUS_SKILLS.flatMap(skill => [[skill.key, skill], [skill.legacyKey, skill]]));
 const ATTRIBUTE_BY_KEY = new Map(NEXUS_ATTRIBUTES.map(attribute => [attribute.key, attribute]));
 
@@ -96,7 +97,7 @@ function getSegmentLabel(segment, parent = "") {
 }
 
 const isLegacyNucleusPath = path => LEGACY_NUCLEUS_PATHS.some(legacy => path === legacy || path.startsWith(legacy + "."));
-const isDuplicatePath = path => DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
+const isDuplicatePath = path => path === "encumbrance.current" || DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
 
 export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], aliases = [], rollAliases = [] } = {}) {
   const labels = new Map(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => [definition.path, definition.label]));
@@ -172,6 +173,11 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
 
     const skill = parts[0] === "skills" ? SKILL_BY_KEY.get(parts[1]) : null;
     const attribute = parts[0] === "attributes" ? ATTRIBUTE_BY_KEY.get(parts[1]) : null;
+    if (parts[0] === "encumbrance" && parts.length === 3 && parts[2] === "value" && ENCUMBRANCE_FIELD_LABELS[parts[1]]) {
+      const displayLabel = ENCUMBRANCE_FIELD_LABELS[parts[1]];
+      entriesByPath.set(path, { path, label: displayLabel, searchLabel: `Carga · ${displayLabel}`, segments: parts, groupPath: "encumbrance", displaySegment: parts[1], groupLabels: { encumbrance: "Carga" } });
+      continue;
+    }
     if (path === "identity.level") {
       entriesByPath.set(path, { path, label: "Nível", searchLabel: "Nível · Progressão", segments: parts, groupPath: "progression", displaySegment: "level", groupLabels: { progression: "Progressão" } });
       continue;

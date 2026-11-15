@@ -3,7 +3,7 @@
  * Kept separate from the sheet class so the lifecycle facade stays focused.
  */
 export function activateActorSheetListeners(sheet, html, dependencies) {
-  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
+  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
 
     const currentRoot = html?.[0];
     // Remove detached property-option portals left by a previous ApplicationV2 render.
@@ -828,14 +828,45 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
         event.preventDefault();
         const entry=getInteractionLibrary(sheet.actor).find(item=>item.id===savedFlowCard.dataset.libraryFlowId);
-        const detail=libraryPanel.querySelector("[data-library-details]");if(!entry||!detail)return;
+        const detail=libraryPanel.querySelector("[data-library-flow-details]");if(!entry||!detail)return;
         libraryPanel.querySelectorAll("[data-library-flow-id]").forEach(item=>item.classList.toggle("is-selected",item===savedFlowCard));
         detail.dataset.selectedType="saved-flow";detail.dataset.selectedFlowId=entry.id;detail.replaceChildren();
         const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
         const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=entry.name||"Fluxo salvo";heading.append(title);
-        const summary=document.createElement("p");summary.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
+        const flow=entry.flow??{};
+        const summary=document.createElement("p");summary.textContent=`${flow.triggers?.length??0} gatilhos · ${flow.conditions?.length??0} condições · ${flow.actions?.length??0} ações`;
+        const status=document.createElement("small");status.className="nexus-library-flow-status";status.textContent=flow.enabled===false?"Desativado":"Ativo";
+        const join=document.createElement("p");join.className="nexus-library-flow-join";join.textContent=flow.conditions?.length?(flow.conditionJoin==="any"?"Condição: qualquer uma (OU)":"Condição: todas (E)"):"Sem condições adicionais";
+        const makeDetailSection=(label,items,emptyText)=>{
+          const section=document.createElement("section");section.className="nexus-library-flow-detail-section";
+          const sectionTitle=document.createElement("strong");sectionTitle.textContent=label;section.append(sectionTitle);
+          const list=document.createElement("ul");
+          if(!items.length){const item=document.createElement("li");item.textContent=emptyText;list.append(item);}
+          else for(const value of items){const item=document.createElement("li");item.textContent=value;list.append(item);}
+          section.append(list);detail.append(section);
+        };
+        const eventLabels={click:"Clique",doubleClick:"Duplo clique",rightClick:"Clique direito",hover:"Passar o cursor",change:"Alterar valor",submit:"Enviar formulário",interact:"Interação encadeada"};
+        const operatorLabels={equals:"igual a",notEquals:"diferente de",greaterThan:"maior que",greaterOrEqual:"maior ou igual a",lessThan:"menor que",lessOrEqual:"menor ou igual a",contains:"contém",isEmpty:"está vazio",isNotEmpty:"não está vazio"};
+        const actionLabels={roll:"Rolagem",calculate:"Calcular",update:"Atualizar propriedade",open:"Abrir",toggle:"Alternar componente",interact:"Interagir com componente",execute:"Executar operação"};
+        const triggerItems=(flow.triggers??[]).map(item=>eventLabels[item.event]??String(item.event??"Gatilho"));
+        const conditionItems=(flow.conditions??[]).map(item=>`${item.path||"Propriedade não definida"} ${operatorLabels[item.operator]??item.operator??"igual a"}${["isEmpty","isNotEmpty"].includes(item.operator)?"":` ${String(item.value??"")}`}`);
+        const actionItems=(flow.actions??[]).map(item=>{
+          const config=item.config??{};const label=actionLabels[item.type]??String(item.type??"Ação");
+          const details=item.type==="roll"?(config.mode==="skill"?`Perícia: ${config.skillKey??"não definida"}`:`Fórmula: ${config.formula??"não definida"}`):
+            item.type==="calculate"?`Fórmula: ${config.formula??"—"} → ${config.targetPath??"sem destino"}`:
+            item.type==="update"?`${config.path??"propriedade não definida"} · ${config.operation??"set"} · ${config.value??"—"}`:
+            ["open","toggle","interact"].includes(item.type)?`Destino: ${config.targetId??"não definido"}${item.type==="interact"?` · Evento: ${config.event??"interact"}`:""}`:
+            item.type==="execute"?`${config.operation??"operação não definida"}${config.message?` · ${config.message}`:""}`:"";
+          return `${item.enabled===false?"Desativada · ":""}${label}${details?` — ${details}`:""}`;
+        });
+        detail.append(heading,summary,status,join);
+        makeDetailSection("Gatilhos",triggerItems,"Nenhum gatilho configurado.");
+        makeDetailSection("Condições",conditionItems,"Nenhuma condição: o fluxo depende apenas do gatilho.");
+        makeDetailSection("Ações",actionItems,"Nenhuma ação configurada.");
+        const actions=document.createElement("div");actions.className="nexus-library-flow-detail-actions";
         const add=document.createElement("button");add.type="button";add.dataset.libraryAddFlow="";add.textContent="Adicionar ao componente selecionado";
-        detail.append(heading,summary,add);return;
+        const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteFlow="";remove.className="danger";remove.textContent="Excluir fluxo da biblioteca";
+        actions.append(add,remove);detail.append(actions);return;
       }
 
       const savedGroupCard = target?.closest("[data-library-saved-group]");
@@ -860,7 +891,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         add.type = "button";
         add.dataset.libraryAddGroup = "";
         add.textContent = "Adicionar grupo ao Canvas";
-        detail.append(heading, summary, add);
+        const remove = document.createElement("button");
+        remove.type = "button"; remove.dataset.libraryDeleteSavedGroup = ""; remove.className = "danger"; remove.textContent = "Excluir grupo da biblioteca";
+        detail.append(heading, summary, add, remove);
         return;
       }
 
@@ -880,6 +913,31 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
         if(id)await sheet._deleteSavedLibraryComponent(id);return;
+      }
+      const deleteSavedGroupButton = target?.closest("[data-library-delete-saved-group]");
+      if (deleteSavedGroupButton && libraryPanel.contains(deleteSavedGroupButton)) {
+        const id = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
+        if (id) await sheet._deleteSavedLibraryGroup(id);
+        return;
+      }
+      const deleteFlowButton = target?.closest("[data-library-delete-flow]");
+      if (deleteFlowButton && libraryPanel.contains(deleteFlowButton)) {
+        const detail = libraryPanel.querySelector("[data-library-flow-details]");
+        const id = detail?.dataset.selectedFlowId;
+        if (id) {
+          await deleteInteractionFromLibrary(sheet.actor, id);
+          libraryPanel.querySelectorAll("[data-library-flow-id]").forEach(card => { if (card.dataset.libraryFlowId === id) card.remove(); });
+          if (detail) {
+            detail.dataset.selectedFlowId = "";
+            detail.replaceChildren();
+            const placeholder = document.createElement("div"); placeholder.className = "nexus-library-detail-placeholder";
+            const title = document.createElement("strong"); title.textContent = "Fluxo excluído";
+            const message = document.createElement("p"); message.textContent = "O fluxo foi removido da biblioteca.";
+            placeholder.append(title, message); detail.append(placeholder);
+          }
+          sheet._libraryApplyFilter?.();
+        }
+        return;
       }
       const addFlowButton=target?.closest("[data-library-add-flow]");
       if(addFlowButton&&libraryPanel.contains(addFlowButton)){
