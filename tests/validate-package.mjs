@@ -68,7 +68,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.41", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.42", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -925,3 +925,9 @@ assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-br"),
 assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-tl"),true,"Contato canto a canto deve achatar somente o canto superior esquerdo do segundo componente");
 for(const corner of ["tl","tr","bl"]) assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do primeiro componente devem permanecer arredondados");
 for(const corner of ["tr","br","bl"]) assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do segundo componente devem permanecer arredondados");
+
+assert.match(sheet,/new foundry\\.data\\.operators\\.ForcedDeletion\\(\\)/,"A migração das perícias deve usar o operador de remoção do Foundry V14");
+assert.doesNotMatch(sheet,/\\.\\-=proficient|\\.\\-=proficiency|\\.\\-=opposed|skills\\.\\-=\"/,"A migração das perícias não deve usar mais a sintaxe legada -= do Foundry");
+assert.match(canvasInteractions,/await saveAfterGesture\\(touchedIds\\);sheet\\._refreshBoundComponents\\?\\.\\(\\)/,"O fim do redimensionamento deve reavaliar as representações por regra");
+assert.match(canvasGroups,/is-compact/,"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
+assert.match(css,/\\.nexus-component\\.is-compact \\.nexus-component-content \\{\\s*padding:\\s*2px\\s*!important/,"Cards com menos de 100px em qualquer dimensão devem limitar o padding a 2px");
