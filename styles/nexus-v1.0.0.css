@@ -5885,3 +5885,17 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 
 /* O arredondamento é controlado exclusivamente pelas classes corner-square-*.
    Classes touching-* descrevem contato de aresta, mas não achatam os dois cantos. */
+
+/* Cards compactos: preserva espaço para o conteúdo e para as representações por regra. */
+.nexus-component.is-compact .nexus-component-content {
+  padding: 2px !important;
+}
+.nexus-component.is-compact .nexus-property-representation {
+  gap: 2px;
+  line-height: 1.05;
+}
+.nexus-component.is-compact .nexus-property-representation-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
