@@ -919,8 +919,8 @@ assert.match(sheetListeners,/input\\$\\{inspectorNamespace\\}/,"As regras devem 
 assert.match(sheetListeners,/render:\\s*false,\\s*captureHistory:\\s*false/,"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
 
 const cornerOnlyA=surface40(0,0,100,100),cornerOnlyB=surface40(100,100,100,100);
-const compactOnly=surface40(0,0,90,120);
-const cornerOnlyCanvas={querySelectorAll(selector){if(selector===".nexus-component")return[cornerOnlyA,cornerOnlyB,compactOnly];if(selector===".nexus-component:not(.is-group-member)")return[cornerOnlyA,cornerOnlyB,compactOnly];if(selector===".nexus-group-surface")return[];return[];}};
+const compactOnly=surface40(500,500,90,120),compactHeightOnly=surface40(650,500,120,90);
+const cornerOnlyCanvas={querySelectorAll(selector){if(selector===".nexus-component")return[cornerOnlyA,cornerOnlyB,compactOnly,compactHeightOnly];if(selector===".nexus-component:not(.is-group-member)")return[cornerOnlyA,cornerOnlyB,compactOnly,compactHeightOnly];if(selector===".nexus-group-surface")return[];return[];}};
 updateCanvasConnectedCorners(cornerOnlyCanvas);
 assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-br"),true,"Contato canto a canto deve achatar somente o canto inferior direito do primeiro componente");
 assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-tl"),true,"Contato canto a canto deve achatar somente o canto superior esquerdo do segundo componente");
@@ -933,3 +933,4 @@ assert.ok(canvasInteractions.includes("await saveAfterGesture(touchedIds);sheet.
 assert.ok(canvasGroups.includes('node.classList.add("is-compact")'),"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
 assert.ok(css.includes(".nexus-component.is-compact .nexus-component-content {\n  padding: 2px !important;"),"Cards com menos de 100px em qualquer dimensão devem limitar o padding a 2px");
 assert.equal(compactOnly.classList.contains("is-compact"),true,"Cards com largura inferior a 100px devem receber o modo compacto");
+assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com altura inferior a 100px devem receber o modo compacto");
