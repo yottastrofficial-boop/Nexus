@@ -1,3 +1,11 @@
+## 1.0.0.36
+
+- Refinada a atualização reativa: o NEXUS identifica os caminhos alterados no Actor e compara com as propriedades e expressões utilizadas por cada componente.
+- Somente componentes afetados são reavaliados; suas interpolações de texto e regras de representação são atualizadas sem renderização integral da ficha, timer ou polling.
+- Adicionadas regressões para a invalidação seletiva baseada em dependências.
+
+**Validação:** sintaxe, testes automatizados, manifesto e build do pacote serão verificados pelo GitHub Actions. Testes funcionais e visuais dentro de uma instalação real do Foundry VTT 14 continuam necessários.
+
 ## 1.0.0.35
 
 - Adicionadas regras de representação visual no menu Comportamento: cada componente pode mapear uma propriedade para ícones, rótulos e valores calculados por condições ordenadas.

@@ -166,7 +166,7 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 O registro de leitura combina propriedades do Core, propriedades nativas, personalizadas e caminhos externos do Actor. Ele não altera os locais de persistência existentes. Propriedades numéricas personalizadas podem usar modo manual ou fórmula automática; o valor manual é mantido mesmo quando a fórmula está ativa.
 
-A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, grafo universal de dependências ou migração universal de IDs. Expressões de texto e regras de representação já são reavaliadas por eventos de atualização do Actor, sem polling; a invalidação ainda não é um grafo global que calcula apenas os nós dependentes.
+A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, grafo universal de dependências ou migração universal de IDs. Expressões de texto e regras de representação já são reavaliadas por eventos de atualização do Actor, sem polling. A ficha compara os caminhos alterados com as referências dos componentes e atualiza apenas os afetados; isso ainda não equivale a um grafo global de dependências com nós e ciclos explícitos.
 
 ## 6. Implementação por etapas
 

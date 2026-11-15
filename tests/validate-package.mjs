@@ -67,7 +67,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.35", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.36", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -815,7 +815,8 @@ assert.equal(representationDraft.representation.rules[0].condition, "level > mb"
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
 assert.match(interactions, /nexus-representation-rules/, "As regras de representação devem integrar o editor de Comportamento");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
-assert.match(sheetCode, /_refreshRichExpressions\?\.\(\)/, "Expressões em texto devem ser reavaliadas após alterações do Actor");
+assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, "Somente os componentes afetados devem reavaliar suas expressões");
+assert.match(sheetCode, /_componentDependsOnActorChanges/, "A invalidação deve comparar as dependências com os caminhos alterados");
 assert.match(actorSheetRendering, /nexusExpressionSource/, "O renderizador deve preservar a expressão original para reavaliação");
 assert.match(template, /nexus-property-representation/, "Componentes devem renderizar a representação selecionada");
 assert.match(css, /nexus-component\.has-representation/, "A representação deve substituir apenas a saída visual do componente");

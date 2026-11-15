@@ -81,13 +81,17 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       while(walker.nextNode()) if(/\{\{[^{}]+\}\}/.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
       for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,false);}
     });
-    sheet._refreshRichExpressions = () => {
+    sheet._refreshRichExpressions = componentIds => {
+      const shouldRefresh = node => !componentIds || componentIds.has(node.closest(".nexus-component")?.dataset.id);
       root.querySelectorAll(".nexus-asset-text").forEach(node => {
+        if (!shouldRefresh(node)) return;
         const card = node.closest(".nexus-component");
         const component = componentById.get(card?.dataset.id);
         renderExpressionText(node, !component?.dataPath);
       });
-      root.querySelectorAll("[data-nexus-expression-text]:not(.nexus-asset-text)").forEach(node => renderExpressionText(node, false));
+      root.querySelectorAll("[data-nexus-expression-text]:not(.nexus-asset-text)").forEach(node => {
+        if (shouldRefresh(node)) renderExpressionText(node, false);
+      });
     };
     sheet._renderAdaptiveContent(root, createMedia);
 }

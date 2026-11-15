@@ -11,7 +11,7 @@ Use duas chaves para delimitar uma expressão:
 - `{{for - 1}}`
 - `{{@identity.level + @combat.mb}}`
 
-O resultado é calculado com os valores atuais do Actor. Em componentes abertos, expressões vinculadas também são reavaliadas quando o Foundry emite uma atualização real do Actor; não há timer nem polling.
+O resultado é calculado com os valores atuais do Actor. Em componentes abertos, expressões vinculadas são reavaliadas quando o Foundry emite uma atualização real do Actor. O NEXUS compara os caminhos alterados com as referências de cada componente e atualiza somente os componentes afetados; não há timer nem polling.
 
 ## Atalhos do NEXUS
 

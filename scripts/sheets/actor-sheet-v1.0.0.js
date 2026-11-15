@@ -1183,7 +1183,59 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
 
-  _refreshBoundComponents() {
+  _collectActorUpdatePaths(changes) {
+    const paths = new Set();
+    const visit = (value, prefix = "") => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        if (prefix) paths.add(prefix.replace(/^system\./, ""));
+        return;
+      }
+      const entries = Object.entries(value);
+      if (!entries.length && prefix) paths.add(prefix.replace(/^system\./, ""));
+      for (const [key, child] of entries) {
+        const next = prefix ? prefix + "." + key : key;
+        visit(child, next);
+      }
+    };
+    visit(changes);
+    return paths;
+  }
+
+  _componentDependsOnActorChanges(component, changedPaths) {
+    const dependencies = new Set();
+    const addPath = raw => {
+      const path = String(raw ?? "").trim().replace(/^actor\./, "").replace(/^system\./, "").replace(/^@/, "");
+      if (!path) return;
+      dependencies.add(path);
+      const binding = resolveNexusBinding(this.actor, resolveFormulaIdentifier(path));
+      if (binding?.path) dependencies.add(binding.path);
+    };
+    const addExpression = expression => {
+      const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
+      for (const match of String(expression ?? "").matchAll(matcher)) addPath(match[0]);
+    };
+    addPath(component.dataPath);
+    addPath(component.customBinding);
+    addPath(component.actionPath);
+    addPath(component.currentPath);
+    addPath(component.maxPath);
+    addPath(component.representation?.sourcePath);
+    for (const expression of JSON.stringify(component).matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)) addExpression(expression[1]);
+    for (const rule of component.representation?.rules ?? []) {
+      addExpression(rule.condition);
+      addExpression(rule.output);
+    }
+    if (component.type === "token" || component.type === "asset-image") addPath("img");
+
+    const overlaps = (left, right) => left === right || left.startsWith(right + ".") || right.startsWith(left + ".");
+    for (const changed of changedPaths) {
+      if (changed === "flags.nexus" || changed.startsWith("flags.nexus.aliases") || changed.startsWith("flags.nexus.customData") || changed.startsWith("flags.nexus.nativeProperties")) return true;
+      for (const dependency of dependencies) if (overlaps(changed, dependency)) return true;
+    }
+    return false;
+  }
+
+  _refreshBoundComponents(changes = null) {
     const root = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
     if (!root) return;
     const writeText = (card, selector, value) => {
@@ -1197,6 +1249,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (element && element !== document.activeElement) element.value = String(value ?? "");
     };
     // Uma única leitura do DOM substitui uma busca por componente.
+    const changedPaths = changes && typeof changes === "object" ? this._collectActorUpdatePaths(changes) : null;
+    const filterByChanges = !!changedPaths?.size;
+    const refreshedComponentIds = new Set();
     const cardsById = new Map();
     root.querySelectorAll(".nexus-component[data-id]").forEach(card => {
       if (!cardsById.has(card.dataset.id)) cardsById.set(card.dataset.id, card);
@@ -1204,8 +1259,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const component of this._currentLayout?.components ?? []) {
       const card = cardsById.get(component.id);
       if (!card) continue;
+      if (filterByChanges && !this._componentDependsOnActorChanges(component, changedPaths)) continue;
       const context = this._componentContext(component);
       if (!context) continue;
+      refreshedComponentIds.add(component.id);
       const current = context.value ?? "—", maximum = context.max ?? "—";
       if (["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(context.kind)) {
         const fill = card.querySelector(".nexus-resource-bar-fill, .nexus-asset-meter-fill");
@@ -1294,7 +1351,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         }
       } else representationNode?.remove();
     }
-    this._refreshRichExpressions?.();
+    this._refreshRichExpressions?.(refreshedComponentIds);
   }
 
   async _updateSystemValue(input) {
