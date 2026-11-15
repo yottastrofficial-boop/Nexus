@@ -9,7 +9,8 @@ import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/c
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
-import { evaluateNexusFormula, evaluateNexusCondition } from "../scripts/core/formula-engine.js";
+import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "../scripts/core/formula-engine.js";
+import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected-corners.js";
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
@@ -865,3 +866,42 @@ const propertyEditorEnd = interactions.indexOf("\n}", propertyEditorStart);
 const propertyEditorSource = interactions.slice(propertyEditorStart, propertyEditorEnd);
 assert.ok(!propertyEditorSource.includes("placeholder"), "O editor de regras não deve exibir placeholders");
 assert.ok(sheetCode.includes('const presentation = component.propertyPresentation ?? component.representation'), "A atualização reativa deve observar as regras novas e legadas");
+
+
+// v1.0.0.40 — expressão tipada, comparadores e contatos geométricos.
+const values40={level:5,mb:3,label:"NEXUS",portrait:"systems/nexus/assets/portrait.webp"};
+const resolver40=(key,options={})=>options.display?(key==="label"?"Nome exibido":values40[key]):values40[key];
+assert.equal(evaluateNexusExpression("2 + 2 + 2",resolver40),6);
+assert.equal(evaluateNexusExpression('"2" + "2" + "2"',resolver40),"222");
+assert.equal(evaluateNexusExpression('"NEXUS" + " RPG"',resolver40),"NEXUS RPG");
+assert.equal(evaluateNexusExpression("@label",resolver40),"Nome exibido");
+assert.equal(evaluateNexusExpression("label",resolver40),"NEXUS");
+assert.equal(evaluateNexusCondition("@level == 5",resolver40),true);
+assert.equal(evaluateNexusCondition("{{level}} == 5",resolver40),true);
+assert.equal(evaluateNexusCondition("5 = 5",resolver40),true);
+assert.equal(evaluateNexusCondition("5 != 3",resolver40),true);
+assert.equal(evaluateNexusCondition("5 > 3",resolver40),true);
+assert.equal(evaluateNexusCondition("3 < 5",resolver40),true);
+assert.equal(evaluateNexusCondition("5 >= 5",resolver40),true);
+assert.equal(evaluateNexusCondition("5 <= 5",resolver40),true);
+assert.equal(evaluateNexusCondition('"NEXUS" == "NEXUS"',resolver40),true);
+assert.equal(evaluateNexusCondition('"NEXUS" != "RPG"',resolver40),true);
+assert.equal(evaluateNexusFormula('"2" + "2"',resolver40),null);
+const typed40=evaluateComponentRepresentation({enabled:true,sourcePath:"level",rules:[{condition:"{{level}} == 5",content:'Exibido: @label · bruto: {{label}} · soma: {{2 + 2 + 2}} · texto: {{"2" + "2" + "2"}} · {{image:@portrait}}'}]},resolver40);
+assert.equal(typed40?.content,'Exibido: Nome exibido · bruto: NEXUS · soma: 6 · texto: 222 · {{image:systems/nexus/assets/portrait.webp}}');
+
+const classList40=()=>{const set=new Set();return{add:(...v)=>v.forEach(x=>set.add(x)),remove:(...v)=>v.forEach(x=>set.delete(x)),contains:x=>set.has(x)};};
+const surface40=(left,top,width,height)=>({hidden:false,classList:classList40(),getBoundingClientRect:()=>({left,top,right:left+width,bottom:top+height,width,height})});
+const a40=surface40(0,0,100,100),b40=surface40(100,0,100,100),g40=surface40(200,0,100,100);
+const canvas40={querySelectorAll(selector){if(selector===".nexus-component:not(.is-group-member)")return[a40,b40];if(selector===".nexus-group-surface")return[g40];return[];}};
+const geometry40=updateCanvasConnectedCorners(canvas40);
+assert.equal(geometry40.surfaces,3);
+assert.equal(a40.classList.contains("nexus-component-touching-right"),true);
+assert.equal(b40.classList.contains("nexus-component-touching-left"),true);
+assert.equal(b40.classList.contains("nexus-component-touching-right"),true);
+assert.equal(g40.classList.contains("nexus-group-touching-left"),true);
+assert.match(canvasGroups,/updateCanvasConnectedCorners/);
+assert.match(interactions,/Conteúdo exibido/);
+assert.match(interactions,/Condição/);
+
+assert.match(css,/nexus-sheet:is\(\[data-mode="play"\],\[data-mode="config"\],\[data-mode="appearance"\]\)/,"Cantos devem ser recalculados em todos os modos");
