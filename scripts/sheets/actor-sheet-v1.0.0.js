@@ -1064,9 +1064,26 @@ export class NexusActorSheet extends NexusActorSheetBase {
     };
   }
   _representationContext(component) {
+    const resolvePresentationValue = (identifier, options = {}) => {
+      const normalized = resolveFormulaIdentifier(String(identifier ?? "").replace(/^@/, ""));
+      const binding = resolveNexusBinding(this.actor, normalized);
+      if (!options.raw) return binding.value;
+      if (binding.virtual) return binding.value;
+      const path = binding.path || normalized;
+      if (binding.alias) {
+        const alias = resolveAliasPath(this.actor, path);
+        if (alias.path) return getPath(this.actor.system ?? {}, alias.path);
+        const dataPath = [alias.alias?.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join(".");
+        const rawAliasValue = getPath(getCustomAliasData(this.actor), dataPath);
+        return rawAliasValue !== undefined ? rawAliasValue : binding.value;
+      }
+      if (path === "name") return this.actor.name;
+      if (path === "img") return this.actor.img;
+      const rawValue = getPath(this.actor.system ?? {}, path);
+      return rawValue !== undefined ? rawValue : binding.value;
+    };
     const hasNewPresentation = !!component?.propertyPresentation;
-    const result = evaluateComponentRepresentation(component?.propertyPresentation ?? component?.representation, identifier =>
-      resolveNexusBinding(this.actor, resolveFormulaIdentifier(identifier)).value,
+    const result = evaluateComponentRepresentation(component?.propertyPresentation ?? component?.representation, resolvePresentationValue,
       hasNewPresentation ? (component?.dataPath || COMPONENTS[component?.type]?.path || "") : ""
     );
     return {
