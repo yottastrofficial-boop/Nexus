@@ -59,32 +59,61 @@ export function normalizeComponentRepresentation(raw) {
   return { enabled: raw.enabled === true, sourcePath: safePath(raw.sourcePath), rules };
 }
 
+function representationValueToString(value) {
+  if (value === undefined || value === null) return "";
+  if (["string", "number", "boolean"].includes(typeof value)) return String(value);
+  if (Array.isArray(value)) return value.map(representationValueToString).filter(Boolean).join(", ");
+  if (typeof value === "object") {
+    for (const key of ["url", "href", "src", "value", "label", "name"]) {
+      const candidate = value[key];
+      if (candidate !== undefined && candidate !== null && ["string", "number", "boolean"].includes(typeof candidate)) return String(candidate);
+    }
+  }
+  return "";
+}
+
 function interpolateRepresentationContent(template, resolveProperty) {
   const source = String(template ?? "");
   const tokenPattern = /\{\{\s*([^{}]+?)\s*\}\}|@([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)/g;
   return source.replace(tokenPattern, (token, wrappedExpression, barePath) => {
     const expression = String(wrappedExpression ?? barePath ?? "").trim();
-    if (/^(?:icon|image):/i.test(expression)) return token;
+    if (/^icon:/i.test(expression)) return token;
+    const imageToken = expression.match(/^image:\s*(.+)$/i);
+    if (imageToken) {
+      const reference = imageToken[1].trim(), path = safePath(reference);
+      if (path && /^[\w@.-]+$/.test(reference)) {
+        const display = reference.startsWith("@");
+        const resolved = resolveProperty(path, { display, raw: !display });
+        const imageSource = representationValueToString(resolved);
+        if (imageSource) return "{{image:" + imageSource + "}}";
+      }
+      return token;
+    }
     const directPath = safePath(expression);
-    const direct = directPath ? resolveProperty(directPath) : undefined;
-    if (direct !== undefined && direct !== null) return String(direct);
+    if (directPath && /^@?[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/.test(expression)) {
+      const display = expression.startsWith("@");
+      const direct = resolveProperty(directPath, { display, raw: !display });
+      return direct !== undefined && direct !== null ? representationValueToString(direct) : "";
+    }
     const evaluated = wrappedExpression ? evaluateNexusExpression(expression, resolveProperty) : null;
-    return evaluated !== null && evaluated !== undefined ? String(evaluated) : "";
+    return evaluated !== null && evaluated !== undefined ? representationValueToString(evaluated) : "";
   });
 }
-
 function representationConditionPasses(condition, resolveProperty) {
   const expression = String(condition ?? "").trim();
   if (!expression) return false;
   const evaluated = evaluateNexusCondition(expression, resolveProperty);
   if (typeof evaluated === "boolean") return evaluated;
-  const unwrapped = expression.replace(/\{\{\s*([^{}]+?)\s*\}\}/g, "$1").trim();
-  const directPath = safePath(unwrapped);
-  if (!directPath) return false;
-  const value = resolveProperty(directPath);
+  const wrapped = expression.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
+  const reference = String(wrapped?.[1] ?? expression).trim();
+  const directPath = safePath(reference);
+  if (!directPath || !/^@?[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/.test(reference)) return false;
+  const display = reference.startsWith("@");
+  const value = resolveProperty(directPath, { display, raw: !display });
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return Number.isFinite(value) && value !== 0;
-  return value !== undefined && value !== null && value !== "";
+  if (typeof value === "string") return value.length > 0;
+  return value !== undefined && value !== null;
 }
 
 export function evaluateComponentRepresentation(raw, resolveProperty, sourcePathOverride = "") {
@@ -390,10 +419,14 @@ export function renderPropertyPresentationEditor(container, component, propertyP
       condition.value = rule.condition; condition.setAttribute("aria-label", "Condição da regra");
       condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition";
       condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? "");
+      const conditionField = document.createElement("label"); conditionField.className = "nexus-property-presentation-field";
+      conditionField.append(document.createTextNode("Condição"), condition);
       const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : "");
-      content.setAttribute("aria-label", "Conteúdo da regra"); content.dataset.interactionScope = "propertyPresentationRule";
+      content.setAttribute("aria-label", "Conteúdo exibido"); content.dataset.interactionScope = "propertyPresentationRule";
       content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? "");
-      row.append(head, condition, content); rules.append(row);
+      const contentField = document.createElement("label"); contentField.className = "nexus-property-presentation-field";
+      contentField.append(document.createTextNode("Conteúdo exibido"), content);
+      row.append(head, conditionField, contentField); rules.append(row);
     });
     container.append(rules);
   }
