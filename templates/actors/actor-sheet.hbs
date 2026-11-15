@@ -274,6 +274,13 @@ remove legacy typography selects                  <label class="nexus-inspector-
                         {{/if}}
                       </div>
                     {{/if}}
+                    {{#if nexus.selectedAlias.isNumeric}}
+                      <section class="nexus-alias-formula">
+                        <label>Modo de cálculo<select data-alias-field="calculationMode"><option value="manual" {{#unless (eq nexus.selectedAlias.calculationMode "formula")}}selected{{/unless}}>Manual</option><option value="formula" {{#if (eq nexus.selectedAlias.calculationMode "formula")}}selected{{/if}}>Automático por fórmula</option></select></label>
+                        <label>Fórmula<input type="text" maxlength="240" value="{{nexus.selectedAlias.formula}}" data-alias-field="formula" spellcheck="false"></label>
+                        <small>Exemplos: nivel + mb; (des + mb) * 2; for - 1. Referências inválidas e ciclos não produzem um valor calculado.</small>
+                      </section>
+                    {{/if}}
                     <label class="nexus-alias-link">Vincular ao Actor (opcional)<input type="text" value="{{nexus.selectedAlias.targetPath}}" data-alias-field="targetPath" spellcheck="false"></label>
                     <div class="nexus-alias-card-actions">
                       <small>{{nexus.selectedAlias.key}}</small>

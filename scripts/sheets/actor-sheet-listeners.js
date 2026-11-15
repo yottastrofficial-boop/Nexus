@@ -432,7 +432,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (alias.source === "custom") alias.targetPath = "";
       }
       else if (field === "valueType") {
-        if (["number", "text", "url", "image", "boolean"].includes(input.value)) alias.type = input.value;
+        if (["number", "text", "url", "image", "boolean"].includes(input.value)) {
+          alias.type = input.value;
+          if (alias.type !== "number") { alias.calculationMode = "manual"; alias.formula = ""; }
+        }
+      }
+      else if (field === "calculationMode") {
+        if (input.value === "formula" && !["attribute", "resource", "number"].includes(alias.type)) { ui.notifications?.warn?.("Fórmulas estão disponíveis para propriedades numéricas."); input.value = "manual"; return; }
+        if (input.value === "formula" && !String(alias.formula ?? "").trim()) { ui.notifications?.warn?.("Informe uma fórmula antes de ativar o cálculo automático."); input.value = "manual"; return; }
+        if (input.value === "formula" && evaluateAliasExpression(sheet.actor, alias.formula) === null) { ui.notifications?.warn?.("A fórmula contém uma referência inválida ou não numérica."); input.value = "manual"; return; }
+        alias.calculationMode = input.value === "formula" ? "formula" : "manual";
+      }
+      else if (field === "formula") {
+        const formula = String(input.value ?? "").trim().slice(0, 240);
+        if (formula && evaluateAliasExpression(sheet.actor, formula) === null) { ui.notifications?.warn?.("Fórmula inválida. Confira as propriedades e os operadores."); input.value = alias.formula ?? ""; return; }
+        alias.formula = formula; alias.calculationMode = formula ? "formula" : "manual";
       }
       else if (field === "keySuffix") {
         const suffix = slugifyAlias(input.value);

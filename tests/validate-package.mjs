@@ -10,6 +10,7 @@ import { getTriggeredActions, executeTriggeredActions, getComponentInteractions,
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula } from "../scripts/core/formula-engine.js";
+import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
@@ -94,6 +95,11 @@ assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
 assert.match(sheet, /NEXUS_RULEBOOK_PROPERTY_DEFINITIONS/);
 assert.equal(NEXUS_PROPERTY_SCHEMA_VERSION, 2);
+const registryFixture = createPropertyRegistry({ core: [{ id: "nexus.core.level", path: "identity.level", label: "Nível", type: "number" }], native: [{ id: "nexus.core.level", key: "identity.level", targetPath: "identity.level", label: "Nível do personagem", type: "number" }], custom: [{ id: "custom-1", key: "custom.stealth", label: "Furtividade extra", type: "number", formula: "des + mb", calculationMode: "formula" }], external: ["details.reputation"] });
+assert.equal(registryFixture.getByPath("identity.level")?.label, "Nível do personagem");
+assert.equal(registryFixture.getById("custom-1")?.calculationMode, "formula");
+assert.equal(registryFixture.resolve("details.reputation")?.origin, "external");
+assert.equal(registryFixture.resolve("__proto__.polluted"), null);
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.name"));
 // Canonical property values and derived data.
 const rulebookActor = {
@@ -753,6 +759,10 @@ assert.equal(evaluateNexusFormula("(nivel + mb) * 2", key => ({ nivel: 3, mb: 2 
 assert.equal(evaluateNexusFormula("des + mb", key => ({ des: 4, mb: 2 })[key]), 6, "Fórmulas devem resolver propriedades numéricas");
 assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null, "Divisão por zero deve ser rejeitada");
 assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
+assert.equal(evaluateNexusFormula("nivel - mb", key => ({ nivel: 5, mb: 2 })[key]), 3);
+assert.match(sheet, /calculationMode === "formula"/);
+assert.match(template, /data-alias-field="formula"/);
+assert.match(propertyCatalog, /createPropertyRegistry/);
 assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
 assert.match(sheetCode, /evaluateNexusFormula\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 

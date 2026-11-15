@@ -1,5 +1,6 @@
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES } from "./skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS } from "./property-schema.js";
+import { createPropertyRegistry } from "./property-registry.js";
 
 const ROOT_LABELS = Object.freeze({
   attributes: "Atributos",
@@ -100,11 +101,8 @@ const isLegacyNucleusPath = path => LEGACY_NUCLEUS_PATHS.some(legacy => path ===
 const isDuplicatePath = path => path === "encumbrance.current" || DUPLICATE_PATHS.some(duplicate => path === duplicate || path.startsWith(duplicate + "."));
 
 export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], aliases = [], rollAliases = [] } = {}) {
-  const labels = new Map(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => [definition.path, definition.label]));
-  for (const alias of [...nativeProperties, ...aliases]) {
-    const key = String(alias?.key ?? "").replace(/^system\./, "");
-    if (key && alias?.label) labels.set(key, String(alias.label));
-  }
+  const registry = createPropertyRegistry({ core: NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, native: nativeProperties, custom: aliases, external: paths });
+  const labels = new Map(registry.list.map(definition => [definition.path, definition.label]));
 
   const entriesByPath = new Map();
   const addEntry = entry => {
@@ -161,7 +159,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
     }
   }
 
-  const allPaths = new Set([...paths, ...NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(definition => definition.path)]);
+  const allPaths = new Set(registry.list.map(definition => definition.path));
   for (const rawPath of allPaths) {
     const path = canonicalizeSkillPath(rawPath);
     if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) continue;

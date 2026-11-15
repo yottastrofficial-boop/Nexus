@@ -142,6 +142,10 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   value = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
   if (alias.alias && alias.suffix === "name" && (value === undefined || value === null || value === "")) value = alias.alias.label;
   if (alias.alias && ["exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.exib ?? alias.alias.label;
+  if (alias.alias && ["", "value"].includes(alias.suffix) && alias.alias.calculationMode === "formula" && alias.alias.formula && depth < 8) {
+    const calculated = evaluateAliasExpression(actor, alias.alias.formula, depth + 1);
+    if (calculated !== null) value = calculated;
+  }
   if (alias.alias?.type === "attribute" && alias.suffix === "checkbonus" && typeof value === "string" && depth < 8) {
     const calculated = evaluateAliasExpression(actor, value, depth + 1);
     if (calculated !== null) value = calculated;
@@ -298,7 +302,8 @@ const normalizeAliasDefinition = alias => {
   if (!key) return null;
   const validTypes = ["attribute", "resource", "number", "text", "url", "image", "boolean"];
   const type = validTypes.includes(alias.type) ? alias.type : (category === "resources" ? "resource" : category === "attributes" ? "attribute" : category === "identity" ? "text" : "number");
-  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys: Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [], label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom" };
+  const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type) ? "formula" : "manual";
+  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys: Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [], label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom", calculationMode, formula: String(alias.formula ?? "").slice(0,240) };
 };
 const safeAliasKey = value => {
   const key = String(value ?? "").trim().replace(/^actor\./, "").replace(/^system\./, "");
@@ -709,7 +714,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         ...alias,
         shortKey: alias.key.split(".").at(-1),
         value: current,
-        scalarValue: sourceValue && typeof sourceValue === "object" ? "" : sourceValue ?? "",
+        scalarValue: alias.calculationMode === "formula" ? (resolveNexusBinding(this.actor, alias.key).value ?? "") : (sourceValue && typeof sourceValue === "object" ? "" : sourceValue ?? ""),
+        isNumeric: ["attribute", "resource", "number"].includes(alias.type),
         percentage: Number.isFinite(max) && max > 0 && Number.isFinite(amount) ? Math.round(amount / max * 100) : 0
       };
     });
