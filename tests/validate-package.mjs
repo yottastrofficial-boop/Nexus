@@ -899,7 +899,7 @@ assert.equal(evaluateNexusExpression("{{1+1}}",resolver40),2,"Soma de números e
 const classList40=()=>{const set=new Set();return{add:(...v)=>v.forEach(x=>set.add(x)),remove:(...v)=>v.forEach(x=>set.delete(x)),contains:x=>set.has(x)};};
 const surface40=(left,top,width,height)=>({hidden:false,classList:classList40(),getBoundingClientRect:()=>({left,top,right:left+width,bottom:top+height,width,height})});
 const a40=surface40(0,0,100,100),b40=surface40(100,0,100,100),g40=surface40(200,0,100,100);
-const canvas40={querySelectorAll(selector){if(selector===".nexus-component:not(.is-group-member)")return[a40,b40];if(selector===".nexus-group-surface")return[g40];return[];}};
+const canvas40={querySelectorAll(selector){if(selector===".nexus-component")return[a40,b40];if(selector===".nexus-component:not(.is-group-member)")return[a40,b40];if(selector===".nexus-group-surface")return[g40];return[];}};
 const geometry40=updateCanvasConnectedCorners(canvas40);
 assert.equal(geometry40.surfaces,3);
 assert.equal(a40.classList.contains("nexus-component-touching-right"),true);
@@ -919,15 +919,17 @@ assert.match(sheetListeners,/input\\$\\{inspectorNamespace\\}/,"As regras devem 
 assert.match(sheetListeners,/render:\\s*false,\\s*captureHistory:\\s*false/,"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
 
 const cornerOnlyA=surface40(0,0,100,100),cornerOnlyB=surface40(100,100,100,100);
-const cornerOnlyCanvas={querySelectorAll(selector){if(selector===".nexus-component:not(.is-group-member)")return[cornerOnlyA,cornerOnlyB];if(selector===".nexus-group-surface")return[];return[];}};
+const compactOnly=surface40(0,0,90,120);
+const cornerOnlyCanvas={querySelectorAll(selector){if(selector===".nexus-component")return[cornerOnlyA,cornerOnlyB,compactOnly];if(selector===".nexus-component:not(.is-group-member)")return[cornerOnlyA,cornerOnlyB,compactOnly];if(selector===".nexus-group-surface")return[];return[];}};
 updateCanvasConnectedCorners(cornerOnlyCanvas);
 assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-br"),true,"Contato canto a canto deve achatar somente o canto inferior direito do primeiro componente");
 assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-tl"),true,"Contato canto a canto deve achatar somente o canto superior esquerdo do segundo componente");
 for(const corner of ["tl","tr","bl"]) assert.equal(cornerOnlyA.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do primeiro componente devem permanecer arredondados");
 for(const corner of ["tr","br","bl"]) assert.equal(cornerOnlyB.classList.contains("nexus-component-corner-square-"+corner),false,"Os demais cantos do segundo componente devem permanecer arredondados");
 
-assert.match(sheet,/new foundry\\.data\\.operators\\.ForcedDeletion\\(\\)/,"A migração das perícias deve usar o operador de remoção do Foundry V14");
-assert.doesNotMatch(sheet,/\\.\\-=proficient|\\.\\-=proficiency|\\.\\-=opposed|skills\\.\\-=\"/,"A migração das perícias não deve usar mais a sintaxe legada -= do Foundry");
-assert.match(canvasInteractions,/await saveAfterGesture\\(touchedIds\\);sheet\\._refreshBoundComponents\\?\\.\\(\\)/,"O fim do redimensionamento deve reavaliar as representações por regra");
-assert.match(canvasGroups,/is-compact/,"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
-assert.match(css,/\\.nexus-component\\.is-compact \\.nexus-component-content \\{\\s*padding:\\s*2px\\s*!important/,"Cards com menos de 100px em qualquer dimensão devem limitar o padding a 2px");
+assert.ok(sheet.includes("new foundry.data.operators.ForcedDeletion()"),"A migração das perícias deve usar o operador de remoção do Foundry V14");
+assert.ok(![".-=proficient",".-=proficiency",".-=opposed","skills.-="].some(token=>sheet.includes(token)),"A migração das perícias não deve usar mais a sintaxe legada -= do Foundry");
+assert.ok(canvasInteractions.includes("await saveAfterGesture(touchedIds);sheet._refreshBoundComponents?.();"),"O fim do redimensionamento deve reavaliar as representações por regra");
+assert.ok(canvasGroups.includes('node.classList.add("is-compact")'),"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
+assert.ok(css.includes(".nexus-component.is-compact .nexus-component-content {\n  padding: 2px !important;"),"Cards com menos de 100px em qualquer dimensão devem limitar o padding a 2px");
+assert.equal(compactOnly.classList.contains("is-compact"),true,"Cards com largura inferior a 100px devem receber o modo compacto");
