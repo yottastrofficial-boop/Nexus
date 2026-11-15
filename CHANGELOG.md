@@ -1,3 +1,14 @@
+## 1.0.0.41
+
+### Bordas e cantos
+- Corrigida a interferência de regras antigas de contato por lado: somente os cantos identificados individualmente como tocados perdem o arredondamento.
+- Mantida a detecção geométrica compartilhada para componentes e superfícies de grupo.
+
+### Edição dinâmica das regras
+- Regras de apresentação passam a ser salvas durante a digitação, sem depender de Enter ou da perda de foco.
+- A atualização durante a digitação não reconstrói os campos, preservando cursor e continuidade da edição.
+- O histórico de alterações permanece associado à confirmação do campo, evitando registrar cada tecla como uma ação separada.
+
 ## 1.0.0.40
 
 ### Bordas e geometria
