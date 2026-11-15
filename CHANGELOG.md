@@ -1,3 +1,12 @@
+## 1.0.0.37
+
+- Reorganizado o editor: regras de apresentação agora ficam no painel Propriedades; Comportamento fica reservado aos fluxos.
+- Substituídos os campos separados de ícone, rótulo e valor por um único campo de conteúdo com interpolação, ícones e imagens.
+- Adicionada compatibilidade de leitura com regras antigas, suporte a `=` como igualdade e avisos de abreviações ambíguas.
+- Ajustada a renderização para evitar substituir o conteúdo visual quando a saída não mudou; reforçada a superfície única de grupos.
+
+**Validação:** sintaxe, testes automatizados, manifesto e build serão verificados pelo GitHub Actions. A validação visual em Foundry VTT 14 ainda é necessária.
+
 ## 1.0.0.36
 
 - Refinada a atualização reativa: o NEXUS identifica os caminhos alterados no Actor e compara com as propriedades e expressões utilizadas por cada componente.

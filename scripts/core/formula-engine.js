@@ -11,7 +11,7 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
   if (!source || source.length > maxLength || typeof resolveProperty !== "function") return null;
 
   const tokens = [];
-  const pattern = /\s*(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*|(?:\d+(?:\.\d*)?|\.\d+)|>=|<=|==|!=|[()+*/%<>-])\s*/gy;
+  const pattern = /\s*(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*|(?:\d+(?:\.\d*)?|\.\d+)|>=|<=|==|!=|=|[()+*/%<>-])\s*/gy;
   let cursor = 0;
   while (cursor < source.length) {
     pattern.lastIndex = cursor;
@@ -77,12 +77,13 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
   const comparison = () => {
     const left = sum();
     const operator = tokens[index];
-    if (!["==", "!=", ">", ">=", "<", "<="].includes(operator)) return left;
+    if (!["==", "=", "!=", ">", ">=", "<", "<="].includes(operator)) return left;
     index += 1;
     const right = sum();
     if (typeof left !== "number" || typeof right !== "number") throw new Error("Comparisons require numbers");
     switch (operator) {
-      case "==": return left === right;
+      case "==":
+      case "=": return left === right;
       case "!=": return left !== right;
       case ">": return left > right;
       case ">=": return left >= right;

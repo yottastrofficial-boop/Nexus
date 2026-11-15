@@ -3,7 +3,7 @@
  * Kept separate from the sheet class so the lifecycle facade stays focused.
  */
 export function activateActorSheetListeners(sheet, html, dependencies) {
-  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
+  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
 
     const currentRoot = html?.[0];
     // Remove detached property-option portals left by a previous ApplicationV2 render.
@@ -1153,13 +1153,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
     const persistInteractionEditor = async (control, command = null) => {
-      const componentId = control.dataset.componentId || control.closest("[data-interaction-editor]")?.dataset.componentId;
+      const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
       if (!componentId) return;
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
       sheet._captureHistory();
-      const data = { interactionId, componentId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, ruleIndex: control.dataset.ruleIndex, direction: control.dataset.direction };
+      const data = { interactionId, componentId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, ruleIndex: control.dataset.ruleIndex, direction: control.dataset.direction, sourcePath: control.dataset.sourcePath };
       if (command === "save-flow") {
         const flow = getComponentInteractions(component).find(item => item.id === interactionId);
         if (!flow) return;
@@ -1172,10 +1172,23 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
       if (command !== "save-flow") await sheet._writeLayouts(layouts, active);
-      if (control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
+      if (control.dataset.interactionScope?.startsWith("propertyPresentation") || command?.includes("property-rule") || control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
         const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
-        if (liveComponent) liveComponent.representation = structuredClone(component.representation ?? { enabled: false, sourcePath: "", rules: [] });
+        if (liveComponent) { if (component.propertyPresentation) liveComponent.propertyPresentation = structuredClone(component.propertyPresentation); else if (component.representation) liveComponent.propertyPresentation = structuredClone(component.representation); }
         sheet._refreshBoundComponents?.();
+      }
+      const propertyEditor = control.closest("[data-property-presentation-editor]");
+      if (propertyEditor) {
+        const scrollTop = propertyEditor.scrollTop;
+        renderPropertyPresentationEditor(propertyEditor, component, component.dataPath ?? "");
+        propertyEditor.dataset.componentId = componentId;
+        propertyEditor.scrollTop = scrollTop;
+        const next = [...propertyEditor.querySelectorAll("[data-interaction-field]")].find(item =>
+          item.dataset.interactionScope === control.dataset.interactionScope &&
+          item.dataset.interactionField === control.dataset.interactionField &&
+          item.dataset.ruleIndex === control.dataset.ruleIndex
+        );
+        next?.focus({ preventScroll: true });
       }
       const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) {
@@ -1209,7 +1222,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       });
       editor.querySelectorAll("[data-interaction-flow-panel]").forEach(panel=>{panel.hidden=panel.dataset.interactionFlowPanel!==flowId;});
     });
-    $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action]", async event => {
+    $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action], .nexus-component-inspector [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
       if(button.dataset.interactionAction==="add-library-flow"){
@@ -1218,7 +1231,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field]", async event => {
+    $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field]", async event => {
       event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";

@@ -67,7 +67,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.36", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.37", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -813,10 +813,22 @@ assert.equal(representationDraft.representation.enabled, true);
 assert.equal(representationDraft.representation.sourcePath, "identity.level");
 assert.equal(representationDraft.representation.rules[0].condition, "level > mb");
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
-assert.match(interactions, /nexus-representation-rules/, "As regras de representação devem integrar o editor de Comportamento");
+assert.match(interactions, /renderPropertyPresentationEditor/, "As regras de apresentação devem integrar o painel Propriedades");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
 assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, "Somente os componentes afetados devem reavaliar suas expressões");
 assert.match(sheetCode, /_componentDependsOnActorChanges/, "A invalidação deve comparar as dependências com os caminhos alterados");
 assert.match(actorSheetRendering, /nexusExpressionSource/, "O renderizador deve preservar a expressão original para reavaliação");
 assert.match(template, /nexus-property-representation/, "Componentes devem renderizar a representação selecionada");
 assert.match(css, /nexus-component\.has-representation/, "A representação deve substituir apenas a saída visual do componente");
+
+ 
+// Property presentation v1.0.0.37.
+assert.equal(evaluateNexusCondition("@level=5", resolveExpressionValue), true, "Single = must act as equality");
+assert.equal(evaluateNexusCondition("@level==5", resolveExpressionValue), true, "Double == remains supported");
+assert.match(interactions, /renderPropertyPresentationEditor/, "Presentation rules must live in the Properties editor");
+assert.match(interactions, /propertyPresentationRule/, "Presentation rules must be persisted independently from interaction flows");
+assert.match(interactions, /content: rule\?\.content === undefined/, "Unified content must preserve legacy output compatibility");
+assert.match(sheetCode, /representationContent/, "Rendering must use a single mixed content field");
+assert.match(template, /data-property-presentation-editor/, "The editor must be mounted in the Properties panel");
+assert.match(template, /data-property-alias-conflicts/, "The Properties panel must expose ambiguity warnings");
+assert.match(css, /nexus-component\.is-group-member,\.nexus-component\.is-group-member:hover/, "Grouped cards must share one rounded surface");

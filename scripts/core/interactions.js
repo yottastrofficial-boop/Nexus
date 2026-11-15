@@ -6,7 +6,7 @@ export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightCli
 export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
 export const INTERACTION_OPERATORS = Object.freeze(["equals","notEquals","greaterThan","greaterOrEqual","lessThan","lessOrEqual","contains","isEmpty","isNotEmpty"]);
 import { NEXUS_SKILLS } from "./skills.js";
-import { evaluateNexusFormula, evaluateNexusCondition } from "./formula-engine.js";
+import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "./formula-engine.js";
 
 const LEGACY = {
   roll: { event:"click", type:"roll", config:c=>({formula:c.rollFormula??""}) },
@@ -14,7 +14,7 @@ const LEGACY = {
 };
 const newId = prefix => `${prefix}-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`}`;
 const safePath = raw => {
-  const path=String(raw??"").trim().replace(/^\{\{\s*/,"").replace(/\s*\}\}$/,"").replace(/^actor\./,"").replace(/^system\./,"");
+  const path=String(raw??"").trim().replace(/^\{\{\s*/,"").replace(/\s*\}\}$/,"").replace(/^@/,"").replace(/^actor\./,"").replace(/^system\./,"");
   return path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) && !path.split(".").some(k=>["__proto__","prototype","constructor"].includes(k)) ? path : "";
 };
 const normalizeTrigger = (t,i) => {
@@ -50,6 +50,7 @@ export function normalizeComponentRepresentation(raw) {
   const rules = (Array.isArray(raw.rules) ? raw.rules : []).slice(0, 32).map((rule, index) => ({
     id: String(rule?.id ?? ("representation-rule-" + (index + 1))),
     condition: String(rule?.condition ?? "").trim().slice(0, 500),
+    content: rule?.content === undefined ? "" : String(rule.content).trim().slice(0, 1000),
     icon: String(rule?.icon ?? "").slice(0, 120),
     label: String(rule?.label ?? "").slice(0, 100),
     output: String(rule?.output ?? "").trim().slice(0, 500)
@@ -57,15 +58,30 @@ export function normalizeComponentRepresentation(raw) {
   return { enabled: raw.enabled === true, sourcePath: safePath(raw.sourcePath), rules };
 }
 
-export function evaluateComponentRepresentation(raw, resolveProperty) {
+function interpolateRepresentationContent(template, resolveProperty) {
+  return String(template ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (token, rawExpression) => {
+    const expression = String(rawExpression).trim();
+    if (/^(?:icon|image):/i.test(expression)) return token;
+    const evaluated = evaluateNexusExpression(expression, resolveProperty);
+    if (evaluated !== null && evaluated !== undefined) return String(evaluated);
+    const direct = resolveProperty(expression.replace(/^@/, ""));
+    return direct === undefined || direct === null ? "" : String(direct);
+  });
+}
+
+export function evaluateComponentRepresentation(raw, resolveProperty, sourcePathOverride = "") {
   const config = normalizeComponentRepresentation(raw);
-  if (!config.enabled || !config.sourcePath || typeof resolveProperty !== "function") return null;
-  const sourceValue = resolveProperty(config.sourcePath);
+  const sourcePath = safePath(sourcePathOverride || config.sourcePath);
+  if (!config.enabled || !sourcePath || typeof resolveProperty !== "function") return null;
+  const sourceValue = resolveProperty(sourcePath);
   for (const [index, rule] of config.rules.entries()) {
-    if (!rule.condition) continue;
-    if (evaluateNexusCondition(rule.condition, resolveProperty) !== true) continue;
-    const calculated = rule.output ? evaluateNexusFormula(rule.output, resolveProperty) : null;
-    return { active: true, ruleId: rule.id, ruleIndex: index, sourcePath: config.sourcePath, sourceValue, icon: rule.icon, label: rule.label, value: calculated === null ? sourceValue : calculated };
+    if (!rule.condition || evaluateNexusCondition(rule.condition, resolveProperty) !== true) continue;
+    let content = rule.content;
+    if (!content) {
+      const calculated = rule.output ? evaluateNexusFormula(rule.output, resolveProperty) : null;
+      content = [rule.icon, rule.label, calculated ?? sourceValue].filter(value => value !== undefined && value !== null && value !== "").join(" ");
+    }
+    return { active: true, ruleId: rule.id, ruleIndex: index, sourcePath, sourceValue, content: interpolateRepresentationContent(content, resolveProperty), icon: rule.icon, label: rule.label, value: rule.output ? (evaluateNexusFormula(rule.output, resolveProperty) ?? sourceValue) : sourceValue };
   }
   return null;
 }
@@ -156,7 +172,20 @@ export function ensureEditableInteractions(component) {
   component.interactions=getComponentInteractions(component).map(flow=>structuredClone(flow));
   return component.interactions;
 }
-export function applyInteractionEditorChange(component,data,value) {
+export function applyInteractionEditorChange(component,data,value) {  if (data.scope === "propertyPresentation" || data.scope === "propertyPresentationRule") {
+    const current = normalizeComponentRepresentation(component.propertyPresentation ?? component.representation);
+    if (data.scope === "propertyPresentation") {
+      if (data.field === "enabled") current.enabled = !!value;
+      else if (data.field === "sourcePath") current.sourcePath = safePath(value);
+    } else {
+      const rule = current.rules[Number(data.ruleIndex)];
+      if (!rule) return false;
+      if (data.field === "condition") rule.condition = String(value ?? "").trim().slice(0, 500);
+      else if (data.field === "content") rule.content = String(value ?? "").slice(0, 1000);
+    }
+    component.propertyPresentation = current;
+    return true;
+  }
   if (data.scope === "representation" || data.scope === "representationRule") {
     const representation = normalizeComponentRepresentation(component.representation);
     if (data.scope === "representation") {
@@ -195,7 +224,25 @@ export function applyInteractionEditorChange(component,data,value) {
   }
   return true;
 }
-export function applyInteractionEditorCommand(component,command,data={}) {
+export function applyInteractionEditorCommand(component,command,data={}) {  if (["add-property-rule", "remove-property-rule", "move-property-rule"].includes(command)) {
+    const presentation = normalizeComponentRepresentation(component.propertyPresentation ?? component.representation);
+    const index = Number(data.ruleIndex);
+    if (command === "add-property-rule") {
+      presentation.enabled = true;
+      presentation.sourcePath = safePath(data.sourcePath) || presentation.sourcePath;
+      presentation.rules.push({ id: newId("property-rule"), condition: "", content: "{{@" + (presentation.sourcePath || "identity.level") + "}}" });
+    } else {
+      if (index < 0 || index >= presentation.rules.length) return false;
+      if (command === "remove-property-rule") presentation.rules.splice(index, 1);
+      else {
+        const target = index + Number(data.direction);
+        if (target < 0 || target >= presentation.rules.length) return false;
+        [presentation.rules[index], presentation.rules[target]] = [presentation.rules[target], presentation.rules[index]];
+      }
+    }
+    component.propertyPresentation = presentation;
+    return true;
+  }
   if (["add-representation-rule","remove-representation-rule","move-representation-rule"].includes(command)) {
     const representation = normalizeComponentRepresentation(component.representation);
     const index = Number(data.ruleIndex);
@@ -260,41 +307,6 @@ export function renderInteractionEditor(container,component,components=[],librar
  if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";toolbar.append(select,btn("Inserir","add-library-flow",""));}
  toolbar.append(btn("＋ Novo fluxo","add-flow",""));heading.append(title,toolbar);
  container.append(heading);
- const representation = normalizeComponentRepresentation(component.representation);
- const representationPanel = el("section","nexus-interaction-group nexus-representation-rules");
- const representationHeading = el("div","nexus-interaction-group-heading");
- representationHeading.append(el("h6","","Regras de representação"));
- const representationEnabled = control("checkbox",representation.enabled,[],"Ativar regras de representação");
- representationPanel.append(representationHeading,field("Ativo",representationEnabled,"representation",component.id,"enabled"));
- const source = control("input",representation.sourcePath,[],"Propriedade de origem");
- source.placeholder = "Buscar propriedade…";
- source.dataset.componentPathInput = "";
- source.dataset.interactionPropertyInput = "";
- representationPanel.append(field("Propriedade",source,"representation",component.id,"sourcePath"));
- representationPanel.append(el("p","nexus-representation-help","A primeira regra compatível define ícone, rótulo e valor. Sem correspondência, a apresentação original é mantida."));
- for (const [i,rule] of representation.rules.entries()) {
-   const row = el("article","nexus-representation-rule");
-   const ruleHead = el("div","nexus-representation-rule-heading");
-   ruleHead.append(el("strong","","Regra "+(i+1)),iconBtn("Remover regra","fa-trash","remove-representation-rule",component.id,{ruleIndex:i}));
-   row.append(ruleHead);
-   const condition = control("input",rule.condition,[],"Condição");
-   condition.dataset.rollFormulaInput = "";
-   condition.placeholder = "@identity.level > @combat.mb";
-   row.append(field("Se",condition,"representationRule",component.id,"condition",{ruleIndex:i}));
-   const icon = control("input",rule.icon,[],"Ícone");
-   icon.placeholder = "✦";
-   row.append(field("Ícone",icon,"representationRule",component.id,"icon",{ruleIndex:i}));
-   const label = control("input",rule.label,[],"Rótulo");
-   label.placeholder = "Ex.: Superior";
-   row.append(field("Rótulo",label,"representationRule",component.id,"label",{ruleIndex:i}));
-   const output = control("input",rule.output,[],"Valor calculado");
-   output.dataset.rollFormulaInput = "";
-   output.placeholder = "@identity.level + @combat.mb (opcional)";
-   row.append(field("Valor / fórmula",output,"representationRule",component.id,"output",{ruleIndex:i}));
-   representationPanel.append(row);
- }
- representationPanel.append(btn("＋ Adicionar regra","add-representation-rule",component.id));
- container.append(representationPanel);
  if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(empty);return;}
  const tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
  for(const flow of flows){const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");tab.type="button";tab.dataset.interactionFlowTab=flow.id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected",String(flow.id===activeId));tab.classList.toggle("active",flow.id===activeId);tabs.append(tab);}
@@ -325,4 +337,34 @@ export function renderInteractionEditor(container,component,components=[],librar
   const advanced=el("details","nexus-interaction-execution"),summary=el("summary","","Execução avançada"),error=control("select",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]],"Se uma ação falhar");advanced.append(summary,field("Se uma ação falhar",error,"flow",flow.id,"onError"));panel.append(advanced);panels.append(panel);
  }
  container.append(panels);
+}
+export function renderPropertyPresentationEditor(container, component, propertyPath = "") {
+  if (!container) return;
+  const config = normalizeComponentRepresentation(component?.propertyPresentation ?? component?.representation);
+  const selectedPath = safePath(propertyPath || component?.dataPath || config.sourcePath);
+  config.sourcePath = selectedPath;
+  container.replaceChildren();
+  container.dataset.componentId = String(component?.id ?? "");
+  const heading = document.createElement("div"); heading.className = "nexus-property-presentation-heading";
+  const title = document.createElement("strong"); title.textContent = "Apresentação da propriedade";
+  const enabledLabel = document.createElement("label"); enabledLabel.className = "nexus-property-presentation-toggle";
+  const enabled = document.createElement("input"); enabled.type = "checkbox"; enabled.checked = config.enabled;
+  enabled.dataset.interactionScope = "propertyPresentation"; enabled.dataset.interactionField = "enabled"; enabled.dataset.componentId = String(component?.id ?? "");
+  const enabledText = document.createElement("span"); enabledText.textContent = "Ativa"; enabledLabel.append(enabled, enabledText); heading.append(title, enabledLabel); container.append(heading);
+  const property = document.createElement("code"); property.className = "nexus-property-presentation-path"; property.textContent = selectedPath || "Selecione uma propriedade no campo acima"; container.append(property);
+  const help = document.createElement("p"); help.className = "nexus-property-presentation-help"; help.textContent = "A primeira condição verdadeira é usada. Sem correspondência, o visual padrão permanece."; container.append(help);
+  const rules = document.createElement("div"); rules.className = "nexus-property-presentation-rules";
+  config.rules.forEach((rule, index) => {
+    const row = document.createElement("article"); row.className = "nexus-property-presentation-rule";
+    const head = document.createElement("div"); head.className = "nexus-property-presentation-rule-head";
+    const label = document.createElement("strong"); label.textContent = "Regra " + (index + 1);
+    const remove = document.createElement("button"); remove.type = "button"; remove.className = "nexus-icon-button"; remove.textContent = "×"; remove.title = "Remover regra"; remove.dataset.interactionAction = "remove-property-rule"; remove.dataset.componentId = String(component?.id ?? ""); remove.dataset.ruleIndex = String(index); head.append(label, remove);
+    const conditionLabel = document.createElement("label"); conditionLabel.textContent = "Se";
+    const condition = document.createElement("input"); condition.type = "text"; condition.value = rule.condition; condition.placeholder = "@identity.level >= 5"; condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition"; condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? ""); conditionLabel.append(condition);
+    const contentLabel = document.createElement("label"); contentLabel.textContent = "Conteúdo";
+    const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : ""); content.placeholder = "{{icon:fa-solid fa-fire}} Fúria: {{@attributes.for.value}}"; content.dataset.interactionScope = "propertyPresentationRule"; content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? ""); contentLabel.append(content);
+    row.append(head, conditionLabel, contentLabel); rules.append(row);
+  });
+  container.append(rules);
+  const add = document.createElement("button"); add.type = "button"; add.className = "nexus-property-presentation-add"; add.textContent = "＋ Adicionar regra"; add.dataset.interactionAction = "add-property-rule"; add.dataset.componentId = String(component?.id ?? ""); add.dataset.sourcePath = selectedPath; container.append(add);
 }

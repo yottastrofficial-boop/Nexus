@@ -51,14 +51,16 @@ O Editor de Dados permite ativar o modo **Automático por fórmula** em propried
 Exemplos aceitos: `nivel + mb`, `(des + mb) * 2` e `for - 1`. Use espaços ao redor dos operadores quando necessário para separar identificadores de subtrações. Fórmulas são avaliadas com os valores atuais do Actor. Ciclos e referências inválidas são rejeitados de forma segura.
 
 
-## Regras de representação no menu Comportamento
+## Apresentação de propriedades
 
-Um componente pode receber um mapeamento visual independente da propriedade que lê. Configure a propriedade de origem e adicione regras em ordem de prioridade. A primeira condição verdadeira define a saída:
+As regras de apresentação são configuradas no painel **Propriedades**, associadas à propriedade selecionada. O painel **Comportamento** é reservado a fluxos de interação.
 
-- **Condição:** expressão booleana, por exemplo `level > mb`, `@identity.level > @combat.mb`, `level == 0` ou `(des + mb) >= 5`.
-- O seletor de propriedades pode inserir referências com `@` nos campos de condição e fórmula.
-- **Ícone e rótulo:** representação visual opcional. O rótulo também aceita interpolação, como `Nível {{level}}`.
-- **Valor / fórmula:** expressão numérica opcional, como `level + mb` ou `level % 2`. Se ficar vazio, a saída utiliza o valor original da propriedade.
-- **Sem correspondência:** o componente mantém sua apresentação original.
+Cada regra contém uma condição e um único campo de conteúdo. O campo aceita texto, valores interpolados, ícones e imagens:
+- Condição: `@attributes.for.value >= 5` ou `@attributes.for.value = 1`.
+- Inserção de valor: `Fúria: {{@attributes.fur.value}}`.
+- Ícone: `{{icon:fa-solid fa-fire}}`.
+- Imagem: `{{image:icons/fury.webp}}`.
 
-O mapeamento é apenas de leitura e apresentação: não grava nem modifica a propriedade de origem. As expressões são avaliadas de forma segura, sem executar JavaScript arbitrário. As mudanças nos valores do Actor atualizam as representações por eventos do Foundry, sem atualização periódica.
+Use `@caminho.completo` nas expressões e `{{@caminho.completo}}` no conteúdo. `=` e `==` são equivalentes para igualdade. Abreviações duplicadas são sinalizadas no painel; use o caminho completo quando houver conflito. A primeira condição verdadeira vence; sem correspondência, a representação original permanece.
+
+Layouts antigos que usam `component.representation` continuam legíveis; novas configurações são gravadas em `component.propertyPresentation`. A apresentação não altera as regras nem os valores do Actor.

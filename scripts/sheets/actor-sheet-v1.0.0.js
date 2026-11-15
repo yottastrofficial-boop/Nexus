@@ -13,7 +13,7 @@ import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
-import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation } from "../core/interactions.js";
+import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor } from "../core/interactions.js";
 
 const NEXUS_PROPERTY_SHORTCUTS = Object.freeze({
   nivel: "identity.level", level: "identity.level", mb: "combat.mb",
@@ -1032,14 +1032,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     };
   }
   _representationContext(component) {
-    const result = evaluateComponentRepresentation(component?.representation, identifier =>
-      resolveNexusBinding(this.actor, resolveFormulaIdentifier(identifier)).value
+    const hasNewPresentation = !!component?.propertyPresentation;
+    const result = evaluateComponentRepresentation(component?.propertyPresentation ?? component?.representation, identifier =>
+      resolveNexusBinding(this.actor, resolveFormulaIdentifier(identifier)).value,
+      hasNewPresentation ? (component?.dataPath || COMPONENTS[component?.type]?.path || "") : ""
     );
     return {
       representationActive: !!result,
-      representationIcon: result?.icon ?? "",
-      representationLabel: result?.label ?? "",
-      representationValue: result?.value ?? "",
+      representationContent: result?.content ?? "",
       representationSourcePath: result?.sourcePath ?? ""
     };
   }
@@ -1178,7 +1178,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -1329,25 +1329,27 @@ export class NexusActorSheet extends NexusActorSheetBase {
             representationNode.setAttribute("aria-live", "polite");
             content.prepend(representationNode);
           }
-          representationNode.replaceChildren();
-          if (context.representationIcon) {
-            const icon = document.createElement("span");
-            icon.className = "nexus-property-representation-icon";
-            icon.textContent = context.representationIcon;
-            representationNode.append(icon);
+          const output = String(context.representationContent ?? "");
+          if (representationNode.dataset.renderedContent !== output) {
+            const fragment = document.createDocumentFragment();
+            const tokenPattern = /\{\{\s*(icon|image):([^{}]+?)\s*\}\}/gi;
+            let cursor = 0, match;
+            while ((match = tokenPattern.exec(output))) {
+              if (match.index > cursor) fragment.append(document.createTextNode(output.slice(cursor, match.index)));
+              const kind = match[1].toLowerCase(), source = match[2].trim();
+              if (kind === "icon") {
+                const icon = document.createElement("i");
+                const classes = source.split(/\s+/).filter(name => /^(?:fa-(?:solid|regular|brands|light|duotone|thin|sharp|fw|spin|pulse|[a-z0-9-]+))$/.test(name));
+                if (classes.length) { icon.className = classes.join(" "); icon.setAttribute("aria-hidden", "true"); fragment.append(icon); }
+              } else if (/^(?:https?:\/\/|icons\/|systems\/|modules\/)/i.test(source)) {
+                const image = document.createElement("img"); image.className = "nexus-property-representation-image"; image.src = source; image.alt = ""; image.loading = "lazy"; fragment.append(image);
+              }
+              cursor = tokenPattern.lastIndex;
+            }
+            if (cursor < output.length) fragment.append(document.createTextNode(output.slice(cursor)));
+            representationNode.replaceChildren(fragment);
+            representationNode.dataset.renderedContent = output;
           }
-          if (context.representationLabel) {
-            const label = document.createElement("span");
-            label.className = "nexus-property-representation-label";
-            label.dataset.nexusExpressionText = "true";
-            label.dataset.nexusExpressionSource = context.representationLabel;
-            label.textContent = context.representationLabel;
-            representationNode.append(label);
-          }
-          const output = document.createElement("strong");
-          output.className = "nexus-property-representation-value";
-          output.textContent = String(context.representationValue ?? "—");
-          representationNode.append(output);
         }
       } else representationNode?.remove();
     }
@@ -2597,6 +2599,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
         interactionEditor.dataset.componentId = one?.id ?? "";
         if (one) renderInteractionEditor(interactionEditor, one, this._currentLayout?.components ?? [], getInteractionLibrary(this.actor), this.actor);
         else interactionEditor.replaceChildren();
+      }
+      const presentationEditor = inspector.querySelector("[data-property-presentation-editor]");
+      if (presentationEditor && one) renderPropertyPresentationEditor(presentationEditor, one, one.dataPath ?? COMPONENTS[one.type]?.path ?? "");
+      else presentationEditor?.replaceChildren();
+      const aliasWarning = inspector.querySelector("[data-property-alias-conflicts]");
+      if (aliasWarning) {
+        const candidates = [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]
+          .map(item => {
+            const label = String(item.label ?? item.key ?? "Propriedade");
+            const parts = String(item.key ?? "").split(".");
+            const baseKey = parts.at(-1) === "value" ? parts.at(-2) : parts.at(-1);
+            const key = String(baseKey ?? "").toLocaleLowerCase("pt-BR");
+            const abbreviation = key.normalize("NFD").replace(/[^a-z0-9]/g, "").slice(0, 3);
+            return { keys: [key, abbreviation].filter((value, index, values) => value.length >= 3 && values.indexOf(value) === index), label, path: String(item.targetPath || item.key || "") };
+          }).filter(item => item.path);
+        const byKey = new Map();
+        for (const item of candidates) {
+          for (const key of item.keys) {
+            if (["val","nom","max","cur","exi","ati","typ"].includes(key)) continue;
+            if (!byKey.has(key)) byKey.set(key, new Map());
+            byKey.get(key).set(item.path, item);
+          }
+        }
+        const conflicts = [...byKey.entries()].filter(([, values]) => values.size > 1)
+          .map(([key, values]) => key + " → " + [...values.values()].map(item => item.label).join(" / "));
+        aliasWarning.textContent = conflicts.length ? "Abreviações ambíguas: " + conflicts.join("; ") + ". Use @caminho.completo para evitar conflitos." : "";
+        aliasWarning.hidden = !conflicts.length;
       }
       const technicalId = inspector.querySelector("[data-component-technical-id]");
       const technicalType = inspector.querySelector("[data-component-technical-type]");

@@ -96,31 +96,19 @@ Estrutura conceitual:
 
 Um fluxo pode conter vários Triggers independentes: qualquer um deles inicia suas Actions. Condições opcionais são avaliadas antes da execução e podem ser combinadas como AND (todas) ou OR (qualquer). As Actions são executadas na ordem em que aparecem e podem ser reordenadas no Inspector. Cada ação mantém sua própria configuração. A política de erro define se uma falha interrompe o fluxo ou permite continuar.
 
-### Regras de representação
+### Apresentação de propriedades
 
-O menu **Comportamento** também configura regras de representação visual associadas ao componente. Essa configuração é independente dos fluxos de interação:
+As regras de apresentação ficam no painel **Propriedades**, junto à propriedade que o componente utiliza. O menu **Comportamento** fica reservado aos fluxos de interação (Triggers e Actions).
 
-- `sourcePath` identifica a propriedade lida.
-- `rules` contém condições ordenadas; a primeira condição verdadeira é utilizada.
-- Cada regra pode definir `icon`, `label` e uma fórmula numérica opcional em `output`.
-- Condições aceitam comparações (`>`, `>=`, `<`, `<=`, `==`, `!=`); fórmulas numéricas aceitam aritmética e módulo (`%`).
-- Um rótulo pode conter interpolações `{{expressão}}`.
-- Se nenhuma regra corresponder, o componente conserva sua representação original. Se `output` estiver vazio, o valor da propriedade de origem é exibido.
+- Cada propriedade pode ter regras ordenadas; a primeira condição verdadeira é aplicada.
+- Cada regra tem uma condição e um único campo de conteúdo, que pode misturar texto, números, ícones, imagens e valores interpolados.
+- `@caminho.completo` referencia uma propriedade em expressões; `{{@caminho.completo}}` insere seu valor no conteúdo.
+- `{{icon:fa-solid fa-fire}}` insere um ícone Font Awesome; `{{image:icons/exemplo.webp}}` insere uma imagem local ou URL HTTP(S).
+- `=` e `==` representam igualdade. Comparações numéricas e fórmulas continuam sendo avaliadas sem JavaScript arbitrário.
+- Abreviações duplicadas são sinalizadas; quando houver ambiguidade, use o caminho completo da propriedade.
+- Configurações antigas em `component.representation` são lidas por compatibilidade; novas edições são salvas em `component.propertyPresentation`.
 
-Exemplo:
-
-```js
-{
-  enabled: true,
-  sourcePath: "identity.level",
-  rules: [
-    { condition: "level > mb", icon: "✦", label: "Superior", output: "level + mb" },
-    { condition: "level == 0", icon: "○", label: "Neutro", output: "" }
-  ]
-}
-```
-
-As regras não alteram nem persistem valores no Actor; determinam somente a saída visual do componente. A configuração fica salva junto à instância do componente no layout.
+A apresentação é somente visual: não altera nem persiste o valor da propriedade de origem.
 
 ### Tipos de ação previstos
 
