@@ -1,3 +1,12 @@
+## 1.0.0.38
+
+- Corrigida a preservação da rolagem durante renderizações completas da ficha: a captura agora contempla todos os contêineres roláveis encontrados nos painéis, abas do Inspector, Biblioteca, Comportamento e janelas flutuantes.
+- A restauração usa o seletor e a posição de cada contêiner correspondente, preservando também painéis internos que antes não entravam na lista de rolagem.
+- Mantidas as correções de atalhos de rolagem e o editor de apresentação simplificado: sem regras, o painel exibe somente “Adicionar regra”.
+- Atualizados os testes de regressão para a nova versão e para a cobertura ampliada de rolagem.
+
+**Validação:** sintaxe, manifesto, templates, estilos, regressões e build serão verificados pelo GitHub Actions. A confirmação visual em Foundry VTT 14 continua necessária.
+
 ## 1.0.0.37
 
 - Reorganizado o editor: regras de apresentação agora ficam no painel Propriedades; Comportamento fica reservado aos fluxos.

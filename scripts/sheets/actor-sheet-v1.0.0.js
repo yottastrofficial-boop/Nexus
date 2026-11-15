@@ -648,15 +648,42 @@ export class NexusActorSheet extends NexusActorSheetBase {
   render(options = {}) {
     const panel = document.querySelector(`[data-tool-panel="aliases"]`) ?? this.element?.querySelector?.('[data-tool-panel="aliases"]');
     if (panel && !panel.hidden) this._pendingAliasScrollTop = panel.scrollTop;
-    const sheetScrollSelectors = [".nexus-appearance-drawer", ".nexus-settings-drawer", ".nexus-behavior-editor", ".nexus-canvas-scroll", ".nexus-sidebar-left", ".nexus-sidebar-right", ".nexus-tool-panel[data-tool-panel='aliases']", ".nexus-library-grid", ".nexus-layer-list", ".nexus-component-inspector", ".nexus-inspector-tab-panel[data-inspector-tab-panel='card']", ".nexus-inspector-tab-panel[data-inspector-tab-panel='appearance']", ".nexus-library-panel", ".nexus-library-details", ".nexus-library-assets", ".nexus-library-flow-grid"];
-    const sheetScrollState = sheetScrollSelectors.map(selector => { const node = this.element?.querySelector?.(selector); return node ? { selector, top: node.scrollTop, left: node.scrollLeft } : null; }).filter(Boolean);
+    const scrollSelectors = [
+      ".window-content", ".application-content", ".nexus-native-panel-content",
+      ".nexus-tool-panel", ".nexus-appearance-drawer", ".nexus-settings-drawer",
+      ".nexus-behavior-editor", ".nexus-interaction-editor",
+      ".nexus-property-presentation-editor", ".nexus-canvas-scroll",
+      ".nexus-sidebar-left", ".nexus-sidebar-right", ".nexus-library-grid",
+      ".nexus-layer-list", ".nexus-component-inspector", ".nexus-inspector-tab-panel",
+      ".nexus-library-panel", ".nexus-library-section-panel:not([hidden])",
+      ".nexus-library-details", ".nexus-library-assets", ".nexus-library-flow-grid"
+    ];
+    const captureScrollState = owner => {
+      const saved = [], seen = new Set();
+      for (const selector of scrollSelectors) {
+        const nodes = owner?.querySelectorAll?.(selector) ?? [];
+        nodes.forEach((node, index) => {
+          if (seen.has(node)) return;
+          seen.add(node);
+          if (node.scrollTop || node.scrollLeft) saved.push({ selector, index, top: node.scrollTop, left: node.scrollLeft });
+        });
+      }
+      return saved;
+    };
+    const restoreScrollState = (owner, saved) => {
+      for (const state of saved ?? []) {
+        const node = owner?.querySelectorAll?.(state.selector)?.[state.index];
+        if (node) { node.scrollTop = state.top; node.scrollLeft = state.left; }
+      }
+    };
+    const sheetScrollState = captureScrollState(this.element);
     const states = [...(this._nexusPanelWindows?.entries?.() ?? [])].map(([key, instance]) => {
       const element = instance?.element;
       if (!element?.isConnected) return null;
       const active = element.contains(document.activeElement) ? document.activeElement : null;
       const attrs = active ? ["data-component-setting","data-layout-setting","data-global-typography","data-alias-field","data-native-property-field","data-property-value","data-component-path-input","data-config-current-value","data-config-max-value","data-alias-select","data-alias-new-name","data-inspector-tab","data-floating-panel","data-text-style-control"] : [];
       const descriptor = active ? attrs.map(attr => active.hasAttribute(attr) ? { attr, value: active.getAttribute(attr), targetId: active.dataset.componentTargetId ?? "", aliasId: active.dataset.aliasId ?? "" } : null).find(Boolean) : null;
-      const scroll = [...element.querySelectorAll(".window-content,.application-content,.nexus-component-inspector,.nexus-layer-list,.nexus-alias-manager,.nexus-library-grid,.nexus-library-panel,.nexus-library-section-panel:not([hidden]),.nexus-library-details,.nexus-library-assets,.nexus-library-flow-grid,.nexus-settings-drawer,.nexus-behavior-editor,.nexus-inspector-tab-panel")].map(node => ({ selector: node.classList.contains("nexus-component-inspector") ? ".nexus-component-inspector" : node.classList.contains("nexus-layer-list") ? ".nexus-layer-list" : node.classList.contains("nexus-alias-manager") ? ".nexus-alias-manager" : node.classList.contains("nexus-library-grid") ? ".nexus-library-grid" : node.classList.contains("nexus-library-panel") ? ".nexus-library-panel" : node.classList.contains("nexus-library-section-panel") ? `.nexus-library-section-panel[data-library-section-panel="${node.dataset.librarySectionPanel}"]` : node.classList.contains("nexus-library-details") ? ".nexus-library-details" : node.classList.contains("nexus-library-assets") ? ".nexus-library-assets" : node.classList.contains("nexus-library-flow-grid") ? ".nexus-library-flow-grid" : node.classList.contains("nexus-settings-drawer") ? ".nexus-settings-drawer" : node.classList.contains("nexus-behavior-editor") ? ".nexus-behavior-editor" : node.classList.contains("nexus-inspector-tab-panel") ? `.nexus-inspector-tab-panel[data-inspector-tab-panel="${node.dataset.inspectorTabPanel}"]` : node.classList.contains("window-content") ? ".window-content" : ".application-content", top: node.scrollTop, left: node.scrollLeft }));
+      const scroll = captureScrollState(element);
       let start = null, end = null;
       try { start = active?.selectionStart ?? null; end = active?.selectionEnd ?? null; } catch (_) {}
       return { key, descriptor, tag: active?.tagName, value: active && "value" in active ? active.value : null, checked: active?.type === "checkbox" ? active.checked : null, start, end, left: element.style.left, top: element.style.top, scroll };
@@ -665,13 +692,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const canvasHadFocus = !!activeCanvasBeforeRender && (document.activeElement === activeCanvasBeforeRender || activeCanvasBeforeRender.contains(document.activeElement));
     const result = super.render(options);
     const restore = () => {
-      for (const saved of sheetScrollState) { const node = this.element?.querySelector?.(saved.selector); if (node) { node.scrollTop = saved.top; node.scrollLeft = saved.left; } }
+      restoreScrollState(this.element, sheetScrollState);
       for (const state of states) {
         const instance = this._nexusPanelWindows?.get(state.key), element = instance?.element;
         if (!element?.isConnected) continue;
         if (state.left) element.style.left = state.left;
         if (state.top) element.style.top = state.top;
-        for (const saved of state.scroll) { const node = element.querySelector(saved.selector); if (node) { node.scrollTop = saved.top; node.scrollLeft = saved.left; } }
+        restoreScrollState(element, state.scroll);
         if (state.descriptor) {
           const activeNow = document.activeElement;
           const { attr, value, targetId, aliasId } = state.descriptor;
