@@ -1866,14 +1866,6 @@
 .nexus-component.is-group-member { box-sizing:border-box; border-radius:var(--nexus-component-radius,7px) !important; }
 .nexus-group-surface { border-radius:var(--nexus-group-radius,9px) !important; }
 .nexus-component.is-selected { outline:1px solid #a9c9ef; outline-offset:0; }
-.nexus-component.nexus-component-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
 .nexus-sheet-element { border-radius:7px; }
 .nexus-sheet-resource-track { border-radius:999px; }
 
@@ -1955,16 +1947,7 @@
 .nexus-component,
 .nexus-component.is-selected,
 .nexus-component.is-group-member { border-radius:var(--nexus-component-radius,7px) !important; }
-.nexus-component.nexus-component-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
 .nexus-group-surface { border-radius:var(--nexus-group-radius,8px) !important; }
-.nexus-group-surface.nexus-group-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
-
 /* v1.27.1 — inspeção de grupo e overlays do editor */
 .nexus-component.is-group-member.is-group-inspecting {
   border:1px dashed var(--nexus-accent-color,#9fc1e8) !important;
@@ -5675,14 +5658,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-theme-asset.is-selected{border-color:var(--nexus-highlight-color,#78b7e8)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 42%,transparent)!important}
 
 /* 1.0.0.33 — contatos geométricos estáveis, fluxos detalhados e grupos responsivos. */
-.nexus-component.nexus-component-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-component.nexus-component-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
-.nexus-group-surface.nexus-group-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
 .nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px; box-sizing:border-box; }
 .nexus-panel-window .nexus-behavior-editor .nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px !important; }
 .nexus-library-flow-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(230px,310px); align-items:start; gap:12px; min-width:0; }
@@ -5899,15 +5874,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-property-presentation-field>input,.nexus-property-presentation-field>textarea{width:100%!important;min-width:0!important;box-sizing:border-box!important}
 .nexus-component:not(.is-group-member){border:1px solid var(--nexus-component-border,var(--nexus-accent-color,#52647b))!important;border-radius:var(--nexus-component-radius,7px)!important}
 .nexus-group-surface{border:1px solid var(--nexus-group-border,#53677f)!important;border-radius:var(--nexus-group-radius,9px)!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-top{border-top-left-radius:0!important;border-top-right-radius:0!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-right{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-bottom{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-left{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
-.nexus-group-surface.nexus-group-touching-top{border-top-left-radius:0!important;border-top-right-radius:0!important}
-.nexus-group-surface.nexus-group-touching-right{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
-.nexus-group-surface.nexus-group-touching-bottom{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
-.nexus-group-surface.nexus-group-touching-left{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tl{border-top-left-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tl{border-top-left-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tr{border-top-right-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-br{border-bottom-right-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-bl{border-bottom-left-radius:0!important}
@@ -5915,3 +5882,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-group-surface.nexus-group-corner-square-tr{border-top-right-radius:0!important}
 .nexus-group-surface.nexus-group-corner-square-br{border-bottom-right-radius:0!important}
 .nexus-group-surface.nexus-group-corner-square-bl{border-bottom-left-radius:0!important}
+
+/* O arredondamento é controlado exclusivamente pelas classes corner-square-*.
+   Classes touching-* descrevem contato de aresta, mas não achatam os dois cantos. */
