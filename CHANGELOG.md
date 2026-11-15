@@ -8,6 +8,7 @@
 - Regras de apresentação passam a ser salvas durante a digitação, sem depender de Enter ou da perda de foco.
 - A atualização durante a digitação não reconstrói os campos, preservando cursor e continuidade da edição.
 - O histórico de alterações permanece associado à confirmação do campo, evitando registrar cada tecla como uma ação separada.
+- Acrescentados testes de regressão para contato isolado entre cantos e salvamento automático durante a edição.
 
 ## 1.0.0.40
 
