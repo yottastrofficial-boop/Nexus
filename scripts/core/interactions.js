@@ -76,7 +76,7 @@ function interpolateRepresentationContent(template, resolveProperty) {
   const source = String(template ?? "");
   const tokenPattern = /\{\{\s*([^{}]+?)\s*\}\}|@([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)/g;
   return source.replace(tokenPattern, (token, wrappedExpression, barePath) => {
-    const expression = String(wrappedExpression ?? barePath ?? "").trim();
+    const expression = String(wrappedExpression ?? (barePath ? "@" + barePath : "")).trim();
     if (/^icon:/i.test(expression)) return token;
     const imageToken = expression.match(/^image:\s*(.+)$/i);
     if (imageToken) {
