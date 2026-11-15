@@ -98,3 +98,9 @@ The migration:
 The implementation follows Foundry's separation between document data, schema definitions and derived data. D&D5e demonstrates the value of stable internal identifiers plus separate labels and abbreviations for abilities and skills. Call of Cthulhu and Tormenta20 are treated as examples of system-specific Actor data models rather than sources of NEXUS mechanics.
 
 No game rules are imported from those systems. NEXUS's names, attributes, skills and formulas remain grounded in its own core rulebook.
+
+## Organização do seletor (1.0.0.33)
+
+- Os caminhos canônicos de token ficam sob `identity.token.*`; os aliases de compatibilidade `token.img` e `token.border` continuam resolvíveis em expressões antigas, mas não aparecem como propriedades independentes.
+- As propriedades de carga são apresentadas diretamente sob o grupo `encumbrance` (Carga): Base, Bônus, Capacidade, Atual e Excedida.
+- O caminho legado `encumbrance.current` é ocultado no catálogo quando o caminho canônico `encumbrance.current.value` está disponível. A origem persistida da carga atual permanece compatível com o campo já existente.

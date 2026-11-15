@@ -5672,3 +5672,28 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* 1.0.0.29 — estados compactos de proficiência e tema selecionado na Biblioteca. */
 .nexus-skill-proficiency-level{font-variant-numeric:tabular-nums}
 .nexus-library-theme-asset.is-selected{border-color:var(--nexus-highlight-color,#78b7e8)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 42%,transparent)!important}
+
+/* 1.0.0.33 — contatos geométricos estáveis, fluxos detalhados e grupos responsivos. */
+.nexus-component.nexus-component-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
+.nexus-component.nexus-component-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
+.nexus-component.nexus-component-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
+.nexus-component.nexus-component-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
+.nexus-group-surface.nexus-group-touching-top { border-top-left-radius:0 !important; border-top-right-radius:0 !important; }
+.nexus-group-surface.nexus-group-touching-right { border-top-right-radius:0 !important; border-bottom-right-radius:0 !important; }
+.nexus-group-surface.nexus-group-touching-bottom { border-bottom-left-radius:0 !important; border-bottom-right-radius:0 !important; }
+.nexus-group-surface.nexus-group-touching-left { border-top-left-radius:0 !important; border-bottom-left-radius:0 !important; }
+.nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px; box-sizing:border-box; }
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px !important; }
+.nexus-library-flow-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(230px,310px); align-items:start; gap:12px; min-width:0; }
+.nexus-library-flow-details { display:flex; flex-direction:column; gap:10px; min-width:0; min-height:190px; max-height:min(62vh,620px); overflow:auto; padding:12px; border:1px solid var(--nexus-panel-border,#3c5067); border-radius:8px; background:var(--nexus-panel-surface,#202e3e); color:var(--nexus-panel-text,#e7edf5); }
+.nexus-library-flow-details .nexus-library-detail-placeholder { display:flex; flex-direction:column; gap:7px; color:var(--nexus-panel-muted,#9aadc2); font-size:10px; }
+.nexus-library-flow-details .nexus-library-detail-placeholder strong { color:var(--nexus-panel-text,#e7edf5); font-size:12px; }
+.nexus-library-flow-status { align-self:flex-start; padding:3px 7px; border:1px solid var(--nexus-panel-border,#3c5067); border-radius:99px; color:var(--nexus-panel-accent,#78b7e8); font-size:9px; }
+.nexus-library-flow-join { margin:0; color:var(--nexus-panel-muted,#9aadc2); font-size:10px; }
+.nexus-library-flow-detail-section { display:flex; flex-direction:column; gap:5px; min-width:0; padding-top:8px; border-top:1px solid var(--nexus-panel-border,#3c5067); }
+.nexus-library-flow-detail-section > strong { color:var(--nexus-panel-text,#e7edf5); font-size:10px; }
+.nexus-library-flow-detail-section ul { display:flex; flex-direction:column; gap:5px; margin:0; padding-left:17px; color:var(--nexus-panel-muted,#aab8c8); font-size:10px; line-height:1.4; overflow-wrap:anywhere; }
+.nexus-library-flow-detail-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:auto; padding-top:9px; border-top:1px solid var(--nexus-panel-border,#3c5067); }
+.nexus-library-flow-detail-actions button { min-height:30px; padding:6px 9px; border:1px solid var(--nexus-panel-border,#526982); border-radius:5px; background:var(--nexus-panel-hover,#2a3d52); color:var(--nexus-panel-text,#e7edf5); font-size:10px; cursor:pointer; }
+.nexus-library-flow-detail-actions button.danger { border-color:#80515a; color:#ffd9df; }
+@media(max-width:700px) { .nexus-library-flow-workspace { grid-template-columns:minmax(0,1fr); } .nexus-library-flow-details { max-height:none; } }

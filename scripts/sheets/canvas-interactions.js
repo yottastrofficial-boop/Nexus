@@ -176,7 +176,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const cornerNames = ["tl", "tr", "br", "bl"];
       const apply = (nodes, prefix) => {
         const squareClasses = cornerNames.map(name => `${prefix}-corner-square-${name}`);
-        nodes.forEach(node => node.classList.remove(...squareClasses));
+        const touchingClasses = ["top", "right", "bottom", "left"].map(side => `${prefix}-touching-${side}`);
+        nodes.forEach(node => node.classList.remove(...squareClasses, ...touchingClasses));
         const rects = nodes.filter(node => !node.hidden).map(node => {
           const rect = node.getBoundingClientRect();
           return {
@@ -231,6 +232,16 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
               for (const corner of b.corners) {
                 if (pointTouchesBorder(corner, a.rect)) b.node.classList.add(`${prefix}-corner-square-${corner.name}`);
               }
+              const overlapX = Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left);
+              const overlapY = Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top);
+              if (overlapX > tolerance) {
+                if (Math.abs(a.rect.bottom - b.rect.top) <= tolerance) { a.node.classList.add(`${prefix}-touching-bottom`); b.node.classList.add(`${prefix}-touching-top`); }
+                if (Math.abs(a.rect.top - b.rect.bottom) <= tolerance) { a.node.classList.add(`${prefix}-touching-top`); b.node.classList.add(`${prefix}-touching-bottom`); }
+              }
+              if (overlapY > tolerance) {
+                if (Math.abs(a.rect.right - b.rect.left) <= tolerance) { a.node.classList.add(`${prefix}-touching-right`); b.node.classList.add(`${prefix}-touching-left`); }
+                if (Math.abs(a.rect.left - b.rect.right) <= tolerance) { a.node.classList.add(`${prefix}-touching-left`); b.node.classList.add(`${prefix}-touching-right`); }
+              }
             }
           }
         }
@@ -243,6 +254,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
+    canvas.addEventListener("nexus:selectionchange", scheduleConnectedCorners);
     const syncGroupBounds = (updateCorners = true) => {
       for (const g of (sheet._activeGroups ?? [])) {
         const members = (membersByGroupId.get(g.id) ?? []).filter(element => !element.hidden);

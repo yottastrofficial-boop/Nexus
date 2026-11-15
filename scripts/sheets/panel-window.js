@@ -28,9 +28,8 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
   }
 
   close(options = {}) {
-    // A biblioteca monta miniaturas e detalhes; remover a animação evita que a
-    // janela pareça travar durante o fechamento. ApplicationV2 V14 suporta animate.
-    return super.close({ ...options, animate: ["library", "behavior"].includes(this.panelKey) ? false : options.animate ?? true });
+    // Fechamento imediato evita a espera longa da animação padrão do ApplicationV2.
+    return super.close({ ...options, animate: options.animate ?? false });
   }
 
   _mountPanel() {

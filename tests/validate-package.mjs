@@ -6,7 +6,7 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 
@@ -64,7 +64,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.32", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.33", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -167,10 +167,13 @@ assert.ok(!groupedProperties.entries.some(entry => entry.path === "skills.athlet
 assert.match(css, /\.nexus-panel-window \.window-header/);
 assert.match(css, /\.nexus-sheet \.nexus-canvas-scroll/);
 assert.match(panelWindow, /export class NexusPanelWindow/);
+assert.match(panelWindow, /animate: options\.animate \?\? false/, "Janelas devem fechar sem a animação longa padrão");
 assert.match(themeModule, /export const applyThemeTokens/);
 assert.match(libraryView, /export function mountLibraryView/);
 assert.match(actorSheetRendering, /export function renderActorSheetRichMedia/);
 assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveContent/);
+assert.match(actorSheetRendering, /IntersectionObserver/, "Áudio e vídeo devem usar carregamento sob demanda");
+assert.match(actorSheetRendering, /nexusLazyMediaSrc/, "A fonte de mídia deve ser adiada até a aproximação da viewport");
 assert.match(sheet, /mountLibraryView\(this, panel/);
 assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({
@@ -186,6 +189,12 @@ assert.equal(propertyTree.entries.some(entry => entry.path === "attributes.body.
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.value").label, "Valor");
 assert.equal(propertyTree.entries.find(entry => entry.path === "attributes.for.name").label, "Nome");
 assert.equal(propertyTree.entries.some(entry => entry.path === "identity.name"), false, "O nome do Actor não deve duplicar identity.name");
+const canonicalIdentityAndLoad = buildPropertyPickerCatalog({ paths: ["identity.token.img", "identity.token.border", "token.img", "token.border", "encumbrance.current", "encumbrance.base.value", "encumbrance.bonus.value", "encumbrance.capacity.value", "encumbrance.current.value", "encumbrance.overloaded.value"] });
+assert.equal(canonicalIdentityAndLoad.entries.some(entry => ["token.img", "token.border", "encumbrance.current"].includes(entry.path)), false, "Aliases de token e carga legada não devem aparecer duplicados");
+assert.equal(canonicalIdentityAndLoad.entries.some(entry => entry.path === "identity.token.img"), true, "A imagem do token deve permanecer dentro de Identidade");
+const loadGroup = findPropertyPickerNode(canonicalIdentityAndLoad, "encumbrance");
+assert.deepEqual([...loadGroup.children.keys()].sort(), ["base", "bonus", "capacity", "current", "overloaded"], "Carga deve exibir propriedades diretamente em um único grupo");
+assert.ok([...loadGroup.children.values()].every(node => node.entry && node.children.size === 0), "Carga não deve criar subgrupos de propriedade única");
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
@@ -636,6 +645,9 @@ assert.ok(interactions.includes("tab.dataset.interactionFlowTab"), "Os fluxos de
 assert.ok(interactions.includes("panel.dataset.interactionFlowPanel"), "Cada aba deve exibir apenas seu fluxo correspondente");
 assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textual QUANDO/SE/ENTÃO deve ser removido");
 assert.ok(css.includes("nexus-interaction-condition-group .nexus-interaction-group-heading"), "O seletor E/OU deve ocupar área dimensionada no cabeçalho de condições");
+assert.ok(css.includes(".nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px"), "O grupo de gatilhos deve iniciar com altura mínima de 54 px");
+assert.ok(css.includes(".nexus-library-flow-details"), "A Biblioteca deve reservar uma área de detalhes para fluxos");
+assert.ok(css.includes(".nexus-component.nexus-component-touching-right"), "As bordas conectadas devem achatar os cantos do lado compartilhado");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura compacta padronizada");
@@ -660,6 +672,9 @@ globalThis.game={settings:{
 await saveInteractionToLibrary(fakeLibraryActor,editorDraft.interactions[0]);
 assert.equal(getInteractionLibrary(fakeLibraryActor).length,1);
 assert.equal(getInteractionLibrary(fakeLibraryActor)[0].flow.actions[0].config.formula,"1d20");
+const savedFlowId = getInteractionLibrary(fakeLibraryActor)[0].id;
+await deleteInteractionFromLibrary(fakeLibraryActor,savedFlowId);
+assert.equal(getInteractionLibrary(fakeLibraryActor).length,0,"Fluxos salvos devem poder ser excluídos da biblioteca");
 assert.equal(fakeLibraryActor.flags.nexus.interactionLibrary,undefined,"A biblioteca pessoal não deve ficar presa ao Actor");
 delete globalThis.game;
 assert.match(sheetCode,/config\.mode === "skill"/);
@@ -712,6 +727,10 @@ assert.match(template,/data-library-scope="personal"/,"Biblioteca deve separar i
 assert.match(template,/data-library-saved-components/,"Biblioteca deve listar componentes salvos individualmente");
 assert.match(sheetCode,/data-library-save-component/,"Biblioteca deve permitir salvar o componente selecionado");
 assert.match(sheetCode,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos");
+assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder ser excluídos");
+assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor a ação de excluir fluxos");
+assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
+assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
 assert.match(sheetCode,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
 assert.match(sheetCode,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");

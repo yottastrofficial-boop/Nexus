@@ -60,7 +60,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const card=document.createElement("button");card.type="button";card.className="nexus-library-flow-card";card.dataset.libraryFlowId=entry.id;
         const icon=document.createElement("i");icon.className="fa-solid fa-diagram-project";icon.setAttribute("aria-hidden","true");
         const title=document.createElement("strong");title.textContent=entry.name||entry.flow?.name||"Fluxo salvo";
-        const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.actions?.length??0} ações`;
+        const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
         card.append(icon,title,meta);flowContainer.append(card);
       }
     }
