@@ -23,6 +23,23 @@ export const NEXUS_LIBRARY_CATALOG = {
         h: 58
       },
       keywords: "pontos de vida PV saúde recurso indicador barra"
+    },
+    {
+      key: "core-skill-proficiency",
+      type: "sheet-proficiency",
+      label: "Marcador de proficiência",
+      category: "core",
+      preview: "proficiency",
+      template: {
+        actionType: "proficiency",
+        actionPath: "skills.athletics.proficient",
+        sheetVariant: "proficiency",
+        customLabel: "Proficiência",
+        showLabel: false,
+        w: 44,
+        h: 44
+      },
+      keywords: "perícia habilidade proficiência domínio marcador"
     }
   ],
   themes: []

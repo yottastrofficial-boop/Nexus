@@ -10,6 +10,7 @@ import { getTriggeredActions, executeTriggeredActions, getComponentInteractions,
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula } from "../scripts/core/formula-engine.js";
+import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
 const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
@@ -754,3 +755,12 @@ assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null
 assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
 assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
 assert.match(sheetCode, /evaluateNexusFormula\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
+
+
+const proficiencyAsset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === "core-skill-proficiency");
+assert.ok(proficiencyAsset, "A Biblioteca deve disponibilizar o marcador de proficiência");
+assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
+assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
+assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
+assert.match(template, /skill\.formatted/, "O valor calculado da perícia deve permanecer visível sem rolagem");
+assert.match(css, /nexus-skill-proficiency-toggle/, "O marcador deve possuir estilo circular próprio");

@@ -124,6 +124,18 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const button = event.currentTarget, card = button.closest(".nexus-component");
       if (card) sheet._setProficiencyLevel(card.dataset.id, Number(button.dataset.proficiencyLevel));
     });
+    html.find("[data-skill-proficiency-toggle]").on("click", async event => {
+      const button = event.currentTarget;
+      const skill = NEXUS_SKILLS.find(item => item.key === button.dataset.skillProficiencyToggle);
+      if (!skill || sheet._mode !== "play") return;
+      event.preventDefault();
+      event.stopPropagation();
+      const current = getNexusSkillModifier(sheet.actor, skill.key);
+      const nextLevel = current?.proficientLevel > 0 ? 0 : 1;
+      const componentId = button.closest(".nexus-component")?.dataset.id;
+      await sheet._setSkillProficientLevel(skill.key, nextLevel);
+      if (componentId) await sheet._runComponentAction(componentId, "click");
+    });
     const setResourceFromTrack = (track, event) => {
       if (sheet._mode !== "play") return;
       const card = track.closest(".nexus-component");
@@ -740,6 +752,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         update();
         return;
       }
+      if (asset.type === "sheet-proficiency") {
+        detail.innerHTML = `<div class="nexus-library-live-preview is-skill-proficiency"><button type="button" class="nexus-skill-proficiency-toggle is-proficient" disabled><span class="nexus-skill-proficiency-indicator"></span></button></div>
+          <div class="nexus-library-config-section"><strong>Vínculo da proficiência</strong><label>Perícia<select data-proficiency-skill></select></label><small>O marcador alterna entre não proficiente e proficiente, seguindo a regra-base do NEXUS.</small></div>
+          <button type="button" data-library-add>Adicionar marcador ao Canvas</button>`;
+        const select = detail.querySelector("[data-proficiency-skill]");
+        for (const skill of NEXUS_SKILLS) {
+          const option = document.createElement("option");
+          option.value = skill.key;
+          option.textContent = `${skill.name} · ${skill.attribute}`;
+          select.append(option);
+        }
+        const initialKey = String(asset.template?.actionPath ?? "").match(/^skills\.([a-zA-Z0-9_-]+)\.proficient$/)?.[1];
+        select.value = initialKey && NEXUS_SKILLS.some(skill => skill.key === initialKey) ? initialKey : (NEXUS_SKILLS[0]?.key ?? "");
+        return;
+      }
       if (asset.type !== "sheet-resource") {
         detail.innerHTML = `<div class="nexus-library-detail-heading"><strong class="nexus-library-detail-title">${asset.label}</strong></div><button type="button" data-library-add>Adicionar à ficha</button>`;
         return;
@@ -994,6 +1021,25 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
             ...clone(asset?.template ?? {}), text: label, dataPath: path,
             attributePreset: preset, sheetCode: label.slice(0, 8).toUpperCase(),
             w: asset?.template?.w ?? 112, h: asset?.template?.h ?? 88
+          };
+          await addComponent(type, { template });
+          return;
+        }
+
+        if (type === "sheet-proficiency") {
+          const skillKey = detail.querySelector("[data-proficiency-skill]")?.value ?? "";
+          const skill = NEXUS_SKILLS.find(item => item.key === skillKey);
+          if (!skill) throw new Error("Selecione uma perícia válida.");
+          const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === detail.dataset.selectedAssetKey);
+          const template = {
+            ...clone(asset?.template ?? {}),
+            actionType: "proficiency",
+            actionPath: `skills.${skill.key}.proficient`,
+            sheetVariant: "proficiency",
+            customLabel: "Proficiência",
+            showLabel: false,
+            w: 44,
+            h: 44
           };
           await addComponent(type, { template });
           return;

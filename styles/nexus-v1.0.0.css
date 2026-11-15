@@ -5698,3 +5698,73 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-flow-detail-actions button { min-height:30px; padding:6px 9px; border:1px solid var(--nexus-panel-border,#526982); border-radius:5px; background:var(--nexus-panel-hover,#2a3d52); color:var(--nexus-panel-text,#e7edf5); font-size:10px; cursor:pointer; }
 .nexus-library-flow-detail-actions button.danger { border-color:#80515a; color:#ffd9df; }
 @media(max-width:700px) { .nexus-library-flow-workspace { grid-template-columns:minmax(0,1fr); } .nexus-library-flow-details { max-height:none; } }
+
+
+/* Marcador circular de proficiência para perícias do Core. */
+.nexus-sheet-element.is-proficiency {
+  display:grid !important;
+  place-items:center !important;
+  width:100% !important;
+  height:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:0 !important;
+}
+.nexus-skill-proficiency-toggle {
+  display:grid !important;
+  place-items:center !important;
+  width:28px !important;
+  height:28px !important;
+  min-width:28px !important;
+  min-height:28px !important;
+  padding:0 !important;
+  border:2px solid var(--nexus-component-border,var(--nexus-panel-border,#52647b)) !important;
+  border-radius:50% !important;
+  background:transparent !important;
+  color:var(--nexus-text-color,#dce6f2) !important;
+  cursor:pointer;
+  box-shadow:none !important;
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.nexus-skill-proficiency-indicator {
+  display:block;
+  width:9px;
+  height:9px;
+  border:1px solid currentColor;
+  border-radius:50%;
+  background:transparent;
+  transition:background-color .15s ease,border-color .15s ease;
+}
+.nexus-skill-proficiency-toggle.is-proficient {
+  border-color:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8)) !important;
+  background:color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 12%,transparent) !important;
+}
+.nexus-skill-proficiency-toggle.is-proficient .nexus-skill-proficiency-indicator {
+  border-color:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8));
+  background:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8));
+}
+.nexus-skill-proficiency-toggle:focus-visible {
+  outline:2px solid var(--nexus-highlight-color,#8fc8ff) !important;
+  outline-offset:3px !important;
+}
+.nexus-skill-proficiency-toggle:disabled { opacity:.55; cursor:not-allowed; }
+.nexus-library-live-preview.is-skill-proficiency {
+  display:grid;
+  place-items:center;
+  min-height:72px;
+}
+.nexus-library-proficiency-preview {
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:2px solid var(--nexus-highlight-color,#78b7e8);
+  border-radius:50%;
+}
+.nexus-library-proficiency-preview i {
+  display:block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--nexus-highlight-color,#78b7e8);
+}

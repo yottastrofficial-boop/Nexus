@@ -32,7 +32,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
         preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
         fitSheetResourcePreview(preview,{w:78,h:78},78);
-      }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
+      }else if(asset.type==="sheet-proficiency"){const marker=document.createElement("span");marker.className="nexus-library-proficiency-preview";const dot=document.createElement("i");marker.append(dot);preview.append(marker);}else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
       else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
       else if(asset.type==="custom-card"){const area=document.createElement("span");area.className="nexus-library-area-preview";area.textContent="+";preview.append(area);}
       else if(asset.type==="sheet-section"){const marker=document.createElement("span");marker.className="nexus-library-marker-preview";marker.textContent="SEÇÃO";preview.append(marker);}
