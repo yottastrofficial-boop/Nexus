@@ -890,6 +890,12 @@ assert.equal(evaluateNexusFormula('"2" + "2"',resolver40),null);
 const typed40=evaluateComponentRepresentation({enabled:true,sourcePath:"level",rules:[{condition:"{{level}} == 5",content:'Exibido: @label · bruto: {{label}} · soma: {{2 + 2 + 2}} · texto: {{"2" + "2" + "2"}} · {{image:@portrait}}'}]},resolver40);
 assert.equal(typed40?.content,'Exibido: Nome exibido · bruto: NEXUS · soma: 6 · texto: 222 · {{image:systems/nexus/assets/portrait.webp}}');
 
+const textSemantics40=evaluateComponentRepresentation({enabled:true,sourcePath:"level",rules:[{condition:"{{level}} == 5",content:'Literal: "1"+"1" · expressão textual: {{"1"+"1"}} · expressão numérica: {{1+1}} · literal repetido: "1"+"1"="1"+"1"'}]},resolver40);
+assert.equal(textSemantics40?.content,'Literal: "1"+"1" · expressão textual: 11 · expressão numérica: 2 · literal repetido: "1"+"1"="1"+"1"',"Somente o conteúdo delimitado por chaves deve ser avaliado; texto fora delas permanece literal");
+assert.equal(evaluateNexusExpression('{{"1"+"1"}}',resolver40),"11","Concatenação de strings entre chaves deve preservar o tipo textual");
+assert.equal(evaluateNexusExpression("{{1+1}}",resolver40),2,"Soma de números entre chaves deve permanecer numérica");
+
+
 const classList40=()=>{const set=new Set();return{add:(...v)=>v.forEach(x=>set.add(x)),remove:(...v)=>v.forEach(x=>set.delete(x)),contains:x=>set.has(x)};};
 const surface40=(left,top,width,height)=>({hidden:false,classList:classList40(),getBoundingClientRect:()=>({left,top,right:left+width,bottom:top+height,width,height})});
 const a40=surface40(0,0,100,100),b40=surface40(100,0,100,100),g40=surface40(200,0,100,100);
