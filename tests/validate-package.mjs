@@ -755,6 +755,7 @@ assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades de
 
 
 const canvasGroups = await readFile(new URL("../scripts/sheets/canvas-group-rendering.js", import.meta.url), "utf8");
+const canvasCorners = await readFile(new URL("../scripts/sheets/canvas-connected-corners.js", import.meta.url), "utf8");
 assert.match(sheetCode,/renderCanvasGroups\(this, form\)/,"Grupos devem ser renderizados também no Modo Padrão");
 assert.match(canvasGroups,/nexus-group-surface/,"O renderizador compartilhado deve criar a superfície visual do grupo");
 assert.match(canvasGroups,/is-group-member/,"O renderizador compartilhado deve marcar os componentes pertencentes a grupos");
@@ -943,7 +944,7 @@ for(const corner of ["tr","br","bl"]) assert.equal(cornerOnlyB.classList.contain
 assert.ok(sheet.includes("new foundry.data.operators.ForcedDeletion()"),"A migração das perícias deve usar o operador de remoção do Foundry V14");
 assert.ok(![".-=proficient",".-=proficiency",".-=opposed","skills.-="].some(token=>sheet.includes(token)),"A migração das perícias não deve usar mais a sintaxe legada -= do Foundry");
 assert.ok(canvasInteractions.includes("await saveAfterGesture(touchedIds);sheet._refreshBoundComponents?.();"),"O fim do redimensionamento deve reavaliar as representações por regra");
-assert.ok(canvasGroups.includes('node.classList.add("is-compact")'),"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
+assert.ok(canvasCorners.includes('node.classList.add("is-compact")'),"O cálculo geométrico deve classificar cards compactos, inclusive os agrupados");
 assert.ok(css.includes(".nexus-component.is-compact .nexus-component-content {\n  padding: 2px !important;"),"Cards com menos de 100px em qualquer dimensão devem limitar o padding a 2px");
 assert.equal(compactOnly.classList.contains("is-compact"),true,"Cards com largura inferior a 100px devem receber o modo compacto");
 assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com altura inferior a 100px devem receber o modo compacto");
