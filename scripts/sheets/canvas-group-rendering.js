@@ -1,3 +1,5 @@
+import { updateCanvasConnectedCorners, observeCanvasConnectedCorners } from "./canvas-connected-corners.js";
+
 /**
  * Shared visual rendering for Canvas groups.
  *
@@ -97,5 +99,7 @@ export function renderCanvasGroups(sheet, root) {
     rendered += 1;
   }
 
+  updateCanvasConnectedCorners(canvas);
+  observeCanvasConnectedCorners(canvas);
   return { rendered, groups };
 }
