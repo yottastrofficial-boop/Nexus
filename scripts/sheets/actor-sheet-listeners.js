@@ -1152,13 +1152,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
-    const persistInteractionEditor = async (control, command = null) => {
+    const pendingInteractionInputSaves = new WeakMap();
+    const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
       if (!componentId) return;
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
-      sheet._captureHistory();
+      if (options.captureHistory !== false) sheet._captureHistory();
       const data = { interactionId, componentId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, ruleIndex: control.dataset.ruleIndex, direction: control.dataset.direction, sourcePath: control.dataset.sourcePath };
       if (command === "save-flow") {
         const flow = getComponentInteractions(component).find(item => item.id === interactionId);
@@ -1178,7 +1179,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         sheet._refreshBoundComponents?.();
       }
       const propertyEditor = control.closest("[data-property-presentation-editor]");
-      if (propertyEditor) {
+      if (propertyEditor && options.render !== false) {
         const scrollTop = propertyEditor.scrollTop;
         renderPropertyPresentationEditor(propertyEditor, component, component.dataPath ?? "");
         propertyEditor.dataset.componentId = componentId;
@@ -1231,8 +1232,25 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field]", async event => {
-      event.stopPropagation(); await persistInteractionEditor(event.currentTarget);
+    // Regras de apresentação são salvas durante a edição, sem reconstruir
+    // o campo a cada tecla (o que interromperia a digitação e o cursor).
+    $(document).on(`input${inspectorNamespace}`, "[data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", event => {
+      const control = event.currentTarget;
+      const previousTimer = pendingInteractionInputSaves.get(control);
+      if (previousTimer) clearTimeout(previousTimer);
+      const timer = setTimeout(() => {
+        pendingInteractionInputSaves.delete(control);
+        persistInteractionEditor(control, null, { render: false, captureHistory: false })
+          .catch(error => console.error("NEXUS | Falha ao salvar regra durante a edição", error));
+      }, 300);
+      pendingInteractionInputSaves.set(control, timer);
+    });
+    $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field], [data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", async event => {
+      const control = event.currentTarget;
+      const pendingTimer = pendingInteractionInputSaves.get(control);
+      if (pendingTimer) { clearTimeout(pendingTimer); pendingInteractionInputSaves.delete(control); }
+      event.stopPropagation();
+      await persistInteractionEditor(control);
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {
