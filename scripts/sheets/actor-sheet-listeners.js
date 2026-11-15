@@ -941,7 +941,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const addFlowButton=target?.closest("[data-library-add-flow]");
       if(addFlowButton&&libraryPanel.contains(addFlowButton)){
-        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedFlowId;
+        const id=libraryPanel.querySelector("[data-library-flow-details]")?.dataset.selectedFlowId;
         const selectedId=[...(sheet._selectedIds??[])][0];
         if(!id||!selectedId||sheet._selectedIds.size!==1){ui.notifications?.warn?.("Selecione um único componente no Canvas antes de inserir um fluxo.");return;}
         const entry=getInteractionLibrary(sheet.actor).find(item=>item.id===id);if(!entry)return;
