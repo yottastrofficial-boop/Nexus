@@ -1,3 +1,14 @@
+## 1.0.0.42
+
+### Exibição das regras e cards compactos
+- Reavalia as representações por regra após o salvamento de movimentos e redimensionamentos no Canvas, evitando que a saída visual desapareça após alterar as dimensões.
+- Cards com largura ou altura inferior a 100 px recebem padding interno de no máximo 2 px.
+- A classificação de cards compactos acompanha redimensionamentos e também considera componentes dentro de grupos.
+
+### Compatibilidade com Foundry VTT 14
+- Substitui a sintaxe legada de exclusão de propriedades de perícias pelo operador `foundry.data.operators.ForcedDeletion`.
+- Remove o aviso de compatibilidade associado à exclusão de `proficient`, `proficiency`, `opposed` e entradas antigas de perícia.
+
 ## 1.0.0.41
 
 ### Bordas e cantos
