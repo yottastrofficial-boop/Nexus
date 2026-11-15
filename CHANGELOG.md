@@ -6,6 +6,7 @@
 - A detecção acompanha alterações dimensionais por ResizeObserver e o editor de Aparência reutiliza o mesmo cálculo.
 
 ### Regras de apresentação e expressões
+- O conteúdo fora de `{{...}}` permanece literal; somente expressões explicitamente delimitadas são avaliadas. Exemplo: `{{"1"+"1"}}` resulta em `11`, enquanto `"1"+"1"` permanece texto.
 - Rótulos “Condição” e “Conteúdo exibido” posicionados acima dos respectivos campos.
 - Padronizadas as referências: `@atalho` solicita o valor apresentado; `{{caminho.direto}}` lê o caminho de dados; `{{@atalho}}` permanece compatível.
 - O avaliador diferencia soma numérica de concatenação textual: `2 + 2 + 2` resulta em `6`; `"2" + "2" + "2"` resulta em `222`.
