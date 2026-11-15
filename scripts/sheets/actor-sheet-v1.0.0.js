@@ -316,25 +316,30 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
   );
 };
 
-const getNexusRollAliasEntries = actor => {
-  const candidates = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
+const getNexusRollAliasCandidates = actor => {
+  return [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
     .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
+    // Native resource maximum and temporary values are not independent roll shortcuts.
+    .filter(alias => !(alias.origin === "native" && ["max", "temporary"].includes(String(alias.key ?? "").split(".").at(-1))))
     .map(alias => {
-    const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
-    const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
-    const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
-    const display = explicit || generated;
-    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
-    const root = safeAliasKey(alias.targetPath || alias.key);
-    if (!root) return null;
-    const raw = alias.targetPath
-      ? getPath(actor?.system ?? {}, alias.targetPath)
-      : getPath(getCustomAliasData(actor), alias.key);
-    const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
-    const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value") ? root + ".value" : root);
-    return target ? { display, target, label: String(alias.label ?? display), alias } : null;
-  }).filter(Boolean);
+      const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+      const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
+      const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
+      const display = explicit || generated;
+      if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
+      const root = safeAliasKey(alias.targetPath || alias.key);
+      if (!root) return null;
+      const raw = alias.targetPath
+        ? getPath(actor?.system ?? {}, alias.targetPath)
+        : getPath(getCustomAliasData(actor), alias.key);
+      const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
+      const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value") ? root + ".value" : root);
+      return target ? { display, target, label: String(alias.label ?? display), alias } : null;
+    }).filter(Boolean);
+};
+const getNexusRollAliasEntries = actor => {
+  const candidates = getNexusRollAliasCandidates(actor);
   const counts = new Map();
   for (const entry of candidates) {
     const key = entry.display.toLocaleUpperCase("pt-BR");
@@ -2605,35 +2610,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       else presentationEditor?.replaceChildren();
       const aliasWarning = inspector.querySelector("[data-property-alias-conflicts]");
       if (aliasWarning) {
-        // Use the same abbreviation rules as roll formulas. Ordinary metadata
-        // fields (name, description, proficient, etc.) are not roll aliases.
-        const candidates = [...getNativePropertyDefinitions(this.actor), ...getAliasDefinitions(this.actor)]
-          .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
-          .map(alias => {
-            const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
-            const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
-              .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
-            const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
-            const display = explicit || generated;
-            if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
-            const root = safeAliasKey(alias.targetPath || alias.key);
-            if (!root) return null;
-            const raw = alias.targetPath
-              ? getPath(this.actor?.system ?? {}, alias.targetPath)
-              : getPath(getCustomAliasData(this.actor), alias.key);
-            const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
-            const path = safeAliasKey(
-              ["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value")
-                ? root + ".value"
-                : root
-            );
-            return path ? { display, label: String(alias.label ?? display), path } : null;
-          }).filter(Boolean);
+        const candidates = getNexusRollAliasCandidates(this.actor);
         const byKey = new Map();
         for (const item of candidates) {
           const key = item.display.toLocaleUpperCase("pt-BR");
           if (!byKey.has(key)) byKey.set(key, new Map());
-          byKey.get(key).set(item.path, item);
+          byKey.get(key).set(item.target, item);
         }
         const conflicts = [...byKey.entries()].filter(([, values]) => values.size > 1)
           .map(([key, values]) => key + " → " + [...values.values()].map(item => item.label).join(" / "));
