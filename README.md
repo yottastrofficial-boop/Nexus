@@ -168,6 +168,8 @@ A separação preserva os contratos entre módulos e o formato de dados já salv
 - `{{@atalho}}`: forma entre chaves compatível com regras existentes.
 - `{{2 + 2 + 2}}`: soma numérica, resultado `6`.
 - `{{"2" + "2" + "2"}}`: concatenação textual, resultado `222`.
+- `{{"1" + "1"}}`: concatenação textual, resultado `11`.
+- Texto fora de `{{...}}` é literal: `"1"+"1"="1"+"1"` permanece exatamente assim na exibição.
 
 Os comparadores são `=` e `==` (igual), `!=` (diferente), `>` (maior), `>=` (maior ou igual), `<` (menor) e `<=` (menor ou igual). Multiplicação, divisão, subtração e módulo permanecem operações numéricas.
 
