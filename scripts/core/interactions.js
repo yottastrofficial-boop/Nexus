@@ -49,8 +49,9 @@ export function normalizeComponentRepresentation(raw) {
   if (!raw || typeof raw !== "object") return { enabled: false, sourcePath: "", rules: [] };
   const rules = (Array.isArray(raw.rules) ? raw.rules : []).slice(0, 32).map((rule, index) => ({
     id: String(rule?.id ?? ("representation-rule-" + (index + 1))),
+    name: String(rule?.name ?? ("Regra " + (index + 1))).trim().slice(0, 60),
     condition: String(rule?.condition ?? "").trim().slice(0, 500),
-    content: rule?.content === undefined ? "" : String(rule.content).trim().slice(0, 1000),
+    content: rule?.content === undefined ? "" : String(rule.content).slice(0, 1000),
     icon: String(rule?.icon ?? "").slice(0, 120),
     label: String(rule?.label ?? "").slice(0, 100),
     output: String(rule?.output ?? "").trim().slice(0, 500)
@@ -59,14 +60,31 @@ export function normalizeComponentRepresentation(raw) {
 }
 
 function interpolateRepresentationContent(template, resolveProperty) {
-  return String(template ?? "").replace(/\{\{\s*([^{}]+?)\s*\}\}/g, (token, rawExpression) => {
-    const expression = String(rawExpression).trim();
+  const source = String(template ?? "");
+  const tokenPattern = /\{\{\s*([^{}]+?)\s*\}\}|@([A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)/g;
+  return source.replace(tokenPattern, (token, wrappedExpression, barePath) => {
+    const expression = String(wrappedExpression ?? barePath ?? "").trim();
     if (/^(?:icon|image):/i.test(expression)) return token;
-    const evaluated = evaluateNexusExpression(expression, resolveProperty);
-    if (evaluated !== null && evaluated !== undefined) return String(evaluated);
-    const direct = resolveProperty(expression.replace(/^@/, ""));
-    return direct === undefined || direct === null ? "" : String(direct);
+    const directPath = safePath(expression);
+    const direct = directPath ? resolveProperty(directPath) : undefined;
+    if (direct !== undefined && direct !== null) return String(direct);
+    const evaluated = wrappedExpression ? evaluateNexusExpression(expression, resolveProperty) : null;
+    return evaluated !== null && evaluated !== undefined ? String(evaluated) : "";
   });
+}
+
+function representationConditionPasses(condition, resolveProperty) {
+  const expression = String(condition ?? "").trim();
+  if (!expression) return false;
+  const evaluated = evaluateNexusCondition(expression, resolveProperty);
+  if (typeof evaluated === "boolean") return evaluated;
+  const unwrapped = expression.replace(/\{\{\s*([^{}]+?)\s*\}\}/g, "$1").trim();
+  const directPath = safePath(unwrapped);
+  if (!directPath) return false;
+  const value = resolveProperty(directPath);
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return Number.isFinite(value) && value !== 0;
+  return value !== undefined && value !== null && value !== "";
 }
 
 export function evaluateComponentRepresentation(raw, resolveProperty, sourcePathOverride = "") {
@@ -75,7 +93,7 @@ export function evaluateComponentRepresentation(raw, resolveProperty, sourcePath
   if (!config.enabled || !sourcePath || typeof resolveProperty !== "function") return null;
   const sourceValue = resolveProperty(sourcePath);
   for (const [index, rule] of config.rules.entries()) {
-    if (!rule.condition || evaluateNexusCondition(rule.condition, resolveProperty) !== true) continue;
+    if (!representationConditionPasses(rule.condition, resolveProperty)) continue;
     let content = rule.content;
     if (!content) {
       const calculated = rule.output ? evaluateNexusFormula(rule.output, resolveProperty) : null;
@@ -180,7 +198,8 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
     } else {
       const rule = current.rules[Number(data.ruleIndex)];
       if (!rule) return false;
-      if (data.field === "condition") rule.condition = String(value ?? "").trim().slice(0, 500);
+      if (data.field === "name") rule.name = String(value ?? "").trim().slice(0, 60);
+      else if (data.field === "condition") rule.condition = String(value ?? "").trim().slice(0, 500);
       else if (data.field === "content") rule.content = String(value ?? "").slice(0, 1000);
     }
     component.propertyPresentation = current;
@@ -230,7 +249,7 @@ export function applyInteractionEditorCommand(component,command,data={}) {  if (
     if (command === "add-property-rule") {
       presentation.enabled = true;
       presentation.sourcePath = safePath(data.sourcePath) || presentation.sourcePath;
-      presentation.rules.push({ id: newId("property-rule"), condition: "", content: "{{@" + (presentation.sourcePath || "identity.level") + "}}" });
+      presentation.rules.push({ id: newId("property-rule"), name: "Regra " + (presentation.rules.length + 1), condition: "", content: "{{@" + (presentation.sourcePath || "identity.level") + "}}" });
     } else {
       if (index < 0 || index >= presentation.rules.length) return false;
       if (command === "remove-property-rule") presentation.rules.splice(index, 1);
@@ -354,13 +373,27 @@ export function renderPropertyPresentationEditor(container, component, propertyP
     config.rules.forEach((rule, index) => {
       const row = document.createElement("article"); row.className = "nexus-property-presentation-rule";
       const head = document.createElement("div"); head.className = "nexus-property-presentation-rule-head";
-      const label = document.createElement("strong"); label.textContent = "Regra " + (index + 1);
-      const remove = document.createElement("button"); remove.type = "button"; remove.className = "nexus-icon-button"; remove.textContent = "×"; remove.title = "Remover regra"; remove.dataset.interactionAction = "remove-property-rule"; remove.dataset.componentId = String(component?.id ?? ""); remove.dataset.ruleIndex = String(index); head.append(label, remove);
-      const conditionLabel = document.createElement("label"); conditionLabel.textContent = "Se";
-      const condition = document.createElement("input"); condition.type = "text"; condition.value = rule.condition; condition.placeholder = "@identity.level >= 5"; condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition"; condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? ""); conditionLabel.append(condition);
-      const contentLabel = document.createElement("label"); contentLabel.textContent = "Conteúdo";
-      const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : ""); content.placeholder = "{{icon:fa-solid fa-fire}} Fúria: {{@attributes.for.value}}"; content.dataset.interactionScope = "propertyPresentationRule"; content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? ""); contentLabel.append(content);
-      row.append(head, conditionLabel, contentLabel); rules.append(row);
+      const name = document.createElement("input");
+      name.type = "text"; name.className = "nexus-property-presentation-rule-name";
+      name.value = rule.name; name.maxLength = 60; name.setAttribute("aria-label", "Nome da regra");
+      name.dataset.interactionScope = "propertyPresentationRule"; name.dataset.interactionField = "name";
+      name.dataset.ruleIndex = String(index); name.dataset.componentId = String(component?.id ?? "");
+      const controls = document.createElement("div"); controls.className = "nexus-property-presentation-rule-controls";
+      const moveUp = document.createElement("button"); moveUp.type = "button"; moveUp.className = "nexus-icon-button"; moveUp.textContent = "↑"; moveUp.title = "Mover regra para cima"; moveUp.setAttribute("aria-label", moveUp.title); moveUp.disabled = index === 0;
+      moveUp.dataset.interactionAction = "move-property-rule"; moveUp.dataset.direction = "-1"; moveUp.dataset.componentId = String(component?.id ?? ""); moveUp.dataset.ruleIndex = String(index);
+      const moveDown = document.createElement("button"); moveDown.type = "button"; moveDown.className = "nexus-icon-button"; moveDown.textContent = "↓"; moveDown.title = "Mover regra para baixo"; moveDown.setAttribute("aria-label", moveDown.title); moveDown.disabled = index === config.rules.length - 1;
+      moveDown.dataset.interactionAction = "move-property-rule"; moveDown.dataset.direction = "1"; moveDown.dataset.componentId = String(component?.id ?? ""); moveDown.dataset.ruleIndex = String(index);
+      const remove = document.createElement("button"); remove.type = "button"; remove.className = "nexus-icon-button"; remove.textContent = "×"; remove.title = "Remover regra"; remove.setAttribute("aria-label", remove.title);
+      remove.dataset.interactionAction = "remove-property-rule"; remove.dataset.componentId = String(component?.id ?? ""); remove.dataset.ruleIndex = String(index);
+      controls.append(moveUp, moveDown, remove); head.append(name, controls);
+      const condition = document.createElement("input"); condition.type = "text"; condition.className = "nexus-property-presentation-condition";
+      condition.value = rule.condition; condition.setAttribute("aria-label", "Condição da regra");
+      condition.dataset.interactionScope = "propertyPresentationRule"; condition.dataset.interactionField = "condition";
+      condition.dataset.ruleIndex = String(index); condition.dataset.componentId = String(component?.id ?? "");
+      const content = document.createElement("textarea"); content.rows = 2; content.value = rule.content || (rule.output ? "{{" + rule.output + "}}" : "");
+      content.setAttribute("aria-label", "Conteúdo da regra"); content.dataset.interactionScope = "propertyPresentationRule";
+      content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? "");
+      row.append(head, condition, content); rules.append(row);
     });
     container.append(rules);
   }

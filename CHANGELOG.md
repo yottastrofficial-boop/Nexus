@@ -1,3 +1,21 @@
+## 1.0.0.39
+
+### Apresentação de propriedades
+- Corrigida a avaliação das condições para aceitar referências simples com `@caminho`, expressões completas entre `{{...}}` e referências entre chaves dentro de comparações.
+- O conteúdo das regras aceita referências `@caminho`, tokens `{{@caminho}}` e expressões numéricas como `{{@nivel + @bonus}}`.
+- Regras também podem usar uma referência direta como condição de presença, além de comparações numéricas.
+- A atualização reativa agora observa dependências de `propertyPresentation`, incluindo referências usadas na condição e no conteúdo.
+- Cada regra possui nome próprio editável e controles para mover para cima ou para baixo.
+- Removidos os rótulos “Se” e “Conteúdo” e os placeholders dos campos.
+- Simplificada a hierarquia visual do editor: removidas superfícies aninhadas, mantendo divisórias discretas e controles alinhados ao restante do Inspector.
+
+### Aparência
+- Corrigida a borda dos componentes para manter uma superfície consistente nos modos padrão, configuração e aparência, respeitando a cor personalizada e preservando a superfície compartilhada dos grupos.
+
+### Validação
+- Adicionadas regressões para sintaxe de condições, interpolação de conteúdo, nomes e ordenação de regras, atualização reativa e bordas nos modos da ficha.
+- Testes automatizados do pacote executados pelo GitHub Actions; confirmação visual em Foundry VTT 14 continua necessária.
+
 ## 1.0.0.38
 
 - Corrigida a preservação da rolagem durante renderizações completas da ficha: a captura agora contempla todos os contêineres roláveis encontrados nos painéis, abas do Inspector, Biblioteca, Comportamento e janelas flutuantes.

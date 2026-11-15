@@ -4,7 +4,7 @@
  */
 function evaluateExpression(expression, resolveProperty, options = {}) {
   let source = String(expression ?? "").trim();
-  source = source.replace(/^\{\{\s*/, "").replace(/\s*\}\}$/, "");
+  source = source.replace(/\{\{\s*([^{}]+?)\s*\}\}/g, "$1").trim();
   const maxLength = Math.min(1000, Math.max(1, Number(options.maxLength) || 500));
   const maxTokens = Math.min(256, Math.max(1, Number(options.maxTokens) || 128));
   const maxDepth = Math.min(32, Math.max(1, Number(options.maxDepth) || 16));

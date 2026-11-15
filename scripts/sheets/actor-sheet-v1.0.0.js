@@ -1251,10 +1251,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     addPath(component.actionPath);
     addPath(component.currentPath);
     addPath(component.maxPath);
-    addPath(component.representation?.sourcePath);
+    const presentation = component.propertyPresentation ?? component.representation;
+    addPath(presentation?.sourcePath);
     for (const expression of JSON.stringify(component).matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)) addExpression(expression[1]);
-    for (const rule of component.representation?.rules ?? []) {
+    for (const rule of presentation?.rules ?? []) {
       addExpression(rule.condition);
+      addExpression(rule.content);
       addExpression(rule.output);
     }
     if (component.type === "token" || component.type === "asset-image") addPath("img");
