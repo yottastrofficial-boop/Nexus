@@ -5892,3 +5892,26 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-sheet[data-mode="config"] .nexus-component:not(.is-group-member) {
   border-color:var(--nexus-component-border,#8299b5) !important;
 }
+
+
+/* v1.0.0.40 — rótulos dos campos e geometria de contato em todos os modos. */
+.nexus-property-presentation-field{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:4px!important;min-width:0!important;margin:0!important;color:var(--nexus-panel-muted,#9aadc2)!important;font-size:10px!important;font-weight:700!important}
+.nexus-property-presentation-field>input,.nexus-property-presentation-field>textarea{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+.nexus-component:not(.is-group-member){border:1px solid var(--nexus-component-border,var(--nexus-accent-color,#52647b))!important;border-radius:var(--nexus-component-radius,7px)!important}
+.nexus-group-surface{border:1px solid var(--nexus-group-border,#53677f)!important;border-radius:var(--nexus-group-radius,9px)!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-top{border-top-left-radius:0!important;border-top-right-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-right{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-bottom{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-touching-left{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
+.nexus-group-surface.nexus-group-touching-top{border-top-left-radius:0!important;border-top-right-radius:0!important}
+.nexus-group-surface.nexus-group-touching-right{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
+.nexus-group-surface.nexus-group-touching-bottom{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
+.nexus-group-surface.nexus-group-touching-left{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tl{border-top-left-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tr{border-top-right-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-br{border-bottom-right-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-bl{border-bottom-left-radius:0!important}
+.nexus-group-surface.nexus-group-corner-square-tl{border-top-left-radius:0!important}
+.nexus-group-surface.nexus-group-corner-square-tr{border-top-right-radius:0!important}
+.nexus-group-surface.nexus-group-corner-square-br{border-bottom-right-radius:0!important}
+.nexus-group-surface.nexus-group-corner-square-bl{border-bottom-left-radius:0!important}
