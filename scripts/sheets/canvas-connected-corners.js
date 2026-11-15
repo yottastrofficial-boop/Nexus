@@ -12,7 +12,14 @@ const getRect = node => {
 
 export function updateCanvasConnectedCorners(canvas, tolerance = 2.5) {
   if (!canvas?.querySelectorAll) return { surfaces: 0, contacts: 0 };
-  const components = [...canvas.querySelectorAll(".nexus-component:not(.is-group-member)")];
+  const allComponents = [...canvas.querySelectorAll(".nexus-component")];
+  for (const node of allComponents) {
+    const width = Number.parseFloat(node.style?.width) || node.offsetWidth || 0;
+    const height = Number.parseFloat(node.style?.height) || node.offsetHeight || 0;
+    if (width < 100 || height < 100) node.classList.add("is-compact");
+    else node.classList.remove("is-compact");
+  }
+  const components = allComponents.filter(node => !node.classList.contains("is-group-member"));
   const groups = [...canvas.querySelectorAll(".nexus-group-surface")];
   const surfaces = [...components.map(node => ({ node, prefix: "nexus-component" })), ...groups.map(node => ({ node, prefix: "nexus-group" }))];
   for (const { node, prefix } of surfaces) node.classList.remove(
@@ -63,7 +70,7 @@ export function observeCanvasConnectedCorners(canvas) {
     record = { observer: new ResizeObserver(schedule), observed: new Set(), schedule };
     observerByCanvas.set(canvas, record);
   }
-  const current = new Set([...canvas.querySelectorAll(".nexus-component:not(.is-group-member)"), ...canvas.querySelectorAll(".nexus-group-surface")]);
+  const current = new Set([...canvas.querySelectorAll(".nexus-component"), ...canvas.querySelectorAll(".nexus-group-surface")]);
   for (const node of record.observed) if (!current.has(node)) { record.observer.unobserve(node); record.observed.delete(node); }
   for (const node of current) if (!record.observed.has(node)) { record.observer.observe(node); record.observed.add(node); }
   record.schedule();
