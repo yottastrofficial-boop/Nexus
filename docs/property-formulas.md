@@ -39,3 +39,10 @@ A precedência matemática é respeitada. Divisão por zero, propriedades descon
 ## Limites desta etapa
 
 O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e não aceita chamadas de funções arbitrárias. Esta etapa habilita expressões aritméticas em texto e fórmulas de rolagem; um editor visual de fórmulas persistentes para qualquer propriedade, com dependências e detecção de ciclos, ainda é uma etapa separada.
+
+
+## Fórmulas persistentes de propriedades
+
+O Editor de Dados permite ativar o modo **Automático por fórmula** em propriedades numéricas personalizadas. A fórmula fica salva nos metadados da propriedade, enquanto o valor manual original permanece em `flags.nexus.customData`. Desativar o cálculo retorna ao valor manual sem perda de dados.
+
+Exemplos aceitos: `nivel + mb`, `(des + mb) * 2` e `for - 1`. Use espaços ao redor dos operadores quando necessário para separar identificadores de subtrações. Fórmulas são avaliadas com os valores atuais do Actor. Ciclos e referências inválidas são rejeitados de forma segura.

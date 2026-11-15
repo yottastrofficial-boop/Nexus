@@ -5768,3 +5768,24 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   border-radius:50%;
   background:var(--nexus-highlight-color,#78b7e8);
 }
+
+
+/* Editor de cálculo das propriedades personalizadas. */
+.nexus-alias-formula {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid var(--nexus-panel-border, rgba(130, 150, 175, .25));
+  border-radius: 8px;
+  background: var(--nexus-panel-bg, rgba(20, 28, 40, .35));
+}
+.nexus-alias-formula label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+}
+.nexus-alias-formula small {
+  color: var(--nexus-text-muted, #9aa9bb);
+  line-height: 1.4;
+}

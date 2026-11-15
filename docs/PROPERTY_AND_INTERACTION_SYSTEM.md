@@ -136,7 +136,13 @@ Dependências futuras deverão detectar ciclos, referências inválidas e atuali
 
 O modo avançado poderá oferecer operações mais expressivas, mas código arbitrário não deve ser executado sem limites. A execução avançada dependerá de uma API controlada, validação de entradas, permissões e limites de execução.
 
-## 5. Implementação por etapas
+## 5. Registro e cálculo incremental de propriedades
+
+O registro de leitura combina propriedades do Core, propriedades nativas, personalizadas e caminhos externos do Actor. Ele não altera os locais de persistência existentes. Propriedades numéricas personalizadas podem usar modo manual ou fórmula automática; o valor manual é mantido mesmo quando a fórmula está ativa.
+
+A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, dependências reativas ou migração universal de IDs.
+
+## 6. Implementação por etapas
 
 ### Implementado nesta etapa
 
@@ -151,11 +157,10 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 ### Próximas etapas
 
-1. Criar o `PropertyRegistry` e o contrato completo de metadados.
-2. Migrar as propriedades existentes para identificadores e chaves canônicas sem quebrar vínculos.
-3. Substituir o seletor rígido de ação por um editor de interações com trigger, lista de ações reordenável e configuração contextual.
+1. Expandir o `PropertyRegistry` para registro global de módulos e metadados completos.
+2. Migrar progressivamente os dados para identificadores neutros sem quebrar vínculos.
+3. Implementar dependências reativas com invalidação e detecção explícita de ciclos.
 4. Consolidar o `Roll Dialog` universal.
-5. Implementar o mecanismo de cálculos e dependências opcionais.
-6. Evoluir a interface visual de criação de comportamentos e, depois, a API avançada segura.
+5. Evoluir a interface visual de comportamentos e a API avançada segura.
 
 A evolução deve continuar incremental. Não se deve reconstruir a ficha inteira nem declarar concluída uma camada que ainda esteja apenas definida neste contrato.

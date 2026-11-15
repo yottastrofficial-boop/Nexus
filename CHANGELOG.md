@@ -1,3 +1,13 @@
+## 1.0.0.34
+
+- Criado o registro central de leitura de propriedades, reunindo definições do Core, metadados nativos, propriedades personalizadas e caminhos externos do Actor.
+- O seletor passa a incluir propriedades personalizadas e identificadores configurados, preservando os caminhos antigos como referências compatíveis.
+- Propriedades numéricas personalizadas agora podem alternar entre valor manual e cálculo automático por fórmula.
+- Fórmulas são avaliadas sob demanda com valores atuais do Actor; referências inválidas, ciclos, divisões inválidas e resultados não finitos não sobrescrevem os valores manuais persistidos.
+- Mantidos os dados existentes em `Actor.system`, `flags.nexus.aliases`, `flags.nexus.customData` e `flags.nexus.nativeProperties`; nenhuma limpeza destrutiva ou reset de personagens foi realizado.
+
+**Validação:** validação estática e regressões aprovadas no GitHub Actions. O build completo e testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+
 ## 1.0.0.33
 
 - Corrigido o encaixe de bordas no Canvas: o controlador detecta contato real entre arestas, aplica estados nos dois elementos e recalcula os cantos quando a seleção muda.
