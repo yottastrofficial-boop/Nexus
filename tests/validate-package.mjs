@@ -753,4 +753,4 @@ assert.equal(evaluateNexusFormula("des + mb", key => ({ des: 4, mb: 2 })[key]), 
 assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null, "Divisão por zero deve ser rejeitada");
 assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
 assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
-assert.match(sheetCode, /evaluateNexusFormula\\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
+assert.match(sheetCode, /evaluateNexusFormula\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
