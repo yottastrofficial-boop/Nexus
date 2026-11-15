@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.39 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.40 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.39-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.40-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.39. Esta atualização integra regras de representação ao menu Comportamento, amplia o avaliador seguro de expressões e atualiza somente os componentes dependentes dos dados alterados no Actor, sem polling. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+> **Versão atual:** 1.0.0.40. Esta atualização integra regras de representação ao menu Comportamento, amplia o avaliador seguro de expressões e atualiza somente os componentes dependentes dos dados alterados no Actor, sem polling. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.39 |
+| Versão atual | 1.0.0.40 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.39 consolida a organização do seletor de propriedades, aprimora o Canvas e a Biblioteca de fluxos e avança o carregamento sob demanda de mídia. A validação automatizada do pacote é executada no CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.40 consolida a organização do seletor de propriedades, aprimora o Canvas e a Biblioteca de fluxos e avança o carregamento sob demanda de mídia. A validação automatizada do pacote é executada no CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
@@ -159,3 +159,16 @@ A ficha continua sendo a fachada que integra o Foundry VTT, mas suas responsabil
 - `scripts/core/skills.js`: fonte das perícias e dos valores derivados.
 
 A separação preserva os contratos entre módulos e o formato de dados já salvo nos Actors. Ela melhora a manutenção e permite testar cada domínio isoladamente; dividir arquivos, por si só, não reduz o trabalho executado pelo navegador. Otimizações de carregamento sob demanda serão avaliadas depois, com medições e sem comprometer a inicialização do Foundry.
+
+
+## Regras de apresentação e expressões
+
+- `@atalho`: referência abreviada ao valor apresentado pela propriedade.
+- `{{caminho.direto}}`: leitura direta do caminho de dados, sem depender do atalho visual.
+- `{{@atalho}}`: forma entre chaves compatível com regras existentes.
+- `{{2 + 2 + 2}}`: soma numérica, resultado `6`.
+- `{{"2" + "2" + "2"}}`: concatenação textual, resultado `222`.
+
+Os comparadores são `=` e `==` (igual), `!=` (diferente), `>` (maior), `>=` (maior ou igual), `<` (menor) e `<=` (menor ou igual). Multiplicação, divisão, subtração e módulo permanecem operações numéricas.
+
+Texto literal e referências podem coexistir no conteúdo. Imagens e ícones são segmentos próprios, por exemplo `{{image:@retrato}}` e `{{icon:fa-solid fa-star}}`, evitando misturar recursos visuais com operações matemáticas.
