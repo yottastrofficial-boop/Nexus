@@ -661,7 +661,7 @@ assert.doesNotMatch(interactions,/summary\.textContent="QUANDO/, "O resumo textu
 assert.ok(css.includes("nexus-interaction-condition-group .nexus-interaction-group-heading"), "O seletor E/OU deve ocupar área dimensionada no cabeçalho de condições");
 assert.ok(css.includes(".nexus-interaction-group.nexus-interaction-trigger-group { min-height:54px"), "O grupo de gatilhos deve iniciar com altura mínima de 54 px");
 assert.ok(css.includes(".nexus-library-flow-details"), "A Biblioteca deve reservar uma área de detalhes para fluxos");
-assert.ok(css.includes(".nexus-component.nexus-component-touching-right"), "As bordas conectadas devem achatar os cantos do lado compartilhado");
+assert.ok(css.includes(".nexus-component.nexus-component-corner-square-br"), "O arredondamento deve ser controlado por classes de cantos individuais");
 assert.ok(css.includes("grid-template-columns:minmax(0,1.55fr) minmax(110px,.85fr) minmax(90px,.8fr) auto"), "A propriedade da condição deve ter prioridade de largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Painéis compactos devem compartilhar largura");
 assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dados deve usar largura compacta padronizada");
@@ -903,9 +903,22 @@ const canvas40={querySelectorAll(selector){if(selector===".nexus-component")retu
 const geometry40=updateCanvasConnectedCorners(canvas40);
 assert.equal(geometry40.surfaces,3);
 assert.equal(a40.classList.contains("nexus-component-touching-right"),true);
+assert.equal(a40.classList.contains("nexus-component-corner-square-tr"),true,"Contato lateral completo deve achatar o canto superior direito que realmente toca a outra borda");
+assert.equal(a40.classList.contains("nexus-component-corner-square-br"),true,"Contato lateral completo deve achatar o canto inferior direito que realmente toca a outra borda");
 assert.equal(b40.classList.contains("nexus-component-touching-left"),true);
+assert.equal(b40.classList.contains("nexus-component-corner-square-tl"),true);
+assert.equal(b40.classList.contains("nexus-component-corner-square-bl"),true);
 assert.equal(b40.classList.contains("nexus-component-touching-right"),true);
 assert.equal(g40.classList.contains("nexus-group-touching-left"),true);
+
+const partialA40=surface40(0,0,100,100),partialB40=surface40(100,50,100,100);
+const partialCanvas40={querySelectorAll(selector){if(selector===".nexus-component"||selector===".nexus-component:not(.is-group-member)")return[partialA40,partialB40];if(selector===".nexus-group-surface")return[];return[];}};
+updateCanvasConnectedCorners(partialCanvas40);
+assert.equal(partialA40.classList.contains("nexus-component-corner-square-br"),true,"Em contato parcial, somente o canto inferior direito do primeiro card toca a borda vizinha");
+assert.equal(partialA40.classList.contains("nexus-component-corner-square-tr"),false,"O canto superior direito não toca a borda vizinha e deve continuar arredondado");
+assert.equal(partialB40.classList.contains("nexus-component-corner-square-tl"),true,"Em contato parcial, somente o canto superior esquerdo do segundo card toca a borda vizinha");
+assert.equal(partialB40.classList.contains("nexus-component-corner-square-bl"),false,"O canto inferior esquerdo não toca a borda vizinha e deve continuar arredondado");
+
 assert.match(canvasGroups,/updateCanvasConnectedCorners/);
 assert.match(interactions,/Conteúdo exibido/);
 assert.match(interactions,/barePath \? "@" \+ barePath/,"A abreviação @ deve preservar o prefixo para resolver o valor de exibição");
@@ -913,10 +926,10 @@ assert.match(interactions,/Condição/);
 
 assert.match(css,/nexus-sheet:is\(\[data-mode="play"\],\[data-mode="config"\],\[data-mode="appearance"\]\)/,"Cantos devem ser recalculados em todos os modos");
 
-assert.doesNotMatch(css,/\\.nexus-component\\.nexus-component-touching-(?:top|right|bottom|left)\\s*\\{/,"Contato em uma aresta não deve achatar automaticamente os dois cantos daquele lado");
-assert.doesNotMatch(css,/\\.nexus-group-surface\\.nexus-group-touching-(?:top|right|bottom|left)\\s*\\{/,"Superfícies de grupo também devem usar arredondamento individual por canto");
-assert.match(sheetListeners,/input\\$\\{inspectorNamespace\\}/,"As regras devem ser salvas durante a digitação, sem depender apenas do evento change");
-assert.match(sheetListeners,/render:\\s*false,\\s*captureHistory:\\s*false/,"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
+assert.ok(!css.includes(".nexus-component.nexus-component-touching-right {") && !css.includes(".nexus-component.nexus-component-touching-left {"),"Contato em uma aresta não deve achatar automaticamente os dois cantos daquele lado");
+assert.ok(!css.includes(".nexus-group-surface.nexus-group-touching-right {") && !css.includes(".nexus-group-surface.nexus-group-touching-left {"),"Superfícies de grupo também devem usar arredondamento individual por canto");
+assert.ok(sheetListeners.includes("input${inspectorNamespace}"),"As regras devem ser salvas durante a digitação, sem depender apenas do evento change");
+assert.ok(sheetListeners.includes("render: false, captureHistory: false"),"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
 
 const cornerOnlyA=surface40(0,0,100,100),cornerOnlyB=surface40(100,100,100,100);
 const compactOnly=surface40(500,500,90,120),compactHeightOnly=surface40(650,500,120,90);
