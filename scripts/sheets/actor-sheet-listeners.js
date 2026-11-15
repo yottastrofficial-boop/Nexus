@@ -1632,6 +1632,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         sheet._componentEditorTargetId = id;
         sheet._selectedIds = new Set([id]);
       }
+      if (key === "width" || key === "height") sheet._refreshBoundComponents?.();
     });
     html.find("[data-group-setting]").on("change", async event => {
       const input = event.currentTarget;
