@@ -7,6 +7,7 @@ import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
 import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
+import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
@@ -1101,6 +1102,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const appWindow = form.closest(".application, .window-app");
     appWindow?.classList.add("nexus-window");
     this.activateListeners($(form));
+    renderCanvasGroups(this, form);
     this._bindComponentQuickEdit(form);
     if (this._pendingAliasScrollTop !== undefined) {
       const top = this._pendingAliasScrollTop; this._pendingAliasScrollTop = undefined;

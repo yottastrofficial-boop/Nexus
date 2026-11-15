@@ -3267,6 +3267,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-group-container { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .nexus-group-container > .nexus-component,
 .nexus-group-container > .nexus-group-surface { pointer-events:auto; }
+.nexus-group-surface.is-static { pointer-events:none !important; }
 
 /* NEXUS v1.30.0 — seleção nítida e grupos sem halo deslocado. */
 .nexus-component.is-selected {

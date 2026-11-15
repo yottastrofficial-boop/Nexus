@@ -738,3 +738,10 @@ assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do edi
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
 assert.match(css,/nexus-library-personal-preview/,"Itens pessoais devem usar miniaturas quadradas");
 assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades deve oferecer navegação hierárquica e pesquisa");
+
+
+const canvasGroups = await readFile(new URL("../scripts/sheets/canvas-group-rendering.js", import.meta.url), "utf8");
+assert.match(sheetCode,/renderCanvasGroups\(this, form\)/,"Grupos devem ser renderizados também no Modo Padrão");
+assert.match(canvasGroups,/nexus-group-surface/,"O renderizador compartilhado deve criar a superfície visual do grupo");
+assert.match(canvasGroups,/is-group-member/,"O renderizador compartilhado deve marcar os componentes pertencentes a grupos");
+assert.ok(css.includes(".nexus-group-surface.is-static"),"Superfícies de grupo no Modo Padrão não devem bloquear controles");
