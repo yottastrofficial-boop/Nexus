@@ -1,3 +1,13 @@
+## 1.0.0.35
+
+- Adicionadas regras de representação visual no menu Comportamento: cada componente pode mapear uma propriedade para ícones, rótulos e valores calculados por condições ordenadas.
+- Condições aceitam comparações numéricas (`>`, `>=`, `<`, `<=`, `==`, `!=`); fórmulas aceitam módulo (`%`) além das operações aritméticas existentes.
+- O mapeamento é somente visual: não altera a propriedade original e preserva a apresentação padrão quando nenhuma regra corresponde.
+- Expressões interpoladas e componentes vinculados são reavaliados em resposta ao evento `updateActor` do Foundry. Não foi adicionado timer, polling ou renderização integral periódica.
+- Adicionadas regressões para comparações, módulo, seleção de regras, persistência da configuração e atualização orientada a eventos.
+
+**Validação:** sintaxe, testes automatizados, manifesto e build do pacote serão verificados pelo GitHub Actions. Testes funcionais e visuais dentro de uma instalação real do Foundry VTT 14 continuam necessários.
+
 ## 1.0.0.34
 
 - Criado o registro central de leitura de propriedades, reunindo definições do Core, metadados nativos, propriedades personalizadas e caminhos externos do Actor.

@@ -6,10 +6,10 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusSkillModifier, getNexusSkillRows } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
-import { evaluateNexusFormula } from "../scripts/core/formula-engine.js";
+import { evaluateNexusFormula, evaluateNexusCondition } from "../scripts/core/formula-engine.js";
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
@@ -67,7 +67,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.34", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.35", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -764,7 +764,7 @@ assert.match(sheet, /calculationMode === "formula"/);
 assert.match(template, /data-alias-field="formula"/);
 assert.match(propertyCatalog, /createPropertyRegistry/);
 assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
-assert.match(sheetCode, /evaluateNexusFormula\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
+assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
 
 const proficiencyAsset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === "core-skill-proficiency");
@@ -774,3 +774,48 @@ assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(template, /skill\.formatted/, "O valor calculado da perícia deve permanecer visível sem rolagem");
 assert.match(css, /nexus-skill-proficiency-toggle/, "O marcador deve possuir estilo circular próprio");
+
+
+// Behavior representation rules and event-driven formula refresh.
+const expressionValues = { level: 5, mb: 3, "identity.level": 5 };
+const resolveExpressionValue = key => expressionValues[key];
+assert.equal(evaluateNexusFormula("level % 2", resolveExpressionValue), 1, "O operador módulo deve calcular o resto");
+assert.equal(evaluateNexusFormula("@level + @mb", resolveExpressionValue), 8, "Referências com @ devem funcionar nas fórmulas do editor");
+assert.equal(evaluateNexusCondition("@level > @mb", resolveExpressionValue), true, "Referências com @ devem funcionar nas condições");
+assert.equal(evaluateNexusCondition("level > mb", resolveExpressionValue), true, "Condições devem aceitar comparações numéricas");
+assert.equal(evaluateNexusCondition("(level + mb) >= 8", resolveExpressionValue), true, "Comparações devem respeitar parênteses e precedência");
+assert.equal(evaluateNexusCondition("level < mb", resolveExpressionValue), false);
+assert.equal(evaluateNexusCondition("level / 0 > mb", resolveExpressionValue), null, "Condições inválidas devem falhar com segurança");
+
+const representationComponent = {
+  id: "representation-card",
+  representation: {
+    enabled: true,
+    sourcePath: "identity.level",
+    rules: [{ id: "rule-1", condition: "level > mb", icon: "✦", label: "Superior", output: "level + mb" }]
+  }
+};
+const representationResult = evaluateComponentRepresentation(representationComponent.representation, resolveExpressionValue);
+assert.equal(representationResult.active, true);
+assert.equal(representationResult.sourceValue, 5);
+assert.equal(representationResult.value, 8);
+assert.equal(representationResult.icon, "✦");
+assert.equal(evaluateComponentRepresentation({ ...representationComponent.representation, rules: [{ condition: "level < mb" }] }, resolveExpressionValue), null, "Sem regra compatível, a apresentação original deve permanecer");
+
+const representationDraft = { id: "representation-editor", representation: { enabled: false, sourcePath: "", rules: [] }, interactions: [] };
+applyInteractionEditorCommand(representationDraft, "add-representation-rule", { interactionId: representationDraft.id });
+assert.equal(representationDraft.representation.rules.length, 1);
+applyInteractionEditorChange(representationDraft, { scope: "representation", interactionId: representationDraft.id, field: "enabled" }, true);
+applyInteractionEditorChange(representationDraft, { scope: "representation", interactionId: representationDraft.id, field: "sourcePath" }, "{{identity.level}}");
+applyInteractionEditorChange(representationDraft, { scope: "representationRule", interactionId: representationDraft.id, ruleIndex: 0, field: "condition" }, "level > mb");
+applyInteractionEditorChange(representationDraft, { scope: "representationRule", interactionId: representationDraft.id, ruleIndex: 0, field: "output" }, "level + mb");
+assert.equal(representationDraft.representation.enabled, true);
+assert.equal(representationDraft.representation.sourcePath, "identity.level");
+assert.equal(representationDraft.representation.rules[0].condition, "level > mb");
+assert.equal(representationDraft.representation.rules[0].output, "level + mb");
+assert.match(interactions, /nexus-representation-rules/, "As regras de representação devem integrar o editor de Comportamento");
+assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
+assert.match(sheetCode, /_refreshRichExpressions\?\.\(\)/, "Expressões em texto devem ser reavaliadas após alterações do Actor");
+assert.match(actorSheetRendering, /nexusExpressionSource/, "O renderizador deve preservar a expressão original para reavaliação");
+assert.match(template, /nexus-property-representation/, "Componentes devem renderizar a representação selecionada");
+assert.match(css, /nexus-component\.has-representation/, "A representação deve substituir apenas a saída visual do componente");

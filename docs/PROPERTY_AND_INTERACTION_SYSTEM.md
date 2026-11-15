@@ -96,6 +96,32 @@ Estrutura conceitual:
 
 Um fluxo pode conter vários Triggers independentes: qualquer um deles inicia suas Actions. Condições opcionais são avaliadas antes da execução e podem ser combinadas como AND (todas) ou OR (qualquer). As Actions são executadas na ordem em que aparecem e podem ser reordenadas no Inspector. Cada ação mantém sua própria configuração. A política de erro define se uma falha interrompe o fluxo ou permite continuar.
 
+### Regras de representação
+
+O menu **Comportamento** também configura regras de representação visual associadas ao componente. Essa configuração é independente dos fluxos de interação:
+
+- `sourcePath` identifica a propriedade lida.
+- `rules` contém condições ordenadas; a primeira condição verdadeira é utilizada.
+- Cada regra pode definir `icon`, `label` e uma fórmula numérica opcional em `output`.
+- Condições aceitam comparações (`>`, `>=`, `<`, `<=`, `==`, `!=`); fórmulas numéricas aceitam aritmética e módulo (`%`).
+- Um rótulo pode conter interpolações `{{expressão}}`.
+- Se nenhuma regra corresponder, o componente conserva sua representação original. Se `output` estiver vazio, o valor da propriedade de origem é exibido.
+
+Exemplo:
+
+```js
+{
+  enabled: true,
+  sourcePath: "identity.level",
+  rules: [
+    { condition: "level > mb", icon: "✦", label: "Superior", output: "level + mb" },
+    { condition: "level == 0", icon: "○", label: "Neutro", output: "" }
+  ]
+}
+```
+
+As regras não alteram nem persistem valores no Actor; determinam somente a saída visual do componente. A configuração fica salva junto à instância do componente no layout.
+
 ### Tipos de ação previstos
 
 - `roll`: realizar uma rolagem.
@@ -140,7 +166,7 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 O registro de leitura combina propriedades do Core, propriedades nativas, personalizadas e caminhos externos do Actor. Ele não altera os locais de persistência existentes. Propriedades numéricas personalizadas podem usar modo manual ou fórmula automática; o valor manual é mantido mesmo quando a fórmula está ativa.
 
-A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, dependências reativas ou migração universal de IDs.
+A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, grafo universal de dependências ou migração universal de IDs. Expressões de texto e regras de representação já são reavaliadas por eventos de atualização do Actor, sem polling; a invalidação ainda não é um grafo global que calcula apenas os nós dependentes.
 
 ## 6. Implementação por etapas
 
@@ -159,7 +185,7 @@ A arquitetura segue incremental: o registro atual não equivale ainda a um siste
 
 1. Expandir o `PropertyRegistry` para registro global de módulos e metadados completos.
 2. Migrar progressivamente os dados para identificadores neutros sem quebrar vínculos.
-3. Implementar dependências reativas com invalidação e detecção explícita de ciclos.
+3. Expandir a invalidação reativa para um grafo global de dependências, com cálculo incremental e detecção explícita de ciclos.
 4. Consolidar o `Roll Dialog` universal.
 5. Evoluir a interface visual de comportamentos e a API avançada segura.
 

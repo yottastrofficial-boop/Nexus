@@ -43,11 +43,12 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       const a=document.createElement("a"); a.href=safe; a.target="_blank"; a.rel="noopener noreferrer"; a.textContent=label||value; a.className="nexus-rich-link"; return a;
     };
     const renderExpressionText = (node, allowPlainUrls = false) => {
-      if (!node || node.dataset.richRendered === "true") return;
-      const source=node.textContent??"";
+      if (!node) return;
+      const source = node.dataset.nexusExpressionSource ?? (node.textContent ?? "");
+      if (!node.dataset.nexusExpressionSource) node.dataset.nexusExpressionSource = source;
       const pattern=allowPlainUrls ? /\{\{\s*([^{}]+?)\s*\}\}|https?:\/\/[^\s<>]+/gi : /\{\{\s*([^{}]+?)\s*\}\}/gi;
       if (!pattern.test(source)) return;
-      pattern.lastIndex=0; node.replaceChildren(); node.dataset.richRendered="true";
+      pattern.lastIndex=0; node.replaceChildren(); node.dataset.richRendered="true"; node.dataset.nexusExpressionText="true";
       let cursor=0,match;
       while ((match=pattern.exec(source))) {
         if(match.index>cursor) node.append(document.createTextNode(source.slice(cursor,match.index)));
@@ -80,6 +81,14 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       while(walker.nextNode()) if(/\{\{[^{}]+\}\}/.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
       for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,false);}
     });
+    sheet._refreshRichExpressions = () => {
+      root.querySelectorAll(".nexus-asset-text").forEach(node => {
+        const card = node.closest(".nexus-component");
+        const component = componentById.get(card?.dataset.id);
+        renderExpressionText(node, !component?.dataPath);
+      });
+      root.querySelectorAll("[data-nexus-expression-text]:not(.nexus-asset-text)").forEach(node => renderExpressionText(node, false));
+    };
     sheet._renderAdaptiveContent(root, createMedia);
 }
 

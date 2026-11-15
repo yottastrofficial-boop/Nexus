@@ -1159,7 +1159,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
       sheet._captureHistory();
-      const data = { interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, direction: control.dataset.direction };
+      const data = { interactionId, componentId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, ruleIndex: control.dataset.ruleIndex, direction: control.dataset.direction };
       if (command === "save-flow") {
         const flow = getComponentInteractions(component).find(item => item.id === interactionId);
         if (!flow) return;
@@ -1172,6 +1172,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
       if (command !== "save-flow") await sheet._writeLayouts(layouts, active);
+      if (control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
+        const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
+        if (liveComponent) liveComponent.representation = structuredClone(component.representation ?? { enabled: false, sourcePath: "", rules: [] });
+        sheet._refreshBoundComponents?.();
+      }
       const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
       if (editor) {
         if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
