@@ -1106,10 +1106,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const rawValue = getPath(this.actor.system ?? {}, path);
       return rawValue !== undefined ? rawValue : binding.value;
     };
-    const hasNewPresentation = !!component?.propertyPresentation;
-    const result = evaluateComponentRepresentation(component?.propertyPresentation ?? component?.representation, resolvePresentationValue,
-      hasNewPresentation ? (component?.dataPath || COMPONENTS[component?.type]?.path || "") : ""
-    );
+    const presentation = component?.propertyPresentation ?? component?.representation;
+    // An explicit component binding wins; otherwise preserve the source selected
+    // for the presentation before falling back to the component default path.
+    const sourcePath = component?.dataPath || presentation?.sourcePath || COMPONENTS[component?.type]?.path || "";
+    const result = evaluateComponentRepresentation(presentation, resolvePresentationValue, sourcePath);
     return {
       representationActive: !!result,
       representationContent: result?.content ?? "",
@@ -1289,7 +1290,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!path) return;
       dependencies.add(path);
       const binding = resolveNexusBinding(this.actor, resolveFormulaIdentifier(path));
-      if (binding?.path) dependencies.add(binding.path);
+      if (binding?.path) dependencies.add(String(binding.path).replace(/^system\./, ""));
+      if (binding?.sourcePath) dependencies.add(String(binding.sourcePath).replace(/^system\./, ""));
+      if (binding?.alias?.path) dependencies.add(String(binding.alias.path).replace(/^system\./, ""));
+      if (binding?.alias?.targetPath) dependencies.add(String(binding.alias.targetPath).replace(/^system\./, ""));
     };
     const addExpression = expression => {
       const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
@@ -1881,8 +1885,31 @@ export class NexusActorSheet extends NexusActorSheetBase {
         "flags.nexus.layouts": _replace(normalized),
         "flags.nexus.activeLayout": nextActive
       }, { render });
-      layoutReadSnapshots.set(normalized, { layouts: clone(normalized), active: nextActive });
-      return normalized;
+
+      // Keep the caller snapshot and its layout object references aligned with
+      // the merged result. Some editor flows retain the layout after this call;
+      // a stale object can make later reactive refreshes read older configuration.
+      const persistedLayouts = {};
+      for (const [id, persistedLayout] of Object.entries(normalized)) {
+        const existingLayout = layouts?.[id];
+        if (existingLayout && typeof existingLayout === "object") {
+          for (const key of Object.keys(existingLayout)) delete existingLayout[key];
+          Object.assign(existingLayout, clone(persistedLayout));
+          persistedLayouts[id] = existingLayout;
+        } else {
+          persistedLayouts[id] = clone(persistedLayout);
+        }
+      }
+      for (const id of Object.keys(layouts ?? {})) {
+        if (!Object.hasOwn(persistedLayouts, id)) delete layouts[id];
+      }
+      Object.assign(layouts, persistedLayouts);
+
+      layoutReadSnapshots.set(layouts, { layouts: clone(layouts), active: nextActive });
+      if (this._currentLayout && String(this._currentLayout.id ?? "") === nextActive) {
+        this._currentLayout = clone(layouts[nextActive]);
+      }
+      return layouts;
     });
     layoutWriteQueues.set(queueKey, operation);
     try {
