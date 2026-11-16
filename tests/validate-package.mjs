@@ -68,7 +68,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.47", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.48", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -908,6 +908,11 @@ assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, 
 assert.match(sheetCode, /_componentDependsOnActorChanges/, "A invalidação deve comparar as dependências com os caminhos alterados");
 assert.match(actorSheetRendering, /nexusExpressionSource/, "O renderizador deve preservar a expressão original para reavaliação");
 assert.match(template, /nexus-property-representation/, "Componentes devem renderizar a representação selecionada");
+assert.match(template, /<span class="nexus-property-representation-value">\{\{component\.representationContent\}\}<\/span>/, "O template deve exibir o campo representationContent produzido pelo avaliador");
+assert.doesNotMatch(template, /component\.representation(?:Value|Icon|Label)/, "O template não deve depender de campos de representação que não existem no contexto");
+assert.match(sheet, /this\._renderRichMedia\(form\);\s*this\._refreshBoundComponents\(\);/, "A primeira renderização deve usar o mesmo atualizador das regras reativas");
+assert.doesNotMatch(css, /font-size:\s*min\(var\(--nexus-component-font-size/, "O conteúdo não deve reduzir a fonte automaticamente conforme a dimensão do card");
+assert.match(css, /\.nexus-property-representation-value\s*\{[^}]*font-size:1em;/s, "O texto da representação deve respeitar o tamanho tipográfico do conteúdo");
 assert.match(css, /nexus-component\.has-representation/, "A representação deve substituir apenas a saída visual do componente");
 
  

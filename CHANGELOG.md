@@ -1,3 +1,15 @@
+## 1.0.0.48
+
+### Regras de apresentação e tipografia
+- Corrigida a ligação entre o resultado calculado das regras (`representationContent`) e o template da ficha; a saída deixa de depender de campos que não são fornecidos pelo contexto.
+- A renderização inicial utiliza o mesmo atualizador de representações da atualização reativa, preservando texto, ícones e imagens após renderizações da ficha.
+- Removido o encolhimento automático da fonte do conteúdo com base na altura/largura do card, que podia sobrepor o tamanho definido na aparência e reduzir textos a aproximadamente 7 px.
+- O valor da representação passa a respeitar o tamanho tipográfico configurado, sem ampliação adicional de 1,45×.
+
+### Validação
+- Adicionados testes para a correspondência entre o campo de saída do avaliador e o template, para o atualizador da primeira renderização e para a preservação do tamanho tipográfico.
+- A validação automatizada do pacote e a publicação da Release são executadas pelo CI; a confirmação visual e funcional em Foundry VTT 14 continua necessária.
+
 ## 1.0.0.47
 
 ### Atualização reativa e regras de apresentação

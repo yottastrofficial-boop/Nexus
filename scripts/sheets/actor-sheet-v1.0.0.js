@@ -1231,6 +1231,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       requestAnimationFrame(() => { const panel = document.querySelector(`[data-tool-panel="aliases"]`) ?? this.element?.querySelector?.('[data-tool-panel="aliases"]'); if (panel && !panel.hidden) panel.scrollTop = top; });
     }
     this._renderRichMedia(form);
+    this._refreshBoundComponents();
   }
 
   _renderRichMedia(root) {
