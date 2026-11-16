@@ -12,6 +12,7 @@
 ### Geometria dos cards
 - A detecção de cantos conectados também acompanha mudanças de posição e inserção/remoção de superfícies, não apenas redimensionamentos.
 - A varredura de cantos é adiada durante arrastes e movimentos por teclado, mantendo a atualização final sem custo por quadro.
+- O pacote desta revisão é publicado após a validação automatizada do repositório.
 - A alça de redimensionamento noroeste deixa livre a borda superior esquerda do card.
 - Mantida a regra de achatar somente o canto que realmente toca outra superfície.
 
