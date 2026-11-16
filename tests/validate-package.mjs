@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.56", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.57", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -836,6 +836,9 @@ assert.equal(evaluateNexusFormula("des + mb", key => ({ des: 4, mb: 2 })[key]), 
 assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null, "Divisão por zero deve ser rejeitada");
 assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
 assert.equal(evaluateNexusFormula("nivel - mb", key => ({ nivel: 5, mb: 2 })[key]), 3);
+assert.equal(evaluateNexusFormula("empty + mb", key => ({ empty: "", mb: 4 })[key]), 4, "Um campo numérico vazio deve valer zero em uma soma");
+assert.equal(evaluateNexusFormula("empty * mb", key => ({ empty: "", mb: 4 })[key]), 0, "Um campo numérico vazio deve valer zero em uma multiplicação");
+assert.equal(evaluateNexusFormula("empty - mb", key => ({ empty: "", mb: 4 })[key]), -4, "Um campo numérico vazio deve valer zero em uma subtração");
 assert.match(sheet, /calculationMode === "formula"/);
 assert.match(template, /data-alias-field="formula"/);
 assert.match(propertyCatalog, /createPropertyRegistry/);
@@ -847,11 +850,18 @@ const proficiencyAsset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === 
 assert.ok(proficiencyAsset, "A Biblioteca deve disponibilizar o marcador de proficiência");
 assert.equal(proficiencyAsset.template.actionPath, "skills.athletics.proficientLevel", "O marcador da Biblioteca deve apontar para o valor numérico canônico");
 assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
+const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, skills: { athletics: { proficientLevel: 2 } } } };
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = skillFormulaMode \? "skill-formula" : propertyType/, "O tipo original da propriedade deve continuar identificado para validar o valor salvo");
-assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O caminho skills.<chave>.value deve ser reconhecido como editor de fórmula e não ficar bloqueado como propriedade derivada");
+assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O resultado calculado da perícia deve oferecer o editor da fórmula subjacente");
+assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
+assert.match(sheet, /MB é calculado automaticamente pelo nível/);
+assert.ok(sheetListeners.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
 assert.match(sheetCode, /const inputValue = storedExpression \?\? \(skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "O editor deve priorizar expressões salvas e manter valores padrão tipados e fórmulas de perícia");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
@@ -1119,8 +1129,12 @@ assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet.actor, match\[1\], formula\)/);
 assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
 assert.match(css, /max-height:7\.5em/);
+assert.match(css, /nexus-property-option-name[\s\S]*overflow-wrap: anywhere[\s\S]*nexus-property-option-value[\s\S]*nexus-property-option-path/, "Nome, valor e caminho devem ter áreas legíveis");
+assert.doesNotMatch(css, /1\.0\.0\.56 — layout isolado/, "O CSS antigo do buscador deve ser removido");
 
 assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
+assert.match(sheet, /flags\\.nexus\\.propertyExpressions/, "Expressões persistidas devem invalidar componentes dependentes");
+assert.ok(sheet.includes('dependencies.add("identity.level")'), "Propriedades derivadas do nível devem atualizar automaticamente");
 assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
 assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
