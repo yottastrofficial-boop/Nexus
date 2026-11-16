@@ -12,6 +12,7 @@
 - `proficientLevel` é reconhecida como propriedade numérica editável, não como campo derivado.
 - O seletor de propriedades passa a exibir o valor atual de cada propriedade, inclusive proficiência, atributos, recursos e propriedades personalizadas resolvidas.
 - Testes de regressão adicionados para caminhos de destino, edição de proficiência, exibição de valores, permanência da aba ativa e API de rolagem.
+- O pacote desta revisão é gerado após a validação de sintaxe, regressões e estrutura do pacote no CI.
 - A validação automatizada e o teste funcional/visual dentro do Foundry VTT 14 devem confirmar o comportamento integrado desta versão.
 
 ## 1.0.0.44
