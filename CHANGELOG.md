@@ -1,3 +1,25 @@
+## 1.0.0.57
+
+### Correções do motor de fórmulas e atualização reativa
+- Campos textuais numéricos vazios agora equivalem a zero em operações aritméticas, sem alterar a concatenação textual.
+- Documentada e testada a sintaxe de fórmulas personalizadas de perícias, incluindo os atalhos `@FOR` e `@MB`.
+- O editor de fórmula da perícia fica claramente identificado e aceita tanto o vínculo ao resultado `.value` quanto o caminho explícito `.formula`; apagar a fórmula restaura o cálculo padrão.
+- O Inspector explica propriedades derivadas, incluindo o MB, que depende do nível e não é um valor manual.
+
+### Correções do Inspector e do buscador
+- Removidas regras CSS conflitantes do buscador e consolidados os estilos em uma única seção, com nome, valor atual e caminho em linhas legíveis e sem recorte.
+- Reorganizados os campos de vínculo e edição para ocupar a largura disponível sem sobreposição.
+- Preservados os dados existentes, aliases, expressões e layouts dos Actors.
+
+### Atualização automática
+- Ampliado o rastreamento de dependências de propriedades derivadas: MB, valores de perícia, proficiência, defesa, recuperação, carga e deslocamento.
+- Corrigido o vínculo legado `skills.<pericia>.proficient` para observar o campo persistido `proficientLevel`.
+- Alterações em expressões persistidas nas flags do Actor também invalidam os componentes dependentes.
+
+### Validação
+- Incluídos testes para campos vazios, fórmulas reais de perícia, atalhos, dependências e estrutura do buscador.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.56
 
 ### Reestruturação do editor de propriedades
