@@ -1648,7 +1648,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
       }
       if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
-      await this.actor.update({ [\`system.\${path}\`]: value }, { render: false });
+      await this.actor.update({ [`system.${path}`]: value }, { render: false });
       this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
       return value;
     }
@@ -1660,7 +1660,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const target = config.targetPath ? normalizeInteractionPropertyPath(config.targetPath) : "";
       if (config.targetPath && !target) throw new Error("Propriedade de destino inválida.");
       if (target) {
-        await this.actor.update({ [\`system.\${target}\`]: roll.total }, { render: false });
+        await this.actor.update({ [`system.${target}`]: roll.total }, { render: false });
         this._refreshBoundComponents({ system: Object.fromEntries([[target, roll.total]]) });
       }
       return roll.total;
