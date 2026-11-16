@@ -5902,3 +5902,5 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   max-height: 100%;
   object-fit: contain;
 }
+
+.nexus-property-option-value { color:var(--nexus-panel-text,#d8e2ed); font-size:10px; opacity:.82; font-variant-numeric:tabular-nums; }
