@@ -32,7 +32,7 @@ export const NEXUS_LIBRARY_CATALOG = {
       preview: "proficiency",
       template: {
         actionType: "proficiency",
-        actionPath: "skills.athletics.proficient",
+        actionPath: "skills.athletics.proficientLevel",
         sheetVariant: "proficiency",
         customLabel: "Proficiência",
         showLabel: false,
