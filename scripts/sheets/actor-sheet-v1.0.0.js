@@ -1767,7 +1767,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return layouts;
   }
 
-  async _writeLayouts(layouts, active) {
+  async _writeLayouts(layouts, active, { render = true } = {}) {
     const queueKey = this.actor.uuid ?? this.actor;
     const previous = layoutWriteQueues.get(queueKey) ?? Promise.resolve();
     const operation = previous.catch(() => {}).then(async () => {
@@ -1798,7 +1798,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       await this.actor.update({
         "flags.nexus.layouts": _replace(normalized),
         "flags.nexus.activeLayout": nextActive
-      }, { render: false });
+      }, { render });
       layoutReadSnapshots.set(normalized, { layouts: clone(normalized), active: nextActive });
       return normalized;
     });
