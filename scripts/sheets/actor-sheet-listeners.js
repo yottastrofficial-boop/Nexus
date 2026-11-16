@@ -207,7 +207,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const input = event.currentTarget;
       const pendingTimer = pendingPropertyValueSaves.get(input);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingPropertyValueSaves.delete(input); }
-      const input = event.currentTarget;
       const path = String(input.dataset.propertyPath ?? "");
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
