@@ -13,6 +13,7 @@
 - Atualizada a versão do esquema de propriedades para 3.
 - Testes de regressão atualizados para os valores assinados, migração de `opposed`, campo numérico e seletor do canto superior esquerdo.
 - A validação automatizada e o teste funcional/visual no Foundry VTT 14 ainda precisam ser executados para confirmar esta versão.
+- Referências de fórmulas a propriedades de Itens não foram incluídas nesta versão; o registro atual cobre propriedades do Actor, e a expansão para documentos Item precisa contemplar resolução de caminhos e atualização reativa de documentos incorporados.
 
 ## 1.0.0.43
 
