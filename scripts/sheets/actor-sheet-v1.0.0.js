@@ -2872,6 +2872,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
           const hasPath = !!propertyPath && (canEditPrimitive || skillFormulaMode);
           const inputValue = skillFormulaMode ? skillFormula : (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value);
+          const propertyValuePath = propertyValueRow.querySelector("[data-property-value-path]");
+          if (propertyValuePath) propertyValuePath.textContent = propertyPath || "—";
           propertyValueRow.hidden = !hasPath || one.type === "token";
           if (hasPath && one.type !== "token") {
             const desiredTag = propertyType === "string" ? "TEXTAREA" : "INPUT";
