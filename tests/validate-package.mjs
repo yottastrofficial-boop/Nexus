@@ -850,7 +850,7 @@ assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = skillFormulaMode \? "skill-formula" : propertyType/, "O tipo original da propriedade deve continuar identificado para validar o valor salvo");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
-assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "Propriedades editáveis sem valor inicial devem receber um valor padrão tipado e fórmulas de perícia devem exibir sua configuração");
+assert.match(sheetCode, /const inputValue = storedExpression \?\? \(skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "O editor deve priorizar expressões salvas e manter valores padrão tipados e fórmulas de perícia");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
 assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
