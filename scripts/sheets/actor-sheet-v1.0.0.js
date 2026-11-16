@@ -322,8 +322,8 @@ const RESERVED_ROLL_ALIAS_TOKENS = new Set([
   "bonus", "formatted", "enabled", "active", "type", "key", "path", "id"
 ]);
 const NON_ROLL_PROPERTY_SUFFIXES = new Set([
-  "name", "exib", "exibicao", "description", "attribute", "attributeName",
-  "attributeKey", "proficient", "proficientLevel", "formatted"
+  "name", "exib", "exibicao", "description", "attribute", "attributename",
+  "attributekey", "proficient", "proficientlevel", "formatted"
 ]);
 const getNexusRollAliasCandidates = actor => {
   return [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
