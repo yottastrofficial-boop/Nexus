@@ -1189,6 +1189,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
       if (!componentId) return;
+      const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
+      let activeInteractionId = editor?.dataset.activeInteractionId || interactionId;
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
       if (options.captureHistory !== false) sheet._captureHistory();
@@ -1204,7 +1206,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
-      if (command !== "save-flow") await sheet._writeLayouts(layouts, active, { render: options.render !== false });
+      if (command === "add-flow" || command === "add-library-flow") activeInteractionId = component.interactions?.at(-1)?.id ?? activeInteractionId;
+      if (command === "remove-flow" && activeInteractionId === interactionId) activeInteractionId = component.interactions?.[0]?.id ?? "";
+      if (command !== "save-flow") {
+        await sheet._writeLayouts(layouts, active, { render: false });
+        const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
+        if (liveComponent && Array.isArray(component.interactions)) liveComponent.interactions = structuredClone(component.interactions);
+      }
       if (control.dataset.interactionScope?.startsWith("propertyPresentation") || command?.includes("property-rule") || control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
         const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
         if (liveComponent) { if (component.propertyPresentation) liveComponent.propertyPresentation = structuredClone(component.propertyPresentation); else if (component.representation) liveComponent.propertyPresentation = structuredClone(component.representation); }
@@ -1223,17 +1231,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         );
         next?.focus({ preventScroll: true });
       }
-      const editor = options.render === false ? null : (control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]"));
-      if (editor) {
-        if (command === "add-flow") editor.dataset.activeInteractionId = component.interactions?.at(-1)?.id ?? "";
-        const scrollContainer = editor.closest(".nexus-behavior-editor");
-        const scrollTop = scrollContainer?.scrollTop ?? editor.scrollTop;
+      const behaviorEditor = options.render === false ? null : editor;
+      if (behaviorEditor) {
+        behaviorEditor.dataset.activeInteractionId = activeInteractionId;
+        const scrollContainer = behaviorEditor.closest(".nexus-behavior-editor");
+        const scrollTop = scrollContainer?.scrollTop ?? behaviorEditor.scrollTop;
         const focusData = { scope: control.dataset.interactionScope, field: control.dataset.interactionField, interactionId, triggerIndex: control.dataset.triggerIndex, conditionIndex: control.dataset.conditionIndex, actionIndex: control.dataset.actionIndex, selectionStart: typeof control.selectionStart === "number" ? control.selectionStart : null, selectionEnd: typeof control.selectionEnd === "number" ? control.selectionEnd : null, selectionDirection: control.selectionDirection ?? "none" };
-        renderInteractionEditor(editor, component, layouts[active]?.components ?? [], getInteractionLibrary(sheet.actor), sheet.actor);
-        editor.dataset.componentId = componentId;
+        renderInteractionEditor(behaviorEditor, component, layouts[active]?.components ?? [], getInteractionLibrary(sheet.actor), sheet.actor);
+        behaviorEditor.dataset.componentId = componentId;
         if (scrollContainer) scrollContainer.scrollTop = scrollTop;
-        else editor.scrollTop = scrollTop;
-        const nextControl = [...editor.querySelectorAll("[data-interaction-field]")].find(item =>
+        else behaviorEditor.scrollTop = scrollTop;
+        const nextControl = [...behaviorEditor.querySelectorAll("[data-interaction-field]")].find(item =>
           item.dataset.interactionScope === focusData.scope &&
           item.dataset.interactionField === focusData.field &&
           item.dataset.interactionId === focusData.interactionId &&
