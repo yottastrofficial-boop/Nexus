@@ -9,14 +9,26 @@ function createButton(label, className, attributes = {}) {
   return button;
 }
 
-function appendPropertyOption(container, entry, label = entry.label, rollAlias = null) {
+function formatPropertyValue(value) {
+  if (value === undefined || value === null) return "—";
+  if (typeof value === "boolean") return value ? "Sim" : "Não";
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "—";
+  if (typeof value === "string") return value.length > 64 ? value.slice(0, 61) + "…" : (value || "—");
+  if (Array.isArray(value)) return value.length ? \`Lista · \${value.length} itens\` : "Lista vazia";
+  return "Objeto";
+}
+
+function appendPropertyOption(container, entry, label = entry.label, rollAlias = null, getValue = null) {
   const button = createButton("", "nexus-property-option", { propertyPathOption: entry.path });
   button.setAttribute("role", "option");
   const title = document.createElement("strong");
   title.textContent = label;
+  const value = document.createElement("small");
+  value.className = "nexus-property-option-value";
+  value.textContent = "Valor: " + formatPropertyValue(getValue?.(entry.path));
   const code = document.createElement("code");
   code.textContent = entry.path;
-  button.append(title, code);
+  button.append(title, value, code);
   if (rollAlias) {
     button.dataset.rollToken = "@" + rollAlias.display;
     button.dataset.rollAliasOption = "true";
@@ -25,7 +37,7 @@ function appendPropertyOption(container, entry, label = entry.label, rollAlias =
   container.append(button);
 }
 
-export function renderPropertyPicker(list, catalog, { categoryPath = "", query = "", formulaMode = false } = {}) {
+export function renderPropertyPicker(list, catalog, { categoryPath = "", query = "", formulaMode = false, getValue = null } = {}) {
   if (!list || !catalog) return;
   const fragment = document.createDocumentFragment();
   const header = document.createElement("div");
@@ -51,7 +63,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
     const matches = catalog.entries.filter(entry =>
       [entry.label, entry.searchLabel, entry.path].some(value => String(value ?? "").toLocaleLowerCase("pt-BR").includes(normalizedQuery))
     );
-    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry, entry.searchLabel ?? entry.label);
+    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry, entry.searchLabel ?? entry.label, null, getValue);
     if (formulaMode) {
       const aliases = catalog.rollAliases.filter(entry =>
         (entry.label + " " + entry.display + " " + entry.target).toLocaleLowerCase("pt-BR").includes(normalizedQuery)
@@ -62,7 +74,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
         heading.textContent = "Atalhos de rolagem";
         content.append(heading);
         for (const alias of aliases.slice(0, 30)) {
-          appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias);
+          appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias, getValue);
         }
       }
     }
@@ -76,7 +88,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
     const node = findPropertyPickerNode(catalog, categoryPath);
     const children = node ? [...node.children.values()] : [];
     if (categoryPath && node?.entry) {
-      appendPropertyOption(content, node.entry, "Usar " + node.label);
+      appendPropertyOption(content, node.entry, "Usar " + node.label, null, getValue);
     }
     children.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
     for (const child of children) {
@@ -91,9 +103,9 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
         arrow.textContent = "›";
         category.append(heading, description, arrow);
         content.append(category);
-        if (child.entry) appendPropertyOption(content, child.entry, child.label + " · valor");
+        if (child.entry) appendPropertyOption(content, child.entry, child.label + " · valor", null, getValue);
       } else if (child.entry) {
-        appendPropertyOption(content, child.entry);
+        appendPropertyOption(content, child.entry, child.entry.label, null, getValue);
       }
     }
     if (formulaMode && catalog.rollAliases.length) {
