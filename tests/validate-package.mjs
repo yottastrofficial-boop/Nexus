@@ -799,7 +799,8 @@ assert.equal(proficiencyAsset.template.actionPath, "skills.athletics.proficientL
 assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
-assert.match(sheetCode, /propertyType === "number" \? "number" : propertyType === "boolean" \? "checkbox" : "text"/, "O editor deve inferir o controle universal pelo tipo da propriedade");
+assert.match(sheetCode, /const desiredTag = propertyType === "string" \? "TEXTAREA" : "INPUT"/, "O editor deve usar área de texto para propriedades textuais e inputs tipados para números e booleanos");
+assert.match(sheetCode, /propertyValueInput.type = "number"/, "Propriedades numéricas devem continuar usando input numérico");
 assert.match(sheetCode, /const inputValue = value === undefined \|\| value === null/, "Propriedades editáveis sem valor inicial devem receber um valor padrão tipado");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
