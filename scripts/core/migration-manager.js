@@ -35,7 +35,7 @@ export async function migrateLegacyActorData({
     for (const skill of NEXUS_SKILLS) {
       const current = nextSkills[skill.key] ?? nextSkills[skill.legacyKey] ?? {};
       const proficientLevel = normalizeNexusProficientLevel(
-        current.proficientLevel ?? current.proficient ?? current.proficiency ?? false
+        current.proficientLevel ?? (current.opposed === true ? -1 : current.proficient ?? current.proficiency) ?? false
       );
       const next = { ...current, proficientLevel };
       delete next.proficient;
