@@ -1,3 +1,14 @@
+## 1.0.0.52
+
+### Correções complementares de propriedades
+- Normalizados os caminhos singulares attribute/resource/skill antes da busca de aliases, mantendo compatibilidade com expressões como `attribute.for.value`.
+- A versão reúne as correções de inicialização do Modo Padrão, persistência de aliases personalizados, edição de campos aninhados e organização visual do Inspector.
+- O caminho configurado do alias permanece visível e estável no editor, mesmo quando o destino é armazenado em dados personalizados.
+
+### Validação
+- Atualizados os testes de regressão e os metadados de distribuição para a versão 1.0.0.52.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.51
 
 ### Modo da ficha e propriedades
