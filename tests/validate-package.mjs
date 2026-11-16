@@ -801,7 +801,7 @@ assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /const desiredTag = propertyType === "string" \? "TEXTAREA" : "INPUT"/, "O editor deve usar área de texto para propriedades textuais e inputs tipados para números e booleanos");
 assert.match(sheetCode, /propertyValueInput.type = "number"/, "Propriedades numéricas devem continuar usando input numérico");
-assert.match(sheetCode, /const inputValue = value === undefined \|\| value === null/, "Propriedades editáveis sem valor inicial devem receber um valor padrão tipado");
+assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "Propriedades editáveis sem valor inicial devem receber um valor padrão tipado e fórmulas de perícia devem exibir sua configuração");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
 assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
