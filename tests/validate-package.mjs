@@ -1117,3 +1117,4 @@ assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
 assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
 assert.match(canvasInteractions, /editorPanelsOpen/, "A proteção de teclado deve considerar todos os painéis abertos");
+assert.match(canvasInteractions, /editorPanelsOpen && isTypingTarget/, "Delete/Backspace em campos de texto não deve alcançar atalhos do canvas da cena");
