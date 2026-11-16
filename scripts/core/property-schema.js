@@ -59,7 +59,8 @@ const definitions = [
     { path: `skills.${skill.key}.proficientLevel`, label: `${skill.name} · Proficiência`, exib: skill.exib, type: "number", category: "skills", derived: false },
     { path: `skills.${skill.key}.proficient`, label: `${skill.name} · É proficiente`, exib: skill.exib, type: "boolean", category: "skills", derived: true },
     { path: `skills.${skill.key}.attribute`, label: `${skill.name} · Atributo`, exib: skill.attribute, type: "string", category: "skills", derived: true },
-    { path: `skills.${skill.key}.description`, label: `${skill.name} · Descrição`, exib: skill.exib, type: "string", category: "skills", derived: true }
+    { path: `skills.${skill.key}.description`, label: `${skill.name} · Descrição`, exib: skill.exib, type: "string", category: "skills", derived: false },
+    { path: `skills.${skill.key}.formula`, label: `${skill.name} · Fórmula`, exib: skill.exib, type: "string", category: "skills", derived: false }
   ]),
   ...RESOURCE_DEFINITIONS.flatMap(resource => resource.fields.map(field => ({
     path: `resources.${resource.key}.${field}`,
@@ -124,8 +125,8 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
       return {
         matched: true,
         value: member ? row[member] : row,
-        readOnly: member !== "proficientLevel",
-        sourcePath: member === "proficientLevel" ? `skills.${definition.key}.proficientLevel` : undefined
+        readOnly: !["proficientLevel", "description", "formula"].includes(member),
+        sourcePath: member ? `skills.${definition.key}.${member}` : undefined
       };
     }
   }

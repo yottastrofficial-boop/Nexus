@@ -2,7 +2,9 @@
  * Interaction Engine do NEXUS: fluxos com múltiplos Triggers, condições e Actions.
  * O motor não avalia JavaScript arbitrário.
  */
-export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightClick","hover","change","submit","interact"]);
+export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hover","change","submit","focus","blur","keyDown","keyUp","interact"]);
+export const INTERACTION_MODIFIERS = Object.freeze(["ctrl","shift","alt","meta"]);
+const normalizeModifiers = raw => [...new Set((Array.isArray(raw) ? raw : String(raw ?? "").split("+")).map(value => String(value).trim().toLowerCase()).filter(value => INTERACTION_MODIFIERS.includes(value)))].sort((a,b) => INTERACTION_MODIFIERS.indexOf(a) - INTERACTION_MODIFIERS.indexOf(b));
 export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
 export const INTERACTION_OPERATORS = Object.freeze(["equals","notEquals","greaterThan","greaterOrEqual","lessThan","lessOrEqual","contains","isEmpty","isNotEmpty"]);
 import { NEXUS_SKILLS } from "./skills.js";
@@ -20,7 +22,7 @@ export const normalizeInteractionPropertyPath = raw => {
 const safePath = normalizeInteractionPropertyPath;
 const normalizeTrigger = (t,i) => {
   const event=String(t?.event??t??"");
-  return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event} : null;
+  return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event,modifiers:normalizeModifiers(t?.modifiers)} : null;
 };
 const normalizeCondition = (c,i) => {
   if(!c || typeof c!=="object")return null;
@@ -180,7 +182,9 @@ const conditionPasses=(condition,actor)=>{
   }
 };
 export function interactionMatches(flow,eventName,context={}) {
-  if(!flow?.enabled||!flow.triggers.some(t=>t.event===eventName))return false;
+  const modifiers = normalizeModifiers(context.modifiers);
+  const triggerMatches = flow?.triggers?.some(trigger => trigger.event === eventName && normalizeModifiers(trigger.modifiers).join("+") === modifiers.join("+"));
+  if(!flow?.enabled||!triggerMatches)return false;
   if(!flow.conditions.length)return true;
   const values=flow.conditions.map(c=>conditionPasses(c,context.actor));
   return flow.conditionJoin==="any"?values.some(Boolean):values.every(Boolean);
@@ -284,6 +288,7 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
     else if(data.field==="conditionJoin")flow.conditionJoin=value==="any"?"any":"all";
     else if(data.field==="onError")flow.execution.onError=value==="continue"?"continue":"stop";
   }else if(data.scope==="trigger"&&trigger&&data.field==="event")trigger.event=INTERACTION_EVENTS.includes(value)?value:"click";
+  else if(data.scope==="trigger"&&trigger&&data.field==="modifiers")trigger.modifiers=normalizeModifiers(value);
   else if(data.scope==="condition"&&condition){
     if(data.field==="path")condition.path=safePath(value)??"";
     else if(data.field==="operator")condition.operator=INTERACTION_OPERATORS.includes(value)?value:"equals";
@@ -357,7 +362,8 @@ const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interacti
 const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flowId,extra);b.classList.add("is-icon");b.title=label;const glyph=el("i","fa-solid "+icon);glyph.setAttribute("aria-hidden","true");b.append(glyph);return b;};
 const control=(type,value,options=[],aria="")=>{const input=el(type);if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}if(type==="checkbox")input.checked=!!value;else input.value=String(value??"");if(aria)input.setAttribute("aria-label",aria);return input;};
 const field=(label,input,scope,id,key,extra={})=>{const wrap=el("label","nexus-interaction-field");if(label)wrap.append(el("span","",label));bind(input,scope,id,key,extra);wrap.append(input);return wrap;};
-const events=[["click","Clique"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["interact","Interação encadeada"]];
+const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Tecla pressionada"],["keyUp","Tecla solta"],["interact","Interação encadeada"]];
+const modifierOptions=[["","Nenhum"],["shift","Shift"],["ctrl","Ctrl"],["alt","Alt"],["meta","Meta"],["ctrl+shift","Ctrl + Shift"],["ctrl+alt","Ctrl + Alt"],["shift+alt","Shift + Alt"],["ctrl+shift+alt","Ctrl + Shift + Alt"],["ctrl+meta","Ctrl + Meta"],["shift+meta","Shift + Meta"],["alt+meta","Alt + Meta"],["ctrl+shift+meta","Ctrl + Shift + Meta"],["ctrl+alt+meta","Ctrl + Alt + Meta"],["shift+alt+meta","Shift + Alt + Meta"],["ctrl+shift+alt+meta","Ctrl + Shift + Alt + Meta"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
 const buildActionConfig=(parent,flow,action,index,components)=>{
@@ -392,7 +398,7 @@ export function renderInteractionEditor(container,component,components=[],librar
   const flowTools=el("div","nexus-interaction-flow-actions");flowTools.append(iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));flowHead.append(flowTools);panel.append(flowHead);
   const guided=el("div","nexus-interaction-guided");
   const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");triggerHead.append(el("h6","","Gatilhos"),btn("＋","add-trigger",flow.id));triggers.append(triggerHead);
-  for(const [i,tr] of flow.triggers.entries()){const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento");bind(select,"trigger",flow.id,"event",{triggerIndex:i});row.append(select,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);}
+  for(const [i,tr] of flow.triggers.entries()){const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores do gatilho");bind(select,"trigger",flow.id,"event",{triggerIndex:i});bind(modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});row.append(select,modifiers,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);}
   const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
   for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}

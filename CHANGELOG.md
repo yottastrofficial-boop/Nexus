@@ -1,3 +1,29 @@
+## 1.0.0.49
+
+### Gatilhos e interações
+- Corrigido o despacho de cliques no modo de jogo: a execução não depende mais de um atributo HTML que podia permanecer desatualizado após salvar um fluxo no Inspector.
+- A edição de comportamento sincroniza imediatamente o estado de ação do card no DOM e no layout em memória, sem exigir alternar para Aparência e voltar.
+- Gatilhos aceitam modificadores independentes e combinações exatas de Shift, Ctrl, Alt e Meta.
+- Ampliados os eventos suportados: clique esquerdo, direito e do meio, duplo clique, pressionar/soltar ponteiro, hover, alteração, envio, foco, perda de foco, teclas pressionadas/soltas e interação encadeada.
+- A ação Interagir com componente continua chamando outro card pelo evento configurado, com limite de profundidade para evitar ciclos ilimitados.
+
+### Propriedades e fórmulas
+- Campos de texto das propriedades passam a usar área expansível até cinco linhas, com rolagem vertical apenas quando necessário.
+- Descrições de perícias podem ser personalizadas por Actor sem alterar as descrições padrão do catálogo.
+- Valores de perícias continuam calculados pelas regras-base quando não há fórmula personalizada.
+- Cada perícia pode receber uma fórmula opcional em `skills.<pericia>.value`; a fórmula fica armazenada em `skills.<pericia>.formula`.
+- Fórmulas de perícia aceitam `força`/`for`, `mb` e `proficiencia` (o sinal do nível de proficiência), além dos caminhos canônicos da perícia. Fórmula vazia restaura o cálculo padrão.
+- Fórmulas inválidas são rejeitadas na edição e não substituem o cálculo padrão.
+
+### Organização e estabilidade do repositório
+- Adicionada uma política explícita de checkpoints estáveis, com critérios de CI, testes funcionais no Foundry e registro de limitações.
+- Protótipos HTML antigos foram resumidos em documentação de arquivo e retirados da árvore ativa; continuam recuperáveis pelo histórico Git.
+- Nenhuma Release/tag antiga foi apagada. O changelog e o histórico de commits permanecem como registro das versões anteriores.
+
+### Validação
+- Adicionados testes para combinações de modificadores, eventos expandidos, fórmulas personalizadas, descrições de perícias e campos textuais expansíveis.
+- CI automatizado ainda precisa aprovar o pacote; teste funcional no Foundry VTT 14 continua necessário para confirmar a interação real e a edição de propriedades.
+
 ## 1.0.0.48
 
 ### Regras de apresentação e tipografia

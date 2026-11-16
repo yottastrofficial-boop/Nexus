@@ -178,3 +178,13 @@ A arquitetura segue incremental: o registro atual não equivale ainda a um siste
 5. Evoluir a interface visual de comportamentos e a API avançada segura.
 
 A evolução deve continuar incremental. Não se deve reconstruir a ficha inteira nem declarar concluída uma camada que ainda esteja apenas definida neste contrato.
+
+
+## 7. Fórmulas e descrições personalizadas de perícias
+
+- `skills.<pericia>.value` continua sendo um valor calculado e somente leitura no editor de valor.
+- `skills.<pericia>.formula` permite definir uma fórmula opcional para substituir o cálculo padrão daquela perícia. Quando vazia, o cálculo-base do NEXUS permanece ativo.
+- `força` ou `for` referencia o atributo associado à perícia; `mb` referencia o Modificador Base; `proficiencia` retorna o sinal do nível de proficiência (-1, 0 ou +1), preservando a regra-base de que a magnitude do nível não multiplica o MB.
+- Caminhos completos também podem ser utilizados, como `attributes.for.value` e `skills.athletics.proficientLevel`.
+- `skills.<pericia>.description` aceita uma descrição personalizada por personagem; sem valor personalizado, usa a descrição padrão do catálogo.
+- O avaliador é restrito a expressões aritméticas seguras; não executa JavaScript arbitrário. Fórmulas inválidas não substituem o valor calculado padrão.

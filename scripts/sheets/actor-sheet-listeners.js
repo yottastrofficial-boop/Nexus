@@ -3,7 +3,7 @@
  * Kept separate from the sheet class so the lifecycle facade stays focused.
  */
 export function activateActorSheetListeners(sheet, html, dependencies) {
-  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
+  const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
 
     const currentRoot = html?.[0];
     // Remove detached property-option portals left by a previous ApplicationV2 render.
@@ -191,8 +191,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet._writeLayouts(layouts, active);
     });
     const pendingPropertyValueSaves = new WeakMap();
-    html.find("[data-property-value]").on("input", event => {
+    html.on("input", "[data-property-value]", event => {
       const input = event.currentTarget;
+      if (input.tagName === "TEXTAREA") { input.style.height = "auto"; const lineHeight = Number.parseFloat(getComputedStyle(input).lineHeight) || 16; const maxHeight = lineHeight * 5 + 16; input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`; input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden"; }
       const path = String(input.dataset.propertyPath ?? "");
       if (!path || ["img", "identity.portrait.img", "prototypeToken.texture.src"].includes(path)) return;
       const kind = input.dataset.propertyKind;
@@ -205,7 +206,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }, 180);
       pendingPropertyValueSaves.set(input, timer);
     });
-    html.find("[data-property-value]").on("change", async event => {
+    html.on("change", "[data-property-value]", async event => {
       const input = event.currentTarget;
       const pendingTimer = pendingPropertyValueSaves.get(input);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingPropertyValueSaves.delete(input); }
@@ -213,6 +214,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
       let value = input.type === "checkbox" ? !!input.checked : input.value;
+      if (kind === "skill-formula") {
+        const match = path.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
+        const formula = String(value ?? "").trim().slice(0, 500);
+        if (!match || (formula && evaluateNexusSkillFormula(sheet.actor, match[1], formula) === null)) { globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use propriedades numéricas e operadores suportados."); return; }
+        await sheet.actor.update({ [`system.skills.${match[1]}.formula`]: formula }, { render: false });
+        sheet._refreshBoundComponents(); return;
+      }
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([^{}]+?)\s*\}\}$/) : null;
@@ -924,10 +932,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           else for(const value of items){const item=document.createElement("li");item.textContent=value;list.append(item);}
           section.append(list);detail.append(section);
         };
-        const eventLabels={click:"Clique",doubleClick:"Duplo clique",rightClick:"Clique direito",hover:"Passar o cursor",change:"Alterar valor",submit:"Enviar formulário",interact:"Interação encadeada"};
+        const eventLabels={click:"Clique esquerdo",doubleClick:"Duplo clique",rightClick:"Clique direito",middleClick:"Clique do meio",pointerDown:"Pressionar botão",pointerUp:"Soltar botão",hover:"Passar o cursor",change:"Alterar valor",submit:"Enviar formulário",focus:"Receber foco",blur:"Perder foco",keyDown:"Tecla pressionada",keyUp:"Tecla solta",interact:"Interação encadeada"};
+        const modifierLabels={shift:"Shift",ctrl:"Ctrl",alt:"Alt",meta:"Meta"};
         const operatorLabels={equals:"igual a",notEquals:"diferente de",greaterThan:"maior que",greaterOrEqual:"maior ou igual a",lessThan:"menor que",lessOrEqual:"menor ou igual a",contains:"contém",isEmpty:"está vazio",isNotEmpty:"não está vazio"};
         const actionLabels={roll:"Rolagem",calculate:"Calcular",update:"Atualizar propriedade",open:"Abrir",toggle:"Alternar componente",interact:"Interagir com componente",execute:"Executar operação"};
-        const triggerItems=(flow.triggers??[]).map(item=>eventLabels[item.event]??String(item.event??"Gatilho"));
+        const triggerItems=(flow.triggers??[]).map(item=>(eventLabels[item.event]??String(item.event??"Gatilho"))+((item.modifiers??[]).length?" + "+item.modifiers.map(value=>modifierLabels[value]??value).join(" + "):""));
         const conditionItems=(flow.conditions??[]).map(item=>`${item.path||"Propriedade não definida"} ${operatorLabels[item.operator]??item.operator??"igual a"}${["isEmpty","isNotEmpty"].includes(item.operator)?"":` ${String(item.value??"")}`}`);
         const actionItems=(flow.actions??[]).map(item=>{
           const config=item.config??{};const label=actionLabels[item.type]??String(item.type??"Ação");
@@ -1217,6 +1226,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         await sheet._writeLayouts(layouts, active, { render: false });
         const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
         if (liveComponent && Array.isArray(component.interactions)) liveComponent.interactions = structuredClone(component.interactions);
+        if (liveComponent) {
+          const node = sheet.element?.querySelector?.(`.nexus-component[data-id="${CSS.escape(componentId)}"]`);
+          const hasClick = getTriggeredActions(liveComponent, "click", { actor: sheet.actor }).length > 0;
+          if (node) { node.dataset.hasClickInteraction = String(hasClick); node.classList.toggle("is-actionable", hasClick); node.classList.toggle("is-rollable", hasClick); if (hasClick) { node.tabIndex = 0; node.setAttribute("role", "button"); node.setAttribute("aria-label", "Executar interação do componente"); } else { node.removeAttribute("tabindex"); node.removeAttribute("role"); node.removeAttribute("aria-label"); } }
+        }
       }
       if (control.dataset.interactionScope?.startsWith("propertyPresentation") || command?.includes("property-rule") || control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
         const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);

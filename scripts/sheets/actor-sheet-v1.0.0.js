@@ -1250,8 +1250,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!component || event.target.closest("input,textarea,select,button,a")) return;
       event.preventDefault(); event.stopPropagation();
       const id = component.dataset.id;
-      if (this._mode === "play" && getTriggeredActions(this._currentLayout?.components?.find(item => item.id === id), "doubleClick", { actor: this.actor }).length) {
-        this._runComponentAction(id, "doubleClick");
+      if (this._mode === "play") {
+        const modifiers = [event.shiftKey ? "shift" : null, event.ctrlKey ? "ctrl" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
+        if (getTriggeredActions(this._currentLayout?.components?.find(item => item.id === id), "doubleClick", { actor: this.actor, modifiers }).length) this._runComponentAction(id, "doubleClick", { modifiers });
         return;
       }
       this._setSelection($(root), [id]);
@@ -1261,7 +1262,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, executeTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -2854,7 +2855,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (showLabelInput) showLabelInput.checked = one.showLabel !== false;
         effectivePath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "");
         const propertyValueRow = inspector.querySelector("[data-property-value-row]");
-        const propertyValueInput = inspector.querySelector("[data-property-value]");
+        let propertyValueInput = inspector.querySelector("[data-property-value]");
         if (propertyValueRow && propertyValueInput) {
           const rawBoundValue = effectivePath.path === "name" ? this.actor.name : effectivePath.path === "img" ? this.actor.img : effectivePath.alias ? effectivePath.value : getPath(this.actor.system ?? {}, effectivePath.path);
           const aliasInfo = resolveAliasPath(this.actor, effectivePath.path);
@@ -2862,34 +2863,32 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const value = effectivePath.value;
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath || item.path === effectivePath.path);
           const aliasType = effectivePath.alias?.type;
-          const inferredAliasType = ["number", "boolean", "string"].includes(aliasType)
-            ? aliasType
-            : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
-          const propertyType = typeof value === "number" || typeof value === "boolean" || typeof value === "string"
-            ? typeof value
-            : (definition?.type ?? inferredAliasType);
+          const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
+          const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
+          const skillFormulaMode = !!skillValueMatch;
+          const skillFormula = skillFormulaMode ? String(getPath(this.actor.system ?? {}, `skills.${skillValueMatch[1]}.formula`) ?? "") : "";
+          const propertyType = skillFormulaMode ? "string" : (typeof value === "number" || typeof value === "boolean" || typeof value === "string" ? typeof value : (definition?.type ?? inferredAliasType));
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
-          const hasPath = !!propertyPath && canEditPrimitive;
-          const inputValue = value === undefined || value === null
-            ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "")
-            : value;
+          const hasPath = !!propertyPath && (canEditPrimitive || skillFormulaMode);
+          const inputValue = skillFormulaMode ? skillFormula : (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value);
           propertyValueRow.hidden = !hasPath || one.type === "token";
           if (hasPath && one.type !== "token") {
-            propertyValueInput.type = propertyType === "number" ? "number" : propertyType === "boolean" ? "checkbox" : "text";
-            if (propertyValueInput.type === "number") {
-              propertyValueInput.step = "any";
-              propertyValueInput.removeAttribute("min");
-              propertyValueInput.removeAttribute("max");
-              propertyValueInput.inputMode = "decimal";
+            const desiredTag = propertyType === "string" ? "TEXTAREA" : "INPUT";
+            if (propertyValueInput.tagName !== desiredTag) {
+              const replacement = document.createElement(desiredTag.toLowerCase());
+              replacement.dataset.propertyValue = ""; replacement.className = propertyValueInput.className;
+              propertyValueInput.replaceWith(replacement); propertyValueInput = replacement;
             }
-            if (propertyValueInput.type === "checkbox") propertyValueInput.checked = !!inputValue;
+            if (propertyType === "number") { propertyValueInput.type = "number"; propertyValueInput.step = "any"; propertyValueInput.removeAttribute("min"); propertyValueInput.removeAttribute("max"); propertyValueInput.inputMode = "decimal"; }
+            else if (propertyType === "boolean") propertyValueInput.type = "checkbox";
+            else { propertyValueInput.rows = 1; propertyValueInput.maxLength = skillFormulaMode ? 500 : 5000; propertyValueInput.style.resize = "none"; }
+            if (propertyType === "boolean") propertyValueInput.checked = !!inputValue;
             else propertyValueInput.value = String(inputValue);
             propertyValueInput.dataset.propertyPath = propertyPath;
-            propertyValueInput.dataset.propertyKind = propertyType;
-            propertyValueInput.disabled = effectivePath.readOnly === true || (propertyPath === "name" && one.updateSource === false);
-            propertyValueInput.title = propertyValueInput.disabled
-              ? "Propriedade calculada ou somente leitura."
-              : "Altera a propriedade vinculada no personagem.";
+            propertyValueInput.dataset.propertyKind = skillFormulaMode ? "skill-formula" : propertyType;
+            propertyValueInput.disabled = (effectivePath.readOnly === true && !skillFormulaMode) || (propertyPath === "name" && one.updateSource === false);
+            propertyValueInput.title = propertyValueInput.disabled ? "Propriedade calculada ou somente leitura." : skillFormulaMode ? "Fórmula opcional para calcular o valor desta perícia. Vazio = regra padrão do NEXUS." : "Altera a propriedade vinculada no personagem.";
+            if (propertyValueInput.tagName === "TEXTAREA") { propertyValueInput.style.height = "auto"; propertyValueInput.style.height = `${Math.min(propertyValueInput.scrollHeight, 120)}px`; propertyValueInput.style.overflowY = propertyValueInput.scrollHeight > 120 ? "auto" : "hidden"; }
           }
         }
         const resourcePaths = getResourceValuePaths(one);
@@ -3313,7 +3312,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const liveRoot = this.element;
       if (generation !== this._nexusCanvasEditorGeneration || this._mode !== "appearance" || !root.isConnected) return;
       if (liveRoot && liveRoot !== root && !liveRoot.contains?.(root)) return;
-      return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+      return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
     }).catch(error => console.error("NEXUS | Falha ao carregar o editor Canvas:", error));
   }
 }

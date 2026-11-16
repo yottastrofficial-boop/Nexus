@@ -1,3 +1,5 @@
+import { evaluateNexusFormula } from "./formula-engine.js";
+
 /**
  * Regras-base de atributos e perícias do NEXUS.
  * Fonte: REGRAS NEXUS.pdf, Capítulo 7 — Atributos, Perícias e Testes de Rolagem.
@@ -54,6 +56,30 @@ function getStoredProficientLevel(system, skill) {
   return normalizeNexusProficientLevel(stored);
 }
 
+export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
+  const skill = NEXUS_SKILLS.find(item => item.key === skillKey);
+  if (!skill) return null;
+  const system = actorOrSystem?.system ?? actorOrSystem ?? {};
+  const rawAttribute = Number(system.attributes?.[skill.attributeKey]);
+  const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
+  const proficientLevel = getStoredProficientLevel(system, skill);
+  const baseModifier = getNexusBaseModifier(system);
+  const source = String(formula ?? "").trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1").replace(/força/giu, "forca");
+  if (!source || source.length > 500) return null;
+  return evaluateNexusFormula(source, identifier => {
+    const key = String(identifier ?? "").replace(/^@/, "").toLocaleLowerCase("pt-BR");
+    const normalized = key.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (["for", "forca", "attribute", "atributo"].includes(normalized)) return attributeValue;
+    if (["mb", "combat.mb", "progression.mb.value"].includes(normalized)) return baseModifier;
+    if (["proficiencia", "proficiency", "proficient"].includes(normalized)) return Math.sign(proficientLevel);
+    if (["proficientlevel", "proficiencylevel", `skills.${skill.key}.proficientlevel`].includes(normalized)) return proficientLevel;
+    if (["bonus", `skills.${skill.key}.bonus`].includes(normalized)) return Math.sign(proficientLevel) * baseModifier;
+    if (normalized === `attributes.${skill.attributeKey}.value`) return attributeValue;
+    if (normalized === `skills.${skill.key}.value`) return attributeValue + Math.sign(proficientLevel) * baseModifier;
+    if (normalized === "identity.level") return Math.max(1, Number(system.identity?.level) || 1);
+    return undefined;
+  });
+}
 export function getNexusSkillRows(actor) {
   const system = actor?.system ?? {};
   const baseModifier = getNexusBaseModifier(system);
@@ -62,39 +88,16 @@ export function getNexusSkillRows(actor) {
     const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
     const proficientLevel = getStoredProficientLevel(system, skill);
     const bonus = Math.sign(proficientLevel) * baseModifier;
-    const modifier = attributeValue + bonus;
-    const proficient = proficientLevel > 0;
-    return {
-      ...skill,
-      attributeValue,
-      proficientLevel,
-      proficient,
-      modifier,
-      value: modifier,
-      formatted: modifier >= 0 ? "+" + modifier : String(modifier),
-      bonus
-    };
+    const defaultModifier = attributeValue + bonus;
+    const formula = String(system.skills?.[skill.key]?.formula ?? "").trim();
+    const formulaValue = formula ? evaluateNexusSkillFormula(system, skill.key, formula) : null;
+    const modifier = formulaValue ?? defaultModifier;
+    return { ...skill, attributeValue, proficientLevel, proficient: proficientLevel > 0, modifier, value: modifier, formula,
+      description: typeof system.skills?.[skill.key]?.description === "string" ? system.skills[skill.key].description : skill.description,
+      formatted: modifier >= 0 ? "+" + modifier : String(modifier), bonus };
   });
 }
-
 export function getNexusSkillModifier(actor, skillKey) {
-  const skill = NEXUS_SKILLS.find(item => item.key === skillKey);
-  if (!skill) return null;
-  const system = actor?.system ?? {};
-  const rawAttribute = Number(system.attributes?.[skill.attributeKey]);
-  const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
-  const proficientLevel = getStoredProficientLevel(system, skill);
-  const baseModifier = getNexusBaseModifier(system);
-  const bonus = Math.sign(proficientLevel) * baseModifier;
-  return {
-    skill,
-    proficientLevel,
-    proficient: proficientLevel > 0,
-    attributeValue,
-    baseModifier,
-    bonus,
-    modifier: attributeValue + bonus,
-    value: attributeValue + bonus,
-    exib: skill.exib
-  };
+  const row = getNexusSkillRows(actor).find(item => item.key === skillKey);
+  return row ? { ...row, skill: NEXUS_SKILLS.find(item => item.key === skillKey), baseModifier: getNexusBaseModifier(actor?.system ?? actor) } : null;
 }
