@@ -13,7 +13,7 @@ function formatPropertyValue(value) {
   if (value === undefined || value === null) return "—";
   if (typeof value === "boolean") return value ? "Sim" : "Não";
   if (typeof value === "number") return Number.isFinite(value) ? String(value) : "—";
-  if (typeof value === "string") return value.length > 64 ? value.slice(0, 61) + "…" : (value || "—");
+  if (typeof value === "string") return value.length > 96 ? value.slice(0, 93) + "…" : (value || "—");
   if (Array.isArray(value)) return value.length ? "Lista · " + value.length + " itens" : "Lista vazia";
   return "Objeto";
 }
@@ -21,19 +21,21 @@ function formatPropertyValue(value) {
 function appendPropertyOption(container, entry, label = entry.label, rollAlias = null, getValue = null) {
   const button = createButton("", "nexus-property-option", { propertyPathOption: entry.path });
   button.setAttribute("role", "option");
-  const heading = document.createElement("div");
-  heading.className = "nexus-property-option-heading";
   const title = document.createElement("strong");
   title.className = "nexus-property-option-name";
   title.textContent = label;
+  title.title = label;
+  const rawValue = getValue?.(entry.path);
   const value = document.createElement("small");
   value.className = "nexus-property-option-value";
-  value.textContent = "Valor: " + formatPropertyValue(getValue?.(entry.path));
+  value.textContent = "Valor atual: " + formatPropertyValue(rawValue);
+  value.title = rawValue === undefined || rawValue === null ? "Sem valor definido" : String(rawValue);
   const code = document.createElement("code");
   code.className = "nexus-property-option-path";
   code.textContent = entry.path;
-  heading.append(title, value);
-  button.append(heading, code);
+  code.title = entry.path;
+  button.setAttribute("aria-label", `${label}; ${entry.path}; valor atual ${formatPropertyValue(rawValue)}`);
+  button.append(title, value, code);
   if (rollAlias) {
     button.dataset.rollToken = "@" + rollAlias.display;
     button.dataset.rollAliasOption = "true";
