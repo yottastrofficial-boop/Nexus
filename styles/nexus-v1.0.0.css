@@ -5702,22 +5702,24 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   transition:border-color .15s ease,background-color .15s ease;
 }
 .nexus-skill-proficiency-indicator {
-  display:block;
-  width:9px;
-  height:9px;
-  border:1px solid currentColor;
-  border-radius:50%;
+  display:inline-block;
+  width:auto;
+  height:auto;
+  border:0;
+  border-radius:0;
   background:transparent;
-  transition:background-color .15s ease,border-color .15s ease;
+  font-size:16px;
+  line-height:1;
+  transition:color .15s ease,transform .15s ease;
 }
 .nexus-skill-proficiency-toggle.is-proficient {
   border-color:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8)) !important;
   background:color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 12%,transparent) !important;
 }
-.nexus-skill-proficiency-toggle.is-proficient .nexus-skill-proficiency-indicator {
-  border-color:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8));
-  background:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8));
-}
+.nexus-skill-proficiency-toggle.is-proficient .nexus-skill-proficiency-indicator { color:var(--nexus-highlight-color,var(--nexus-accent-color,#78b7e8)); }
+.nexus-skill-proficiency-toggle.is-deficient { border-color:#c96b72 !important; background:color-mix(in srgb,#c96b72 12%,transparent) !important; }
+.nexus-skill-proficiency-toggle.is-deficient .nexus-skill-proficiency-indicator { color:#e07b82; }
+.nexus-skill-proficiency-toggle:not(.is-proficient):not(.is-deficient) .nexus-skill-proficiency-indicator { color:var(--nexus-panel-muted,#9aadc2); }
 .nexus-skill-proficiency-toggle:focus-visible {
   outline:2px solid var(--nexus-highlight-color,#8fc8ff) !important;
   outline-offset:3px !important;
@@ -5874,7 +5876,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-property-presentation-field>input,.nexus-property-presentation-field>textarea{width:100%!important;min-width:0!important;box-sizing:border-box!important}
 .nexus-component:not(.is-group-member){border:1px solid var(--nexus-component-border,var(--nexus-accent-color,#52647b))!important;border-radius:var(--nexus-component-radius,7px)!important}
 .nexus-group-surface{border:1px solid var(--nexus-group-border,#53677f)!important;border-radius:var(--nexus-group-radius,9px)!important}
-.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tl{border-top-left-radius:0!important}
+.nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tl{border-top-left-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-tr{border-top-right-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-br{border-bottom-right-radius:0!important}
 .nexus-sheet:is([data-mode="play"],[data-mode="config"],[data-mode="appearance"]) .nexus-component.nexus-component-corner-square-bl{border-bottom-left-radius:0!important}
