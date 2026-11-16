@@ -1438,21 +1438,58 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const output = String(context.representationContent ?? "");
           if (representationNode.dataset.renderedContent !== output) {
             const fragment = document.createDocumentFragment();
-            const tokenPattern = /\{\{\s*(icon|image):([^{}]+?)\s*\}\}/gi;
-            let cursor = 0, match;
-            while ((match = tokenPattern.exec(output))) {
-              if (match.index > cursor) fragment.append(document.createTextNode(output.slice(cursor, match.index)));
-              const kind = match[1].toLowerCase(), source = match[2].trim();
-              if (kind === "icon") {
-                const icon = document.createElement("i");
-                const classes = source.split(/\s+/).filter(name => /^(?:fa-(?:solid|regular|brands|light|duotone|thin|sharp|fw|spin|pulse|[a-z0-9-]+))$/.test(name));
-                if (classes.length) { icon.className = classes.join(" "); icon.setAttribute("aria-hidden", "true"); fragment.append(icon); }
-              } else if (/^(?:https?:\/\/|icons\/|systems\/|modules\/)/i.test(source)) {
-                const image = document.createElement("img"); image.className = "nexus-property-representation-image"; image.src = source; image.alt = ""; image.loading = "lazy"; fragment.append(image);
+            const appendIcon = source => {
+              const icon = document.createElement("i");
+              const classes = source.split(/\s+/).filter(name => /^(?:fa-(?:solid|regular|brands|light|duotone|thin|sharp|fw|spin|pulse|[a-z0-9-]+))$/.test(name));
+              if (classes.length) { icon.className = classes.join(" "); icon.setAttribute("aria-hidden", "true"); fragment.append(icon); }
+            };
+            const appendImage = (source, settings = []) => {
+              if (!/^(?:https?:\/\/|icons\/|systems\/|modules\/)/i.test(source)) return false;
+              const image = document.createElement("img");
+              image.className = "nexus-property-representation-image";
+              image.src = source;
+              image.alt = "";
+              image.loading = "lazy";
+              for (const setting of settings) {
+                const [key, rawValue] = setting.split("=").map(value => value.trim());
+                if (!rawValue) continue;
+                if (["width", "height"].includes(key) && /^(?:0|(?:\d+(?:\.\d+)?|\.\d+)(?:px|%|em|rem|vw|vh|vmin|vmax))$/i.test(rawValue)) image.style[key] = rawValue;
+                if (key === "fit" && ["contain", "cover", "fill"].includes(rawValue)) image.style.objectFit = rawValue;
               }
-              cursor = tokenPattern.lastIndex;
+              fragment.append(image);
+              return true;
+            };
+            const standaloneIcon = output.trim().match(/^fa-(?:solid|regular|brands|light|duotone|thin|sharp)(?:\s+fa-[a-z0-9-]+)+$/i);
+            let cursor = 0, match;
+            if (standaloneIcon) {
+              appendIcon(standaloneIcon[0]);
+              cursor = output.length;
+            } else {
+              const tokenPattern = /\{\{\s*(icon|image):([^{}]+?)\s*\}\}|(?:https?:\/\/|(?:icons|systems|modules)\/)[^\s<>{}]+/gi;
+              while ((match = tokenPattern.exec(output))) {
+                if (match.index > cursor) fragment.append(document.createTextNode(output.slice(cursor, match.index)));
+                if (match[1]) {
+                  const kind = match[1].toLowerCase();
+                  const parts = match[2].split("|").map(value => value.trim());
+                  if (kind === "icon") appendIcon(parts[0]);
+                  else appendImage(parts[0], parts.slice(1));
+                } else {
+                  const raw = match[0];
+                  const source = raw.replace(/[),.;!?]+$/, "");
+                  const punctuation = raw.slice(source.length);
+                  const imagePath = source.split(/[?#]/, 1)[0];
+                  if (/\.(?:svg|png|jpe?g|webp|gif|avif)$/i.test(imagePath) && appendImage(source)) {
+                    if (punctuation) fragment.append(document.createTextNode(punctuation));
+                  } else fragment.append(document.createTextNode(raw));
+                }
+                cursor = tokenPattern.lastIndex;
+              }
             }
             if (cursor < output.length) fragment.append(document.createTextNode(output.slice(cursor)));
+            const meaningfulNodes = [...fragment.childNodes].filter(node => node.nodeType !== 3 || node.textContent.trim());
+            const mediaOnly = meaningfulNodes.length === 1 && meaningfulNodes[0].nodeType === 1 && ["IMG", "I"].includes(meaningfulNodes[0].tagName);
+            representationNode.classList.toggle("is-media-only", mediaOnly);
+            if (mediaOnly) meaningfulNodes[0].classList.add("is-standalone");
             representationNode.replaceChildren(fragment);
             representationNode.dataset.renderedContent = output;
           }
