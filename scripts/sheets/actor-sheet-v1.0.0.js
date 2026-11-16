@@ -411,14 +411,23 @@ const resolveAliasPath = (actor, path) => {
   if (!alias) return { path, alias: null, suffix: "" };
   const suffix = path.slice(matchedKey.length).replace(/^\./, "");
   let targetPath = alias.targetPath ? [alias.targetPath, suffix].filter(Boolean).join(".") : "";
-  // Atributos podem apontar o valor para um campo numérico nativo; metadados
-  // (nome, bônus e fórmula) continuam pertencendo ao alias.
+  // Se o destino for um objeto de atributo/recurso, edite o campo interno
+  // sem substituir a estrutura inteira do Actor.
   if (alias.targetPath && alias.type === "attribute") {
-    if (suffix === "value") targetPath = alias.targetPath;
-    else if (["name", "exib", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
+    if (suffix === "value") {
+      const target = getPath(actor?.system ?? {}, alias.targetPath);
+      targetPath = target && typeof target === "object" && Object.hasOwn(target, "value")
+        ? `${alias.targetPath}.value`
+        : alias.targetPath;
+    } else if (["name", "exib", "exibicao", "checkbonus", "roll"].includes(suffix)) targetPath = "";
   }
   if (alias.targetPath && alias.type === "resource") {
-    if (suffix === "percentage") targetPath = alias.targetPath;
+    if (["value", "max"].includes(suffix)) {
+      const target = getPath(actor?.system ?? {}, alias.targetPath);
+      targetPath = target && typeof target === "object" && Object.hasOwn(target, suffix)
+        ? `${alias.targetPath}.${suffix}`
+        : (suffix === "value" ? alias.targetPath : "");
+    } else if (suffix === "percentage") targetPath = alias.targetPath;
     else if (["name", "exib", "exibicao"].includes(suffix)) targetPath = "";
   }
   return { path: targetPath, alias, suffix };
@@ -743,6 +752,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _prepareContext(options = {}) {
+    // O modo padrão é estado real da ficha, não apenas fallback de apresentação.
+    this._mode ??= "play";
     const context = await super._prepareContext(options);
     context.actor = this.actor;
     context.system = this.actor.system ?? {};
@@ -2846,7 +2857,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         // Single property picker portal: options are built only by the shared picker.
         const optionsList = document.getElementById("nexus-property-picker-" + String(this.id).replace(/[^a-zA-Z0-9_-]/g, ""));
         const pathInput = inspector.querySelector("[data-component-path-input]");
-        const defaultPath = resolveNexusBinding(this.actor, one.dataPath ?? COMPONENTS[one.type]?.path ?? "").path;
+        const defaultPath = String(one.dataPath ?? COMPONENTS[one.type]?.path ?? "");
         if (pathInput) pathInput.value = defaultPath;
         if (optionsList) optionsList.hidden = true;
         for (const [key, value] of [["x", one.x], ["y", one.y], ["width", one.w], ["height", one.h], ["actionType", one.actionType ?? ""], ["actionTargetId", one.actionTargetId ?? ""], ["attributePreset", one.attributePreset ?? "for"], ["rollFormula", one.rollFormula ?? ""], ["actionPath", one.actionPath ?? ""], ["proficiencyLabel0", one.proficiencyLabels?.[0] ?? "Nível 0"], ["proficiencyLabel1", one.proficiencyLabels?.[1] ?? "Nível 1"], ["proficiencyLabel2", one.proficiencyLabels?.[2] ?? "Nível 2"], ["proficiencyLabel3", one.proficiencyLabels?.[3] ?? "Nível 3"], ["imageFit", one.imageFit ?? "contain"], ["imagePosition", one.imagePosition ?? "center"], ["imageOpacity", one.imageOpacity ?? 100], ["currentPath", one.currentPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.value")], ["maxPath", one.maxPath ?? (String(one.sheetCode).toUpperCase()==="REC"?"":"resources.pv.max")], ["dataPath", one.dataPath ?? COMPONENTS[one.type]?.path ?? ""], ["text", one.text ?? ""], ["customLabel", one.customLabel ?? one.text ?? ""], ["showLabel", one.showLabel !== false], ["labelPosition", one.labelPosition ?? "top-left"], ["fontSize", one.fontSize ?? this._currentLayout?.fontSize ?? 13], ["fontFamily", one.fontFamily ?? this._currentLayout?.fontFamily ?? "Inter"], ["headingFontSize", one.headingFontSize ?? ""], ["headingFontFamily", one.headingFontFamily ?? ""], ["rows", one.rows ?? 3], ["columns", one.columns ?? 3], ["placeholder", one.placeholder ?? ""], ["binding", one.binding ?? ""], ["customBinding", one.customBinding ?? ""], ["resourceLabel", one.resourceLabel ?? "Recurso"], ["format", one.format ?? "bar"], ["backgroundColor", one.backgroundColor ?? "#273443"], ["borderColor", one.borderColor ?? "#52647b"], ["borderRadius", one.borderRadius ?? "7"], ["opacity", one.opacity ?? "100"], ["sheetContent1",one.sheetContent1??"PV"], ["sheetContent2",one.sheetContent2??"❤️"], ["sheetColor",one.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[String(one.sheetCode??one.sheetContent1??"PV").toUpperCase()]??"#d94b4b"], ["sheetTrackColor",one.sheetTrackColor??"#080d14"], ["sheetOrientation",one.sheetOrientation??"horizontal"], ["previewCurrent",one.previewCurrent??32], ["previewMax",one.previewMax??40], ["tokenImage",one.tokenImage??""], ["tokenFrameMode",one.tokenFrameMode??"solid"], ["tokenFrameSource",one.tokenFrameSource??""], ["tokenFrameColor",one.tokenFrameColor??"#78b7e8"], ["tokenFrameWidth",one.tokenFrameWidth??3], ["tokenShape",one.tokenShape??"circle"], ["tokenOverlay",one.tokenOverlay??""], ["tokenBackgroundColor",one.tokenBackgroundColor??"#202e3e"], ["layerIcon",one.layerIcon??""], ["layerImage",one.layerImage??""]]) {
@@ -2858,9 +2869,22 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const propertyValueRow = inspector.querySelector("[data-property-value-row]");
         let propertyValueInput = inspector.querySelector("[data-property-value]");
         if (propertyValueRow && propertyValueInput) {
-          const rawBoundValue = effectivePath.path === "name" ? this.actor.name : effectivePath.path === "img" ? this.actor.img : effectivePath.alias ? effectivePath.value : getPath(this.actor.system ?? {}, effectivePath.path);
-          const aliasInfo = resolveAliasPath(this.actor, effectivePath.path);
-          const propertyPath = effectivePath.virtual ? effectivePath.sourcePath : (effectivePath.alias?.type === "resource" && !aliasInfo.suffix ? `${effectivePath.path}.value` : (rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value") ? `${effectivePath.path}.value` : effectivePath.path));
+          const aliasInfo = resolveAliasPath(this.actor, String(one.dataPath ?? COMPONENTS[one.type]?.path ?? ""));
+          const storedAliasSuffix = aliasInfo.suffix === "exib" ? "exibicao" : aliasInfo.suffix;
+          const storedAliasPath = effectivePath.alias && !aliasInfo.path
+            ? [effectivePath.alias.key, storedAliasSuffix || (["attribute", "resource"].includes(effectivePath.alias.type) ? "value" : "")].filter(Boolean).join(".")
+            : "";
+          const sourcePropertyPath = effectivePath.virtual ? effectivePath.sourcePath : (storedAliasPath || effectivePath.path);
+          const rawBoundValue = storedAliasPath
+            ? getPath(getCustomAliasData(this.actor), storedAliasPath)
+            : sourcePropertyPath === "name" ? this.actor.name
+              : sourcePropertyPath === "img" ? this.actor.img
+                : sourcePropertyPath ? getPath(this.actor.system ?? {}, sourcePropertyPath) : undefined;
+          const propertyPath = String(effectivePath.virtual ? (effectivePath.sourcePath ?? "") : (
+            storedAliasPath || (rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value")
+              ? `${sourcePropertyPath}.value`
+              : sourcePropertyPath)
+          ) ?? "");
           const value = effectivePath.value;
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath || item.path === effectivePath.path);
           const aliasType = effectivePath.alias?.type;
