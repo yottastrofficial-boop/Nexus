@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.55", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.56", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -121,6 +121,8 @@ assert.match(propertyPickerView, /value.textContent = "Valor: " \+ formatPropert
 assert.match(sheetListeners, /getValue: path => resolveNexusBinding\(sheet.actor, path\)\.value/, "O seletor deve resolver valores do Actor em tempo real");
 assert.doesNotMatch(propertyCatalog.match(/const DERIVED_SKILL_FIELDS = new Set\(\[[\s\S]*?\]\);/)?.[0] ?? "", /proficientLevel/, "Proficiência numérica não pode ser classificada como campo derivado");
 assert.match(propertyPickerView, /createButton\("", "nexus-property-option"/, "As opções não devem duplicar o rótulo no texto do botão");
+assert.match(propertyPickerView, /nexus-property-option-heading[\s\S]*nexus-property-option-name[\s\S]*nexus-property-option-value[\s\S]*nexus-property-option-path/, "Nome, valor atual e caminho técnico devem ter contêineres separados");
+assert.match(css, /nexus-property-option-heading[\s\S]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, auto\)/, "O layout do seletor deve reservar áreas distintas para nome e valor");
 assert.match(propertyPickerView, /category\.append\(heading, description, arrow\)/, "Categorias devem separar título, caminho e indicador de navegação");
 assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
 assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
@@ -849,6 +851,7 @@ assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = skillFormulaMode \? "skill-formula" : propertyType/, "O tipo original da propriedade deve continuar identificado para validar o valor salvo");
+assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O caminho skills.<chave>.value deve ser reconhecido como editor de fórmula e não ficar bloqueado como propriedade derivada");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
 assert.match(sheetCode, /const inputValue = storedExpression \?\? \(skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "O editor deve priorizar expressões salvas e manter valores padrão tipados e fórmulas de perícia");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
