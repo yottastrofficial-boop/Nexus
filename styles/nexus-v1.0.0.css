@@ -5925,3 +5925,66 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-component-inspector [data-property-value][data-property-kind="string"],
 .nexus-component-inspector [data-property-value][data-property-kind="skill-formula"] { display:block;width:100%;min-height:34px;max-height:7.5em;padding:7px 9px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere;overflow-y:hidden;resize:none; }
 .nexus-component-inspector [data-property-value][data-property-kind="skill-formula"] { font-family:ui-monospace,monospace; }
+
+
+/* 1.0.0.51 — campo de propriedade separado do nome e do caminho do componente. */
+.nexus-property-value-panel {
+  display:grid;
+  gap:9px;
+  min-width:0;
+  margin:10px 0 12px;
+  padding:11px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:8px;
+  background:color-mix(in srgb,var(--nexus-panel-surface,#202e3e) 82%,transparent);
+  box-sizing:border-box;
+}
+.nexus-property-value-panel[hidden] { display:none !important; }
+.nexus-property-value-heading { display:grid; gap:5px; min-width:0; }
+.nexus-property-value-heading strong { color:var(--nexus-panel-text,#e7edf5); font-size:11px; font-weight:700; }
+.nexus-property-value-heading code {
+  display:block;
+  min-width:0;
+  padding:5px 7px;
+  border:1px solid color-mix(in srgb,var(--nexus-panel-border,#3c5067) 72%,transparent);
+  border-radius:5px;
+  background:var(--nexus-panel-input,#111b27);
+  color:var(--nexus-panel-muted,#9aadc2);
+  font-size:10px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+.nexus-property-value-control {
+  display:grid !important;
+  gap:5px !important;
+  min-width:0;
+  margin:0 !important;
+  color:var(--nexus-panel-muted,#9aadc2) !important;
+  font-size:10px !important;
+  font-weight:650 !important;
+}
+.nexus-property-value-control > textarea,
+.nexus-property-value-control > input {
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  box-sizing:border-box;
+  padding:8px 9px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  background:var(--nexus-panel-input,#111b27);
+  color:var(--nexus-panel-text,#e7edf5);
+  font:inherit;
+  font-size:12px;
+  line-height:1.4;
+}
+.nexus-property-value-control > textarea {
+  max-height:7.5em;
+  resize:vertical !important;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.nexus-property-value-control > :focus-visible { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; }
