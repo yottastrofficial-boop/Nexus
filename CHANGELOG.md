@@ -1,3 +1,19 @@
+## 1.0.0.45
+
+### Interações e atualização dinâmica
+- Corrigida a validação dos caminhos das ações `update` e `calculate`; destinos como `skills.athletics.proficientLevel` agora são aceitos e normalizados, mantendo a proteção contra caminhos inválidos.
+- Ações de soma e subtração leem o valor numérico atual, validam o incremento e persistem sem forçar uma renderização integral da ficha.
+- Após uma ação de atualização ou cálculo, os componentes e expressões dependentes são atualizados imediatamente.
+- Propriedades virtuais com origem em `Actor.system` agora são gravadas no caminho `system.*`, corrigindo a edição de `proficientLevel` e outras propriedades calculadas com origem persistida.
+- O editor de fluxos salva layouts sem renderizar a ficha inteira, mantém a aba selecionada e restaura foco/cursor no campo editado.
+- A avaliação de rolagens utiliza `Roll.evaluate()` sem a opção `async` removida no Foundry VTT 14.
+
+### Propriedades
+- `proficientLevel` é reconhecida como propriedade numérica editável, não como campo derivado.
+- O seletor de propriedades passa a exibir o valor atual de cada propriedade, inclusive proficiência, atributos, recursos e propriedades personalizadas resolvidas.
+- Testes de regressão adicionados para caminhos de destino, edição de proficiência, exibição de valores, permanência da aba ativa e API de rolagem.
+- A validação automatizada e o teste funcional/visual dentro do Foundry VTT 14 devem confirmar o comportamento integrado desta versão.
+
 ## 1.0.0.44
 
 ### Propriedades e proficiência
