@@ -1,3 +1,21 @@
+## 1.0.0.54
+
+### Proteção do Canvas e tokens
+- Delete/Backspace não excluem tokens por engano enquanto os painéis do Inspector ou Comportamento estão ativos.
+- A exclusão de tokens continua permitida quando o token está diretamente controlado/selecionado na cena.
+- A edição de componentes do Canvas continua usando a seleção própria da ficha, sem confundir a seleção de tokens da cena.
+
+### Propriedades e valores dinâmicos
+- Removido o elemento visual `data-property-value-path`.
+- Todos os valores editáveis usam um campo textual inteligente, preservando a tipagem da propriedade ao salvar.
+- Propriedades numéricas, textuais e booleanas aceitam expressões entre `{{ }}`; expressões válidas ficam vinculadas e são reavaliadas quando suas referências mudam.
+- Corrigida a leitura de atributos armazenados como objetos `{ value }` no cálculo de perícias e fórmulas, evitando resultados incorretos iguais a zero.
+- A validação impede expressões inválidas ou resultados incompatíveis com o tipo da propriedade.
+
+### Validação
+- Adicionados testes para atributos aninhados, fórmulas, expressões persistidas e bloqueio de exclusão acidental de tokens.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.53
 
 ### Inspector e propriedades
