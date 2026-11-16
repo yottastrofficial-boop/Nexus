@@ -65,7 +65,8 @@ export function observeCanvasConnectedCorners(canvas) {
   if (!record) {
     let frame = 0;
     const schedule = () => {
-      if (frame) return;
+      // Pointer and keyboard gestures already perform one final scan on release.
+      if (canvas.dataset?.nexusGestureActive === "true" || frame) return;
       frame = requestAnimationFrame(() => { frame = 0; updateCanvasConnectedCorners(canvas); });
     };
     const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
