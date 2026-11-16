@@ -941,7 +941,7 @@ assert.match(css,/nexus-sheet:is\(\[data-mode="play"\],\[data-mode="config"\],\[
 
 assert.ok(!css.includes(".nexus-component.nexus-component-touching-right {") && !css.includes(".nexus-component.nexus-component-touching-left {"),"Contato em uma aresta não deve achatar automaticamente os dois cantos daquele lado");
 assert.ok(!css.includes(".nexus-group-surface.nexus-group-touching-right {") && !css.includes(".nexus-group-surface.nexus-group-touching-left {"),"Superfícies de grupo também devem usar arredondamento individual por canto");
-assert.ok(!sheetListeners.includes("input${inspectorNamespace}"),"Regras de apresentação não devem gravar a cada tecla e interromper a digitação");
+assert.ok(!sheetListeners.includes("[data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']"),"Regras de apresentação não devem gravar a cada tecla e interromper a digitação");
 assert.ok(!sheetListeners.includes("capturedInteractionInputHistory"),"O histórico de edição de regras não deve ser capturado a cada tecla");
 assert.ok(sheet.includes("async _writeLayouts(layouts, active, { render = true } = {})"), "A supressão de renderização deve ser opcional para não afetar outros comandos");
 assert.ok(sheetListeners.includes("{ render: options.render !== false }"), "Somente os campos de apresentação em edição devem salvar sem rerender");
