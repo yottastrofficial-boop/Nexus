@@ -2895,7 +2895,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
             : sourcePropertyPath === "name" ? this.actor.name
               : sourcePropertyPath === "img" ? this.actor.img
                 : sourcePropertyPath ? getPath(this.actor.system ?? {}, sourcePropertyPath) : undefined;
-          const propertyPath = String(storedAliasPath || effectivePath.path || sourcePropertyPath || "");
+          const propertyPath = String(storedAliasPath || (
+            effectivePath.path && rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value")
+              ? `${effectivePath.path}.value`
+              : effectivePath.path
+          ) || sourcePropertyPath || "");
           const value = effectivePath.value ?? rawBoundValue;
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath);
           const aliasType = effectivePath.alias?.type;
