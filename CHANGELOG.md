@@ -1,3 +1,16 @@
+## 1.0.0.47
+
+### Atualização reativa e regras de apresentação
+- A saída de uma regra que resulte em conteúdo vazio agora recua para o valor da propriedade de origem; uma condição correspondente não deixa mais o card sem conteúdo.
+- A origem das regras respeita o vínculo explícito do componente e, na ausência dele, o caminho configurado na apresentação antes do padrão do tipo de componente.
+- A invalidação reativa considera os caminhos reais de origem de propriedades virtuais e aliases, não apenas seus identificadores de apresentação.
+- A persistência de layouts mantém o snapshot em memória alinhado ao resultado do merge de três vias, evitando que edições posteriores reutilizem configurações antigas.
+- Adicionados testes de regressão para os cinco estágios assinados de proficiência (-2 a +2), conteúdo interpolado vazio e preservação do valor original.
+
+### Validação
+- A suíte automatizada do repositório valida sintaxe, manifesto, regras, persistência e pacote.
+- A confirmação visual e funcional em Foundry VTT 14 continua necessária; a automação não substitui o teste dentro do Foundry.
+
 ## 1.0.0.46
 
 ### Mídia flexível nas regras de apresentação
