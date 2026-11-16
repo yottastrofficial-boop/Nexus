@@ -1,5 +1,8 @@
 ## 1.0.0.43
 
+### Validação
+- A validação automatizada da versão 1.0.0.43 é executada pelo fluxo de release; a confirmação funcional/visual em Foundry VTT 14 continua necessária.
+
 ### Edição dinâmica e sincronização
 - Valores editáveis de propriedades e recursos passam a atualizar as regras durante a digitação, sem depender de Enter.
 - A gravação de layouts e valores evita renderizações integrais da ficha durante a edição, preservando foco e continuidade.
