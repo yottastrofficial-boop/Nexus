@@ -6,6 +6,10 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
   const { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet } = dependencies;
 
     const currentRoot = html?.[0];
+    const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
+    sheet._nexusInspectorNamespace = inspectorNamespace;
+    $(document).off(inspectorNamespace);
+    const isSheetOwnedControl = input => currentRoot?.contains(input) || [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.contains(input));
     // Remove detached property-option portals left by a previous ApplicationV2 render.
     document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
       if (!list._nexusOwnerInspector?.isConnected) list.remove();
@@ -191,8 +195,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet._writeLayouts(layouts, active);
     });
     const pendingPropertyValueSaves = new WeakMap();
-    html.on("input", "[data-property-value]", event => {
+    $(document).on(`input${inspectorNamespace}`, "[data-property-value]", event => {
       const input = event.currentTarget;
+      if (!isSheetOwnedControl(input)) return;
       if (input.tagName === "TEXTAREA") { input.style.height = "auto"; const lineHeight = Number.parseFloat(getComputedStyle(input).lineHeight) || 16; const maxHeight = lineHeight * 5 + 16; input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`; input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden"; }
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
       if (!path || ["img", "identity.portrait.img", "prototypeToken.texture.src"].includes(path)) return;
@@ -206,8 +211,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }, 180);
       pendingPropertyValueSaves.set(input, timer);
     });
-    html.on("change", "[data-property-value]", async event => {
+    $(document).on(`change${inspectorNamespace}`, "[data-property-value]", async event => {
       const input = event.currentTarget;
+      if (!isSheetOwnedControl(input)) return;
       const pendingTimer = pendingPropertyValueSaves.get(input);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingPropertyValueSaves.delete(input); }
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
@@ -317,8 +323,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet._writeLayouts(layouts, active);
     });
     const pendingResourceValueSaves = new WeakMap();
-    html.find("[data-config-current-value], [data-config-max-value]").on("input", event => {
+    $(document).on(`input${inspectorNamespace}`, "[data-config-current-value], [data-config-max-value]", event => {
       const input = event.currentTarget;
+      if (!isSheetOwnedControl(input)) return;
       const previousTimer = pendingResourceValueSaves.get(input);
       if (previousTimer) clearTimeout(previousTimer);
       const timer = setTimeout(() => {
@@ -327,8 +334,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }, 180);
       pendingResourceValueSaves.set(input, timer);
     });
-    html.find("[data-config-current-value], [data-config-max-value]").on("change", async event => {
+    $(document).on(`change${inspectorNamespace}`, "[data-config-current-value], [data-config-max-value]", async event => {
       const input = event.currentTarget;
+      if (!isSheetOwnedControl(input)) return;
       const pendingTimer = pendingResourceValueSaves.get(input);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingResourceValueSaves.delete(input); }
       const id = [...(sheet._selectedIds ?? [])][0];
@@ -1230,9 +1238,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         row.classList.remove("drop-before","drop-after","drop-inside");
         if(!source || source===target) return; await sheet._reorderLayer(source,target,placement);
       });
-    const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
-    sheet._nexusInspectorNamespace = inspectorNamespace;
-    $(document).off(inspectorNamespace);
     const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
