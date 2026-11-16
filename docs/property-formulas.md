@@ -37,7 +37,7 @@ Os atalhos não diferenciam maiúsculas de minúsculas. Também é possível usa
 - Comparações: `>`, `>=`, `<`, `<=`, `==`, `!=` (para condições)
 - Agrupamento: `(` e `)`
 
-A precedência matemática é respeitada. Divisão ou módulo por zero, propriedades desconhecidas e valores não numéricos são rejeitados. O operador `%` significa módulo, não porcentagem; para percentual de um recurso, utilize a propriedade derivada correspondente, como `resources.pv.percentage` quando disponível.
+A precedência matemática é respeitada. Um campo numérico vazio é tratado como zero em operações aritméticas; campos textuais vazios continuam vazios fora de operações numéricas. Divisão ou módulo por zero, propriedades desconhecidas e valores não numéricos são rejeitados. O operador `%` significa módulo, não porcentagem; para percentual de um recurso, utilize a propriedade derivada correspondente, como `resources.pv.percentage` quando disponível.
 
 ## Limites desta etapa
 
@@ -64,3 +64,15 @@ Cada regra contém uma condição e um único campo de conteúdo. O campo aceita
 Use `@caminho.completo` nas expressões e `{{@caminho.completo}}` no conteúdo. `=` e `==` são equivalentes para igualdade. Abreviações duplicadas são sinalizadas no painel; use o caminho completo quando houver conflito. A primeira condição verdadeira vence; sem correspondência, a representação original permanece.
 
 Layouts antigos que usam `component.representation` continuam legíveis; novas configurações são gravadas em `component.propertyPresentation`. A apresentação não altera as regras nem os valores do Actor.
+
+
+## Fórmulas personalizadas de perícias
+
+O resultado `skills.<pericia>.value` é calculado e não deve ser editado como um número manual. A fórmula opcional é armazenada em `skills.<pericia>.formula`; o Inspector também oferece esse campo quando o componente está vinculado ao resultado `.value`. Deixe a fórmula vazia para voltar ao cálculo padrão.
+
+Exemplos válidos para Atletismo:
+
+- `{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}`
+- `@FOR + (@MB * skills.athletics.proficientLevel)`
+
+Use uma única expressão completa entre chaves quando estiver configurando um vínculo de componente. Não envolva cada parcela em chaves separadas. Os atalhos `@FOR` e `@MB` são aceitos no editor de fórmulas de perícia.
