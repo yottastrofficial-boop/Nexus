@@ -1204,7 +1204,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
-      if (command !== "save-flow") await sheet._writeLayouts(layouts, active);
+      if (command !== "save-flow") await sheet._writeLayouts(layouts, active, { render: options.render !== false });
       if (control.dataset.interactionScope?.startsWith("propertyPresentation") || command?.includes("property-rule") || control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {
         const liveComponent = sheet._currentLayout?.components?.find(item => item.id === componentId);
         if (liveComponent) { if (component.propertyPresentation) liveComponent.propertyPresentation = structuredClone(component.propertyPresentation); else if (component.representation) liveComponent.propertyPresentation = structuredClone(component.representation); }
