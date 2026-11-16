@@ -122,14 +122,38 @@ export function evaluateComponentRepresentation(raw, resolveProperty, sourcePath
   const sourcePath = safePath(sourcePathOverride || config.sourcePath);
   if (!config.enabled || !sourcePath || typeof resolveProperty !== "function") return null;
   const sourceValue = resolveProperty(sourcePath);
+
+  // Rules are evaluated in their saved order. A matching rule must never hide
+  // the component's normal value merely because its interpolation is empty.
   for (const [index, rule] of config.rules.entries()) {
     if (!representationConditionPasses(rule.condition, resolveProperty)) continue;
-    let content = rule.content;
-    if (!content) {
-      const calculated = rule.output ? evaluateNexusFormula(rule.output, resolveProperty) : null;
-      content = [rule.icon, rule.label, calculated ?? sourceValue].filter(value => value !== undefined && value !== null && value !== "").join(" ");
+
+    const calculated = rule.output ? evaluateNexusFormula(rule.output, resolveProperty) : null;
+    let content = String(rule.content ?? "");
+    if (content.trim()) {
+      content = interpolateRepresentationContent(content, resolveProperty);
+    } else {
+      content = [rule.icon, rule.label, representationValueToString(calculated ?? sourceValue)]
+        .filter(value => value !== undefined && value !== null && value !== "")
+        .join(" ");
     }
-    return { active: true, ruleId: rule.id, ruleIndex: index, sourcePath, sourceValue, content: interpolateRepresentationContent(content, resolveProperty), icon: rule.icon, label: rule.label, value: rule.output ? (evaluateNexusFormula(rule.output, resolveProperty) ?? sourceValue) : sourceValue };
+
+    if (!String(content ?? "").trim()) {
+      content = representationValueToString(calculated ?? sourceValue);
+      if (!content) continue;
+    }
+
+    return {
+      active: true,
+      ruleId: rule.id,
+      ruleIndex: index,
+      sourcePath,
+      sourceValue,
+      content: String(content),
+      icon: rule.icon,
+      label: rule.label,
+      value: calculated ?? sourceValue
+    };
   }
   return null;
 }
