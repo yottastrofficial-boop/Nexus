@@ -1565,9 +1565,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="actionTargetId") component.actionTargetId = String(input.value ?? "").trim().slice(0,100);
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
-        const resolved = resolveNexusBinding(sheet.actor, input.value);
-        const path = resolved.path;
-        if (String(input.value).trim() && (!path || !/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path))) return;
+        const path = String(input.value ?? "").replace(/^system\./, "").trim();
+        const resolved = resolveNexusBinding(sheet.actor, path);
+        const validPath = /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        // Um alias personalizado pode não possuir caminho físico em Actor.system.
+        if (path && (!validPath || (!resolved.path && !resolved.alias))) return;
         component.dataPath = path;
         if(component.type==="resource-meter"){component.customBinding=path;component.binding="custom";}
       }
