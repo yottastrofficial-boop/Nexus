@@ -68,7 +68,7 @@ const SEGMENT_LABELS = Object.freeze({
 
 const DERIVED_SKILL_FIELDS = new Set([
   "name", "attribute", "attributeName", "attributeKey", "attributeValue",
-  "description", "proficient", "proficientLevel", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao"
+  "description", "proficient", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao"
 ]);
 const LEGACY_NUCLEUS_PATHS = ["attributes.body", "attributes.mind", "attributes.soul"];
 const DUPLICATE_PATHS = ["identity.name", "token.img", "token.border"];
@@ -134,7 +134,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
   }
 
   // Perícias seguem o modelo do livro-base: metadados de identificação,
-  // valor calculado e proficiência binária.
+  // valor calculado e proficiência numérica assinada.
   for (const skill of NEXUS_SKILLS) {
     const groupPath = "skills." + skill.attributeKey + "." + skill.key;
     const groupLabels = {
