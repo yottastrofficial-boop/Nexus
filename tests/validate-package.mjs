@@ -1100,7 +1100,7 @@ assert.match(css, /max-height:7\.5em/);
 
 assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
 assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
-assert.match(sheetListeners, /evaluateNexusExpression\\(expression\\[1\\]\\.trim\\(\\)/, "O salvamento deve validar expressões antes de persistir");
+assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
 assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
 assert.match(canvasInteractions, /editorPanelsOpen/, "A proteção de teclado deve considerar todos os painéis abertos");
