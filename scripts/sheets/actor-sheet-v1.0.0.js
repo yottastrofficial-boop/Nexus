@@ -13,7 +13,7 @@ import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
-import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor } from "../core/interactions.js";
+import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
 
 const NEXUS_PROPERTY_SHORTCUTS = Object.freeze({
   nivel: "identity.level", level: "identity.level", mb: "combat.mb",
@@ -1587,7 +1587,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const formula = modifier < 0 ? "1d20 - " + Math.abs(modifier) : "1d20 + " + modifier;
     try {
       const roll = new Roll(formula);
-      await roll.evaluate({ async: true });
+      await roll.evaluate();
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor: skill.name + " (" + skill.attribute + ") · " + (proficientLevel > 0 ? "Proficiente · MB +" + baseModifier : proficientLevel < 0 ? "Proficiência negativa · MB -" + baseModifier : "Sem proficiência") + " · Proficiência " + (proficientLevel > 0 ? "+" : "") + proficientLevel + " · Modificador " + (modifier >= 0 ? "+" : "") + modifier
@@ -1634,24 +1634,34 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "roll") return this._rollComponent(componentId, config);
     if (action?.type === "toggle") return this._toggleTargetComponent(componentId, config);
     if (action?.type === "update") {
-      const path = String(config.path ?? "").replace(/^system\\./, "");
-      if (!/^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(path) || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) throw new Error("Propriedade de destino inválida.");
-      const current = foundry.utils.getProperty(this.actor.system, path), raw = String(config.value ?? "");
-      const value = config.operation === "add" || config.operation === "subtract"
-        ? Number(current ?? 0) + (config.operation === "subtract" ? -1 : 1) * Number(raw)
-        : (raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw);
+      const path = normalizeInteractionPropertyPath(config.path);
+      if (!path) throw new Error("Propriedade de destino inválida.");
+      const stored = foundry.utils.getProperty(this.actor.system, path);
+      const resolved = stored ?? resolveNexusBinding(this.actor, path).value;
+      const raw = String(config.value ?? "");
+      let value;
+      if (config.operation === "add" || config.operation === "subtract") {
+        const current = Number(resolved ?? 0), delta = Number(raw);
+        if (!Number.isFinite(current) || !Number.isFinite(delta)) throw new Error("A soma ou subtração exige valores numéricos válidos.");
+        value = current + (config.operation === "subtract" ? -delta : delta);
+      } else {
+        value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
+      }
       if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
-      return this.actor.update({ [`system.${path}`]: value });
+      await this.actor.update({ [\`system.\${path}\`]: value }, { render: false });
+      this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
+      return value;
     }
     if (action?.type === "calculate") {
       const formula = String(config.formula ?? "").trim();
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
       const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor)), getNexusRollData(this.actor));
-      await roll.evaluate({ async: true });
-      const target = String(config.targetPath ?? "").replace(/^system\\./, "");
+      await roll.evaluate();
+      const target = config.targetPath ? normalizeInteractionPropertyPath(config.targetPath) : "";
+      if (config.targetPath && !target) throw new Error("Propriedade de destino inválida.");
       if (target) {
-        if (!/^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(target) || target.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) throw new Error("Propriedade de destino inválida.");
-        await this.actor.update({ [`system.${target}`]: roll.total });
+        await this.actor.update({ [\`system.\${target}\`]: roll.total }, { render: false });
+        this._refreshBoundComponents({ system: Object.fromEntries([[target, roll.total]]) });
       }
       return roll.total;
     }
@@ -1697,7 +1707,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     try {
       formula = expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor));
       const roll = new Roll(formula, getNexusRollData(this.actor));
-      await roll.evaluate({ async: true });
+      await roll.evaluate();
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor: component.customLabel || component.text || "Rolagem NEXUS"
