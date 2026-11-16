@@ -223,7 +223,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
-      const expression = typeof value === "string" ? value.trim().match(/^\\{\\{\\s*([\\s\\S]+?)\\s*\\}\\}$/) : null;
+      const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([\s\S]+?)\s*\}\}$/) : null;
       const expressions = clone(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {});
       if (expression) {
         const calculated = evaluateNexusExpression(expression[1].trim(), identifier =>
