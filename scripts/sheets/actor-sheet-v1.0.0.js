@@ -1334,6 +1334,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (binding?.sourcePath) dependencies.add(String(binding.sourcePath).replace(/^system\./, ""));
       if (binding?.alias?.path) dependencies.add(String(binding.alias.path).replace(/^system\./, ""));
       if (binding?.alias?.targetPath) dependencies.add(String(binding.alias.targetPath).replace(/^system\./, ""));
+
+      const legacyProficiency = path.match(/^skills\.([^.]+)\.proficient$/);
+      if (legacyProficiency) dependencies.add(`skills.${legacyProficiency[1]}.proficientLevel`);
+      const skillValue = path.match(/^skills\.([^.]+)\.value$/);
+      if (skillValue) {
+        const skill = NEXUS_SKILLS.find(item => item.key === skillValue[1] || item.legacyKey === skillValue[1]);
+        if (skill) dependencies.add(`attributes.${skill.attributeKey}.value`);
+        dependencies.add(`skills.${skillValue[1]}.proficientLevel`);
+        dependencies.add("identity.level");
+      }
+      if (["progression.mb.value", "combat.mb", "combat.mb.value", "recovery.count.value", "recovery.die.value", "resources.pe.recovery.value"].includes(path)) dependencies.add("identity.level");
+      if (path === "recovery.available.value") { dependencies.add("identity.level"); dependencies.add("recovery.spent"); }
+      if (["combat.defense.value", "combat.defense"].includes(path)) { dependencies.add("attributes.des.value"); dependencies.add("combat.defenseModifier"); }
+      if (path === "combat.initiative.value") dependencies.add("attributes.des.value");
+      if (path === "combat.movement.meters") dependencies.add("combat.movement.value");
+      if (["encumbrance.bonus.value", "encumbrance.capacity.value", "encumbrance.overloaded.value"].includes(path)) {
+        dependencies.add("attributes.for.value");
+        dependencies.add("encumbrance.current");
+      }
     };
     const addExpression = expression => {
       const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
@@ -1346,7 +1365,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     addPath(component.maxPath);
     const presentation = component.propertyPresentation ?? component.representation;
     addPath(presentation?.sourcePath);
-    for (const expression of JSON.stringify(component).matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)) addExpression(expression[1]);
+    const scanExpressions = value => {
+      if (typeof value === "string") {
+        if (value.includes("{{") || value.includes("@") || /[()+*/%<>=]|\s[+-]\s/.test(value)) addExpression(value);
+      } else if (Array.isArray(value)) value.forEach(scanExpressions);
+      else if (value && typeof value === "object") Object.values(value).forEach(scanExpressions);
+    };
+    scanExpressions(component);
     for (const rule of presentation?.rules ?? []) {
       addExpression(rule.condition);
       addExpression(rule.content);
@@ -1356,7 +1381,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     const overlaps = (left, right) => left === right || left.startsWith(right + ".") || right.startsWith(left + ".");
     for (const changed of changedPaths) {
-      if (changed === "flags.nexus" || changed.startsWith("flags.nexus.aliases") || changed.startsWith("flags.nexus.customData") || changed.startsWith("flags.nexus.nativeProperties")) return true;
+      if (changed === "flags.nexus" || changed.startsWith("flags.nexus.aliases") || changed.startsWith("flags.nexus.customData") || changed.startsWith("flags.nexus.nativeProperties") || changed.startsWith("flags.nexus.propertyExpressions")) return true;
       for (const dependency of dependencies) if (overlaps(changed, dependency)) return true;
     }
     return false;
@@ -2916,14 +2941,29 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const aliasType = effectivePath.alias?.type;
           const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
           const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
-          const skillFormulaMode = !!skillValueMatch;
-          const skillFormula = skillFormulaMode ? String(getPath(this.actor.system ?? {}, `skills.${skillValueMatch[1]}.formula`) ?? "") : "";
+          const skillFormulaMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.formula$/);
+          const skillFormulaKey = skillValueMatch?.[1] ?? skillFormulaMatch?.[1] ?? "";
+          const skillFormulaMode = !!skillFormulaKey;
+          const skillFormula = skillFormulaMode ? String(getPath(this.actor.system ?? {}, `skills.${skillFormulaKey}.formula`) ?? "") : "";
           const storedExpressions = this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
           const storedExpression = getPath(storedExpressions, propertyPath);
           const propertyType = skillFormulaMode ? "string" : (definition?.type ?? (["number", "boolean", "string"].includes(typeof value) ? typeof value : inferredAliasType));
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
           const hasPath = !!propertyPath && (canEditPrimitive || skillFormulaMode);
-          const inputValue = storedExpression ?? (skillFormulaMode ? skillFormula : (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value));
+          const inputValue = skillFormulaMode ? skillFormula : (storedExpression ?? (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value));
+          const valueLabel = propertyValueRow.querySelector("[data-property-value-label]");
+          const valueHint = propertyValueRow.querySelector("[data-property-value-hint]");
+          if (valueLabel) valueLabel.textContent = skillFormulaMode ? "Fórmula da perícia" : "Valor/Conteúdo da propriedade";
+          if (valueHint) {
+            const isBaseModifier = ["progression.mb.value", "combat.mb", "combat.mb.value"].includes(propertyPath);
+            valueHint.textContent = skillFormulaMode
+              ? "Esta fórmula define o valor calculado da perícia. Deixe vazio para usar o cálculo padrão. Ex.: {{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"
+              : isBaseModifier
+                ? "MB é calculado automaticamente pelo nível do personagem. Para alterá-lo, edite identity.level."
+                : effectivePath.readOnly
+                  ? "Propriedade calculada ou somente leitura. Edite a propriedade de origem indicada pelas regras."
+                  : "Aceita valores literais. Para cálculos, use uma expressão completa entre {{ }}.";
+          }
           propertyValueRow.hidden = !one;
           if (hasPath && one.type !== "token") {
             if (propertyValueInput.tagName !== "TEXTAREA") {
@@ -2938,7 +2978,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
             propertyValueInput.dataset.propertyPath = propertyPath;
             propertyValueInput.dataset.propertyKind = skillFormulaMode ? "skill-formula" : propertyType;
             propertyValueInput.disabled = !hasPath || (effectivePath.readOnly === true && !skillFormulaMode) || (propertyPath === "name" && one.updateSource === false);
-            propertyValueInput.title = !hasPath ? "Selecione uma propriedade relacionada para editar seu valor." : propertyValueInput.disabled ? "Propriedade calculada ou somente leitura." : "Valor literal ou expressão dinâmica entre {{ }}. Ex.: {{attributes.for.value + mb}}.";
+            propertyValueInput.title = skillFormulaMode
+              ? "Fórmula personalizada da perícia. Deixe vazio para retornar ao cálculo padrão."
+              : !hasPath ? "Selecione uma propriedade relacionada para editar seu valor."
+                : propertyValueInput.disabled ? "Propriedade calculada ou somente leitura."
+                  : "Valor literal ou expressão dinâmica entre {{ }}. Ex.: {{attributes.for.value + mb}}.";
             if (!hasPath) propertyValueInput.value = "";
             const lineHeight = Number.parseFloat(getComputedStyle(propertyValueInput).lineHeight) || 16;
             const maxHeight = lineHeight * 5 + 16;
