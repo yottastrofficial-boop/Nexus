@@ -249,7 +249,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) return;
         await sheet.actor.update({ "prototypeToken.ring.colors.ring": color }, { render: false });
       }
-      else await sheet.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value }, { render: false });
+      else {
+        const actorRootPath = ["name", "img"].includes(targetPath) || targetPath.startsWith("prototypeToken.");
+        const updatePath = resolvedPath.virtual && actorRootPath ? targetPath : `system.${targetPath || path}`;
+        await sheet.actor.update({ [updatePath]: value }, { render: false });
+      }
       sheet._refreshBoundComponents();
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; sheet._updateSystemValue(input); });
