@@ -34,11 +34,11 @@ export async function migrateLegacyActorData({
     const nextSkills = structuredClone(currentSkills);
     for (const skill of NEXUS_SKILLS) {
       const current = nextSkills[skill.key] ?? nextSkills[skill.legacyKey] ?? {};
-      const proficient = normalizeNexusProficientLevel(
-        current.proficient ?? current.proficientLevel ?? current.proficiency ?? false
-      ) > 0;
-      const next = { ...current, proficient };
-      delete next.proficientLevel;
+      const proficientLevel = normalizeNexusProficientLevel(
+        current.proficientLevel ?? current.proficient ?? current.proficiency ?? false
+      );
+      const next = { ...current, proficientLevel };
+      delete next.proficient;
       delete next.proficiency;
       delete next.opposed;
       nextSkills[skill.key] = next;
