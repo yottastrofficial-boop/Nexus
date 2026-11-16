@@ -22,7 +22,7 @@
 
 ### Validação
 - Adicionados testes para combinações de modificadores, eventos expandidos, fórmulas personalizadas, descrições de perícias e campos textuais expansíveis.
-- CI automatizado ainda precisa aprovar o pacote; teste funcional no Foundry VTT 14 continua necessário para confirmar a interação real e a edição de propriedades.
+- A aprovação automatizada é registrada pelo workflow associado à release; os testes funcionais no Foundry VTT 14 continuam necessários para confirmar a interação real e a edição de propriedades.
 
 ## 1.0.0.48
 

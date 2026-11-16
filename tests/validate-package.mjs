@@ -637,7 +637,7 @@ assert.ok(sheetCode.includes("data-interaction-action"));
 assert.ok(template.includes("data-interaction-editor"));
 assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
-assert.ok(sheetCode.includes('addEventListener("pointerover"'));
+assert.ok(canvasPlayInteractions.includes('["pointerover",onPointerOver]'));
 assert.ok(sheetCode.includes("_executeComponentAction"));
 assert.match(sheet, /normalizeInteractionPropertyPath\(config\.path\)/, "Ação update deve normalizar caminhos canônicos");
 assert.match(sheet, /await roll\.evaluate\(\)/, "Rolagens assíncronas devem usar a API atual do Foundry");
