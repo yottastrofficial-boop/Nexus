@@ -1,3 +1,20 @@
+## 1.0.0.43
+
+### Edição dinâmica e sincronização
+- Valores editáveis de propriedades e recursos passam a atualizar as regras durante a digitação, sem depender de Enter.
+- A gravação de layouts e valores evita renderizações integrais da ficha durante a edição, preservando foco e continuidade.
+- Campos de condição e conteúdo das regras são persistidos sem substituir seus elementos, mantendo texto, cursor e seleção.
+- O histórico captura o início da edição, sem criar uma entrada para cada tecla.
+
+### Geometria dos cards
+- A detecção de cantos conectados também acompanha mudanças de posição e inserção/remoção de superfícies, não apenas redimensionamentos.
+- Mantida a regra de achatar somente o canto que realmente toca outra superfície.
+
+### Atalhos e propriedades
+- Identificadores genéricos de metadados, como name, exib e attribute, deixam de ser tratados como abreviações de rolagem.
+- Candidatos que apontam para o mesmo valor são deduplicados antes da detecção de ambiguidades.
+- Preservadas as convenções @atalho para valor exibido e {{caminho}} para leitura direta ou expressão, sem alterar dados já salvos.
+
 ## 1.0.0.42
 
 ### Exibição das regras e cards compactos
