@@ -1128,7 +1128,7 @@ assert.match(template, /<textarea rows="1" data-property-value/);
 assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet.actor, match\[1\], formula\)/);
 assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
-assert.match(css, /max-height:7\.5em/);
+assert.match(css, /max-height:\s*7\.5em/);
 assert.match(css, /nexus-property-option-name[\s\S]*overflow-wrap: anywhere[\s\S]*nexus-property-option-value[\s\S]*nexus-property-option-path/, "Nome, valor e caminho devem ter áreas legíveis");
 assert.doesNotMatch(css, /1\.0\.0\.56 — layout isolado/, "O CSS antigo do buscador deve ser removido");
 
