@@ -8,6 +8,7 @@
 - Tokens de imagem aceitam opções seguras de dimensão e ajuste: `{{image:URL|width=80px|height=80px|fit=contain}}`. Dimensões aceitas: px, %, em, rem, vw, vh, vmin e vmax; ajuste: contain, cover ou fill.
 - Imagens exibidas sozinhas passam a usar o espaço disponível do card, preservando a proporção e sem corte por padrão; mídia misturada com texto continua em tamanho inline.
 - Adicionados testes de regressão para reconhecimento automático, compatibilidade e dimensionamento.
+- O pacote de distribuição é publicado automaticamente após a validação do repositório.
 
 ### Observação de validação
 - A validação automatizada do pacote é executada pelo CI. A conferência visual e funcional em Foundry VTT 14 continua necessária para confirmar o comportamento em cards de diferentes dimensões.
