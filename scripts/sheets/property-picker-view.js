@@ -21,14 +21,19 @@ function formatPropertyValue(value) {
 function appendPropertyOption(container, entry, label = entry.label, rollAlias = null, getValue = null) {
   const button = createButton("", "nexus-property-option", { propertyPathOption: entry.path });
   button.setAttribute("role", "option");
+  const heading = document.createElement("div");
+  heading.className = "nexus-property-option-heading";
   const title = document.createElement("strong");
+  title.className = "nexus-property-option-name";
   title.textContent = label;
   const value = document.createElement("small");
   value.className = "nexus-property-option-value";
   value.textContent = "Valor: " + formatPropertyValue(getValue?.(entry.path));
   const code = document.createElement("code");
+  code.className = "nexus-property-option-path";
   code.textContent = entry.path;
-  button.append(title, value, code);
+  heading.append(title, value);
+  button.append(heading, code);
   if (rollAlias) {
     button.dataset.rollToken = "@" + rollAlias.display;
     button.dataset.rollAliasOption = "true";
