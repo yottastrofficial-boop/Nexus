@@ -958,7 +958,7 @@ assert.ok(!css.includes(".nexus-group-surface.nexus-group-touching-right {") && 
 assert.ok(!sheetListeners.includes("persistInteractionEditor(control, null, { render: false, captureHistory: false })"),"Regras de apresentação não devem gravar a cada tecla e interromper a digitação");
 assert.ok(!sheetListeners.includes("capturedInteractionInputHistory"),"O histórico de edição de regras não deve ser capturado a cada tecla");
 assert.ok(sheet.includes("async _writeLayouts(layouts, active, { render = true } = {})"), "A supressão de renderização deve ser opcional para não afetar outros comandos");
-assert.ok(sheetListeners.includes("{ render: options.render !== false }"), "Somente os campos de apresentação em edição devem salvar sem rerender");
+assert.ok(sheetListeners.includes("await sheet._writeLayouts(layouts, active, { render: false })"), "Editar fluxos e condições deve salvar sem renderização integral da ficha");
 assert.ok(sheet.includes("labelSuffix") && sheet.includes("NON_ROLL_PROPERTY_SUFFIXES.has(labelSuffix)"), "Rótulos genéricos também devem ser excluídos dos atalhos");
 
 assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
