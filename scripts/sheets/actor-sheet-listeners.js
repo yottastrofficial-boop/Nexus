@@ -188,7 +188,25 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       component.localValue = String(input.value ?? "").slice(0, 5000);
       await sheet._writeLayouts(layouts, active);
     });
+    const pendingPropertyValueSaves = new WeakMap();
+    html.find("[data-property-value]").on("input", event => {
+      const input = event.currentTarget;
+      const path = String(input.dataset.propertyPath ?? "");
+      if (!path || ["img", "identity.portrait.img", "prototypeToken.texture.src"].includes(path)) return;
+      const kind = input.dataset.propertyKind;
+      if (kind === "number" && (input.value === "" || !Number.isFinite(Number(input.value)))) return;
+      const previousTimer = pendingPropertyValueSaves.get(input);
+      if (previousTimer) clearTimeout(previousTimer);
+      const timer = setTimeout(() => {
+        pendingPropertyValueSaves.delete(input);
+        if (input.isConnected) $(input).trigger("change");
+      }, 180);
+      pendingPropertyValueSaves.set(input, timer);
+    });
     html.find("[data-property-value]").on("change", async event => {
+      const input = event.currentTarget;
+      const pendingTimer = pendingPropertyValueSaves.get(input);
+      if (pendingTimer) { clearTimeout(pendingTimer); pendingPropertyValueSaves.delete(input); }
       const input = event.currentTarget;
       const path = String(input.dataset.propertyPath ?? "");
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
@@ -212,25 +230,25 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
         value = Number(value);
       }
-      if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) });
+      if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) }, { render: false });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
         const imagePath = String(value).trim().slice(0, 2048);
         if (targetPath === "prototypeToken.texture.src" && !imagePath) {
-          await sheet.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE });
+          await sheet.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE }, { render: false });
         } else if (!isMediaSource(imagePath)) {
           globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida ou uma propriedade que contenha uma imagem.");
           input.value = path === "img" || path === "identity.portrait.img" ? (sheet.actor.img ?? "") : getFoundryDefaultTokenImage(sheet.actor);
           return;
         } else {
-          await sheet.actor.update(targetPath === "img" ? { img: imagePath } : { [targetPath]: imagePath });
+          await sheet.actor.update(targetPath === "img" ? { img: imagePath } : { [targetPath]: imagePath }, { render: false });
         }
       }
       else if (targetPath === "prototypeToken.ring.colors.ring") {
         const color = String(value).trim();
         if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) return;
-        await sheet.actor.update({ "prototypeToken.ring.colors.ring": color });
+        await sheet.actor.update({ "prototypeToken.ring.colors.ring": color }, { render: false });
       }
-      else await sheet.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value });
+      else await sheet.actor.update(resolvedPath.virtual ? { [targetPath]: value } : { [`system.${targetPath || path}`]: value }, { render: false });
       sheet._refreshBoundComponents();
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; sheet._updateSystemValue(input); });
@@ -250,8 +268,22 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       sheet._captureHistory(); component.text = String(input.value ?? "").slice(0, 500);
       await sheet._writeLayouts(layouts, active);
     });
+    const pendingResourceValueSaves = new WeakMap();
+    html.find("[data-config-current-value], [data-config-max-value]").on("input", event => {
+      const input = event.currentTarget;
+      const previousTimer = pendingResourceValueSaves.get(input);
+      if (previousTimer) clearTimeout(previousTimer);
+      const timer = setTimeout(() => {
+        pendingResourceValueSaves.delete(input);
+        if (input.isConnected && input.value !== "" && Number.isFinite(Number(input.value))) $(input).trigger("change");
+      }, 180);
+      pendingResourceValueSaves.set(input, timer);
+    });
     html.find("[data-config-current-value], [data-config-max-value]").on("change", async event => {
-      const input = event.currentTarget, id = [...(sheet._selectedIds ?? [])][0];
+      const input = event.currentTarget;
+      const pendingTimer = pendingResourceValueSaves.get(input);
+      if (pendingTimer) { clearTimeout(pendingTimer); pendingResourceValueSaves.delete(input); }
+      const id = [...(sheet._selectedIds ?? [])][0];
       if (!id) return;
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId();
       const component = layouts[active]?.components?.find(item => item.id === id);
@@ -262,7 +294,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const value = Number(input.value);
       if (!Number.isFinite(value)) return;
       sheet._captureHistory();
-      await sheet.actor.update({ [`system.${path}`]: value });
+      await sheet.actor.update({ [`system.${path}`]: value }, { render: false });
       sheet._refreshBoundComponents();
     });
     const persistAliases = async (aliases, focusTarget = null) => {
@@ -1153,6 +1185,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
     const pendingInteractionInputSaves = new WeakMap();
+    const capturedInteractionInputHistory = new WeakSet();
     const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
@@ -1232,17 +1265,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    // Regras de apresentação são salvas durante a edição, sem reconstruir
-    // o campo a cada tecla (o que interromperia a digitação e o cursor).
+    // Regras de apresentação são persistidas sem substituir os campos.
+    // Isso evita perder foco, seleção e texto durante a digitação.
     $(document).on(`input${inspectorNamespace}`, "[data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", event => {
       const control = event.currentTarget;
+      if (!capturedInteractionInputHistory.has(control)) {
+        sheet._captureHistory();
+        capturedInteractionInputHistory.add(control);
+      }
       const previousTimer = pendingInteractionInputSaves.get(control);
       if (previousTimer) clearTimeout(previousTimer);
       const timer = setTimeout(() => {
         pendingInteractionInputSaves.delete(control);
         persistInteractionEditor(control, null, { render: false, captureHistory: false })
           .catch(error => console.error("NEXUS | Falha ao salvar regra durante a edição", error));
-      }, 300);
+      }, 180);
       pendingInteractionInputSaves.set(control, timer);
     });
     $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field], [data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", async event => {
@@ -1250,7 +1287,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const pendingTimer = pendingInteractionInputSaves.get(control);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingInteractionInputSaves.delete(control); }
       event.stopPropagation();
-      await persistInteractionEditor(control);
+      const isPresentationField = control.dataset.interactionScope?.startsWith("propertyPresentation");
+      const historyAlreadyCaptured = capturedInteractionInputHistory.has(control);
+      await persistInteractionEditor(control, null, {
+        render: !isPresentationField,
+        captureHistory: !historyAlreadyCaptured
+      });
+      capturedInteractionInputHistory.delete(control);
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {
