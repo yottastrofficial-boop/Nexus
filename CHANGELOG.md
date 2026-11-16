@@ -15,7 +15,7 @@
 - Mantida a regra de achatar somente o canto que realmente toca outra superfície.
 
 ### Atalhos e propriedades
-- Identificadores genéricos de metadados, como name, exib e attribute, deixam de ser tratados como abreviações de rolagem.
+- Identificadores genéricos de metadados, como name, exib e attribute, deixam de ser tratados como abreviações de rolagem, inclusive quando aparecem nos rótulos com acentos.
 - Candidatos que apontam para o mesmo valor são deduplicados antes da detecção de ambiguidades.
 - Preservadas as convenções @atalho para valor exibido e {{caminho}} para leitura direta ou expressão, sem alterar dados já salvos.
 
