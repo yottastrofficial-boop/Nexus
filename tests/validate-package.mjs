@@ -68,13 +68,21 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.50", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.51", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
 assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\(\$\(form\)\);/, "O Canvas deve registrar os gatilhos automaticamente após cada renderização da ficha");
+assert.match(sheet, /async _prepareContext\(options = \{\}\) \{\s*\/\/ O modo padrão é estado real da ficha, não apenas fallback de apresentação\.\s*this\._mode \?\?= "play";/, "O modo Padrão deve existir no estado interno antes da preparação da ficha");
+assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(target, "value"\)/, "Aliases de atributo devem editar o campo value de objetos");
+assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
+assert.match(sheet, /data-property-value-path/, "O Inspector deve mostrar o caminho separado do campo de edição");
+assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
+assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
+assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
+assert.ok(css.includes(".nexus-property-value-panel"), "O campo de valor deve possuir painel visual próprio");
 assert.match(sheet, /const captureScrollState = owner/, "A ficha deve capturar a rolagem de todos os contêineres encontrados");
 assert.match(sheet, /".nexus-native-panel-content"/, "A rolagem do conteúdo nativo dos painéis deve ser preservada");
 assert.match(sheet, /".nexus-tool-panel"/, "A rolagem dos painéis de ferramentas deve ser preservada");
