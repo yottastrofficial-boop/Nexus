@@ -121,7 +121,12 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     const row = definition ? getNexusSkillRows(actor).find(skill => skill.key === definition.key) : null;
     const member = skillMatch[2];
     if (row && (!member || Object.hasOwn(row, member))) {
-      return { matched: true, value: member ? row[member] : row, readOnly: member !== "proficient", sourcePath: member === "proficient" ? `skills.${definition.key}.proficient` : undefined };
+      return {
+        matched: true,
+        value: member ? row[member] : row,
+        readOnly: member !== "proficientLevel",
+        sourcePath: member === "proficientLevel" ? `skills.${definition.key}.proficientLevel` : undefined
+      };
     }
   }
 
