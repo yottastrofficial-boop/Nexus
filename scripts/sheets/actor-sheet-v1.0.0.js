@@ -402,14 +402,21 @@ const getNexusRollData = actor => {
 
 const resolveAliasPath = (actor, path) => {
   const aliases = [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)];
+  // Aceita caminhos equivalentes usados na interface, como attribute.for.value,
+  // sem perder o identificador canônico do alias (attributes.for).
+  const lookupPath = String(path ?? "")
+    .replace(/^(?:actor\.)?(?:system\.)?/, "")
+    .replace(/^attribute\./, "attributes.")
+    .replace(/^resource\./, "resources.")
+    .replace(/^skill\./, "skills.");
   let matchedKey = "";
   const alias = aliases.find(item => {
     const keys = [item.key, ...(item.legacyKeys ?? [])];
-    matchedKey = keys.find(key => path === key || path.startsWith(`${key}.`)) ?? "";
+    matchedKey = keys.find(key => lookupPath === key || lookupPath.startsWith(`${key}.`)) ?? "";
     return !!matchedKey;
   });
   if (!alias) return { path, alias: null, suffix: "" };
-  const suffix = path.slice(matchedKey.length).replace(/^\./, "");
+  const suffix = lookupPath.slice(matchedKey.length).replace(/^\./, "");
   let targetPath = alias.targetPath ? [alias.targetPath, suffix].filter(Boolean).join(".") : "";
   // Se o destino for um objeto de atributo/recurso, edite o campo interno
   // sem substituir a estrutura inteira do Actor.
