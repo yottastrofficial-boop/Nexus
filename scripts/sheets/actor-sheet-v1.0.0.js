@@ -2915,7 +2915,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath);
           const aliasType = effectivePath.alias?.type;
           const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
-          const skillValueMatch = propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/);
+          const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
           const skillFormulaMode = !!skillValueMatch;
           const skillFormula = skillFormulaMode ? String(getPath(this.actor.system ?? {}, `skills.${skillValueMatch[1]}.formula`) ?? "") : "";
           const storedExpressions = this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
