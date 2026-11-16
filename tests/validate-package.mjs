@@ -870,6 +870,7 @@ for (const level of proficiencyStages) {
 
 // A matching condition with an unresolved/empty interpolation must not hide
 // the original property value or leave the card visually empty.
+currentProficiency = 0;
 const emptyInterpolationFallback = evaluateComponentRepresentation({
   enabled: true,
   sourcePath: "proficiency",
