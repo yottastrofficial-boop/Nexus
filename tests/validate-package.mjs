@@ -863,7 +863,7 @@ assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formu
 assert.match(sheet, /MB é calculado automaticamente pelo nível/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
-assert.match(sheetCode, /const inputValue = storedExpression \?\? \(skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "O editor deve priorizar expressões salvas e manter valores padrão tipados e fórmulas de perícia");
+assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula : \(storedExpression \?\?/, "O editor de perícia deve mostrar a fórmula persistida e os demais campos devem priorizar expressões salvas");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
 assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
