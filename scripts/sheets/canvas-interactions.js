@@ -331,6 +331,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       canvas.focus({ preventScroll: true });
       sheet._nexusCanvasKeyboardFocus = true;
       sheet._nexusInteractionActive=true;
+      canvas.dataset.nexusGestureActive = "true";
       const p=point(event), component=event.target.closest(".nexus-component"), surface=event.target.closest(".nexus-group-surface"), mod=event.ctrlKey||event.metaKey||event.shiftKey;
       if(surface && !component){const group = groupsById.get(surface.dataset.groupId);if(beginGroupMove(group,p,event))return;}
       if(!component && !surface){
@@ -475,7 +476,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       canvas.style.removeProperty("cursor");
     };
     canvas.addEventListener("pointerleave", clearInteractionCursor);
-    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave){await saveAfterGesture(touchedIds);sheet._refreshBoundComponents?.();}};
+    const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;delete canvas.dataset.nexusGestureActive;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;delete canvas.dataset.nexusGestureActive;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave){await saveAfterGesture(touchedIds);sheet._refreshBoundComponents?.();}};
     canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
     const restoreCanvasKeyboardFocus = () => {
       if (!sheet._nexusCanvasKeyboardFocus) return;
@@ -500,6 +501,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     const beginKeyboardMove = () => {
       if (keyboardMoveHistoryCaptured) return;
       sheet._captureHistory();
+      canvas.dataset.nexusGestureActive = "true";
       keyboardMoveHistoryCaptured = true;
       keyboardMoveTouched = new Set();
       keyboardMoveAllElements = elements();
@@ -547,6 +549,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       keyboardMovePending = false;
       keyboardMoveDeltaX = 0;
       keyboardMoveDeltaY = 0;
+      delete canvas.dataset.nexusGestureActive;
       if (touched.length) {
         renderGroups();
         scheduleConnectedCorners();
