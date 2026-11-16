@@ -8,6 +8,7 @@
 
 ### Geometria dos cards
 - A detecção de cantos conectados também acompanha mudanças de posição e inserção/remoção de superfícies, não apenas redimensionamentos.
+- A alça de redimensionamento noroeste deixa livre a borda superior esquerda do card.
 - Mantida a regra de achatar somente o canto que realmente toca outra superfície.
 
 ### Atalhos e propriedades
