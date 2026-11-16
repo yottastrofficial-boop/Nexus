@@ -14,8 +14,8 @@ const LEGACY = {
 };
 const newId = prefix => `${prefix}-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`}`;
 export const normalizeInteractionPropertyPath = raw => {
-  const path=String(raw??"").trim().replace(/^\\{\\{\\s*/, "").replace(/\\s*\\}\\}$/, "").replace(/^@/, "").replace(/^actor\\./, "").replace(/^system\\./, "");
-  return path && /^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(path) && !path.split(".").some(k=>["__proto__","prototype","constructor"].includes(k)) ? path : "";
+  const path=String(raw??"").trim().replace(/^\{\{\s*/, "").replace(/\s*\}\}$/, "").replace(/^@/, "").replace(/^actor\./, "").replace(/^system\./, "");
+  return path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) && !path.split(".").some(k=>["__proto__","prototype","constructor"].includes(k)) ? path : "";
 };
 const safePath = normalizeInteractionPropertyPath;
 const normalizeTrigger = (t,i) => {
