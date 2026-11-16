@@ -250,8 +250,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         await sheet.actor.update({ "prototypeToken.ring.colors.ring": color }, { render: false });
       }
       else {
-        const actorRootPath = ["name", "img"].includes(targetPath) || targetPath.startsWith("prototypeToken.");
-        const updatePath = resolvedPath.virtual && actorRootPath ? targetPath : `system.${targetPath || path}`;
+        const updateTargetPath = String(targetPath ?? path);
+        const actorRootPath = ["name", "img"].includes(updateTargetPath) || updateTargetPath.startsWith("prototypeToken.");
+        const updatePath = resolvedPath.virtual && actorRootPath ? updateTargetPath : `system.${updateTargetPath}`;
         await sheet.actor.update({ [updatePath]: value }, { render: false });
       }
       sheet._refreshBoundComponents();
