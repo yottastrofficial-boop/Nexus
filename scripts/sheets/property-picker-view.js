@@ -14,7 +14,7 @@ function formatPropertyValue(value) {
   if (typeof value === "boolean") return value ? "Sim" : "Não";
   if (typeof value === "number") return Number.isFinite(value) ? String(value) : "—";
   if (typeof value === "string") return value.length > 64 ? value.slice(0, 61) + "…" : (value || "—");
-  if (Array.isArray(value)) return value.length ? \`Lista · \${value.length} itens\` : "Lista vazia";
+  if (Array.isArray(value)) return value.length ? "Lista · " + value.length + " itens" : "Lista vazia";
   return "Objeto";
 }
 
