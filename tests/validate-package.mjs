@@ -932,6 +932,10 @@ assert.ok(!css.includes(".nexus-group-surface.nexus-group-touching-right {") && 
 assert.ok(sheetListeners.includes("input${inspectorNamespace}"),"As regras devem ser salvas durante a digitação, sem depender apenas do evento change");
 assert.ok(sheetListeners.includes("render: false, captureHistory: false"),"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
 assert.ok(sheetListeners.includes("capturedInteractionInputHistory"), "A edição de regras deve capturar histórico sem substituir os campos");
+assert.ok(sheet.includes("async _writeLayouts(layouts, active, { render = true } = {})"), "A supressão de renderização deve ser opcional para não afetar outros comandos");
+assert.ok(sheetListeners.includes("{ render: options.render !== false }"), "Somente os campos de apresentação em edição devem salvar sem rerender");
+assert.ok(sheet.includes("labelSuffix") && sheet.includes("NON_ROLL_PROPERTY_SUFFIXES.has(labelSuffix)"), "Rótulos genéricos também devem ser excluídos dos atalhos");
+
 assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
 assert.ok(sheetListeners.includes("pendingPropertyValueSaves") && sheetListeners.includes('on("input"'), "Valores de propriedades devem salvar durante a digitação");
 assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recursos devem atualizar sem Enter");
