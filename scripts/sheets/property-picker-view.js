@@ -114,7 +114,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
       heading.textContent = "Atalhos de rolagem";
       content.append(heading);
       for (const alias of catalog.rollAliases.slice(0, 30)) {
-        appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias);
+        appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias, getValue);
       }
     }
     if (!content.childElementCount) {
