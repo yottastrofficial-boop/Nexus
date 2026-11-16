@@ -1331,6 +1331,18 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const element = card.querySelector(selector);
       if (element && element !== document.activeElement) element.value = String(value ?? "");
     };
+    root.querySelectorAll("[data-skill-proficient-level]").forEach(input => {
+      const skill = getNexusSkillModifier(this.actor, input.dataset.skillProficientLevel);
+      if (!skill) return;
+      if (input !== document.activeElement) input.value = String(skill.proficientLevel);
+      input.classList.toggle("is-proficient", skill.proficientLevel > 0);
+      input.classList.toggle("is-deficient", skill.proficientLevel < 0);
+    });
+    root.querySelectorAll("[data-skill-roll]").forEach(button => {
+      const skill = getNexusSkillModifier(this.actor, button.dataset.skillRoll);
+      const value = button.closest(".nexus-skill-row")?.querySelector(".nexus-skill-value");
+      if (skill && value && value !== document.activeElement) value.textContent = skill.formatted;
+    });
     // Uma única leitura do DOM substitui uma busca por componente.
     const changedPaths = changes && typeof changes === "object" ? this._collectActorUpdatePaths(changes) : null;
     const filterByChanges = !!changedPaths?.size;
