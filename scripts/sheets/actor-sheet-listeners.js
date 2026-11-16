@@ -257,8 +257,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color)) return;
         await sheet.actor.update({ "prototypeToken.ring.colors.ring": color }, { render: false });
       }
+      else if (resolvedPath.alias && !targetPath) {
+        // Aliases personalizados e metadados permanecem em flags.nexus.customData.
+        const aliasInfo = resolveAliasPath(sheet.actor, path);
+        const suffix = aliasInfo.suffix === "exib" ? "exibicao" : aliasInfo.suffix;
+        const customPath = [resolvedPath.alias.key, suffix || (["attribute", "resource"].includes(resolvedPath.alias.type) ? "value" : "")].filter(Boolean).join(".");
+        const customData = clone(getCustomAliasData(sheet.actor));
+        foundry.utils.setProperty(customData, customPath, value);
+        await sheet.actor.setFlag("nexus", "customData", customData);
+      }
       else {
-        const updateTargetPath = String(targetPath ?? path);
+        const updateTargetPath = String(targetPath || path);
         const actorRootPath = ["name", "img"].includes(updateTargetPath) || updateTargetPath.startsWith("prototypeToken.");
         const updatePath = resolvedPath.virtual && actorRootPath ? updateTargetPath : `system.${updateTargetPath}`;
         await sheet.actor.update({ [updatePath]: value }, { render: false });
