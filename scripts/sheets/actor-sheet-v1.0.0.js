@@ -2782,9 +2782,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const propertyPath = effectivePath.virtual ? effectivePath.sourcePath : (effectivePath.alias?.type === "resource" && !aliasInfo.suffix ? `${effectivePath.path}.value` : (rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value") ? `${effectivePath.path}.value` : effectivePath.path));
           const value = effectivePath.value;
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath || item.path === effectivePath.path);
+          const aliasType = effectivePath.alias?.type;
+          const inferredAliasType = ["number", "boolean", "string"].includes(aliasType)
+            ? aliasType
+            : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
           const propertyType = typeof value === "number" || typeof value === "boolean" || typeof value === "string"
             ? typeof value
-            : (definition?.type ?? (effectivePath.alias?.type === "attribute" || effectivePath.alias?.type === "resource" ? "number" : "string"));
+            : (definition?.type ?? inferredAliasType);
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
           const hasPath = !!propertyPath && canEditPrimitive;
           const inputValue = value === undefined || value === null
