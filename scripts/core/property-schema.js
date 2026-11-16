@@ -1,4 +1,4 @@
-import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows } from "./skills.js";
+import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
 
 /**
  * Canonical property registry for the NEXUS core rules.
@@ -114,7 +114,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     const value = member === "name" ? definition.name
       : member === "exib" ? definition.exib
       : member === "description" ? definition.description
-      : Number(nestedValue ? storedAttribute.value : storedAttribute) || 0;
+      : getNexusAttributeValue(actor, definition.key);
     const sourcePath = member === "value" ? (nestedValue ? `attributes.${definition.key}.value` : `attributes.${definition.key}`) : undefined;
     return { matched: true, value, readOnly: member !== "value", sourcePath };
   }
@@ -144,10 +144,10 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     return { matched: true, value: getNexusBaseModifier(system), readOnly: true };
   }
   if (["combat.defense", "combat.defense.value"].includes(key)) {
-    return { matched: true, value: 8 + (Number(system.attributes?.des) || 0) + (Number(system.combat?.defenseModifier) || 0), readOnly: true };
+    return { matched: true, value: 8 + getNexusAttributeValue(actor, "des") + (Number(system.combat?.defenseModifier) || 0), readOnly: true };
   }
   if (key === "combat.initiative.value") {
-    return { matched: true, value: Number(system.attributes?.des) || 0, readOnly: true };
+    return { matched: true, value: getNexusAttributeValue(actor, "des"), readOnly: true };
   }
   if (["combat.movement", "combat.movement.value", "combat.desl"].includes(key)) {
     return { matched: true, value: Number(system.combat?.movement ?? system.combat?.desl) || 0, sourcePath: "combat.movement" };
@@ -169,7 +169,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     return { matched: true, value: getNexusBaseModifier(system) * 4, readOnly: true };
   }
 
-  const strength = Number(system.attributes?.for) || 0;
+  const strength = getNexusAttributeValue(actor, "for");
   const base = 5;
   const bonus = strength * 2;
   const capacity = base + bonus;
