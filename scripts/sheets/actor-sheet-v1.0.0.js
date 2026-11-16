@@ -2781,22 +2781,32 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const aliasInfo = resolveAliasPath(this.actor, effectivePath.path);
           const propertyPath = effectivePath.virtual ? effectivePath.sourcePath : (effectivePath.alias?.type === "resource" && !aliasInfo.suffix ? `${effectivePath.path}.value` : (rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value") ? `${effectivePath.path}.value` : effectivePath.path));
           const value = effectivePath.value;
-          const hasPath = !!propertyPath && value !== undefined && value !== null && typeof value !== "object";
+          const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath || item.path === effectivePath.path);
+          const propertyType = typeof value === "number" || typeof value === "boolean" || typeof value === "string"
+            ? typeof value
+            : (definition?.type ?? (effectivePath.alias?.type === "attribute" || effectivePath.alias?.type === "resource" ? "number" : "string"));
+          const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
+          const hasPath = !!propertyPath && canEditPrimitive;
+          const inputValue = value === undefined || value === null
+            ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "")
+            : value;
           propertyValueRow.hidden = !hasPath || one.type === "token";
           if (hasPath && one.type !== "token") {
-            propertyValueInput.type = typeof value === "number" ? "number" : typeof value === "boolean" ? "checkbox" : "text";
+            propertyValueInput.type = propertyType === "number" ? "number" : propertyType === "boolean" ? "checkbox" : "text";
             if (propertyValueInput.type === "number") {
               propertyValueInput.step = "any";
               propertyValueInput.removeAttribute("min");
               propertyValueInput.removeAttribute("max");
               propertyValueInput.inputMode = "decimal";
             }
-            if (propertyValueInput.type === "checkbox") propertyValueInput.checked = value;
-            else propertyValueInput.value = String(value);
+            if (propertyValueInput.type === "checkbox") propertyValueInput.checked = !!inputValue;
+            else propertyValueInput.value = String(inputValue);
             propertyValueInput.dataset.propertyPath = propertyPath;
-            propertyValueInput.dataset.propertyKind = typeof value;
+            propertyValueInput.dataset.propertyKind = propertyType;
             propertyValueInput.disabled = effectivePath.readOnly === true || (propertyPath === "name" && one.updateSource === false);
-            propertyValueInput.title = propertyValueInput.disabled ? "A edição do nome original está desativada." : "Altera a propriedade vinculada no personagem.";
+            propertyValueInput.title = propertyValueInput.disabled
+              ? "Propriedade calculada ou somente leitura."
+              : "Altera a propriedade vinculada no personagem.";
           }
         }
         const resourcePaths = getResourceValuePaths(one);
