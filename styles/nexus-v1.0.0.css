@@ -3098,7 +3098,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window .nexus-inspector-manual-path[open] summary { margin-bottom:6px; }
 .nexus-panel-window .nexus-inspector-manual-path .nexus-inspector-field { margin:0; }
 .nexus-panel-window .nexus-component-inspector [hidden] { display:none !important; }
-.nexus-panel-window .nexus-component-inspector [data-property-value][type=checkbox] { width:14px !important; min-width:14px; height:14px; }
 
 
 /* NEXUS 1.28.15 — dimensões compactas e tipografia por componente. */
@@ -3339,33 +3338,19 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-resource-path-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .nexus-data-binding [data-component-path-input] { width: 100%; }
 .nexus-inspector-subsection[data-custom-card-config] { display: grid; gap: 8px; }
-
-.nexus-property-options { position: relative; z-index: 30; max-height: 240px; overflow: auto; margin-top: 4px; padding: 5px; border: 1px solid var(--nexus-panel-border, #43546a); border-radius: 7px; background: var(--nexus-menu-bg, #202f40); box-shadow: 0 8px 20px #0007; }
-.nexus-property-options[hidden] { display: none !important; }
-.nexus-property-options-heading { padding: 7px 7px 4px; color: var(--nexus-muted, #91a4bb); font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .nexus-property-option { display: flex; flex-direction: column; width: 100%; gap: 2px; padding: 6px 8px; border: 0; border-radius: 5px; color: var(--nexus-panel-text, #e7edf5); background: transparent; text-align: left; cursor: pointer; }
 .nexus-property-option:hover { background: var(--nexus-panel-hover, #2a3d52); }
 .nexus-property-option strong { font-size: 11px; font-weight: 600; }
 .nexus-property-option code { color: var(--nexus-muted, #91a4bb); font-size: 9px; }
-.nexus-property-option[hidden], .nexus-property-options-heading[hidden] { display: none !important; }
 
 /* v1.31.0 — compact property binding and paired resource paths */
 .nexus-resource-path-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .nexus-data-binding [data-component-path-input] { width: 100%; }
 .nexus-inspector-subsection[data-custom-card-config] { display: grid; gap: 8px; }
-
-.nexus-property-options { position: relative; z-index: 30; max-height: 240px; overflow: auto; margin-top: 4px; padding: 5px; border: 1px solid var(--nexus-panel-border, #43546a); border-radius: 7px; background: var(--nexus-menu-bg, #202f40); box-shadow: 0 8px 20px #0007; }
-.nexus-property-options[hidden] { display: none !important; }
-.nexus-property-options-heading { padding: 7px 7px 4px; color: var(--nexus-muted, #91a4bb); font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .nexus-property-option { display: flex; flex-direction: column; width: 100%; gap: 2px; padding: 6px 8px; border: 0; border-radius: 5px; color: var(--nexus-panel-text, #e7edf5); background: transparent; text-align: left; cursor: pointer; }
 .nexus-property-option:hover { background: var(--nexus-panel-hover, #2a3d52); }
 .nexus-property-option strong { font-size: 11px; font-weight: 600; }
 .nexus-property-option code { color: var(--nexus-muted, #91a4bb); font-size: 9px; }
-.nexus-property-option[hidden], .nexus-property-options-heading[hidden] { display: none !important; }
-
-
-/* v1.31.1 — floating property suggestions and universal card content */
- .nexus-property-options { position: fixed !important; z-index: 2147483647 !important; margin: 0 !important; max-width: calc(100vw - 24px); box-sizing: border-box; }
 .nexus-panel-window .nexus-component-inspector nexus-color-picker { width: 100% !important; min-width: 100% !important; height: 42px !important; min-height: 42px !important; aspect-ratio: auto !important; border-radius: 7px !important; padding: 4px !important; }
 .nexus-custom-card-value { width: 100%; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; text-align: center; font-size: var(--nexus-component-font-size, 13px); line-height: 1.35; }
 .nexus-component[data-type="custom-card"] .nexus-component-content { display: flex; align-items: center; justify-content: center; padding: 8px; }
@@ -3482,8 +3467,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-sheet nexus-color-picker, .nexus-panel-window nexus-color-picker { display:block; width:100%; min-width:0; }
 .nexus-global-color-grid nexus-color-picker { grid-column:2; width:36px; min-width:36px; }
 .nexus-inspector-grid nexus-color-picker { width:100%; }
-.nexus-property-options { z-index: 10020 !important; pointer-events:auto; }
-.nexus-component-inspector [data-component-path-input] { position:relative; z-index:10021; }
 
 
 /* Ação funcional opcional de componentes vinculados. */
@@ -5266,9 +5249,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window .nexus-library-saved-group>small{font-size:9px!important;color:var(--nexus-panel-muted,#9aadc2)!important}
 @media(max-width:680px){.nexus-panel-window .nexus-behavior-editor .nexus-interaction-guided{grid-template-columns:minmax(0,1fr)!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row input:first-child{grid-column:1/-1!important}}
 @media(max-width:520px){.nexus-panel-window .nexus-behavior-editor .nexus-interaction-editor-heading{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"title" "toolbar" "tabs"!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-flow-heading{grid-template-columns:minmax(0,1fr) auto!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-flow-actions{grid-column:1/-1!important;justify-content:flex-end!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-action-head{grid-template-columns:minmax(0,1fr) auto!important}.nexus-panel-window .nexus-behavior-editor .nexus-interaction-action-tools{grid-column:1/-1!important;justify-content:flex-end!important}}
-
-/* 1.0.0.23 — buscador compartilhado e cabeçalho compacto das condições. */
-.nexus-panel-window .nexus-property-options{position:fixed!important;z-index:2147483647!important;max-width:calc(100vw - 24px)!important;box-sizing:border-box!important}
 .nexus-panel-window .nexus-interaction-condition-group .nexus-interaction-group-heading{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(110px,145px) 30px!important;align-items:center!important;gap:7px!important}
 .nexus-panel-window .nexus-interaction-condition-group .nexus-interaction-condition-join{width:100%!important;min-width:0!important;max-width:145px!important}
 .nexus-panel-window .nexus-interaction-condition-group .nexus-interaction-group-heading>.nexus-interaction-button{width:30px!important;min-width:30px!important;padding:0!important}
@@ -5317,16 +5297,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-theme-grid .nexus-library-preview-stage{display:flex!important;flex-direction:row!important;gap:4px!important}
 .nexus-library-theme-grid .nexus-library-preview-stage>i{flex:1 1 0;height:100%;border-radius:4px}
 .nexus-library-details{min-width:0!important;max-width:100%!important;overflow:auto!important}
-.nexus-property-options{position:fixed!important;z-index:2147483647!important;display:flex;flex-direction:column;gap:2px;max-width:calc(100vw - 24px)!important;margin:0!important;padding:6px!important;box-sizing:border-box!important;border:1px solid var(--nexus-panel-border,#52647b)!important;border-radius:9px!important;background:var(--nexus-menu-bg,#202f40)!important;color:var(--nexus-panel-text,#e7edf5)!important;box-shadow:0 12px 32px #0009!important;overscroll-behavior:contain}
-.nexus-property-options[hidden]{display:none!important}
-.nexus-property-options-toolbar{position:sticky;top:-6px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-6px -6px 3px;padding:8px 10px;border-bottom:1px solid var(--nexus-panel-border,#43546a);background:var(--nexus-menu-bg,#202f40)}
-.nexus-property-options-toolbar>strong{font-size:10px;letter-spacing:.02em}
-.nexus-property-options-toolbar>button{min-height:24px;padding:2px 7px;border:1px solid var(--nexus-panel-border,#43546a);border-radius:5px;background:var(--nexus-panel-card,#273443);color:inherit;font-size:9px}
-.nexus-property-options .nexus-property-option{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;width:100%;min-width:0;min-height:36px;padding:6px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:inherit;text-align:left}
-.nexus-property-options .nexus-property-option:hover,.nexus-property-options .nexus-property-option:focus-visible{border-color:var(--nexus-panel-accent,#78b7e8);background:color-mix(in srgb,var(--nexus-panel-accent,#78b7e8) 12%,transparent);outline:0}
-.nexus-property-options .nexus-property-option strong{font-size:10px;font-weight:650}
-.nexus-property-options .nexus-property-option code{font-size:9px;color:var(--nexus-panel-muted,#9aadc2);overflow-wrap:anywhere}
-.nexus-property-options .nexus-property-option[hidden],.nexus-property-options-heading[hidden]{display:none!important}
 @media(max-width:700px){
  .nexus-panel-window .nexus-library-toolbar{grid-template-columns:minmax(0,1fr)!important}
  .nexus-library-workspace{grid-template-columns:minmax(0,1fr)!important}
@@ -5448,17 +5418,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   -webkit-box-orient:vertical;
   -webkit-line-clamp:4;
 }
-.nexus-property-options{
-  scrollbar-width:thin!important;
-  scrollbar-color:var(--nexus-scroll-thumb,var(--nexus-accent-color,#52647b)) var(--nexus-scroll-bg,var(--nexus-panel-input,#111b27))!important;
-  scrollbar-gutter:stable!important;
-  overscroll-behavior:contain!important;
-  overflow-x:hidden!important;
-  overflow-y:auto!important;
-}
-.nexus-property-options::-webkit-scrollbar{width:8px;height:8px}
-.nexus-property-options::-webkit-scrollbar-track{background:var(--nexus-scroll-bg,var(--nexus-panel-input,#111b27));border-radius:8px}
-.nexus-property-options::-webkit-scrollbar-thumb{background:var(--nexus-scroll-thumb,var(--nexus-accent-color,#52647b));border:2px solid var(--nexus-scroll-bg,var(--nexus-panel-input,#111b27));border-radius:8px}
 @media(max-width:620px){
   .nexus-panel-window .nexus-library-toolbar,
   .nexus-library-panel .nexus-library-toolbar{flex-direction:column!important;align-items:stretch!important}
@@ -5467,127 +5426,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-panel-window .nexus-library-tag,
   .nexus-library-panel .nexus-library-tag{flex:1 1 auto!important;width:100%!important}
 }
-
-
-/* 1.0.0.26 — seletor hierárquico e foco sem recorte. */
-.nexus-property-options {
-  display:flex!important;
-  flex-direction:column!important;
-  gap:0!important;
-  padding:5px!important;
-  overflow-x:hidden!important;
-  overflow-y:auto!important;
-  scrollbar-width:thin!important;
-  scrollbar-color:var(--nexus-scrollbar-thumb,var(--nexus-scroll-thumb,#52647b)) var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923))!important;
-  overscroll-behavior:contain;
-}
-.nexus-property-options::-webkit-scrollbar { width:9px; height:9px; }
-.nexus-property-options::-webkit-scrollbar-track { background:var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923)); border-radius:8px; }
-.nexus-property-options::-webkit-scrollbar-thumb { background:var(--nexus-scrollbar-thumb,var(--nexus-scroll-thumb,#52647b)); border:2px solid var(--nexus-scrollbar-track,var(--nexus-scroll-bg,#111923)); border-radius:8px; }
-.nexus-property-options::-webkit-scrollbar-thumb:hover { background:var(--nexus-scrollbar-thumb-hover,var(--nexus-highlight-color,#78b7e8)); }
-.nexus-property-options-toolbar {
-  position:sticky!important;
-  top:-5px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:8px!important;
-  margin:-5px -5px 5px!important;
-  padding:8px!important;
-  border-bottom:1px solid var(--nexus-panel-border,#43546a)!important;
-  background:var(--nexus-menu-bg,#202f40)!important;
-}
-.nexus-property-options-toolbar>strong { flex:1 1 auto; min-width:0; font-size:10px; }
-.nexus-property-options-toolbar .nexus-property-back {
-  flex:0 0 26px;
-  width:26px;
-  min-width:26px;
-  min-height:26px;
-  padding:0;
-  border:1px solid var(--nexus-panel-border,#43546a);
-  border-radius:5px;
-  color:var(--nexus-panel-text,#e7edf5);
-  background:var(--nexus-panel-card,#273443);
-  font-size:18px;
-  line-height:1;
-}
-.nexus-property-options-content { display:flex; flex-direction:column; gap:3px; min-width:0; }
-.nexus-property-options .nexus-property-category {
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  grid-template-rows:auto auto!important;
-  align-items:center!important;
-  gap:2px 8px!important;
-  width:100%!important;
-  min-height:38px!important;
-  padding:7px 9px!important;
-  border:1px solid transparent!important;
-  border-radius:6px!important;
-  color:var(--nexus-panel-text,#e7edf5)!important;
-  background:transparent!important;
-  text-align:left!important;
-}
-.nexus-property-options .nexus-property-category:hover,
-.nexus-property-options .nexus-property-category:focus-visible {
-  border-color:var(--nexus-panel-accent,#78b7e8)!important;
-  background:color-mix(in srgb,var(--nexus-panel-accent,#78b7e8) 12%,transparent)!important;
-  outline:0!important;
-}
-.nexus-property-options .nexus-property-category>small {
-  grid-column:1;
-  color:var(--nexus-panel-muted,#9aadc2);
-  font-size:9px;
-  overflow-wrap:anywhere;
-}
-.nexus-property-options .nexus-property-category>span { grid-column:2; grid-row:1/3; font-size:18px; color:var(--nexus-panel-muted,#9aadc2); }
-.nexus-property-options .nexus-property-option { min-height:34px!important; }
-.nexus-property-options-heading { padding:8px 8px 3px; color:var(--nexus-panel-muted,#9aadc2); font-size:9px; font-weight:700; }
-.nexus-property-options-empty { padding:12px 8px; color:var(--nexus-panel-muted,#9aadc2); font-size:10px; text-align:center; }
 .nexus-component:has(.nexus-component-content :focus-visible) { overflow:visible!important; z-index:2147482002!important; }
 .nexus-component-content:has(:focus-visible) { overflow:visible!important; }
 .nexus-component-content :is(input,textarea,select,[contenteditable="true"]):focus-visible { position:relative; z-index:2; outline-offset:2px!important; }
-
-
-/* 1.0.0.28 — acabamento do seletor e aplicação uniforme dos tokens de tema. */
-.nexus-property-options .nexus-property-category{
-  grid-template-columns:minmax(0,1fr) 18px!important;
-  grid-template-rows:auto auto!important;
-  align-items:center!important;
-  gap:2px 8px!important;
-  min-width:0!important;
-  overflow:hidden!important;
-}
-.nexus-property-options .nexus-property-category>strong{
-  grid-column:1!important;grid-row:1!important;display:block!important;
-  min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;
-  white-space:nowrap!important;font-size:11px!important;line-height:1.25!important;
-}
-.nexus-property-options .nexus-property-category>small{
-  grid-column:1!important;grid-row:2!important;display:block!important;
-  min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;
-  white-space:nowrap!important;overflow-wrap:normal!important;font-size:9px!important;
-}
-.nexus-property-options .nexus-property-category>span{
-  grid-column:2!important;grid-row:1/3!important;justify-self:center!important;
-}
-.nexus-property-options .nexus-property-option{
-  grid-template-columns:minmax(0,1fr)!important;
-  align-items:start!important;
-  gap:3px!important;
-  min-width:0!important;
-  overflow:hidden!important;
-}
-.nexus-property-options .nexus-property-option>strong{
-  display:block!important;min-width:0!important;overflow:hidden!important;
-  text-overflow:ellipsis!important;white-space:nowrap!important;
-  font-size:10px!important;line-height:1.25!important;
-}
-.nexus-property-options .nexus-property-option>code{
-  display:block!important;min-width:0!important;max-width:100%!important;
-  overflow-wrap:anywhere!important;white-space:normal!important;
-  font-size:9px!important;line-height:1.25!important;
-}
-.nexus-property-options-toolbar>strong{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
 
 /* Theme aliases: keep older selectors and semantic HTML controls in sync. */
 .nexus-sheet,.nexus-floating-ui,.nexus-panel-window{
@@ -5903,8 +5744,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   object-fit: contain;
 }
 
-.nexus-property-option-value { color:var(--nexus-panel-text,#d8e2ed); font-size:10px; opacity:.82; font-variant-numeric:tabular-nums; }
-
 
 /* Mídia em representações: URLs diretas e tokens ocupam o espaço disponível sem distorção. */
 .nexus-component.has-representation .nexus-component-content { overflow:hidden; }
@@ -5922,125 +5761,108 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-property-representation > i.is-standalone { font-size:3.5em; }
 
 .nexus-interaction-trigger-row { grid-template-columns:minmax(0,1fr) minmax(0,.82fr) auto !important; }
-.nexus-component-inspector [data-property-value][data-property-kind="string"],
-.nexus-component-inspector [data-property-value][data-property-kind="skill-formula"] { display:block;width:100%;min-height:34px;max-height:7.5em;padding:7px 9px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere;overflow-y:hidden;resize:none; }
-.nexus-component-inspector [data-property-value][data-property-kind="skill-formula"] { font-family:ui-monospace,monospace; }
-
-
-/* 1.0.0.53 — campo de valor integrado ao Inspector e cursor consistente em interações. */
-.nexus-component-inspector .nexus-property-value-field { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:5px!important; min-width:0!important; margin:8px 0!important; }
-.nexus-component-inspector .nexus-property-value-field > span { color:var(--nexus-panel-muted,#9aadc2)!important; font-size:10px!important; font-weight:700!important; }
-.nexus-component-inspector .nexus-property-value-field > code { display:block; min-width:0; color:var(--nexus-panel-muted,#9aadc2); font-size:9px; line-height:1.35; overflow-wrap:anywhere; white-space:normal; }
-.nexus-component-inspector .nexus-property-value-field > textarea,.nexus-component-inspector .nexus-property-value-field > input { display:block; width:100%; min-width:0; min-height:36px; box-sizing:border-box; padding:7px 9px; border:1px solid var(--nexus-panel-border,#3c5067); border-radius:6px; background:var(--nexus-panel-input,#111b27); color:var(--nexus-panel-text,#e7edf5); font:inherit; font-size:12px; line-height:1.4; }
-.nexus-component-inspector .nexus-property-value-field > textarea { max-height:calc(5 * 1.4em + 16px); resize:vertical!important; overflow-y:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
-.nexus-component-inspector [data-property-value][data-property-kind="skill-formula"] { font-family:ui-monospace,monospace; }
-.nexus-component-inspector .nexus-property-value-field > :focus-visible { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; }
 .nexus-panel-window .nexus-behavior-editor button:not(:disabled),.nexus-panel-window .nexus-behavior-editor .nexus-interaction-button:not(:disabled),.nexus-behavior-editor .nexus-interaction-button:not(:disabled) { cursor:pointer!important; }
 .nexus-panel-window .nexus-behavior-editor button:disabled,.nexus-panel-window .nexus-behavior-editor .nexus-interaction-button:disabled { cursor:not-allowed!important; }
 
 
-/* 1.0.0.56 — layout isolado do seletor de propriedades.
-   Nome, valor atual e caminho técnico ocupam linhas/áreas independentes. */
-.nexus-property-options .nexus-property-option {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  grid-template-rows: auto auto !important;
-  align-items: start !important;
-  justify-items: stretch !important;
-  gap: 4px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  white-space: normal !important;
+
+/* 1.0.0.57 — estilos consolidados do seletor de propriedades e campos do Inspector. */
+.nexus-property-options {
+  position: fixed !important; z-index: 2147483647 !important;
+  display: flex !important; flex-direction: column !important; gap: 5px !important;
+  max-width: calc(100vw - 24px) !important; margin: 0 !important; padding: 7px !important;
+  box-sizing: border-box !important; overflow-x: hidden !important; overflow-y: auto !important;
+  overscroll-behavior: contain !important; border: 1px solid var(--nexus-panel-border, #52647b) !important;
+  border-radius: 9px !important; background: var(--nexus-menu-bg, #202f40) !important;
+  color: var(--nexus-panel-text, #e7edf5) !important; box-shadow: 0 12px 32px #0009 !important;
+  scrollbar-width: thin !important;
 }
-.nexus-property-options .nexus-property-option-heading {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto) !important;
-  align-items: start !important;
-  gap: 8px !important;
-  width: 100% !important;
-  min-width: 0 !important;
+.nexus-property-options[hidden] { display: none !important; }
+.nexus-property-options-toolbar {
+  position: sticky !important; top: -7px !important; z-index: 2 !important;
+  display: flex !important; align-items: center !important; gap: 8px !important;
+  margin: -7px -7px 2px !important; padding: 9px !important;
+  border-bottom: 1px solid var(--nexus-panel-border, #43546a) !important;
+  background: var(--nexus-menu-bg, #202f40) !important;
+}
+.nexus-property-options-toolbar > strong {
+  display: block !important; min-width: 0 !important; white-space: normal !important;
+  overflow-wrap: anywhere !important; font-size: 11px !important;
+}
+.nexus-property-options-toolbar > button { flex: 0 0 28px !important; width: 28px !important; min-width: 28px !important; min-height: 28px !important; }
+.nexus-property-options-content { display: flex !important; flex-direction: column !important; gap: 5px !important; width: 100% !important; min-width: 0 !important; }
+.nexus-property-options .nexus-property-option {
+  display: flex !important; flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important;
+  gap: 4px !important; width: 100% !important; height: auto !important; min-width: 0 !important; min-height: 0 !important;
+  max-height: none !important; margin: 0 !important; padding: 9px 10px !important; box-sizing: border-box !important;
+  overflow: visible !important; border: 1px solid transparent !important; border-radius: 6px !important;
+  background: transparent !important; color: inherit !important; text-align: left !important; white-space: normal !important;
+  line-height: 1.3 !important;
+}
+.nexus-property-options .nexus-property-option:hover,
+.nexus-property-options .nexus-property-option:focus-visible {
+  border-color: var(--nexus-panel-accent, #78b7e8) !important;
+  background: color-mix(in srgb, var(--nexus-panel-accent, #78b7e8) 12%, transparent) !important; outline: 0 !important;
 }
 .nexus-property-options .nexus-property-option-name {
-  display: block !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  overflow-wrap: anywhere !important;
-  white-space: normal !important;
-  line-height: 1.3 !important;
+  display: block !important; width: 100% !important; min-width: 0 !important; margin: 0 !important;
+  overflow: visible !important; color: var(--nexus-panel-text, #e7edf5) !important;
+  font-size: 11px !important; font-weight: 700 !important; line-height: 1.35 !important;
+  white-space: normal !important; overflow-wrap: anywhere !important; text-overflow: clip !important;
 }
 .nexus-property-options .nexus-property-option-value {
-  display: block !important;
-  min-width: 0 !important;
-  max-width: 45% !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-  color: var(--nexus-panel-muted, #9aadc2) !important;
-  font-size: 9px !important;
-  line-height: 1.3 !important;
-  text-align: right !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  display: block !important; width: 100% !important; min-width: 0 !important; max-width: none !important;
+  margin: 0 !important; overflow: visible !important; color: var(--nexus-panel-muted, #a9bacd) !important;
+  font-size: 10px !important; line-height: 1.35 !important; text-align: left !important;
+  white-space: normal !important; overflow-wrap: anywhere !important; text-overflow: clip !important;
 }
 .nexus-property-options .nexus-property-option-path {
-  display: block !important;
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-wrap: anywhere !important;
-  color: var(--nexus-panel-muted, #9aadc2) !important;
-  font-size: 9px !important;
-  line-height: 1.3 !important;
-  white-space: normal !important;
+  display: block !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important;
+  overflow: visible !important; color: var(--nexus-panel-muted, #91a5bb) !important; font-size: 9px !important;
+  line-height: 1.35 !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: break-word !important;
 }
-.nexus-component-inspector .nexus-data-binding {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  width: 100% !important;
-  min-width: 0 !important;
+.nexus-property-options .nexus-property-category {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) 18px !important; grid-template-rows: auto auto !important;
+  align-items: start !important; gap: 3px 8px !important; width: 100% !important; min-width: 0 !important;
+  min-height: 0 !important; height: auto !important; padding: 9px 10px !important; box-sizing: border-box !important;
+  overflow: visible !important; border: 1px solid transparent !important; border-radius: 6px !important;
+  background: transparent !important; color: inherit !important; text-align: left !important;
 }
-.nexus-component-inspector .nexus-data-binding > .nexus-inspector-field {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  margin: 0 !important;
+.nexus-property-options .nexus-property-category:hover,
+.nexus-property-options .nexus-property-category:focus-visible {
+  border-color: var(--nexus-panel-accent, #78b7e8) !important;
+  background: color-mix(in srgb, var(--nexus-panel-accent, #78b7e8) 12%, transparent) !important;
 }
-.nexus-component-inspector [data-component-path-input] {
-  position: static !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.nexus-property-options .nexus-property-category > strong,
+.nexus-property-options .nexus-property-category > small {
+  display: block !important; grid-column: 1 !important; min-width: 0 !important; overflow: visible !important;
+  white-space: normal !important; overflow-wrap: anywhere !important; text-overflow: clip !important;
 }
+.nexus-property-options .nexus-property-category > strong { grid-row: 1 !important; font-size: 11px !important; }
+.nexus-property-options .nexus-property-category > small { grid-row: 2 !important; color: var(--nexus-panel-muted, #a9bacd) !important; font-size: 9px !important; }
+.nexus-property-options .nexus-property-category > span { grid-column: 2 !important; grid-row: 1 / 3 !important; align-self: center !important; }
+.nexus-property-options-heading,
+.nexus-property-options-empty {
+  display: block !important; min-width: 0 !important; padding: 8px !important;
+  color: var(--nexus-panel-muted, #a9bacd) !important; font-size: 10px !important;
+  white-space: normal !important; overflow-wrap: anywhere !important;
+}
+.nexus-component-inspector .nexus-data-binding,
 .nexus-component-inspector .nexus-property-value-field {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 5px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  margin: 10px 0 0 !important;
+  display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 6px !important;
+  width: 100% !important; min-width: 0 !important; margin: 0 !important;
 }
-.nexus-component-inspector .nexus-property-value-field > * {
-  position: static !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.nexus-component-inspector .nexus-data-binding > .nexus-inspector-field,
+.nexus-component-inspector .nexus-property-value-field {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) !important; align-items: start !important;
+  gap: 6px !important; width: 100% !important; min-width: 0 !important;
 }
-@media (max-width: 360px) {
-  .nexus-property-options .nexus-property-option-heading {
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 2px !important;
-  }
-  .nexus-property-options .nexus-property-option-value {
-    max-width: 100% !important;
-    text-align: left !important;
-  }
+.nexus-component-inspector [data-component-path-input],
+.nexus-component-inspector [data-property-value] {
+  position: static !important; display: block !important; width: 100% !important;
+  min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important;
+}
+.nexus-component-inspector [data-property-value-hint] {
+  display: block !important; min-width: 0 !important; color: var(--nexus-panel-muted, #a9bacd) !important;
+  font-size: 10px !important; line-height: 1.4 !important; white-space: normal !important; overflow-wrap: anywhere !important;
 }
