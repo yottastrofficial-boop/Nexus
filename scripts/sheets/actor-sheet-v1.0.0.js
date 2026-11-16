@@ -119,6 +119,18 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
   const rulebookProperty = getNexusRulebookPropertyValue(actor, path);
+  const propertyExpressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? {};
+  const storedPropertyExpression = getPath(propertyExpressions, path);
+  if (typeof storedPropertyExpression === "string" && storedPropertyExpression.trim() && depth < 8) {
+    const expressionSource = storedPropertyExpression.trim().replace(/^\\{\\{\\s*([\\s\\S]*?)\\s*\\}\\}$/, "$1");
+    const calculated = evaluateNexusExpression(expressionSource, identifier =>
+      resolveNexusBinding(actor, resolveFormulaIdentifier(identifier), depth + 1).value
+    );
+    if (calculated !== null) {
+      return { value: calculated, path, sourcePath: rulebookProperty.sourcePath ?? path, virtual: true,
+        readOnly: rulebookProperty.readOnly ?? false, expression: true, formula: storedPropertyExpression };
+    }
+  }
   if (rulebookProperty.matched) {
     return {
       value: rulebookProperty.value,
@@ -2883,43 +2895,41 @@ export class NexusActorSheet extends NexusActorSheetBase {
             : sourcePropertyPath === "name" ? this.actor.name
               : sourcePropertyPath === "img" ? this.actor.img
                 : sourcePropertyPath ? getPath(this.actor.system ?? {}, sourcePropertyPath) : undefined;
-          const propertyPath = String(effectivePath.virtual ? (effectivePath.sourcePath ?? "") : (
-            storedAliasPath || (rawBoundValue && typeof rawBoundValue === "object" && Object.hasOwn(rawBoundValue, "value")
-              ? `${sourcePropertyPath}.value`
-              : sourcePropertyPath)
-          ) ?? "");
+          const propertyPath = String(storedAliasPath || effectivePath.path || sourcePropertyPath || "");
           const value = effectivePath.value ?? rawBoundValue;
-          const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath || item.path === effectivePath.path);
+          const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath);
           const aliasType = effectivePath.alias?.type;
           const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
-          const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
+          const skillValueMatch = propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/);
           const skillFormulaMode = !!skillValueMatch;
           const skillFormula = skillFormulaMode ? String(getPath(this.actor.system ?? {}, `skills.${skillValueMatch[1]}.formula`) ?? "") : "";
-          const propertyType = skillFormulaMode ? "string" : (typeof value === "number" || typeof value === "boolean" || typeof value === "string" ? typeof value : (definition?.type ?? inferredAliasType));
+          const storedExpressions = this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
+          const storedExpression = getPath(storedExpressions, propertyPath);
+          const propertyType = skillFormulaMode ? "string" : (definition?.type ?? (["number", "boolean", "string"].includes(typeof value) ? typeof value : inferredAliasType));
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
           const hasPath = !!propertyPath && (canEditPrimitive || skillFormulaMode);
-          const inputValue = skillFormulaMode ? skillFormula : (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value);
-          const propertyValuePath = propertyValueRow.querySelector("[data-property-value-path]");
-          if (propertyValuePath) propertyValuePath.textContent = propertyPath || "Selecione uma propriedade relacionada";
+          const inputValue = storedExpression ?? (skillFormulaMode ? skillFormula : (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value));
           propertyValueRow.hidden = !one;
           if (hasPath && one.type !== "token") {
-            const desiredTag = propertyType === "string" ? "TEXTAREA" : "INPUT";
-            if (propertyValueInput.tagName !== desiredTag) {
-              const replacement = document.createElement(desiredTag.toLowerCase());
-              replacement.dataset.propertyValue = ""; replacement.className = propertyValueInput.className;
-              propertyValueInput.replaceWith(replacement); propertyValueInput = replacement;
+            if (propertyValueInput.tagName !== "TEXTAREA") {
+              const replacementInput = document.createElement("textarea");
+              replacementInput.dataset.propertyValue = ""; replacementInput.className = propertyValueInput.className;
+              propertyValueInput.replaceWith(replacementInput); propertyValueInput = replacementInput;
             }
-            if (propertyType === "number") { propertyValueInput.type = "number"; propertyValueInput.step = "any"; propertyValueInput.removeAttribute("min"); propertyValueInput.removeAttribute("max"); propertyValueInput.inputMode = "decimal"; }
-            else if (propertyType === "boolean") propertyValueInput.type = "checkbox";
-            else { propertyValueInput.rows = 1; propertyValueInput.maxLength = skillFormulaMode ? 500 : 5000; propertyValueInput.style.resize = "none"; }
-            if (propertyType === "boolean") propertyValueInput.checked = !!inputValue;
-            else propertyValueInput.value = String(inputValue);
+            propertyValueInput.rows = 1;
+            propertyValueInput.maxLength = skillFormulaMode ? 500 : 5000;
+            propertyValueInput.style.resize = "none";
+            propertyValueInput.value = String(inputValue);
             propertyValueInput.dataset.propertyPath = propertyPath;
             propertyValueInput.dataset.propertyKind = skillFormulaMode ? "skill-formula" : propertyType;
             propertyValueInput.disabled = !hasPath || (effectivePath.readOnly === true && !skillFormulaMode) || (propertyPath === "name" && one.updateSource === false);
-            propertyValueInput.title = !hasPath ? "Selecione uma propriedade relacionada para editar seu valor." : propertyValueInput.disabled ? "Propriedade calculada ou somente leitura." : skillFormulaMode ? "Fórmula opcional para calcular o valor desta perícia. Vazio = regra padrão do NEXUS." : "Altera a propriedade vinculada no personagem.";
+            propertyValueInput.title = !hasPath ? "Selecione uma propriedade relacionada para editar seu valor." : propertyValueInput.disabled ? "Propriedade calculada ou somente leitura." : "Valor literal ou expressão dinâmica entre {{ }}. Ex.: {{attributes.for.value + mb}}.";
             if (!hasPath) propertyValueInput.value = "";
-            if (propertyValueInput.tagName === "TEXTAREA") { const lineHeight = Number.parseFloat(getComputedStyle(propertyValueInput).lineHeight) || 16; const maxHeight = lineHeight * 5 + 16; propertyValueInput.style.height = "auto"; propertyValueInput.style.height = `${Math.min(propertyValueInput.scrollHeight, maxHeight)}px`; propertyValueInput.style.overflowY = propertyValueInput.scrollHeight > maxHeight ? "auto" : "hidden"; }
+            const lineHeight = Number.parseFloat(getComputedStyle(propertyValueInput).lineHeight) || 16;
+            const maxHeight = lineHeight * 5 + 16;
+            propertyValueInput.style.height = "auto";
+            propertyValueInput.style.height = `${Math.min(propertyValueInput.scrollHeight, maxHeight)}px`;
+            propertyValueInput.style.overflowY = propertyValueInput.scrollHeight > maxHeight ? "auto" : "hidden";
           }
         }
         const resourcePaths = getResourceValuePaths(one);
