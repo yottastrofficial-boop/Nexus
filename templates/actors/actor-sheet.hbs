@@ -76,7 +76,16 @@
                     <label class="nexus-inspector-field">Propriedade relacionada<input type="text" data-component-setting="dataPath" data-component-path-input autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="nexus-component-path-options-{{nexus.actor.id}}"></label>
                   </div>
                   <div class="nexus-property-options" id="nexus-component-path-options-{{nexus.actor.id}}" data-component-path-options hidden role="listbox" aria-label="Propriedades e atalhos disponíveis"></div>
-                  <label class="nexus-inspector-field" data-property-value-row hidden>Valor da propriedade<textarea rows="1" data-property-value autocomplete="off" spellcheck="false"></textarea></label>
+                  <section class="nexus-property-value-panel" data-property-value-row hidden aria-label="Valor da propriedade">
+                    <div class="nexus-property-value-heading">
+                      <strong>Valor da propriedade</strong>
+                      <code data-property-value-path>—</code>
+                    </div>
+                    <label class="nexus-property-value-control">
+                      <span>Valor atual</span>
+                      <textarea rows="1" data-property-value autocomplete="off" spellcheck="false"></textarea>
+                    </label>
+                  </section>
                   <p class="nexus-property-alias-conflicts" data-property-alias-conflicts hidden></p>
                   <section class="nexus-property-presentation-editor" data-property-presentation-editor data-component-id="" aria-label="Apresentação da propriedade"></section>
 
