@@ -316,14 +316,18 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
   );
 };
 
+const normalizeRollAliasToken = value => String(value ?? "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("pt-BR");
 const RESERVED_ROLL_ALIAS_TOKENS = new Set([
-  "name", "nam", "exib", "exibicao", "attribute", "att", "description",
-  "pro", "proficient", "value", "val", "max", "current", "modifier",
-  "bonus", "formatted", "enabled", "active", "type", "key", "path", "id"
+  "name", "nam", "nome", "exib", "exibicao", "attribute", "att", "atributo",
+  "description", "descricao", "pro", "proficient", "proficiencia", "value",
+  "val", "valor", "max", "maximo", "current", "atual", "modifier", "bonus",
+  "formatted", "enabled", "active", "type", "key", "path", "id"
 ]);
 const NON_ROLL_PROPERTY_SUFFIXES = new Set([
-  "name", "exib", "exibicao", "description", "attribute", "attributename",
-  "attributekey", "proficient", "proficientlevel", "formatted"
+  "name", "nome", "exib", "exibicao", "description", "descricao", "attribute",
+  "atributo", "attributename", "attributekey", "proficient", "proficiencia",
+  "proficientlevel", "formatted"
 ]);
 const getNexusRollAliasCandidates = actor => {
   return [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
@@ -331,19 +335,19 @@ const getNexusRollAliasCandidates = actor => {
     // Metadata fields describe a property; they are not independent roll values.
     .filter(alias => {
       const pathSuffix = String(alias.key ?? "").split(".").at(-1).toLowerCase();
-      const labelSuffix = String(alias.label ?? "").split(/[·/]/).at(-1).trim().toLocaleLowerCase("pt-BR");
+      const labelSuffix = normalizeRollAliasToken(String(alias.label ?? "").split(/[·/]/).at(-1));
       return !NON_ROLL_PROPERTY_SUFFIXES.has(pathSuffix) && !NON_ROLL_PROPERTY_SUFFIXES.has(labelSuffix);
     })
     // Native resource maximum and temporary values are not independent roll shortcuts.
     .filter(alias => !(alias.origin === "native" && ["max", "temporary"].includes(String(alias.key ?? "").split(".").at(-1))))
     .map(alias => {
       const explicitRaw = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
-      const explicit = RESERVED_ROLL_ALIAS_TOKENS.has(explicitRaw.toLocaleLowerCase("pt-BR")) ? "" : explicitRaw;
+      const explicit = RESERVED_ROLL_ALIAS_TOKENS.has(normalizeRollAliasToken(explicitRaw)) ? "" : explicitRaw;
       const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
       const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
       const display = explicit || generated;
-      if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display) || RESERVED_ROLL_ALIAS_TOKENS.has(display.toLocaleLowerCase("pt-BR"))) return null;
+      if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display) || RESERVED_ROLL_ALIAS_TOKENS.has(normalizeRollAliasToken(display))) return null;
       const root = safeAliasKey(alias.targetPath || alias.key);
       if (!root) return null;
       const raw = alias.targetPath
