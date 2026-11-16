@@ -1176,7 +1176,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const headingLabel = ["level", "attribute"].includes(componentVariant) ? (component.customLabel ?? component.text ?? def.label) : (component.customLabel ?? "");
     const actionType = ["roll", "proficiency", "toggle-component"].includes(component.actionType) ? component.actionType : (component.actionType === "resource-slider" && (sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind)) ? "resource-slider" : "");
     const proficiencyBinding = component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : undefined;
-    const proficiencySkillPath = componentVariant === "proficiency" ? String(component.actionPath ?? "").match(/^skills\.([a-zA-Z0-9_-]+)\.proficientLevel$/) : null;
+    const proficiencySkillPath = componentVariant === "proficiency" ? String(component.actionPath ?? "").match(/^skills\.([a-zA-Z0-9_-]+)\.proficient(?:Level)?$/) : null;
     const proficiencySkill = proficiencySkillPath ? NEXUS_SKILLS.find(skill => skill.key === proficiencySkillPath[1] || skill.legacyKey === proficiencySkillPath[1]) : null;
     const skillProficiency = proficiencySkill ? getNexusSkillModifier(this.actor, proficiencySkill.key) : null;
     const proficiencyLevel = componentVariant === "proficiency"
