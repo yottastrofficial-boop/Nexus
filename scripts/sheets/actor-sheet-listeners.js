@@ -1371,7 +1371,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if((formulaMode&&!formulaAt&&!formulaExpression)||(!formulaMode&&!propertyMode&&!templateExpression)){list.hidden=true;return;}
       const query=(formulaAt?.[1]??formulaExpression?.[1]??templateExpression?.[1]??(propertyMode?raw:"")).trim();
       list._nexusQuery=query;list._nexusFormulaMode=formulaMode;
-      renderPropertyPicker(list,list._nexusCatalog,{categoryPath:list.dataset.categoryPath??"",query,formulaMode});
+      renderPropertyPicker(list,list._nexusCatalog,{
+        categoryPath:list.dataset.categoryPath??"",
+        query,
+        formulaMode,
+        getValue: path => resolveNexusBinding(sheet.actor, path).value
+      });
       list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
     const propertyInputSelector=".nexus-panel-window [data-component-path-input], .nexus-panel-window [data-interaction-property-input], .nexus-panel-window [data-roll-formula-input], .nexus-library-panel [data-component-path-input], .nexus-library-panel [data-interaction-property-input], .nexus-library-panel [data-roll-formula-input]";
