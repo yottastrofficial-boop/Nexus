@@ -68,7 +68,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.42", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.43", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -931,6 +931,14 @@ assert.ok(!css.includes(".nexus-component.nexus-component-touching-right {") && 
 assert.ok(!css.includes(".nexus-group-surface.nexus-group-touching-right {") && !css.includes(".nexus-group-surface.nexus-group-touching-left {"),"Superfícies de grupo também devem usar arredondamento individual por canto");
 assert.ok(sheetListeners.includes("input${inspectorNamespace}"),"As regras devem ser salvas durante a digitação, sem depender apenas do evento change");
 assert.ok(sheetListeners.includes("render: false, captureHistory: false"),"O salvamento durante a digitação não deve reconstruir o editor nem poluir o histórico a cada tecla");
+assert.ok(sheetListeners.includes("capturedInteractionInputHistory"), "A edição de regras deve capturar histórico sem substituir os campos");
+assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
+assert.ok(sheetListeners.includes("pendingPropertyValueSaves") && sheetListeners.includes('on("input"'), "Valores de propriedades devem salvar durante a digitação");
+assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recursos devem atualizar sem Enter");
+assert.ok(sheet.includes("RESERVED_ROLL_ALIAS_TOKENS") && sheet.includes("NON_ROLL_PROPERTY_SUFFIXES"), "Identificadores genéricos não devem virar atalhos de rolagem");
+assert.ok(sheet.includes("byDisplay") && sheet.includes("targets.size === 1"), "Atalhos repetidos para o mesmo caminho não devem gerar ambiguidade falsa");
+assert.ok(canvasCorners.includes("MutationObserver") && canvasCorners.includes('attributeFilter: ["style"]'), "Cantos devem ser recalculados também após alterações de posição");
+
 
 const cornerOnlyA=surface40(0,0,100,100),cornerOnlyB=surface40(100,100,100,100);
 const compactOnly=surface40(500,500,90,120),compactHeightOnly=surface40(650,500,120,90);
