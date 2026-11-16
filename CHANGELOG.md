@@ -19,6 +19,7 @@
 ### Validação
 - Incluídos testes para campos vazios, fórmulas reais de perícia, atalhos, dependências e estrutura do buscador.
 - A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+- Pacote 1.0.0.57 publicado após aprovação dos testes automatizados.
 
 ## 1.0.0.56
 
