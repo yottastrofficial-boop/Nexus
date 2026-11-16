@@ -5866,3 +5866,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   display: block !important; min-width: 0 !important; color: var(--nexus-panel-muted, #a9bacd) !important;
   font-size: 10px !important; line-height: 1.4 !important; white-space: normal !important; overflow-wrap: anywhere !important;
 }
+.nexus-component-inspector [data-property-value] {
+  max-height: 7.5em !important;
+  overflow-y: auto !important;
+  resize: vertical !important;
+}
