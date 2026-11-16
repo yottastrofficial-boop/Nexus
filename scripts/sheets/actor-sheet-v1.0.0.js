@@ -2773,6 +2773,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
           propertyValueRow.hidden = !hasPath || one.type === "token";
           if (hasPath && one.type !== "token") {
             propertyValueInput.type = typeof value === "number" ? "number" : typeof value === "boolean" ? "checkbox" : "text";
+            if (propertyValueInput.type === "number") {
+              propertyValueInput.step = "any";
+              propertyValueInput.removeAttribute("min");
+              propertyValueInput.removeAttribute("max");
+              propertyValueInput.inputMode = "decimal";
+            }
             if (propertyValueInput.type === "checkbox") propertyValueInput.checked = value;
             else propertyValueInput.value = String(value);
             propertyValueInput.dataset.propertyPath = propertyPath;
