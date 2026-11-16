@@ -1,3 +1,15 @@
+## 1.0.0.56
+
+### Reestruturação do editor de propriedades
+- Corrigida a identificação de caminhos `skills.<perícia>.value`: o campo agora reconhece corretamente o modo de fórmula da perícia, em vez de herdar o bloqueio de propriedades calculadas.
+- Reorganizada cada opção do buscador em áreas independentes para nome, valor atual e caminho técnico, evitando sobreposição e conflitos de largura.
+- Separados os contêineres do caminho vinculado e do editor de valor no Inspector, com largura e dimensionamento previsíveis.
+- Mantidos os caminhos canônicos, os dados já salvos nos Actors, os aliases e as expressões dinâmicas; nenhuma propriedade ou valor persistido é apagado.
+
+### Validação
+- Adicionadas regressões para o reconhecimento de fórmulas de perícia e para a estrutura/layout do buscador.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.55
 
 ### Correção do salvamento no Inspector
