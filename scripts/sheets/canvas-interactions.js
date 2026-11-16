@@ -571,9 +571,21 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const focusedInCanvas = !!liveCanvas && (activeElement === liveCanvas || liveCanvas.contains(activeElement)
         || (sheet._nexusCanvasKeyboardFocus && (activeElement === document.body || activeElement === document.documentElement)));
       if (sheet._mode !== "appearance") return;
-      // Não deixar Delete/Backspace escapar para o canvas de cena quando o
-      // usuário está em um painel do NEXUS; nesses painéis a tecla não exclui
-      // componentes nem tokens.
+      const editorPanelsOpen = panelWindows.some(instance => instance?.element?.isConnected)
+        || !!floating?.querySelector('[data-floating-panel="component"].active, [data-floating-panel="behavior"].active');
+      const controlledTokens = globalThis.canvas?.tokens?.controlled ?? [];
+      const hasDirectlyActiveToken = controlledTokens.length > 0;
+      // Com painéis de edição abertos, Delete/Backspace só alcança tokens
+      // realmente controlados no canvas da cena. Inputs continuam editáveis.
+      if ((event.key === "Delete" || event.key === "Backspace") && editorPanelsOpen && !isTypingTarget) {
+        if (hasDirectlyActiveToken) return;
+        event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
+        if (focusedInCanvas && sheet._selectedIds?.size) {
+          await sheet._deleteComponents([...sheet._selectedIds]);
+          restoreCanvasKeyboardFocus();
+        }
+        return;
+      }
       if ((event.key === "Delete" || event.key === "Backspace") && focusedInPanel && !isTypingTarget) {
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.(); return;
       }
@@ -637,8 +649,17 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     };
     root.addEventListener("pointerdown",activateInteraction,true);
     document.addEventListener("pointerdown",deactivateInteraction,true);
+    const tokenDeletionGuardId = Hooks.on("preDeleteToken", tokenDocument => {
+      if (sheet._mode !== "appearance") return;
+      const panelsOpen = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.isConnected)
+        || !!document.querySelector(`[data-nexus-floating-for="${sheet.id}"] [data-floating-panel="component"].active, [data-nexus-floating-for="${sheet.id}"] [data-floating-panel="behavior"].active`);
+      if (!panelsOpen) return;
+      const controlled = globalThis.canvas?.tokens?.controlled ?? [];
+      const directlyActive = controlled.some(token => token?.document?.id === tokenDocument?.id || token?.id === tokenDocument?.id);
+      if (!directlyActive) return false;
+    });
     window.addEventListener("keydown",keyHandler,true);
-    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
+    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); Hooks.off("preDeleteToken", tokenDeletionGuardId); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
     root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;button.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
     canvas.addEventListener("dragover",e=>e.preventDefault());
     canvas.addEventListener("drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
