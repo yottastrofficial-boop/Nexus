@@ -13,10 +13,11 @@ const LEGACY = {
   "toggle-component": { event:"click", type:"toggle", config:c=>({targetId:c.actionTargetId??""}) }
 };
 const newId = prefix => `${prefix}-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`}`;
-const safePath = raw => {
-  const path=String(raw??"").trim().replace(/^\{\{\s*/,"").replace(/\s*\}\}$/,"").replace(/^@/,"").replace(/^actor\./,"").replace(/^system\./,"");
-  return path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path) && !path.split(".").some(k=>["__proto__","prototype","constructor"].includes(k)) ? path : "";
+export const normalizeInteractionPropertyPath = raw => {
+  const path=String(raw??"").trim().replace(/^\\{\\{\\s*/, "").replace(/\\s*\\}\\}$/, "").replace(/^@/, "").replace(/^actor\\./, "").replace(/^system\\./, "");
+  return path && /^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$/.test(path) && !path.split(".").some(k=>["__proto__","prototype","constructor"].includes(k)) ? path : "";
 };
+const safePath = normalizeInteractionPropertyPath;
 const normalizeTrigger = (t,i) => {
   const event=String(t?.event??t??"");
   return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event} : null;
