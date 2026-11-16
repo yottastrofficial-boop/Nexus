@@ -361,7 +361,7 @@ const propertyMigration = await migrateLegacyActorData(propertyMigrationDependen
 assert.equal(propertyMigration.propertiesMigrated, true);
 assert.equal(legacyPropertyActor.system.skills.athletics.proficientLevel, 1);
 assert.equal(legacyPropertyActor.system.skills.athletics.proficient, undefined);
-assert.equal(legacyPropertyActor.system.skills.stealth.proficientLevel, 0);
+assert.equal(legacyPropertyActor.system.skills.stealth.proficientLevel, -1, "A antiga marcação opposed deve migrar para nível negativo");
 assert.equal(legacyPropertyActor.system.skills.stealth.proficient, undefined);
 assert.equal(legacyPropertyActor.system.skills.furtividade, undefined);
 assert.equal(legacyPropertyActor.system.combat.defenseModifier, 6);
