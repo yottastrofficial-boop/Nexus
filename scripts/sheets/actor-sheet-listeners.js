@@ -1185,7 +1185,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
-    const pendingInteractionInputSaves = new WeakMap();
     const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
@@ -1267,8 +1266,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field], [data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", async event => {
       const control = event.currentTarget;
-      const pendingTimer = pendingInteractionInputSaves.get(control);
-      if (pendingTimer) { clearTimeout(pendingTimer); pendingInteractionInputSaves.delete(control); }
       event.stopPropagation();
       const isPresentationField = control.dataset.interactionScope?.startsWith("propertyPresentation");
       await persistInteractionEditor(control, null, {
