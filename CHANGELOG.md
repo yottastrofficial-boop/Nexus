@@ -1,3 +1,21 @@
+## 1.0.0.53
+
+### Inspector e propriedades
+- Removido o painel visual separado de valor; o editor utiliza diretamente o campo `data-property-value`, expansível até cinco linhas e com rolagem interna.
+- Padronizados os campos de Conteúdo, Propriedade relacionada e Valor/Conteúdo da propriedade para todos os cards selecionados.
+- Centralizada a normalização de caminhos canônicos, singulares e abreviados, incluindo `for.value`, `attribute.for.value`, `resource.pv.value` e `skill.*`.
+- Corrigida a leitura e a gravação de atributos armazenados como números ou como objetos legados com `value`, incluindo os seis atributos do NEXUS.
+- O campo de valor permanece visível sem vínculo, mas fica desativado até que uma propriedade seja selecionada.
+
+### Foco e interação
+- As barras laterais respeitam a camada das janelas abertas e não ultrapassam o Inspector ou o editor de Comportamento quando o Canvas recebe foco.
+- Cards com gatilhos de interação exibem consistentemente o cursor de mão no Modo Padrão.
+- Botões do editor de Comportamento recuperam o cursor de interação, mantendo o estado desativado visualmente distinto.
+
+### Validação
+- Incluídos testes de regressão para caminhos abreviados, atributos escalares/aninhados, campos padronizados, empilhamento das janelas e cursor de interação.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.52
 
 ### Correções complementares de propriedades

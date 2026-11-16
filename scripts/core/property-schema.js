@@ -109,11 +109,14 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     const definition = NEXUS_ATTRIBUTES.find(attribute => attribute.key === attributeMatch[1]);
     if (!definition) return { matched: false };
     const member = attributeMatch[2];
+    const storedAttribute = system.attributes?.[definition.key];
+    const nestedValue = storedAttribute && typeof storedAttribute === "object" && Object.hasOwn(storedAttribute, "value");
     const value = member === "name" ? definition.name
       : member === "exib" ? definition.exib
       : member === "description" ? definition.description
-      : Number(system.attributes?.[definition.key]) || 0;
-    return { matched: true, value, readOnly: member !== "value", sourcePath: member === "value" ? `attributes.${definition.key}` : undefined };
+      : Number(nestedValue ? storedAttribute.value : storedAttribute) || 0;
+    const sourcePath = member === "value" ? (nestedValue ? `attributes.${definition.key}.value` : `attributes.${definition.key}`) : undefined;
+    return { matched: true, value, readOnly: member !== "value", sourcePath };
   }
 
   const skillMatch = key.match(/^skills\.([^.]+)(?:\.(.+))?$/);

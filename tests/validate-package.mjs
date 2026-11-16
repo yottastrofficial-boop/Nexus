@@ -12,6 +12,7 @@ import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "../scripts/core/formula-engine.js";
 import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected-corners.js";
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
+import { normalizeNexusPropertyPath } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
@@ -68,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.52", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.53", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -83,7 +84,19 @@ assert.match(sheet, /data-property-value-path/, "O Inspector deve mostrar o cami
 assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
-assert.ok(css.includes(".nexus-property-value-panel"), "O campo de valor deve possuir painel visual próprio");
+assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
+assert.match(template, /nexus-property-value-field[\s\S]*data-property-value/, "O valor deve permanecer no campo integrado do Inspector");
+assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar disponível para qualquer card selecionado");
+assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
+assert.match(sheet, /highestPanelZ === null \? desiredZ : Math\.min\(desiredZ, highestPanelZ - 1\)/, "As barras laterais não podem sobrepor janelas abertas");
+assert.match(css, /nexus-behavior-editor button:not\(:disabled\)[\s\S]*cursor:pointer!important/, "Botões de comportamento devem restaurar o cursor de interação");
+assert.match(canvasPlayInteractions, /pointermove[\s\S]*card\.style\.setProperty\("cursor", "pointer", "important"\)/, "Cards com gatilhos devem exibir a mãozinha no Modo Padrão");
+assert.equal(normalizeNexusPropertyPath("for.value"), "attributes.for.value");
+assert.equal(normalizeNexusPropertyPath("attribute.for.value"), "attributes.for.value");
+assert.equal(normalizeNexusPropertyPath("resource.pv.value"), "resources.pv.value");
+assert.equal(normalizeNexusPropertyPath("skill.athletics.value"), "skills.athletics.value");
+assert.equal(normalizeNexusPropertyPath("system.attributes.for.value"), "attributes.for.value");
+assert.equal(normalizeNexusPropertyPath("__proto__.polluted"), "");
 assert.match(sheet, /const captureScrollState = owner/, "A ficha deve capturar a rolagem de todos os contêineres encontrados");
 assert.match(sheet, /".nexus-native-panel-content"/, "A rolagem do conteúdo nativo dos painéis deve ser preservada");
 assert.match(sheet, /".nexus-tool-panel"/, "A rolagem dos painéis de ferramentas deve ser preservada");
@@ -145,6 +158,14 @@ assert.equal(normalizeInteractionPropertyPath("system.skills.athletics.proficien
 assert.equal(normalizeInteractionPropertyPath("@skills.athletics.proficientLevel"), "skills.athletics.proficientLevel");
 assert.equal(normalizeInteractionPropertyPath("skills..athletics"), "", "Destinos inválidos devem continuar bloqueados");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").value, 2);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").sourcePath, "attributes.for", "Atributos escalares devem gravar no caminho físico existente");
+const nestedAttributeActor = { system: { attributes: { for: { value: 7 } } } };
+assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").value, 7, "Atributos legados aninhados devem ler o campo value");
+assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").sourcePath, "attributes.for.value", "Atributos legados aninhados devem gravar no campo value");
+for (const attribute of NEXUS_ATTRIBUTES) {
+  const scalar = { system: { attributes: { [attribute.key]: 3 } } };
+  assert.equal(getNexusRulebookPropertyValue(scalar, `attributes.${attribute.key}.value`).value, 3, `Atributo ${attribute.key} deve ser lido como número`);
+}
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);

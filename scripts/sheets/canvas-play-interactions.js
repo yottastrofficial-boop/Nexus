@@ -1,4 +1,4 @@
-import { getTriggeredActions } from "../core/interactions.js";
+import { getTriggeredActions, getComponentInteractions } from "../core/interactions.js";
 
 /** Play-mode events always resolve against the latest in-memory component data. */
 export function activateCanvasPlayInteractions(sheet, html) {
@@ -22,6 +22,23 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onDoubleClick=event=>{if(!isControlTarget(event))stop(event,"doubleClick");};
   const onContextMenu=event=>{if(!isControlTarget(event))stop(event,"rightClick");};
   const onAuxClick=event=>{if(event.button===1&&!isControlTarget(event))stop(event,"middleClick");};
+  const pointerBehaviorEvents = new Set(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","interact"]);
+  let cursorCard = null;
+  const clearBehaviorCursor = () => { cursorCard?.style.removeProperty("cursor"); cursorCard = null; };
+  const onPointerMove = event => {
+    if (sheet._mode !== "play") { clearBehaviorCursor(); return; }
+    const card = cardOf(event);
+    if (cursorCard && cursorCard !== card) clearBehaviorCursor();
+    if (!card) return;
+    const component = sheet._currentLayout?.components?.find(item => item.id === card.dataset.id);
+    const actionable = getComponentInteractions(component).some(flow =>
+      flow.enabled && flow.triggers.some(trigger => pointerBehaviorEvents.has(trigger.event)) &&
+      flow.actions.some(action => action.enabled)
+    );
+    if (actionable) { card.style.setProperty("cursor", "pointer", "important"); cursorCard = card; }
+    else if (cursorCard === card) clearBehaviorCursor();
+  };
+  const onPointerLeave = clearBehaviorCursor;
   const onPointerDown=event=>{if(!isControlTarget(event))dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});};
   const onPointerUp=event=>{if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
   const onPointerOver=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"hover",{pointerType:event.pointerType});};
@@ -29,7 +46,8 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onFocusOut=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"blur");};
   const onChange=event=>dispatch(event,"change",{fieldName:event.target?.name??""});
   const onSubmit=event=>stop(event,"submit");
-  const listeners=[["keydown",onKeydown],["keyup",onKeyup],["click",onClick],["dblclick",onDoubleClick],["contextmenu",onContextMenu],["auxclick",onAuxClick],["pointerdown",onPointerDown],["pointerup",onPointerUp],["pointerover",onPointerOver],["focusin",onFocusIn],["focusout",onFocusOut],["change",onChange],["submit",onSubmit]];
+  const listeners=[["keydown",onKeydown],["keyup",onKeyup],["click",onClick],["dblclick",onDoubleClick],["contextmenu",onContextMenu],["auxclick",onAuxClick],["pointerdown",onPointerDown],["pointerup",onPointerUp],["pointermove",onPointerMove],["pointerover",onPointerOver],["focusin",onFocusIn],["focusout",onFocusOut],["change",onChange],["submit",onSubmit]];
   for(const [name,listener] of listeners)canvas.addEventListener(name,listener);
-  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);};
+  canvas.addEventListener("pointerleave",onPointerLeave);
+  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);clearBehaviorCursor();};
 }
