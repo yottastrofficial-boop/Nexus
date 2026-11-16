@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.47. Esta atualização amplia a renderização de mídia nas regras de apresentação: URLs de imagens e ícones Font Awesome podem ser reconhecidos automaticamente, com dimensionamento responsivo e opções de tamanho. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+> **Versão atual:** 1.0.0.47. Esta atualização fortalece a atualização reativa das regras de apresentação, preserva o valor original quando uma regra produz saída vazia, considera caminhos reais de propriedades virtuais e mantém o layout em memória sincronizado com o merge persistido. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 ## Visão geral
 
