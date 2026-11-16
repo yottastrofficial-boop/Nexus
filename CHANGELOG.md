@@ -8,6 +8,7 @@
 - Adicionados testes de regressão para os cinco estágios assinados de proficiência (-2 a +2), conteúdo interpolado vazio e preservação do valor original.
 
 ### Validação
+- O workflow oficial valida o código e os testes, gera `nexus.zip` com os diretórios necessários do sistema e publica a Release correspondente.
 - A suíte automatizada do repositório valida sintaxe, manifesto, regras, persistência e pacote.
 - A confirmação visual e funcional em Foundry VTT 14 continua necessária; a automação não substitui o teste dentro do Foundry.
 
