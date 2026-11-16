@@ -197,7 +197,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
       if (!path || ["img", "identity.portrait.img", "prototypeToken.texture.src"].includes(path)) return;
       const kind = input.dataset.propertyKind;
-      if (kind === "number" && (input.value === "" || !Number.isFinite(Number(input.value)))) return;
+      if (kind === "number" && input.value.trim() === "") return;
       const previousTimer = pendingPropertyValueSaves.get(input);
       if (previousTimer) clearTimeout(previousTimer);
       const timer = setTimeout(() => {
@@ -213,7 +213,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
-      let value = input.type === "checkbox" ? !!input.checked : input.value;
+      let value = input.value;
       if (kind === "skill-formula") {
         const match = path.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
         const formula = String(value ?? "").trim().slice(0, 500);
@@ -223,21 +223,46 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
-      const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([^{}]+?)\s*\}\}$/) : null;
+      const expression = typeof value === "string" ? value.trim().match(/^\\{\\{\\s*([\\s\\S]+?)\\s*\\}\\}$/) : null;
+      const expressions = clone(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {});
       if (expression) {
-        const binding = resolveNexusBinding(sheet.actor, expression[1]);
-        if (binding.value === undefined || binding.value === null || binding.readOnly) {
-          globalThis.ui?.notifications?.warn?.("A referência informada não corresponde a uma propriedade disponível.");
+        const calculated = evaluateNexusExpression(expression[1].trim(), identifier =>
+          resolveNexusBinding(sheet.actor, identifier, 1).value
+        );
+        const incompatible = calculated === null
+          || (kind === "number" && typeof calculated !== "number")
+          || (kind === "boolean" && typeof calculated !== "boolean");
+        if (incompatible || resolvedPath.readOnly) {
+          globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
         }
-        value = binding.value;
+        foundry.utils.setProperty(expressions, path, String(value).slice(0, 500));
+        await sheet.actor.setFlag("nexus", "propertyExpressions", expressions);
+        sheet._refreshBoundComponents();
+        return;
+      }
+      const expressionParts = path.split(".");
+      let expressionParent = expressions;
+      for (const part of expressionParts.slice(0, -1)) {
+        if (!expressionParent[part] || typeof expressionParent[part] !== "object") expressionParent[part] = {};
+        expressionParent = expressionParent[part];
+      }
+      if (Object.hasOwn(expressionParent, expressionParts.at(-1))) {
+        delete expressionParent[expressionParts.at(-1)];
+        await sheet.actor.setFlag("nexus", "propertyExpressions", expressions);
       }
       if (kind === "number") {
-        if (value === "" || typeof value === "boolean" || !Number.isFinite(Number(value))) {
-          globalThis.ui?.notifications?.warn?.("Informe um número válido ou uma propriedade numérica.");
+        if (value.trim() === "" || !Number.isFinite(Number(value))) {
+          globalThis.ui?.notifications?.warn?.("Informe um número válido ou uma expressão entre {{ }}.");
           return;
         }
         value = Number(value);
+      } else if (kind === "boolean") {
+        if (!["true", "false"].includes(value.trim().toLowerCase())) {
+          globalThis.ui?.notifications?.warn?.("Informe true ou false, ou uma referência booleana entre {{ }}.");
+          return;
+        }
+        value = value.trim().toLowerCase() === "true";
       }
       if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) }, { render: false });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
