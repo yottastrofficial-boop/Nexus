@@ -9,6 +9,7 @@
 ### Validação
 - A validação automatizada verifica a delegação e o isolamento dos eventos de edição.
 - O teste funcional final deve ser confirmado no Foundry VTT 14.
+- Pacote 1.0.0.55 publicado após aprovação da validação automatizada.
 
 ## 1.0.0.54
 
