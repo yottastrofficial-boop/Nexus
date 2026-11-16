@@ -848,6 +848,42 @@ const truthyRepresentation = evaluateComponentRepresentation({
 assert.equal(truthyRepresentation?.content, "Ativo", "Uma referência direta pode ser usada como condição de presença");
 assert.equal(evaluateComponentRepresentation({ ...representationComponent.representation, rules: [{ condition: "level < mb" }] }, resolveExpressionValue), null, "Sem regra compatível, a apresentação original deve permanecer");
 
+// Dynamic proficiency presentation: every signed stage must select exactly its rule.
+const proficiencyStages = [-2, -1, 0, 1, 2];
+let currentProficiency = 0;
+const resolveProficiency = key => key === "proficiency" ? currentProficiency : undefined;
+const proficiencyPresentation = {
+  enabled: true,
+  sourcePath: "proficiency",
+  rules: proficiencyStages.map(level => ({
+    id: "stage-" + level,
+    condition: "proficiency == " + level,
+    content: "{{icon:fa-solid fa-star}} Estágio {{proficiency}}"
+  }))
+};
+for (const level of proficiencyStages) {
+  currentProficiency = level;
+  const result = evaluateComponentRepresentation(proficiencyPresentation, resolveProficiency);
+  assert.equal(result?.ruleId, "stage-" + level, "Cada nível de proficiência deve selecionar sua regra, inclusive valores negativos e zero");
+  assert.equal(result?.content, "{{icon:fa-solid fa-star}} Estágio " + level, "O conteúdo da regra deve acompanhar o valor atual");
+}
+
+// A matching condition with an unresolved/empty interpolation must not hide
+// the original property value or leave the card visually empty.
+const emptyInterpolationFallback = evaluateComponentRepresentation({
+  enabled: true,
+  sourcePath: "proficiency",
+  rules: [{ id: "fallback", condition: "proficiency == 0", content: "{{missing.property}}" }]
+}, resolveProficiency);
+assert.equal(emptyInterpolationFallback?.content, "0", "Conteúdo vazio deve recuar para o valor da propriedade de origem");
+
+// The selected presentation path must be retained when the component has no
+// explicit dataPath, and virtual aliases must invalidate from their real source.
+assert.match(sheet, /component\?\.dataPath \|\| presentation\?\.sourcePath \|\| COMPONENTS\[component\?\.type\]\?\.path/, "A fonte explícita da regra deve ser respeitada antes do caminho padrão");
+assert.match(sheet, /binding\?\.sourcePath/, "Dependências virtuais devem observar seu caminho persistido real");
+assert.match(sheet, /persistedLayouts/, "A persistência deve atualizar o snapshot em memória com o merge consolidado");
+
+
 const representationDraft = { id: "representation-editor", representation: { enabled: false, sourcePath: "", rules: [] }, interactions: [] };
 applyInteractionEditorCommand(representationDraft, "add-representation-rule", { interactionId: representationDraft.id });
 assert.equal(representationDraft.representation.rules.length, 1);
