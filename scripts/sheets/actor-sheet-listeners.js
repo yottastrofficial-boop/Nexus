@@ -117,7 +117,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     html.find("[data-skill-proficient-level]").on("change", event => {
       const input = event.currentTarget;
-      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, input.checked);
+      if (input.value === "" || !Number.isFinite(Number(input.value))) return;
+      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, Number(input.value));
     });
     html.find("[data-proficiency-level]").on("click", event => {
       event.preventDefault(); event.stopPropagation();
@@ -131,7 +132,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       event.preventDefault();
       event.stopPropagation();
       const current = getNexusSkillModifier(sheet.actor, skill.key);
-      const nextLevel = current?.proficientLevel > 0 ? 0 : 1;
+      const currentLevel = Number(current?.proficientLevel) || 0;
+      const nextLevel = event.altKey ? 0 : currentLevel + (event.shiftKey ? -1 : 1);
       const componentId = button.closest(".nexus-component")?.dataset.id;
       await sheet._setSkillProficientLevel(skill.key, nextLevel);
       if (componentId) await sheet._runComponentAction(componentId, "click");
@@ -1184,7 +1186,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
     const pendingInteractionInputSaves = new WeakMap();
-    const capturedInteractionInputHistory = new WeakSet();
     const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
@@ -1264,35 +1265,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
-    // Regras de apresentação são persistidas sem substituir os campos.
-    // Isso evita perder foco, seleção e texto durante a digitação.
-    $(document).on(`input${inspectorNamespace}`, "[data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", event => {
-      const control = event.currentTarget;
-      if (!capturedInteractionInputHistory.has(control)) {
-        sheet._captureHistory();
-        capturedInteractionInputHistory.add(control);
-      }
-      const previousTimer = pendingInteractionInputSaves.get(control);
-      if (previousTimer) clearTimeout(previousTimer);
-      const timer = setTimeout(() => {
-        pendingInteractionInputSaves.delete(control);
-        persistInteractionEditor(control, null, { render: false, captureHistory: false })
-          .catch(error => console.error("NEXUS | Falha ao salvar regra durante a edição", error));
-      }, 180);
-      pendingInteractionInputSaves.set(control, timer);
-    });
     $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field], [data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", async event => {
       const control = event.currentTarget;
       const pendingTimer = pendingInteractionInputSaves.get(control);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingInteractionInputSaves.delete(control); }
       event.stopPropagation();
       const isPresentationField = control.dataset.interactionScope?.startsWith("propertyPresentation");
-      const historyAlreadyCaptured = capturedInteractionInputHistory.has(control);
       await persistInteractionEditor(control, null, {
         render: !isPresentationField,
-        captureHistory: !historyAlreadyCaptured
+        captureHistory: true
       });
-      capturedInteractionInputHistory.delete(control);
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {
