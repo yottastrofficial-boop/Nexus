@@ -1,5 +1,9 @@
 ## 1.0.0.54
 
+### Publicação do pacote
+- Geração e publicação do arquivo instalável `nexus.zip` correspondente ao manifesto desta versão.
+
+
 ### Proteção do Canvas e tokens
 - Delete/Backspace não excluem tokens por engano enquanto os painéis do Inspector ou Comportamento estão ativos.
 - A exclusão de tokens continua permitida quando o token está diretamente controlado/selecionado na cena.
