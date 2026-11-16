@@ -90,7 +90,7 @@ assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar dispo
 assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /highestPanelZ === null \? desiredZ : Math\.min\(desiredZ, highestPanelZ - 1\)/, "As barras laterais não podem sobrepor janelas abertas");
 assert.match(css, /nexus-behavior-editor button:not\(:disabled\)[\s\S]*cursor:pointer!important/, "Botões de comportamento devem restaurar o cursor de interação");
-assert.match(canvasPlayInteractions, /pointermove[\s\S]*card\.style\.setProperty\("cursor", "pointer", "important"\)/, "Cards com gatilhos devem exibir a mãozinha no Modo Padrão");
+assert.match(canvasPlayInteractions, /onPointerMove[\s\S]*card\.style\.setProperty\("cursor", "pointer", "important"\)/, "Cards com gatilhos devem exibir a mãozinha no Modo Padrão");
 assert.equal(normalizeNexusPropertyPath("for.value"), "attributes.for.value");
 assert.equal(normalizeNexusPropertyPath("attribute.for.value"), "attributes.for.value");
 assert.equal(normalizeNexusPropertyPath("resource.pv.value"), "resources.pv.value");
