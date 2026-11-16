@@ -1190,7 +1190,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       : "fa-solid fa-award";
     const proficiencyLabels = (Array.isArray(component.proficiencyLabels) ? component.proficiencyLabels : ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4);
     while (proficiencyLabels.length < 4) proficiencyLabels.push("Nível " + proficiencyLabels.length);
-    const showProficiencyStages = actionType === "proficiency" && componentVariant !== "proficiency";    const showProficiencyStages = actionType === "proficiency" && componentVariant !== "proficiency";
+    const showProficiencyStages = actionType === "proficiency" && componentVariant !== "proficiency";
     const isResourceComponent = sheetResource || ["resource", "resource-bar", "resource-ring", "resource-meter", "asset-meter"].includes(def.kind);
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
