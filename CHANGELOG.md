@@ -1,3 +1,15 @@
+## 1.0.0.50
+
+### Correções críticas da ficha
+- Corrigida a importação ausente de `evaluateNexusSkillFormula`, que interrompia a ativação dos listeners e impedia a abertura normal da ficha.
+- O método `_activateCanvas()` agora é chamado no fim de cada renderização, após a atualização dos componentes.
+- Os listeners de interação do modo de jogo são registrados automaticamente ao abrir e re-renderizar a ficha; listeners anteriores são limpos antes da nova ativação.
+- O registro dos listeners do editor Canvas também volta a ocorrer quando a ficha é renderizada no modo Aparência.
+
+### Validação
+- Adicionados testes de regressão para a importação explícita da função e para a chamada de ativação do Canvas no ciclo de renderização.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.49
 
 ### Gatilhos e interações

@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.49 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.50 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.49-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.50-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.49. Esta atualização completa o despacho dos gatilhos no modo de jogo, adiciona combinações de modificadores de teclado, amplia os eventos de interação, permite fórmulas opcionais e descrições personalizadas para perícias e expande campos textuais até cinco linhas. A validação automatizada é executada no CI; testes funcionais/visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+> **Versão atual:** 1.0.0.50. Corrigida a importação do avaliador de fórmulas e ativado o registro automático dos gatilhos do Canvas a cada renderização da ficha. Testes automatizados passam no CI; a confirmação funcional final ainda depende de teste no Foundry VTT 14.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.49 |
+| Versão atual | 1.0.0.50 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.49 corrige o seletor do canto superior esquerdo, consolida o campo numérico de proficiência com sinais preservados e atualiza cards e regras sem exigir Enter ou reconstruir o campo em edição. A validação automatizada do pacote é executada no CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.50 corrige o seletor do canto superior esquerdo, consolida o campo numérico de proficiência com sinais preservados e atualiza cards e regras sem exigir Enter ou reconstruir o campo em edição. A validação automatizada do pacote é executada no CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 

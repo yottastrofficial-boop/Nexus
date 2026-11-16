@@ -68,11 +68,13 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.49", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.50", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
+assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
+assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\(\$\(form\)\);/, "O Canvas deve registrar os gatilhos automaticamente após cada renderização da ficha");
 assert.match(sheet, /const captureScrollState = owner/, "A ficha deve capturar a rolagem de todos os contêineres encontrados");
 assert.match(sheet, /".nexus-native-panel-content"/, "A rolagem do conteúdo nativo dos painéis deve ser preservada");
 assert.match(sheet, /".nexus-tool-panel"/, "A rolagem dos painéis de ferramentas deve ser preservada");
