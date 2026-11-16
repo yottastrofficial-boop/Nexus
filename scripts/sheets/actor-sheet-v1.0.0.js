@@ -329,7 +329,11 @@ const getNexusRollAliasCandidates = actor => {
   return [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
     .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
     // Metadata fields describe a property; they are not independent roll values.
-    .filter(alias => !NON_ROLL_PROPERTY_SUFFIXES.has(String(alias.key ?? "").split(".").at(-1).toLowerCase()))
+    .filter(alias => {
+      const pathSuffix = String(alias.key ?? "").split(".").at(-1).toLowerCase();
+      const labelSuffix = String(alias.label ?? "").split(/[·/]/).at(-1).trim().toLocaleLowerCase("pt-BR");
+      return !NON_ROLL_PROPERTY_SUFFIXES.has(pathSuffix) && !NON_ROLL_PROPERTY_SUFFIXES.has(labelSuffix);
+    })
     // Native resource maximum and temporary values are not independent roll shortcuts.
     .filter(alias => !(alias.origin === "native" && ["max", "temporary"].includes(String(alias.key ?? "").split(".").at(-1))))
     .map(alias => {
