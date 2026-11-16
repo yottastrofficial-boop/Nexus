@@ -56,12 +56,22 @@ function getStoredProficientLevel(system, skill) {
   return normalizeNexusProficientLevel(stored);
 }
 
+/** Reads both canonical scalar attributes and legacy { value } attribute objects. */
+export function getNexusAttributeValue(actorOrSystem, attributeKey) {
+  const system = actorOrSystem?.system ?? actorOrSystem ?? {};
+  const stored = system.attributes?.[attributeKey];
+  const raw = stored && typeof stored === "object" && Object.hasOwn(stored, "value")
+    ? stored.value
+    : stored;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
 export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
   const skill = NEXUS_SKILLS.find(item => item.key === skillKey);
   if (!skill) return null;
   const system = actorOrSystem?.system ?? actorOrSystem ?? {};
-  const rawAttribute = Number(system.attributes?.[skill.attributeKey]);
-  const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
+  const attributeValue = getNexusAttributeValue(system, skill.attributeKey);
   const proficientLevel = getStoredProficientLevel(system, skill);
   const baseModifier = getNexusBaseModifier(system);
   const source = String(formula ?? "").trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1").replace(/força/giu, "forca");
@@ -84,8 +94,7 @@ export function getNexusSkillRows(actor) {
   const system = actor?.system ?? {};
   const baseModifier = getNexusBaseModifier(system);
   return NEXUS_SKILLS.map(skill => {
-    const rawAttribute = Number(system.attributes?.[skill.attributeKey]);
-    const attributeValue = Number.isFinite(rawAttribute) ? rawAttribute : 0;
+    const attributeValue = getNexusAttributeValue(system, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
     const bonus = Math.sign(proficientLevel) * baseModifier;
     const defaultModifier = attributeValue + bonus;
