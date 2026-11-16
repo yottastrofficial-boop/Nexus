@@ -68,7 +68,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.45", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.46", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -881,6 +881,12 @@ assert.match(interactions, /renderPropertyPresentationEditor/, "Presentation rul
 assert.match(interactions, /propertyPresentationRule/, "Presentation rules must be persisted independently from interaction flows");
 assert.match(interactions, /content: rule\?\.content === undefined/, "Unified content must preserve legacy output compatibility");
 assert.match(sheetCode, /representationContent/, "Rendering must use a single mixed content field");
+assert.match(sheet, /https\?:/, "URLs de mídia devem ser reconhecidas sem marcador explícito");
+assert.ok(sheet.includes("standaloneIcon"), "Classes Font Awesome isoladas devem ser reconhecidas automaticamente");
+assert.ok(sheet.includes("image.style[key] = rawValue"), "Tokens de imagem devem aceitar dimensões personalizadas seguras");
+assert.ok(sheet.includes("is-media-only"), "Mídia isolada deve receber layout próprio para ocupar o card");
+assert.match(css, /nexus-property-representation\.is-media-only \.nexus-property-representation-image/, "Imagens isoladas devem preencher o espaço disponível sem distorção");
+assert.match(css, /object-fit:contain/, "Imagens das representações devem preservar a proporção");
 assert.match(template, /data-property-presentation-editor/, "The editor must be mounted in the Properties panel");
 assert.match(template, /data-property-alias-conflicts/, "The Properties panel must expose ambiguity warnings");
 assert.match(css, /nexus-component\.is-group-member,\.nexus-component\.is-group-member:hover/, "Grouped cards must share one rounded surface");
