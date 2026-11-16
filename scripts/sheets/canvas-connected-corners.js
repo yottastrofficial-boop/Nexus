@@ -60,7 +60,7 @@ export function updateCanvasConnectedCorners(canvas, tolerance = 2.5) {
 }
 
 export function observeCanvasConnectedCorners(canvas) {
-  if (!canvas?.querySelectorAll || typeof ResizeObserver !== "function") return;
+  if (!canvas?.querySelectorAll || (typeof ResizeObserver !== "function" && typeof MutationObserver !== "function")) return;
   let record = observerByCanvas.get(canvas);
   if (!record) {
     let frame = 0;
@@ -68,11 +68,16 @@ export function observeCanvasConnectedCorners(canvas) {
       if (frame) return;
       frame = requestAnimationFrame(() => { frame = 0; updateCanvasConnectedCorners(canvas); });
     };
-    record = { observer: new ResizeObserver(schedule), observed: new Set(), schedule };
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
+    const mutationObserver = typeof MutationObserver === "function" ? new MutationObserver(schedule) : null;
+    // Position changes do not trigger ResizeObserver. Watch inline geometry and
+    // inserted/removed surfaces so corner classes stay correct after Inspector edits.
+    mutationObserver?.observe(canvas, { subtree: true, childList: true, attributes: true, attributeFilter: ["style"] });
+    record = { observer, mutationObserver, observed: new Set(), schedule };
     observerByCanvas.set(canvas, record);
   }
   const current = new Set([...canvas.querySelectorAll(".nexus-component"), ...canvas.querySelectorAll(".nexus-group-surface")]);
-  for (const node of record.observed) if (!current.has(node)) { record.observer.unobserve(node); record.observed.delete(node); }
-  for (const node of current) if (!record.observed.has(node)) { record.observer.observe(node); record.observed.add(node); }
+  for (const node of record.observed) if (!current.has(node)) { record.observer?.unobserve(node); record.observed.delete(node); }
+  for (const node of current) if (!record.observed.has(node)) { record.observer?.observe(node); record.observed.add(node); }
   record.schedule();
 }
