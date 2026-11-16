@@ -575,8 +575,13 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         || !!floating?.querySelector('[data-floating-panel="component"].active, [data-floating-panel="behavior"].active');
       const controlledTokens = globalThis.canvas?.tokens?.controlled ?? [];
       const hasDirectlyActiveToken = controlledTokens.length > 0;
+      // Em campos de texto, a tecla continua editando o texto, mas nunca
+      // propaga para os atalhos globais do canvas da cena.
+      if ((event.key === "Delete" || event.key === "Backspace") && editorPanelsOpen && isTypingTarget) {
+        event.stopPropagation(); event.stopImmediatePropagation?.(); return;
+      }
       // Com painéis de edição abertos, Delete/Backspace só alcança tokens
-      // realmente controlados no canvas da cena. Inputs continuam editáveis.
+      // realmente controlados no canvas da cena.
       if ((event.key === "Delete" || event.key === "Backspace") && editorPanelsOpen && !isTypingTarget) {
         if (hasDirectlyActiveToken) return;
         event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
