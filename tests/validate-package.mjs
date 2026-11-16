@@ -861,7 +861,7 @@ assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = skillFormul
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O resultado calculado da perícia deve oferecer o editor da fórmula subjacente");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
 assert.match(sheet, /MB é calculado automaticamente pelo nível/);
-assert.ok(sheetListeners.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
+assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
 assert.match(sheetCode, /const inputValue = storedExpression \?\? \(skillFormulaMode \? skillFormula : \(value === undefined \|\| value === null/, "O editor deve priorizar expressões salvas e manter valores padrão tipados e fórmulas de perícia");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
