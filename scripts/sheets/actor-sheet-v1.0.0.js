@@ -316,18 +316,30 @@ const evaluateAliasExpression = (actor, expression, depth = 0) => {
   );
 };
 
+const RESERVED_ROLL_ALIAS_TOKENS = new Set([
+  "name", "nam", "exib", "exibicao", "attribute", "att", "description",
+  "pro", "proficient", "value", "val", "max", "current", "modifier",
+  "bonus", "formatted", "enabled", "active", "type", "key", "path", "id"
+]);
+const NON_ROLL_PROPERTY_SUFFIXES = new Set([
+  "name", "exib", "exibicao", "description", "attribute", "attributeName",
+  "attributeKey", "proficient", "proficientLevel", "formatted"
+]);
 const getNexusRollAliasCandidates = actor => {
   return [...getNativePropertyDefinitions(actor), ...getAliasDefinitions(actor)]
     .filter(alias => ["attribute", "resource", "number"].includes(alias.type))
+    // Metadata fields describe a property; they are not independent roll values.
+    .filter(alias => !NON_ROLL_PROPERTY_SUFFIXES.has(String(alias.key ?? "").split(".").at(-1).toLowerCase()))
     // Native resource maximum and temporary values are not independent roll shortcuts.
     .filter(alias => !(alias.origin === "native" && ["max", "temporary"].includes(String(alias.key ?? "").split(".").at(-1))))
     .map(alias => {
-      const explicit = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+      const explicitRaw = String(alias.exib ?? alias.exibicao ?? alias.abbreviation ?? alias.shortName ?? "").trim();
+      const explicit = RESERVED_ROLL_ALIAS_TOKENS.has(explicitRaw.toLocaleLowerCase("pt-BR")) ? "" : explicitRaw;
       const words = String(alias.label ?? alias.key?.split(".").at(-1) ?? "")
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[A-Za-z0-9]+/g) ?? [];
       const generated = words.length > 1 ? words.map(word => word[0]).join("").slice(0, 4) : (words[0] ?? "").slice(0, 3);
       const display = explicit || generated;
-      if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display)) return null;
+      if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(display) || RESERVED_ROLL_ALIAS_TOKENS.has(display.toLocaleLowerCase("pt-BR"))) return null;
       const root = safeAliasKey(alias.targetPath || alias.key);
       if (!root) return null;
       const raw = alias.targetPath
@@ -339,13 +351,16 @@ const getNexusRollAliasCandidates = actor => {
     }).filter(Boolean);
 };
 const getNexusRollAliasEntries = actor => {
-  const candidates = getNexusRollAliasCandidates(actor);
-  const counts = new Map();
-  for (const entry of candidates) {
+  const byDisplay = new Map();
+  for (const entry of getNexusRollAliasCandidates(actor)) {
     const key = entry.display.toLocaleUpperCase("pt-BR");
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    if (!byDisplay.has(key)) byDisplay.set(key, new Map());
+    byDisplay.get(key).set(entry.target, entry);
   }
-  return candidates.filter(entry => counts.get(entry.display.toLocaleUpperCase("pt-BR")) === 1);
+  // Repeated metadata pointing to the same value is one candidate, not an ambiguity.
+  return [...byDisplay.values()]
+    .filter(targets => targets.size === 1)
+    .map(targets => targets.values().next().value);
 };
 
 const expandNexusRollAliases = (actor, formula) => {
@@ -1779,7 +1794,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       await this.actor.update({
         "flags.nexus.layouts": _replace(normalized),
         "flags.nexus.activeLayout": nextActive
-      });
+      }, { render: false });
       layoutReadSnapshots.set(normalized, { layouts: clone(normalized), active: nextActive });
       return normalized;
     });
