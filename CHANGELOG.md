@@ -1,3 +1,15 @@
+## 1.0.0.55
+
+### Correção do salvamento no Inspector
+- Corrigida a delegação dos eventos do editor de propriedades depois que o Inspector é movido para sua janela flutuante.
+- Valores de propriedades e campos de recursos atuais/máximos (PV, PM e PE) agora salvam por eventos delegados ao documento, limitados à ficha e às janelas pertencentes a ela.
+- Corrigido o fluxo que impedia alterações no valor máximo de recursos e deixava os valores do Inspector sem persistência.
+- Adicionadas regressões automatizadas para edição de propriedades e recursos em painéis flutuantes.
+
+### Validação
+- A validação automatizada verifica a delegação e o isolamento dos eventos de edição.
+- O teste funcional final deve ser confirmado no Foundry VTT 14.
+
 ## 1.0.0.54
 
 ### Publicação do pacote
