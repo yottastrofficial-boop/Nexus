@@ -5,7 +5,7 @@ import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows
  * Rule mechanics come from REGRAS NEXUS.pdf; display abbreviations are UI metadata.
  * Stored values remain separate from derived/read-only presentation properties.
  */
-export const NEXUS_PROPERTY_SCHEMA_VERSION = 2;
+export const NEXUS_PROPERTY_SCHEMA_VERSION = 3;
 
 const RESOURCE_DEFINITIONS = Object.freeze([
   { key: "pv", name: "Pontos de Vida", exib: "PV", description: "Vitalidade e sobrevivência.", fields: ["name", "exib", "value", "max", "temporary"] },
@@ -56,7 +56,7 @@ const definitions = [
     { path: `skills.${skill.key}.name`, label: `${skill.name} · Nome`, exib: skill.exib, type: "string", category: "skills", derived: true },
     { path: `skills.${skill.key}.exib`, label: `${skill.name} · Exibição`, exib: skill.exib, type: "string", category: "skills", derived: true },
     { path: `skills.${skill.key}.value`, label: `${skill.name} · Valor`, exib: skill.exib, type: "number", category: "skills", derived: true },
-    { path: `skills.${skill.key}.proficient`, label: `${skill.name} · Proficiência`, exib: skill.exib, type: "boolean", category: "skills", derived: false },
+    { path: `skills.${skill.key}.proficientLevel`, label: `${skill.name} · Proficiência`, exib: skill.exib, type: "number", category: "skills", derived: false },
     { path: `skills.${skill.key}.attribute`, label: `${skill.name} · Atributo`, exib: skill.attribute, type: "string", category: "skills", derived: true },
     { path: `skills.${skill.key}.description`, label: `${skill.name} · Descrição`, exib: skill.exib, type: "string", category: "skills", derived: true }
   ]),
