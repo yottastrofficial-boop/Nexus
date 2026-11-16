@@ -5937,3 +5937,110 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-component-inspector .nexus-property-value-field > :focus-visible { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; }
 .nexus-panel-window .nexus-behavior-editor button:not(:disabled),.nexus-panel-window .nexus-behavior-editor .nexus-interaction-button:not(:disabled),.nexus-behavior-editor .nexus-interaction-button:not(:disabled) { cursor:pointer!important; }
 .nexus-panel-window .nexus-behavior-editor button:disabled,.nexus-panel-window .nexus-behavior-editor .nexus-interaction-button:disabled { cursor:not-allowed!important; }
+
+
+/* 1.0.0.56 — layout isolado do seletor de propriedades.
+   Nome, valor atual e caminho técnico ocupam linhas/áreas independentes. */
+.nexus-property-options .nexus-property-option {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-items: start !important;
+  justify-items: stretch !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+}
+.nexus-property-options .nexus-property-option-heading {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) !important;
+  align-items: start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.nexus-property-options .nexus-property-option-name {
+  display: block !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+}
+.nexus-property-options .nexus-property-option-value {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 45% !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: var(--nexus-panel-muted, #9aadc2) !important;
+  font-size: 9px !important;
+  line-height: 1.3 !important;
+  text-align: right !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.nexus-property-options .nexus-property-option-path {
+  display: block !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-wrap: anywhere !important;
+  color: var(--nexus-panel-muted, #9aadc2) !important;
+  font-size: 9px !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+}
+.nexus-component-inspector .nexus-data-binding {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.nexus-component-inspector .nexus-data-binding > .nexus-inspector-field {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.nexus-component-inspector [data-component-path-input] {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.nexus-component-inspector .nexus-property-value-field {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 10px 0 0 !important;
+}
+.nexus-component-inspector .nexus-property-value-field > * {
+  position: static !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 360px) {
+  .nexus-property-options .nexus-property-option-heading {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+  .nexus-property-options .nexus-property-option-value {
+    max-width: 100% !important;
+    text-align: left !important;
+  }
+}
