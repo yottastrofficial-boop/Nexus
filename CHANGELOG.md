@@ -2,7 +2,7 @@
 
 ### Modo da ficha e propriedades
 - O estado interno da ficha é inicializado explicitamente como Modo Padrão antes da preparação do contexto, mantendo o modo visual e os gatilhos sincronizados.
-- O campo de vínculo preserva o identificador original do alias, inclusive quando a propriedade personalizada não possui caminho físico em Actor.system.
+- O campo de vínculo preserva o identificador original do alias, inclusive quando a propriedade personalizada não possui caminho físico em Actor.system; caminhos legados como `attribute.for.value` também são normalizados para localizar o alias canônico.
 - A edição de aliases personalizados e de metadados grava em flags.nexus.customData, em vez de tentar atualizar um caminho vazio em Actor.system.
 - A resolução de aliases de atributos e recursos identifica destinos que são objetos e direciona a edição para .value ou .max, sem substituir a estrutura inteira.
 - O Inspector separa o valor editável do nome e do caminho da propriedade, mostrando o caminho em uma área própria e legível.
