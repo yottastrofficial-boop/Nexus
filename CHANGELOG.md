@@ -1,3 +1,19 @@
+## 1.0.0.44
+
+### Propriedades e proficiência
+- Corrigida a migração para persistir `proficientLevel` como número, preservando valores negativos e positivos; booleanos antigos são convertidos para 1 ou 0 e o antigo estado `opposed` é convertido para -1.
+- A leitura de proficiência prioriza o campo numérico canônico. O sinal do nível determina se MB é adicionado, subtraído ou não aplicado; a magnitude fica preservada no dado sem multiplicar MB.
+- O catálogo e o registro passam a expor o campo numérico editável de proficiência. O estado `proficient` permanece somente como leitura derivada.
+- As linhas de perícia usam campos numéricos editáveis; alterações atualizam valores e cards vinculados sem renderizar novamente a ficha.
+- Cards de proficiência exibem ícones para níveis negativos, neutros e positivos. Clique aumenta um nível, Shift+clique reduz e Alt+clique redefine para zero.
+- Regras de apresentação deixam de salvar durante cada tecla; a persistência ocorre ao concluir a edição, sem reconstruir o campo enquanto o usuário digita.
+
+### Interface e validação
+- Corrigido o seletor CSS excessivamente específico que impedia a regra do canto superior esquerdo de ser aplicada.
+- Atualizada a versão do esquema de propriedades para 3.
+- Testes de regressão atualizados para os valores assinados, migração de `opposed`, campo numérico e seletor do canto superior esquerdo.
+- A validação automatizada e o teste funcional/visual no Foundry VTT 14 ainda precisam ser executados para confirmar esta versão.
+
 ## 1.0.0.43
 
 ### Validação
