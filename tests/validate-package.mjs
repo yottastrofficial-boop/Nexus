@@ -942,6 +942,7 @@ assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recu
 assert.ok(sheet.includes("RESERVED_ROLL_ALIAS_TOKENS") && sheet.includes("NON_ROLL_PROPERTY_SUFFIXES"), "Identificadores genéricos não devem virar atalhos de rolagem");
 assert.ok(sheet.includes("byDisplay") && sheet.includes("targets.size === 1"), "Atalhos repetidos para o mesmo caminho não devem gerar ambiguidade falsa");
 assert.ok(canvasCorners.includes("MutationObserver") && canvasCorners.includes('attributeFilter: ["style"]'), "Cantos devem ser recalculados também após alterações de posição");
+assert.ok(canvasInteractions.includes("nexusGestureActive"), "A detecção geométrica deve ser adiada durante gestos e recalculada ao liberar o controle");
 assert.match(css, /\.nexus-resize\.nw \{ left:-9px; top:-9px;/, "A alça noroeste não deve cobrir a borda superior esquerda do card");
 
 
