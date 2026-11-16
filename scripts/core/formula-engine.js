@@ -35,9 +35,11 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
   if (!tokens.length) return null;
 
   const isPrimitive = value => value === null || ["string", "number", "boolean"].includes(typeof value);
+  const isEmptyValue = value => typeof value === "string" && value.trim() === "";
   const numericValue = value => {
     if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) return Number(value);
+    if (typeof value === "string" && isEmptyValue(value)) return 0;
+    if (typeof value === "string" && Number.isFinite(Number(value))) return Number(value);
     return null;
   };
   const equalValues = (left, right) => {
@@ -101,7 +103,8 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
     while (tokens[index]?.value === "+" || tokens[index]?.value === "-") {
       const operator = tokens[index++].value, right = product();
       if (operator === "+") {
-        if (typeof value === "number" && typeof right === "number") value += right;
+        if (typeof value === "number" && (typeof right === "number" || isEmptyValue(right))) value += numericValue(right);
+        else if (isEmptyValue(value) && typeof right === "number") value = numericValue(value) + right;
         else value = stringify(value) + stringify(right);
       } else {
         const leftNumber = numericValue(value), rightNumber = numericValue(right);
