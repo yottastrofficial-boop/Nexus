@@ -115,7 +115,18 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   };
   if (virtualPaths[path]) return { value: virtualPaths[path].value, path, sourcePath: virtualPaths[path].sourcePath, virtual: true };
   if (shortDisplayPath && getPath(actor?.system ?? {}, path) === undefined && getPath(actor?.system ?? {}, shortDisplayPath) !== undefined) return { value: getPath(actor.system, shortDisplayPath), path, sourcePath: shortDisplayPath };
-  if (path === "name") return { value: actor?.name ?? "", path: "name" };
+  if (path === "name") {
+    const nameExpressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? {};
+    const nameExpression = getPath(nameExpressions, "name");
+    if (typeof nameExpression === "string" && nameExpression.trim() && depth < 8) {
+      const source = nameExpression.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
+      const calculated = evaluateNexusExpression(source, identifier =>
+        resolveNexusBinding(actor, resolveFormulaIdentifier(identifier), depth + 1).value
+      );
+      if (calculated !== null) return { value: calculated, path: "name", sourcePath: "name", virtual: true, expression: true, formula: nameExpression };
+    }
+    return { value: actor?.name ?? "", path: "name" };
+  }
   if (path === "img") return { value: actor?.img ?? "", path: "img" };
   if (["uuid", "id", "_id"].includes(path)) return { value: actor?.[path] ?? "", path, readOnly: true };
   const rulebookProperty = getNexusRulebookPropertyValue(actor, path);
