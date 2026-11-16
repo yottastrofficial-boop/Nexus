@@ -2781,7 +2781,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
         else interactionEditor.replaceChildren();
       }
       const presentationEditor = inspector.querySelector("[data-property-presentation-editor]");
-      if (presentationEditor && one) renderPropertyPresentationEditor(presentationEditor, one, one.dataPath ?? COMPONENTS[one.type]?.path ?? "");
+      if (presentationEditor && one) {
+        const presentation = one.propertyPresentation ?? one.representation;
+        const presentationPath = one.dataPath || presentation?.sourcePath || COMPONENTS[one.type]?.path || "";
+        renderPropertyPresentationEditor(presentationEditor, one, presentationPath);
+      }
       else presentationEditor?.replaceChildren();
       const aliasWarning = inspector.querySelector("[data-property-alias-conflicts]");
       if (aliasWarning) {
