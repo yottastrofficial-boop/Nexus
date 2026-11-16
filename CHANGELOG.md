@@ -1,3 +1,16 @@
+## 1.0.0.51
+
+### Modo da ficha e propriedades
+- O estado interno da ficha é inicializado explicitamente como Modo Padrão antes da preparação do contexto, mantendo o modo visual e os gatilhos sincronizados.
+- O campo de vínculo preserva o identificador original do alias, inclusive quando a propriedade personalizada não possui caminho físico em Actor.system.
+- A edição de aliases personalizados e de metadados grava em flags.nexus.customData, em vez de tentar atualizar um caminho vazio em Actor.system.
+- A resolução de aliases de atributos e recursos identifica destinos que são objetos e direciona a edição para .value ou .max, sem substituir a estrutura inteira.
+- O Inspector separa o valor editável do nome e do caminho da propriedade, mostrando o caminho em uma área própria e legível.
+
+### Validação
+- Adicionadas regressões estáticas para inicialização do modo, resolução de aliases, persistência de propriedades personalizadas e organização do Inspector.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.50
 
 ### Correções críticas da ficha
