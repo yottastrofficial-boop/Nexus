@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.53", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.54", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -80,7 +80,7 @@ assert.match(sheet, /async _prepareContext\(options = \{\}\) \{\s*\/\/ O modo pa
 assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(target, "value"\)/, "Aliases de atributo devem editar o campo value de objetos");
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
 assert.match(sheet, /const lookupPath = normalizeNexusPropertyPath\(path\)/, "Caminhos singulares e abreviados devem usar o normalizador canônico");
-assert.match(sheet, /data-property-value-path/, "O Inspector deve mostrar o caminho separado do campo de edição");
+assert.doesNotMatch(sheet, /data-property-value-path/, "O identificador visual de caminho deve ser removido");
 assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
@@ -162,6 +162,8 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value"
 const nestedAttributeActor = { system: { attributes: { for: { value: 7 } } } };
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").value, 7, "Atributos legados aninhados devem ler o campo value");
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").sourcePath, "attributes.for.value", "Atributos legados aninhados devem gravar no campo value");
+assert.equal(getNexusSkillRows(nestedAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 7, "Perícias devem ler atributos aninhados sem retornar zero");
+assert.equal(evaluateNexusSkillFormula(nestedAttributeActor, "athletics", "for + mb"), 8, "Fórmulas de perícia devem usar o atributo aninhado");
 for (const attribute of NEXUS_ATTRIBUTES) {
   const scalar = { system: { attributes: { [attribute.key]: 3 } } };
   assert.equal(getNexusRulebookPropertyValue(scalar, `attributes.${attribute.key}.value`).value, 3, `Atributo ${attribute.key} deve ser lido como número`);
@@ -1095,3 +1097,10 @@ assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet.actor, match\[1\], formula\)/);
 assert.match(sheetListeners, /html\.on\("input", "\[data-property-value\]"/);
 assert.match(css, /max-height:7\.5em/);
+
+assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
+assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
+assert.match(sheetListeners, /evaluateNexusExpression\(expression\[1\]/, "O salvamento deve validar expressões antes de persistir");
+assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
+assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
+assert.match(canvasInteractions, /editorPanelsOpen/, "A proteção de teclado deve considerar todos os painéis abertos");
