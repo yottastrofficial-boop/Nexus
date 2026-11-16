@@ -221,9 +221,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const kind = input.dataset.propertyKind;
       let value = input.value;
       if (kind === "skill-formula") {
-        const match = path.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
+        const match = path.match(/^skills\.([a-zA-Z0-9_-]+)\.(?:value|formula)$/);
         const formula = String(value ?? "").trim().slice(0, 500);
-        if (!match || (formula && evaluateNexusSkillFormula(sheet.actor, match[1], formula) === null)) { globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use propriedades numéricas e operadores suportados."); return; }
+        if (!match || (formula && evaluateNexusSkillFormula(sheet.actor, match[1], formula) === null)) { globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use caminhos de propriedades numéricas e operadores suportados."); return; }
         await sheet.actor.update({ [`system.skills.${match[1]}.formula`]: formula }, { render: false });
         sheet._refreshBoundComponents(); return;
       }
