@@ -81,7 +81,7 @@ assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(tar
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
 assert.match(sheet, /const lookupPath = normalizeNexusPropertyPath\(path\)/, "Caminhos singulares e abreviados devem usar o normalizador canônico");
 assert.doesNotMatch(sheet, /data-property-value-path/, "O identificador visual de caminho deve ser removido");
-assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
+assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
 assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
@@ -1114,7 +1114,7 @@ assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{acto
 assert.match(template, /<textarea rows="1" data-property-value/);
 assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet.actor, match\[1\], formula\)/);
-assert.match(sheetListeners, /\\$\\(document\\)\\.on\\(`input\\$\\{inspectorNamespace\\}`, "\\[data-property-value\\]"/);
+assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
 assert.match(css, /max-height:7\.5em/);
 
 assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
