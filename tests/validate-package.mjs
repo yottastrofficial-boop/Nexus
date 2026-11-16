@@ -78,6 +78,7 @@ assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\
 assert.match(sheet, /async _prepareContext\(options = \{\}\) \{\s*\/\/ O modo padrão é estado real da ficha, não apenas fallback de apresentação\.\s*this\._mode \?\?= "play";/, "O modo Padrão deve existir no estado interno antes da preparação da ficha");
 assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(target, "value"\)/, "Aliases de atributo devem editar o campo value de objetos");
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
+assert.match(sheet, /const lookupPath = String\(path \?\? ""\)[\s\S]*replace\(\/\^attribute\\\.\/, "attributes\."\)/, "Caminhos singulares de atributo devem resolver o alias canônico");
 assert.match(sheet, /data-property-value-path/, "O Inspector deve mostrar o caminho separado do campo de edição");
 assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
