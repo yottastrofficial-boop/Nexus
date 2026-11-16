@@ -1133,7 +1133,7 @@ assert.match(css, /nexus-property-option-name[\s\S]*overflow-wrap: anywhere[\s\S
 assert.doesNotMatch(css, /1\.0\.0\.56 — layout isolado/, "O CSS antigo do buscador deve ser removido");
 
 assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
-assert.match(sheet, /flags\\.nexus\\.propertyExpressions/, "Expressões persistidas devem invalidar componentes dependentes");
+assert.ok(sheet.includes('flags.nexus.propertyExpressions'), "Expressões persistidas devem invalidar componentes dependentes");
 assert.ok(sheet.includes('dependencies.add("identity.level")'), "Propriedades derivadas do nível devem atualizar automaticamente");
 assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
 assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
