@@ -73,7 +73,10 @@ const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteract
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.equal(manifest.version, "1.0.0.61", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
+assert.ok(
+  changelog.startsWith(`## ${manifest.version}`) || (changelog.startsWith("## Em desenvolvimento") && changelog.includes(`## ${manifest.version}`)),
+  "CHANGELOG deve iniciar pela versão atual ou por uma seção explícita de desenvolvimento"
+);
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
