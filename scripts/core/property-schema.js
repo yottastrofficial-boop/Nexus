@@ -123,7 +123,9 @@ function getStoredPathValue(object, path) {
 
 function evaluateDefaultPropertyFormula(actor, path, depth = 0, visited = new Set()) {
   if (depth > 12 || visited.has(path)) return null;
-  const formula = DEFAULT_PROPERTY_FORMULAS[path];
+  const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? actor.system?.flags?.nexus?.propertyExpressions ?? {};
+  const customFormula = getStoredPathValue(expressions, path);
+  const formula = typeof customFormula === "string" && customFormula.trim() ? customFormula : DEFAULT_PROPERTY_FORMULAS[path];
   if (!formula) return undefined;
   const nextVisited = new Set(visited);
   nextVisited.add(path);
@@ -209,6 +211,12 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   };
   const formulaPath = legacyFormulaPaths[key] ?? key;
   if (DEFAULT_PROPERTY_FORMULAS[formulaPath]) {
+    const expressions = actor.getFlag?.("nexus", "propertyExpressions") ?? actor.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
+    const customFormula = getStoredPathValue(expressions, formulaPath);
+    if (typeof customFormula === "string" && customFormula.trim()) {
+      const value = evaluateDefaultPropertyFormula(actor, formulaPath);
+      return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula: customFormula, formulaEditable: true };
+    }
     const stored = getStoredPathValue(system, formulaPath);
     if (stored !== undefined && stored !== null) {
       const value = stored && typeof stored === "object" && Object.hasOwn(stored, "value") ? stored.value : stored;
