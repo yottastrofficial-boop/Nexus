@@ -80,7 +80,7 @@ const COMPONENTS = {
 
 const resolveNexusBinding = (actor, expression, depth = 0) => {
   const raw = String(expression ?? "").trim();
-  if (depth > 8) return { value: "", path: "" };
+  if (depth > 8) return { value: null, path: "", readOnly: true, invalid: true };
   const wrapped = raw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
   const formulaSource = wrapped ? wrapped[1].trim() : raw;
   if ((wrapped && !/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(formulaSource)) || /[()+*/%<>=!]|\s[+-]\s/.test(formulaSource)) {

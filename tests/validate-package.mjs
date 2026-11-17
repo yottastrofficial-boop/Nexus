@@ -213,6 +213,17 @@ const customMbActor = {
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
+const cyclicFormulaActor = {
+  system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { formula: "{{combat.mb + 1}}" } } },
+  flags: { nexus: { propertyExpressions: {
+    progression: { mb: { value: "{{attributes.for.value + 1}}" } },
+    attributes: { for: { value: "{{combat.mb + 1}}" } }
+  } } }
+};
+assert.equal(getNexusBaseModifier(cyclicFormulaActor), null, "Ciclos de fórmula devem permanecer inválidos, não virar zero silenciosamente");
+assert.equal(getNexusAttributeValue(cyclicFormulaActor, "for"), null, "Atributo com fórmula circular não deve cair para o valor armazenado");
+assert.equal(getNexusSkillRows(cyclicFormulaActor).find(skill => skill.key === "athletics")?.value, null, "Perícia com fórmula inválida não deve usar fallback armazenado");
+
 assert.equal(getNexusBaseModifier({ system: { identity: { level: 5 } } }), 0, "MB não deve ser calculado automaticamente sem fórmula ou valor salvo");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem fórmula própria não devem herdar o MB");
 assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, "", "Uma fórmula de MB não deve criar fórmulas implícitas para outras propriedades");
@@ -739,6 +750,7 @@ assert.ok(!template.includes('data-component-setting="actionType"'));
 assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
 assert.ok(canvasPlayInteractions.includes('["pointerover",onPointerOver]'));
 assert.ok(sheetCode.includes("_executeComponentAction"));
+assert.match(sheet, /if \(depth > 8\) return \{ value: null, path: "", readOnly: true, invalid: true \}/, "Limites de recursão devem sinalizar fórmula inválida");
 assert.match(sheet, /_resolveInteractionWriteTarget\(config\.path\)/, "Ação update deve resolver o caminho físico gravável");
 assert.match(sheet, /target\.updateKey/, "Ação update deve gravar no destino resolvido, inclusive aliases");
 assert.match(sheet, /await roll\.evaluate\(\)/, "Rolagens assíncronas devem usar a API atual do Foundry");
