@@ -1,3 +1,26 @@
+## 1.0.0.61
+
+### Propriedades e fórmulas
+- Padronizado o campo editável de propriedades com o único rótulo **Valor**.
+- Fórmulas de perícias e de propriedades derivadas passam pela mesma validação de expressões e resolução de caminhos; a persistência continua respeitando o armazenamento interno de cada tipo para preservar compatibilidade.
+- Caminhos de propriedades normalizam aliases legados e caminhos hierárquicos usados na navegação do seletor, incluindo agrupamentos por núcleo de atributo e atributo associado à perícia.
+- Fórmulas internas de perícias deixaram de aparecer como propriedades separadas no seletor.
+- Adicionadas regressões para a fórmula completa de Atletismo, funções matemáticas, proficiência assinada e caminhos legados.
+
+### Interface
+- Reformulado o Inspector com hierarquia plana, menos contêineres, sem faixas decorativas, sombras em cascata ou cartões aninhados.
+- O mostrador de propriedades exibe somente o nome e o caminho canônico abaixo, com altura reduzida e sem prévia de valor.
+- Categorias do seletor deixaram de exibir caminhos de navegação que poderiam ser confundidos com caminhos reais de dados.
+- Campos, abas, espaçamentos e estados de foco foram refinados para uma interface mais legível e consistente.
+
+### Referências de design
+- Aplicados princípios de hierarquia por tipografia e espaçamento, superfícies planas, rótulos curtos, tokens semânticos e remoção de decoração sem função.
+- A identidade visual do NEXUS foi preservada; as referências externas foram usadas como critérios de qualidade, não como modelos para copiar.
+
+### Validação
+- Incluídos testes de regressão para caminhos canônicos, compatibilidade de aliases, padronização do rótulo e fórmulas de perícias.
+- A validação automatizada não substitui o teste visual e funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.60
 
 ### Motor de fórmulas
