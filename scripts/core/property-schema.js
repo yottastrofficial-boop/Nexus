@@ -132,7 +132,7 @@ function evaluateDefaultPropertyFormula(actor, path, depth = 0, visited = new Se
   return evaluateNexusExpression(formula, identifier => {
     const raw = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "");
     const aliases = {
-      level: "identity.level", mb: "progression.mb.value", for: "attributes.for.value",
+      level: "identity.level", mb: "progression.mb.value", "combat.mb": "progression.mb.value", "combat.mb.value": "progression.mb.value", for: "attributes.for.value",
       des: "attributes.des.value", sab: "attributes.sab.value", int: "attributes.int.value",
       car: "attributes.car.value", von: "attributes.von.value", def: "combat.defense.value",
       defesa: "combat.defense.value", desl: "combat.movement.value", movimento: "combat.movement.value",
