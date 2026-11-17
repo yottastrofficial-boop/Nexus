@@ -244,9 +244,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
 
       if (expression) {
-        const calculated = evaluateNexusExpression(expression[1].trim(), identifier =>
-          resolveNexusBinding(sheet.actor, resolveFormulaIdentifier(identifier), 1).value
-        );
+        const calculated = skillFormulaMatch
+          ? evaluateNexusSkillFormula(sheet.actor, skillFormulaMatch[1], String(value))
+          : evaluateNexusExpression(expression[1].trim(), identifier =>
+              resolveNexusBinding(sheet.actor, resolveFormulaIdentifier(identifier), 1).value
+            );
         const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
         const incompatible = calculated === null
           || (valueKind === "number" && typeof calculated !== "number")
@@ -266,9 +268,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (skillFormulaMatch) {
         const formula = String(value ?? "").trim().slice(0, 500);
         const source = formula.replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
-        const calculated = formula ? evaluateNexusExpression(source, identifier =>
-          resolveNexusBinding(sheet.actor, resolveFormulaIdentifier(identifier), 1).value
-        ) : 0;
+        const calculated = formula ? evaluateNexusSkillFormula(sheet.actor, skillFormulaMatch[1], formula) : 0;
         if (formula && (typeof calculated !== "number" || !Number.isFinite(calculated))) {
           globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use caminhos de propriedades numéricas e operadores suportados.");
           return;
