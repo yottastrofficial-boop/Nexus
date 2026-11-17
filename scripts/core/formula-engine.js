@@ -12,7 +12,7 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
   if (!source || source.length > maxLength || typeof resolveProperty !== "function") return null;
 
   const tokens = [];
-  const pattern = /\s*(?:(\d+(?:\.\d*)?|\.\d+)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)|(>=|<=|==|!=|=|[()+*/%<>-]))\s*/gy;
+  const pattern = /\s*(?:(\d+(?:\.\d*)?|\.\d+)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)|(>=|<=|==|!=|=|[(),+*/%<>-]))\s*/gy;
   let cursor = 0;
   while (cursor < source.length) {
     pattern.lastIndex = cursor;
