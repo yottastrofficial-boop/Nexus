@@ -8,6 +8,7 @@ import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
+import { disconnectCanvasConnectedCorners } from "./canvas-connected-corners.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../core/skills.js";
@@ -79,7 +80,7 @@ const COMPONENTS = {
 
 const resolveNexusBinding = (actor, expression, depth = 0) => {
   const raw = String(expression ?? "").trim();
-  if (depth > 8) return { value: "", path: "" };
+  if (depth > 8) return { value: null, path: "", readOnly: true, invalid: true };
   const wrapped = raw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
   const formulaSource = wrapped ? wrapped[1].trim() : raw;
   if ((wrapped && !/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(formulaSource)) || /[()+*/%<>=!]|\s[+-]\s/.test(formulaSource)) {
@@ -965,8 +966,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const system = this.actor.system ?? {};
     const updates = {};
     for (const key of ["for", "des", "sab", "int", "car", "von"]) {
-      const value = system.attributes?.[key];
-      if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
+      const current = system.attributes?.[key];
+      const nested = current !== null && typeof current === "object" && !Array.isArray(current);
+      const value = nested ? current.value : current;
+      if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) {
+        updates["system.attributes." + key + (nested ? ".value" : "")] = 0;
+      }
     }
     for (const skill of NEXUS_SKILLS) {
       const current = system.skills?.[skill.key];
@@ -1159,7 +1164,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return {
         ...component,
         ...this._representationContext(component),
-        hasClickInteraction: getTriggeredActions(component, "click", { actor: this.actor }).length > 0,
+        hasClickInteraction: getTriggeredActions(component, "click", { actor: this.actor, resolveProperty: path => this._resolveInteractionProperty(path) }).length > 0,
         actionType: ["roll", "proficiency"].includes(component.actionType) ? component.actionType : "",
         proficiencyLevel: clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3),
         proficiencyStages: (component.proficiencyLabels ?? ["Nível 0", "Nível 1", "Nível 2", "Nível 3"]).slice(0, 4).map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === clamp(Number(component.actionPath ? resolveNexusBinding(this.actor, component.actionPath).value : component.proficiencyLevel) || 0, 0, 3) })),
@@ -1228,7 +1233,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const sliderPath = sheetResource ? currentResourcePath : (bindingPath ? (bindingPath.endsWith(".value") ? bindingPath : bindingPath + ".value") : "");
     const safeSliderPath = safeResourcePath(sliderPath);
     const showResourceSlider = actionType === "resource-slider" && isResourceComponent && !!safeSliderPath && numericMax > 0;
-    return { ...component, ...this._representationContext(component), hasClickInteraction: getTriggeredActions(component, "click").length > 0, actionType, showProficiencyStages, skillKey: proficiencySkill?.key ?? "", skillName: proficiencySkill?.name ?? "Perícia", isSkillProficient: !!skillProficiency?.proficient, isSkillDeficient: (skillProficiency?.proficientLevel ?? 0) < 0, hasProficiencyTarget: !!proficiencySkill, proficiencyLevel, skillProficiencyLevel: skillProficiency?.proficientLevel ?? 0, skillProficiencyLabel: "Proficiência " + ((skillProficiency?.proficientLevel ?? 0) > 0 ? "+" : "") + (skillProficiency?.proficientLevel ?? 0), proficiencyIcon, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
+    return { ...component, ...this._representationContext(component), hasClickInteraction: getTriggeredActions(component, "click", { actor: this.actor, resolveProperty: path => this._resolveInteractionProperty(path) }).length > 0, actionType, showProficiencyStages, skillKey: proficiencySkill?.key ?? "", skillName: proficiencySkill?.name ?? "Perícia", isSkillProficient: !!skillProficiency?.proficient, isSkillDeficient: (skillProficiency?.proficientLevel ?? 0) < 0, hasProficiencyTarget: !!proficiencySkill, proficiencyLevel, skillProficiencyLevel: skillProficiency?.proficientLevel ?? 0, skillProficiencyLabel: "Proficiência " + ((skillProficiency?.proficientLevel ?? 0) > 0 ? "+" : "") + (skillProficiency?.proficientLevel ?? 0), proficiencyIcon, proficiencyStages: proficiencyLabels.map((label, level) => ({ level, label: String(label || ("Nível " + level)), active: level === proficiencyLevel })), actionPath: component.actionPath ?? "", contentStyle: this._normalizeTextStyle(component.contentStyle), headingStyle: this._normalizeTextStyle(component.headingStyle), sliderPath: safeSliderPath, showResourceSlider, imageFit: ["contain","cover"].includes(component.imageFit) ? component.imageFit : "contain", imagePosition: ["center","top","bottom","left","right"].includes(component.imagePosition) ? component.imagePosition : "center", imageOpacity: Number.isFinite(Number(component.imageOpacity ?? 100)) ? clamp(Number(component.imageOpacity ?? 100), 0, 100) : 100, hasBorderRadius: component.borderRadius !== undefined && component.borderRadius !== null, hasOpacity: component.opacity !== undefined && component.opacity !== null, safeLink: isSafeLink(value) ? String(value).trim() : "", headingLabel, showCardHeading: !!headingLabel && component.showLabel !== false && !["token", "sheet-resource", "asset-text", "asset-notes", "asset-image", "asset-link"].includes(component.type), fontSize: clamp(Number(component.fontSize ?? this._currentLayout?.fontSize ?? 13) || 13, 7, 48), fontFamily: component.fontFamily || this._currentLayout?.fontFamily || "Inter", labelPosition: component.labelPosition || "top-left", resourcePercent: percent, resourceColor, path: sheetResource ? currentResourcePath : bindingPath, z: Number(component.z) || 0, renderZ: (Number(component.z) || 0) * 100000 + (Number(component.stackOrder) || 0) + 1, label: component.customLabel ?? (component.type === "resource-meter" ? (component.resourceLabel || "Medidor") : def.label), kind: def.kind, format: component.format ?? "bar", value: value ?? (def.variant === "attribute" ? 0 : ""), max: max ?? "", percent, rows: clamp(Number(component.rows) || 3, 1, 20), columns: clamp(Number(component.columns) || 3, 1, 12), tableCells: component.type === "asset-table" ? Array.from({ length: clamp(Number(component.rows) || 3, 1, 20) * clamp(Number(component.columns) || 3, 1, 12) }, (_, index) => ({ index, value: component.cells?.[index] ?? "" })) : [], text: component.customLabel ?? component.text ?? def.label, path: sheetResource ? currentResourcePath : bindingPath, group: def.group, namespace: def.namespace, sheetVariant: def.variant ?? component.sheetVariant ?? "", skillRows: def.variant === "skill-group" ? getNexusSkillRows(this.actor) : [], sheetHint: component.sheetHint ?? "Configure o conteúdo no editor", sheetCode: component.sheetCode ?? "", sheetLabel: component.sheetLabel ?? component.sheetCode ?? "", sheetIcon: component.sheetIcon ?? "", sheetContent1: component.sheetContent1 ?? component.sheetLabel ?? component.sheetCode ?? "PV", sheetContent2: component.sheetContent2 ?? component.sheetIcon ?? ({ PV: "❤️", PM: "💧", PE: "⚡" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "✦", updateSource: component.updateSource !== false, showLabel: component.showLabel !== false, sheetContent1IsImage: isImageSource(component.sheetContent1), sheetContent2IsImage: isImageSource(component.sheetContent2), sheetColor: component.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[String(component.sheetCode ?? component.sheetContent1 ?? "PV").toUpperCase()] ?? "#d94b4b", sheetTrackColor: component.sheetTrackColor ?? "#080d14", sheetOrientation: component.sheetOrientation === "vertical" ? "vertical" : "horizontal", tokenImage: String(component.tokenImage ?? ""), tokenImageVideo: isVideoSource(getTokenImageSource(this.actor, component, bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")), tokenFrameSource: component.tokenFrameSource ?? "", tokenFrameVideo: isVideoSource(component.tokenFrameSource), tokenFrameMode: component.tokenFrameMode === "media" ? "media" : "solid", tokenFrameColor: component.tokenFrameColor ?? "#78b7e8", tokenFrameWidth: clamp(Number(component.tokenFrameWidth ?? 3), 0, 16), tokenShape: component.tokenShape ?? "circle", tokenOverlay: component.tokenOverlay ?? "", tokenBackgroundColor: component.tokenBackgroundColor ?? "#202e3e", previewCurrent: Number(component.previewCurrent ?? 32), previewMax: Number(component.previewMax ?? 40), previewPercent: clamp(Number(component.previewCurrent ?? 32) / Math.max(1, Number(component.previewMax ?? 40)) * 100, 0, 100) };
   }
 
   async _onRender(context, options) {
@@ -1246,6 +1251,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       return;
     }
     const form = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
+    const currentCanvas = form?.querySelector?.(".nexus-canvas") ?? null;
+    if (this._nexusObservedCanvas && this._nexusObservedCanvas !== currentCanvas) {
+      disconnectCanvasConnectedCorners(this._nexusObservedCanvas);
+    }
+    this._nexusObservedCanvas = currentCanvas;
     if (!form) return;
     const appWindow = form.closest(".application, .window-app");
     appWindow?.classList.add("nexus-window");
@@ -1285,7 +1295,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const id = component.dataset.id;
       if (this._mode === "play") {
         const modifiers = [event.shiftKey ? "shift" : null, event.ctrlKey ? "ctrl" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
-        if (getTriggeredActions(this._currentLayout?.components?.find(item => item.id === id), "doubleClick", { actor: this.actor, modifiers }).length) this._runComponentAction(id, "doubleClick", { modifiers });
+        if (getTriggeredActions(this._currentLayout?.components?.find(item => item.id === id), "doubleClick", { actor: this.actor, modifiers, resolveProperty: path => this._resolveInteractionProperty(path) }).length) this._runComponentAction(id, "doubleClick", { modifiers });
         return;
       }
       this._setSelection($(root), [id]);
@@ -1746,12 +1756,34 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await this.render({ force: true });
   }
 
+  _resolveInteractionProperty(path) {
+    const binding = resolveNexusBinding(this.actor, path);
+    return binding?.path || binding?.alias || binding?.virtual ? binding.value : undefined;
+  }
+
+  _resolveInteractionWriteTarget(path) {
+    const normalized = normalizeInteractionPropertyPath(path);
+    if (!normalized) return null;
+    const binding = resolveNexusBinding(this.actor, normalized);
+    if (binding?.readOnly || binding?.expression) return null;
+    const alias = resolveAliasPath(this.actor, normalized);
+    if (binding?.alias && !alias.path) return null;
+    const targetPath = binding?.sourcePath || alias.path || binding?.path || normalized;
+    if (!targetPath || targetPath.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return null;
+    const actorDocumentPath = targetPath === "name" || targetPath === "img" || targetPath.startsWith("prototypeToken.");
+    const updateKey = actorDocumentPath ? targetPath : `system.${targetPath}`;
+    const stored = actorDocumentPath
+      ? getPath(this.actor, targetPath)
+      : getPath(this.actor.system ?? {}, targetPath);
+    return { path: targetPath, updateKey, value: stored ?? binding?.value };
+  }
+
   _runComponentAction(componentId, eventName = "click", context = {}) {
     const component = this._currentLayout?.components?.find(item => item.id === componentId);
     if (!component || this._mode !== "play") return;
     const depth = Number(context.depth) || 0;
     if (depth > 8) { ui.notifications?.warn?.("O limite de encadeamento de interações foi atingido."); return; }
-    return executeTriggeredActions(component, eventName, action => this._executeComponentAction(componentId, action, { ...context, depth }), { actor: this.actor, ...context }).catch(error => { console.error("NEXUS | Falha ao executar interação", error); ui.notifications?.error?.("Falha ao executar a interação do componente."); return []; });
+    return executeTriggeredActions(component, eventName, action => this._executeComponentAction(componentId, action, { ...context, depth }), { actor: this.actor, resolveProperty: path => this._resolveInteractionProperty(path), ...context }).catch(error => { console.error("NEXUS | Falha ao executar interação", error); ui.notifications?.error?.("Falha ao executar a interação do componente."); return []; });
   }
 
   async _executeComponentAction(componentId, action, context = {}) {
@@ -1759,11 +1791,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "roll") return this._rollComponent(componentId, config);
     if (action?.type === "toggle") return this._toggleTargetComponent(componentId, config);
     if (action?.type === "update") {
-      const path = normalizeInteractionPropertyPath(config.path);
-      if (!path) throw new Error("Propriedade de destino inválida.");
-      const stored = foundry.utils.getProperty(this.actor.system, path);
-      const resolved = stored ?? resolveNexusBinding(this.actor, path).value;
+      const target = this._resolveInteractionWriteTarget(config.path);
+      if (!target) throw new Error("A propriedade de destino não possui um caminho gravável.");
       const raw = String(config.value ?? "");
+      const resolved = target.value;
       let value;
       if (config.operation === "add" || config.operation === "subtract") {
         const current = Number(resolved ?? 0), delta = Number(raw);
@@ -1773,8 +1804,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
       }
       if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
-      await this.actor.update({ [`system.${path}`]: value }, { render: false });
-      this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
+      await this.actor.update({ [target.updateKey]: value }, { render: false });
+      this._refreshBoundComponents();
       return value;
     }
     if (action?.type === "calculate") {
@@ -1782,11 +1813,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
       const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor)), getNexusRollData(this.actor));
       await roll.evaluate();
-      const target = config.targetPath ? normalizeInteractionPropertyPath(config.targetPath) : "";
-      if (config.targetPath && !target) throw new Error("Propriedade de destino inválida.");
+      const target = config.targetPath ? this._resolveInteractionWriteTarget(config.targetPath) : null;
+      if (config.targetPath && !target) throw new Error("A propriedade de destino não possui um caminho gravável.");
       if (target) {
-        await this.actor.update({ [`system.${target}`]: roll.total }, { render: false });
-        this._refreshBoundComponents({ system: Object.fromEntries([[target, roll.total]]) });
+        await this.actor.update({ [target.updateKey]: roll.total }, { render: false });
+        this._refreshBoundComponents();
       }
       return roll.total;
     }
@@ -3354,6 +3385,7 @@ if (!hasPath) propertyValueInput.value = "";
     window.addEventListener("scroll", positionRails, true);
 
     this._nexusFloatingCleanup = ({ preserveWindows = true } = {}) => {
+      if (pendingLayoutClick) { clearTimeout(pendingLayoutClick); pendingLayoutClick = null; }
       resizeObserver?.disconnect(); moveObserver?.disconnect();
       window.removeEventListener("resize", positionRails);
       window.removeEventListener("scroll", positionRails, true);
@@ -3404,7 +3436,14 @@ if (!hasPath) propertyValueInput.value = "";
     this._refreshRichExpressions = null;
     if (this._nexusActorUpdateHookId) Hooks.off("updateActor", this._nexusActorUpdateHookId);
     this._nexusActorUpdateHookId = null;
-    if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
+    if (this._nexusInspectorNamespace) {
+      $(document).off(this._nexusInspectorNamespace);
+      $(window).off(this._nexusInspectorNamespace);
+    }
+    this._nexusPropertyPickerCleanup?.();
+    this._nexusPropertyPickerCleanup = null;
+    if (this._nexusObservedCanvas) disconnectCanvasConnectedCorners(this._nexusObservedCanvas);
+    this._nexusObservedCanvas = null;
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
     this._nexusPanelWindows?.clear?.();

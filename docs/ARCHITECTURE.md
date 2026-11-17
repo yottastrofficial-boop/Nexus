@@ -1,4 +1,4 @@
-# NEXUS — Arquitetura técnica e plano de estabilização 1.0.0.2
+# NEXUS — Arquitetura técnica e plano de estabilização
 
 ## Estado deste documento
 
@@ -78,6 +78,19 @@ Este documento registra os limites de responsabilidade desejados para a refatora
 - O merge de três vias reduz a perda de alterações simultâneas no mesmo cliente. Não é um bloqueio transacional entre clientes/usuários diferentes; esse cenário ainda exige teste funcional no Foundry e pode exigir controle de versão no servidor.
 - Os testes automatizados cobrem a preservação de edições em componentes distintos e propriedades diferentes, além da idempotência da migração. Ainda não substituem testes de concorrência com duas janelas/usuários no Foundry real.
 
+## Estabilização em andamento — branch `fix/comprehensive-stability-audit`
+
+A auditoria atual identificou e está corrigindo, de forma incremental:
+
+- Preservação de atributos aninhados durante a inicialização dos Actors.
+- Migrações com atualizações diferenciais por caminho e remoção explícita via `ForcedDeletion`.
+- Fórmulas opcionais e locais ao Actor; ausência de fórmulas padrão ou cálculos implícitos de MB/perícias/propriedades derivadas.
+- Condições e ações de interação usando o resolvedor de propriedades e caminhos físicos graváveis.
+- Limpeza dos listeners de janela, temporizadores do seletor e observadores do Canvas no ciclo de vida da ficha.
+- Testes de regressão para isolamento de fórmulas, migração e resolução de propriedades virtuais.
+
+A branch ainda exige validação automatizada completa e teste funcional no Foundry VTT 14 antes de qualquer publicação. Não tratar os itens como release concluída enquanto essas etapas estiverem pendentes.
+
 ## Critério de conclusão
 
-A versão 1.0.0.2 só deve ser publicada quando os fluxos essenciais tiverem sido validados. Se um teste depender do Foundry real e ainda não tiver sido executado, a limitação deve permanecer explícita e a release não deve ser descrita como integralmente validada.
+A versão seguinte só deve ser publicada quando os fluxos essenciais tiverem sido validados. Se um teste depender do Foundry real e ainda não tiver sido executado, a limitação deve permanecer explícita e a release não deve ser descrita como integralmente validada.

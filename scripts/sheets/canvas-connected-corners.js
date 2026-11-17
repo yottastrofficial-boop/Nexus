@@ -74,11 +74,30 @@ export function observeCanvasConnectedCorners(canvas) {
     // Position changes do not trigger ResizeObserver. Watch inline geometry and
     // inserted/removed surfaces so corner classes stay correct after Inspector edits.
     mutationObserver?.observe(canvas, { subtree: true, childList: true, attributes: true, attributeFilter: ["style"] });
-    record = { observer, mutationObserver, observed: new Set(), schedule };
+    record = {
+      observer,
+      mutationObserver,
+      observed: new Set(),
+      schedule,
+      disconnect() {
+        if (frame) cancelAnimationFrame(frame);
+        observer?.disconnect();
+        mutationObserver?.disconnect();
+        record.observed.clear();
+        observerByCanvas.delete(canvas);
+      }
+    };
     observerByCanvas.set(canvas, record);
   }
   const current = new Set([...canvas.querySelectorAll(".nexus-component"), ...canvas.querySelectorAll(".nexus-group-surface")]);
   for (const node of record.observed) if (!current.has(node)) { record.observer?.unobserve(node); record.observed.delete(node); }
   for (const node of current) if (!record.observed.has(node)) { record.observer?.observe(node); record.observed.add(node); }
   record.schedule();
+}
+
+export function disconnectCanvasConnectedCorners(canvas) {
+  const record = canvas ? observerByCanvas.get(canvas) : null;
+  if (!record) return false;
+  record.disconnect();
+  return true;
 }

@@ -2,10 +2,41 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 
+export function renderLibraryFlows(sheet, panel) {
+  const flowContainer = panel?.querySelector?.("[data-library-flows]");
+  if (!flowContainer) return;
+  flowContainer.replaceChildren();
+  const flows = getInteractionLibrary(sheet.actor);
+  if (!flows.length) {
+    const empty = document.createElement("p");
+    empty.className = "nexus-library-empty";
+    empty.textContent = "Nenhum fluxo salvo na biblioteca.";
+    flowContainer.append(empty);
+  }
+  for (const entry of flows) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "nexus-library-flow-card";
+    card.dataset.libraryFlowId = entry.id;
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-diagram-project";
+    icon.setAttribute("aria-hidden", "true");
+    const title = document.createElement("strong");
+    title.textContent = entry.name || entry.flow?.name || "Fluxo salvo";
+    const meta = document.createElement("small");
+    meta.textContent = `${entry.flow?.triggers?.length ?? 0} gatilhos · ${entry.flow?.conditions?.length ?? 0} condições · ${entry.flow?.actions?.length ?? 0} ações`;
+    card.append(icon, title, meta);
+    flowContainer.append(card);
+  }
+  sheet._libraryApplyFilter?.();
+}
+
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
 
     const assets=panel.querySelector("[data-library-assets]");
-    if(!assets||panel.dataset.libraryMounted==="true")return;
+    if(!assets)return;
+    sheet._libraryRenderFlows = () => renderLibraryFlows(sheet, panel);
+    if(panel.dataset.libraryMounted==="true"){renderLibraryFlows(sheet,panel);return;}
     panel.dataset.libraryMounted="true";assets.replaceChildren();
     const searchInput = panel.querySelector("[data-library-search]");
     if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
@@ -52,18 +83,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
       const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
     }
-    const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
-    const flows=getInteractionLibrary(sheet.actor);
-    if(flowContainer){
-      if(!flows.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum fluxo salvo na biblioteca.";flowContainer.append(empty);}
-      for(const entry of flows){
-        const card=document.createElement("button");card.type="button";card.className="nexus-library-flow-card";card.dataset.libraryFlowId=entry.id;
-        const icon=document.createElement("i");icon.className="fa-solid fa-diagram-project";icon.setAttribute("aria-hidden","true");
-        const title=document.createElement("strong");title.textContent=entry.name||entry.flow?.name||"Fluxo salvo";
-        const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
-        card.append(icon,title,meta);flowContainer.append(card);
-      }
-    }
+    renderLibraryFlows(sheet, panel);
+    sheet._libraryRenderFlows = () => renderLibraryFlows(sheet, panel);
     const activateSection=(key)=>{
       sheet._librarySection=key;
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});

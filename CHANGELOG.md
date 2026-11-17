@@ -1,3 +1,21 @@
+## 1.0.0.62
+
+### Integridade e resolução de propriedades
+- Removidas fórmulas padrão do Core para perícias e propriedades derivadas; valores só usam fórmula explicitamente salva ou valor armazenado.
+- Removido o cálculo implícito de MB a partir do nível e o cálculo automático de valores de perícia a partir de atributo/proficiência.
+- Fórmulas personalizadas continuam isoladas por Actor e podem usar referências a atributos, MB e proficiência.
+- Corrigida a inicialização de atributos legados no formato `{ value }`, evitando substituir o objeto inteiro por zero.
+
+### Migrações e interações
+- Migrações passam a gravar por caminhos específicos e remover campos legados com `ForcedDeletion`, respeitando a mesclagem diferencial do Foundry.
+- Condições de interação consultam o resolvedor de propriedades da ficha; ações de escrita resolvem aliases para destinos físicos graváveis.
+- Preservados metadados canônicos ao combinar propriedades de perícias legadas.
+
+### Ciclo de vida da interface
+- Corrigido o fechamento atrasado do seletor de propriedades ao alternar rapidamente entre campos.
+- Listeners globais, temporizadores de abas e observadores do Canvas recebem limpeza explícita ao renderizar ou fechar a ficha.
+- Validação automatizada e teste funcional no Foundry VTT 14 ainda são necessários antes da publicação.
+
 ## 1.0.0.61
 
 ### Propriedades e fórmulas

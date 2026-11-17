@@ -197,14 +197,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       }
       if (updateCorners) scheduleConnectedCorners();
     };
-    // Layout comes from the rendered context, avoiding an asynchronous race during listener setup.
-    sheet._currentLayout = sheet._currentLayout ?? {groups:[]};
-    try {
-      const raw = sheet.actor.getFlag("nexus", "layouts") ?? {};
-      sheet._currentLayout = raw[sheet._activeLayoutId()] ?? sheet._currentLayout;
-    } catch (error) {
-      console.warn("NEXUS | Não foi possível recuperar o layout ativo durante a montagem dos grupos", error);
-    }
+    // _currentLayout is already normalized by the sheet preparation pipeline.
+    // Re-reading raw Actor flags here can reintroduce legacy shapes and bypass normalization.
+    sheet._currentLayout = sheet._currentLayout ?? { groups: [] };
     renderGroups();
     updateConnectedCorners();
     const sizeReadout = document.createElement("div"); sizeReadout.className = "nexus-resize-readout"; sizeReadout.hidden = true; canvas.append(sizeReadout);
