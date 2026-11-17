@@ -30,54 +30,54 @@ export async function migrateLegacyActorData({
     const system = actor.system;
     const updates = {};
 
+    const makeDeletion = () => {
+      const ForcedDeletion = globalThis.foundry?.data?.operators?.ForcedDeletion;
+      if (typeof ForcedDeletion !== "function") throw new Error("Foundry VTT ForcedDeletion operator is unavailable.");
+      return new ForcedDeletion();
+    };
     const currentSkills = system.skills ?? {};
-    const nextSkills = structuredClone(currentSkills);
     for (const skill of NEXUS_SKILLS) {
-      const current = nextSkills[skill.key] ?? nextSkills[skill.legacyKey] ?? {};
+      const current = currentSkills[skill.key] ?? currentSkills[skill.legacyKey] ?? {};
       const proficientLevel = normalizeNexusProficientLevel(
         current.proficientLevel ?? (current.opposed === true ? -1 : current.proficient ?? current.proficiency) ?? false
       );
-      const next = { ...current, proficientLevel };
-      delete next.proficient;
-      delete next.proficiency;
-      delete next.opposed;
-      nextSkills[skill.key] = next;
-      if (skill.legacyKey !== skill.key) delete nextSkills[skill.legacyKey];
+      if (currentSkills[skill.key]?.proficientLevel !== proficientLevel) {
+        updates[`system.skills.${skill.key}.proficientLevel`] = proficientLevel;
+      }
+      for (const legacyField of ["proficient", "proficiency", "opposed"]) {
+        if (Object.hasOwn(current, legacyField)) updates[`system.skills.${skill.key}.${legacyField}`] = makeDeletion();
+      }
+      if (skill.legacyKey !== skill.key && Object.hasOwn(currentSkills, skill.legacyKey)) {
+        updates[`system.skills.${skill.legacyKey}`] = makeDeletion();
+      }
     }
-    if (JSON.stringify(nextSkills) !== JSON.stringify(currentSkills)) updates["system.skills"] = nextSkills;
 
     const currentCombat = system.combat ?? {};
-    const nextCombat = { ...currentCombat };
-    if (nextCombat.defenseModifier === undefined) {
-      const legacyDefense = Number(nextCombat.defense);
-      const dexterity = Number(system.attributes?.des) || 0;
-      // The former default of 10 was arbitrary; convert only non-default saved
-      // values into modifiers over the rulebook formula (8 + DES).
-      nextCombat.defenseModifier = Number.isFinite(legacyDefense) && legacyDefense !== 10
+    if (currentCombat.defenseModifier === undefined) {
+      const legacyDefense = Number(currentCombat.defense);
+      const storedDexterity = system.attributes?.des;
+      const dexterity = Number(storedDexterity && typeof storedDexterity === "object" ? storedDexterity.value : storedDexterity) || 0;
+      updates["system.combat.defenseModifier"] = Number.isFinite(legacyDefense) && legacyDefense !== 10
         ? legacyDefense - 8 - dexterity
         : 0;
     }
-    if (nextCombat.movement === undefined && Number(nextCombat.desl) > 0) {
-      nextCombat.movement = Number(nextCombat.desl);
+    if (currentCombat.movement === undefined && Number(currentCombat.desl) > 0) {
+      updates["system.combat.movement"] = Number(currentCombat.desl);
     }
-    delete nextCombat.defense;
-    delete nextCombat.mb;
-    delete nextCombat.ddr;
-    delete nextCombat.desl;
-    if (JSON.stringify(nextCombat) !== JSON.stringify(currentCombat)) updates["system.combat"] = nextCombat;
+    for (const legacyField of ["defense", "mb", "ddr", "desl"]) {
+      if (Object.hasOwn(currentCombat, legacyField)) updates[`system.combat.${legacyField}`] = makeDeletion();
+    }
 
-    const currentResources = system.resources ?? {};
-    const nextResources = { ...currentResources };
     for (const key of ["pv", "pm", "pe"]) {
-      if (nextResources[key]) nextResources[key] = { ...nextResources[key], temporary: Number(nextResources[key].temporary) || 0 };
+      const resource = system.resources?.[key];
+      if (resource && (resource.temporary === undefined || !Number.isFinite(Number(resource.temporary)))) {
+        updates[`system.resources.${key}.temporary`] = 0;
+      }
     }
-    if (JSON.stringify(nextResources) !== JSON.stringify(currentResources)) updates["system.resources"] = nextResources;
 
     if (!Array.isArray(system.conditions)) updates["system.conditions"] = [];
-    if (!system.recovery || typeof system.recovery !== "object") updates["system.recovery"] = { spent: 0 };
-    else if (system.recovery.spent === undefined) updates["system.recovery"] = { ...system.recovery, spent: 0 };
-    if (!system.encumbrance || typeof system.encumbrance !== "object") updates["system.encumbrance"] = { current: 0 };
-    else if (system.encumbrance.current === undefined) updates["system.encumbrance"] = { ...system.encumbrance, current: 0 };
+    if (!system.recovery || typeof system.recovery !== "object" || system.recovery.spent === undefined) updates["system.recovery.spent"] = 0;
+    if (!system.encumbrance || typeof system.encumbrance !== "object" || system.encumbrance.current === undefined) updates["system.encumbrance.current"] = 0;
 
     if (Object.keys(updates).length) {
       await actor.update(updates);

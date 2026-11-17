@@ -165,10 +165,19 @@ export function getComponentInteractions(component) {
   const legacy=LEGACY[component?.actionType];
   return legacy?[normalizeInteraction({id:"legacy-"+component.actionType,name:component.actionType==="roll"?"Rolagem":"Alternar componente",trigger:{event:legacy.event},actions:[{id:"legacy-action",type:legacy.type,config:legacy.config(component)}]})]:[];
 }
-const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
-const conditionPasses=(condition,actor)=>{
+const getPath=(actor,path,resolveProperty)=>{
+  const safe = safePath(path);
+  if (!safe) return undefined;
+  if (typeof resolveProperty === "function") {
+    const resolved = resolveProperty(safe);
+    if (resolved !== undefined) return resolved && typeof resolved === "object" && Object.hasOwn(resolved, "value") ? resolved.value : resolved;
+  }
+  if (safe === "name") return actor?.name;
+  return safe.split(".").reduce((value,key)=>value?.[key],actor?.system??{});
+};
+const conditionPasses=(condition,actor,resolveProperty)=>{
   if(!condition?.path)return false;
-  const actual=getPath(actor,condition.path), expected=condition.value, a=Number(actual), b=Number(expected);
+  const actual=getPath(actor,condition.path,resolveProperty), expected=condition.value, a=Number(actual), b=Number(expected);
   switch(condition.operator){
     case "notEquals":return String(actual??"")!==expected;
     case "greaterThan":return Number.isFinite(a)&&Number.isFinite(b)&&a>b;
@@ -186,7 +195,7 @@ export function interactionMatches(flow,eventName,context={}) {
   const triggerMatches = flow?.triggers?.some(trigger => trigger.event === eventName && normalizeModifiers(trigger.modifiers).join("+") === modifiers.join("+"));
   if(!flow?.enabled||!triggerMatches)return false;
   if(!flow.conditions.length)return true;
-  const values=flow.conditions.map(c=>conditionPasses(c,context.actor));
+  const values=flow.conditions.map(c=>conditionPasses(c,context.actor,context.resolveProperty));
   return flow.conditionJoin==="any"?values.some(Boolean):values.every(Boolean);
 }
 export function getTriggeredActions(component,eventName="click",context={}) {

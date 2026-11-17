@@ -28,6 +28,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     sheet._nexusInspectorNamespace = inspectorNamespace;
     $(document).off(inspectorNamespace);
+    $(window).off(inspectorNamespace);
+    let propertyPickerCloseTimer = null;
     const isSheetOwnedControl = input => currentRoot?.contains(input) || [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.contains(input));
     // Remove detached property-option portals left by a previous ApplicationV2 render.
     document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
@@ -1426,6 +1428,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       list.style.bottom="auto";list.style.overflowY="auto";
     };
     const filterPropertyOptions=input=>{
+      if (propertyPickerCloseTimer) { clearTimeout(propertyPickerCloseTimer); propertyPickerCloseTimer = null; }
       const list=ensurePropertyOptionsList(),owner=getPropertyOptionsOwner(input);if(!owner)return;
       if(list._nexusOwnerInput!==input)list.dataset.categoryPath="";
       list._nexusOwnerInput=input;list._nexusOwnerInspector=owner;
@@ -1509,7 +1512,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const list=document.getElementById(propertyPickerId),input=list?._nexusOwnerInput;if(input?.isConnected)positionPropertyOptions(input);});
     $(document).on(`focusout${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>{
       const input=event.currentTarget,list=document.getElementById(propertyPickerId);
-      setTimeout(()=>{if(list&&!list.contains(document.activeElement)&&document.activeElement!==input){list.hidden=true;list.dataset.categoryPath="";list.style.top="";list.style.left="";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}},140);
+      if (propertyPickerCloseTimer) clearTimeout(propertyPickerCloseTimer);
+      propertyPickerCloseTimer = setTimeout(()=>{
+        propertyPickerCloseTimer = null;
+        if (!list || list._nexusOwnerInput !== input) return;
+        const active = document.activeElement;
+        if (list.contains(active) || active === input) return;
+        list.hidden=true;list.dataset.categoryPath="";list.style.top="";list.style.left="";list.style.width="";
+        list._nexusOwnerInput=null;list._nexusOwnerInspector=null;
+      },140);
     });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
