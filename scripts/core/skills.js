@@ -157,9 +157,8 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
   };
   return evaluateNexusFormula(source, resolve);
 }
-export function getNexusDefaultSkillFormula(skillKey) {
-  const skill = NEXUS_SKILLS.find(item => item.key === skillKey || item.legacyKey === skillKey);
-  return skill ? `{{attributes.${skill.attributeKey}.value + (combat.mb * sign(skills.${skill.key}.proficientLevel))}}` : "";
+export function getNexusDefaultSkillFormula(_skillKey) {
+  return "";
 }
 
 export function getNexusSkillRows(actor) {
@@ -171,8 +170,8 @@ export function getNexusSkillRows(actor) {
     const bonus = Math.sign(proficientLevel) * baseModifier;
     const defaultModifier = attributeValue + bonus;
     const storedFormula = String(system.skills?.[skill.key]?.formula ?? "").trim();
-    const formula = storedFormula || getNexusDefaultSkillFormula(skill.key);
-    const formulaValue = evaluateNexusSkillFormula(actor, skill.key, formula);
+    const formula = storedFormula;
+    const formulaValue = formula ? evaluateNexusSkillFormula(actor, skill.key, formula) : null;
     const modifier = formulaValue ?? defaultModifier;
     return { ...skill, attributeValue, proficientLevel, proficient: proficientLevel > 0, modifier, value: modifier, formula,
       description: typeof system.skills?.[skill.key]?.description === "string" ? system.skills[skill.key].description : skill.description,
