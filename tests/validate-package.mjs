@@ -761,6 +761,7 @@ assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
 assert.ok(canvasPlayInteractions.includes('["pointerover",onPointerOver]'));
 assert.ok(sheetCode.includes("_executeComponentAction"));
 assert.match(sheet, /if \(depth > 8\) return \{ value: null, path: "", readOnly: true, invalid: true \}/, "Limites de recursão devem sinalizar fórmula inválida");
+assert.doesNotMatch(canvasInteractions, /actor\.getFlag\("nexus", "layouts"\)/, "O Canvas não deve substituir o layout normalizado por flags brutas");
 assert.match(sheet, /_resolveInteractionWriteTarget\(config\.path\)/, "Ação update deve resolver o caminho físico gravável");
 assert.match(sheet, /target\.updateKey/, "Ação update deve gravar no destino resolvido, inclusive aliases");
 assert.match(sheet, /await roll\.evaluate\(\)/, "Rolagens assíncronas devem usar a API atual do Foundry");
