@@ -1362,14 +1362,26 @@ export class NexusActorSheet extends NexusActorSheetBase {
       for (const match of String(expression ?? "").matchAll(matcher)) addPath(match[0]);
     };
     const addPropertyFormulaDependencies = rawPath => {
-      const path = normalizeNexusPropertyPath(String(rawPath ?? "").replace(/^system\./, ""));
-      if (!path) return;
-      const skillMatch = path.match(/^skills\.([^.]+)\.(?:value|formula)$/);
-      const formula = skillMatch
-        ? (getPath(this.actor.system ?? {}, `skills.${skillMatch[1]}.formula`) || getNexusDefaultSkillFormula(skillMatch[1]))
-        : (getPath(this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {}, path)
-          || getNexusDefaultPropertyFormula(path));
-      if (formula) addExpression(formula);
+      const visitedFormulas = new Set();
+      const scanFormulaPath = candidate => {
+        const path = normalizeNexusPropertyPath(String(candidate ?? "").replace(/^system\./, ""));
+        if (!path || visitedFormulas.has(path)) return;
+        visitedFormulas.add(path);
+        const skillMatch = path.match(/^skills\.([^.]+)\.(?:value|formula)$/);
+        const formula = skillMatch
+          ? (getPath(this.actor.system ?? {}, `skills.${skillMatch[1]}.formula`) || getNexusDefaultSkillFormula(skillMatch[1]))
+          : (getPath(this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {}, path)
+            || getNexusDefaultPropertyFormula(path));
+        if (!formula) return;
+        addExpression(formula);
+        const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
+        for (const match of String(formula).matchAll(matcher)) {
+          const reference = String(match[0]).replace(/^@/, "");
+          const canonical = reference === "combat.mb" || reference === "combat.mb.value" ? "progression.mb.value" : reference;
+          if (getNexusDefaultPropertyFormula(canonical) || /^skills\.[^.]+\.value$/.test(canonical)) scanFormulaPath(canonical);
+        }
+      };
+      scanFormulaPath(rawPath);
     };
     addPropertyFormulaDependencies(component.dataPath);
     addPropertyFormulaDependencies(component.actionPath);
