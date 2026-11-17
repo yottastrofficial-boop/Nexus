@@ -1761,6 +1761,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return binding?.path || binding?.alias || binding?.virtual ? binding.value : undefined;
   }
 
+  _resolveInteractionWriteTarget(path) {
+    const normalized = normalizeInteractionPropertyPath(path);
+    if (!normalized) return null;
+    const binding = resolveNexusBinding(this.actor, normalized);
+    if (binding?.readOnly || binding?.expression) return null;
+    const alias = resolveAliasPath(this.actor, normalized);
+    if (binding?.alias && !alias.path) return null;
+    const targetPath = binding?.sourcePath || alias.path || binding?.path || normalized;
+    if (!targetPath || targetPath.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return null;
+    const actorDocumentPath = targetPath === "name" || targetPath === "img" || targetPath.startsWith("prototypeToken.");
+    const updateKey = actorDocumentPath ? targetPath : `system.${targetPath}`;
+    const stored = actorDocumentPath
+      ? getPath(this.actor, targetPath)
+      : getPath(this.actor.system ?? {}, targetPath);
+    return { path: targetPath, updateKey, value: stored ?? binding?.value };
+  }
+
   _runComponentAction(componentId, eventName = "click", context = {}) {
     const component = this._currentLayout?.components?.find(item => item.id === componentId);
     if (!component || this._mode !== "play") return;
@@ -1774,11 +1791,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "roll") return this._rollComponent(componentId, config);
     if (action?.type === "toggle") return this._toggleTargetComponent(componentId, config);
     if (action?.type === "update") {
-      const path = normalizeInteractionPropertyPath(config.path);
-      if (!path) throw new Error("Propriedade de destino inválida.");
-      const stored = foundry.utils.getProperty(this.actor.system, path);
-      const resolved = stored ?? resolveNexusBinding(this.actor, path).value;
+      const target = this._resolveInteractionWriteTarget(config.path);
+      if (!target) throw new Error("A propriedade de destino não possui um caminho gravável.");
       const raw = String(config.value ?? "");
+      const resolved = target.value;
       let value;
       if (config.operation === "add" || config.operation === "subtract") {
         const current = Number(resolved ?? 0), delta = Number(raw);
@@ -1788,8 +1804,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
         value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
       }
       if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
-      await this.actor.update({ [`system.${path}`]: value }, { render: false });
-      this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
+      await this.actor.update({ [target.updateKey]: value }, { render: false });
+      this._refreshBoundComponents();
       return value;
     }
     if (action?.type === "calculate") {
@@ -1797,11 +1813,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (!formula || formula.length > 500) throw new Error("Fórmula de cálculo inválida.");
       const roll = new Roll(expandNexusRollAliases(this.actor, expandNexusPropertyExpressions(formula, this.actor)), getNexusRollData(this.actor));
       await roll.evaluate();
-      const target = config.targetPath ? normalizeInteractionPropertyPath(config.targetPath) : "";
-      if (config.targetPath && !target) throw new Error("Propriedade de destino inválida.");
+      const target = config.targetPath ? this._resolveInteractionWriteTarget(config.targetPath) : null;
+      if (config.targetPath && !target) throw new Error("A propriedade de destino não possui um caminho gravável.");
       if (target) {
-        await this.actor.update({ [`system.${target}`]: roll.total }, { render: false });
-        this._refreshBoundComponents({ system: Object.fromEntries([[target, roll.total]]) });
+        await this.actor.update({ [target.updateKey]: roll.total }, { render: false });
+        this._refreshBoundComponents();
       }
       return roll.total;
     }
