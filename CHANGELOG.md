@@ -1,4 +1,4 @@
-## Em desenvolvimento — próxima versão
+## 1.0.0.62
 
 ### Integridade e resolução de propriedades
 - Removidas fórmulas padrão do Core para perícias e propriedades derivadas; valores só usam fórmula explicitamente salva ou valor armazenado.

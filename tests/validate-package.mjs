@@ -73,7 +73,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.61", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.62", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(
   changelog.startsWith(`## ${manifest.version}`) || (changelog.startsWith("## Em desenvolvimento") && changelog.includes(`## ${manifest.version}`)),
