@@ -166,11 +166,10 @@ export function getNexusDefaultSkillFormula() {
 
 export function getNexusSkillRows(actor) {
   const system = actor?.system ?? {};
-  const baseModifier = getNexusBaseModifier(actor);
   return NEXUS_SKILLS.map(skill => {
     const attributeValue = getNexusAttributeValue(actor, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
-    const bonus = Math.sign(proficientLevel) * baseModifier;
+    const bonus = 0; // No automatic proficiency modifier; custom formulas may use the bonus alias explicitly.
     const storedFormula = String(system.skills?.[skill.key]?.formula ?? "").trim();
     const formula = storedFormula;
     const formulaValue = formula ? evaluateNexusSkillFormula(actor, skill.key, formula) : null;

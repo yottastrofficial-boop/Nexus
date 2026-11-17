@@ -1198,6 +1198,7 @@ assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com 
 const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, skills: { athletics: { proficientLevel: -1, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
 const formulaAthletics = getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics");
 assert.equal(formulaAthletics.value, 4);
+assert.equal(formulaAthletics.bonus, 0, "A proficiência não deve gerar bônus implícito fora da fórmula configurada");
 assert.equal(formulaAthletics.description, "Descrição personalizada de Atletismo.");
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força + (mb * proficiencia)"), 4);
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força / 0"), null);
