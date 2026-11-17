@@ -178,8 +178,8 @@ const expressionAttributeActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, skills: {} },
   flags: { nexus: { propertyExpressions: { attributes: { for: { value: "{{attributes.des.value + mb}}" } } } } }
 };
-assert.equal(getNexusSkillRows(expressionAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 5, "Atributos usados por perícias devem reavaliar expressões vinculadas");
-assert.equal(getNexusRulebookPropertyValue(expressionAttributeActor, "attributes.for.value").value, 5, "O registro de propriedades deve exibir o atributo dinâmico calculado");
+assert.equal(getNexusSkillRows(expressionAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 3, "Atributos usados por perícias devem reavaliar expressões vinculadas sem MB implícito");
+assert.equal(getNexusRulebookPropertyValue(expressionAttributeActor, "attributes.for.value").value, 3, "O registro deve avaliar a fórmula explícita sem MB implícito");
 const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
