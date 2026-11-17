@@ -6119,3 +6119,20 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-panel-window .nexus-inspector-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media(prefers-reduced-motion:reduce) { .nexus-panel-window .nexus-inspector-tabs button { transition:none !important; } }
+
+
+/* Inspector: property name and path share one compact row. */
+.nexus-panel-window .nexus-data-binding-inline {
+  display:flex; align-items:center; gap:6px; min-width:0;
+}
+.nexus-panel-window .nexus-data-binding-inline > strong {
+  flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  color:var(--nexus-panel-text,#e7edf5); font-size:11px; font-weight:650;
+}
+.nexus-panel-window .nexus-data-binding-inline > span {
+  flex:0 0 auto; color:var(--nexus-panel-muted,#9aadc2); font-size:11px;
+}
+.nexus-panel-window .nexus-data-binding-inline > [data-component-path-input] {
+  flex:1 1 0; width:100%; min-width:0;
+}
+.nexus-panel-window .nexus-property-value-field { margin-top:7px !important; }
