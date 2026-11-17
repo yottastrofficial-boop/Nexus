@@ -5990,3 +5990,240 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media (prefers-reduced-motion:reduce) {
   .nexus-tool-panel input,.nexus-tool-panel textarea,.nexus-tool-panel select { transition:none !important; }
 }
+
+/* 1.0.0.60 — reorganização visual do Inspector e dos painéis de edição. */
+.nexus-panel-window .nexus-component-editor {
+  gap:14px !important;
+  padding:0 10px 16px 8px !important;
+}
+.nexus-panel-window .nexus-component-editor > h3 {
+  display:flex !important;
+  align-items:center;
+  min-height:38px;
+  margin:0 !important;
+  padding:0 2px 10px;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+  font-size:15px !important;
+  font-weight:750 !important;
+  letter-spacing:-.02em;
+}
+.nexus-panel-window .nexus-component-inspector {
+  gap:12px !important;
+  padding:0 2px 12px !important;
+}
+.nexus-panel-window .nexus-inspector-tabs {
+  position:sticky;
+  top:0;
+  z-index:8;
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px !important;
+  margin:0 !important;
+  padding:5px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:10px;
+  background:var(--nexus-panel-bg,var(--nexus-window-content,#182330));
+  box-shadow:0 5px 14px #0003;
+}
+.nexus-panel-window .nexus-inspector-tabs button {
+  min-width:0;
+  min-height:36px !important;
+  padding:7px 5px !important;
+  border:1px solid transparent !important;
+  border-radius:7px !important;
+  background:transparent !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important;
+  font-size:11px !important;
+  font-weight:650 !important;
+  transition:background-color .14s ease,border-color .14s ease,color .14s ease;
+}
+.nexus-panel-window .nexus-inspector-tabs button.active {
+  border-color:var(--nexus-border-strong,var(--nexus-panel-accent,#52647b)) !important;
+  background:var(--nexus-surface-raised,var(--nexus-panel-card,#273443)) !important;
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
+  box-shadow:inset 0 -2px 0 var(--nexus-highlight-color,#78b7e8);
+}
+.nexus-panel-window .nexus-inspector-tab-panel:not([hidden]) {
+  display:flex !important;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+  padding-top:2px;
+}
+.nexus-panel-window .nexus-inspector-tab-panel[hidden] { display:none !important; }
+.nexus-panel-window .nexus-inspector-section {
+  min-width:0;
+  margin:0 !important;
+  padding:12px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:10px !important;
+  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e)) !important;
+  box-shadow:0 3px 10px #0002;
+}
+.nexus-panel-window .nexus-inspector-section > h4 {
+  display:flex;
+  align-items:center;
+  min-height:25px;
+  margin:0 0 12px !important;
+  padding:0 0 8px;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
+  font-size:12px !important;
+  font-weight:750 !important;
+  letter-spacing:.01em;
+}
+.nexus-panel-window .nexus-inspector-section > h4::before {
+  content:"";
+  flex:0 0 3px;
+  width:3px;
+  height:15px;
+  margin-right:8px;
+  border-radius:3px;
+  background:var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8));
+}
+.nexus-panel-window .nexus-inspector-subsection {
+  display:grid;
+  gap:9px;
+  min-width:0;
+  margin:10px 0 0 !important;
+  padding:10px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-radius:8px;
+  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 72%,transparent);
+}
+.nexus-panel-window .nexus-inspector-subsection > h5 {
+  margin:0 0 2px;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  font-size:10px !important;
+  font-weight:750 !important;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+}
+.nexus-panel-window .nexus-inspector-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:10px !important;
+  align-items:start;
+}
+.nexus-panel-window .nexus-inspector-field {
+  display:grid !important;
+  align-content:start;
+  gap:6px !important;
+  min-width:0;
+  margin:0 !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important;
+  font-size:10px !important;
+  font-weight:650 !important;
+  line-height:1.35;
+}
+.nexus-panel-window .nexus-inspector-field :is(input:not([type="checkbox"]),select,textarea) {
+  width:100%;
+  min-width:0;
+  min-height:35px;
+  padding:7px 9px;
+  box-sizing:border-box;
+  border:1px solid var(--nexus-field-border,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:6px !important;
+  background:var(--nexus-field-bg,var(--nexus-panel-input,#111b27)) !important;
+  color:var(--nexus-field-text,var(--nexus-panel-text,#e7edf5)) !important;
+  font-size:11px;
+}
+.nexus-panel-window .nexus-data-binding {
+  display:grid !important;
+  gap:8px !important;
+  margin:0 !important;
+  padding:11px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-left:3px solid var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8)) !important;
+  border-radius:8px !important;
+  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 74%,transparent) !important;
+}
+.nexus-panel-window .nexus-property-value-field {
+  display:grid !important;
+  gap:7px !important;
+  margin:0 !important;
+  padding:11px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:8px !important;
+  background:var(--nexus-panel-bg,var(--nexus-panel-input,#111b27)) !important;
+}
+.nexus-panel-window .nexus-property-value-field > span {
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+  font-size:11px;
+  font-weight:750;
+}
+.nexus-panel-window .nexus-property-value-field [data-property-value] {
+  min-height:48px !important;
+  padding:9px 10px !important;
+  border-color:var(--nexus-border-strong,var(--nexus-panel-border,#3c5067)) !important;
+  background:var(--nexus-surface-sunken,var(--nexus-panel-input,#111b27)) !important;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  font-size:11px !important;
+  line-height:1.5 !important;
+  tab-size:2;
+}
+.nexus-panel-window .nexus-property-presentation-editor {
+  margin:0 !important;
+  padding:11px !important;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:8px !important;
+  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 72%,transparent) !important;
+}
+.nexus-panel-window .nexus-inspector-section-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:0 0 10px;
+}
+.nexus-panel-window .nexus-inspector-section-heading > h4 {
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+}
+.nexus-panel-window .nexus-inspector-section-heading > h4::before { display:none; }
+.nexus-panel-window .nexus-inspector-section-heading > button,
+.nexus-panel-window .nexus-field-reset {
+  min-height:27px;
+  padding:4px 8px;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-radius:6px;
+  background:var(--nexus-panel-hover,#2a3d52);
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  font-size:10px;
+}
+.nexus-panel-window .nexus-inspector-empty {
+  margin:0;
+  padding:18px 12px;
+  border:1px dashed var(--nexus-panel-border,#3c5067);
+  border-radius:9px;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  text-align:center;
+  line-height:1.5;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group {
+  margin:0 0 10px;
+  padding:11px;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-radius:9px;
+  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e));
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-action {
+  padding:10px;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-left:3px solid var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8));
+  border-radius:8px;
+  background:var(--nexus-panel-bg,var(--nexus-window-content,#182330));
+}
+.nexus-panel-window .nexus-alias-manager .nexus-alias-card {
+  padding:12px;
+  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-radius:9px;
+  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e));
+}
+@media(max-width:520px) {
+  .nexus-panel-window .nexus-component-editor { padding-inline:5px !important; }
+  .nexus-panel-window .nexus-inspector-section { padding:9px !important; }
+  .nexus-panel-window .nexus-inspector-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}

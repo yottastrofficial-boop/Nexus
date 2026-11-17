@@ -1,7 +1,22 @@
 const ROOT_ALIASES = Object.freeze({ attribute:"attributes", resource:"resources", skill:"skills" });
+const FORMULA_IDENTIFIER_ALIASES = Object.freeze({
+  nivel:"identity.level", level:"identity.level", mb:"combat.mb",
+  for:"attributes.for.value", des:"attributes.des.value", sab:"attributes.sab.value",
+  int:"attributes.int.value", car:"attributes.car.value", von:"attributes.von.value",
+  pv:"resources.pv.value", pm:"resources.pm.value", pe:"resources.pe.value",
+  def:"combat.defense.value", defesa:"combat.defense.value",
+  desl:"combat.movement.value", movimento:"combat.movement.value", ddr:"recovery.count.value"
+});
 const ATTRIBUTE_KEYS = new Set(["for","des","sab","int","car","von"]);
 const RESOURCE_KEYS = new Set(["pv","pm","pe"]);
 const UNSAFE_SEGMENTS = new Set(["__proto__","prototype","constructor"]);
+/** Normalize user-facing property paths into stable NEXUS paths. */
+export function normalizeNexusFormulaIdentifier(identifier) {
+  const source = String(identifier ?? "").trim();
+  const alias = FORMULA_IDENTIFIER_ALIASES[source.toLocaleLowerCase("pt-BR")];
+  return normalizeNexusPropertyPath(alias ?? source);
+}
+
 /** Normalize user-facing property paths into stable NEXUS paths. */
 export function normalizeNexusPropertyPath(raw) {
   let path=String(raw??"").trim();

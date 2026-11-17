@@ -12,19 +12,11 @@ import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../core/property-schema.js";
-import { normalizeNexusPropertyPath } from "../core/property-paths.js";
+import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
 
-const NEXUS_PROPERTY_SHORTCUTS = Object.freeze({
-  nivel: "identity.level", level: "identity.level", mb: "combat.mb",
-  for: "attributes.for.value", des: "attributes.des.value", sab: "attributes.sab.value",
-  int: "attributes.int.value", car: "attributes.car.value", von: "attributes.von.value",
-  pv: "resources.pv.value", pm: "resources.pm.value", pe: "resources.pe.value",
-  def: "combat.defense.value", defesa: "combat.defense.value",
-  desl: "combat.movement.value", movimento: "combat.movement.value", ddr: "recovery.count.value"
-});
-const resolveFormulaIdentifier = identifier => normalizeNexusPropertyPath(NEXUS_PROPERTY_SHORTCUTS[String(identifier).toLocaleLowerCase("pt-BR")] ?? identifier);
+const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
 const layoutReadSnapshots = new WeakMap();
 const layoutWriteQueues = new Map();
@@ -1303,7 +1295,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, executeTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, executeTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, resolveFormulaIdentifier, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }

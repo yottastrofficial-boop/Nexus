@@ -1,3 +1,20 @@
+## 1.0.0.60
+
+### Motor de fórmulas
+- A normalização de atalhos de propriedades foi centralizada e compartilhada entre a ficha e o Editor de Propriedades.
+- A validação de expressões agora resolve referências como `level`, `nivel`, `mb` e os atalhos de atributos pelo mesmo caminho usado na leitura das fórmulas.
+- Adicionados testes de integração para fórmulas com caminhos completos, propriedades derivadas, proficiência e funções matemáticas como `ceil()`.
+
+### Interface
+- Reorganizado o Inspector com cabeçalho visível, navegação segmentada e painéis de seção com hierarquia mais clara.
+- Campos de vínculo e valor receberam superfícies próprias, melhor separação e apresentação monoespaçada para expressões.
+- Os painéis de Comportamento e Estrutura de Dados receberam agrupamento visual mais consistente.
+- A alteração é focada no ambiente de edição; não representa uma reformulação completa da ficha Canvas.
+
+### Validação
+- Adicionadas regressões para as duas expressões relatadas.
+- A validação automatizada não substitui o teste visual e funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.59
 
 > Publicação oficial acionada para disponibilizar o pacote instalável pelo manifesto.

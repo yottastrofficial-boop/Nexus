@@ -12,7 +12,7 @@ import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "../scripts/core/formula-engine.js";
 import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected-corners.js";
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
-import { normalizeNexusPropertyPath } from "../scripts/core/property-paths.js";
+import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.59", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.60", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -850,13 +850,42 @@ assert.equal(evaluateNexusFormula("des + mb", key => ({ des: 4, mb: 2 })[key]), 
 assert.equal(evaluateNexusFormula("nivel / 0", key => ({ nivel: 3 })[key]), null, "Divisão por zero deve ser rejeitada");
 assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referências inseguras devem ser rejeitadas");
 assert.equal(evaluateNexusFormula("nivel - mb", key => ({ nivel: 5, mb: 2 })[key]), 3);
+assert.equal(normalizeNexusFormulaIdentifier("level"), "identity.level", "O atalho level deve apontar para o nível do personagem");
+assert.equal(normalizeNexusFormulaIdentifier("nivel"), "identity.level", "O atalho nivel deve continuar aceito em português");
+assert.equal(normalizeNexusFormulaIdentifier("mb"), "combat.mb", "O atalho mb deve apontar para o modificador base");
+assert.equal(normalizeNexusFormulaIdentifier("for"), "attributes.for.value", "O atalho for deve apontar para o valor do atributo");
+const formulaResolutionActor = {
+  system: {
+    identity: { level: 5 },
+    attributes: { for: 2 },
+    skills: { athletics: { proficientLevel: 1 } }
+  }
+};
+const resolveFormulaTestProperty = identifier => {
+  const path = normalizeNexusFormulaIdentifier(identifier);
+  const rulebookValue = getNexusRulebookPropertyValue(formulaResolutionActor, path);
+  if (rulebookValue.matched) return rulebookValue.value;
+  return path.split(".").reduce((value, key) => value?.[key], formulaResolutionActor.system);
+};
+assert.equal(
+  evaluateNexusExpression("attributes.for.value + (combat.mb * skills.athletics.proficientLevel)", resolveFormulaTestProperty),
+  5,
+  "Expressões devem resolver atributos, MB e nível de proficiência pela mesma normalização"
+);
+assert.equal(
+  evaluateNexusExpression("ceil(level/2)", resolveFormulaTestProperty),
+  3,
+  "Funções matemáticas devem aceitar atalhos como level"
+);
+assert.equal(evaluateNexusFormula("ceil(level / 2)", key => ({ level: 5 })[key]), 3, "ceil deve permanecer disponível no avaliador seguro");
 assert.equal(evaluateNexusFormula("empty + mb", key => ({ empty: "", mb: 4 })[key]), 4, "Um campo numérico vazio deve valer zero em uma soma");
 assert.equal(evaluateNexusFormula("empty * mb", key => ({ empty: "", mb: 4 })[key]), 0, "Um campo numérico vazio deve valer zero em uma multiplicação");
 assert.equal(evaluateNexusFormula("empty - mb", key => ({ empty: "", mb: 4 })[key]), -4, "Um campo numérico vazio deve valer zero em uma subtração");
 assert.match(sheet, /calculationMode === "formula"/);
 assert.match(template, /data-alias-field="formula"/);
 assert.match(propertyCatalog, /createPropertyRegistry/);
-assert.match(sheetCode, /NEXUS_PROPERTY_SHORTCUTS/, "Fórmulas devem reconhecer atalhos de propriedades do NEXUS");
+assert.match(sheet, /normalizeNexusFormulaIdentifier/, "Fórmulas devem usar um normalizador compartilhado de identificadores");
+assert.match(sheetListeners, /resolveNexusBinding\\(sheet\\.actor, resolveFormulaIdentifier\\(identifier\\), 1\\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
 assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
 
