@@ -406,7 +406,8 @@ const legacyPropertyActor = {
     identity: { level: 4 },
     attributes: { des: 1 },
     skills: {
-      athletics: { proficientLevel: 1 },
+      athletics: { description: "Descrição canônica preservada" },
+      atletismo: { proficient: true },
       furtividade: { opposed: true }
     },
     combat: { defense: 15, movement: 6, mb: 2, ddr: 4, desl: 5 },
@@ -445,6 +446,7 @@ const propertyMigrationDependencies = {
 const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
 assert.equal(propertyMigration.propertiesMigrated, true);
 assert.equal(legacyPropertyActor.system.skills.athletics.proficientLevel, 1);
+assert.equal(legacyPropertyActor.system.skills.athletics.description, "Descrição canônica preservada", "Dados canônicos devem ser preservados ao mesclar a proficiência legada");
 assert.equal(legacyPropertyActor.system.skills.athletics.proficient, undefined);
 assert.equal(legacyPropertyActor.system.skills.stealth.proficientLevel, -1, "A antiga marcação opposed deve migrar para nível negativo");
 assert.equal(legacyPropertyActor.system.skills.stealth.proficient, undefined);
