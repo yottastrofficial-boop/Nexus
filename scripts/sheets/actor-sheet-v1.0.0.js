@@ -139,7 +139,8 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
     );
     if (calculated !== null) {
       return { value: calculated, path, sourcePath: rulebookProperty.sourcePath ?? path, virtual: true,
-        readOnly: rulebookProperty.readOnly ?? false, expression: true, formula: storedPropertyExpression };
+        readOnly: rulebookProperty.readOnly ?? false, expression: true, formula: storedPropertyExpression,
+        formulaEditable: rulebookProperty.formulaEditable === true };
     }
   }
   if (rulebookProperty.matched) {
