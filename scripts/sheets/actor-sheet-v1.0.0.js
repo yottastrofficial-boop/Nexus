@@ -10,8 +10,8 @@ import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./ac
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
-import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../core/skills.js";
-import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../core/property-schema.js";
+import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
@@ -182,7 +182,7 @@ const expandNexusPropertyExpressions = (formula, actor) => String(formula ?? "")
     if (!path) throw new Error("Referência de propriedade inválida na fórmula.");
     return "@" + path;
   }
-  const value = evaluateNexusFormula(source, identifier =>
+  const value = evaluateNexusExpression(source, identifier =>
     resolveNexusBinding(actor, resolveFormulaIdentifier(identifier)).value
   );
   if (value === null) throw new Error("A expressão contém uma propriedade inválida ou não numérica.");
@@ -2957,6 +2957,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
           ) || sourcePropertyPath || "");
           const value = effectivePath.value ?? rawBoundValue;
           const definition = NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.find(item => item.path === propertyPath);
+          const propertyNameNode = inspector.querySelector("[data-component-property-name]");
+          if (propertyNameNode) {
+            const propertyName = definition?.label ?? effectivePath.alias?.label ?? propertyPath.split(".").at(-1) ?? "Propriedade";
+            propertyNameNode.textContent = propertyName;
+            propertyNameNode.title = propertyName;
+          }
           const aliasType = effectivePath.alias?.type;
           const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
           const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
@@ -2964,7 +2970,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const skillFormulaKey = skillValueMatch?.[1] ?? skillFormulaMatch?.[1] ?? "";
           const skillFormulaMode = !!skillFormulaKey;
           const skillFormula = skillFormulaMode
-            ? String(getPath(this.actor.system ?? {}, `skills.${skillFormulaKey}.formula`) || getNexusDefaultSkillFormula(skillFormulaKey))
+            ? String(getPath(this.actor.system ?? {}, `skills.${skillFormulaKey}.formula`) ?? "")
             : "";
           const storedExpressions = this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
           const storedExpression = getPath(storedExpressions, propertyPath);
@@ -2989,7 +2995,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
             propertyValueInput.style.resize = "none";
             propertyValueInput.value = String(inputValue);
             propertyValueInput.dataset.propertyPath = propertyPath;
-            propertyValueInput.dataset.propertyKind = propertyFormulaMode ? "property-formula" : propertyType;
+            propertyValueInput.dataset.propertyKind = propertyType;
             propertyValueInput.disabled = !hasPath || (effectivePath.readOnly === true && !propertyFormulaMode) || (propertyPath === "name" && one.updateSource === false);
             propertyValueInput.removeAttribute("title");
 if (!hasPath) propertyValueInput.value = "";
