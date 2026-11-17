@@ -1,3 +1,11 @@
+## Campo Valor unificado
+
+O Inspector apresenta um único campo chamado **Valor** para propriedades simples, propriedades derivadas e perícias. O modo de validação é definido pela propriedade selecionada, mas a interface não troca o rótulo nem o componente de edição.
+
+As fórmulas de perícias e propriedades derivadas usam a mesma sintaxe segura, as mesmas funções matemáticas e o mesmo resolvedor de caminhos. O armazenamento permanece compatível com o formato já usado pelos Actors: fórmulas de perícias em `system.skills.<perícia>.formula` e expressões de outras propriedades em `flags.nexus.propertyExpressions`.
+
+O seletor de propriedades mostra somente o nome e o caminho real. Caminhos de navegação por Corpo, Mente, Alma ou atributo associado à perícia são normalizados para o caminho canônico antes de serem salvos.
+
 # Fórmulas de propriedades
 
 O NEXUS aceita expressões aritméticas em interpolações de texto e em fórmulas de rolagem.
