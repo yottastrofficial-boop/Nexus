@@ -1,4 +1,5 @@
 import { findPropertyPickerNode } from "../core/property-catalog.js";
+import { normalizeNexusPropertyPath } from "../core/property-paths.js";
 
 function createButton(label, className, attributes = {}) {
   const button = document.createElement("button");
@@ -9,36 +10,22 @@ function createButton(label, className, attributes = {}) {
   return button;
 }
 
-function formatPropertyValue(value) {
-  if (value === undefined || value === null) return "—";
-  if (typeof value === "boolean") return value ? "Sim" : "Não";
-  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "—";
-  if (typeof value === "string") return value.length > 96 ? value.slice(0, 93) + "…" : (value || "—");
-  if (Array.isArray(value)) return value.length ? "Lista · " + value.length + " itens" : "Lista vazia";
-  return "Objeto";
-}
-
-function appendPropertyOption(container, entry, label = entry.label, rollAlias = null, getValue = null) {
+function appendPropertyOption(container, entry, label = entry.label, rollAlias = null) {
   const button = createButton("", "nexus-property-option", { propertyPathOption: entry.path });
   button.setAttribute("role", "option");
   const title = document.createElement("strong");
   title.className = "nexus-property-option-name";
   title.textContent = label;
   title.title = label;
-  const rawValue = getValue?.(entry.path);
-  const value = document.createElement("small");
-  value.className = "nexus-property-option-value";
-  value.textContent = "Valor atual: " + formatPropertyValue(rawValue);
-  value.title = rawValue === undefined || rawValue === null ? "Sem valor definido" : String(rawValue);
   const code = document.createElement("code");
   code.className = "nexus-property-option-path";
   code.textContent = entry.path;
   code.title = entry.path;
-  button.setAttribute("aria-label", `${label}; ${entry.path}; valor atual ${formatPropertyValue(rawValue)}`);
+  button.setAttribute("aria-label", `${label}; caminho ${entry.path}`);
   const heading = document.createElement("span");
   heading.className = "nexus-property-option-heading";
-  heading.append(title, code);
-  button.append(heading, value);
+  heading.append(title);
+  button.append(heading, code);
   if (rollAlias) {
     button.dataset.rollToken = "@" + rollAlias.display;
     button.dataset.rollAliasOption = "true";
@@ -47,7 +34,7 @@ function appendPropertyOption(container, entry, label = entry.label, rollAlias =
   container.append(button);
 }
 
-export function renderPropertyPicker(list, catalog, { categoryPath = "", query = "", formulaMode = false, getValue = null } = {}) {
+export function renderPropertyPicker(list, catalog, { categoryPath = "", query = "", formulaMode = false } = {}) {
   if (!list || !catalog) return;
   const fragment = document.createDocumentFragment();
   const header = document.createElement("div");
@@ -69,11 +56,15 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
   content.className = "nexus-property-options-content";
 
   const normalizedQuery = String(query ?? "").trim().toLocaleLowerCase("pt-BR");
+  const canonicalQuery = normalizeNexusPropertyPath(query).toLocaleLowerCase("pt-BR");
   if (normalizedQuery) {
     const matches = catalog.entries.filter(entry =>
-      [entry.label, entry.searchLabel, entry.path].some(value => String(value ?? "").toLocaleLowerCase("pt-BR").includes(normalizedQuery))
+      [entry.label, entry.searchLabel, entry.path].some(value => {
+        const candidate = String(value ?? "").toLocaleLowerCase("pt-BR");
+        return candidate.includes(normalizedQuery) || (canonicalQuery && candidate.includes(canonicalQuery));
+      })
     );
-    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry, entry.searchLabel ?? entry.label, null, getValue);
+    for (const entry of matches.slice(0, 100)) appendPropertyOption(content, entry, entry.searchLabel ?? entry.label);
     if (formulaMode) {
       const aliases = catalog.rollAliases.filter(entry =>
         (entry.label + " " + entry.display + " " + entry.target).toLocaleLowerCase("pt-BR").includes(normalizedQuery)
@@ -84,7 +75,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
         heading.textContent = "Atalhos de rolagem";
         content.append(heading);
         for (const alias of aliases.slice(0, 30)) {
-          appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias, getValue);
+          appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias);
         }
       }
     }
@@ -98,7 +89,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
     const node = findPropertyPickerNode(catalog, categoryPath);
     const children = node ? [...node.children.values()] : [];
     if (categoryPath && node?.entry) {
-      appendPropertyOption(content, node.entry, "Usar " + node.label, null, getValue);
+      appendPropertyOption(content, node.entry, "Usar " + node.label);
     }
     children.sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
     for (const child of children) {
@@ -106,16 +97,14 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
         const category = createButton("", "nexus-property-category", { propertyCategory: child.path });
         const heading = document.createElement("strong");
         heading.textContent = child.label;
-        const description = document.createElement("small");
-        description.textContent = child.path;
         const arrow = document.createElement("span");
         arrow.setAttribute("aria-hidden", "true");
         arrow.textContent = "›";
-        category.append(heading, description, arrow);
+        category.append(heading, arrow);
         content.append(category);
-        if (child.entry) appendPropertyOption(content, child.entry, child.label + " · valor", null, getValue);
+        if (child.entry) appendPropertyOption(content, child.entry, child.label + " · valor");
       } else if (child.entry) {
-        appendPropertyOption(content, child.entry, child.entry.label, null, getValue);
+        appendPropertyOption(content, child.entry, child.entry.label);
       }
     }
     if (formulaMode && catalog.rollAliases.length) {
@@ -124,7 +113,7 @@ export function renderPropertyPicker(list, catalog, { categoryPath = "", query =
       heading.textContent = "Atalhos de rolagem";
       content.append(heading);
       for (const alias of catalog.rollAliases.slice(0, 30)) {
-        appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias, getValue);
+        appendPropertyOption(content, { path: alias.target, label: alias.label }, alias.label, alias);
       }
     }
     if (!content.childElementCount) {

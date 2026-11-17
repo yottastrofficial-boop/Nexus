@@ -2966,17 +2966,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
           const skillFormula = skillFormulaMode
             ? String(getPath(this.actor.system ?? {}, `skills.${skillFormulaKey}.formula`) || getNexusDefaultSkillFormula(skillFormulaKey))
             : "";
-          const propertyFormulaMode = effectivePath.formulaEditable === true && !!effectivePath.formula;
           const storedExpressions = this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
           const storedExpression = getPath(storedExpressions, propertyPath);
-          const propertyType = skillFormulaMode ? "string" : (definition?.type ?? (["number", "boolean", "string"].includes(typeof value) ? typeof value : inferredAliasType));
+          const propertyFormulaMode = skillFormulaMode || effectivePath.formulaEditable === true;
+          const propertyType = skillFormulaMode ? "number" : (definition?.type ?? (["number", "boolean", "string"].includes(typeof value) ? typeof value : inferredAliasType));
           const canEditPrimitive = ["number", "boolean", "string"].includes(propertyType);
-          const hasPath = !!propertyPath && (canEditPrimitive || skillFormulaMode || propertyFormulaMode);
+          const hasPath = !!propertyPath && (canEditPrimitive || propertyFormulaMode);
           const inputValue = skillFormulaMode ? skillFormula
-            : propertyFormulaMode ? (storedExpression ?? effectivePath.formula)
+            : propertyFormulaMode ? (storedExpression ?? effectivePath.formula ?? (value === undefined || value === null ? "" : value))
             : (storedExpression ?? (value === undefined || value === null ? (propertyType === "number" ? 0 : propertyType === "boolean" ? false : "") : value));
           const valueLabel = propertyValueRow.querySelector("[data-property-value-label]");
-          if (valueLabel) valueLabel.textContent = skillFormulaMode ? "Fórmula da perícia" : propertyFormulaMode ? "Fórmula da propriedade" : "Valor/Conteúdo da propriedade";
+          if (valueLabel) valueLabel.textContent = "Valor";
           propertyValueRow.hidden = !one;
           if (hasPath && one.type !== "token") {
             if (propertyValueInput.tagName !== "TEXTAREA") {
@@ -2989,8 +2989,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
             propertyValueInput.style.resize = "none";
             propertyValueInput.value = String(inputValue);
             propertyValueInput.dataset.propertyPath = propertyPath;
-            propertyValueInput.dataset.propertyKind = skillFormulaMode ? "skill-formula" : propertyFormulaMode ? "property-formula" : propertyType;
-            propertyValueInput.disabled = !hasPath || (effectivePath.readOnly === true && !skillFormulaMode && !propertyFormulaMode) || (propertyPath === "name" && one.updateSource === false);
+            propertyValueInput.dataset.propertyKind = propertyFormulaMode ? "property-formula" : propertyType;
+            propertyValueInput.disabled = !hasPath || (effectivePath.readOnly === true && !propertyFormulaMode) || (propertyPath === "name" && one.updateSource === false);
             propertyValueInput.removeAttribute("title");
 if (!hasPath) propertyValueInput.value = "";
             const lineHeight = Number.parseFloat(getComputedStyle(propertyValueInput).lineHeight) || 16;

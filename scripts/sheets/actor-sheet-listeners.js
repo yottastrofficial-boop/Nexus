@@ -232,13 +232,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
       let value = input.value;
-      if (kind === "skill-formula") {
-        const match = path.match(/^skills\.([a-zA-Z0-9_-]+)\.(?:value|formula)$/);
-        const formula = String(value ?? "").trim().slice(0, 500);
-        if (!match || (formula && evaluateNexusSkillFormula(sheet.actor, match[1], formula) === null)) { globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use caminhos de propriedades numéricas e operadores suportados."); return; }
-        await sheet.actor.update({ [`system.skills.${match[1]}.formula`]: formula }, { render: false });
-        sheet._refreshBoundComponents(); return;
-      }
+      const skillFormulaMatch = path.match(/^skills\.([a-zA-Z0-9_-]+)\.(?:value|formula)$/);
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const trimmedValue = typeof value === "string" ? value.trim() : value;
@@ -257,11 +251,29 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const incompatible = calculated === null
           || (valueKind === "number" && typeof calculated !== "number")
           || (valueKind === "boolean" && typeof calculated !== "boolean");
-        if (incompatible || resolvedPath.readOnly) {
+        if (incompatible || (resolvedPath.readOnly && !skillFormulaMatch)) {
           globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
         }
-        await writePropertyExpression(sheet.actor, path, String(value));
+        if (skillFormulaMatch) {
+          await sheet.actor.update({ [`system.skills.${skillFormulaMatch[1]}.formula`]: String(value).trim().slice(0, 500) }, { render: false });
+        } else {
+          await writePropertyExpression(sheet.actor, path, String(value));
+        }
+        sheet._refreshBoundComponents();
+        return;
+      }
+      if (skillFormulaMatch) {
+        const formula = String(value ?? "").trim().slice(0, 500);
+        const source = formula.replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
+        const calculated = formula ? evaluateNexusExpression(source, identifier =>
+          resolveNexusBinding(sheet.actor, resolveFormulaIdentifier(identifier), 1).value
+        ) : 0;
+        if (formula && (typeof calculated !== "number" || !Number.isFinite(calculated))) {
+          globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use caminhos de propriedades numéricas e operadores suportados.");
+          return;
+        }
+        await sheet.actor.update({ [`system.skills.${skillFormulaMatch[1]}.formula`]: formula }, { render: false });
         sheet._refreshBoundComponents();
         return;
       }
@@ -1441,8 +1453,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       renderPropertyPicker(list,list._nexusCatalog,{
         categoryPath:list.dataset.categoryPath??"",
         query,
-        formulaMode,
-        getValue: path => resolveNexusBinding(sheet.actor, path).value
+        formulaMode
       });
       list.hidden=false;requestAnimationFrame(()=>positionPropertyOptions(input));
     };
@@ -1618,12 +1629,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="actionTargetId") component.actionTargetId = String(input.value ?? "").trim().slice(0,100);
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
-        const path = String(input.value ?? "").replace(/^system\./, "").trim();
+        const path = normalizeNexusPropertyPath(String(input.value ?? ""));
         const resolved = resolveNexusBinding(sheet.actor, path);
-        const validPath = /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        const validPath = !!path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
         // Um alias personalizado pode não possuir caminho físico em Actor.system.
         if (path && (!validPath || (!resolved.path && !resolved.alias))) return;
         component.dataPath = path;
+        input.value = path;
         if(component.type==="resource-meter"){component.customBinding=path;component.binding="custom";}
       }
       else if(key==="customLabel") { const title=String(input.value).trim().slice(0,48); component.customLabel=title; if (["level","attribute"].includes(COMPONENTS[component.type]?.variant) || ["level","attribute"].includes(component.sheetVariant)) component.text=title; }
