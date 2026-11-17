@@ -90,7 +90,7 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   if (depth > 8) return { value: "", path: "" };
   const wrapped = raw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
   const formulaSource = wrapped ? wrapped[1].trim() : raw;
-  if (/[()+*/%<>=!]|\s[+-]\s/.test(formulaSource)) {
+  if ((wrapped && !/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(formulaSource)) || /[()+*/%<>=!]|\s[+-]\s/.test(formulaSource)) {
     const calculated = evaluateNexusExpression(formulaSource, identifier =>
       resolveNexusBinding(actor, resolveFormulaIdentifier(identifier), depth + 1).value
     );
