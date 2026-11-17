@@ -885,7 +885,7 @@ assert.match(sheet, /calculationMode === "formula"/);
 assert.match(template, /data-alias-field="formula"/);
 assert.match(propertyCatalog, /createPropertyRegistry/);
 assert.match(sheet, /normalizeNexusFormulaIdentifier/, "Fórmulas devem usar um normalizador compartilhado de identificadores");
-assert.match(sheetListeners, /resolveNexusBinding\\(sheet\\.actor, resolveFormulaIdentifier\\(identifier\\), 1\\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
+assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
 assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
 
