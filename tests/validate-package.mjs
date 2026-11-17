@@ -191,6 +191,13 @@ assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "{{min(5, c
 assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").value, 4, "Um valor manual deve substituir a fórmula padrão de MB");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "A fórmula padrão de recuperação deve manter os intervalos de nível");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve usar a fórmula padrão editável");
+const customMbActor = {
+  system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
+  flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
+};
+assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
+assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "Fórmulas derivadas dependentes devem usar o MB personalizado");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
