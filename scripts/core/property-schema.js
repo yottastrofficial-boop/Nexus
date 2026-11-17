@@ -126,6 +126,9 @@ function evaluateCustomPropertyFormula(actor, path, depth = 0, visited = new Set
     const aliases = {
       level: "identity.level", mb: "progression.mb.value",
       "combat.mb": "progression.mb.value", "combat.mb.value": "progression.mb.value",
+      def: "combat.defense.value", defesa: "combat.defense.value",
+      desl: "combat.movement.value", movimento: "combat.movement.value",
+      ddr: "recovery.count.value",
       for: "attributes.for.value", des: "attributes.des.value", sab: "attributes.sab.value",
       int: "attributes.int.value", car: "attributes.car.value", von: "attributes.von.value"
     };
@@ -197,11 +200,16 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     ?? actor.flags?.nexus?.propertyExpressions
     ?? system.flags?.nexus?.propertyExpressions
     ?? {};
-  const customFormula = getStoredPathValue(expressions, formulaPath);
+  const formulaCandidates = [...new Set([formulaPath, key])];
+  const customFormulaPath = formulaCandidates.find(candidate => {
+    const candidateFormula = getStoredPathValue(expressions, candidate);
+    return typeof candidateFormula === "string" && candidateFormula.trim();
+  }) ?? formulaPath;
+  const customFormula = getStoredPathValue(expressions, customFormulaPath);
   const definition = definitionByPath.get(formulaPath);
   if (definition?.derived || (typeof customFormula === "string" && customFormula.trim())) {
     if (typeof customFormula === "string" && customFormula.trim()) {
-      const value = evaluateCustomPropertyFormula(actor, formulaPath);
+      const value = evaluateCustomPropertyFormula(actor, customFormulaPath);
       return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula: customFormula, formulaEditable: true };
     }
     return {

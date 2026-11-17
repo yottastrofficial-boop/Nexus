@@ -205,6 +205,11 @@ const customFormulaActorA = { system: { attributes: { for: 2 } }, flags: { nexus
 const customFormulaActorB = { system: { attributes: { for: 9 } }, flags: { nexus: { propertyExpressions: {} } } };
 assert.equal(getNexusRulebookPropertyValue(customFormulaActorA, "progression.mb.value").value, 3, "A fórmula salva deve ser avaliada no Actor proprietário");
 assert.equal(getNexusRulebookPropertyValue(customFormulaActorB, "progression.mb.value").value, "", "Fórmulas não podem vazar entre Actors");
+const legacyAliasFormulaActor = {
+  system: { attributes: { for: 4 } },
+  flags: { nexus: { propertyExpressions: { combat: { mb: "{{attributes.for.value + 2}}" } } } }
+};
+assert.equal(getNexusRulebookPropertyValue(legacyAliasFormulaActor, "progression.mb.value").value, 6, "Aliases legados devem localizar a fórmula personalizada original");
 assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").value, 4, "Um valor manual deve substituir a fórmula padrão de MB");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "", "Dados de recuperação não devem receber fórmulas padrão");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, "", "Recuperação de PE não deve receber fórmula padrão");
