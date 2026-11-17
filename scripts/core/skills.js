@@ -50,12 +50,12 @@ export function getNexusBaseModifier(actorOrSystem, depth = 0) {
   const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
   const formula = expressions?.progression?.mb?.value ?? expressions?.combat?.mb;
   if (typeof formula === "string" && formula.trim() && depth < 8) {
-    const source = formula.trim().replace(/^\\{\\{\\s*([\\s\\S]*?)\\s*\\}\\}$/, "$1");
+    const source = formula.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
     const calculated = evaluateNexusExpression(source, identifier => {
-      const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\\./, "").toLocaleLowerCase("pt-BR");
+      const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "").toLocaleLowerCase("pt-BR");
       if (["identity.level", "level"].includes(key)) return Math.max(1, Number(system.identity?.level) || 1);
       if (["combat.mb", "progression.mb.value", "mb"].includes(key)) return Math.min(5, Math.ceil(Math.max(1, Number(system.identity?.level) || 1) / 2));
-      const attributeMatch = key.match(/^(?:attributes\\.)?(for|des|sab|int|car|von)(?:\\.value)?$/);
+      const attributeMatch = key.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
       if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1]);
       const parts = key.split(".");
       if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) return undefined;
