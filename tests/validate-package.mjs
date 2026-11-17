@@ -904,6 +904,7 @@ const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 5, "O atalho de proficiência deve continuar aplicando apenas o sinal do nível");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
@@ -1204,6 +1205,7 @@ assert.match(propertyPickerView, /canonicalQuery/);
 assert.match(sheetListeners, /normalizeNexusPropertyPath\(String\(input\.value \?\? ""\)\)/);
 assert.match(template, /Caminho da propriedade/);
 assert.match(sheetListeners, /const skillFormulaMatch = path\.match/);
+assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet\.actor, skillFormulaMatch\[1\], String\(value\)\)/);
 assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)\.value/);
 assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
 assert.match(css, /max-height:\s*none !important/);
