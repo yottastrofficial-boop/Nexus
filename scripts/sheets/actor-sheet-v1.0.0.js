@@ -11,7 +11,7 @@ import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../core/skills.js";
-import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
+import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../core/property-schema.js";
 import { normalizeNexusPropertyPath } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
@@ -1361,6 +1361,18 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
       for (const match of String(expression ?? "").matchAll(matcher)) addPath(match[0]);
     };
+    const addPropertyFormulaDependencies = rawPath => {
+      const path = normalizeNexusPropertyPath(String(rawPath ?? "").replace(/^system\./, ""));
+      if (!path) return;
+      const skillMatch = path.match(/^skills\.([^.]+)\.(?:value|formula)$/);
+      const formula = skillMatch
+        ? (getPath(this.actor.system ?? {}, `skills.${skillMatch[1]}.formula`) || getNexusDefaultSkillFormula(skillMatch[1]))
+        : (getPath(this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {}, path)
+          || getNexusDefaultPropertyFormula(path));
+      if (formula) addExpression(formula);
+    };
+    addPropertyFormulaDependencies(component.dataPath);
+    addPropertyFormulaDependencies(component.actionPath);
     addPath(component.dataPath);
     addPath(component.customBinding);
     addPath(component.actionPath);
