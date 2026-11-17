@@ -46,29 +46,28 @@ export function getNexusBaseModifier(actorOrSystem, depth = 0) {
   const actor = actorOrSystem?.system ? actorOrSystem : null;
   const system = actor?.system ?? actorOrSystem ?? {};
   const stored = system.progression?.mb?.value ?? system.combat?.mb;
-  if (stored !== undefined && stored !== null && Number.isFinite(Number(stored))) return Number(stored);
-  const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
+  if (stored !== undefined && stored !== null && stored !== "" && Number.isFinite(Number(stored))) return Number(stored);
+  const expressions = actor?.getFlag?.("nexus", "propertyExpressions")
+    ?? actor?.flags?.nexus?.propertyExpressions
+    ?? system.flags?.nexus?.propertyExpressions
+    ?? {};
   const formula = expressions?.progression?.mb?.value ?? expressions?.combat?.mb;
-  if (typeof formula === "string" && formula.trim() && depth < 8) {
-    const source = formula.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
-    const calculated = evaluateNexusExpression(source, identifier => {
-      const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "").toLocaleLowerCase("pt-BR");
-      if (["identity.level", "level"].includes(key)) return Math.max(1, Number(system.identity?.level) || 1);
-      if (["combat.mb", "progression.mb.value", "mb"].includes(key)) return Math.min(5, Math.ceil(Math.max(1, Number(system.identity?.level) || 1) / 2));
-      const attributeMatch = key.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
-      if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1]);
-      const parts = key.split(".");
-      if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) return undefined;
-      const raw = parts.reduce((value, part) => value?.[part], system);
-      const resolved = raw && typeof raw === "object" && Object.hasOwn(raw, "value") ? raw.value : raw;
-      return ["string", "number", "boolean"].includes(typeof resolved) ? resolved : undefined;
-    });
-    if (typeof calculated === "number" && Number.isFinite(calculated)) return calculated;
-  }
-  const level = Math.max(1, Number(system.identity?.level) || 1);
-  return Math.min(5, Math.ceil(level / 2));
+  if (typeof formula !== "string" || !formula.trim() || depth >= 8) return 0;
+  const source = formula.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
+  const calculated = evaluateNexusExpression(source, identifier => {
+    const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "").toLocaleLowerCase("pt-BR");
+    if (["identity.level", "level"].includes(key)) return Number(system.identity?.level) || 0;
+    if (["combat.mb", "progression.mb.value", "mb"].includes(key)) return 0;
+    const attributeMatch = key.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
+    if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1], depth + 1);
+    const parts = key.split(".");
+    if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) return undefined;
+    const raw = parts.reduce((value, part) => value?.[part], system);
+    const resolved = raw && typeof raw === "object" && Object.hasOwn(raw, "value") ? raw.value : raw;
+    return ["string", "number", "boolean"].includes(typeof resolved) ? resolved : undefined;
+  });
+  return typeof calculated === "number" && Number.isFinite(calculated) ? calculated : 0;
 }
-
 function getStoredProficientLevel(system, skill) {
   const current = system.skills?.[skill.key];
   const legacy = system.skills?.[skill.legacyKey];
@@ -93,7 +92,7 @@ export function getNexusAttributeValue(actorOrSystem, attributeKey, depth = 0) {
       const normalized = key.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const attributeMatch = normalized.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
       if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1], depth + 1);
-      if (["mb", "combat.mb", "progression.mb.value"].includes(normalized)) return getNexusBaseModifier(system);
+      if (["mb", "combat.mb", "progression.mb.value"].includes(normalized)) return getNexusBaseModifier(actorOrSystem, depth + 1);
       if (["identity.level", "level"].includes(normalized)) return Math.max(1, Number(system.identity?.level) || 1);
       const parts = key.replace(/^system\./, "").split(".");
       if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) return undefined;

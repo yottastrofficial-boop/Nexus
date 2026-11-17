@@ -173,7 +173,7 @@ const nestedAttributeActor = { system: { attributes: { for: { value: 7 } } } };
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").value, 7, "Atributos legados aninhados devem ler o campo value");
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").sourcePath, "attributes.for.value", "Atributos legados aninhados devem gravar no campo value");
 assert.equal(getNexusSkillRows(nestedAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 7, "Perícias devem ler atributos aninhados sem retornar zero");
-assert.equal(evaluateNexusSkillFormula(nestedAttributeActor, "athletics", "for + mb"), 8, "Fórmulas de perícia devem usar o atributo aninhado");
+assert.equal(evaluateNexusSkillFormula(nestedAttributeActor, "athletics", "for + mb"), 7, "Sem MB configurado, fórmulas usam somente o atributo armazenado");
 const expressionAttributeActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, skills: {} },
   flags: { nexus: { propertyExpressions: { attributes: { for: { value: "{{attributes.des.value + mb}}" } } } } }
@@ -208,6 +208,7 @@ const customMbActor = {
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
+assert.equal(getNexusBaseModifier({ system: { identity: { level: 5 } } }), 0, "MB não deve ser calculado automaticamente sem fórmula ou valor salvo");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem fórmula própria não devem herdar o MB");
 assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, "", "Uma fórmula de MB não deve criar fórmulas implícitas para outras propriedades");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, "");
@@ -923,10 +924,10 @@ assert.ok(proficiencyAsset, "A Biblioteca deve disponibilizar o marcador de prof
 assert.equal(proficiencyAsset.template.actionPath, "skills.athletics.proficientLevel", "O marcador da Biblioteca deve apontar para o valor numérico canônico");
 assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
 const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, skills: { athletics: { proficientLevel: 2 } } } };
-assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
-assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
-assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
-assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 5, "O atalho de proficiência deve continuar aplicando apenas o sinal do nível");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 3, "Sem MB configurado, somente o atributo armazenado contribui");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 3, "Atalhos @FOR e @MB não devem introduzir MB padrão");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 3, "A expressão completa deve respeitar MB não configurado");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 3, "Proficiência não deve criar bônus sem MB configurado");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
@@ -1193,14 +1194,14 @@ const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for:
 const formulaAthletics = getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics");
 assert.equal(formulaAthletics.value, 2);
 assert.equal(formulaAthletics.description, "Descrição personalizada de Atletismo.");
-assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força + (mb * proficiencia)"), 2);
+assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força + (mb * proficiencia)"), 4);
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força / 0"), null);
 const fullPathSkillFormula = "{{attributes.for.value + (combat.mb * sign(skills.athletics.proficientLevel))}}";
-assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 2, "Fórmulas de perícia devem resolver caminhos completos e funções matemáticas");
+assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 4, "Fórmulas devem usar somente MB configurado explicitamente");
 formulaSkillActor.system.skills.athletics.formula = fullPathSkillFormula;
 assert.equal(getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics").value, 2, "O valor exibido da perícia deve usar a fórmula validada no Inspector");
 formulaSkillActor.system.skills.athletics.proficientLevel = 1;
-assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 6, "O sinal da proficiência deve alterar o bônus sem multiplicar sua magnitude");
+assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 4, "Proficiência não deve criar bônus sem MB configurado");
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "{{ceil(level / 2)}}"), 2, "Atalhos de nível devem funcionar em fórmulas de perícia");
 const propertyPickerWithoutFormulaInternals = buildPropertyPickerCatalog();
 assert.equal(propertyPickerWithoutFormulaInternals.entries.some(entry => entry.path === "skills.athletics.formula"), false, "A fórmula é configuração interna do Valor da perícia, não uma propriedade separada no seletor");
