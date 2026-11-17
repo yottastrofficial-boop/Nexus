@@ -86,7 +86,7 @@ assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve p
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
 assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
 assert.match(template, /nexus-property-value-field[\s\S]*data-property-value/, "O valor deve permanecer no campo integrado do Inspector");
-assert.match(propertyPickerView, /nexus-property-option-heading/, "O seletor deve agrupar nome e caminho na mesma linha");
+assert.match(propertyPickerView, /nexus-property-option-heading/, "O seletor deve organizar nome e caminho em linhas separadas");
 assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /highestPanelZ === null \? desiredZ : Math\.min\(desiredZ, highestPanelZ - 1\)/, "As barras laterais não podem sobrepor janelas abertas");
@@ -123,7 +123,7 @@ assert.match(propertyCatalog, /NEXUS_SKILLS/);
 assert.match(propertyCatalog, /modifier/);
 assert.match(propertyPickerView, /propertyCategory/, "O seletor hierárquico deve marcar as opções de categoria");
 assert.doesNotMatch(propertyPickerView, /Valor atual:|nexus-property-option-value/, "O seletor não deve exibir uma prévia de valor");
-assert.match(sheetListeners, /getValue: path => resolveNexusBinding\(sheet.actor, path\)\.value/, "O seletor deve resolver valores do Actor em tempo real");
+assert.doesNotMatch(sheetListeners, /getValue: path => resolveNexusBinding\(sheet.actor, path\)\.value/, "O seletor não deve calcular prévias de valores que não são exibidas");
 assert.doesNotMatch(propertyCatalog.match(/const DERIVED_SKILL_FIELDS = new Set\(\[[\s\S]*?\]\);/)?.[0] ?? "", /proficientLevel/, "Proficiência numérica não pode ser classificada como campo derivado");
 assert.match(propertyPickerView, /createButton\("", "nexus-property-option"/, "As opções não devem duplicar o rótulo no texto do botão");
 assert.match(propertyPickerView, /heading\.append\(title\)/, "O nome deve ocupar a primeira linha do item");
