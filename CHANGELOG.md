@@ -17,6 +17,7 @@
 ### Validação
 - Adicionados testes de fórmulas padrão, funções seguras, valores manuais, ausência de hints e serialização das gravações.
 - A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+- Pacote 1.0.0.58 publicado após aprovação das verificações automatizadas.
 
 ## 1.0.0.57
 
