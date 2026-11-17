@@ -115,7 +115,7 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
   const system = actorOrSystem?.system ?? actorOrSystem ?? {};
   const attributeValue = getNexusAttributeValue(actorOrSystem, skill.attributeKey);
   const proficientLevel = getStoredProficientLevel(system, skill);
-  const baseModifier = getNexusBaseModifier(system);
+  const baseModifier = getNexusBaseModifier(actorOrSystem);
   const source = String(formula ?? "").trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1").replace(/força/giu, "forca");
   if (!source || source.length > 500) return null;
   return evaluateNexusFormula(source, identifier => {
@@ -139,7 +139,7 @@ export function getNexusDefaultSkillFormula(skillKey) {
 
 export function getNexusSkillRows(actor) {
   const system = actor?.system ?? {};
-  const baseModifier = getNexusBaseModifier(system);
+  const baseModifier = getNexusBaseModifier(actor);
   return NEXUS_SKILLS.map(skill => {
     const attributeValue = getNexusAttributeValue(actor, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
@@ -156,5 +156,5 @@ export function getNexusSkillRows(actor) {
 }
 export function getNexusSkillModifier(actor, skillKey) {
   const row = getNexusSkillRows(actor).find(item => item.key === skillKey);
-  return row ? { ...row, skill: NEXUS_SKILLS.find(item => item.key === skillKey), baseModifier: getNexusBaseModifier(actor?.system ?? actor) } : null;
+  return row ? { ...row, skill: NEXUS_SKILLS.find(item => item.key === skillKey), baseModifier: getNexusBaseModifier(actor) } : null;
 }
