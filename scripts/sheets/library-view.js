@@ -34,7 +34,9 @@ export function renderLibraryFlows(sheet, panel) {
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
 
     const assets=panel.querySelector("[data-library-assets]");
-    if(!assets||panel.dataset.libraryMounted==="true")return;
+    if(!assets)return;
+    sheet._libraryRenderFlows = () => renderLibraryFlows(sheet, panel);
+    if(panel.dataset.libraryMounted==="true"){renderLibraryFlows(sheet,panel);return;}
     panel.dataset.libraryMounted="true";assets.replaceChildren();
     const searchInput = panel.querySelector("[data-library-search]");
     if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
