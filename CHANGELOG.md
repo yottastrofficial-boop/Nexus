@@ -1,3 +1,23 @@
+## 1.0.0.58
+
+### Inspector e fórmulas
+- Removidos os textos de dica do campo de valor e seus estilos.
+- O campo de texto cresce conforme o conteúdo e passa a usar rolagem somente quando ultrapassa cinco linhas; uma linha não exibe barra de rolagem.
+- Fórmulas padrão de MB, defesa, iniciativa, deslocamento em metros, recuperação, recuperação de PE e carga agora são apresentadas no próprio campo de valor e podem ser substituídas por outra fórmula ou por um valor manual.
+- Fórmulas padrão das perícias também ficam visíveis e editáveis; o cálculo padrão é expresso com a mesma sintaxe de fórmulas persistentes.
+
+### Salvamento e atualização dinâmica
+- Gravações de expressões em `flags.nexus.propertyExpressions` são serializadas por Actor e sempre partem do estado mais recente, evitando que edições rápidas em propriedades diferentes sobrescrevam umas às outras.
+- Mantido o rastreamento reativo das dependências das propriedades calculadas e atualização imediata após alterações no Inspector.
+
+### Motor de fórmulas
+- Adicionadas funções seguras `min`, `max`, `ceil`, `floor`, `round`, `abs`, `sign` e `if`, sem executar JavaScript arbitrário.
+- Os valores derivados podem ser substituídos por números, textos ou expressões persistidas.
+
+### Validação
+- Adicionados testes de fórmulas padrão, funções seguras, valores manuais, ausência de hints e serialização das gravações.
+- A validação automatizada não substitui o teste funcional dentro do Foundry VTT 14.
+
 ## 1.0.0.57
 
 ### Correções do motor de fórmulas e atualização reativa
