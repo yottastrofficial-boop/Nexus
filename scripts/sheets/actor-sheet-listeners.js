@@ -1,3 +1,22 @@
+const propertyExpressionQueues = new WeakMap();
+
+function writePropertyExpression(actor, path, expression) {
+  const previous = propertyExpressionQueues.get(actor) ?? Promise.resolve();
+  const next = previous.catch(() => {}).then(async () => {
+    const current = foundry.utils.deepClone(actor.getFlag?.("nexus", "propertyExpressions") ?? actor.flags?.nexus?.propertyExpressions ?? {});
+    const parts = String(path).split(".");
+    let parent = current;
+    for (const part of parts.slice(0, -1)) {
+      if (!parent[part] || typeof parent[part] !== "object") parent[part] = {};
+      parent = parent[part];
+    }
+    if (expression === null) delete parent[parts.at(-1)];
+    else parent[parts.at(-1)] = String(expression).slice(0, 500);
+    await actor.setFlag("nexus", "propertyExpressions", current);
+  });
+  propertyExpressionQueues.set(actor, next);
+  return next;
+}
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -230,40 +249,33 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([\s\S]+?)\s*\}\}$/) : null;
-      const expressions = clone(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {});
+
       if (expression) {
         const calculated = evaluateNexusExpression(expression[1].trim(), identifier =>
           resolveNexusBinding(sheet.actor, identifier, 1).value
         );
+        const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
         const incompatible = calculated === null
-          || (kind === "number" && typeof calculated !== "number")
-          || (kind === "boolean" && typeof calculated !== "boolean");
+          || (valueKind === "number" && typeof calculated !== "number")
+          || (valueKind === "boolean" && typeof calculated !== "boolean");
         if (incompatible || resolvedPath.readOnly) {
           globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
         }
-        foundry.utils.setProperty(expressions, path, String(value).slice(0, 500));
-        await sheet.actor.setFlag("nexus", "propertyExpressions", expressions);
+        await writePropertyExpression(sheet.actor, path, String(value));
         sheet._refreshBoundComponents();
         return;
       }
-      const expressionParts = path.split(".");
-      let expressionParent = expressions;
-      for (const part of expressionParts.slice(0, -1)) {
-        if (!expressionParent[part] || typeof expressionParent[part] !== "object") expressionParent[part] = {};
-        expressionParent = expressionParent[part];
-      }
-      if (Object.hasOwn(expressionParent, expressionParts.at(-1))) {
-        delete expressionParent[expressionParts.at(-1)];
-        await sheet.actor.setFlag("nexus", "propertyExpressions", expressions);
-      }
-      if (kind === "number") {
+      const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
+      if (typeof existingExpression === "string") await writePropertyExpression(sheet.actor, path, null);
+      const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
+      if (valueKind === "number") {
         if (value.trim() === "" || !Number.isFinite(Number(value))) {
           globalThis.ui?.notifications?.warn?.("Informe um número válido ou uma expressão entre {{ }}.");
           return;
         }
         value = Number(value);
-      } else if (kind === "boolean") {
+      } else if (valueKind === "boolean") {
         if (!["true", "false"].includes(value.trim().toLowerCase())) {
           globalThis.ui?.notifications?.warn?.("Informe true ou false, ou uma referência booleana entre {{ }}.");
           return;
