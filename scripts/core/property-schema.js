@@ -134,7 +134,8 @@ function evaluateDefaultPropertyFormula(actor, path, depth = 0, visited = new Se
       des: "attributes.des.value", sab: "attributes.sab.value", int: "attributes.int.value",
       car: "attributes.car.value", von: "attributes.von.value", def: "combat.defense.value",
       defesa: "combat.defense.value", desl: "combat.movement.value", movimento: "combat.movement.value",
-      ddr: "recovery.count.value"
+      ddr: "recovery.count.value", "combat.movement.value": "combat.movement",
+      "encumbrance.current.value": "encumbrance.current"
     };
     const key = aliases[raw.toLocaleLowerCase("pt-BR")] ?? raw;
     if (DEFAULT_PROPERTY_FORMULAS[key]) {
