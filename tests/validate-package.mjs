@@ -865,7 +865,6 @@ assert.match(css,/nexus-property-options-toolbar/,"O buscador de propriedades de
 
 
 const canvasGroups = await readFile(new URL("../scripts/sheets/canvas-group-rendering.js", import.meta.url), "utf8");
-const canvasCorners = await readFile(new URL("../scripts/sheets/canvas-connected-corners.js", import.meta.url), "utf8");
 assert.match(sheetCode,/renderCanvasGroups\(this, form\)/,"Grupos devem ser renderizados também no Modo Padrão");
 assert.match(canvasGroups,/nexus-group-surface/,"O renderizador compartilhado deve criar a superfície visual do grupo");
 assert.match(canvasGroups,/is-group-member/,"O renderizador compartilhado deve marcar os componentes pertencentes a grupos");
