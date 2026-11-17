@@ -5991,239 +5991,131 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-tool-panel input,.nexus-tool-panel textarea,.nexus-tool-panel select { transition:none !important; }
 }
 
-/* 1.0.0.60 — reorganização visual do Inspector e dos painéis de edição. */
-.nexus-panel-window .nexus-component-editor {
-  gap:14px !important;
-  padding:0 10px 16px 8px !important;
-}
+/* 1.0.0.61 — Inspector plano, compacto e orientado à tarefa. */
+.nexus-panel-window .nexus-component-editor { gap:10px !important; padding:0 10px 14px 8px !important; }
 .nexus-panel-window .nexus-component-editor > h3 {
-  display:flex !important;
-  align-items:center;
-  min-height:38px;
-  margin:0 !important;
-  padding:0 2px 10px;
+  display:flex !important; align-items:center; min-height:34px; margin:0 !important; padding:0 2px 8px;
   border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
-  font-size:15px !important;
-  font-weight:750 !important;
-  letter-spacing:-.02em;
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)); font-size:14px !important; font-weight:650 !important; letter-spacing:0;
 }
-.nexus-panel-window .nexus-component-inspector {
-  gap:12px !important;
-  padding:0 2px 12px !important;
-}
+.nexus-panel-window .nexus-component-inspector { display:flex; flex-direction:column; gap:0 !important; min-width:0; padding:0 2px 10px !important; }
 .nexus-panel-window .nexus-inspector-tabs {
-  position:sticky;
-  top:0;
-  z-index:8;
-  display:grid !important;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:5px !important;
-  margin:0 !important;
-  padding:5px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
-  border-radius:10px;
-  background:var(--nexus-panel-bg,var(--nexus-window-content,#182330));
-  box-shadow:0 5px 14px #0003;
+  position:sticky; top:0; z-index:8; display:flex !important; gap:14px !important; margin:0 !important; padding:0 2px !important;
+  border:0 !important; border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:0 !important; background:var(--nexus-panel-bg,var(--nexus-window-content,#182330)) !important; box-shadow:none !important;
 }
 .nexus-panel-window .nexus-inspector-tabs button {
-  min-width:0;
-  min-height:36px !important;
-  padding:7px 5px !important;
-  border:1px solid transparent !important;
-  border-radius:7px !important;
-  background:transparent !important;
-  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important;
-  font-size:11px !important;
-  font-weight:650 !important;
-  transition:background-color .14s ease,border-color .14s ease,color .14s ease;
+  min-width:0; min-height:34px !important; padding:7px 1px 8px !important; border:0 !important;
+  border-bottom:2px solid transparent !important; border-radius:0 !important; background:transparent !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important; font-size:11px !important; font-weight:550 !important;
+  box-shadow:none !important; transition:color .16s ease,border-color .16s ease;
 }
 .nexus-panel-window .nexus-inspector-tabs button.active {
-  border-color:var(--nexus-border-strong,var(--nexus-panel-accent,#52647b)) !important;
-  background:var(--nexus-surface-raised,var(--nexus-panel-card,#273443)) !important;
-  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
-  box-shadow:inset 0 -2px 0 var(--nexus-highlight-color,#78b7e8);
+  border-bottom-color:var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8)) !important;
+  background:transparent !important; color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important; box-shadow:none !important;
 }
-.nexus-panel-window .nexus-inspector-tab-panel:not([hidden]) {
-  display:flex !important;
-  flex-direction:column;
-  gap:12px;
-  min-width:0;
-  padding-top:2px;
-}
+.nexus-panel-window .nexus-inspector-tab-panel:not([hidden]) { display:flex !important; flex-direction:column; gap:0; min-width:0; padding-top:0; }
 .nexus-panel-window .nexus-inspector-tab-panel[hidden] { display:none !important; }
 .nexus-panel-window .nexus-inspector-section {
-  min-width:0;
-  margin:0 !important;
-  padding:12px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
-  border-radius:10px !important;
-  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e)) !important;
-  box-shadow:0 3px 10px #0002;
+  min-width:0; margin:0 !important; padding:13px 2px !important; border:0 !important;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:0 !important; background:transparent !important; box-shadow:none !important;
 }
 .nexus-panel-window .nexus-inspector-section > h4 {
-  display:flex;
-  align-items:center;
-  min-height:25px;
-  margin:0 0 12px !important;
-  padding:0 0 8px;
-  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
-  font-size:12px !important;
-  font-weight:750 !important;
-  letter-spacing:.01em;
+  display:block; min-height:0; margin:0 0 10px !important; padding:0 !important; border:0 !important;
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important; font-size:12px !important; font-weight:650 !important; letter-spacing:0;
 }
-.nexus-panel-window .nexus-inspector-section > h4::before {
-  content:"";
-  flex:0 0 3px;
-  width:3px;
-  height:15px;
-  margin-right:8px;
-  border-radius:3px;
-  background:var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8));
-}
+.nexus-panel-window .nexus-inspector-section > h4::before { display:none !important; }
 .nexus-panel-window .nexus-inspector-subsection {
-  display:grid;
-  gap:9px;
-  min-width:0;
-  margin:10px 0 0 !important;
-  padding:10px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  border-radius:8px;
-  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 72%,transparent);
+  display:grid; gap:8px; min-width:0; margin:12px 0 0 !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
 }
 .nexus-panel-window .nexus-inspector-subsection > h5 {
-  margin:0 0 2px;
-  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
-  font-size:10px !important;
-  font-weight:750 !important;
-  letter-spacing:.045em;
-  text-transform:uppercase;
+  margin:0; color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  font-size:11px !important; font-weight:650 !important; letter-spacing:0; text-transform:none;
 }
-.nexus-panel-window .nexus-inspector-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
-  gap:10px !important;
-  align-items:start;
-}
+.nexus-panel-window .nexus-inspector-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:9px !important; align-items:start; }
 .nexus-panel-window .nexus-inspector-field {
-  display:grid !important;
-  align-content:start;
-  gap:6px !important;
-  min-width:0;
-  margin:0 !important;
-  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important;
-  font-size:10px !important;
-  font-weight:650 !important;
-  line-height:1.35;
+  display:grid !important; align-content:start; gap:5px !important; min-width:0; margin:0 !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important; font-size:11px !important; font-weight:550 !important; line-height:1.35;
 }
 .nexus-panel-window .nexus-inspector-field :is(input:not([type="checkbox"]),select,textarea) {
-  width:100%;
-  min-width:0;
-  min-height:35px;
-  padding:7px 9px;
-  box-sizing:border-box;
-  border:1px solid var(--nexus-field-border,var(--nexus-panel-border,#3c5067)) !important;
-  border-radius:6px !important;
-  background:var(--nexus-field-bg,var(--nexus-panel-input,#111b27)) !important;
-  color:var(--nexus-field-text,var(--nexus-panel-text,#e7edf5)) !important;
-  font-size:11px;
+  width:100%; min-width:0; min-height:33px; padding:7px 8px; box-sizing:border-box;
+  border:1px solid var(--nexus-field-border,var(--nexus-panel-border,#3c5067)) !important; border-radius:5px !important;
+  background:var(--nexus-field-bg,var(--nexus-panel-input,#111b27)) !important; color:var(--nexus-field-text,var(--nexus-panel-text,#e7edf5)) !important;
+  font-size:12px; box-shadow:none !important;
 }
-.nexus-panel-window .nexus-data-binding {
-  display:grid !important;
-  gap:8px !important;
-  margin:0 !important;
-  padding:11px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
-  border-left:3px solid var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8)) !important;
-  border-radius:8px !important;
-  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 74%,transparent) !important;
-}
+.nexus-panel-window .nexus-data-binding { display:grid !important; gap:6px !important; margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
 .nexus-panel-window .nexus-property-value-field {
-  display:grid !important;
-  gap:7px !important;
-  margin:0 !important;
-  padding:11px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
-  border-radius:8px !important;
-  background:var(--nexus-panel-bg,var(--nexus-panel-input,#111b27)) !important;
+  display:grid !important; gap:5px !important; margin:10px 0 0 !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
 }
-.nexus-panel-window .nexus-property-value-field > span {
-  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
-  font-size:11px;
-  font-weight:750;
-}
+.nexus-panel-window .nexus-property-value-field > span { color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)); font-size:11px; font-weight:600; }
 .nexus-panel-window .nexus-property-value-field [data-property-value] {
-  min-height:48px !important;
-  padding:9px 10px !important;
-  border-color:var(--nexus-border-strong,var(--nexus-panel-border,#3c5067)) !important;
-  background:var(--nexus-surface-sunken,var(--nexus-panel-input,#111b27)) !important;
-  font-family:ui-monospace,SFMono-Regular,Consolas,monospace !important;
-  font-size:11px !important;
-  line-height:1.5 !important;
-  tab-size:2;
+  min-height:35px !important; padding:7px 9px !important; border:1px solid var(--nexus-field-border,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:5px !important; background:var(--nexus-field-bg,var(--nexus-panel-input,#111b27)) !important;
+  color:var(--nexus-field-text,var(--nexus-panel-text,#e7edf5)) !important; font-family:ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  font-size:12px !important; line-height:1.45 !important; tab-size:2; box-shadow:none !important;
 }
-.nexus-panel-window .nexus-property-presentation-editor {
-  margin:0 !important;
-  padding:11px !important;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
-  border-radius:8px !important;
-  background:color-mix(in srgb,var(--nexus-panel-bg,#182330) 72%,transparent) !important;
-}
-.nexus-panel-window .nexus-inspector-section-heading {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin:0 0 10px;
-}
-.nexus-panel-window .nexus-inspector-section-heading > h4 {
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-}
-.nexus-panel-window .nexus-inspector-section-heading > h4::before { display:none; }
+.nexus-panel-window .nexus-property-presentation-editor { margin:12px 0 0 !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
+.nexus-panel-window .nexus-inspector-section-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 8px; }
+.nexus-panel-window .nexus-inspector-section-heading > h4 { margin:0 !important; padding:0 !important; border:0 !important; }
+.nexus-panel-window .nexus-inspector-section-heading > h4::before { display:none !important; }
 .nexus-panel-window .nexus-inspector-section-heading > button,
 .nexus-panel-window .nexus-field-reset {
-  min-height:27px;
-  padding:4px 8px;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  border-radius:6px;
-  background:var(--nexus-panel-hover,#2a3d52);
-  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
-  font-size:10px;
+  min-height:29px; padding:5px 8px; border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  border-radius:5px; background:transparent; color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)); font-size:11px; box-shadow:none;
 }
 .nexus-panel-window .nexus-inspector-empty {
-  margin:0;
-  padding:18px 12px;
-  border:1px dashed var(--nexus-panel-border,#3c5067);
-  border-radius:9px;
-  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
-  text-align:center;
-  line-height:1.5;
+  margin:0; padding:16px 8px; border:1px dashed var(--nexus-panel-border,#3c5067); border-radius:5px; background:transparent;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)); text-align:left; line-height:1.5;
 }
-.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group {
-  margin:0 0 10px;
-  padding:11px;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  border-radius:9px;
-  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e));
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group,
+.nexus-panel-window .nexus-alias-manager .nexus-alias-card {
+  margin:0 !important; padding:12px 2px !important; border:0 !important;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:0 !important; background:transparent !important; box-shadow:none !important;
 }
 .nexus-panel-window .nexus-behavior-editor .nexus-interaction-action {
-  padding:10px;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  border-left:3px solid var(--nexus-highlight-color,var(--nexus-panel-accent,#78b7e8));
-  border-radius:8px;
-  background:var(--nexus-panel-bg,var(--nexus-window-content,#182330));
+  margin:8px 0 0; padding:8px 0 !important; border:0 !important;
+  border-top:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:0 !important; background:transparent !important; box-shadow:none !important;
 }
-.nexus-panel-window .nexus-alias-manager .nexus-alias-card {
-  padding:12px;
-  border:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
-  border-radius:9px;
-  background:var(--nexus-panel-surface,var(--nexus-panel-card,#202e3e));
+.nexus-panel-window .nexus-property-options { gap:0 !important; padding:4px !important; border-radius:7px !important; box-shadow:0 8px 22px #0005 !important; }
+.nexus-panel-window .nexus-property-options .nexus-property-option {
+  display:flex !important; flex-direction:column !important; align-items:stretch !important; gap:2px !important;
+  width:100% !important; min-height:0 !important; height:auto !important; margin:0 !important; padding:7px 8px !important;
+  border:0 !important; border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important;
+  border-radius:4px !important; background:transparent !important; color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
+  text-align:left !important; white-space:normal !important; box-shadow:none !important;
+}
+.nexus-panel-window .nexus-property-options .nexus-property-option:hover,
+.nexus-panel-window .nexus-property-options .nexus-property-option:focus-visible { background:var(--nexus-panel-hover,#2a3d52) !important; outline:0 !important; }
+.nexus-property-option-heading { display:block !important; min-width:0; }
+.nexus-property-options .nexus-property-option-name {
+  display:block !important; min-width:0 !important; color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important;
+  font-size:11px !important; font-weight:650 !important; line-height:1.3 !important; overflow-wrap:anywhere;
+}
+.nexus-property-options .nexus-property-option-path {
+  display:block !important; max-width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important; font-family:ui-monospace,SFMono-Regular,Consolas,monospace !important;
+  font-size:9px !important; line-height:1.3 !important; text-align:left !important; white-space:normal !important; overflow-wrap:anywhere !important; opacity:.9;
+}
+.nexus-panel-window .nexus-property-options .nexus-property-category {
+  display:grid !important; grid-template-columns:minmax(0,1fr) 18px !important; align-items:center !important; gap:6px !important;
+  width:100% !important; min-height:34px !important; padding:7px 8px !important; border:0 !important;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067)) !important; border-radius:4px !important;
+  background:transparent !important; color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5)) !important; text-align:left !important; box-shadow:none !important;
+}
+.nexus-property-options .nexus-property-category > strong { min-width:0; font-size:11px !important; font-weight:600 !important; }
+.nexus-property-options .nexus-property-category > span { justify-self:end; color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)); }
+.nexus-property-options-heading,.nexus-property-options-empty { padding:8px !important; color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important; font-size:10px !important; }
+.nexus-panel-window :is(button,input,select,textarea):focus-visible {
+  outline:2px solid var(--nexus-focus-ring,var(--nexus-highlight-color,#78b7e8)) !important; outline-offset:2px;
 }
 @media(max-width:520px) {
   .nexus-panel-window .nexus-component-editor { padding-inline:5px !important; }
-  .nexus-panel-window .nexus-inspector-section { padding:9px !important; }
+  .nexus-panel-window .nexus-inspector-section { padding:11px 1px !important; }
   .nexus-panel-window .nexus-inspector-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+@media(prefers-reduced-motion:reduce) { .nexus-panel-window .nexus-inspector-tabs button { transition:none !important; } }
