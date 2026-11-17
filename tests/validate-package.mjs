@@ -404,7 +404,7 @@ globalThis.foundry = { data: { operators: { ForcedDeletion: TestForcedDeletion }
 const legacyPropertyActor = {
   system: {
     identity: { level: 4 },
-    attributes: { des: 1 },
+    attributes: { des: { value: 1 } },
     skills: {
       athletics: { description: "Descrição canônica preservada" },
       atletismo: { proficient: true },
@@ -452,6 +452,7 @@ assert.equal(legacyPropertyActor.system.skills.stealth.proficientLevel, -1, "A a
 assert.equal(legacyPropertyActor.system.skills.stealth.proficient, undefined);
 assert.equal(legacyPropertyActor.system.skills.furtividade, undefined);
 assert.equal(legacyPropertyActor.system.combat.defenseModifier, 6);
+assert.deepEqual(legacyPropertyActor.system.attributes.des, { value: 1 }, "Migração deve preservar o formato aninhado do atributo");
 assert.equal(legacyPropertyActor.system.combat.defense, undefined);
 assert.equal(legacyPropertyActor.system.combat.mb, undefined);
 assert.equal(legacyPropertyActor.system.combat.ddr, undefined);

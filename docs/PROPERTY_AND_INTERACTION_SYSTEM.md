@@ -38,7 +38,7 @@ O exemplo representa o contrato desejado; não significa que o `PropertyRegistry
 
 ### Proficiência
 
-As perícias utilizam um único campo numérico persistido: `proficientLevel`.
+As perícias utilizam um único campo numérico persistido: `proficientLevel`. O campo de valor final é independente da proficiência e só é calculado quando existe fórmula personalizada salva no próprio Actor.
 
 | Valor | Significado |
 |---:|---|
@@ -46,13 +46,13 @@ As perícias utilizam um único campo numérico persistido: `proficientLevel`.
 | `1+` | Proficiente |
 | `-1 ou menor` | Deficiência; aplica o modificador de proficiência no sentido oposto |
 
-Na regra-base implementada nesta etapa, o sinal determina a direção do modificador: positivo adiciona MB, negativo subtrai MB e zero não aplica MB. A magnitude do nível é preservada no dado, mas não multiplica o MB.
+O campo registra o nível de proficiência/deficiência e não aplica bônus por conta própria. O Core não injeta fórmulas padrão nem calcula automaticamente o valor final da perícia. Uma fórmula personalizada pode consultar `proficientLevel`, usar `sign()` ou aplicar qualquer regra definida pelo autor da ficha. Sem fórmula ou valor manual salvo, o resultado permanece neutro (zero).
 
 A propriedade derivada `proficient` pode ser utilizada pela interface para exibição, mas não é um segundo campo persistido.
 
 ### Compatibilidade
 
-As chaves técnicas das 18 perícias utilizam inglês, mantendo os nomes exibidos em português. Durante a migração, o NEXUS transfere o valor para `proficientLevel` na chave canônica e remove a chave antiga em português no mesmo update do Actor. Se a migração falhar, a leitura de compatibilidade continua reconhecendo os dados antigos até uma nova tentativa.
+As chaves técnicas das 18 perícias utilizam inglês, mantendo os nomes exibidos em português. Durante a migração, o NEXUS combina os dados legados com os campos canônicos sem descartar metadados já existentes, grava o nível na chave canônica e remove os campos antigos com o operador `ForcedDeletion` do Foundry. As atualizações são feitas por caminhos específicos para evitar que a mesclagem diferencial restaure campos removidos.
 
 ## 2. Interações de componentes
 
@@ -120,7 +120,7 @@ A apresentação é somente visual: não altera nem persiste o valor da propried
 - `interact`: chamar uma interação definida por outro componente ou sistema.
 - `execute`: executar uma operação avançada por uma API controlada.
 
-O editor oferece configuração contextual para os tipos listados. O executor implementa rolagem, cálculo, atualização de propriedades, abertura de documentos/componentes, alternância, encadeamento de interações e operações avançadas de uma lista permitida. A ação execute não interpreta JavaScript arbitrário.
+O editor oferece configuração contextual para os tipos listados. O executor implementa rolagem, cálculo, atualização de propriedades, abertura de documentos/componentes, alternância, encadeamento de interações e operações avançadas de uma lista permitida. Condições consultam o resolvedor da ficha para reconhecer aliases e propriedades virtuais; ações de escrita convertem o destino em caminho físico gravável e rejeitam expressões calculadas sem destino persistente. A ação execute não interpreta JavaScript arbitrário.
 
 ### Compatibilidade com componentes antigos
 
@@ -142,7 +142,7 @@ Cada propriedade poderá escolher seu modo de cálculo:
 - **Automático:** o valor é calculado a partir de uma fórmula ou dependências.
 - **Automático com substituição manual:** o cálculo fornece o padrão, mas o usuário pode sobrescrever o resultado.
 
-A automação não deve ser obrigatória. MB, atributos, recursos e outras propriedades não devem ser forçados a um único comportamento universal.
+A automação não deve ser obrigatória. MB, atributos, recursos e outras propriedades não devem ser forçados a um único comportamento universal. No modo de trabalho atual, o Core não fornece fórmulas padrão para MB, defesa, iniciativa, recuperação, carga ou perícias. Uma propriedade derivada sem fórmula personalizada ou valor armazenado permanece sem cálculo; fórmulas salvas pertencem ao Actor que as configurou e não são compartilhadas implicitamente entre fichas. O MB também não recebe um cálculo de fallback a partir do nível.
 
 Dependências futuras deverão detectar ciclos, referências inválidas e atualizações recursivas. Fórmulas devem referenciar chaves ou IDs estáveis, nunca rótulos exibidos.
 
@@ -152,7 +152,7 @@ O modo avançado poderá oferecer operações mais expressivas, mas código arbi
 
 ## 5. Registro e cálculo incremental de propriedades
 
-O registro de leitura combina propriedades do Core, propriedades nativas, personalizadas e caminhos externos do Actor. Ele não altera os locais de persistência existentes. Propriedades numéricas personalizadas podem usar modo manual ou fórmula automática; o valor manual é mantido mesmo quando a fórmula está ativa.
+O registro de leitura combina propriedades do Core, propriedades nativas, personalizadas e caminhos externos do Actor. Ele não altera os locais de persistência existentes. Propriedades numéricas personalizadas podem usar modo manual ou fórmula automática; o valor manual é mantido mesmo quando a fórmula está ativa. Fórmulas de perícias ficam em seus campos internos próprios; fórmulas de outras propriedades são persistidas em `flags.nexus.propertyExpressions`. Nenhuma fórmula é gerada pelo Core quando esses campos estão vazios.
 
 A arquitetura segue incremental: o registro atual não equivale ainda a um sistema global de módulos, grafo universal de dependências ou migração universal de IDs. Expressões de texto e regras de representação já são reavaliadas por eventos de atualização do Actor, sem polling. A ficha compara os caminhos alterados com as referências dos componentes e atualiza apenas os afetados; isso ainda não equivale a um grafo global de dependências com nós e ciclos explícitos.
 
@@ -164,6 +164,9 @@ A arquitetura segue incremental: o registro atual não equivale ainda a um siste
 - Campo numérico `proficientLevel`, com valores positivos, zero e negativos.
 - Migração dos campos antigos para a chave canônica, com remoção segura das chaves legadas após preparar o valor novo.
 - Preservação de modificadores e valores negativos nas rolagens.
+- Fórmulas padrão desativadas: perícias e propriedades derivadas só calculam com fórmula explicitamente salva ou valor armazenado.
+- Resolução de MB sem fallback calculado pelo nível; referências sem configuração retornam zero.
+- Condições de interação integradas ao resolvedor de propriedades da ficha e destinos de escrita convertidos em caminhos físicos.
 - Motor de interações com vários Triggers por fluxo, condições AND/OR e Actions sequenciais.
 - Editor visual no Inspector para criar, configurar, ativar, remover e reordenar fluxos, Triggers e Actions.
 - Executores controlados para rolagem, cálculo, atualização, abertura, alternância, encadeamento e operações permitidas.
