@@ -130,9 +130,10 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
       level:"identity.level", nivel:"identity.level", mb:"combat.mb",
       for:`attributes.${skill.attributeKey}.value`, forca:`attributes.${skill.attributeKey}.value`,
       atributo:`attributes.${skill.attributeKey}.value`, attribute:`attributes.${skill.attributeKey}.value`,
-      proficiencia:`skills.${skill.key}.proficientLevel`, proficiency:`skills.${skill.key}.proficientLevel`,
-      proficient:`skills.${skill.key}.proficientLevel`
     };
+    if (["proficiencia","proficiency","proficient"].includes(key)) return Math.sign(getStoredProficientLevel(system, skill));
+    if (["proficientlevel","proficiencylevel"].includes(key)) return getStoredProficientLevel(system, skill);
+    if (key === "bonus") return Math.sign(getStoredProficientLevel(system, skill)) * getNexusBaseModifier(actorOrSystem);
     const path = aliases[key] ?? key;
     if (path === "identity.level") return Math.max(1, Number(system.identity?.level) || 1);
     if (["combat.mb","progression.mb.value"].includes(path)) return getNexusBaseModifier(actorOrSystem);
