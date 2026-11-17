@@ -5872,3 +5872,121 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   box-sizing: border-box !important; overflow-x: hidden !important;
   overflow-y: hidden !important; resize: none !important;
 }
+
+
+/* 1.0.0.59 — refinamento do Inspector e hierarquia visual do Design System. */
+.nexus-sheet {
+  font-family:var(--nexus-font-ui,system-ui,sans-serif);
+  font-size:var(--nexus-font-size,13px);
+  line-height:1.45;
+  text-rendering:optimizeLegibility;
+}
+.nexus-tool-panel h3,
+.nexus-tool-panel h4,
+.nexus-tool-panel h5 {
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+  letter-spacing:normal;
+  line-height:1.3;
+}
+.nexus-tool-panel h3 { font-size:14px; font-weight:700; }
+.nexus-tool-panel h4 { font-size:12px; font-weight:700; }
+.nexus-tool-panel h5 { font-size:11px; font-weight:650; }
+.nexus-tool-panel input:not([type="checkbox"]):not([type="radio"]),
+.nexus-tool-panel textarea,
+.nexus-tool-panel select,
+.nexus-component-inspector input:not([type="checkbox"]):not([type="radio"]),
+.nexus-component-inspector textarea,
+.nexus-component-inspector select {
+  border:1px solid var(--nexus-field-border,var(--nexus-panel-border,#3c5067));
+  border-radius:var(--nexus-radius-small,6px);
+  background:var(--nexus-field-bg,var(--nexus-panel-input,#111b27));
+  color:var(--nexus-field-text,var(--nexus-panel-text,#e7edf5));
+  font:inherit;
+  transition:border-color .14s ease,background-color .14s ease;
+}
+.nexus-tool-panel input:focus-visible,
+.nexus-tool-panel textarea:focus-visible,
+.nexus-tool-panel select:focus-visible,
+.nexus-tool-panel button:focus-visible,
+.nexus-component-inspector input:focus-visible,
+.nexus-component-inspector textarea:focus-visible,
+.nexus-component-inspector select:focus-visible,
+.nexus-component-inspector button:focus-visible {
+  outline:2px solid var(--nexus-focus-ring,var(--nexus-highlight-color,#78b7e8));
+  outline-offset:2px;
+}
+.nexus-appearance-drawer .nexus-tool-panel,
+.nexus-panel-window .nexus-tool-panel {
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+}
+.nexus-inspector-tabs {
+  gap:4px;
+  padding:3px;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+}
+.nexus-inspector-tabs [data-inspector-tab] {
+  min-height:32px;
+  padding:6px 10px;
+  border:1px solid transparent;
+  border-radius:var(--nexus-radius-small,6px);
+  background:transparent;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  font-size:11px;
+  font-weight:650;
+}
+.nexus-inspector-tabs [data-inspector-tab].active {
+  border-color:var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+  background:var(--nexus-surface-raised,var(--nexus-panel-card,#273443));
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+}
+.nexus-inspector-section {
+  min-width:0;
+  padding:10px 0;
+  border-bottom:1px solid var(--nexus-border-subtle,var(--nexus-panel-border,#3c5067));
+}
+.nexus-inspector-section > h4 {
+  margin:0 0 9px;
+  color:var(--nexus-text-primary,var(--nexus-panel-text,#e7edf5));
+  font-size:11px;
+  font-weight:750;
+  letter-spacing:.035em;
+}
+.nexus-inspector-field {
+  gap:5px;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2));
+  font-size:10px;
+  font-weight:650;
+}
+.nexus-property-options .nexus-property-option {
+  gap:5px !important;
+  padding:8px 10px !important;
+  border-bottom:1px solid var(--nexus-border-subtle,color-mix(in srgb,var(--nexus-panel-border,#3c5067) 48%,transparent)) !important;
+}
+.nexus-property-option-heading {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,auto);
+  align-items:baseline;
+  gap:8px;
+  min-width:0;
+}
+.nexus-property-options .nexus-property-option-name {
+  min-width:0 !important;
+  font-size:11px !important;
+  font-weight:700 !important;
+}
+.nexus-property-options .nexus-property-option-path {
+  max-width:52%;
+  font-size:9px !important;
+  text-align:right !important;
+  opacity:.78;
+}
+.nexus-property-options .nexus-property-option-value {
+  margin:0 !important;
+  padding-left:0 !important;
+  color:var(--nexus-text-secondary,var(--nexus-panel-muted,#9aadc2)) !important;
+  font-size:10px !important;
+}
+.nexus-property-options .nexus-property-option:last-child { border-bottom:0 !important; }
+@media (prefers-reduced-motion:reduce) {
+  .nexus-tool-panel input,.nexus-tool-panel textarea,.nexus-tool-panel select { transition:none !important; }
+}

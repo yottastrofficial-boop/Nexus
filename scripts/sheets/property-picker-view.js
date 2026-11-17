@@ -35,7 +35,10 @@ function appendPropertyOption(container, entry, label = entry.label, rollAlias =
   code.textContent = entry.path;
   code.title = entry.path;
   button.setAttribute("aria-label", `${label}; ${entry.path}; valor atual ${formatPropertyValue(rawValue)}`);
-  button.append(title, value, code);
+  const heading = document.createElement("span");
+  heading.className = "nexus-property-option-heading";
+  heading.append(title, code);
+  button.append(heading, value);
   if (rollAlias) {
     button.dataset.rollToken = "@" + rollAlias.display;
     button.dataset.rollAliasOption = "true";

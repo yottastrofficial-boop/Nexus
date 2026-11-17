@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.58", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.59", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -86,6 +86,7 @@ assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve p
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
 assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
 assert.match(template, /nexus-property-value-field[\s\S]*data-property-value/, "O valor deve permanecer no campo integrado do Inspector");
+assert.match(propertyPickerView, /nexus-property-option-heading/, "O seletor deve agrupar nome e caminho na mesma linha");
 assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /highestPanelZ === null \? desiredZ : Math\.min\(desiredZ, highestPanelZ - 1\)/, "As barras laterais não podem sobrepor janelas abertas");
@@ -645,7 +646,7 @@ assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 1);
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
-assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(value\.trim\(\) === "" \|\| !Number\.isFinite\(Number\(value\)\)\) \{[\s\S]*?\}\s*value = Number\(value\);\s*\}/, "Propriedades numéricas devem rejeitar valores vazios e não numéricos, aceitando números finitos inclusive negativos");
+assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
 assert.match(sheetListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
 
 // Trigger -> Action -> Configuration pipeline.
@@ -1051,6 +1052,8 @@ assert.equal(typed40?.content,'Exibido: Nome exibido · bruto: NEXUS · soma: 6 
 const textSemantics40=evaluateComponentRepresentation({enabled:true,sourcePath:"level",rules:[{condition:"{{level}} == 5",content:'Literal: "1"+"1" · expressão textual: {{"1"+"1"}} · expressão numérica: {{1+1}} · literal repetido: "1"+"1"="1"+"1"'}]},resolver40);
 assert.equal(textSemantics40?.content,'Literal: "1"+"1" · expressão textual: 11 · expressão numérica: 2 · literal repetido: "1"+"1"="1"+"1"',"Somente o conteúdo delimitado por chaves deve ser avaliado; texto fora delas permanece literal");
 assert.equal(evaluateNexusExpression('{{"1"+"1"}}',resolver40),"11","Concatenação de strings entre chaves deve preservar o tipo textual");
+assert.equal(evaluateNexusExpression('{{"texto"}}',resolver40),"texto","Expressões com literal textual entre chaves devem retornar a string sem aspas");
+assert.equal(evaluateNexusExpression('"texto"',resolver40),"texto","Literais textuais entre aspas devem ser aceitos sem chaves");
 assert.equal(evaluateNexusExpression("{{1+1}}",resolver40),2,"Soma de números entre chaves deve permanecer numérica");
 
 
@@ -1093,7 +1096,9 @@ assert.ok(sheetListeners.includes("await sheet._writeLayouts(layouts, active, { 
 assert.ok(sheet.includes("labelSuffix") && sheet.includes("NON_ROLL_PROPERTY_SUFFIXES.has(labelSuffix)"), "Rótulos genéricos também devem ser excluídos dos atalhos");
 
 assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
-assert.ok(sheetListeners.includes("pendingPropertyValueSaves") && sheetListeners.includes('on("input"'), "Valores de propriedades devem salvar durante a digitação");
+assert.doesNotMatch(sheetListeners, /pendingPropertyValueSaves/, "Valores de propriedades não devem ser salvos por debounce durante a digitação");
+assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
+assert.match(sheetListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
 assert.ok(sheetListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-config-current-value], [data-config-max-value]\""), "PV/PM/PE atuais e máximos devem salvar também na janela flutuante");

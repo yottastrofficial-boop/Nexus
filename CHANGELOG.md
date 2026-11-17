@@ -1,3 +1,21 @@
+## 1.0.0.59
+
+### Editor de propriedades
+- A digitação deixou de disparar salvamentos automáticos a cada pausa; a validação ocorre ao confirmar o campo, permitindo escrever expressões sem alertas intermediários.
+- Valores numéricos vazios são normalizados para zero; valores textuais vazios permanecem strings vazias e booleanos vazios assumem falso.
+- Literais textuais entre aspas são interpretados sem manter as aspas no valor salvo; expressões no formato `{{"texto"}}` usam o avaliador seguro.
+- Fórmulas anteriores só são removidas depois que o novo valor passa pela validação.
+- O seletor apresenta **Nome | Caminho** na primeira linha e **Valor** abaixo, reduzindo a altura de cada opção.
+
+### Interface e Design System
+- Refinada a hierarquia tipográfica dos painéis e do Inspector, com campos, bordas e estados de foco consistentes.
+- Ampliados os tokens centrais de tipografia, espaçamento, altura de controles e altura de linha, sem alterar os dados ou regras dos Actors.
+- Mantida a linguagem visual sóbria e funcional, sem efeitos decorativos que prejudiquem a leitura.
+
+### Validação
+- Adicionados testes para strings entre aspas, expressões textuais entre chaves, valores vazios e salvamento apenas na confirmação do campo.
+- A validação automatizada não substitui o teste funcional e visual dentro do Foundry VTT 14.
+
 ## 1.0.0.58
 
 ### Inspector e fórmulas

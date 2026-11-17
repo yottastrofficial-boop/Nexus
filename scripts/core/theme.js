@@ -96,7 +96,16 @@ export const applyThemeTokens = (element, layout = {}) => {
     "--nexus-navigation-active": theme.accent,
     "--nexus-input-focus": theme.highlight,
     "--nexus-scroll-track": theme.scroll,
-    "--nexus-scroll-handle": theme.accent
+    "--nexus-scroll-handle": theme.accent,
+    "--nexus-font-size": `${Number(layout.fontSize) || 13}px`,
+    "--nexus-secondary-font-size": `${Number(layout.secondaryFontSize) || 11}px`,
+    "--nexus-value-font-size": `${Number(layout.valueFontSize) || 20}px`,
+    "--nexus-space-1": "4px",
+    "--nexus-space-2": "8px",
+    "--nexus-space-3": "12px",
+    "--nexus-space-4": "16px",
+    "--nexus-control-height": "34px",
+    "--nexus-line-height": "1.45"
   };
   values["--nexus-theme-id"] = layout.theme ?? "nexus-dark";
   for (const [key, value] of Object.entries(values)) element.style.setProperty(key, value);

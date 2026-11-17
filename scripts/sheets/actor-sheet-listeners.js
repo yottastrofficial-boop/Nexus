@@ -213,28 +213,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       component.localValue = String(input.value ?? "").slice(0, 5000);
       await sheet._writeLayouts(layouts, active);
     });
-    const pendingPropertyValueSaves = new WeakMap();
     $(document).on(`input${inspectorNamespace}`, "[data-property-value]", event => {
       const input = event.currentTarget;
       if (!isSheetOwnedControl(input)) return;
-      if (input.tagName === "TEXTAREA") { input.style.height = "auto"; const lineHeight = Number.parseFloat(getComputedStyle(input).lineHeight) || 16; const maxHeight = lineHeight * 5 + 16; input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`; input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden"; }
-      const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
-      if (!path || ["img", "identity.portrait.img", "prototypeToken.texture.src"].includes(path)) return;
-      const kind = input.dataset.propertyKind;
-      if (kind === "number" && input.value.trim() === "") return;
-      const previousTimer = pendingPropertyValueSaves.get(input);
-      if (previousTimer) clearTimeout(previousTimer);
-      const timer = setTimeout(() => {
-        pendingPropertyValueSaves.delete(input);
-        if (input.isConnected) $(input).trigger("change");
-      }, 180);
-      pendingPropertyValueSaves.set(input, timer);
+      if (input.tagName === "TEXTAREA") {
+        input.style.height = "auto";
+        const lineHeight = Number.parseFloat(getComputedStyle(input).lineHeight) || 16;
+        const maxHeight = lineHeight * 5 + 16;
+        input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`;
+        input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
+      }
     });
+    // Confirmar ao sair do campo evita validar fórmulas enquanto ainda estão sendo digitadas.
     $(document).on(`change${inspectorNamespace}`, "[data-property-value]", async event => {
       const input = event.currentTarget;
       if (!isSheetOwnedControl(input)) return;
-      const pendingTimer = pendingPropertyValueSaves.get(input);
-      if (pendingTimer) { clearTimeout(pendingTimer); pendingPropertyValueSaves.delete(input); }
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
@@ -248,7 +241,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
-      const expression = typeof value === "string" ? value.trim().match(/^\{\{\s*([\s\S]+?)\s*\}\}$/) : null;
+      const trimmedValue = typeof value === "string" ? value.trim() : value;
+      const expression = typeof value === "string" ? trimmedValue.match(/^\{\{\s*([\s\S]+?)\s*\}\}$/) : null;
+      // Aspas fora de {{...}} representam um literal textual, não parte do valor.
+      if (!expression && typeof trimmedValue === "string" && /^(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')$/.test(trimmedValue)) {
+        const quotedValue = evaluateNexusExpression(trimmedValue, () => undefined);
+        if (typeof quotedValue === "string") value = quotedValue;
+      }
 
       if (expression) {
         const calculated = evaluateNexusExpression(expression[1].trim(), identifier =>
@@ -267,22 +266,23 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
-      if (kind === "property-formula" || typeof existingExpression === "string") {
-        await writePropertyExpression(sheet.actor, path, null);
-      }
       const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
       if (valueKind === "number") {
-        if (value.trim() === "" || !Number.isFinite(Number(value))) {
+        if (String(value).trim() === "") value = 0;
+        else if (!Number.isFinite(Number(value))) {
           globalThis.ui?.notifications?.warn?.("Informe um número válido ou uma expressão entre {{ }}.");
           return;
-        }
-        value = Number(value);
+        } else value = Number(value);
       } else if (valueKind === "boolean") {
-        if (!["true", "false"].includes(value.trim().toLowerCase())) {
+        if (String(value).trim() === "") value = false;
+        else if (!["true", "false"].includes(String(value).trim().toLowerCase())) {
           globalThis.ui?.notifications?.warn?.("Informe true ou false, ou uma referência booleana entre {{ }}.");
           return;
-        }
-        value = value.trim().toLowerCase() === "true";
+        } else value = String(value).trim().toLowerCase() === "true";
+      }
+      // A fórmula anterior só é removida depois que o novo valor passa pela validação.
+      if (kind === "property-formula" || typeof existingExpression === "string") {
+        await writePropertyExpression(sheet.actor, path, null);
       }
       if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) }, { render: false });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
