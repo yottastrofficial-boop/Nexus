@@ -36,12 +36,13 @@ Os atalhos não diferenciam maiúsculas de minúsculas. Também é possível usa
 - Módulo (resto da divisão): `%`
 - Comparações: `>`, `>=`, `<`, `<=`, `==`, `!=` (para condições)
 - Agrupamento: `(` e `)`
+- Funções seguras: `min(a, b, ...)`, `max(a, b, ...)`, `ceil(x)`, `floor(x)`, `round(x)`, `abs(x)`, `sign(x)` e `if(condição, valor1, valor2)`
 
 A precedência matemática é respeitada. Um campo numérico vazio é tratado como zero em operações aritméticas; campos textuais vazios continuam vazios fora de operações numéricas. Divisão ou módulo por zero, propriedades desconhecidas e valores não numéricos são rejeitados. O operador `%` significa módulo, não porcentagem; para percentual de um recurso, utilize a propriedade derivada correspondente, como `resources.pv.percentage` quando disponível.
 
 ## Limites desta etapa
 
-O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e não aceita chamadas de funções arbitrárias. Esta etapa habilita expressões aritméticas em texto e fórmulas de rolagem; um editor visual de fórmulas persistentes para qualquer propriedade, com dependências e detecção de ciclos, ainda é uma etapa separada.
+O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e aceita somente as funções seguras listadas acima. Fórmulas padrão de propriedades derivadas e perícias são exibidas no campo de valor do Inspector. É possível substituí-las por outra expressão ou por um valor manual; as fórmulas personalizadas ficam persistidas no Actor.
 
 
 ## Fórmulas persistentes de propriedades
@@ -68,7 +69,7 @@ Layouts antigos que usam `component.representation` continuam legíveis; novas c
 
 ## Fórmulas personalizadas de perícias
 
-O resultado `skills.<pericia>.value` é calculado e não deve ser editado como um número manual. A fórmula opcional é armazenada em `skills.<pericia>.formula`; o Inspector também oferece esse campo quando o componente está vinculado ao resultado `.value`. Deixe a fórmula vazia para voltar ao cálculo padrão.
+O resultado `skills.<pericia>.value` usa uma fórmula padrão visível no Inspector. A fórmula fica armazenada em `skills.<pericia>.formula`; ao editar a propriedade `.value`, o Inspector apresenta a fórmula subjacente. É possível substituir a fórmula padrão por outra fórmula ou por um valor manual.
 
 Exemplos válidos para Atletismo:
 
