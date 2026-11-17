@@ -5862,12 +5862,13 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   position: static !important; display: block !important; width: 100% !important;
   min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important;
 }
-.nexus-component-inspector [data-property-value-hint] {
-  display: block !important; min-width: 0 !important; color: var(--nexus-panel-muted, #a9bacd) !important;
-  font-size: 10px !important; line-height: 1.4 !important; white-space: normal !important; overflow-wrap: anywhere !important;
-}
-.nexus-component-inspector [data-property-value] {
-  max-height: 7.5em !important;
-  overflow-y: auto !important;
-  resize: vertical !important;
+
+
+/* 1.0.0.58 — autoajuste da área de valor do Inspector. */
+.nexus-component-inspector [data-property-value],
+.nexus-panel-window .nexus-component-inspector [data-property-value] {
+  display: block !important; width: 100% !important; min-width: 0 !important;
+  min-height: 0 !important; max-height: none !important; height: auto;
+  box-sizing: border-box !important; overflow-x: hidden !important;
+  overflow-y: hidden !important; resize: none !important;
 }
