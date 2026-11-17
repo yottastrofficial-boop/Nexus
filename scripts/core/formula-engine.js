@@ -80,6 +80,36 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
     if (identifier === "true") return true;
     if (identifier === "false") return false;
     if (identifier === "null") return null;
+    if (tokens[index]?.value === "(") {
+      const allowed = new Set(["min", "max", "ceil", "floor", "round", "abs", "sign", "if"]);
+      if (!allowed.has(identifier.toLowerCase())) throw new Error("Unsupported formula function");
+      index++;
+      const args = [];
+      if (tokens[index]?.value !== ")") {
+        while (true) {
+          args.push(comparison());
+          if (tokens[index]?.value !== ",") break;
+          index++;
+        }
+      }
+      if (tokens[index++]?.value !== ")") throw new Error("Unclosed function call");
+      const name = identifier.toLowerCase();
+      const numbers = args.map(numericValue);
+      if (name === "if") {
+        if (args.length !== 3 || typeof args[0] !== "boolean") throw new Error("if requires a boolean and two values");
+        return args[0] ? args[1] : args[2];
+      }
+      if (numbers.some(value => value === null)) throw new Error("Formula function requires numbers");
+      if (name === "min" && args.length >= 1) return Math.min(...numbers);
+      if (name === "max" && args.length >= 1) return Math.max(...numbers);
+      if (args.length !== 1) throw new Error("Formula function requires one argument");
+      if (name === "ceil") return Math.ceil(numbers[0]);
+      if (name === "floor") return Math.floor(numbers[0]);
+      if (name === "round") return Math.round(numbers[0]);
+      if (name === "abs") return Math.abs(numbers[0]);
+      if (name === "sign") return Math.sign(numbers[0]);
+      throw new Error("Invalid formula function");
+    }
     const displayReference = identifier.startsWith("@");
     const reference = displayReference ? identifier.slice(1) : identifier;
     if (!reference || reference.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) throw new Error("Unsafe property reference");
