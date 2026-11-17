@@ -928,6 +928,7 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attribu
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 3, "Atalhos @FOR e @MB não devem introduzir MB padrão");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 3, "A expressão completa deve respeitar MB não configurado");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 3, "Proficiência não deve criar bônus sem MB configurado");
+assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "skills.stealth.value + 1"), 1, "Referenciar outra perícia não deve sintetizar valor sem fórmula/valor salvo");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");

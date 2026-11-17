@@ -148,7 +148,10 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
         if (skillMatch[2].toLowerCase() === "proficientlevel") return targetProficiency;
         if (skillMatch[2].toLowerCase() === "proficient") return targetProficiency > 0;
         if (skillMatch[2].toLowerCase() === "bonus") return targetBonus;
-        if (["value","modifier"].includes(skillMatch[2].toLowerCase())) return targetAttribute + targetBonus;
+        if (["value","modifier"].includes(skillMatch[2].toLowerCase())) {
+          const storedValue = readSafeFormulaPath(system, path);
+          return storedValue === undefined || storedValue === null || storedValue === "" ? 0 : storedValue;
+        }
         if (skillMatch[2].toLowerCase() === "attributevalue") return targetAttribute;
       }
     }
@@ -168,7 +171,6 @@ export function getNexusSkillRows(actor) {
     const attributeValue = getNexusAttributeValue(actor, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
     const bonus = Math.sign(proficientLevel) * baseModifier;
-    const defaultModifier = attributeValue + bonus;
     const storedFormula = String(system.skills?.[skill.key]?.formula ?? "").trim();
     const formula = storedFormula;
     const formulaValue = formula ? evaluateNexusSkillFormula(actor, skill.key, formula) : null;
