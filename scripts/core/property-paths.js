@@ -10,7 +10,7 @@ const FORMULA_IDENTIFIER_ALIASES = Object.freeze({
 const ATTRIBUTE_KEYS = new Set(["for","des","sab","int","car","von"]);
 const RESOURCE_KEYS = new Set(["pv","pm","pe"]);
 const UNSAFE_SEGMENTS = new Set(["__proto__","prototype","constructor"]);
-/** Normalize user-facing property paths into stable NEXUS paths. */
+/** Normalize short identifiers and aliases used inside formulas. */
 export function normalizeNexusFormulaIdentifier(identifier) {
   const source = String(identifier ?? "").trim();
   const alias = FORMULA_IDENTIFIER_ALIASES[source.toLocaleLowerCase("pt-BR")];
