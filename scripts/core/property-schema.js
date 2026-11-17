@@ -1,5 +1,4 @@
-import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
-import { evaluateNexusExpression } from "./formula-engine.js";
+import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
 
 /**
  * Canonical property registry for the NEXUS core rules.
@@ -98,61 +97,8 @@ export function getNexusRulebookPropertyPaths() {
  * Resolve computed and metadata-only properties from the canonical registry.
  * Returns matched:false for ordinary stored Actor.system paths.
  */
-const DEFAULT_PROPERTY_FORMULAS = Object.freeze({
-  "progression.mb.value": "{{min(5, ceil(max(1, identity.level) / 2))}}",
-  "combat.defense.value": "{{8 + attributes.des.value + combat.defenseModifier}}",
-  "combat.initiative.value": "{{attributes.des.value}}",
-  "combat.movement.meters": "{{combat.movement.value * 1.5}}",
-  "recovery.count.value": "{{identity.level}}",
-  "recovery.die.value": "{{if(identity.level <= 2, 'd4', if(identity.level <= 4, 'd6', if(identity.level <= 6, 'd8', if(identity.level <= 8, 'd10', 'd12'))))}}",
-  "recovery.available.value": "{{max(0, identity.level - recovery.spent)}}",
-  "resources.pe.recovery.value": "{{combat.mb * 4}}",
-  "encumbrance.base.value": "{{5}}",
-  "encumbrance.bonus.value": "{{attributes.for.value * 2}}",
-  "encumbrance.capacity.value": "{{5 + (attributes.for.value * 2)}}",
-  "encumbrance.overloaded.value": "{{encumbrance.current.value > encumbrance.capacity.value}}"
-});
-
-export function getNexusDefaultPropertyFormula(path) {
-  return DEFAULT_PROPERTY_FORMULAS[String(path ?? "").replace(/^system\./, "")] ?? "";
-}
-
-function getStoredPathValue(object, path) {
-  return String(path ?? "").split(".").reduce((value, key) => value?.[key], object);
-}
-
-function evaluateDefaultPropertyFormula(actor, path, depth = 0, visited = new Set()) {
-  if (depth > 12 || visited.has(path)) return null;
-  const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? actor.system?.flags?.nexus?.propertyExpressions ?? {};
-  const customFormula = getStoredPathValue(expressions, path);
-  const formula = typeof customFormula === "string" && customFormula.trim() ? customFormula : DEFAULT_PROPERTY_FORMULAS[path];
-  if (!formula) return undefined;
-  const nextVisited = new Set(visited);
-  nextVisited.add(path);
-  return evaluateNexusExpression(formula, identifier => {
-    const raw = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "");
-    const aliases = {
-      level: "identity.level", mb: "progression.mb.value", "combat.mb": "progression.mb.value", "combat.mb.value": "progression.mb.value", for: "attributes.for.value",
-      des: "attributes.des.value", sab: "attributes.sab.value", int: "attributes.int.value",
-      car: "attributes.car.value", von: "attributes.von.value", def: "combat.defense.value",
-      defesa: "combat.defense.value", desl: "combat.movement.value", movimento: "combat.movement.value",
-      ddr: "recovery.count.value", "combat.movement.value": "combat.movement",
-      "encumbrance.current.value": "encumbrance.current"
-    };
-    const key = aliases[raw.toLocaleLowerCase("pt-BR")] ?? raw;
-    if (DEFAULT_PROPERTY_FORMULAS[key]) {
-      const stored = getStoredPathValue(actor.system ?? {}, key);
-      if (stored !== undefined && stored !== null) {
-        return stored && typeof stored === "object" && Object.hasOwn(stored, "value") ? stored.value : stored;
-      }
-      return evaluateDefaultPropertyFormula(actor, key, depth + 1, nextVisited);
-    }
-    const attributeMatch = key.match(/^attributes\.([^.]+)\.value$/);
-    if (attributeMatch) return getNexusAttributeValue(actor, attributeMatch[1]);
-    const stored = getStoredPathValue(actor.system ?? {}, key);
-    if (stored === undefined) return undefined;
-    return stored && typeof stored === "object" && Object.hasOwn(stored, "value") ? stored.value : stored;
-  });
+export function getNexusDefaultPropertyFormula(_path) {
+  return "";
 }
 
 /**
@@ -163,8 +109,6 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const actor = actorOrSystem?.system ? actorOrSystem : { system: actorOrSystem ?? {} };
   const system = actor.system ?? {};
   const key = String(path ?? "").replace(/^system\./, "");
-  const level = Math.max(1, Number(system.identity?.level) || 1);
-
   if (key === "identity.name") return { matched: true, value: actor.name ?? "", readOnly: true, sourcePath: "name" };
   const attributeMatch = key.match(/^attributes\.([^.]+)\.(name|exib|value|description)$/);
   if (attributeMatch) {
@@ -200,31 +144,6 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   if (resourceMatch) {
     const resource = RESOURCE_DEFINITIONS.find(item => item.key === resourceMatch[1]);
     if (resource) return { matched: true, value: resourceMatch[2] === "name" ? resource.name : resource.exib, readOnly: true };
-  }
-
-  const legacyFormulaPaths = {
-    "combat.mb": "progression.mb.value",
-    "combat.mb.value": "progression.mb.value",
-    "combat.defense": "combat.defense.value",
-    "combat.ddr": "recovery.count.value",
-    "combat.desl": "combat.movement.value"
-  };
-  const formulaPath = legacyFormulaPaths[key] ?? key;
-  if (DEFAULT_PROPERTY_FORMULAS[formulaPath]) {
-    const expressions = actor.getFlag?.("nexus", "propertyExpressions") ?? actor.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
-    const customFormula = getStoredPathValue(expressions, formulaPath);
-    if (typeof customFormula === "string" && customFormula.trim()) {
-      const value = evaluateDefaultPropertyFormula(actor, formulaPath);
-      return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula: customFormula, formulaEditable: true };
-    }
-    const stored = getStoredPathValue(system, formulaPath);
-    if (stored !== undefined && stored !== null) {
-      const value = stored && typeof stored === "object" && Object.hasOwn(stored, "value") ? stored.value : stored;
-      return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula: "", formulaEditable: true, manual: true };
-    }
-    const formula = DEFAULT_PROPERTY_FORMULAS[formulaPath];
-    const value = evaluateDefaultPropertyFormula(actor, formulaPath);
-    return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula, formulaEditable: true };
   }
 
   if (["combat.movement", "combat.movement.value"].includes(key)) {
