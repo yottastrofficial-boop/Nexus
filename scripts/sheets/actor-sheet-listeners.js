@@ -267,7 +267,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
-      if (typeof existingExpression === "string") await writePropertyExpression(sheet.actor, path, null);
+      if (kind === "property-formula" || typeof existingExpression === "string") {
+        await writePropertyExpression(sheet.actor, path, null);
+      }
       const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
       if (valueKind === "number") {
         if (value.trim() === "" || !Number.isFinite(Number(value))) {
