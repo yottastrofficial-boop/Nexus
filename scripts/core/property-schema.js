@@ -1,4 +1,5 @@
-import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
+import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
+import { evaluateNexusExpression } from "./formula-engine.js";
 
 /**
  * Canonical property registry for the NEXUS core rules.
@@ -110,6 +111,35 @@ function unwrapStoredValue(value) {
   return value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
 }
 
+function evaluateCustomPropertyFormula(actor, path, depth = 0, visited = new Set()) {
+  if (depth > 12 || visited.has(path)) return null;
+  const expressions = actor?.getFlag?.("nexus", "propertyExpressions")
+    ?? actor?.flags?.nexus?.propertyExpressions
+    ?? actor.system?.flags?.nexus?.propertyExpressions
+    ?? {};
+  const formula = getStoredPathValue(expressions, path);
+  if (typeof formula !== "string" || !formula.trim()) return undefined;
+  const nextVisited = new Set(visited);
+  nextVisited.add(path);
+  return evaluateNexusExpression(formula, identifier => {
+    const raw = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "");
+    const aliases = {
+      level: "identity.level", mb: "progression.mb.value",
+      "combat.mb": "progression.mb.value", "combat.mb.value": "progression.mb.value",
+      for: "attributes.for.value", des: "attributes.des.value", sab: "attributes.sab.value",
+      int: "attributes.int.value", car: "attributes.car.value", von: "attributes.von.value"
+    };
+    const target = aliases[raw.toLocaleLowerCase("pt-BR")] ?? raw;
+    const nestedFormula = getStoredPathValue(expressions, target);
+    if (typeof nestedFormula === "string" && nestedFormula.trim()) {
+      return evaluateCustomPropertyFormula(actor, target, depth + 1, nextVisited);
+    }
+    const attribute = target.match(/^attributes\.([^.]+)\.value$/);
+    if (attribute) return getNexusAttributeValue(actor, attribute[1]);
+    return unwrapStoredValue(getStoredPathValue(actor.system ?? {}, target));
+  });
+}
+
 /**
  * Resolves rulebook properties while keeping every default calculation visible
  * and editable in the Inspector. Saving a literal value replaces the formula.
@@ -171,21 +201,7 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const definition = definitionByPath.get(formulaPath);
   if (definition?.derived || (typeof customFormula === "string" && customFormula.trim())) {
     if (typeof customFormula === "string" && customFormula.trim()) {
-      const value = evaluateNexusExpression(customFormula, identifier => {
-        const raw = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "");
-        const aliases = {
-          level: "identity.level", mb: "progression.mb.value",
-          "combat.mb": "progression.mb.value", "combat.mb.value": "progression.mb.value",
-          for: "attributes.for.value", des: "attributes.des.value", sab: "attributes.sab.value",
-          int: "attributes.int.value", car: "attributes.car.value", von: "attributes.von.value"
-        };
-        const target = aliases[raw.toLocaleLowerCase("pt-BR")] ?? raw;
-        const nested = getStoredPathValue(expressions, target);
-        if (typeof nested === "string" && nested.trim()) return null;
-        const attribute = target.match(/^attributes\.([^.]+)\.value$/);
-        if (attribute) return getNexusAttributeValue(actor, attribute[1]);
-        return unwrapStoredValue(getStoredPathValue(system, target));
-      });
+      const value = evaluateCustomPropertyFormula(actor, formulaPath);
       return { matched: true, value, readOnly: false, sourcePath: formulaPath, formula: customFormula, formulaEditable: true };
     }
     return {
