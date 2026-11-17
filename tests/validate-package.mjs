@@ -159,7 +159,7 @@ const rulebookActor = {
 };
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.name").value, "Furtividade");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.exib").value, "FUR");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.value").value, 4);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.value").value, 0, "Perícia sem fórmula/valor salvo não deve calcular automaticamente");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.proficient").value, true);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.proficientLevel").value, 1);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.proficientLevel").readOnly, false, "Proficiência numérica deve ser editável");
@@ -215,7 +215,7 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.val
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, "");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, "");
