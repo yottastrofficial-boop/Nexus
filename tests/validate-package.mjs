@@ -895,8 +895,8 @@ const resolveFormulaTestProperty = identifier => {
 };
 assert.equal(
   evaluateNexusExpression("attributes.for.value + (combat.mb * skills.athletics.proficientLevel)", resolveFormulaTestProperty),
-  5,
-  "Expressões devem resolver atributos, MB e nível de proficiência pela mesma normalização"
+  2,
+  "Sem MB armazenado ou fórmula configurada, a referência deve ser neutra"
 );
 assert.equal(
   evaluateNexusExpression("ceil(level/2)", resolveFormulaTestProperty),
