@@ -214,10 +214,11 @@ assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, p
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "", "Dados de recuperação não devem receber fórmulas padrão");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, "", "Recuperação de PE não deve receber fórmula padrão");
 const customMbActor = {
-  system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
+  system: { identity: { level: 4 }, attributes: { for: 2 }, progression: { mb: { value: 4 } }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
+assert.equal(getNexusBaseModifier(customMbActor), 3, "A fórmula personalizada deve prevalecer sobre o valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "progression.mb.value").value, 3, "Inspector e perícias devem resolver a mesma fórmula personalizada");
 const cyclicFormulaActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { formula: "{{combat.mb + 1}}" } } },
   flags: { nexus: { propertyExpressions: {
@@ -638,6 +639,8 @@ assert.match(sheetCode, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar p
 assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
 assert.match(sheet, /const nested = current !== null && typeof current === "object" && !Array.isArray\(current\)/, "A inicialização deve preservar atributos aninhados");
 assert.match(sheetListeners, /list\._nexusOwnerInput !== input/, "Um blur antigo não pode fechar o seletor de outro campo");
+assert.match(sheetListeners, /_nexusPropertyPickerCleanup = \(\) =>/, "O temporizador do seletor deve ser cancelado na troca de renderização");
+assert.match(sheet, /_nexusPropertyPickerCleanup\?\.\(\)/, "O temporizador do seletor deve ser cancelado ao fechar a ficha");
 assert.match(sheetListeners, /\$\(window\)\.off\(inspectorNamespace\)/, "Listeners globais devem ser removidos entre renderizações");
 assert.match(canvasCorners, /export function disconnectCanvasConnectedCorners/, "Observadores do Canvas devem possuir rotina explícita de limpeza");
 assert.match(migration, /ForcedDeletion/, "Migrações devem usar o operador de remoção do Foundry");
@@ -1219,7 +1222,7 @@ assert.ok(css.includes(".nexus-component.is-compact .nexus-component-content {\n
 assert.equal(compactOnly.classList.contains("is-compact"),true,"Cards com largura inferior a 100px devem receber o modo compacto");
 assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com altura inferior a 100px devem receber o modo compacto");
 
-const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, skills: { athletics: { proficientLevel: -1, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
+const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, skills: { athletics: { proficientLevel: -1, value: 99, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
 const formulaAthletics = getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics");
 assert.equal(formulaAthletics.value, 4);
 assert.equal(formulaAthletics.bonus, 0, "A proficiência não deve gerar bônus implícito fora da fórmula configurada");
