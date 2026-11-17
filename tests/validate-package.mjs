@@ -122,7 +122,8 @@ assert.match(propertyPickerView, /value.textContent = "Valor atual: " \+ formatP
 assert.match(sheetListeners, /getValue: path => resolveNexusBinding\(sheet.actor, path\)\.value/, "O seletor deve resolver valores do Actor em tempo real");
 assert.doesNotMatch(propertyCatalog.match(/const DERIVED_SKILL_FIELDS = new Set\(\[[\s\S]*?\]\);/)?.[0] ?? "", /proficientLevel/, "Proficiência numérica não pode ser classificada como campo derivado");
 assert.match(propertyPickerView, /createButton\("", "nexus-property-option"/, "As opções não devem duplicar o rótulo no texto do botão");
-assert.match(propertyPickerView, /button\.append\(title, value, code\)/, "Nome, valor atual e caminho técnico devem ser elementos independentes");
+assert.match(propertyPickerView, /heading\.append\(title, code\)/, "Nome e caminho técnico devem compartilhar a primeira linha");
+assert.match(propertyPickerView, /button\.append\(heading, value\)/, "O valor atual deve ficar abaixo do nome e do caminho");
 assert.match(css, /nexus-property-options \.nexus-property-option[\s\S]*overflow: visible !important[\s\S]*nexus-property-option-name[\s\S]*nexus-property-option-value[\s\S]*nexus-property-option-path/, "O layout do seletor deve exibir nome, valor e caminho sem recortar o conteúdo");
 assert.match(propertyPickerView, /category\.append\(heading, description, arrow\)/, "Categorias devem separar título, caminho e indicador de navegação");
 assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
