@@ -67,6 +67,8 @@ const canvasViewport = await read("scripts/sheets/canvas-viewport.js");
 const canvasPlayInteractions = await read("scripts/sheets/canvas-play-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
 const libraryView = await read("scripts/sheets/library-view.js");
+assert.match(libraryView, /sheet\._libraryRenderFlows = \(\) => renderLibraryFlows\(sheet, panel\)/, "A Biblioteca deve expor atualização da lista de fluxos após salvar");
+assert.match(sheetListeners, /sheet\._libraryRenderFlows\?\.\(\)/, "Salvar um fluxo deve atualizar a Biblioteca já aberta");
 const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js");
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 

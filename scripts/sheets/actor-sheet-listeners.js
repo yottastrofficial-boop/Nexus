@@ -1280,6 +1280,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const flow = getComponentInteractions(component).find(item => item.id === interactionId);
         if (!flow) return;
         await saveInteractionToLibrary(sheet.actor, flow);
+        sheet._libraryRenderFlows?.();
         ui.notifications?.info?.("Fluxo salvo na Biblioteca.");
       } else if (command === "add-library-flow") {
         const template = getInteractionLibrary(sheet.actor).find(item => item.id === control.dataset.templateId);
