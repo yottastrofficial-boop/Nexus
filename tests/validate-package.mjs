@@ -874,7 +874,7 @@ assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
-assert.match(sheet, /propertyFormulaMode \? effectivePath\.formula/);
+assert.match(sheet, /propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula\)/);
 assert.match(sheetListeners, /propertyExpressionQueues = new WeakMap/);
 assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
