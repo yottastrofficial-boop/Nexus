@@ -49,7 +49,7 @@ export function getNexusBaseModifier(actorOrSystem, depth = 0) {
     ?? actor?.flags?.nexus?.propertyExpressions
     ?? system.flags?.nexus?.propertyExpressions
     ?? {};
-  const formula = expressions?.progression?.mb?.value ?? expressions?.combat?.mb;
+  const formula = expressions?.progression?.mb?.value || expressions?.combat?.mb;
   if (typeof formula === "string" && formula.trim()) {
     if (depth >= 8) return null;
     const source = formula.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
@@ -174,14 +174,16 @@ export function getNexusSkillRows(actor) {
     const attributeValue = getNexusAttributeValue(actor, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
     const bonus = 0; // No automatic proficiency modifier; custom formulas may use the bonus alias explicitly.
-    const storedFormula = String(system.skills?.[skill.key]?.formula ?? "").trim();
+    const storedFormula = String(system.skills?.[skill.key]?.formula ?? system.skills?.[skill.legacyKey]?.formula ?? "").trim();
     const formula = storedFormula;
     const formulaValue = formula ? evaluateNexusSkillFormula(actor, skill.key, formula) : null;
     const storedValue = system.skills?.[skill.key]?.value ?? system.skills?.[skill.legacyKey]?.value;
     const numericStoredValue = storedValue === undefined || storedValue === null || storedValue === "" ? 0 : Number(storedValue);
     const modifier = formula ? formulaValue : (Number.isFinite(numericStoredValue) ? numericStoredValue : 0);
     return { ...skill, attributeValue, proficientLevel, proficient: proficientLevel > 0, modifier, value: modifier, formula,
-      description: typeof system.skills?.[skill.key]?.description === "string" ? system.skills[skill.key].description : skill.description,
+      description: typeof (system.skills?.[skill.key]?.description ?? system.skills?.[skill.legacyKey]?.description) === "string"
+        ? (system.skills?.[skill.key]?.description ?? system.skills?.[skill.legacyKey]?.description)
+        : skill.description,
       formatted: typeof modifier === "number" ? (modifier >= 0 ? "+" + modifier : String(modifier)) : "—", bonus };
   });
 }

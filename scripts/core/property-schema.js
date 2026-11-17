@@ -200,7 +200,10 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     ?? actor.flags?.nexus?.propertyExpressions
     ?? system.flags?.nexus?.propertyExpressions
     ?? {};
-  const formulaCandidates = [...new Set([formulaPath, key])];
+  const legacyFormulaAliases = Object.entries(legacyFormulaPaths)
+    .filter(([, canonical]) => canonical === formulaPath)
+    .map(([legacy]) => legacy);
+  const formulaCandidates = [...new Set([formulaPath, key, ...legacyFormulaAliases])];
   const customFormulaPath = formulaCandidates.find(candidate => {
     const candidateFormula = getStoredPathValue(expressions, candidate);
     return typeof candidateFormula === "string" && candidateFormula.trim();

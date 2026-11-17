@@ -690,6 +690,8 @@ assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 0);
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
+const legacySkillFormulaActor = { system: { skills: { atletismo: { formula: "{{for + 2}}" } } } };
+assert.equal(getNexusSkillRows(legacySkillFormulaActor).find(skill => skill.key === "athletics")?.value, 2, "Fórmulas legadas devem continuar vinculadas à perícia canônica");
 assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
 assert.match(sheetListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
 
