@@ -55,6 +55,8 @@ const css = await read("styles/nexus-v1.0.0.css");
 const readme = await read("README.md");
 const changelog = await read("CHANGELOG.md");
 const interactions = await read("scripts/core/interactions.js");
+const migration = await read("scripts/core/migration-manager.js");
+const canvasCorners = await read("scripts/sheets/canvas-connected-corners.js");
 const propertyCatalog = await read("scripts/core/property-catalog.js");
 const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
@@ -182,7 +184,7 @@ const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, 11, "Propriedades derivadas devem usar atributos dinâmicos");
+assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, "", "Uma propriedade derivada sem fórmula própria deve permanecer sem cálculo");
 
 
 for (const attribute of NEXUS_ATTRIBUTES) {
@@ -191,30 +193,34 @@ for (const attribute of NEXUS_ATTRIBUTES) {
 }
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, false, "MB deve permitir edição direta ou fórmula personalizada");
-assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "{{min(5, ceil(max(1, identity.level) / 2))}}", "A fórmula padrão de MB deve estar visível e ser editável");
+assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O Core não deve inserir fórmulas padrão");
+const customFormulaActorA = { system: { attributes: { for: 2 } }, flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } } };
+const customFormulaActorB = { system: { attributes: { for: 9 } }, flags: { nexus: { propertyExpressions: {} } } };
+assert.equal(getNexusRulebookPropertyValue(customFormulaActorA, "progression.mb.value").value, 3, "A fórmula salva deve ser avaliada no Actor proprietário");
+assert.equal(getNexusRulebookPropertyValue(customFormulaActorB, "progression.mb.value").value, "", "Fórmulas não podem vazar entre Actors");
 assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").value, 4, "Um valor manual deve substituir a fórmula padrão de MB");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "A fórmula padrão de recuperação deve manter os intervalos de nível");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve usar a fórmula padrão editável");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "", "Dados de recuperação não devem receber fórmulas padrão");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, "", "Recuperação de PE não deve receber fórmula padrão");
 const customMbActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
-assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
-assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "Fórmulas derivadas dependentes devem usar o MB personalizado");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
+assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem fórmula própria não devem herdar o MB");
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, "", "Uma fórmula de MB não deve criar fórmulas implícitas para outras propriedades");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, "");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, "");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, "");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, "");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.current.value").value, 8);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, "");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "identity.name").value, "Ayla");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").matched, false);
 
@@ -392,6 +398,8 @@ assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não de
 
 // Rulebook property migration: signed proficiency and stored derived combat
 // values are normalized once, while custom final values are preserved as modifiers.
+class TestForcedDeletion {}
+globalThis.foundry = { data: { operators: { ForcedDeletion: TestForcedDeletion } } };
 const legacyPropertyActor = {
   system: {
     identity: { level: 4 },
@@ -416,7 +424,8 @@ const legacyPropertyActor = {
       const leaf = parts.pop();
       let target = this;
       for (const part of parts) target = target[part] ??= {};
-      target[leaf] = structuredClone(value);
+      if (value instanceof TestForcedDeletion) delete target[leaf];
+      else target[leaf] = structuredClone(value);
     }
     this.updateCount++;
   }
@@ -602,6 +611,11 @@ assert.match(sheetCode, /scale<0\.12/, "Grupos muito espalhados devem alternar p
 
 assert.match(sheetCode, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
+assert.match(sheet, /const nested = current !== null && typeof current === "object" && !Array.isArray\(current\)/, "A inicialização deve preservar atributos aninhados");
+assert.match(sheetListeners, /list\._nexusOwnerInput !== input/, "Um blur antigo não pode fechar o seletor de outro campo");
+assert.match(sheetListeners, /\$\(window\)\.off\(inspectorNamespace\)/, "Listeners globais devem ser removidos entre renderizações");
+assert.match(canvasCorners, /export function disconnectCanvasConnectedCorners/, "Observadores do Canvas devem possuir rotina explícita de limpeza");
+assert.match(migration, /ForcedDeletion/, "Migrações devem usar o operador de remoção do Foundry");
 assert.match(sheetCode, /new foundry\.data\.operators\.ForcedDeletion\(\)/, "A migração deve usar ForcedDeletion ao remover chaves legadas de perícias");
 assert.match(sheetCode, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
 assert.doesNotMatch(template, /Digite @ para consultar|Os quatro nomes são rótulos configuráveis|Exibe uma barra arrastável|Ao clicar neste card no modo de jogo/, "Dicas instrutivas do Inspector devem ser removidas");
@@ -636,19 +650,19 @@ const negativeSkillActor = {
     }
   }
 };
-assert.equal(getNexusSkillModifier(negativeSkillActor, "athletics").modifier, -5, "Atributos negativos devem permanecer negativos");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, -2, "Nível negativo deve subtrair MB uma única vez, preservando a magnitude no dado");
-assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 2, "Nível positivo deve adicionar MB uma única vez");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "athletics").modifier, 0, "Sem fórmula ou valor salvo, a perícia deve permanecer neutra");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").modifier, 0, "Proficiência não deve gerar bônus implícito");
+assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").modifier, 0, "Proficiência não deve gerar bônus implícito");
 assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").proficientLevel, -3);
 assert.equal(getNexusSkillModifier(negativeSkillActor, "perception").proficientLevel, 2);
 assert.equal(normalizeNexusProficientLevel(-9), -9);
 assert.equal(normalizeNexusProficientLevel(9), 9);
 assert.equal(normalizeNexusProficientLevel(0), 0);
-assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").value, -2);
+assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").value, 0);
 assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").exib, "FUR");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient, true, "Dados antigos devem ser lidos durante a migração");
-assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 1);
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 0);
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
 assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
@@ -686,6 +700,15 @@ const multiFlowComponent = { interactions: [{
 }] };
 const conditionActor = { system: { identity: { level: 4 } } };
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
+const virtualConditionFlow = { interactions: [{
+  id: "virtual-condition", triggers: [{ event: "click" }],
+  conditions: [{ path: "custom.power", operator: "greaterOrEqual", value: "4" }],
+  actions: [{ type: "roll", config: { formula: "1d20" } }]
+}] };
+assert.equal(getTriggeredActions(virtualConditionFlow, "click", {
+  actor: conditionActor,
+  resolveProperty: path => path === "custom.power" ? 5 : undefined
+}).length, 1, "Condições devem consultar o resolvedor canônico de propriedades virtuais");
 assert.equal(getTriggeredActions(multiFlowComponent, "doubleClick", { actor: conditionActor }).length, 2);
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: { system: { identity: { level: 1 } } } }).length, 0);
 const editorDraft = { interactions: [] };
@@ -933,8 +956,8 @@ const resolveExpressionValue = key => expressionValues[key];
 assert.equal(evaluateNexusFormula("level % 2", resolveExpressionValue), 1, "O operador módulo deve calcular o resto");
 assert.equal(evaluateNexusExpression("min(5, ceil(4 / 2))", () => undefined), 2, "Funções matemáticas seguras devem funcionar nas fórmulas");
 assert.equal(evaluateNexusExpression("if(5 <= 6, 'd8', 'd10')", () => undefined), "d8", "A função if deve permitir fórmulas condicionais seguras");
-assert.equal(getNexusDefaultSkillFormula("athletics"), "{{attributes.for.value + (combat.mb * sign(skills.athletics.proficientLevel))}}", "A fórmula padrão da perícia deve estar disponível para edição");
-assert.ok(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.formula.includes("sign("), "O cálculo padrão de perícia deve ser exposto como fórmula editável");
+assert.equal(getNexusDefaultSkillFormula("athletics"), "", "O Core não deve fornecer fórmulas padrão de perícia");
+assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.formula, "", "A fórmula deve permanecer vazia até configuração explícita");
 assert.equal(evaluateNexusFormula("@level + @mb", resolveExpressionValue), 8, "Referências com @ devem funcionar nas fórmulas do editor");
 assert.equal(evaluateNexusCondition("@level > @mb", resolveExpressionValue), true, "Referências com @ devem funcionar nas condições");
 assert.equal(evaluateNexusCondition("{{@level}} >= 5", resolveExpressionValue), true, "Referências entre chaves devem funcionar dentro de comparações");
