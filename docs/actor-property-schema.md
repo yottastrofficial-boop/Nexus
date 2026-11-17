@@ -8,7 +8,7 @@
 
 - Stable technical keys are independent from Portuguese display labels.
 - `name` identifies the property; `exib` is its short display label; `value` is the value used by formulas and bindings.
-- Stored data and derived values are separate. Derived values are resolved by `getNexusRulebookPropertyValue()` and are read-only unless a writable source path is explicitly provided.
+- Stored values and formula-backed values are separate. Default formulas for derived properties are displayed and editable in the Inspector; a manual value or custom formula can replace the default.
 - Actor data remains under `system.*`; paths are exposed without requiring the UI to know how a value is calculated.
 - Legacy paths remain readable where practical, while migrations normalize stored data to the current shape.
 
