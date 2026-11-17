@@ -144,7 +144,7 @@ export function buildPropertyPickerCatalog({ paths = [], nativeProperties = [], 
     };
     for (const [field, label] of [
       ["name", "Nome"], ["exib", "Exibição"], ["value", "Valor"],
-      ["proficientLevel", "Proficiência"], ["attribute", "Atributo"], ["description", "Descrição"], ["formula", "Fórmula"]
+      ["proficientLevel", "Proficiência"], ["attribute", "Atributo"], ["description", "Descrição"]
     ]) {
       const path = "skills." + skill.key + "." + field;
       addEntry({
