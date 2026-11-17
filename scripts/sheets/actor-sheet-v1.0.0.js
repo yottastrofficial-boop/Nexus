@@ -3440,6 +3440,8 @@ if (!hasPath) propertyValueInput.value = "";
       $(document).off(this._nexusInspectorNamespace);
       $(window).off(this._nexusInspectorNamespace);
     }
+    this._nexusPropertyPickerCleanup?.();
+    this._nexusPropertyPickerCleanup = null;
     if (this._nexusObservedCanvas) disconnectCanvasConnectedCorners(this._nexusObservedCanvas);
     this._nexusObservedCanvas = null;
     this._nexusFloatingCleanup?.();
