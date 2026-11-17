@@ -885,9 +885,9 @@ assert.match(sheet, /calculationMode === "formula"/);
 assert.match(template, /data-alias-field="formula"/);
 assert.match(propertyCatalog, /createPropertyRegistry/);
 assert.match(sheet, /normalizeNexusFormulaIdentifier/, "Fórmulas devem usar um normalizador compartilhado de identificadores");
-assert.match(css, /nexus-panel-window \\.nexus-component-editor > h3[\\s\\S]*display:flex!important/, "O Inspector deve exibir seu cabeçalho de forma clara");
-assert.match(css, /nexus-panel-window \\.nexus-inspector-tab-panel:not\\(\\[hidden\\]\\)/, "As abas do Inspector devem organizar o conteúdo em painéis");
-assert.match(css, /nexus-panel-window \\.nexus-data-binding/, "O vínculo de dados deve ter uma área visual própria");
+assert.ok(css.includes(".nexus-panel-window .nexus-component-editor > h3") && css.includes("display:flex !important"), "O Inspector deve exibir seu cabeçalho de forma clara");
+assert.ok(css.includes(".nexus-panel-window .nexus-inspector-tab-panel:not([hidden])"), "As abas do Inspector devem organizar o conteúdo em painéis");
+assert.ok(css.includes(".nexus-panel-window .nexus-data-binding"), "O vínculo de dados deve ter uma área visual própria");
 assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
 assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
