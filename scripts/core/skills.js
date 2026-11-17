@@ -121,7 +121,7 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
   const skill = NEXUS_SKILLS.find(item => item.key === skillKey || item.legacyKey === skillKey);
   if (!skill) return null;
   const system = actorOrSystem?.system ?? actorOrSystem ?? {};
-  const source = String(formula ?? "").trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
+  const source = String(formula ?? "").trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1").replace(/força/giu, "forca").replace(/proficiência/giu, "proficiencia").replace(/inteligência/giu, "inteligencia");
   if (!source || source.length > 500) return null;
   const resolve = identifier => {
     const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "")
