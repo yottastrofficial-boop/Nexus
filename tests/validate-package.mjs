@@ -1192,14 +1192,14 @@ assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com 
 
 const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, skills: { athletics: { proficientLevel: -1, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
 const formulaAthletics = getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics");
-assert.equal(formulaAthletics.value, 2);
+assert.equal(formulaAthletics.value, 4);
 assert.equal(formulaAthletics.description, "Descrição personalizada de Atletismo.");
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força + (mb * proficiencia)"), 4);
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "força / 0"), null);
 const fullPathSkillFormula = "{{attributes.for.value + (combat.mb * sign(skills.athletics.proficientLevel))}}";
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 4, "Fórmulas devem usar somente MB configurado explicitamente");
 formulaSkillActor.system.skills.athletics.formula = fullPathSkillFormula;
-assert.equal(getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics").value, 2, "O valor exibido da perícia deve usar a fórmula validada no Inspector");
+assert.equal(getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics").value, 4, "O valor exibido deve refletir a fórmula personalizada sem MB implícito");
 formulaSkillActor.system.skills.athletics.proficientLevel = 1;
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", fullPathSkillFormula), 4, "Proficiência não deve criar bônus sem MB configurado");
 assert.equal(evaluateNexusSkillFormula(formulaSkillActor, "athletics", "{{ceil(level / 2)}}"), 2, "Atalhos de nível devem funcionar em fórmulas de perícia");
