@@ -68,7 +68,7 @@ const SEGMENT_LABELS = Object.freeze({
 
 const DERIVED_SKILL_FIELDS = new Set([
   "name", "attribute", "attributeName", "attributeKey", "attributeValue",
-  "description", "proficient", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao"
+  "description", "proficient", "opposed", "proficiency", "bonus", "value", "modifier", "formatted", "exib", "exibicao", "formula"
 ]);
 const LEGACY_NUCLEUS_PATHS = ["attributes.body", "attributes.mind", "attributes.soul"];
 const DUPLICATE_PATHS = ["identity.name", "token.img", "token.border"];
