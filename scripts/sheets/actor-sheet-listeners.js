@@ -249,10 +249,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           : evaluateNexusExpression(expression[1].trim(), identifier =>
               resolveNexusBinding(sheet.actor, resolveFormulaIdentifier(identifier), 1).value
             );
-        const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
+        const valueKind = kind;
         const incompatible = calculated === null
           || (valueKind === "number" && typeof calculated !== "number")
-          || (valueKind === "boolean" && typeof calculated !== "boolean");
+          || (valueKind === "boolean" && typeof calculated !== "boolean")
+          || (valueKind === "string" && typeof calculated !== "string");
         if (incompatible || (resolvedPath.readOnly && !skillFormulaMatch)) {
           globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
@@ -278,7 +279,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
-      const valueKind = kind === "property-formula" ? typeof resolvedPath.value : kind;
+      const valueKind = kind;
       if (valueKind === "number") {
         if (String(value).trim() === "") value = 0;
         else if (!Number.isFinite(Number(value))) {
@@ -293,7 +294,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         } else value = String(value).trim().toLowerCase() === "true";
       }
       // A fórmula anterior só é removida depois que o novo valor passa pela validação.
-      if (kind === "property-formula" || typeof existingExpression === "string") {
+      if (typeof existingExpression === "string") {
         await writePropertyExpression(sheet.actor, path, null);
       }
       if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) }, { render: false });
@@ -1509,7 +1510,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`scroll${inspectorNamespace}`,".nexus-panel-window, .nexus-component-inspector",()=>{const list=document.getElementById(propertyPickerId),input=list?._nexusOwnerInput;if(input?.isConnected)positionPropertyOptions(input);});
     $(document).on(`focusout${inspectorNamespace}`,propertyInputSelector+", "+templateInputSelector,event=>{
       const input=event.currentTarget,list=document.getElementById(propertyPickerId);
-      setTimeout(()=>{if(list&&!list.contains(document.activeElement)&&document.activeElement!==input){list.hidden=true;list.dataset.categoryPath="";list.style.top="";list.style.left="";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}},140);
+      requestAnimationFrame(()=>{if(list&&!list.contains(document.activeElement)&&document.activeElement!==input){list.hidden=true;list.dataset.categoryPath="";list.style.top="";list.style.left="";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}});
     });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
