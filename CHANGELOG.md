@@ -1,5 +1,7 @@
 ## 1.0.0.59
 
+> Publicação oficial acionada para disponibilizar o pacote instalável pelo manifesto.
+
 ### Editor de propriedades
 - A digitação deixou de disparar salvamentos automáticos a cada pausa; a validação ocorre ao confirmar o campo, permitindo escrever expressões sem alertas intermediários.
 - Valores numéricos vazios são normalizados para zero; valores textuais vazios permanecem strings vazias e booleanos vazios assumem falso.
