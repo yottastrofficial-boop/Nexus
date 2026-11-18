@@ -135,7 +135,7 @@ assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolage
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
 assert.match(sheet, /NEXUS_RULEBOOK_PROPERTY_DEFINITIONS/);
-assert.equal(NEXUS_PROPERTY_SCHEMA_VERSION, 3);
+assert.equal(NEXUS_PROPERTY_SCHEMA_VERSION, 4);
 const registryFixture = createPropertyRegistry({ core: [{ id: "nexus.core.level", path: "identity.level", label: "Nível", type: "number" }], native: [{ id: "nexus.core.level", key: "identity.level", targetPath: "identity.level", label: "Nível do personagem", type: "number" }], custom: [{ id: "custom-1", key: "custom.stealth", label: "Furtividade extra", type: "number", formula: "des + mb", calculationMode: "formula" }], external: ["details.reputation"] });
 assert.equal(registryFixture.getByPath("identity.level")?.label, "Nível do personagem");
 assert.equal(registryFixture.getById("custom-1")?.calculationMode, "formula");
