@@ -1,6 +1,6 @@
 const actorPropertyWriteQueues = new WeakMap();
 
-function serializeActorPropertyWrite(actor, operation) {
+export function serializeActorPropertyWrite(actor, operation) {
   const previous = actorPropertyWriteQueues.get(actor) ?? Promise.resolve();
   const next = previous.catch(() => {}).then(operation);
   actorPropertyWriteQueues.set(actor, next);
@@ -392,6 +392,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, "[data-config-current-value], [data-config-max-value]", async event => {
       const input = event.currentTarget;
       if (!isSheetOwnedControl(input)) return;
+      await serializeActorPropertyWrite(sheet.actor, async () => {
       const pendingTimer = pendingResourceValueSaves.get(input);
       if (pendingTimer) { clearTimeout(pendingTimer); pendingResourceValueSaves.delete(input); }
       const id = [...(sheet._selectedIds ?? [])][0];
@@ -407,6 +408,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       sheet._captureHistory();
       await sheet.actor.update({ [`system.${path}`]: value }, { render: false });
       sheet._refreshBoundComponents();
+      });
     });
     const persistAliases = async (aliases, focusTarget = null) => {
       const normalized = aliases.map(normalizeAliasDefinition).filter(Boolean);
