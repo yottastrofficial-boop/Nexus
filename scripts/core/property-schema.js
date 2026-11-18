@@ -138,11 +138,17 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     }
     if (member === "value") {
       const stored = system.skills?.[definition.key]?.value;
-      return { matched: true, value: stored ?? 0, readOnly: false, sourcePath: `skills.${definition.key}.value` };
+      const nestedValue = stored && typeof stored === "object" && Object.hasOwn(stored, "value");
+      return {
+        matched: true,
+        value: nestedValue ? stored.value : (stored ?? 0),
+        readOnly: false,
+        sourcePath: nestedValue ? `skills.${definition.key}.value` : `skills.${definition.key}.value`
+      };
     }
     const stored = system.skills?.[definition.key]?.[member];
     if (["proficientLevel", "description", "formula"].includes(member)) {
-      return { matched: true, value: stored ?? (member === "proficientLevel" ? 0 : ""), readOnly: false, sourcePath: `skills.${definition.key}.${member}` };
+      return { matched: true, value: stored ?? (member === "proficientLevel" ? 0 : member === "description" ? definition.description : ""), readOnly: false, sourcePath: `skills.${definition.key}.${member}` };
     }
   }
 
