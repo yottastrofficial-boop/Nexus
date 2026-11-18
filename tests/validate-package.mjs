@@ -951,7 +951,7 @@ const proficiencyAsset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === 
 assert.ok(proficiencyAsset, "A Biblioteca deve disponibilizar o marcador de proficiência");
 assert.equal(proficiencyAsset.template.actionPath, "skills.athletics.proficientLevel", "O marcador da Biblioteca deve apontar para o valor numérico canônico");
 assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
-const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, skills: { athletics: { proficientLevel: 2 } } } };
+const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, combat: { mb: 2 }, skills: { athletics: { proficientLevel: 2 } } } };
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
@@ -959,7 +959,7 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + 
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = propertyType/, "O campo deve preservar o tipo real da propriedade");
-assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O resultado calculado da perícia deve oferecer o editor da fórmula subjacente");
+assert.doesNotMatch(sheet, /propertyPath\.match\(\/\^skills\\\.\(\[a-zA-Z0-9_\\-\]\+\)\\\.value\$\//, "O valor da perícia deve ser um campo armazenado, não um atalho para fórmula predefinida");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
