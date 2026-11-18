@@ -137,13 +137,15 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
       return { matched: true, value: row?.[member], readOnly: true };
     }
     if (member === "value") {
-      const stored = system.skills?.[definition.key]?.value;
+      const skillData = system.skills?.[definition.key] ?? {};
+      const stored = skillData.value;
       const nestedValue = stored && typeof stored === "object" && Object.hasOwn(stored, "value");
+      const explicitFormula = typeof skillData.formula === "string" && skillData.formula.trim();
       return {
         matched: true,
-        value: nestedValue ? stored.value : (stored ?? 0),
+        value: explicitFormula ? row?.value : (nestedValue ? stored.value : (stored ?? 0)),
         readOnly: false,
-        sourcePath: nestedValue ? `skills.${definition.key}.value` : `skills.${definition.key}.value`
+        sourcePath: `skills.${definition.key}.value`
       };
     }
     const stored = system.skills?.[definition.key]?.[member];
