@@ -42,7 +42,7 @@ Every skill has the same contract:
 
 Example: `skills.stealth.name`, `skills.stealth.exib`, `skills.stealth.value`.
 
-`proficientLevel` is the canonical persisted numeric field. `0` means no proficiency, positive values indicate proficiency, and negative values represent deficiency in the current NEXUS implementation. The magnitude remains available to custom formulas; the default skill calculation applies the sign only, adding or subtracting one MB.
+`proficientLevel` is the canonical persisted numeric field. `0` means no proficiency, positive values indicate proficiency, and negative values represent deficiency in the current NEXUS implementation. The magnitude remains available to explicit formulas. The Core does not calculate a default skill total from attributes, proficiency or MB.
 
 ### Resources
 
