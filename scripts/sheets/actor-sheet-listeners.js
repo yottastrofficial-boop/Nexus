@@ -242,7 +242,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
       let value = input.value;
-      const skillFormulaMatch = path.match(/^skills\.([a-zA-Z0-9_-]+)\.(?:value|formula)$/);
+      const skillFormulaMatch = path.match(/^skills\.([a-zA-Z0-9_-]+)\.formula$/);
       const resolvedPath = resolveNexusBinding(sheet.actor, path);
       const targetPath = resolvedPath.virtual ? resolvedPath.sourcePath : resolvedPath.path;
       const trimmedValue = typeof value === "string" ? value.trim() : value;
