@@ -1382,6 +1382,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
       addExpression(rule.content);
       addExpression(rule.output);
     }
+    // If a card references another formula-backed property, follow that
+    // property's own inputs so changes propagate through the full dependency chain.
+    for (const dependency of [...dependencies]) addPropertyFormulaDependencies(dependency);
     if (component.type === "token" || component.type === "asset-image") addPath("img");
 
     const overlaps = (left, right) => left === right || left.startsWith(right + ".") || right.startsWith(left + ".");
