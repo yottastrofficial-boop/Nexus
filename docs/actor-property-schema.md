@@ -1,6 +1,6 @@
 # NEXUS Actor Property Schema
 
-**Schema version:** 3  
+**Schema version:** 4  
 **Source of mechanics:** `REGRAS NEXUS.pdf` (core rulebook)  
 **Scope:** Actor/personagem properties. Item documents keep their own data model and are not mixed into this registry.
 
@@ -8,9 +8,10 @@
 
 - Stable technical keys are independent from Portuguese display labels.
 - `name` identifies the property; `exib` is its short display label; `value` is the value used by formulas and bindings.
-- Stored values and derived values are separate. Derived properties are calculated at read time and do not trust stale persisted scalars. A property may expose a custom formula when explicitly marked formula-editable; this does not make a derived property manually writable.
-- Actor data remains under `system.*`; paths are exposed without requiring the UI to know how a value is calculated.
-- Legacy paths remain readable where practical, while migrations normalize stored data to the current shape.
+- Mechanical properties are stored values by default; the Core does not assign pre-made calculations or formulas to them.
+- Formulas may be supplied by imported Library cards or explicitly configured by the user. They read current Actor values and are re-evaluated when dependencies change.
+- Actor data remains under `system.*`; the property layer exposes paths without imposing a calculation.
+- Legacy paths remain readable where practical, while migrations preserve user-authored values.
 
 ## Canonical property families
 
@@ -33,7 +34,7 @@ Every skill has the same contract:
 
 - `skills.<key>.name`: Portuguese display name.
 - `skills.<key>.exib`: short label for compact UI.
-- `skills.<key>.value`: numeric total modifier (attribute + MB when proficient).
+- `skills.<key>.value`: stored numeric value; no automatic attribute/MB calculation is applied by the property layer.
 - `skills.<key>.proficientLevel`: persisted numeric proficiency level.
 - `skills.<key>.proficient`: derived boolean training state.
 - `skills.<key>.attribute`: associated attribute code.
@@ -52,28 +53,28 @@ The PE recovery reference is exposed as `resources.pe.recovery.value`.
 ### Progression and recovery
 
 - `identity.level`: stored character level.
-- `progression.mb.value`: derived MB.
-- `recovery.count.value`: number of recovery dice, derived from level.
-- `recovery.die.value`: recovery die size, derived from level.
+- `progression.mb.value`: stored MB value.
+- `recovery.count.value`: stored number of recovery dice.
+- `recovery.die.value`: stored recovery die size.
 - `recovery.spent`: stored number of spent dice.
-- `recovery.available.value`: remaining dice.
+- `recovery.available.value`: stored number of remaining dice.
 
 ### Movement, defense and initiative
 
-- `combat.movement.value`: stored movement in grid spaces.
-- `combat.movement.meters`: derived conversion using 1.5 m per grid space.
-- `combat.defense.value`: derived base defense using the rulebook formula and the stored additional modifier.
-- `combat.initiative.value`: derived from the relevant attribute.
+- `combat.movement.value`: stored movement value.
+- `combat.movement.meters`: stored value; no automatic unit conversion is applied.
+- `combat.defense.value`: stored defense value.
+- `combat.initiative.value`: stored initiative value.
 
 The former `combat.mb`, `combat.ddr`, `combat.desl` and scalar `combat.defense` paths are read as compatibility aliases where applicable.
 
 ### Carrying capacity
 
-- `encumbrance.base.value`: base capacity.
-- `encumbrance.bonus.value`: attribute contribution.
-- `encumbrance.capacity.value`: derived total capacity.
+- `encumbrance.base.value`: stored base capacity.
+- `encumbrance.bonus.value`: stored bonus.
+- `encumbrance.capacity.value`: stored total capacity.
 - `encumbrance.current.value`: stored current load.
-- `encumbrance.overloaded.value`: derived comparison.
+- `encumbrance.overloaded.value`: stored state.
 
 Current load is a stored total. Automatic summation from embedded Items is intentionally kept separate for a later inventory integration.
 
@@ -86,14 +87,11 @@ Personality fields include appearance, traits, flaws, bonds, ideals, motivation 
 ## Migration behavior
 
 The migration:
-- Normalizes legacy skill proficiency representations into the canonical numeric `proficientLevel` field and removes the obsolete boolean fields.
-- Removes persisted snapshots of derived MB, defense, initiative, recovery count/die/availability, PE recovery and carrying-capacity totals.
-- Converts a non-default legacy defense total into an additional modifier, preserving the existing total where possible.
-- Preserves editable source values such as recovery dice spent, current load, movement and resource totals.
-- Moves the legacy movement alias into the canonical movement field when needed.
-- Initializes temporary resource values, recovery tracking, carrying-load tracking and conditions.
-- Clears the old native-property override list so the new registry becomes authoritative.
-- Preserves custom aliases and custom alias data.
+- Normalizes legacy skill proficiency representations into the canonical numeric `proficientLevel` field and removes obsolete boolean fields.
+- Preserves manually stored mechanical values, including MB, defense, initiative, recovery values, PE recovery and carrying-capacity totals.
+- Copies the legacy movement alias into the current movement field only when the current field is absent; it does not delete the legacy value.
+- Initializes missing temporary resource values and conditions without replacing existing values.
+- Preserves native property definitions, custom aliases and custom alias data.
 
 ## Foundry and other systems: architectural lessons
 
