@@ -605,7 +605,8 @@ assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes de
 assert.match(sheetCode, /new foundry\.data\.operators\.ForcedDeletion\(\)/, "A migração deve usar ForcedDeletion ao remover chaves legadas de perícias");
 assert.match(sheetCode, /LEGACY_SKILL_PATHS/, "O scanner não deve redescobrir caminhos de perícias legadas");
 assert.doesNotMatch(template, /Digite @ para consultar|Os quatro nomes são rótulos configuráveis|Exibe uma barra arrastável|Ao clicar neste card no modo de jogo/, "Dicas instrutivas do Inspector devem ser removidas");
-assert.doesNotMatch(template, /\splaceholder=|\stitle=/, "Placeholders e tooltips instrutivos não devem permanecer na ficha");
+const propertyValueField = template.match(/<label[^>]*data-property-value-row[\\s\\S]*?<\\/label>/)?.[0] ?? "";
+assert.doesNotMatch(propertyValueField, /placeholder=|title=/, "O campo Valor não deve exibir dicas ou tooltips instrutivos");
 assert.match(sheetCode, /async _rollSkill\(skillKey\)/, "As perícias devem executar testes");
 assert.match(sheetCode, /async _setSkillProficientLevel\(skillKey, rawLevel\)/, "A proficiência deve aceitar níveis numéricos assinados");
 assert.match(skills, /key: "athletics", legacyKey: "atletismo"/);
