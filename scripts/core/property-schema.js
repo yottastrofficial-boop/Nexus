@@ -166,6 +166,10 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const parts = key.split(".");
   let stored = parts.reduce((value, part) => value?.[part], system);
   let sourcePath = key;
+  if (stored === undefined && key === "progression.mb.value" && system.combat?.mb !== undefined) {
+    stored = system.combat.mb;
+    sourcePath = "combat.mb";
+  }
   if (stored === undefined && key === "combat.movement.value" && system.combat?.movement !== undefined) {
     stored = system.combat.movement;
     sourcePath = "combat.movement";
