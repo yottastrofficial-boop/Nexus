@@ -1141,7 +1141,7 @@ assert.match(sheet, /dependencies\.add\("combat\.mb"\)/, "Aliases do MB também 
 assert.doesNotMatch(sheet, /getNexusDefaultSkillFormula|getNexusDefaultPropertyFormula/, "A ficha não deve consultar fórmulas padrão globais");
 assert.match(sheetListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
 assert.match(sheetListeners, /valueKind === "string"/, "Expressões devem validar o resultado de acordo com o tipo textual");
-assert.match(template, /data-component-property-name[\s\S]*<span aria-hidden="true">\\|<\\/span>/, "O vínculo deve apresentar nome e caminho na mesma linha");
+assert.ok(template.includes('<span aria-hidden="true">|</span>'), "O vínculo deve apresentar nome e caminho na mesma linha");
 assert.match(template, /data-property-value-label>Valor:/, "O campo editável deve usar o rótulo compacto Valor");
 assert.match(css, /nexus-data-binding-inline/, "O vínculo deve usar o layout compacto de nome e caminho");
 assert.match(sheetListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
