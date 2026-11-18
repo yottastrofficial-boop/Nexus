@@ -290,17 +290,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
       const valueKind = kind;
-      const baseModifierPath = ["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path);
-      if (baseModifierPath) {
-        if (String(value ?? "").trim() === "" && typeof existingExpression === "string") {
-          await writePropertyExpression(sheet.actor, path, null);
-          sheet._refreshBoundComponents();
-          return;
-        }
-        input.value = String(resolveNexusBinding(sheet.actor, path).value ?? "");
-        globalThis.ui?.notifications?.warn?.("O MB é calculado pelo nível. Para personalizá-lo, informe uma fórmula entre {{ }}; um valor manual não altera o nível nem substitui o cálculo-base.");
-        return;
-      }
       if (resolvedPath.readOnly) {
         if (String(value ?? "").trim() === "" && typeof existingExpression === "string") {
           await writePropertyExpression(sheet.actor, path, null);
