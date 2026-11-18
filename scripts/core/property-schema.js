@@ -178,7 +178,11 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   if (key === "encumbrance.overloaded.value") return derived(currentLoad > 5 + strength * 2, "encumbrance.current");
 
   if (["combat.movement", "combat.movement.value"].includes(key)) {
-    return { matched: true, value: movement, sourcePath: "combat.movement" };
+    const storedMovement = system.combat?.movement;
+    const sourcePath = storedMovement && typeof storedMovement === "object" && Object.hasOwn(storedMovement, "value")
+      ? "combat.movement.value"
+      : "combat.movement";
+    return { matched: true, value: movement, sourcePath };
   }
   if (key === "recovery.spent") return { matched: true, value: spentRecovery, sourcePath: "recovery.spent" };
   if (key === "encumbrance.current.value") return { matched: true, value: currentLoad, sourcePath: "encumbrance.current" };
