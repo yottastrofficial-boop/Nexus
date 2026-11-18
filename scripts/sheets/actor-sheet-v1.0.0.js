@@ -1784,23 +1784,25 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (action?.type === "roll") return this._rollComponent(componentId, config);
     if (action?.type === "toggle") return this._toggleTargetComponent(componentId, config);
     if (action?.type === "update") {
-      const path = normalizeInteractionPropertyPath(config.path);
-      if (!path) throw new Error("Propriedade de destino inválida.");
-      const stored = foundry.utils.getProperty(this.actor.system, path);
-      const resolved = stored ?? resolveNexusBinding(this.actor, path).value;
-      const raw = String(config.value ?? "");
-      let value;
-      if (config.operation === "add" || config.operation === "subtract") {
-        const current = Number(resolved ?? 0), delta = Number(raw);
-        if (!Number.isFinite(current) || !Number.isFinite(delta)) throw new Error("A soma ou subtração exige valores numéricos válidos.");
-        value = current + (config.operation === "subtract" ? -delta : delta);
-      } else {
-        value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
-      }
-      if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
-      await this.actor.update({ [`system.${path}`]: value }, { render: false });
-      this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
-      return value;
+      return serializeActorPropertyWrite(this.actor, async () => {
+        const path = normalizeInteractionPropertyPath(config.path);
+        if (!path) throw new Error("Propriedade de destino inválida.");
+        const stored = foundry.utils.getProperty(this.actor.system, path);
+        const resolved = stored ?? resolveNexusBinding(this.actor, path).value;
+        const raw = String(config.value ?? "");
+        let value;
+        if (config.operation === "add" || config.operation === "subtract") {
+          const current = Number(resolved ?? 0), delta = Number(raw);
+          if (!Number.isFinite(current) || !Number.isFinite(delta)) throw new Error("A soma ou subtração exige valores numéricos válidos.");
+          value = current + (config.operation === "subtract" ? -delta : delta);
+        } else {
+          value = raw.trim() !== "" && Number.isFinite(Number(raw)) ? Number(raw) : raw;
+        }
+        if (typeof value === "number" && !Number.isFinite(value)) throw new Error("Valor numérico inválido.");
+        await this.actor.update({ [`system.${path}`]: value }, { render: false });
+        this._refreshBoundComponents({ system: Object.fromEntries([[path, value]]) });
+        return value;
+      });
     }
     if (action?.type === "calculate") {
       const formula = String(config.formula ?? "").trim();
