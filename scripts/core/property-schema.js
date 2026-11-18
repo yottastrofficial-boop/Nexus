@@ -94,16 +94,16 @@ export function getNexusRulebookPropertyPaths() {
 }
 
 /**
- * Resolve computed and metadata-only properties from the canonical registry.
- * Returns matched:false for ordinary stored Actor.system paths.
+ * Compatibility export retained for older callers. The editor no longer
+ * supplies global or pre-programmed formulas; expressions are user-authored.
  */
 export function getNexusDefaultPropertyFormula(_path) {
   return "";
 }
 
 /**
- * Resolves rulebook properties while keeping every default calculation visible
- * and editable in the Inspector. Saving a literal value replaces the formula.
+ * Resolves only properties with an explicit rulebook mapping or stored source.
+ * Derived values without an explicit calculation are not injected here.
  */
 export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const actor = actorOrSystem?.system ? actorOrSystem : { system: actorOrSystem ?? {} };
