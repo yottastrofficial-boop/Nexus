@@ -182,7 +182,7 @@ const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").matched, false, "Propriedades derivadas não devem receber cálculos globais pré-configurados");
+assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, 11, "Defesa deve acompanhar atributos e modificadores atuais");
 
 
 for (const attribute of NEXUS_ATTRIBUTES) {
@@ -191,12 +191,21 @@ for (const attribute of NEXUS_ATTRIBUTES) {
 }
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").matched, false, "O MB não deve receber uma fórmula ou valor derivado pré-configurado no registro de propriedades");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3, "O MB deve ser derivado do nível, sem depender de valor persistido");
 assert.equal(getNexusBaseModifier(rulebookActor), 3, "O cálculo-base de MB continua disponível para as regras de perícias sem preencher o editor");
 assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O sistema não deve preencher fórmulas globais no editor de propriedades");
-assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").matched, false, "O registro não deve injetar valores padrão para o MB");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false, "O dado de recuperação não deve receber fórmula global pré-configurada");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false, "A recuperação de PE não deve receber fórmula global pré-configurada");
+assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 1 }, combat: { mb: 1 } } } }, "progression.mb.value").value, 3, "Valores antigos de MB não podem sobrepor o nível atual");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "O dado de recuperação deve acompanhar a progressão de nível");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve acompanhar o MB atual");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10, "Defesa deve ser 8 + DES + modificador adicional");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1, "Iniciativa deve usar Destreza");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9, "Movimento em metros deve converter 1,5 m por espaço");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5, "A quantidade de dados de recuperação deve acompanhar o nível");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3, "Dados disponíveis devem descontar os gastos");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.base.value").value, 5, "A carga base deve seguir a regra do livro");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.bonus.value").value, 4, "A carga adicional deve ser duas vezes Força");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9, "A capacidade deve somar carga base e bônus");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false, "A carga excedida deve comparar carga atual e capacidade");
 const customMbActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
