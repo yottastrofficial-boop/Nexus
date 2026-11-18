@@ -20,7 +20,16 @@ export function createPropertyRegistry({ core = [], native = [], custom = [], ex
     const definition = normalizeDefinition(raw, origin);
     if (!definition || !definition.active) return;
     const existing = byPath.get(definition.path);
-    const merged = existing ? Object.freeze({ ...existing, ...definition, id: existing.origin === "core" ? existing.id : definition.id, origin: existing.origin === "core" ? "core" : definition.origin, targetPath: definition.targetPath || existing.targetPath, legacyKeys: Object.freeze([...new Set([...existing.legacyKeys, ...definition.legacyKeys])]) }) : definition;
+    const merged = existing ? Object.freeze({
+      ...existing,
+      ...definition,
+      id: existing.origin === "core" ? existing.id : definition.id,
+      origin: existing.origin === "core" ? "core" : definition.origin,
+      type: existing.origin === "core" ? existing.type : definition.type,
+      readOnly: existing.origin === "core" ? existing.readOnly : definition.readOnly,
+      targetPath: existing.origin === "core" ? (existing.targetPath || existing.path) : (definition.targetPath || existing.targetPath),
+      legacyKeys: Object.freeze([...new Set([...existing.legacyKeys, ...definition.legacyKeys])])
+    }) : definition;
     byPath.set(merged.path, merged); byId.set(merged.id, merged);
   };
   core.forEach(item => add(item, "core"));
