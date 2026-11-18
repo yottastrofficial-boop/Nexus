@@ -1198,8 +1198,9 @@ assert.match(sheetListeners, /if \(baseModifierPath\)[\s\S]*?MB é calculado pel
 assert.match(sheet, /formulaEditable: true[\s\S]*?if \(rulebookProperty\.matched\)/, "O MB deve aceitar fórmula personalizada sem aceitar substituição manual");
 assert.match(sheetListeners, /previous formula remains intact/, "A fórmula anterior deve permanecer salva se a gravação do novo valor falhar");
 assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
-assert.match(sheet, /dependencies\.add\("progression\.mb\.value"\)/, "Perícias sem fórmula manual devem atualizar quando o MB mudar");
-assert.match(sheet, /dependencies\.add\("combat\.mb"\)/, "Aliases do MB também devem invalidar perícias calculadas");
+assert.match(sheet, /addPropertyFormulaDependencies\(component\.dataPath\)/, "Dependências de propriedades devem vir de fórmulas explicitamente configuradas");
+assert.match(sheet, /scanExpressions\(component\)/, "Expressões dos cards devem registrar suas dependências atuais");
+assert.doesNotMatch(sheet, /Perícias sem fórmula manual devem atualizar quando o MB mudar/, "O Core não deve impor dependências mecânicas a propriedades sem fórmula");
 assert.doesNotMatch(sheet, /getNexusDefaultSkillFormula|getNexusDefaultPropertyFormula/, "A ficha não deve consultar fórmulas padrão globais");
 assert.match(sheetListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
 assert.match(sheetListeners, /valueKind === "string"/, "Expressões devem validar o resultado de acordo com o tipo textual");
