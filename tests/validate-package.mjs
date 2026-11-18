@@ -433,8 +433,7 @@ assert.equal(secondMigration.changed, false, "Migração repetida não deve sina
 
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
 
-// Rulebook property migration: signed proficiency and stored derived combat
-// values are normalized once, while custom final values are preserved as modifiers.
+// Property migration normalizes legacy proficiency fields but preserves manually stored mechanical values.
 const legacyPropertyActor = {
   system: {
     identity: { level: 4 },
@@ -924,7 +923,7 @@ const resolveFormulaTestProperty = identifier => {
   return path.split(".").reduce((value, key) => value?.[key], formulaResolutionActor.system);
 };
 assert.equal(
-  evaluateNexusExpression("attributes.for.value + (combat.mb * skills.athletics.proficientLevel)", resolveFormulaTestProperty),
+  evaluateNexusExpression("attributes.for.value + (mb * skills.athletics.proficientLevel)", resolveFormulaTestProperty),
   5,
   "Expressões devem resolver atributos, MB e nível de proficiência pela mesma normalização"
 );
