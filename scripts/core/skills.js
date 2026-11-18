@@ -93,7 +93,7 @@ export function getNexusAttributeValue(actorOrSystem, attributeKey, depth = 0) {
       const normalized = key.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const attributeMatch = normalized.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
       if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1], depth + 1);
-      if (["mb", "combat.mb", "progression.mb.value"].includes(normalized)) return getNexusBaseModifier(system);
+      if (["mb", "combat.mb", "progression.mb.value"].includes(normalized)) return getNexusBaseModifier(actorOrSystem, depth + 1);
       if (["identity.level", "level"].includes(normalized)) return Math.max(1, Number(system.identity?.level) || 1);
       const parts = key.replace(/^system\./, "").split(".");
       if (parts.some(part => ["__proto__", "prototype", "constructor"].includes(part))) return undefined;
