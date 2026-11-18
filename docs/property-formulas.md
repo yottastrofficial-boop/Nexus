@@ -19,7 +19,7 @@ Use duas chaves para delimitar uma expressão:
 - `{{for - 1}}`
 - `{{@identity.level + @combat.mb}}`
 
-O resultado é calculado com os valores atuais do Actor. Em componentes abertos, expressões vinculadas são reavaliadas quando o Foundry emite uma atualização real do Actor. O NEXUS compara os caminhos alterados com as referências de cada componente e atualiza somente os componentes afetados; não há timer nem polling.
+O resultado é calculado com os valores atuais do Actor. O Core não instala fórmulas mecânicas padrão nas propriedades. Fórmulas prontas podem acompanhar cards importados da Biblioteca; fórmulas explicitamente configuradas também permanecem vinculadas às propriedades atuais. Em componentes abertos, expressões são reavaliadas quando o Foundry emite uma atualização real do Actor. O NEXUS compara os caminhos alterados com as referências de cada componente e atualiza somente os componentes afetados; não há timer nem polling.
 
 ## Atalhos do NEXUS
 
@@ -33,7 +33,7 @@ O resultado é calculado com os valores atuais do Actor. Em componentes abertos,
 | `desl` / `movimento` | Deslocamento |
 | `ddr` | Dados de Recuperação |
 
-Os atalhos não diferenciam maiúsculas de minúsculas. Também é possível usar caminhos completos de propriedades quando disponíveis.
+Os atalhos não diferenciam maiúsculas de minúsculas. Também é possível usar caminhos completos de propriedades quando disponíveis. Os atalhos são referências a valores armazenados; não aplicam cálculos por conta própria.
 
 ## Operadores suportados
 
@@ -50,7 +50,7 @@ A precedência matemática é respeitada. Um campo numérico vazio é tratado co
 
 ## Limites desta etapa
 
-O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e aceita somente as funções seguras listadas acima. O cálculo-base das propriedades derivadas é resolvido em tempo de leitura. Propriedades editáveis aceitam valores manuais; propriedades derivadas permanecem somente leitura para valores escalares. Quando permitido pela propriedade, uma fórmula personalizada pode substituir o cálculo-base e fica persistida no Actor. Limpar a fórmula restaura o cálculo-base, sem gravar um número antigo no caminho derivado.
+O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e aceita somente as funções seguras listadas acima. O avaliador não define quais fórmulas devem existir: ele apenas executa expressões presentes em cards da Biblioteca ou configuradas explicitamente. As propriedades do Core armazenam valores e não recebem cálculos mecânicos predefinidos.
 
 
 ## Fórmulas persistentes de propriedades
@@ -77,7 +77,7 @@ Layouts antigos que usam `component.representation` continuam legíveis; novas c
 
 ## Fórmulas personalizadas de perícias
 
-O resultado `skills.<pericia>.value` usa o cálculo-base de perícia ou uma fórmula personalizada. A fórmula fica armazenada em `skills.<pericia>.formula`; ao editar a propriedade `.value`, o Inspector apresenta a fórmula subjacente. Limpar o campo restaura o cálculo-base. O resultado calculado não é substituído por um valor escalar manual.
+O resultado `skills.<pericia>.value` é um valor armazenado. A propriedade não recebe uma soma automática de atributo e MB. Uma fórmula só é executada quando existe uma configuração explícita em `skills.<pericia>.formula` ou em um card importado da Biblioteca; ela consulta os valores atuais e é reavaliada quando suas dependências mudam.
 
 Exemplos válidos para Atletismo:
 
