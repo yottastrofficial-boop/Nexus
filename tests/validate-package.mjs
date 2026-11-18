@@ -181,7 +181,7 @@ assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for
 assert.equal(getNexusSkillRows(nestedAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 7, "Perícias devem ler atributos aninhados sem retornar zero");
 assert.equal(evaluateNexusSkillFormula(nestedAttributeActor, "athletics", "for + mb"), 8, "Fórmulas de perícia devem usar o atributo aninhado");
 const expressionAttributeActor = {
-  system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, skills: {} },
+  system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, progression: { mb: { value: 2 } }, skills: {} },
   flags: { nexus: { propertyExpressions: { attributes: { for: { value: "{{attributes.des.value + mb}}" } } } } }
 };
 assert.equal(getNexusSkillRows(expressionAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 5, "Atributos usados por perícias devem reavaliar expressões vinculadas");
