@@ -259,7 +259,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           || (valueKind === "number" && typeof calculated !== "number")
           || (valueKind === "boolean" && typeof calculated !== "boolean")
           || (valueKind === "string" && typeof calculated !== "string");
-        const baseModifierPath = ["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path);
         if (incompatible || (resolvedPath.readOnly && !resolvedPath.formulaEditable && !skillFormulaMatch)) {
           globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
