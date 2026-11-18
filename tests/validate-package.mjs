@@ -958,6 +958,7 @@ assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*r
 assert.match(sheet, /action\?\.type === "update"[\s\S]*?return serializeActorPropertyWrite\(this\.actor/, "Actions de interação também devem serializar alterações de propriedades");
 assert.match(sheetListeners, /data-config-current-value[\s\S]*?serializeActorPropertyWrite\(sheet\.actor/, "Valores de recursos no Inspector devem compartilhar a fila");
 assert.doesNotMatch(sheetListeners, /propertyExpressionQueues = new WeakMap/, "A fila não deve serializar apenas fórmulas e deixar valores manuais concorrentes");
+assert.match(sheetListeners, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
 assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
