@@ -182,7 +182,7 @@ const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").matched, false,
+assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").matched, false, "Propriedades derivadas não devem receber cálculos globais pré-configurados");
 
 
 for (const attribute of NEXUS_ATTRIBUTES) {
@@ -192,18 +192,18 @@ for (const attribute of NEXUS_ATTRIBUTES) {
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").matched, false, "O MB não deve receber uma fórmula ou valor derivado pré-configurado no registro de propriedades");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, false, "MB deve permitir edição direta ou fórmula personalizada");
+assert.equal(getNexusBaseModifier(rulebookActor), 3, "O cálculo-base de MB continua disponível para as regras de perícias sem preencher o editor");
 assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O sistema não deve preencher fórmulas globais no editor de propriedades");
 assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").matched, false, "O registro não deve injetar valores padrão para o MB");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false,
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false,
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false, "O dado de recuperação não deve receber fórmula global pré-configurada");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false, "A recuperação de PE não deve receber fórmula global pré-configurada");
 const customMbActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
-assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").matched, false,
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").matched, false, "O editor não deve injetar cálculos derivados mesmo quando o MB tem expressão manual");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").matched, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").matched, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
