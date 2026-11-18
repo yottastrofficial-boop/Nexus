@@ -45,8 +45,8 @@ export function normalizeNexusProficientLevel(rawLevel) {
 export function getNexusBaseModifier(actorOrSystem, depth = 0) {
   const actor = actorOrSystem?.system ? actorOrSystem : null;
   const system = actor?.system ?? actorOrSystem ?? {};
-  const stored = system.progression?.mb?.value ?? system.combat?.mb;
-  if (stored !== undefined && stored !== null && Number.isFinite(Number(stored))) return Number(stored);
+  // MB is derived from level. Never let a stale persisted scalar override
+  // the current rulebook formula or an explicitly configured property formula.
   const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
   const formula = expressions?.progression?.mb?.value ?? expressions?.combat?.mb;
   if (typeof formula === "string" && formula.trim() && depth < 8) {
