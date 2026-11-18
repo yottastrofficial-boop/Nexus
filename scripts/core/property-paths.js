@@ -1,7 +1,7 @@
 import { NEXUS_SKILLS } from "./skills.js";
 const ROOT_ALIASES = Object.freeze({ attribute:"attributes", resource:"resources", skill:"skills" });
 const FORMULA_IDENTIFIER_ALIASES = Object.freeze({
-  nivel:"identity.level", level:"identity.level", mb:"combat.mb",
+  nivel:"identity.level", level:"identity.level", mb:"progression.mb.value",
   for:"attributes.for.value", des:"attributes.des.value", sab:"attributes.sab.value",
   int:"attributes.int.value", car:"attributes.car.value", von:"attributes.von.value",
   pv:"resources.pv.value", pm:"resources.pm.value", pe:"resources.pe.value",
@@ -9,7 +9,7 @@ const FORMULA_IDENTIFIER_ALIASES = Object.freeze({
   desl:"combat.movement.value", movimento:"combat.movement.value", ddr:"recovery.count.value"
 });
 const PROPERTY_PATH_ALIASES = Object.freeze({
-  nivel:"identity.level", level:"identity.level", mb:"combat.mb",
+  nivel:"identity.level", level:"identity.level", mb:"progression.mb.value",
   def:"combat.defense.value", defesa:"combat.defense.value",
   desl:"combat.movement.value", movimento:"combat.movement.value", ddr:"recovery.count.value"
 });
