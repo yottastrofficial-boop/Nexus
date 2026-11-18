@@ -430,8 +430,11 @@ const legacyPropertyActor = {
       athletics: { proficientLevel: 1 },
       furtividade: { opposed: true }
     },
-    combat: { defense: 15, movement: 6, mb: 2, ddr: 4, desl: 5 },
-    resources: { pv: { value: 12, max: 12 } }
+    combat: { defense: 15, initiative: 3, movement: 6, mb: 2, ddr: 4, desl: 5 },
+    progression: { mb: { value: 2 } },
+    recovery: { spent: 1, count: 4, die: "d6", available: 3 },
+    encumbrance: { current: 8, base: 5, bonus: 2, capacity: 7, overloaded: true },
+    resources: { pv: { value: 12, max: 12 }, pe: { value: 5, max: 10, recovery: 8 } }
   },
   flags: { nexus: { activeLayout: "principal", aliases: [], customData: {}, nativeProperties: [{ id: "core.resource.pv", label: "PV antigo" }] } },
   updateCount: 0,
@@ -474,11 +477,14 @@ assert.equal(legacyPropertyActor.system.combat.defense, undefined);
 assert.equal(legacyPropertyActor.system.combat.mb, undefined);
 assert.equal(legacyPropertyActor.system.combat.ddr, undefined);
 assert.equal(legacyPropertyActor.system.combat.desl, undefined);
+assert.equal(legacyPropertyActor.system.combat.initiative, undefined);
 assert.equal(legacyPropertyActor.system.combat.movement, 6);
+assert.equal(legacyPropertyActor.system.progression.mb, undefined, "Snapshots antigos de MB devem ser removidos");
 assert.equal(legacyPropertyActor.system.resources.pv.temporary, 0);
+assert.equal(legacyPropertyActor.system.resources.pe.recovery, undefined, "Recuperação derivada de PE não deve permanecer persistida");
 assert.deepEqual(legacyPropertyActor.system.conditions, []);
-assert.deepEqual(legacyPropertyActor.system.recovery, { spent: 0 });
-assert.deepEqual(legacyPropertyActor.system.encumbrance, { current: 0 });
+assert.deepEqual(legacyPropertyActor.system.recovery, { spent: 1 }, "A migração deve preservar gastos e remover contagens derivadas");
+assert.deepEqual(legacyPropertyActor.system.encumbrance, { current: 8 }, "A migração deve preservar a carga atual e remover totais derivados");
 assert.deepEqual(legacyPropertyActor.flags.nexus.nativeProperties, [], "Definições nativas antigas devem ser substituídas pelo registro canônico");
 const propertyMigrationWrites = legacyPropertyActor.updateCount;
 const repeatedPropertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
