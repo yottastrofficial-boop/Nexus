@@ -10,6 +10,7 @@ const FORMULA_IDENTIFIER_ALIASES = Object.freeze({
 });
 const PROPERTY_PATH_ALIASES = Object.freeze({
   nivel:"identity.level", level:"identity.level", mb:"progression.mb.value",
+  "combat.mb":"progression.mb.value", "combat.mb.value":"progression.mb.value",
   def:"combat.defense.value", defesa:"combat.defense.value",
   desl:"combat.movement.value", movimento:"combat.movement.value", ddr:"recovery.count.value"
 });
