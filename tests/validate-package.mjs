@@ -69,7 +69,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.61", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.62", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -193,7 +193,7 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib")
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, false, "MB deve permitir edição direta ou fórmula personalizada");
-assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "{{min(5, ceil(max(1, identity.level) / 2))}}", "A fórmula padrão de MB deve estar visível e ser editável");
+assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O sistema não deve preencher fórmulas globais no editor de propriedades");
 assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").value, 4, "Um valor manual deve substituir a fórmula padrão de MB");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "A fórmula padrão de recuperação deve manter os intervalos de nível");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve usar a fórmula padrão editável");
@@ -907,7 +907,7 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attribu
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 5, "O atalho de proficiência deve continuar aplicando apenas o sinal do nível");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
-assert.match(sheetCode, /propertyValueInput\.tagName !== "TEXTAREA"[\s\S]*?document\.createElement\("textarea"\)/, "O editor deve usar uma área de texto para aceitar valores literais e expressões dinâmicas");
+assert.match(sheetCode, /propertyValueInput\\.dataset\\.propertyKind = propertyType/, "O campo deve preservar o tipo real da propriedade");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = propertyFormulaMode \? "property-formula" : propertyType/, "Todos os campos de fórmula devem usar o mesmo modo de edição");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.value$/)'), "O resultado calculado da perícia deve oferecer o editor da fórmula subjacente");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
@@ -918,7 +918,7 @@ assert.match(sheetListeners, /propertyExpressionQueues = new WeakMap/);
 assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
-assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula[\s\S]*?propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/, "O editor deve exibir fórmulas padrão e fórmulas personalizadas");
+assert.match(sheetCode, /const inputValue = skillFormulaMode \\? skillFormula[\\s\\S]*?propertyFormulaMode \\? \\(storedExpression \\?\\? effectivePath\\.formula \\?\\?/, "O editor deve exibir apenas expressões salvas manualmente, sem preencher fórmulas padrão");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
 assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
@@ -933,8 +933,9 @@ const resolveExpressionValue = key => expressionValues[key];
 assert.equal(evaluateNexusFormula("level % 2", resolveExpressionValue), 1, "O operador módulo deve calcular o resto");
 assert.equal(evaluateNexusExpression("min(5, ceil(4 / 2))", () => undefined), 2, "Funções matemáticas seguras devem funcionar nas fórmulas");
 assert.equal(evaluateNexusExpression("if(5 <= 6, 'd8', 'd10')", () => undefined), "d8", "A função if deve permitir fórmulas condicionais seguras");
-assert.equal(getNexusDefaultSkillFormula("athletics"), "{{attributes.for.value + (combat.mb * sign(skills.athletics.proficientLevel))}}", "A fórmula padrão da perícia deve estar disponível para edição");
-assert.ok(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.formula.includes("sign("), "O cálculo padrão de perícia deve ser exposto como fórmula editável");
+assert.equal(getNexusDefaultSkillFormula("athletics"), "", "Perícias não devem receber fórmulas globais predefinidas");
+assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.formula, "", "A fórmula da perícia deve permanecer vazia até ser definida manualmente");
+assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.value, 5, "O modificador básico da perícia continua sendo calculado pelas regras do sistema");
 assert.equal(evaluateNexusFormula("@level + @mb", resolveExpressionValue), 8, "Referências com @ devem funcionar nas fórmulas do editor");
 assert.equal(evaluateNexusCondition("@level > @mb", resolveExpressionValue), true, "Referências com @ devem funcionar nas condições");
 assert.equal(evaluateNexusCondition("{{@level}} >= 5", resolveExpressionValue), true, "Referências entre chaves devem funcionar dentro de comparações");
