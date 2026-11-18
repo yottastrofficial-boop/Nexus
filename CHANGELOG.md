@@ -12,7 +12,7 @@
 ### Validação
 - Atualizados os testes de regressão para a edição manual de fórmulas e tipos reais de propriedade.
 - Incluídas verificações para valores vazios, literais textuais, expressões entre chaves, layout compacto e dependências do modificador base.
-- A publicação do pacote instalável é condicionada à aprovação do workflow de validação; o teste funcional e visual em uma instalação real do Foundry VTT 14 continua necessário antes de declarar estabilidade.
+- A validação automatizada, a verificação de sintaxe e a geração do ZIP foram aprovadas nos workflows do GitHub Actions. O teste funcional e visual em uma instalação real do Foundry VTT 14 continua necessário antes de declarar estabilidade.
 
 ## 1.0.0.61
 
