@@ -1337,6 +1337,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const skill = NEXUS_SKILLS.find(item => item.key === skillValue[1] || item.legacyKey === skillValue[1]);
         if (skill) dependencies.add(`attributes.${skill.attributeKey}.value`);
         dependencies.add(`skills.${skillValue[1]}.proficientLevel`);
+        // The built-in skill modifier still follows the core rule calculation
+        // when no manual formula is stored, so MB changes must invalidate it.
+        dependencies.add("progression.mb.value");
+        dependencies.add("combat.mb");
+        dependencies.add("combat.mb.value");
         dependencies.add("identity.level");
       }
       if (["progression.mb.value", "combat.mb", "combat.mb.value", "recovery.count.value", "recovery.die.value", "resources.pe.recovery.value"].includes(path)) dependencies.add("identity.level");
