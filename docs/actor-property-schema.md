@@ -87,8 +87,9 @@ Personality fields include appearance, traits, flaws, bonds, ideals, motivation 
 
 The migration:
 - Normalizes legacy skill proficiency representations into the canonical numeric `proficientLevel` field and removes the obsolete boolean fields.
-- Removes old derived MB and recovery-count fields from persisted combat data.
+- Removes persisted snapshots of derived MB, defense, initiative, recovery count/die/availability, PE recovery and carrying-capacity totals.
 - Converts a non-default legacy defense total into an additional modifier, preserving the existing total where possible.
+- Preserves editable source values such as recovery dice spent, current load, movement and resource totals.
 - Moves the legacy movement alias into the canonical movement field when needed.
 - Initializes temporary resource values, recovery tracking, carrying-load tracking and conditions.
 - Clears the old native-property override list so the new registry becomes authoritative.
