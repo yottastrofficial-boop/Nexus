@@ -102,8 +102,8 @@ export function getNexusDefaultPropertyFormula(_path) {
 }
 
 /**
- * Resolves canonical stored and derived Actor properties.
- * Derived values are calculated on read and never written back as stale scalar snapshots.
+ * Resolves stored Actor properties and static metadata.
+ * Mechanical calculations are opt-in formulas, not property-layer defaults.
  */
 export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const actor = actorOrSystem?.system ? actorOrSystem : { system: actorOrSystem ?? {} };
