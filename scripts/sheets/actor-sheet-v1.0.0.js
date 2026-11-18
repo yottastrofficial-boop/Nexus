@@ -135,6 +135,17 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
         formulaEditable: rulebookProperty.formulaEditable === true };
     }
   }
+  // MB has one canonical, level-derived value. Legacy combat.mb paths
+  // must resolve through the same calculation instead of stale system data.
+  if (["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path)) {
+    return {
+      value: getNexusBaseModifier(actor),
+      path: "progression.mb.value",
+      sourcePath: "identity.level",
+      virtual: true,
+      readOnly: true
+    };
+  }
   if (rulebookProperty.matched) {
     return {
       value: rulebookProperty.value,
