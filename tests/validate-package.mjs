@@ -175,7 +175,7 @@ assert.equal(normalizeInteractionPropertyPath("@skills.athletics.proficientLevel
 assert.equal(normalizeInteractionPropertyPath("skills..athletics"), "", "Destinos inválidos devem continuar bloqueados");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").value, 2);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.value").sourcePath, "attributes.for", "Atributos escalares devem gravar no caminho físico existente");
-const nestedAttributeActor = { system: { attributes: { for: { value: 7 } } } };
+const nestedAttributeActor = { system: { attributes: { for: { value: 7 } }, progression: { mb: { value: 1 } } } };
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").value, 7, "Atributos legados aninhados devem ler o campo value");
 assert.equal(getNexusRulebookPropertyValue(nestedAttributeActor, "attributes.for.value").sourcePath, "attributes.for.value", "Atributos legados aninhados devem gravar no campo value");
 assert.equal(getNexusSkillRows(nestedAttributeActor).find(skill => skill.key === "athletics")?.attributeValue, 7, "Perícias devem ler atributos aninhados sem retornar zero");
@@ -220,7 +220,7 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.bonus.val
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9, "A capacidade deve ser lida do valor armazenado");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false, "O estado de carga excedida deve ser lido do valor armazenado");
 const customMbActor = {
-  system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
+  system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1, formula: "{{attributes.for.value + (mb * proficientLevel)}}" } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
@@ -240,7 +240,12 @@ const cyclicFormulaActor = {
   } } }
 };
 assert.ok(Number.isFinite(getNexusBaseModifier(cyclicFormulaActor)), "Ciclos entre propriedades devem terminar com fallback seguro");
-assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
+assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "Uma fórmula explicitamente configurada deve usar os valores atuais");
+customMbActor.system.attributes.for = 4;
+assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 7, "Fórmulas explícitas devem reavaliar dependências atuais sem salvar snapshots");
+const skillWithoutFormula = { system: { identity: { level: 10 }, attributes: { for: 5 }, skills: { athletics: { proficientLevel: 3 } } } };
+assert.equal(getNexusSkillRows(skillWithoutFormula).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem valor ou fórmula explícitos não devem receber cálculo predefinido");
+assert.equal(getNexusBaseModifier(skillWithoutFormula), 0, "MB ausente deve permanecer sem cálculo predefinido");
 assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, undefined, "A propriedade de recuperação de PE não deve ser calculada pelo MB");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
