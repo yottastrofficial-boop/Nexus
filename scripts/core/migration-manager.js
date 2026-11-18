@@ -25,7 +25,7 @@ export async function migrateLegacyActorData({
   let propertiesMigrated = false;
 
   // Migrate legacy sheet fields to the rulebook-aligned property model.
-  // Derived values are recalculated on read; only their editable source inputs remain persisted.
+  // Preserve stored mechanical values; formulas are opt-in and never imposed by migration.
   if (actor?.system && typeof actor.update === "function") {
     const system = actor.system;
     const updates = {};
