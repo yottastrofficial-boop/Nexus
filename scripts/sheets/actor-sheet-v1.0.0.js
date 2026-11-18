@@ -143,7 +143,8 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
       path: "progression.mb.value",
       sourcePath: "identity.level",
       virtual: true,
-      readOnly: true
+      readOnly: true,
+      formulaEditable: true
     };
   }
   if (rulebookProperty.matched) {
