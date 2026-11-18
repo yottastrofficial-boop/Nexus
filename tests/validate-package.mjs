@@ -200,6 +200,9 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10, "Defesa deve ser 8 + DES + modificador adicional");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1, "Iniciativa deve usar Destreza");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9, "Movimento em metros deve converter 1,5 m por espaço");
+const nestedMovementActor = { system: { combat: { movement: { value: 7 } } } };
+assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").value, 7);
+assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").sourcePath, "combat.movement.value", "A edição deve preservar o formato aninhado do deslocamento");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5, "A quantidade de dados de recuperação deve acompanhar o nível");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3, "Dados disponíveis devem descontar os gastos");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.base.value").value, 5, "A carga base deve seguir a regra do livro");
@@ -211,6 +214,14 @@ const customMbActor = {
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
+const customMbAttributeActor = {
+  system: { identity: { level: 4 }, attributes: { for: 2, des: 1 } },
+  flags: { nexus: { propertyExpressions: {
+    progression: { mb: { value: "{{attributes.for.value + 1}}" } },
+    attributes: { des: { value: "{{mb + 1}}" } }
+  } } }
+};
+assert.equal(getNexusAttributeValue(customMbAttributeActor, "des"), 4, "Fórmulas de atributos devem usar o MB personalizado atual");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
 assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").matched, false, "O editor não deve injetar cálculos derivados mesmo quando o MB tem expressão manual");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").matched, false);
