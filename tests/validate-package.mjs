@@ -1193,9 +1193,8 @@ assert.ok(sheet.includes("labelSuffix") && sheet.includes("NON_ROLL_PROPERTY_SUF
 
 assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
 assert.doesNotMatch(sheetListeners, /pendingPropertyValueSaves/, "Valores de propriedades não devem ser salvos por debounce durante a digitação");
-assert.match(sheetListeners, /const baseModifierPath = \["progression\.mb\.value", "combat\.mb", "combat\.mb\.value"\]\.includes\(path\)/, "O MB deve ser tratado como propriedade derivada em todos os aliases");
-assert.match(sheetListeners, /if \(baseModifierPath\)[\s\S]*?MB é calculado pelo nível/, "O Inspector não deve gravar um valor manual de MB sobre o nível");
-assert.match(sheet, /formulaEditable: true[\s\S]*?if \(rulebookProperty\.matched\)/, "O MB deve aceitar fórmula personalizada sem aceitar substituição manual");
+assert.doesNotMatch(sheetListeners, /baseModifierPath/, "O Inspector deve permitir valores manuais para MB como qualquer outra propriedade");
+assert.doesNotMatch(sheet, /formulaEditable: true/, "O Core não deve marcar propriedades mecânicas com fórmulas predefinidas");
 assert.match(sheetListeners, /previous formula remains intact/, "A fórmula anterior deve permanecer salva se a gravação do novo valor falhar");
 assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
 assert.match(sheet, /addPropertyFormulaDependencies\(component\.dataPath\)/, "Dependências de propriedades devem vir de fórmulas explicitamente configuradas");
