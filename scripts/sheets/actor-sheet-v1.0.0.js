@@ -3,7 +3,7 @@ import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
-import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
+import { activateActorSheetListeners, serializeActorPropertyWrite } from "./actor-sheet-listeners.js";
 import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
@@ -1610,6 +1610,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _updateSystemValue(input) {
+    return serializeActorPropertyWrite(this.actor, async () => {
     const path = input.dataset.systemPath, value = ["number", "range"].includes(input.type) ? Number(input.value) : input.value;
     if (!path) return;
     if (path === "name") { await this.actor.update({ name: value }); this._refreshBoundComponents(); return; }
@@ -1629,7 +1630,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (writePath === "img") return this.actor.update({ img: value });
     await this.actor.update({ [`system.${writePath}`]: value });
     this._refreshBoundComponents();
-
+    });
   }
   _syncTextToolbar(inspector, component) {
     if (!inspector) return;
@@ -1746,10 +1747,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _setSkillProficientLevel(skillKey, rawLevel) {
+    return serializeActorPropertyWrite(this.actor, async () => {
     if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) return;
     const proficientLevel = normalizeNexusProficientLevel(rawLevel);
     await this.actor.update({ ["system.skills." + skillKey + ".proficientLevel"]: proficientLevel }, { render: false });
     this._refreshBoundComponents();
+    });
   }
 
   async _toggleTargetComponent(componentId, config = {}) {
