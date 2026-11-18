@@ -153,11 +153,6 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
   let value = alias.alias
     ? (alias.path ? (resolvedAliasTarget ?? virtualPaths[alias.path]?.value ?? (alias.path === "name" ? actor?.name : alias.path === "img" ? actor?.img : getPath(actor?.system ?? {}, alias.path))) : (alias.alias?.[alias.suffix] !== undefined ? alias.alias[alias.suffix] : getPath(getCustomAliasData(actor), [alias.alias.key, alias.suffix === "exib" ? "exibicao" : alias.suffix].filter(Boolean).join("."))))
     : getPath(actor?.system ?? {}, path);
-  if (alias.alias?.type === "resource" && alias.suffix === "percentage") {
-    const resource = alias.path ? getPath(actor?.system ?? {}, alias.path) : getPath(getCustomAliasData(actor), alias.alias.key);
-    const current = Number(resource?.value), max = Number(resource?.max);
-    value = Number.isFinite(current) && Number.isFinite(max) && max > 0 ? Math.round(current / max * 100) : 0;
-  }
   value = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
   if (alias.alias && alias.suffix === "name" && (value === undefined || value === null || value === "")) value = alias.alias.label;
   if (alias.alias && ["exib", "exibicao"].includes(alias.suffix) && (value === undefined || value === null || value === "")) value = alias.alias.exib ?? alias.alias.label;
