@@ -309,10 +309,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           return;
         } else value = String(value).trim().toLowerCase() === "true";
       }
-      // A fórmula anterior só é removida depois que o novo valor passa pela validação.
-      if (typeof existingExpression === "string") {
-        await writePropertyExpression(sheet.actor, path, null);
-      }
       if (path === "name") await sheet.actor.update({ name: String(value).slice(0, 100) }, { render: false });
       else if (["img", "prototypeToken.texture.src"].includes(targetPath)) {
         const imagePath = String(value).trim().slice(0, 2048);
@@ -345,6 +341,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const actorRootPath = ["name", "img"].includes(updateTargetPath) || updateTargetPath.startsWith("prototypeToken.");
         const updatePath = resolvedPath.virtual && actorRootPath ? updateTargetPath : `system.${updateTargetPath}`;
         await sheet.actor.update({ [updatePath]: value }, { render: false });
+      }
+      // Persist the replacement value first. If the document update fails,
+      // the previous formula remains intact instead of being silently lost.
+      if (typeof existingExpression === "string") {
+        await writePropertyExpression(sheet.actor, path, null);
       }
       sheet._refreshBoundComponents();
       });
