@@ -141,6 +141,13 @@ assert.equal(registryFixture.getByPath("identity.level")?.label, "Nível do pers
 assert.equal(registryFixture.getById("custom-1")?.calculationMode, "formula");
 assert.equal(registryFixture.resolve("details.reputation")?.origin, "external");
 assert.equal(registryFixture.resolve("__proto__.polluted"), null);
+const canonicalRegistry = createPropertyRegistry({
+  core: NEXUS_RULEBOOK_PROPERTY_DEFINITIONS,
+  native: [{ key: "combat.defense.value", type: "string", derived: false, label: "Defesa editável" }]
+});
+assert.equal(canonicalRegistry.resolve("combat.defense.value")?.readOnly, true, "Módulos não podem tornar uma propriedade derivada do Core gravável");
+assert.equal(canonicalRegistry.resolve("combat.defense.value")?.type, "number", "Módulos não podem alterar o tipo de uma propriedade do Core");
+assert.equal(canonicalRegistry.resolve("attributes.for.value")?.readOnly, false, "Atributos são valores armazenados e editáveis");
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.name"));
 // Canonical property values and derived data.
 const rulebookActor = {
