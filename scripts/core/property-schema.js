@@ -1,4 +1,4 @@
-import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusAttributeValue, getNexusSkillRows } from "./skills.js";
+import { NEXUS_ATTRIBUTES, NEXUS_SKILLS, getNexusAttributeValue, getNexusBaseModifier, getNexusSkillRows } from "./skills.js";
 
 /**
  * Canonical property registry for the NEXUS core rules.
@@ -146,11 +146,42 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     if (resource) return { matched: true, value: resourceMatch[2] === "name" ? resource.name : resource.exib, readOnly: true };
   }
 
+  const number = value => {
+    const raw = value && typeof value === "object" && Object.hasOwn(value, "value") ? value.value : value;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const level = Math.max(1, number(system.identity?.level));
+  const mb = getNexusBaseModifier(actor);
+  const strength = getNexusAttributeValue(actor, "for");
+  const dexterity = getNexusAttributeValue(actor, "des");
+  const movement = number(system.combat?.movement ?? system.combat?.desl);
+  const spentRecovery = Math.max(0, number(system.recovery?.spent));
+  const recoveryCount = level;
+  const recoveryDie = "d" + Math.min(12, 4 + 2 * Math.floor((level - 1) / 2));
+  const currentLoad = number(system.encumbrance?.current);
+  const derived = (value, sourcePath = key) => ({
+    matched: true, value, readOnly: true, formulaEditable: true, sourcePath
+  });
+
+  if (key === "progression.mb.value") return derived(mb, "identity.level");
+  if (key === "combat.defense.value") return derived(8 + dexterity + number(system.combat?.defenseModifier));
+  if (key === "combat.initiative.value") return derived(dexterity, "attributes.des");
+  if (key === "combat.movement.meters") return derived(movement * 1.5, "combat.movement");
+  if (key === "recovery.count.value") return derived(recoveryCount, "identity.level");
+  if (key === "recovery.die.value") return derived(recoveryDie, "identity.level");
+  if (key === "recovery.available.value") return derived(Math.max(0, recoveryCount - spentRecovery), "recovery.spent");
+  if (key === "resources.pe.recovery.value") return derived(mb * 4, "progression.mb.value");
+  if (key === "encumbrance.base.value") return derived(5);
+  if (key === "encumbrance.bonus.value") return derived(strength * 2, "attributes.for");
+  if (key === "encumbrance.capacity.value") return derived(5 + strength * 2, "attributes.for");
+  if (key === "encumbrance.overloaded.value") return derived(currentLoad > 5 + strength * 2, "encumbrance.current");
+
   if (["combat.movement", "combat.movement.value"].includes(key)) {
-    return { matched: true, value: Number(system.combat?.movement ?? system.combat?.desl) || 0, sourcePath: "combat.movement" };
+    return { matched: true, value: movement, sourcePath: "combat.movement" };
   }
-  if (key === "recovery.spent") return { matched: true, value: Number(system.recovery?.spent) || 0, sourcePath: "recovery.spent" };
-  if (key === "encumbrance.current.value") return { matched: true, value: Number(system.encumbrance?.current) || 0, sourcePath: "encumbrance.current" };
+  if (key === "recovery.spent") return { matched: true, value: spentRecovery, sourcePath: "recovery.spent" };
+  if (key === "encumbrance.current.value") return { matched: true, value: currentLoad, sourcePath: "encumbrance.current" };
   return { matched: false };
 }
 
