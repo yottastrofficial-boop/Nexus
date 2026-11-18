@@ -959,7 +959,7 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + 
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
 assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = propertyType/, "O campo deve preservar o tipo real da propriedade");
-assert.doesNotMatch(sheet, /propertyPath\.match\(\/\^skills\\\.\(\[a-zA-Z0-9_\\-\]\+\)\\\.value\$\//, "O valor da perícia deve ser um campo armazenado, não um atalho para fórmula predefinida");
+assert.doesNotMatch(sheet, /skillValueMatch/, "O valor da perícia deve ser um campo armazenado, não um atalho para fórmula predefinida");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
