@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.62 corrige o seletor do canto superior esquerdo, consolida o campo numérico de proficiência com sinais preservados e atualiza cards e regras sem exigir Enter ou reconstruir o campo em edição. A validação automatizada do pacote é executada no CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.62 refina o editor de propriedades: aceita valores vazios e expressões textuais, mantém fórmulas somente quando inseridas manualmente, preserva os cálculos-base das regras e atualiza dependências de perícias. O pacote é validado pelo CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
