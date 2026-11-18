@@ -29,24 +29,42 @@ export function activateCanvasViewport(sheet, html) {
   appWindow?.style.setProperty("--nexus-highlight-color", layout.highlightColor ?? "#78b7e8");
   appWindow?.style.setProperty("--nexus-button-color", layout.buttonColor ?? "#315b7d");
 
+  let pendingFrame = 0;
+  let lastScale = null;
   const fitCanvas = () => {
     if (!stage.isConnected || !canvas.isConnected) return;
+    const stageWidth = stage.clientWidth;
+    const stageHeight = stage.clientHeight;
+    if (stageWidth <= 0 || stageHeight <= 0) return;
+
     const width = Number(canvas.dataset.layoutWidth) || 800;
     const height = Number(canvas.dataset.layoutHeight) || 800;
-    const scaleX = Math.max(1, stage.clientWidth - 24) / width;
-    const scaleY = Math.max(1, stage.clientHeight - 24) / height;
-    const scale = Math.max(0.25, Math.min(1.5, Math.min(scaleX, scaleY)));
-    canvas.style.zoom = String(Number(scale.toFixed(4)));
+    const scaleX = Math.max(1, stageWidth - 24) / width;
+    const scaleY = Math.max(1, stageHeight - 24) / height;
+    const scale = Number(Math.max(0.25, Math.min(1.5, Math.min(scaleX, scaleY))).toFixed(4));
+
+    // Evita escrita de estilo e invalidação de layout quando o zoom não mudou.
+    if (scale === lastScale) return;
+    canvas.style.zoom = String(scale);
+    lastScale = scale;
+  };
+  const scheduleFitCanvas = () => {
+    if (pendingFrame) return;
+    pendingFrame = requestAnimationFrame(() => {
+      pendingFrame = 0;
+      fitCanvas();
+    });
   };
 
-  sheet._fitNexusCanvas = fitCanvas;
-  const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fitCanvas) : null;
+  sheet._fitNexusCanvas = scheduleFitCanvas;
+  const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(scheduleFitCanvas) : null;
   observer?.observe(stage);
-  const frame = requestAnimationFrame(fitCanvas);
+  scheduleFitCanvas();
 
   sheet._nexusViewportCleanup = () => {
     observer?.disconnect();
-    cancelAnimationFrame(frame);
-    if (sheet._fitNexusCanvas === fitCanvas) sheet._fitNexusCanvas = null;
+    if (pendingFrame) cancelAnimationFrame(pendingFrame);
+    pendingFrame = 0;
+    if (sheet._fitNexusCanvas === scheduleFitCanvas) sheet._fitNexusCanvas = null;
   };
 }

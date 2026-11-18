@@ -8,6 +8,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEX
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
 import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
+import { activateCanvasViewport } from "../scripts/sheets/canvas-viewport.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "../scripts/core/formula-engine.js";
 import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected-corners.js";
@@ -44,6 +45,87 @@ assert.deepEqual(
 assert.doesNotThrow(() => activateCanvasInteractions({}, [], {}), "A render without a root element must exit safely");
 assert.doesNotThrow(() => activateCanvasInteractions({}, [{ querySelector: () => null }], {}), "A render without a Canvas must exit safely");
 
+// Runtime regression: viewport resize requests are coalesced into one animation frame.
+{
+  const previous = {
+    requestAnimationFrame: globalThis.requestAnimationFrame,
+    cancelAnimationFrame: globalThis.cancelAnimationFrame,
+    ResizeObserver: globalThis.ResizeObserver
+  };
+  const frames = new Map();
+  let nextFrame = 1;
+  let resizeCallback = null;
+  let disconnected = false;
+  let zoomWrites = 0;
+  const canvasStyle = {
+    zoom: "",
+    setProperty() {}
+  };
+  const canvas = {
+    dataset: { layoutWidth: "800", layoutHeight: "800" },
+    style: canvasStyle,
+    isConnected: true
+  };
+  Object.defineProperty(canvasStyle, "zoom", {
+    get() { return this._zoom ?? ""; },
+    set(value) { this._zoom = value; zoomWrites += 1; }
+  });
+  const stage = { clientWidth: 800, clientHeight: 600, isConnected: true };
+  const themeTarget = { style: { setProperty() {} } };
+  const appWindow = { style: { setProperty() {} } };
+  const rootElement = {
+    querySelector(selector) {
+      if (selector === ".nexus-canvas") return canvas;
+      if (selector === ".nexus-canvas-stage") return stage;
+      if (selector === ".nexus-sheet") return themeTarget;
+      return null;
+    },
+    closest() { return appWindow; }
+  };
+  const viewportSheet = {};
+  globalThis.requestAnimationFrame = callback => {
+    const id = nextFrame++;
+    frames.set(id, callback);
+    return id;
+  };
+  globalThis.cancelAnimationFrame = id => frames.delete(id);
+  globalThis.ResizeObserver = class {
+    constructor(callback) { resizeCallback = callback; }
+    observe() {}
+    disconnect() { disconnected = true; }
+  };
+  try {
+    activateCanvasViewport(viewportSheet, [rootElement]);
+    assert.equal(frames.size, 1, "Initial viewport fitting must schedule one frame");
+    resizeCallback?.();
+    viewportSheet._fitNexusCanvas();
+    assert.equal(frames.size, 1, "Repeated resize notifications must share one pending frame");
+    const [firstId, firstCallback] = frames.entries().next().value;
+    frames.delete(firstId);
+    firstCallback();
+    assert.equal(canvas.style.zoom, "0.72", "Canvas zoom must use the available stage dimensions");
+    assert.equal(zoomWrites, 1, "Initial fitting must write zoom once");
+
+    resizeCallback?.();
+    const [secondId, secondCallback] = frames.entries().next().value;
+    frames.delete(secondId);
+    secondCallback();
+    assert.equal(zoomWrites, 1, "Unchanged scale must not rewrite the zoom style");
+
+    viewportSheet._fitNexusCanvas();
+    assert.equal(frames.size, 1);
+    viewportSheet._nexusViewportCleanup();
+    assert.equal(frames.size, 0, "Cleanup must cancel a pending viewport frame");
+    assert.equal(disconnected, true, "Cleanup must disconnect ResizeObserver");
+    assert.equal(viewportSheet._fitNexusCanvas, null);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+  }
+}
+
 const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
 const exists = async file => access(path.join(root, file));
@@ -61,7 +143,7 @@ const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
-const canvasViewport = await read("scripts/sheets/canvas-viewport.js");
+const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
 const canvasPlayInteractions = await read("scripts/sheets/canvas-play-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
 const libraryView = await read("scripts/sheets/library-view.js");
@@ -69,7 +151,7 @@ const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js"
 const sheetCode = [sheet, sheetListeners, canvasInteractions, canvasPlayInteractions, libraryView, actorSheetRendering, propertyPickerView, panelWindow, themeModule].join("\n");
 
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
-assert.equal(manifest.version, "1.0.0.62", "Versão do manifesto incorreta");
+assert.equal(manifest.version, "1.0.0.63", "Versão do manifesto incorreta");
 assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
 assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
@@ -328,6 +410,16 @@ assert.match(actorSheetRendering, /export function renderActorSheetRichMedia/);
 assert.match(actorSheetRendering, /export function renderActorSheetAdaptiveContent/);
 assert.match(actorSheetRendering, /IntersectionObserver/, "Áudio e vídeo devem usar carregamento sob demanda");
 assert.match(actorSheetRendering, /nexusLazyMediaSrc/, "A fonte de mídia deve ser adiada até a aproximação da viewport");
+assert.match(actorSheetRendering, /const assetTextNodes = \[\.\.\.root\.querySelectorAll\("\.nexus-asset-text"\)\]/, "Os nós de texto rico devem ser coletados uma vez por renderização");
+assert.match(actorSheetRendering, /const expressionTextNodes = \[\.\.\.root\.querySelectorAll\("\[data-nexus-expression-text\]:not\(\.nexus-asset-text\)"\)\]/, "Os wrappers de expressão devem ser reutilizados entre atualizações");
+const richRefreshStart = actorSheetRendering.indexOf("sheet._refreshRichExpressions = componentIds => {");
+const richRefreshEnd = actorSheetRendering.indexOf("\n    };", richRefreshStart);
+assert.ok(richRefreshStart >= 0 && richRefreshEnd > richRefreshStart, "O atualizador de expressões deve existir");
+assert.doesNotMatch(actorSheetRendering.slice(richRefreshStart, richRefreshEnd), /querySelectorAll/, "Atualizações reativas não devem pesquisar novamente todo o DOM");
+assert.match(canvasViewportSource, /const scheduleFitCanvas = \(\) => \{/);
+assert.match(canvasViewportSource, /if \(pendingFrame\) return/);
+assert.match(canvasViewportSource, /if \(scale === lastScale\) return/);
+assert.match(css, /@media \(prefers-reduced-motion: reduce\)/, "A interface deve respeitar movimento reduzido");
 assert.match(sheet, /mountLibraryView\(this, panel/);
 assert.match(sheet, /renderActorSheetRichMedia\(this, root/);
 const propertyTree = buildPropertyPickerCatalog({

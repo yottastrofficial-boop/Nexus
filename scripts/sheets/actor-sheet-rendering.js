@@ -71,27 +71,33 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
     for (const component of sheet._currentLayout?.components ?? []) {
       if (!componentById.has(component.id)) componentById.set(component.id, component);
     }
-    root.querySelectorAll(".nexus-asset-text").forEach(node => {
+    // Reaproveita as referências DOM durante atualizações do Actor. A lista é
+    // reconstruída somente quando a ficha é renderizada novamente.
+    const assetTextNodes = [...root.querySelectorAll(".nexus-asset-text")];
+    for (const node of assetTextNodes) {
       const card = node.closest(".nexus-component");
       const component = componentById.get(card?.dataset.id);
       renderExpressionText(node, !component?.dataPath);
-    });
+    }
     root.querySelectorAll(".nexus-component-content, .nexus-component-heading").forEach(container => {
       const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT); const nodes=[];
       while(walker.nextNode()) if(/\{\{[^{}]+\}\}/.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
       for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,false);}
     });
+    // Os wrappers são criados pelo TreeWalker acima. Mantê-los em cache evita
+    // consultas globais ao DOM a cada atualização de propriedade do Actor.
+    const expressionTextNodes = [...root.querySelectorAll("[data-nexus-expression-text]:not(.nexus-asset-text)")];
     sheet._refreshRichExpressions = componentIds => {
       const shouldRefresh = node => !componentIds || componentIds.has(node.closest(".nexus-component")?.dataset.id);
-      root.querySelectorAll(".nexus-asset-text").forEach(node => {
-        if (!shouldRefresh(node)) return;
+      for (const node of assetTextNodes) {
+        if (!node.isConnected || !shouldRefresh(node)) continue;
         const card = node.closest(".nexus-component");
         const component = componentById.get(card?.dataset.id);
         renderExpressionText(node, !component?.dataPath);
-      });
-      root.querySelectorAll("[data-nexus-expression-text]:not(.nexus-asset-text)").forEach(node => {
-        if (shouldRefresh(node)) renderExpressionText(node, false);
-      });
+      }
+      for (const node of expressionTextNodes) {
+        if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, false);
+      }
     };
     sheet._renderAdaptiveContent(root, createMedia);
 }

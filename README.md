@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.62 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.63 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.62-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.63-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.62. Editor de propriedades com rótulo único **Valor**, fórmulas de perícias e propriedades validadas pelo mesmo fluxo, caminhos canônicos e seletor compacto com nome e caminho. A validação automatizada não substitui o teste funcional no Foundry VTT 14.
+> **Versão atual:** 1.0.0.63. Atualizações de expressões com cache de nós DOM, ajuste do Canvas coalescido por frame e respeito à preferência de movimento reduzido. A validação automatizada não substitui o teste funcional no Foundry VTT 14.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.62 |
+| Versão atual | 1.0.0.63 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.62 refina o editor de propriedades: aceita valores vazios e expressões textuais, mantém fórmulas somente quando inseridas manualmente, preserva os cálculos-base das regras e atualiza dependências de perícias. O pacote é validado pelo CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.63 reduz consultas repetidas ao DOM durante atualizações reativas de texto, agrupa ajustes de escala do Canvas em um único frame e respeita a preferência de movimento reduzido. O pacote é validado pelo CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 

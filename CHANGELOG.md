@@ -1,3 +1,20 @@
+## 1.0.0.63
+
+### Desempenho
+- O ajuste de escala do Canvas agora agrupa notificações de redimensionamento em um único `requestAnimationFrame`, evitando execuções repetidas no mesmo frame.
+- O zoom só é escrito quando a escala realmente muda; dimensões temporariamente zeradas durante abertura/ocultação não forçam escala incorreta.
+- O atualizador de expressões textuais reutiliza as referências dos nós coletadas na renderização, evitando novas consultas globais ao DOM em cada atualização do Actor.
+- As referências em cache são ignoradas quando os nós deixam de estar conectados; uma nova renderização reconstrói o cache.
+ 
+### Interface e acessibilidade
+- A ficha, os painéis e a interface flutuante respeitam `prefers-reduced-motion`, reduzindo animações e transições sem alterar o layout.
+- Mantida a identidade visual e a organização existentes; esta versão não altera os dados dos Actors nem introduz fórmulas padrão.
+
+### Validação
+- Adicionado teste de regressão para coalescência do redimensionamento, cálculo de escala, ausência de escritas redundantes e limpeza do observador.
+- Adicionadas verificações para garantir que a atualização reativa de texto não volte a pesquisar todo o DOM.
+- A validação automatizada e o empacotamento precisam passar no CI. O teste visual e funcional em uma instalação real do Foundry VTT 14 continua obrigatório antes de declarar estabilidade.
+
 ## 1.0.0.62
 
 ### Editor de propriedades e expressões

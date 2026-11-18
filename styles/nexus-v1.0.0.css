@@ -6136,3 +6136,16 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   flex:1 1 0; width:100%; min-width:0;
 }
 .nexus-panel-window .nexus-property-value-field { margin-top:7px !important; }
+
+
+/* 1.0.0.63 — respeita a preferência de movimento reduzido sem alterar o layout. */
+@media (prefers-reduced-motion: reduce) {
+  .nexus-sheet *,
+  .nexus-panel-window *,
+  .nexus-floating-ui * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
