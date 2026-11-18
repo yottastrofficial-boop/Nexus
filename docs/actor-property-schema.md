@@ -8,7 +8,7 @@
 
 - Stable technical keys are independent from Portuguese display labels.
 - `name` identifies the property; `exib` is its short display label; `value` is the value used by formulas and bindings.
-- Stored values and formula-backed values are separate. Default formulas for derived properties are displayed and editable in the Inspector; a manual value or custom formula can replace the default.
+- Stored values and derived values are separate. Derived properties are calculated at read time and do not trust stale persisted scalars. A property may expose a custom formula when explicitly marked formula-editable; this does not make a derived property manually writable.
 - Actor data remains under `system.*`; paths are exposed without requiring the UI to know how a value is calculated.
 - Legacy paths remain readable where practical, while migrations normalize stored data to the current shape.
 
@@ -34,7 +34,8 @@ Every skill has the same contract:
 - `skills.<key>.name`: Portuguese display name.
 - `skills.<key>.exib`: short label for compact UI.
 - `skills.<key>.value`: numeric total modifier (attribute + MB when proficient).
-- `skills.<key>.proficient`: boolean training state.
+- `skills.<key>.proficientLevel`: persisted numeric proficiency level.
+- `skills.<key>.proficient`: derived boolean training state.
 - `skills.<key>.attribute`: associated attribute code.
 - `skills.<key>.description`: rulebook summary.
 
@@ -85,7 +86,7 @@ Personality fields include appearance, traits, flaws, bonds, ideals, motivation 
 ## Migration behavior
 
 The migration:
-- Converts old skill proficiency values to booleans.
+- Normalizes legacy skill proficiency representations into the canonical numeric `proficientLevel` field and removes the obsolete boolean fields.
 - Removes old derived MB and recovery-count fields from persisted combat data.
 - Converts a non-default legacy defense total into an additional modifier, preserving the existing total where possible.
 - Moves the legacy movement alias into the canonical movement field when needed.
