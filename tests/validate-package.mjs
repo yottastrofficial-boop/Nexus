@@ -145,7 +145,7 @@ const canonicalRegistry = createPropertyRegistry({
   core: NEXUS_RULEBOOK_PROPERTY_DEFINITIONS,
   native: [{ key: "combat.defense.value", type: "string", derived: false, label: "Defesa editável" }]
 });
-assert.equal(canonicalRegistry.resolve("combat.defense.value")?.readOnly, true, "Módulos não podem tornar uma propriedade derivada do Core gravável");
+assert.equal(canonicalRegistry.resolve("combat.defense.value")?.readOnly, false, "Propriedades mecânicas do Core devem permanecer valores editáveis, sem cálculo obrigatório");
 assert.equal(canonicalRegistry.resolve("combat.defense.value")?.type, "number", "Módulos não podem alterar o tipo de uma propriedade do Core");
 assert.equal(canonicalRegistry.resolve("attributes.for.value")?.readOnly, false, "Atributos são valores armazenados e editáveis");
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.name"));
@@ -155,11 +155,12 @@ const rulebookActor = {
   system: {
     identity: { level: 5 },
     attributes: { for: 2, des: 1, sab: 0, int: 0, car: 0, von: 0 },
-    skills: { stealth: { proficientLevel: 1 } },
-    resources: { pv: { value: 12, max: 15, temporary: 2 }, pm: { value: 4, max: 8, temporary: 0 }, pe: { value: 6, max: 10, temporary: 0 } },
-    combat: { defenseModifier: 1, movement: 6 },
-    recovery: { spent: 2 },
-    encumbrance: { current: 8 }
+    skills: { stealth: { value: 4, proficientLevel: 1 } },
+    resources: { pv: { value: 12, max: 15, temporary: 2 }, pm: { value: 4, max: 8, temporary: 0 }, pe: { value: 6, max: 10, temporary: 0, recovery: { value: 12 } } },
+    combat: { defense: { value: 10 }, initiative: { value: 1 }, movement: { value: 6, meters: 9 } },
+    progression: { mb: { value: 3 } },
+    recovery: { spent: 2, count: { value: 5 }, die: { value: "d8" }, available: { value: 3 } },
+    encumbrance: { current: { value: 8 }, base: { value: 5 }, bonus: { value: 4 }, capacity: { value: 9 }, overloaded: { value: false } }
   }
 };
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "skills.stealth.name").value, "Furtividade");
@@ -189,7 +190,7 @@ const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, 11, "Defesa deve acompanhar atributos e modificadores atuais");
+assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, undefined, "A propriedade não deve calcular Defesa automaticamente a partir de atributos");
 
 
 for (const attribute of NEXUS_ATTRIBUTES) {
@@ -198,26 +199,26 @@ for (const attribute of NEXUS_ATTRIBUTES) {
 }
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3, "O MB deve ser derivado do nível, sem depender de valor persistido");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, true, "O MB não deve aceitar substituição numérica manual");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").formulaEditable, true, "O MB deve aceitar uma fórmula personalizada");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3, "O MB deve ser lido do valor atualmente armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, false, "O MB deve ser um valor editável, sem cálculo obrigatório");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").formulaEditable, undefined, "A propriedade não deve receber fórmula predefinida");
 assert.equal(getNexusBaseModifier(rulebookActor), 3, "O cálculo-base de MB continua disponível para as regras de perícias sem preencher o editor");
 assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O sistema não deve preencher fórmulas globais no editor de propriedades");
-assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 1 }, combat: { mb: 1 } } } }, "progression.mb.value").value, 3, "Valores antigos de MB não podem sobrepor o nível atual");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "O dado de recuperação deve acompanhar a progressão de nível");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve acompanhar o MB atual");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10, "Defesa deve ser 8 + DES + modificador adicional");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1, "Iniciativa deve usar Destreza");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9, "Movimento em metros deve converter 1,5 m por espaço");
+assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 1 } } } }, "progression.mb.value").value, 1, "Um valor manual de MB não deve ser substituído pelo nível");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "O dado de recuperação deve ser lido do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve ser lida do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10, "A Defesa deve preservar o valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1, "A Iniciativa deve preservar o valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9, "Metros deve ser lido do valor armazenado");
 const nestedMovementActor = { system: { combat: { movement: { value: 7 } } } };
 assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").value, 7);
 assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").sourcePath, "combat.movement.value", "A edição deve preservar o formato aninhado do deslocamento");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5, "A quantidade de dados de recuperação deve acompanhar o nível");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3, "Dados disponíveis devem descontar os gastos");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.base.value").value, 5, "A carga base deve seguir a regra do livro");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.bonus.value").value, 4, "A carga adicional deve ser duas vezes Força");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9, "A capacidade deve somar carga base e bônus");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false, "A carga excedida deve comparar carga atual e capacidade");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5, "A quantidade de dados de recuperação deve ser lida do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3, "Dados disponíveis devem ser lidos do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.base.value").value, 5, "A carga base deve ser lida do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.bonus.value").value, 4, "O bônus de carga deve ser lido do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9, "A capacidade deve ser lida do valor armazenado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false, "O estado de carga excedida deve ser lido do valor armazenado");
 const customMbActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
@@ -240,7 +241,7 @@ const cyclicFormulaActor = {
 };
 assert.ok(Number.isFinite(getNexusBaseModifier(cyclicFormulaActor)), "Ciclos entre propriedades devem terminar com fallback seguro");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
-assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve acompanhar o MB personalizado");
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, undefined, "A propriedade de recuperação de PE não deve ser calculada pelo MB");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
@@ -257,7 +258,7 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").m
 
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.exib"));
 assert.ok(NEXUS_RULEBOOK_PROPERTY_PATHS.includes("skills.stealth.value"));
-assert.ok(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.some(definition => definition.path === "combat.defense.value" && definition.derived));
+assert.ok(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.some(definition => definition.path === "combat.defense.value" && !definition.derived));
 assert.match(sheet, /normalizeNexusProficientLevel/);
 assert.match(sheet, /synchronizedSettings/);
 assert.match(sheet, /this\._updateLayoutSetting\(\{/);
