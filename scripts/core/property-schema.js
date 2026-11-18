@@ -152,10 +152,29 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
     if (resource) return { matched: true, value: resourceMatch[2] === "name" ? resource.name : resource.exib, readOnly: true };
   }
 
-  // Mechanical values are intentionally not calculated by the property layer.
-  // Cards imported from the Library may provide formulas that read these
-  // stored values dynamically through resolveNexusBinding().
-  return { matched: false };
+  const definition = definitionByPath.get(key);
+  if (!definition) return { matched: false };
+
+  const parts = key.split(".");
+  let stored = parts.reduce((value, part) => value?.[part], system);
+  let sourcePath = key;
+  if (stored === undefined && key === "combat.movement.value" && system.combat?.movement !== undefined) {
+    stored = system.combat.movement;
+    sourcePath = "combat.movement";
+  }
+  if (stored === undefined && key === "encumbrance.current.value" && system.encumbrance?.current !== undefined) {
+    stored = system.encumbrance.current;
+    sourcePath = "encumbrance.current";
+  }
+  const nestedValue = stored && typeof stored === "object" && Object.hasOwn(stored, "value");
+  if (nestedValue) stored = stored.value;
+  if (nestedValue) sourcePath = key;
+  return {
+    matched: true,
+    value: stored,
+    readOnly: definition.derived === true,
+    sourcePath
+  };
 }
 
 export function getNexusResourceDefinition(key) {
