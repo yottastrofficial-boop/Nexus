@@ -1287,7 +1287,8 @@ assert.doesNotMatch(css, /1\.0\.0\.56 — layout isolado/, "O CSS antigo do busc
 
 assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressões persistidas por propriedade");
 assert.ok(sheet.includes('flags.nexus.propertyExpressions'), "Expressões persistidas devem invalidar componentes dependentes");
-assert.ok(sheet.includes('dependencies.add("identity.level")'), "Propriedades derivadas do nível devem atualizar automaticamente");
+assert.doesNotMatch(sheet, /dependencies\.add\("identity\.level"\)/, "O Core não deve impor atualização por nível a propriedades sem fórmula");
+assert.match(sheet, /addExpression\(formula\)/, "Referências de fórmulas explícitas devem determinar as dependências dinâmicas");
 assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
 assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
