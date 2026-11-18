@@ -135,18 +135,6 @@ const resolveNexusBinding = (actor, expression, depth = 0) => {
         formulaEditable: rulebookProperty.formulaEditable === true };
     }
   }
-  // MB has one canonical, level-derived value. Legacy combat.mb paths
-  // must resolve through the same calculation instead of stale system data.
-  if (["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path)) {
-    return {
-      value: getNexusBaseModifier(actor),
-      path: "progression.mb.value",
-      sourcePath: "identity.level",
-      virtual: true,
-      readOnly: true,
-      formulaEditable: true
-    };
-  }
   if (rulebookProperty.matched) {
     return {
       value: rulebookProperty.value,
@@ -2992,9 +2980,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
           }
           const aliasType = effectivePath.alias?.type;
           const inferredAliasType = ["number", "boolean", "string"].includes(aliasType) ? aliasType : (["attribute", "resource"].includes(aliasType) ? "number" : "string");
-          const skillValueMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.value$/);
           const skillFormulaMatch = propertyPath.match(/^skills\.([a-zA-Z0-9_-]+)\.formula$/);
-          const skillFormulaKey = skillValueMatch?.[1] ?? skillFormulaMatch?.[1] ?? "";
+          const skillFormulaKey = skillFormulaMatch?.[1] ?? "";
           const skillFormulaMode = !!skillFormulaKey;
           const skillFormula = skillFormulaMode
             ? String(getPath(this.actor.system ?? {}, `skills.${skillFormulaKey}.formula`) ?? "")
