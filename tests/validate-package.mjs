@@ -674,15 +674,16 @@ assert.match(sheetCode, /setResourceFromTrack/);
 console.log(`NEXUS ${manifest.version}: catálogo canônico, proficiência assinada e sincronização de temas verificados.`);
 
 
-// Rulebook proficiency is binary; the attribute modifier always remains active.
+// Proficiency is stored independently; skill totals require an explicit value or formula.
 const negativeSkillActor = {
   system: {
     identity: { level: 4 },
     attributes: { for: -5, des: 0, sab: 0 },
+    progression: { mb: { value: 2 } },
     skills: {
-      athletics: { proficientLevel: 0 },
-      stealth: { proficientLevel: -3 },
-      perception: { proficientLevel: 2 }
+      athletics: { proficientLevel: 0, formula: "{{attributes.for.value}}" },
+      stealth: { proficientLevel: -3, formula: "{{attributes.des.value - mb}}" },
+      perception: { proficientLevel: 2, formula: "{{attributes.sab.value + mb}}" }
     }
   }
 };
@@ -698,7 +699,7 @@ assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").value, -2);
 assert.equal(getNexusSkillModifier(negativeSkillActor, "stealth").exib, "FUR");
 const legacySkillRows = getNexusSkillRows({ system: { skills: { atletismo: { proficient: true } } } });
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient, true, "Dados antigos devem ser lidos durante a migração");
-assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 1);
+assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 0, "Proficiência não deve gerar bônus automático sem fórmula ou valor armazenado");
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
 assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
@@ -906,13 +907,13 @@ assert.equal(evaluateNexusFormula("constructor + 1", () => 1), null, "Referênci
 assert.equal(evaluateNexusFormula("nivel - mb", key => ({ nivel: 5, mb: 2 })[key]), 3);
 assert.equal(normalizeNexusFormulaIdentifier("level"), "identity.level", "O atalho level deve apontar para o nível do personagem");
 assert.equal(normalizeNexusFormulaIdentifier("nivel"), "identity.level", "O atalho nivel deve continuar aceito em português");
-assert.equal(normalizeNexusFormulaIdentifier("mb"), "combat.mb", "O atalho mb deve apontar para o modificador base");
+assert.equal(normalizeNexusFormulaIdentifier("mb"), "progression.mb.value", "O atalho mb deve apontar para a propriedade MB armazenada");
 assert.equal(normalizeNexusFormulaIdentifier("for"), "attributes.for.value", "O atalho for deve apontar para o valor do atributo");
 const formulaResolutionActor = {
   system: {
     identity: { level: 5 },
     attributes: { for: 2 },
-    combat: { mb: 3 },
+    progression: { mb: { value: 3 } },
     skills: { athletics: { proficientLevel: 1 } }
   }
 };
@@ -992,7 +993,7 @@ assert.equal(evaluateNexusExpression("min(5, ceil(4 / 2))", () => undefined), 2,
 assert.equal(evaluateNexusExpression("if(5 <= 6, 'd8', 'd10')", () => undefined), "d8", "A função if deve permitir fórmulas condicionais seguras");
 assert.equal(getNexusDefaultSkillFormula("athletics"), "", "Perícias não devem receber fórmulas globais predefinidas");
 assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.formula, "", "A fórmula da perícia deve permanecer vazia até ser definida manualmente");
-assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.value, 5, "O modificador básico da perícia continua sendo calculado pelas regras do sistema");
+assert.equal(getNexusSkillRows(formulaTestActor).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem valor ou fórmula explícitos não recebem cálculo padrão");
 assert.equal(evaluateNexusFormula("@level + @mb", resolveExpressionValue), 8, "Referências com @ devem funcionar nas fórmulas do editor");
 assert.equal(evaluateNexusCondition("@level > @mb", resolveExpressionValue), true, "Referências com @ devem funcionar nas condições");
 assert.equal(evaluateNexusCondition("{{@level}} >= 5", resolveExpressionValue), true, "Referências entre chaves devem funcionar dentro de comparações");
