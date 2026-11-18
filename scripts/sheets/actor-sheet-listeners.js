@@ -296,6 +296,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         globalThis.ui?.notifications?.warn?.("O MB é calculado pelo nível. Para personalizá-lo, informe uma fórmula entre {{ }}; um valor manual não altera o nível nem substitui o cálculo-base.");
         return;
       }
+      if (resolvedPath.readOnly) {
+        if (String(value ?? "").trim() === "" && typeof existingExpression === "string") {
+          await writePropertyExpression(sheet.actor, path, null);
+          sheet._refreshBoundComponents();
+          return;
+        }
+        input.value = String(resolveNexusBinding(sheet.actor, path).value ?? "");
+        globalThis.ui?.notifications?.warn?.("Esta propriedade é calculada ou somente de leitura. Para alterar seu resultado, edite suas dependências ou configure uma fórmula personalizada quando permitido.");
+        return;
+      }
       if (valueKind === "number") {
         if (String(value).trim() === "") value = 0;
         else if (!Number.isFinite(Number(value))) {
