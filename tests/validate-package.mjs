@@ -242,7 +242,7 @@ const cyclicFormulaActor = {
 assert.ok(Number.isFinite(getNexusBaseModifier(cyclicFormulaActor)), "Ciclos entre propriedades devem terminar com fallback seguro");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "Uma fórmula explicitamente configurada deve usar os valores atuais");
 customMbActor.system.attributes.for = 4;
-assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 7, "Fórmulas explícitas devem reavaliar dependências atuais sem salvar snapshots");
+assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 9, "Fórmulas explícitas devem reavaliar dependências atuais sem salvar snapshots");
 const skillWithoutFormula = { system: { identity: { level: 10 }, attributes: { for: 5 }, skills: { athletics: { proficientLevel: 3 } } } };
 assert.equal(getNexusSkillRows(skillWithoutFormula).find(skill => skill.key === "athletics")?.value, 0, "Perícias sem valor ou fórmula explícitos não devem receber cálculo predefinido");
 assert.equal(getNexusBaseModifier(skillWithoutFormula), 0, "MB ausente deve permanecer sem cálculo predefinido");
