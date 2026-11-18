@@ -84,6 +84,21 @@ const definitions = [
 export const NEXUS_RULEBOOK_PROPERTY_DEFINITIONS = Object.freeze(definitions.map(item => Object.freeze(item)));
 export const NEXUS_RULEBOOK_PROPERTY_PATHS = Object.freeze(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(item => item.path));
 const definitionByPath = new Map(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.map(item => [item.path, item]));
+const LEGACY_PROPERTY_SOURCES = Object.freeze({
+  "progression.mb.value": ["combat.mb"],
+  "combat.defense.value": ["combat.defense"],
+  "combat.initiative.value": ["combat.initiative"],
+  "combat.movement.value": ["combat.movement", "combat.desl"],
+  "recovery.count.value": ["recovery.count", "combat.ddr"],
+  "recovery.die.value": ["recovery.die"],
+  "recovery.available.value": ["recovery.available"],
+  "resources.pe.recovery.value": ["resources.pe.recovery"],
+  "encumbrance.base.value": ["encumbrance.base"],
+  "encumbrance.bonus.value": ["encumbrance.bonus"],
+  "encumbrance.capacity.value": ["encumbrance.capacity"],
+  "encumbrance.current.value": ["encumbrance.current"],
+  "encumbrance.overloaded.value": ["encumbrance.overloaded"]
+});
 
 export function getNexusRulebookPropertyDefinition(path) {
   return definitionByPath.get(String(path ?? "").replace(/^system\./, "")) ?? null;
@@ -163,23 +178,24 @@ export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const definition = definitionByPath.get(key);
   if (!definition) return { matched: false };
 
-  const parts = key.split(".");
-  let stored = parts.reduce((value, part) => value?.[part], system);
+  const readPath = path => String(path ?? "").split(".").reduce((value, part) => value?.[part], system);
   let sourcePath = key;
-  if (stored === undefined && key === "progression.mb.value" && system.combat?.mb !== undefined) {
-    stored = system.combat.mb;
-    sourcePath = "combat.mb";
-  }
-  if (stored === undefined && key === "combat.movement.value" && system.combat?.movement !== undefined) {
-    stored = system.combat.movement;
-    sourcePath = "combat.movement";
-  }
-  if (stored === undefined && key === "encumbrance.current.value" && system.encumbrance?.current !== undefined) {
-    stored = system.encumbrance.current;
-    sourcePath = "encumbrance.current";
+  let stored = readPath(key);
+  if (stored === undefined) {
+    for (const legacyPath of LEGACY_PROPERTY_SOURCES[key] ?? []) {
+      const legacyValue = readPath(legacyPath);
+      if (legacyValue !== undefined) {
+        stored = legacyValue;
+        sourcePath = legacyPath;
+        break;
+      }
+    }
   }
   const nestedValue = stored && typeof stored === "object" && Object.hasOwn(stored, "value");
-  if (nestedValue) stored = stored.value;
+  if (nestedValue) {
+    stored = stored.value;
+    if (sourcePath !== key) sourcePath += ".value";
+  }
   if (nestedValue) sourcePath = key;
   return {
     matched: true,
