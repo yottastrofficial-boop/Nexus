@@ -101,6 +101,8 @@ assert.equal(normalizeNexusPropertyPath("attributes.body.for.value"), "attribute
 assert.equal(normalizeNexusPropertyPath("skills.for.athletics.value"), "skills.athletics.value");
 assert.equal(normalizeNexusPropertyPath("skills.atletismo.value"), "skills.athletics.value");
 assert.equal(normalizeNexusPropertyPath("level"), "identity.level");
+assert.equal(normalizeNexusPropertyPath("combat.mb"), "progression.mb.value", "O caminho legado combat.mb deve apontar para o MB armazenado");
+assert.equal(normalizeNexusPropertyPath("combat.mb.value"), "progression.mb.value", "O caminho legado combat.mb.value deve apontar para o MB armazenado");
 assert.equal(normalizeNexusPropertyPath("__proto__.polluted"), "");
 assert.match(sheet, /const captureScrollState = owner/, "A ficha deve capturar a rolagem de todos os contêineres encontrados");
 assert.match(sheet, /".nexus-native-panel-content"/, "A rolagem do conteúdo nativo dos painéis deve ser preservada");
