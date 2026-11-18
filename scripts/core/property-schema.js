@@ -102,8 +102,8 @@ export function getNexusDefaultPropertyFormula(_path) {
 }
 
 /**
- * Resolves only properties with an explicit rulebook mapping or stored source.
- * Derived values without an explicit calculation are not injected here.
+ * Resolves canonical stored and derived Actor properties.
+ * Derived values are calculated on read and never written back as stale scalar snapshots.
  */
 export function getNexusRulebookPropertyValue(actorOrSystem, path) {
   const actor = actorOrSystem?.system ? actorOrSystem : { system: actorOrSystem ?? {} };
