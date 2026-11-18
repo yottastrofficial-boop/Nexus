@@ -3,9 +3,14 @@ const actorPropertyWriteQueues = new WeakMap();
 export function serializeActorPropertyWrite(actor, operation) {
   const previous = actorPropertyWriteQueues.get(actor) ?? Promise.resolve();
   const next = previous.catch(() => {}).then(operation);
-  actorPropertyWriteQueues.set(actor, next);
-  return next.finally(() => {
-    if (actorPropertyWriteQueues.get(actor) === next) actorPropertyWriteQueues.delete(actor);
+  const tracked = next.catch(error => {
+    console.error("NEXUS | Falha ao salvar uma propriedade do Actor.", error);
+    globalThis.ui?.notifications?.error?.("Não foi possível concluir o salvamento da propriedade. Confira o valor antes de continuar.");
+    throw error;
+  });
+  actorPropertyWriteQueues.set(actor, tracked);
+  return tracked.finally(() => {
+    if (actorPropertyWriteQueues.get(actor) === tracked) actorPropertyWriteQueues.delete(actor);
   });
 }
 
