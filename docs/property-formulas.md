@@ -50,7 +50,7 @@ A precedência matemática é respeitada. Um campo numérico vazio é tratado co
 
 ## Limites desta etapa
 
-O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e aceita somente as funções seguras listadas acima. Fórmulas padrão de propriedades derivadas e perícias são exibidas no campo de valor do Inspector. É possível substituí-las por outra expressão ou por um valor manual; as fórmulas personalizadas ficam persistidas no Actor.
+O avaliador é intencionalmente restrito: não executa JavaScript, não usa `eval` e aceita somente as funções seguras listadas acima. O cálculo-base das propriedades derivadas é resolvido em tempo de leitura. Propriedades editáveis aceitam valores manuais; propriedades derivadas permanecem somente leitura para valores escalares. Quando permitido pela propriedade, uma fórmula personalizada pode substituir o cálculo-base e fica persistida no Actor. Limpar a fórmula restaura o cálculo-base, sem gravar um número antigo no caminho derivado.
 
 
 ## Fórmulas persistentes de propriedades
@@ -77,7 +77,7 @@ Layouts antigos que usam `component.representation` continuam legíveis; novas c
 
 ## Fórmulas personalizadas de perícias
 
-O resultado `skills.<pericia>.value` usa uma fórmula padrão visível no Inspector. A fórmula fica armazenada em `skills.<pericia>.formula`; ao editar a propriedade `.value`, o Inspector apresenta a fórmula subjacente. É possível substituir a fórmula padrão por outra fórmula ou por um valor manual.
+O resultado `skills.<pericia>.value` usa o cálculo-base de perícia ou uma fórmula personalizada. A fórmula fica armazenada em `skills.<pericia>.formula`; ao editar a propriedade `.value`, o Inspector apresenta a fórmula subjacente. Limpar o campo restaura o cálculo-base. O resultado calculado não é substituído por um valor escalar manual.
 
 Exemplos válidos para Atletismo:
 
