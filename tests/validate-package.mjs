@@ -1201,6 +1201,7 @@ assert.match(sheetListeners, /previous formula remains intact/, "A fórmula ante
 assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
 assert.match(sheet, /addPropertyFormulaDependencies\(component\.dataPath\)/, "Dependências de propriedades devem vir de fórmulas explicitamente configuradas");
 assert.match(sheet, /scanExpressions\(component\)/, "Expressões dos cards devem registrar suas dependências atuais");
+assert.match(sheet, /for \(const dependency of \[\.\.\.dependencies\]\) addPropertyFormulaDependencies\(dependency\)/, "Cards devem acompanhar dependências transitivas de propriedades com fórmula");
 assert.doesNotMatch(sheet, /Perícias sem fórmula manual devem atualizar quando o MB mudar/, "O Core não deve impor dependências mecânicas a propriedades sem fórmula");
 assert.doesNotMatch(sheet, /getNexusDefaultSkillFormula|getNexusDefaultPropertyFormula/, "A ficha não deve consultar fórmulas padrão globais");
 assert.match(sheetListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
