@@ -212,6 +212,24 @@ assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10, "A Defesa deve preservar o valor armazenado");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1, "A Iniciativa deve preservar o valor armazenado");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9, "Metros deve ser lido do valor armazenado");
+const legacyStoredPropertyActor = {
+  system: {
+    combat: { defense: 15, initiative: 3, mb: 2, ddr: 4, desl: 5 },
+    recovery: { count: 4, die: "d6", available: 3 },
+    resources: { pe: { recovery: 8 } },
+    encumbrance: { base: 5, bonus: 2, capacity: 7, current: 8, overloaded: true }
+  }
+};
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "progression.mb.value").value, 2);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "progression.mb.value").sourcePath, "combat.mb");
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "combat.defense.value").value, 15);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "combat.initiative.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "combat.movement.value").value, 5);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "recovery.count.value").value, 4);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "recovery.die.value").value, "d6");
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "recovery.available.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "resources.pe.recovery.value").value, 8);
+assert.equal(getNexusRulebookPropertyValue(legacyStoredPropertyActor, "encumbrance.capacity.value").value, 7);
 const nestedMovementActor = { system: { combat: { movement: { value: 7 } } } };
 assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").value, 7);
 assert.equal(getNexusRulebookPropertyValue(nestedMovementActor, "combat.movement.value").sourcePath, "combat.movement.value", "A edição deve preservar o formato aninhado do deslocamento");
