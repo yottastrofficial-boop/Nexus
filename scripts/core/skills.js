@@ -45,16 +45,21 @@ export function normalizeNexusProficientLevel(rawLevel) {
 export function getNexusBaseModifier(actorOrSystem, depth = 0) {
   const actor = actorOrSystem?.system ? actorOrSystem : null;
   const system = actor?.system ?? actorOrSystem ?? {};
-  // MB is derived from level. Never let a stale persisted scalar override
-  // the current rulebook formula or an explicitly configured property formula.
-  const expressions = actor?.getFlag?.("nexus", "propertyExpressions") ?? actor?.flags?.nexus?.propertyExpressions ?? system.flags?.nexus?.propertyExpressions ?? {};
+  const expressions = actor?.getFlag?.("nexus", "propertyExpressions")
+    ?? actor?.flags?.nexus?.propertyExpressions
+    ?? system.flags?.nexus?.propertyExpressions
+    ?? {};
   const formula = expressions?.progression?.mb?.value ?? expressions?.combat?.mb;
   if (typeof formula === "string" && formula.trim() && depth < 8) {
     const source = formula.trim().replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
     const calculated = evaluateNexusExpression(source, identifier => {
       const key = String(identifier ?? "").replace(/^@/, "").replace(/^system\./, "").toLocaleLowerCase("pt-BR");
       if (["identity.level", "level"].includes(key)) return Math.max(1, Number(system.identity?.level) || 1);
-      if (["combat.mb", "progression.mb.value", "mb"].includes(key)) return Math.min(5, Math.ceil(Math.max(1, Number(system.identity?.level) || 1) / 2));
+      if (["combat.mb", "progression.mb.value", "mb"].includes(key)) {
+        const stored = system.progression?.mb?.value ?? system.combat?.mb?.value ?? system.combat?.mb;
+        const parsed = Number(stored);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
       const attributeMatch = key.match(/^(?:attributes\.)?(for|des|sab|int|car|von)(?:\.value)?$/);
       if (attributeMatch) return getNexusAttributeValue(actorOrSystem, attributeMatch[1], depth + 1);
       const parts = key.split(".");
@@ -65,8 +70,9 @@ export function getNexusBaseModifier(actorOrSystem, depth = 0) {
     });
     if (typeof calculated === "number" && Number.isFinite(calculated)) return calculated;
   }
-  const level = Math.max(1, Number(system.identity?.level) || 1);
-  return Math.min(5, Math.ceil(level / 2));
+  const stored = system.progression?.mb?.value ?? system.combat?.mb?.value ?? system.combat?.mb;
+  const value = Number(stored);
+  return Number.isFinite(value) ? value : 0;
 }
 
 function getStoredProficientLevel(system, skill) {
@@ -133,7 +139,7 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
     };
     if (["proficiencia","proficiency","proficient"].includes(key)) return Math.sign(getStoredProficientLevel(system, skill));
     if (["proficientlevel","proficiencylevel"].includes(key)) return getStoredProficientLevel(system, skill);
-    if (key === "bonus") return Math.sign(getStoredProficientLevel(system, skill)) * getNexusBaseModifier(actorOrSystem);
+    if (key === "bonus") return readSafeFormulaPath(system, `skills.${skill.key}.bonus`) ?? 0;
     const path = aliases[key] ?? key;
     if (path === "identity.level") return Math.max(1, Number(system.identity?.level) || 1);
     if (["combat.mb","progression.mb.value"].includes(path)) return getNexusBaseModifier(actorOrSystem);
@@ -144,13 +150,11 @@ export function evaluateNexusSkillFormula(actorOrSystem, skillKey, formula) {
       const targetSkill = NEXUS_SKILLS.find(item => item.key === skillMatch[1] || item.legacyKey === skillMatch[1]);
       if (targetSkill) {
         const targetProficiency = getStoredProficientLevel(system, targetSkill);
-        const targetAttribute = getNexusAttributeValue(actorOrSystem, targetSkill.attributeKey);
-        const targetBonus = Math.sign(targetProficiency) * getNexusBaseModifier(actorOrSystem);
         if (skillMatch[2].toLowerCase() === "proficientlevel") return targetProficiency;
         if (skillMatch[2].toLowerCase() === "proficient") return targetProficiency > 0;
-        if (skillMatch[2].toLowerCase() === "bonus") return targetBonus;
-        if (["value","modifier"].includes(skillMatch[2].toLowerCase())) return targetAttribute + targetBonus;
-        if (skillMatch[2].toLowerCase() === "attributevalue") return targetAttribute;
+        if (["bonus", "value", "modifier", "attributevalue"].includes(skillMatch[2].toLowerCase())) {
+          return readSafeFormulaPath(system, `skills.${targetSkill.key}.${skillMatch[2].toLowerCase()}`) ?? 0;
+        }
       }
     }
     return readSafeFormulaPath(system, path);
@@ -163,16 +167,16 @@ export function getNexusDefaultSkillFormula(_skillKey) {
 
 export function getNexusSkillRows(actor) {
   const system = actor?.system ?? {};
-  const baseModifier = getNexusBaseModifier(actor);
   return NEXUS_SKILLS.map(skill => {
     const attributeValue = getNexusAttributeValue(actor, skill.attributeKey);
     const proficientLevel = getStoredProficientLevel(system, skill);
-    const bonus = Math.sign(proficientLevel) * baseModifier;
-    const defaultModifier = attributeValue + bonus;
     const storedFormula = String(system.skills?.[skill.key]?.formula ?? "").trim();
     const formula = storedFormula;
     const formulaValue = formula ? evaluateNexusSkillFormula(actor, skill.key, formula) : null;
-    const modifier = formulaValue ?? defaultModifier;
+    const storedValue = Number(system.skills?.[skill.key]?.value);
+    const modifier = formulaValue ?? (Number.isFinite(storedValue) ? storedValue : 0);
+    const bonusValue = Number(system.skills?.[skill.key]?.bonus);
+    const bonus = Number.isFinite(bonusValue) ? bonusValue : 0;
     return { ...skill, attributeValue, proficientLevel, proficient: proficientLevel > 0, modifier, value: modifier, formula,
       description: typeof system.skills?.[skill.key]?.description === "string" ? system.skills[skill.key].description : skill.description,
       formatted: modifier >= 0 ? "+" + modifier : String(modifier), bonus };
