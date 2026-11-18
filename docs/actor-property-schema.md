@@ -1,6 +1,6 @@
 # NEXUS Actor Property Schema
 
-**Schema version:** 2  
+**Schema version:** 3  
 **Source of mechanics:** `REGRAS NEXUS.pdf` (core rulebook)  
 **Scope:** Actor/personagem properties. Item documents keep their own data model and are not mixed into this registry.
 
@@ -40,7 +40,7 @@ Every skill has the same contract:
 
 Example: `skills.stealth.name`, `skills.stealth.exib`, `skills.stealth.value`.
 
-The old signed `proficientLevel` representation is migrated to a boolean. Negative proficiency is not part of the core rulebook model.
+`proficientLevel` is the canonical persisted numeric field. `0` means no proficiency, positive values indicate proficiency, and negative values represent deficiency in the current NEXUS implementation. The magnitude remains available to custom formulas; the default skill calculation applies the sign only, adding or subtracting one MB.
 
 ### Resources
 
