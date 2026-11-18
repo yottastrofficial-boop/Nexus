@@ -1,21 +1,25 @@
-const propertyExpressionQueues = new WeakMap();
+const actorPropertyWriteQueues = new WeakMap();
 
-function writePropertyExpression(actor, path, expression) {
-  const previous = propertyExpressionQueues.get(actor) ?? Promise.resolve();
-  const next = previous.catch(() => {}).then(async () => {
-    const current = foundry.utils.deepClone(actor.getFlag?.("nexus", "propertyExpressions") ?? actor.flags?.nexus?.propertyExpressions ?? {});
-    const parts = String(path).split(".");
-    let parent = current;
-    for (const part of parts.slice(0, -1)) {
-      if (!parent[part] || typeof parent[part] !== "object") parent[part] = {};
-      parent = parent[part];
-    }
-    if (expression === null) delete parent[parts.at(-1)];
-    else parent[parts.at(-1)] = String(expression).slice(0, 500);
-    await actor.setFlag("nexus", "propertyExpressions", current);
+function serializeActorPropertyWrite(actor, operation) {
+  const previous = actorPropertyWriteQueues.get(actor) ?? Promise.resolve();
+  const next = previous.catch(() => {}).then(operation);
+  actorPropertyWriteQueues.set(actor, next);
+  return next.finally(() => {
+    if (actorPropertyWriteQueues.get(actor) === next) actorPropertyWriteQueues.delete(actor);
   });
-  propertyExpressionQueues.set(actor, next);
-  return next;
+}
+
+async function writePropertyExpression(actor, path, expression) {
+  const current = foundry.utils.deepClone(actor.getFlag?.("nexus", "propertyExpressions") ?? actor.flags?.nexus?.propertyExpressions ?? {});
+  const parts = String(path).split(".");
+  let parent = current;
+  for (const part of parts.slice(0, -1)) {
+    if (!parent[part] || typeof parent[part] !== "object") parent[part] = {};
+    parent = parent[part];
+  }
+  if (expression === null) delete parent[parts.at(-1)];
+  else parent[parts.at(-1)] = String(expression).slice(0, 500);
+  await actor.setFlag("nexus", "propertyExpressions", current);
 }
 /**
  * Event bindings for the NEXUS Actor Sheet.
@@ -228,6 +232,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, "[data-property-value]", async event => {
       const input = event.currentTarget;
       if (!isSheetOwnedControl(input)) return;
+      await serializeActorPropertyWrite(sheet.actor, async () => {
       const path = normalizeNexusPropertyPath(input.dataset.propertyPath);
       if (!path || path.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part))) return;
       const kind = input.dataset.propertyKind;
@@ -254,7 +259,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           || (valueKind === "number" && typeof calculated !== "number")
           || (valueKind === "boolean" && typeof calculated !== "boolean")
           || (valueKind === "string" && typeof calculated !== "string");
-        if (incompatible || (resolvedPath.readOnly && !skillFormulaMatch)) {
+        const baseModifierPath = ["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path);
+        if (incompatible || (resolvedPath.readOnly && !resolvedPath.formulaEditable && !skillFormulaMatch)) {
           globalThis.ui?.notifications?.warn?.("Expressão inválida para esta propriedade. Verifique as referências e o tipo do resultado.");
           return;
         }
@@ -280,6 +286,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
       const valueKind = kind;
+      const baseModifierPath = ["progression.mb.value", "combat.mb", "combat.mb.value"].includes(path);
+      if (baseModifierPath) {
+        if (String(value ?? "").trim() === "" && typeof existingExpression === "string") {
+          await writePropertyExpression(sheet.actor, path, null);
+          sheet._refreshBoundComponents();
+          return;
+        }
+        input.value = String(resolveNexusBinding(sheet.actor, path).value ?? "");
+        globalThis.ui?.notifications?.warn?.("O MB é calculado pelo nível. Para personalizá-lo, informe uma fórmula entre {{ }}; um valor manual não altera o nível nem substitui o cálculo-base.");
+        return;
+      }
       if (valueKind === "number") {
         if (String(value).trim() === "") value = 0;
         else if (!Number.isFinite(Number(value))) {
@@ -331,6 +348,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         await sheet.actor.update({ [updatePath]: value }, { render: false });
       }
       sheet._refreshBoundComponents();
+      });
     });
     html.find("[data-config-system-path]").on("change", event => { const input = event.currentTarget; input.dataset.systemPath = input.dataset.configSystemPath; sheet._updateSystemValue(input); });
     html.find("[data-config-component-code]").on("change", async event => {
