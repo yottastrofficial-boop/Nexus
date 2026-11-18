@@ -863,6 +863,7 @@ const formulaResolutionActor = {
   system: {
     identity: { level: 5 },
     attributes: { for: 2 },
+    progression: { mb: { value: 3 } },
     skills: { athletics: { proficientLevel: 1 } }
   }
 };
