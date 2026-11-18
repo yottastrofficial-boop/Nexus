@@ -915,7 +915,9 @@ assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formu
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
 assert.match(sheet, /propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/);
-assert.match(sheetListeners, /propertyExpressionQueues = new WeakMap/);
+assert.match(sheetListeners, /actorPropertyWriteQueues = new WeakMap/, "Gravações de propriedades do mesmo Actor devem ser serializadas");
+assert.match(sheetListeners, /await serializeActorPropertyWrite\(sheet\.actor, async \(\) => \{/, "Edições manuais e fórmulas devem compartilhar a mesma fila de persistência");
+assert.doesNotMatch(sheetListeners, /propertyExpressionQueues = new WeakMap/, "A fila não deve serializar apenas fórmulas e deixar valores manuais concorrentes");
 assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
@@ -1137,6 +1139,10 @@ assert.ok(sheet.includes("labelSuffix") && sheet.includes("NON_ROLL_PROPERTY_SUF
 
 assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações de condição e conteúdo não devem reconstruir o editor");
 assert.doesNotMatch(sheetListeners, /pendingPropertyValueSaves/, "Valores de propriedades não devem ser salvos por debounce durante a digitação");
+assert.match(sheetListeners, /const baseModifierPath = \["progression\.mb\.value", "combat\.mb", "combat\.mb\.value"\]\.includes\(path\)/, "O MB deve ser tratado como propriedade derivada em todos os aliases");
+assert.match(sheetListeners, /if \(baseModifierPath\)[\s\S]*?MB é calculado pelo nível/, "O Inspector não deve gravar um valor manual de MB sobre o nível");
+assert.match(sheet, /formulaEditable: true[\s\S]*?if \(rulebookProperty\.matched\)/, "O MB deve aceitar fórmula personalizada sem aceitar substituição manual");
+assert.match(sheetListeners, /previous formula remains intact/, "A fórmula anterior deve permanecer salva se a gravação do novo valor falhar");
 assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
 assert.match(sheet, /dependencies\.add\("progression\.mb\.value"\)/, "Perícias sem fórmula manual devem atualizar quando o MB mudar");
 assert.match(sheet, /dependencies\.add\("combat\.mb"\)/, "Aliases do MB também devem invalidar perícias calculadas");
