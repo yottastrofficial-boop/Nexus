@@ -1359,20 +1359,24 @@ export class NexusActorSheet extends NexusActorSheetBase {
         const path = normalizeNexusPropertyPath(String(candidate ?? "").replace(/^system\./, ""));
         if (!path || visitedFormulas.has(path)) return;
         visitedFormulas.add(path);
-        const skillMatch = path.match(/^skills\.([^.]+)\.(?:value|formula)$/);
+        const skillMatch = path.match(/^skills\\.([^.]+)\\.(?:value|formula)$/);
+        const propertyExpressions = this.actor.getFlag?.("nexus", "propertyExpressions")
+          ?? this.actor.flags?.nexus?.propertyExpressions ?? {};
         const formula = skillMatch
-          ? (getPath(this.actor.system ?? {}, `skills.${skillMatch[1]}.formula`) || getNexusDefaultSkillFormula(skillMatch[1]))
-          : (getPath(this.actor.getFlag?.("nexus", "propertyExpressions") ?? this.actor.flags?.nexus?.propertyExpressions ?? {}, path)
-            || getNexusDefaultPropertyFormula(path));
-        if (!formula) return;
+          ? getPath(this.actor.system ?? {}, `skills.${skillMatch[1]}.formula`)
+          : getPath(propertyExpressions, path);
+        if (typeof formula !== "string" || !formula.trim()) return;
         addExpression(formula);
-        const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
+        const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
         for (const match of String(formula).matchAll(matcher)) {
           const reference = String(match[0]).replace(/^@/, "");
           const canonical = reference === "combat.mb" || reference === "combat.mb.value" ? "progression.mb.value" : reference;
-          if (getNexusDefaultPropertyFormula(canonical) || /^skills\.[^.]+\.value$/.test(canonical)) scanFormulaPath(canonical);
-        }
-      };
+          const skillReference = canonical.match(/^skills\\.([^.]+)\\.(?:value|formula)$/);
+          const referencedFormula = skillReference
+            ? getPath(this.actor.system ?? {}, `skills.${skillReference[1]}.formula`)
+            : getPath(propertyExpressions, canonical);
+          if (typeof referencedFormula === "string" && referencedFormula.trim()) scanFormulaPath(canonical);
+        }      };
       scanFormulaPath(rawPath);
     };
     addPropertyFormulaDependencies(component.dataPath);
