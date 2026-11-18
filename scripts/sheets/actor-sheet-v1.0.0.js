@@ -1332,27 +1332,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
       const legacyProficiency = path.match(/^skills\.([^.]+)\.proficient$/);
       if (legacyProficiency) dependencies.add(`skills.${legacyProficiency[1]}.proficientLevel`);
-      const skillValue = path.match(/^skills\.([^.]+)\.value$/);
-      if (skillValue) {
-        const skill = NEXUS_SKILLS.find(item => item.key === skillValue[1] || item.legacyKey === skillValue[1]);
-        if (skill) dependencies.add(`attributes.${skill.attributeKey}.value`);
-        dependencies.add(`skills.${skillValue[1]}.proficientLevel`);
-        // The built-in skill modifier still follows the core rule calculation
-        // when no manual formula is stored, so MB changes must invalidate it.
-        dependencies.add("progression.mb.value");
-        dependencies.add("combat.mb");
-        dependencies.add("combat.mb.value");
-        dependencies.add("identity.level");
-      }
-      if (["progression.mb.value", "combat.mb", "combat.mb.value", "recovery.count.value", "recovery.die.value", "resources.pe.recovery.value"].includes(path)) dependencies.add("identity.level");
-      if (path === "recovery.available.value") { dependencies.add("identity.level"); dependencies.add("recovery.spent"); }
-      if (["combat.defense.value", "combat.defense"].includes(path)) { dependencies.add("attributes.des.value"); dependencies.add("combat.defenseModifier"); }
-      if (path === "combat.initiative.value") dependencies.add("attributes.des.value");
-      if (path === "combat.movement.meters") dependencies.add("combat.movement.value");
-      if (["encumbrance.bonus.value", "encumbrance.capacity.value", "encumbrance.overloaded.value"].includes(path)) {
-        dependencies.add("attributes.for.value");
-        dependencies.add("encumbrance.current");
-      }
+      // Property dependencies are inferred from explicit formulas and component
+      // expressions below; the Core does not impose mechanical dependencies.
     };
     const addExpression = expression => {
       const matcher = /@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g;
