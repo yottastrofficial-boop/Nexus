@@ -182,7 +182,7 @@ const derivedExpressionActor = {
   system: { identity: { level: 4 }, attributes: { for: 2, des: 3 }, combat: { defenseModifier: 0 } },
   flags: { nexus: { propertyExpressions: { attributes: { des: { value: "{{attributes.for.value + 1}}" } } } } }
 };
-assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").value, 11, "Propriedades derivadas devem usar atributos dinâmicos");
+assert.equal(getNexusRulebookPropertyValue(derivedExpressionActor, "combat.defense.value").matched, false,
 
 
 for (const attribute of NEXUS_ATTRIBUTES) {
@@ -191,30 +191,30 @@ for (const attribute of NEXUS_ATTRIBUTES) {
 }
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "attributes.for.exib").value, "FOR");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pv.name").value, "Pontos de Vida");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").matched, false, "O MB não deve receber uma fórmula ou valor derivado pré-configurado no registro de propriedades");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "progression.mb.value").readOnly, false, "MB deve permitir edição direta ou fórmula personalizada");
 assert.equal(getNexusDefaultPropertyFormula("progression.mb.value"), "", "O sistema não deve preencher fórmulas globais no editor de propriedades");
-assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").value, 4, "Um valor manual deve substituir a fórmula padrão de MB");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8", "A fórmula padrão de recuperação deve manter os intervalos de nível");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve usar a fórmula padrão editável");
+assert.equal(getNexusRulebookPropertyValue({ system: { identity: { level: 5 }, progression: { mb: { value: 4 } } } }, "progression.mb.value").matched, false, "O registro não deve injetar valores padrão para o MB");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false,
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false,
 const customMbActor = {
   system: { identity: { level: 4 }, attributes: { for: 2 }, skills: { athletics: { proficientLevel: 1 } } },
   flags: { nexus: { propertyExpressions: { progression: { mb: { value: "{{attributes.for.value + 1}}" } } } } }
 };
 assert.equal(getNexusBaseModifier(customMbActor), 3, "O MB deve respeitar sua fórmula personalizada");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
-assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "Fórmulas derivadas dependentes devem usar o MB personalizado");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").matched, false,
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").matched, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").matched, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.current.value").value, 8);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").matched, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "identity.name").value, "Ayla");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").matched, false);
 
