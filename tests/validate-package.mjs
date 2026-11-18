@@ -71,7 +71,7 @@ assert.doesNotThrow(() => activateCanvasInteractions({}, [{ querySelector: () =>
     set(value) { this._zoom = value; zoomWrites += 1; }
   });
   const stage = { clientWidth: 800, clientHeight: 600, isConnected: true };
-  const themeTarget = { style: { setProperty() {} } };
+  const themeTarget = { dataset: {}, style: { setProperty() {} } };
   const appWindow = { style: { setProperty() {} } };
   const rootElement = {
     querySelector(selector) {
