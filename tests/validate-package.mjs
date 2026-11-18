@@ -224,6 +224,14 @@ const customMbAttributeActor = {
   } } }
 };
 assert.equal(getNexusAttributeValue(customMbAttributeActor, "des"), 4, "Fórmulas de atributos devem usar o MB personalizado atual");
+const cyclicFormulaActor = {
+  system: { identity: { level: 4 }, attributes: { for: 2, des: 1 } },
+  flags: { nexus: { propertyExpressions: {
+    progression: { mb: { value: "{{attributes.des.value + 1}}" } },
+    attributes: { des: { value: "{{mb + 1}}" } }
+  } } }
+};
+assert.ok(Number.isFinite(getNexusBaseModifier(cyclicFormulaActor)), "Ciclos entre propriedades devem terminar com fallback seguro");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
 assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve acompanhar o MB personalizado");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
