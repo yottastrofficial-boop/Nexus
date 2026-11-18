@@ -1237,7 +1237,7 @@ assert.ok(css.includes(".nexus-component.is-compact .nexus-component-content {\n
 assert.equal(compactOnly.classList.contains("is-compact"),true,"Cards com largura inferior a 100px devem receber o modo compacto");
 assert.equal(compactHeightOnly.classList.contains("is-compact"),true,"Cards com altura inferior a 100px devem receber o modo compacto");
 
-const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, skills: { athletics: { proficientLevel: -1, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
+const formulaSkillActor = { system: { identity: { level: 4 }, attributes: { for: 4 }, progression: { mb: { value: 2 } }, skills: { athletics: { proficientLevel: -1, formula: "{{força+(mb*proficiencia)}}", description: "Descrição personalizada de Atletismo." } } } };
 const formulaAthletics = getNexusSkillRows(formulaSkillActor).find(skill => skill.key === "athletics");
 assert.equal(formulaAthletics.value, 2);
 assert.equal(formulaAthletics.description, "Descrição personalizada de Atletismo.");
