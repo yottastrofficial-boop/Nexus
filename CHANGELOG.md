@@ -1,3 +1,19 @@
+## 1.0.0.62
+
+### Editor de propriedades e expressões
+- Campos de valor aceitam texto literal entre aspas e expressões textuais no formato `{{"texto"}}`, respeitando o tipo real da propriedade.
+- Valores numéricos vazios são normalizados para zero; valores textuais vazios permanecem vazios.
+- O editor usa o tipo real do dado na validação, sem um tipo artificial exclusivo para fórmulas.
+- Fórmulas padrão globais foram removidas do editor. Expressões de propriedades e perícias são preenchidas somente quando definidas manualmente.
+- Os cálculos-base previstos pelas regras do NEXUS continuam funcionando sem exigir que uma fórmula apareça previamente no editor.
+- O vínculo de propriedade foi compactado para exibir **Nome | Caminho** na mesma linha e **Valor** abaixo.
+- O rastreamento reativo foi ajustado para atualizar perícias calculadas pelas regras-base quando atributo, proficiência, nível ou modificador base mudarem.
+
+### Validação
+- Atualizados os testes de regressão para a edição manual de fórmulas e tipos reais de propriedade.
+- Incluídas verificações para valores vazios, literais textuais, expressões entre chaves, layout compacto e dependências do modificador base.
+- O pacote precisa passar pelo workflow de validação e ainda requer teste funcional e visual em uma instalação real do Foundry VTT 14 antes de ser considerado estável.
+
 ## 1.0.0.61
 
 ### Propriedades e fórmulas
