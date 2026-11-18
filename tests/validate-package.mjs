@@ -225,18 +225,18 @@ const customMbAttributeActor = {
 };
 assert.equal(getNexusAttributeValue(customMbAttributeActor, "des"), 4, "Fórmulas de atributos devem usar o MB personalizado atual");
 assert.equal(getNexusSkillRows(customMbActor).find(skill => skill.key === "athletics")?.value, 5, "As perícias devem usar o MB manual ou personalizado atual");
-assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").matched, false, "O editor não deve injetar cálculos derivados mesmo quando o MB tem expressão manual");
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(customMbActor, "resources.pe.recovery.value").value, 12, "A recuperação de PE deve acompanhar o MB personalizado");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.defense.value").value, 10);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.initiative.value").value, 1);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.value").value, 6);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").matched, false);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "combat.movement.meters").value, 9);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.count.value").value, 5);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.die.value").value, "d8");
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "recovery.available.value").value, 3);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "resources.pe.recovery.value").value, 12);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.capacity.value").value, 9);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.current.value").value, 8);
-assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").matched, false);
+assert.equal(getNexusRulebookPropertyValue(rulebookActor, "encumbrance.overloaded.value").value, false);
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "identity.name").value, "Ayla");
 assert.equal(getNexusRulebookPropertyValue(rulebookActor, "unregistered.path").matched, false);
 
