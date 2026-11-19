@@ -1,5 +1,8 @@
 ## 1.0.0.64
 
+### Distribuição
+- O pacote instalável é gerado e publicado automaticamente após a aprovação das validações do repositório.
+
 ### Biblioteca e compartilhamento
 - Grupos salvos preservam as configurações do grupo e dos componentes, incluindo regras de apresentação e fluxos de interação.
 - Adicionadas exportação e importação de grupos por código JSON versionado e legível, sem execução de código.
