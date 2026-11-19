@@ -15,6 +15,7 @@ import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode } from "../scripts/core/library-sharing.js";
 
 // Geometry regression tests for the Canvas smart-alignment search.
 const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
@@ -1196,6 +1197,8 @@ assert.equal(representationDraft.propertyPresentation.rules[0].name, "Regra 2", 
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
 assert.match(interactions, /renderPropertyPresentationEditor/, "As regras de apresentação devem integrar o painel Propriedades");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
+assert.ok(sheetListeners.includes("on(`input${inspectorNamespace}`"), "A edição do conteúdo das regras deve atualizar a prévia durante a digitação");
+assert.ok(sheetListeners.includes("sheet._refreshBoundComponents?.()"), "A prévia das regras deve ser recalculada sem alterar propriedades do Actor");
 assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, "Somente os componentes afetados devem reavaliar suas expressões");
 assert.match(sheetCode, /_componentDependsOnActorChanges/, "A invalidação deve comparar as dependências com os caminhos alterados");
 assert.match(actorSheetRendering, /nexusExpressionSource/, "O renderizador deve preservar a expressão original para reavaliação");
@@ -1208,6 +1211,27 @@ assert.match(css, /\.nexus-property-representation-value\s*\{[^}]*font-size:1em;
 assert.match(css, /nexus-component\.has-representation/, "A representação deve substituir apenas a saída visual do componente");
 
  
+// Group sharing: full card configuration, presentation rules and interactions survive export/import.
+const sharedGroupFixture = {
+  name: "Perícias",
+  groupSettings: { backgroundColor: "#172331", borderColor: "#52647b", borderRadius: 12 },
+  components: [
+    { id: "old-1", type: "asset-text", x: 0, y: 0, w: 160, h: 44, text: "Atletismo", propertyPresentation: { enabled: true, sourcePath: "skills.athletics.value", rules: [{ condition: "@level > 2", content: "{{icon:fa-solid fa-star}} {{@level}}" }] }, interactions: [{ id: "flow-1", enabled: true, triggers: [{ event: "click" }], actions: [{ id: "action-1", type: "roll", config: { formula: "1d20" } }] }] },
+    { id: "old-2", type: "asset-image", x: 170, y: 0, w: 80, h: 80, imageFit: "contain", imagePosition: "center" }
+  ]
+};
+const sharedGroupCode = createNexusGroupShareCode(sharedGroupFixture);
+assert.equal(sharedGroupCode.split("\\n", 1)[0], "NEXUS-GROUP/1", "O código de grupo deve identificar o formato e sua versão");
+const importedGroupFixture = parseNexusGroupShareCode(sharedGroupCode, ["asset-text", "asset-image"]);
+assert.equal(importedGroupFixture.name, "Perícias");
+assert.deepEqual(importedGroupFixture.groupSettings, sharedGroupFixture.groupSettings);
+assert.equal(importedGroupFixture.components[0].propertyPresentation.rules[0].content, "{{icon:fa-solid fa-star}} {{@level}}");
+assert.deepEqual(importedGroupFixture.components[0].interactions, sharedGroupFixture.components[0].interactions);
+assert.equal(importedGroupFixture.components[1].imageFit, "contain");
+assert.equal(Object.hasOwn(importedGroupFixture.components[0], "id"), false, "IDs antigos não devem ser reutilizados ao importar um grupo");
+assert.throws(() => parseNexusGroupShareCode(sharedGroupCode, ["asset-text"]), /não está disponível/, "Tipos de componentes desconhecidos devem ser rejeitados");
+assert.throws(() => parseNexusGroupShareCode('NEXUS-GROUP/1\\n{"format":"nexus-group","version":2,"components":[]}', ["asset-text"]), /versão de compartilhamento/, "Versões de compartilhamento incompatíveis devem ser rejeitadas");
+
 // Property presentation v1.0.0.37.
 assert.equal(evaluateNexusCondition("@level=5", resolveExpressionValue), true, "Single = must act as equality");
 assert.equal(evaluateNexusCondition("@level==5", resolveExpressionValue), true, "Double == remains supported");
@@ -1220,6 +1244,8 @@ assert.ok(sheet.includes("standaloneIcon"), "Classes Font Awesome isoladas devem
 assert.ok(sheet.includes("image.style[key] = rawValue"), "Tokens de imagem devem aceitar dimensões personalizadas seguras");
 assert.ok(sheet.includes("is-media-only"), "Mídia isolada deve receber layout próprio para ocupar o card");
 assert.match(css, /nexus-property-representation\.is-media-only \.nexus-property-representation-image/, "Imagens isoladas devem preencher o espaço disponível sem distorção");
+assert.match(css, /font-size:min\(100cqw,100cqh\)/, "Ícones Font Awesome isolados devem acompanhar a menor dimensão interna do card");
+assert.match(css, /\.nexus-property-representation\.is-media-only \.nexus-property-representation-image[\s\S]*?width:100%[\s\S]*?height:100%/, "Imagens isoladas devem preencher a área disponível preservando a proporção");
 assert.match(css, /object-fit:contain/, "Imagens das representações devem preservar a proporção");
 assert.match(template, /data-property-presentation-editor/, "The editor must be mounted in the Properties panel");
 assert.match(template, /data-property-alias-conflicts/, "The Properties panel must expose ambiguity warnings");

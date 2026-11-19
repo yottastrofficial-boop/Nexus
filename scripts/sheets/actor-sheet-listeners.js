@@ -1072,9 +1072,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         add.type = "button";
         add.dataset.libraryAddGroup = "";
         add.textContent = "Adicionar grupo ao Canvas";
+        const copy = document.createElement("button");
+        copy.type = "button";
+        copy.dataset.libraryCopyGroupCode = "";
+        copy.textContent = "Copiar código de compartilhamento";
         const remove = document.createElement("button");
         remove.type = "button"; remove.dataset.libraryDeleteSavedGroup = ""; remove.className = "danger"; remove.textContent = "Excluir grupo da biblioteca";
-        detail.append(heading, summary, add, remove);
+        detail.append(heading, summary, add, copy, remove);
         return;
       }
 
@@ -1094,6 +1098,31 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
         if(id)await sheet._deleteSavedLibraryComponent(id);return;
+      }
+      const importGroupButton = target?.closest("[data-library-import-group]");
+      if (importGroupButton && libraryPanel.contains(importGroupButton)) {
+        event.preventDefault();
+        const result = await foundry.applications.api.DialogV2.input({
+          window: { title: "Importar grupo por código" },
+          content: '<label class="nexus-library-card-content-label">Código de compartilhamento<textarea name="code" rows="10" spellcheck="false" autocomplete="off"></textarea></label><p>O código precisa ser de um grupo exportado pelo NEXUS.</p>',
+          ok: { label: "Importar grupo" },
+          rejectClose: false
+        });
+        const code = String(result?.code ?? "").trim();
+        if (!code) return;
+        try {
+          await sheet._importSavedGroupCode(code);
+        } catch (error) {
+          console.warn("NEXUS | Código de grupo inválido", error);
+          ui.notifications?.warn?.(error?.message || "Não foi possível importar este grupo.");
+        }
+        return;
+      }
+      const copySavedGroupButton = target?.closest("[data-library-copy-group-code]");
+      if (copySavedGroupButton && libraryPanel.contains(copySavedGroupButton)) {
+        const id = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
+        if (id) await sheet._copySavedGroupCode(id);
+        return;
       }
       const deleteSavedGroupButton = target?.closest("[data-library-delete-saved-group]");
       if (deleteSavedGroupButton && libraryPanel.contains(deleteSavedGroupButton)) {
@@ -1381,14 +1410,33 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       await persistInteractionEditor(button, button.dataset.interactionAction);
     });
+    $(document).on(`input${inspectorNamespace}`, "[data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", event => {
+      const control = event.currentTarget;
+      const componentId = control.dataset.componentId || control.closest("[data-property-presentation-editor]")?.dataset.componentId;
+      const component = sheet._currentLayout?.components?.find(item => item.id === componentId);
+      if (!component) return;
+      if (control.dataset.nexusPresentationHistoryCaptured !== "true") {
+        sheet._captureHistory();
+        control.dataset.nexusPresentationHistoryCaptured = "true";
+      }
+      applyInteractionEditorChange(component, {
+        scope: control.dataset.interactionScope,
+        interactionId: control.dataset.interactionId || "",
+        ruleIndex: control.dataset.ruleIndex,
+        field: control.dataset.interactionField
+      }, control.type === "checkbox" ? control.checked : control.value);
+      sheet._refreshBoundComponents?.();
+    });
     $(document).on(`change${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-field], .nexus-component-inspector [data-interaction-field], [data-property-presentation-editor] [data-interaction-scope^='propertyPresentation']", async event => {
       const control = event.currentTarget;
       event.stopPropagation();
       const isPresentationField = control.dataset.interactionScope?.startsWith("propertyPresentation");
+      const historyAlreadyCaptured = control.dataset.nexusPresentationHistoryCaptured === "true";
       await persistInteractionEditor(control, null, {
         render: !isPresentationField,
-        captureHistory: true
+        captureHistory: !isPresentationField || !historyAlreadyCaptured
       });
+      if (isPresentationField) delete control.dataset.nexusPresentationHistoryCaptured;
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
     const getInspectorComponent = element => {

@@ -15,6 +15,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -2520,15 +2521,64 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const left = Math.min(...members.map(item => item.x));
     const top = Math.min(...members.map(item => item.y));
     const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    const groupSettings = clone(group);
+    for (const key of ["id", "name", "componentIds", "x", "y", "w", "h", "z"]) delete groupSettings[key];
     saved.push({
       id: `libgrp-${foundry.utils.randomID(8)}`, name,
-      groupSettings: { backgroundColor: group.backgroundColor ?? "", borderColor: group.borderColor ?? "", borderRadius: group.borderRadius ?? 0 },
-      components: members.map(item => { const { id, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
+      groupSettings,
+      components: members.map(item => { const { id, definition, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
     });
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
     ui.notifications?.info?.(`Grupo "${name}" salvo na sua Biblioteca pessoal.`);
     this._libraryRenderSavedGroups?.();
     this._libraryApplyFilter?.();
+    return true;
+  }
+
+  async _copySavedGroupCode(groupId) {
+    const group = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === groupId);
+    if (!group) return false;
+    const code = createNexusGroupShareCode(group);
+    let copied = false;
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(code);
+        copied = true;
+      }
+    } catch (_) {}
+    if (!copied) {
+      const field = document.createElement("textarea");
+      field.value = code;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.opacity = "0";
+      document.body.append(field);
+      field.select();
+      copied = document.execCommand?.("copy") === true;
+      field.remove();
+    }
+    if (!copied) {
+      ui.notifications?.warn?.("Não foi possível copiar automaticamente. Tente novamente em uma janela segura do navegador.");
+      return false;
+    }
+    ui.notifications?.info?.("Código do grupo copiado. Você pode compartilhá-lo ou colá-lo em uma conversa para análise.");
+    return true;
+  }
+
+  async _importSavedGroupCode(code) {
+    const imported = parseNexusGroupShareCode(code, Object.keys(COMPONENTS));
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    const entry = {
+      id: `libgrp-${foundry.utils.randomID(8)}`,
+      name: imported.name,
+      groupSettings: imported.groupSettings,
+      components: imported.components
+    };
+    await game.user.setFlag("nexus", "libraryGroups", [...saved, entry].slice(-100));
+    this._libraryAssetScope = "personal";
+    this._libraryRenderSavedGroups?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`Grupo "${entry.name}" importado para sua Biblioteca pessoal.`);
     return true;
   }
 

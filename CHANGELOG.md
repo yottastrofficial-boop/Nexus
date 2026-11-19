@@ -15,6 +15,18 @@
 - Adicionadas verificações para garantir que a atualização reativa de texto não volte a pesquisar todo o DOM.
 - A validação automatizada e o empacotamento precisam passar no CI. O teste visual e funcional em uma instalação real do Foundry VTT 14 continua obrigatório antes de declarar estabilidade.
 
+## Próxima versão (em desenvolvimento)
+
+### Biblioteca e compartilhamento
+- Grupos salvos passam a preservar todas as configurações próprias do grupo e dos componentes, incluindo regras de apresentação e fluxos de interação.
+- Adicionadas exportação e importação de grupos por um código JSON versionado e legível, sem execução de código.
+- A Biblioteca permite copiar o código de compartilhamento de um grupo salvo e importar códigos recebidos.
+
+### Atualização visual e reativa
+- Regras de apresentação atualizam a prévia enquanto o conteúdo é digitado, sem depender de uma alteração posterior no Actor.
+- Ícones Font Awesome isolados passam a dimensionar-se pela menor dimensão interna do card; imagens adaptam-se à área disponível sem distorção.
+- A mídia isolada deixa de herdar o espaçamento interno que reduzia desnecessariamente sua área útil.
+
 ## 1.0.0.62
 
 ### Editor de propriedades e expressões
