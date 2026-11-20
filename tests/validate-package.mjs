@@ -1290,7 +1290,7 @@ const legacyGroupCode = "NEXUS-GROUP/1\\n" + JSON.stringify({
 const legacyGroup = parseNexusGroupShareCode(legacyGroupCode, ["asset-text"]);
 assert.equal(legacyGroup.groups[0].name, "Grupo legado");
 assert.deepEqual(legacyGroup.groups[0].componentIds, ["legacy-a"], "NEXUS-GROUP/1 deve criar vínculo de membro válido");
-const plainGroupJson = sharedGroupCode.replace(/^NEXUS-GROUP\\/2\\s*/, "");
+const plainGroupJson = sharedGroupCode.slice("NEXUS-GROUP/2\\n".length);
 const importedPlainJson = parseNexusGroupShareCode(plainGroupJson, ["asset-text", "asset-image"]);
 assert.equal(importedPlainJson.groups.length, 1, "JSON puro deve manter a estrutura de grupo");
 assert.deepEqual(importedPlainJson.groups[0].componentIds, ["old-1", "old-2"], "JSON puro deve preservar todos os vínculos");
