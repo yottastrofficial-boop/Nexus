@@ -6256,7 +6256,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 }
 .nexus-group-container > .nexus-group-handle[hidden] { display:none !important; }
 .nexus-group-container > .nexus-group-handle { z-index:2147483002 !important; }
-.nexus-group-container > .nexus-group-surface { pointer-events:none !important; }
 .nexus-group-container > .nexus-component { pointer-events:auto !important; }
 .nexus-panel-window .nexus-interaction-trigger-row {
   display:grid !important; grid-template-columns:minmax(0,1.15fr) minmax(0,.8fr) 30px !important;
