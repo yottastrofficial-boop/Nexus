@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.66 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.67 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.66-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.67-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.66. Adiciona grupos hierárquicos sem cabeçalhos, superfícies independentes, seleção pela árvore de camadas e compartilhamento de grupos aninhados. A Biblioteca passa a salvar, importar, exportar e inserir layouts completos como novas abas, sem sobrescrever o layout atual.
+> **Versão atual:** 1.0.0.67. Adiciona grupos hierárquicos sem cabeçalhos, superfícies independentes, seleção pela árvore de camadas e compartilhamento de grupos aninhados. A Biblioteca passa a salvar, importar, exportar e inserir layouts completos como novas abas, sem sobrescrever o layout atual.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.66 |
+| Versão atual | 1.0.0.67 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -120,7 +120,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.66 introduz grupos hierárquicos com superfícies independentes e uma Biblioteca capaz de compartilhar layouts completos entre fichas. A validação automatizada cobre os formatos de compartilhamento e a estrutura das camadas; testes visuais e funcionais no Foundry VTT 14 continuam necessários.
+A versão 1.0.0.67 corrige a preparação do contexto da ficha, garantindo que a hierarquia de grupos use os componentes e grupos do layout ativo.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
