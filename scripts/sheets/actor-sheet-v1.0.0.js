@@ -3,7 +3,8 @@ import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
-import { activateActorSheetListeners, serializeActorPropertyWrite } from "./actor-sheet-listeners.js";
+import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
+import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
 import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
