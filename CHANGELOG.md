@@ -10,6 +10,12 @@
 - Permite exportar grupos como JSON puro e importar tanto JSON puro quanto códigos versionados.
 - Mantém compatibilidade com `NEXUS-GROUP/1` e valida IDs, referências, propriedade direta de componentes e ciclos na hierarquia.
 - Adiciona testes de regressão para grupos aninhados, grupos legados e importação/exportação JSON.
+- Adiciona nome editável e seletor de grupo superior no Inspector, permitindo mover grupos entre níveis sem recriar seus componentes; destinos que causariam ciclos são bloqueados.
+- Introduz o formato unificado e versionado `NEXUS-PACK/1` para componentes individuais, grupos hierárquicos e layouts completos.
+- Componentes salvos preservam todas as configurações serializáveis, inclusive propriedades futuras, sem carregar IDs ou posições específicas da instância original.
+- A Biblioteca permite copiar ou exportar componentes, grupos e layouts como pacotes JSON e importar esses pacotes em seus respectivos espaços pessoais.
+- A importação mantém compatibilidade com arquivos e códigos legados `NEXUS-GROUP/1`, `NEXUS-GROUP/2` e `NEXUS-LAYOUT/1`.
+- Os pacotes compartilham apenas dados JSON inertes; fórmulas, caminhos e interações são preservados como configuração, sem executar código recebido.
 
 ### Validação
 - A suíte automatizada continua sendo executada pelo GitHub Actions.
