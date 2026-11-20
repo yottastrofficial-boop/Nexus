@@ -266,7 +266,7 @@ assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\
 assert.match(template, /data-group-parent/, "O Inspector deve expor a escolha de grupo superior");
 assert.match(template,/data-group-setting="layoutMode"/);
 assert.match(template,/data-group-setting="kind"/);
-assert.match(sheet,/applyGroupLayouts\\(layout\\.groups,\\s*layout\\.components\\)/);
+assert.match(sheet,/applyGroupLayouts\(layout\.groups,\s*layout\.components\)/);
 assert.match(sheetListeners, /validateGroupParent\(groups, groupId, parentId\)/, "A mudança de grupo superior deve rejeitar ciclos");
 assert.match(sheet, /createNexusSharePackage, parseNexusSharePackage/, "A ficha deve utilizar o formato unificado de pacotes");
 assert.match(sheetListeners, /data-library-export-saved-component/, "Componentes salvos devem poder ser exportados");
