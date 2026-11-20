@@ -1,4 +1,5 @@
 import { NEXUS_SKILLS, normalizeNexusProficientLevel } from "./skills.js";
+import { moveActorAliasCustomData } from "./actor-aliases.js";
 
 const getActiveLayoutId = (layouts, storedId) =>
   layouts[storedId] ? storedId : "principal";
@@ -15,13 +16,12 @@ export async function migrateLegacyActorData({
   getCustomAliasData,
   normalizeAliasDefinition,
   invalidateAliasDefinitionCache,
-  getPath,
-  clone,
-  setProperty
+  clone
 }) {
   const layouts = await readLayouts();
   let changed = false;
   let aliasesChanged = false;
+  let aliasDataConflicts = 0;
   let propertiesMigrated = false;
 
   // Migrate legacy sheet fields to the rulebook-aligned property model.
@@ -88,14 +88,8 @@ export async function migrateLegacyActorData({
     for (const raw of rawAliases) {
       const normalized = normalizeAliasDefinition(raw);
       if (!normalized || normalized.targetPath || normalized.key === raw.key) continue;
-      const oldValue = getPath(customData, raw.key);
-      if (oldValue === undefined || getPath(customData, normalized.key) !== undefined) continue;
-
-      setProperty(customData, normalized.key, oldValue);
-      const parts = String(raw.key).split(".");
-      const leaf = parts.pop();
-      const parent = getPath(customData, parts.join("."));
-      if (parent && typeof parent === "object") delete parent[leaf];
+      const result = moveActorAliasCustomData(customData, raw.key, normalized.key);
+      if (result.status === "conflict") aliasDataConflicts++;
     }
 
     if (JSON.stringify(customData) !== JSON.stringify(getCustomAliasData(actor))) {
@@ -108,5 +102,5 @@ export async function migrateLegacyActorData({
     changed = true;
   }
 
-  return { activeLayout: activeId, aliasesMigrated: aliasesChanged, propertiesMigrated, changed };
+  return { activeLayout: activeId, aliasesMigrated: aliasesChanged, aliasDataConflicts, propertiesMigrated, changed };
 }
