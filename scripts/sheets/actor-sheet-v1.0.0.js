@@ -2637,6 +2637,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     base.id = layoutIdNew; base.name = String(entry.name ?? base.name ?? "Layout importado").slice(0, 32);
     base.components = (base.components ?? []).map(component => ({ ...remapReferences(component), id: componentIds.get(String(component.id)) ?? `cmp-${foundry.utils.randomID(8)}` }));
     base.groups = (base.groups ?? []).map(group => ({ ...remapReferences(group), id: groupIds.get(String(group.id)) ?? `grp-${foundry.utils.randomID(8)}`, parentGroupId: group.parentGroupId ? groupIds.get(String(group.parentGroupId)) ?? "" : "", componentIds: (group.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean) }));
+    base.links = remapReferences(base.links ?? []);
     const nameBase = base.name; let name = nameBase, suffix = 2;
     while (Object.values(layouts).some(item => String(item.name).toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) name = `${nameBase.slice(0, 26)} (${suffix++})`;
     base.name = name; layouts[layoutIdNew] = this._normalizeLayout(base);
@@ -2909,7 +2910,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!targetGroup && !targetComponent) return;
     const targetParentId = targetGroup
       ? (placement === "inside" ? String(targetGroup.id) : hierarchy.parentById.get(String(targetGroup.id)) ?? "")
-      : (hierarchy.parentById.get(hierarchy.componentOwner.get(String(targetComponent.id)) ?? "") ?? "");
+      : (hierarchy.componentOwner.get(String(targetComponent.id)) ?? "");
     if (sourceGroup) {
       if (placement === "inside" && !validateGroupParent(layout.groups, sourceGroup.id, targetParentId)) return;
       if (sourceGroup.id === targetParentId) return;
