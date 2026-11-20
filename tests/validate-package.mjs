@@ -19,7 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
-import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition } from "../scripts/core/actor-aliases.js";
+import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1830,6 +1830,12 @@ assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases 
   assert.equal(createUniqueActorAliasKey("custom", "PV", aliases, natives), "custom.pv");
   assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives, "a"), "custom.poder");
   assert.equal(createUniqueActorAliasKey("invalid.category", "Poder", aliases, natives), "");
+  const legacyPayload = { attributes: { old: { value: 18 }, current: { value: 22 } } };
+  assert.deepEqual(getActorAliasCustomValue(legacyPayload, { key: "attributes.current", legacyKeys: ["attributes.old"] }), { value: 22 },
+    "O caminho canônico deve ter prioridade sobre dados legados");
+  assert.deepEqual(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: ["attributes.old"] }), { value: 18 },
+    "O payload legado deve continuar legível quando a migração encontrar conflito");
+  assert.equal(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: [] }), undefined);
   const customData = { custom: { old: { value: 12 } } };
   assert.deepEqual(moveActorAliasCustomData(customData, "custom.old", "custom.new"), { status: "moved", changed: true });
   assert.deepEqual(customData.custom.new, { value: 12 });
