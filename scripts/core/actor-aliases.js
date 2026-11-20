@@ -72,7 +72,7 @@ export function normalizeActorAliasDefinition(alias, createId) {
  * legacy keys when a migration could not move the payload without conflict.
  */
 export function getActorAliasCustomValue(customData, alias) {
-  if (!customData || typeof customData !== "object" || !alias || typeof alias !== "object") return undefined;
+  if (!customData || typeof customData !== "object" || Array.isArray(customData) || !alias || typeof alias !== "object") return undefined;
   const read = key => {
     const safeKey = isSafeActorAliasKey(key);
     if (!safeKey) return undefined;
@@ -85,7 +85,7 @@ export function getActorAliasCustomValue(customData, alias) {
   };
   const current = read(alias.key);
   if (current !== undefined) return current;
-  for (const legacyKey of alias.legacyKeys ?? []) {
+  for (const legacyKey of (Array.isArray(alias.legacyKeys) ? alias.legacyKeys : [])) {
     const legacy = read(legacyKey);
     if (legacy !== undefined) return legacy;
   }
