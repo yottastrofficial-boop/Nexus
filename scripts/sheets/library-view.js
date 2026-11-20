@@ -52,6 +52,16 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
       const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
     }
+    const customThemes=game.user?.getFlag?.("nexus","libraryThemes")??[];
+    for(const theme of customThemes){
+      if(!theme?.id||!theme.palette)continue;
+      const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
+      const labelText=String(theme.name??"Tema personalizado");card.dataset.libraryAsset=labelText.toLocaleLowerCase("pt-BR");card.dataset.libraryCustomTheme=theme.id;
+      const selected=theme.id===(sheet._currentLayout?.customThemeId??"");card.classList.toggle("is-selected",selected);card.setAttribute("aria-pressed",String(selected));
+      const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";
+      for(const key of ["canvasColor","cardColor","accentColor","highlightColor","buttonColor"]){const swatch=document.createElement("i");swatch.style.backgroundColor=theme.palette[key]??"#52647b";preview.append(swatch);}
+      const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
+    }
     const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
     const flows=getInteractionLibrary(sheet.actor);
     if(flowContainer){
@@ -71,8 +81,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       if(key==="assets")sheet._libraryApplyFilter?.();
       if(key==="themes"){
         const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
-        const cards=[...panel.querySelectorAll("[data-library-theme]")];let visible=0;
-        cards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visible++;});
+        const cards=[...panel.querySelectorAll("[data-library-theme],[data-library-custom-theme]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visible++;});
         panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"tema":"temas"}`;
       }
       if(key==="flows"){
