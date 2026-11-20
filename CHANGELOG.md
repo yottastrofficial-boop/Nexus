@@ -15,7 +15,7 @@
 - Permite importar/exportar layouts por código JSON legível e versionado.
 - Inserir um layout da Biblioteca cria uma nova aba na ficha, preservando a aba atual.
 - IDs de componentes e grupos são regenerados durante a inserção, incluindo referências internas e vínculos entre componentes.
-- Limites e validações impedem códigos com tipos de componentes desconhecidos, grupos inexistentes ou ciclos na hierarquia.
+- Limites e validações impedem códigos com tipos de componentes desconhecidos, grupos inexistentes ou ciclos na hierarquia. O importador de layouts também rejeita IDs de componentes ausentes/duplicados e referências de grupo sem destino.
 
 ### Compatibilidade e validação
 - Mantém compatibilidade de importação com códigos antigos `NEXUS-GROUP/1`; novos grupos usam `NEXUS-GROUP/2`.
