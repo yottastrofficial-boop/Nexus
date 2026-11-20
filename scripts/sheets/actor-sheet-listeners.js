@@ -1,3 +1,5 @@
+import { validateGroupParent } from "../core/group-hierarchy.js";
+
 const actorPropertyWriteQueues = new WeakMap();
 
 export function serializeActorPropertyWrite(actor, operation) {
@@ -1950,6 +1952,29 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         sheet._selectedIds = new Set([id]);
       }
       if (key === "width" || key === "height") sheet._refreshBoundComponents?.();
+    });
+    html.find("[data-group-parent]").on("change", async event => {
+      const parentId = String(event.currentTarget.value ?? "");
+      const groupId = String(sheet._selectedGroupId ?? "");
+      if (!groupId) return;
+      const layouts = await sheet._readLayouts();
+      const active = sheet._activeLayoutId();
+      const layout = layouts[active];
+      const groups = layout?.groups ?? [];
+      const group = groups.find(item => String(item.id) === groupId);
+      if (!group) return;
+      if (!validateGroupParent(groups, groupId, parentId)) {
+        ui.notifications?.warn?.("Esse destino criaria uma hierarquia inválida. Escolha outro grupo superior.");
+        event.currentTarget.value = String(group.parentGroupId ?? "");
+        return;
+      }
+      if (String(group.parentGroupId ?? "") === parentId) return;
+      sheet._captureHistory();
+      group.parentGroupId = parentId;
+      await sheet._writeLayouts(layouts, active);
+      sheet._selectedGroupId = groupId;
+      sheet._selectedIds = new Set(sheet._groupHierarchy?.descendants.get(groupId) ?? []);
+      sheet.render({ force: true });
     });
     html.find("[data-group-setting]").on("change", async event => {
       const input = event.currentTarget;
