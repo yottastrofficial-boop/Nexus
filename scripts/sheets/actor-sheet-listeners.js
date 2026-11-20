@@ -2,7 +2,7 @@ import { validateGroupParent } from "../core/group-hierarchy.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
-import { slugifyActorAlias, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences } from "../core/actor-aliases.js";
+import { slugifyActorAlias, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition } from "../core/actor-aliases.js";
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -273,9 +273,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       aliases.push({ id, key, label: String(label || "Nova propriedade").slice(0,48), category, type: finalType, source: resolvedSource, targetPath: safeTarget });
       if (resolvedSource === "custom") {
         const customData = clone(getCustomAliasData(sheet.actor));
-        if (finalType === "attribute") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, checkbonus: 0, roll: "" });
-        else if (finalType === "resource") foundry.utils.setProperty(customData, key, { name: String(label), exib: String(label), exibicao: String(label), value: 0, max: 0 });
-        else foundry.utils.setProperty(customData, key, finalType === "number" ? 0 : finalType === "boolean" ? false : "");
+        foundry.utils.setProperty(customData, key, createActorAliasDefaultValue({ type: finalType, label: String(label) }));
         await sheet.actor.setFlag("nexus", "customData", customData);
       }
       await sheet.actor.setFlag("nexus", "aliases", aliases);
@@ -331,12 +329,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const nextKey = createUniqueActorAliasKey(property.category, suffix, getAliasDefinitions(sheet.actor), definitions, id);
         if (!suffix || !nextKey || nextKey !== `${property.category}.${suffix}`) { ui.notifications?.warn?.("Esse identificador já está em uso ou é inválido."); input.value = property.key.split(".").at(-1); return; }
         const previousKey = property.key;
+        const customData = clone(getCustomAliasData(sheet.actor));
+        const moveResult = moveActorAliasCustomData(customData, previousKey, nextKey);
+        if (moveResult.status === "conflict" || moveResult.status === "invalid") {
+          ui.notifications?.warn?.("Não foi possível renomear: já existem dados no caminho de destino.");
+          input.value = previousKey.split(".").at(-1);
+          return;
+        }
         override.key = nextKey;
         override.legacyKeys = [...new Set([...(property.legacyKeys ?? []), previousKey])];
-        const customData = clone(getCustomAliasData(sheet.actor));
-        if (moveActorAliasCustomData(customData, previousKey, nextKey)) {
-          await sheet.actor.setFlag("nexus", "customData", customData);
-        }
+        if (moveResult.changed) await sheet.actor.setFlag("nexus", "customData", customData);
         const layouts = await sheet._readLayouts();
         replaceActorAliasLayoutReferences(layouts, previousKey, nextKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
@@ -353,12 +355,18 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const saved = clone(sheet.actor.getFlag("nexus", "nativeProperties") ?? []);
       const override = saved.find(item => item.id === id);
       const oldKey = property.key;
+      const customData = clone(getCustomAliasData(sheet.actor));
+      if (oldKey !== property.defaultKey) {
+        const moveResult = moveActorAliasCustomData(customData, oldKey, property.defaultKey);
+        if (moveResult.status === "conflict" || moveResult.status === "invalid") {
+          ui.notifications?.warn?.("Não foi possível restaurar: já existem dados no identificador original.");
+          return;
+        }
+      }
       if (override) {
         override.legacyKeys = [...new Set([...(override.legacyKeys ?? []), oldKey])];
         override.key = property.defaultKey; override.label = property.defaultLabel;
       }
-      const customData = clone(getCustomAliasData(sheet.actor));
-      if (oldKey !== property.defaultKey) moveActorAliasCustomData(customData, oldKey, property.defaultKey);
       const defaultMeta = getPath(customData, property.defaultKey);
       if (defaultMeta && typeof defaultMeta === "object") { delete defaultMeta.checkbonus; delete defaultMeta.roll; }
       await sheet.actor.setFlag("nexus", "customData", customData);
@@ -428,9 +436,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const previousKey = alias.key;
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
         const customData = clone(getCustomAliasData(sheet.actor));
-        if (!alias.targetPath && moveActorAliasCustomData(customData, previousKey, next)) {
-          await sheet.actor.setFlag("nexus", "customData", customData);
+        const moveResult = alias.targetPath
+          ? { status: "skipped", changed: false }
+          : moveActorAliasCustomData(customData, previousKey, next);
+        if (moveResult.status === "conflict" || moveResult.status === "invalid") {
+          ui.notifications?.warn?.("Não foi possível renomear: já existem dados no caminho de destino.");
+          input.value = previousKey.split(".").at(-1);
+          return;
         }
+        if (moveResult.changed) await sheet.actor.setFlag("nexus", "customData", customData);
         // Migra referências de componentes para que a troca do identificador
         // não deixe cartões apontando para o caminho antigo.
         const layouts = await sheet._readLayouts();
@@ -461,14 +475,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const source = aliases.find(item => item.id === id); if (!source) return;
       const key = createUniqueActorAliasKey(source.category, `${source.key.split(".").at(-1)}_copy`, aliases, getNativePropertyDefinitions(sheet.actor));
       if (!key) return;
-      const copy = { ...clone(source), id: foundry.utils.randomID(), key, label: `${source.label} (cópia)`.slice(0,48), source: "custom", targetPath: "" };
+      const copy = createActorAliasCopyDefinition(source, key, foundry.utils.randomID());
+      if (!copy) return;
       aliases.push(copy);
       const customData = clone(getCustomAliasData(sheet.actor));
       const original = getPath(customData, source.key);
       if (original !== undefined) foundry.utils.setProperty(customData, key, clone(original));
-      else if (source.type === "attribute") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, checkbonus: 0, roll: "" });
-      else if (source.type === "resource") foundry.utils.setProperty(customData, key, { name: copy.label, exib: copy.label, exibicao: copy.label, value: 0, max: 0 });
-      else foundry.utils.setProperty(customData, key, source.type === "number" ? 0 : source.type === "boolean" ? false : "");
+      else foundry.utils.setProperty(customData, key, createActorAliasDefaultValue(copy));
       await sheet.actor.setFlag("nexus", "customData", customData);
       await sheet.actor.setFlag("nexus", "aliases", aliases);
       invalidateAliasDefinitionCache(sheet.actor); sheet._selectedAliasId = copy.id; renderDataEditorPreservingState(event.currentTarget);
@@ -484,24 +497,27 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       });
       if (!confirmed) return;
       const customData = clone(getCustomAliasData(sheet.actor));
-      const defaultSuffix = slugifyAlias(alias.label);
-      let defaultKey = `${alias.category}.${defaultSuffix}`, collision = 2;
-      while (aliases.some(item => item !== alias && item.key === defaultKey)) defaultKey = `${alias.category}.${defaultSuffix}_${collision++}`;
+      const defaultKey = createUniqueActorAliasKey(
+        alias.category, alias.label, aliases, getNativePropertyDefinitions(sheet.actor), alias.id
+      );
+      if (!defaultKey) return;
       if (defaultKey !== alias.key) {
         const previousKey = alias.key;
+        const moveResult = alias.targetPath
+          ? { status: "skipped", changed: false }
+          : moveActorAliasCustomData(customData, previousKey, defaultKey);
+        if (moveResult.status === "conflict" || moveResult.status === "invalid") {
+          ui.notifications?.warn?.("Não foi possível restaurar: já existem dados no identificador original.");
+          return;
+        }
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
-        if (!alias.targetPath) moveActorAliasCustomData(customData, previousKey, defaultKey);
         const layouts = await sheet._readLayouts();
         replaceActorAliasLayoutReferences(layouts, previousKey, defaultKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
         alias.key = defaultKey;
       }
       if (!alias.targetPath) {
-        let defaults;
-        if (alias.type === "attribute") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, checkbonus: 0, roll: "" };
-        else if (alias.type === "resource") defaults = { name: alias.label, exib: alias.exib ?? alias.label, exibicao: alias.exib ?? alias.label, value: 0, max: 0 };
-        else defaults = alias.type === "number" ? 0 : alias.type === "boolean" ? false : "";
-        foundry.utils.setProperty(customData, alias.key, defaults);
+        foundry.utils.setProperty(customData, alias.key, createActorAliasDefaultValue(alias));
         await sheet.actor.setFlag("nexus", "customData", customData);
       }
       await sheet.actor.setFlag("nexus", "aliases", aliases);
