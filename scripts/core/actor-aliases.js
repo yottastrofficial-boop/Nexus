@@ -18,6 +18,54 @@ export function isSafeActorAliasKey(value) {
     : "";
 }
 
+/**
+ * Normalize a persisted alias definition and retain its previous key as a
+ * legacy reference when normalization changes the identifier.
+ * The caller supplies ID generation so the core service stays environment-free.
+ */
+export function normalizeActorAliasDefinition(alias, createId) {
+  if (!alias || typeof alias !== "object") return null;
+  const category = ["attributes", "resources", "combat", "identity", "custom"].includes(alias.category)
+    ? alias.category
+    : "custom";
+  const originalKey = String(alias.key ?? "").trim().replace(/^system\./, "");
+  let key = originalKey;
+  const repeated = new RegExp("^(?:" + category + "\\\\.){2,}", "i");
+  if (repeated.test(key)) key = key.replace(repeated, category + ".");
+  key = isSafeActorAliasKey(key);
+  if (!key) return null;
+
+  const id = alias.id ?? (typeof createId === "function" ? createId() : null);
+  if (!id) return null;
+  const validTypes = ["attribute", "resource", "number", "text", "url", "image", "boolean"];
+  const type = validTypes.includes(alias.type)
+    ? alias.type
+    : (category === "resources" ? "resource" : category === "attributes" ? "attribute" : category === "identity" ? "text" : "number");
+  const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type)
+    ? "formula"
+    : "manual";
+  const legacyKeys = Array.isArray(alias.legacyKeys)
+    ? alias.legacyKeys.map(isSafeActorAliasKey).filter(Boolean)
+    : [];
+  if (originalKey !== key && isSafeActorAliasKey(originalKey) && !legacyKeys.includes(originalKey)) {
+    legacyKeys.push(originalKey);
+  }
+
+  return {
+    ...alias,
+    id,
+    key,
+    category,
+    legacyKeys,
+    label: String(alias.label ?? key.split(".").at(-1)).slice(0, 48),
+    type,
+    targetPath: isSafeActorAliasKey(alias.targetPath ?? ""),
+    source: alias.source === "actor" ? "actor" : "custom",
+    calculationMode,
+    formula: String(alias.formula ?? "").slice(0, 240)
+  };
+}
+
 export function createUniqueActorAliasKey(category, label, aliases = [], nativeProperties = [], excludeId = null) {
   const safeCategory = isSafeActorAliasKey(category);
   if (!safeCategory || safeCategory.includes(".")) return "";
