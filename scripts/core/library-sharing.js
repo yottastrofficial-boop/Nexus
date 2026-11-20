@@ -65,13 +65,9 @@ export function createNexusGroupShareCode(group) {
   const groups = (group.groups ?? []).map(item => sanitizeJsonValue(item));
   if (groups.length > 50) throw new Error("O grupo excede o limite de 50 subgrupos.");
   const payload = { format:"nexus-group", version:2, name:String(group.name ?? "Grupo").trim().slice(0,48)||"Grupo", groupSettings:sanitizeJsonValue(group.groupSettings ?? {}), components, groups };
-  return "NEXUS-GROUP/2\\n" + JSON.stringify(payload,null,2);
+  return "NEXUS-GROUP/2\n" + JSON.stringify(payload,null,2);
 }
 
-/**
- * Parses and validates a NEXUS group code. Only registered component types
- * are accepted; presentation rules and interaction flows remain intact.
- */
 /**
  * Parses and validates a NEXUS group code. Only registered component types
  * are accepted; presentation rules and interaction flows remain intact.
@@ -152,7 +148,7 @@ export function createNexusLayoutShareCode(layout) {
     return item;
   });
   const payload = { format: "nexus-layout", version: 1, name: String(layout.name ?? "Layout").trim().slice(0, 48) || "Layout", layout: snapshot };
-  const code = "NEXUS-LAYOUT/1\\n" + JSON.stringify(payload, null, 2);
+  const code = "NEXUS-LAYOUT/1\n" + JSON.stringify(payload, null, 2);
   if (code.length > MAX_SHARE_CODE_LENGTH) throw new Error("O layout excede o tamanho máximo permitido para compartilhamento.");
   return code;
 }
@@ -160,7 +156,7 @@ export function createNexusLayoutShareCode(layout) {
 export function parseNexusLayoutShareCode(code, componentTypes = []) {
   let source = String(code ?? "").trim();
   if (!source || source.length > MAX_SHARE_CODE_LENGTH) throw new Error("O código está vazio ou excede o limite permitido.");
-  source = source.replace(/^\\x60{3}(?:json)?\\s*/i, "").replace(/\\s*\\x60{3}$/, "");
+  source = source.replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/, "");
   if (source.startsWith("NEXUS-LAYOUT/1")) source = source.slice("NEXUS-LAYOUT/1".length).trim();
   const start = source.indexOf("{"), end = source.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Não encontrei um JSON válido para o layout.");
