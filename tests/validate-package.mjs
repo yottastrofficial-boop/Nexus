@@ -1220,7 +1220,7 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 5, "O atalho de proficiência deve continuar aplicando apenas o sinal do nível");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
-assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
+assert.match(actorSheetSkillListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = propertyType/, "O campo deve preservar o tipo real da propriedade");
 assert.doesNotMatch(sheet, /skillValueMatch/, "O valor da perícia deve ser um campo armazenado, não um atalho para fórmula predefinida");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
@@ -1247,8 +1247,8 @@ assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo n
 assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula[\s\S]*?propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/, "O editor deve exibir apenas expressões salvas manualmente, sem preencher fórmulas padrão");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
-assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
-assert.match(sheetListeners, /event\.altKey \? 0/, "Alt+clique deve redefinir a proficiência");
+assert.match(actorSheetSkillListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
+assert.match(actorSheetSkillListeners, /event\.altKey \? 0/, "Alt+clique deve redefinir a proficiência");
 assert.match(template, /skill\.formatted/, "O valor calculado da perícia deve permanecer visível sem rolagem");
 assert.match(css, /nexus-skill-proficiency-toggle/, "O marcador deve possuir estilo circular próprio");
 
