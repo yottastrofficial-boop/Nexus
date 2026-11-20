@@ -16,7 +16,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode } from "../core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -2652,37 +2652,78 @@ export class NexusActorSheet extends NexusActorSheetBase {
     ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
   }
 
-  async _copySavedGroupCode(groupId) {
-    const group = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === groupId);
-    if (!group) return false;
-    const code = createNexusGroupShareCode(group);
+  _getLibraryPackageEntry(kind, id) {
+    if (kind === "component") return (game.user?.getFlag?.("nexus", "libraryComponents") ?? []).find(item => item.id === id);
+    if (kind === "group") return (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === id);
+    if (kind === "layout") return (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === id);
+    return null;
+  }
+
+  async _copyLibraryPackage(kind, id) {
+    const entry = this._getLibraryPackageEntry(kind, id);
+    if (!entry) return false;
+    const code = createNexusSharePackage(kind, entry, Object.keys(COMPONENTS));
     let copied = false;
-    try {
-      if (globalThis.navigator?.clipboard?.writeText) {
-        await globalThis.navigator.clipboard.writeText(code);
-        copied = true;
-      }
-    } catch (_) {}
+    try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(code); copied = true; } } catch (_) {}
     if (!copied) {
-      const field = document.createElement("textarea");
-      field.value = code;
-      field.setAttribute("readonly", "");
-      field.style.position = "fixed";
-      field.style.opacity = "0";
-      document.body.append(field);
-      field.select();
-      copied = document.execCommand?.("copy") === true;
-      field.remove();
+      const field = document.createElement("textarea"); field.value = code; field.setAttribute("readonly", "");
+      field.style.position = "fixed"; field.style.opacity = "0"; document.body.append(field); field.select();
+      copied = document.execCommand?.("copy") === true; field.remove();
     }
-    if (!copied) {
-      ui.notifications?.warn?.("Não foi possível copiar automaticamente. Tente novamente em uma janela segura do navegador.");
-      return false;
-    }
-    ui.notifications?.info?.("Código do grupo copiado. Você pode compartilhá-lo ou colá-lo em uma conversa para análise.");
+    if (!copied) { ui.notifications?.warn?.("Não foi possível copiar o pacote. Tente novamente em uma janela segura do navegador."); return false; }
+    ui.notifications?.info?.("Pacote NEXUS copiado. Você pode colá-lo em outra instalação ou enviá-lo para análise.");
     return true;
   }
 
+  async _exportLibraryPackageFile(kind, id) {
+    const entry = this._getLibraryPackageEntry(kind, id);
+    if (!entry) return false;
+    const code = createNexusSharePackage(kind, entry, Object.keys(COMPONENTS)).replace("NEXUS-PACK/1\\n", "");
+    const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob), anchor = document.createElement("a");
+    const safeName = String(entry.name ?? entry.label ?? kind).normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || kind;
+    anchor.href = url; anchor.download = `nexus-${kind}-${safeName}.json`; anchor.hidden = true;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    ui.notifications?.info?.(`Pacote "${entry.name ?? entry.label ?? kind}" exportado em JSON.`);
+    return true;
+  }
+
+  async _importLibraryPackageCode(source) {
+    const imported = parseNexusSharePackage(source, Object.keys(COMPONENTS));
+    const id = foundry.utils.randomID(10);
+    if (imported.kind === "component") {
+      const saved = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
+      saved.push({ id, label: imported.payload.label ?? imported.name, type: imported.payload.type, settings: imported.payload.settings });
+      await game.user.setFlag("nexus", "libraryComponents", saved.slice(-200));
+      this._libraryAssetScope = "personal"; this._libraryRenderPersonalItems?.();
+    } else if (imported.kind === "group") {
+      const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+      saved.push({ id: `libgrp-${id}`, name: imported.name, groupSettings: imported.payload.groupSettings, components: imported.payload.components, groups: imported.payload.groups });
+      await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
+      this._libraryAssetScope = "personal"; this._libraryRenderPersonalItems?.();
+    } else if (imported.kind === "layout") {
+      const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
+      saved.push({ id: `liblayout-${id}`, name: imported.name, layout: imported.payload });
+      await game.user.setFlag("nexus", "libraryLayouts", saved.slice(-100));
+      this._libraryRenderSavedLayouts?.();
+    }
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`Pacote "${imported.name}" importado para a Biblioteca pessoal.`);
+    return imported;
+  }
+
+  async _importLibraryPackageFile(file) {
+    return this._importLibraryPackageCode(typeof file === "string" ? file : await file.text());
+  }
+
+  async _copySavedGroupCode(groupId) {
+    return this._copyLibraryPackage("group", groupId);
+  }
+
   async _importSavedGroupCode(code) {
+    if (String(code ?? "").trim().startsWith("NEXUS-PACK/1")) return this._importLibraryPackageCode(code);
     const imported = parseNexusGroupShareCode(code, Object.keys(COMPONENTS));
     const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
     const entry = {
@@ -2701,22 +2742,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _exportSavedGroupFile(groupId) {
-    const group = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === groupId);
-    if (!group) return false;
-    const code = createNexusGroupShareCode(group).replace("NEXUS-GROUP/2\n", "");
-    const blob = new Blob([code], { type: "application/json;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    const safeName = String(group.name ?? "grupo").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "grupo";
-    anchor.href = url;
-    anchor.download = `nexus-grupo-${safeName}.json`;
-    anchor.hidden = true;
-    document.body.append(anchor);
-    anchor.click();
-    anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    ui.notifications?.info?.(`Arquivo do grupo "${group.name}" exportado.`);
-    return true;
+    return this._exportLibraryPackageFile("group", groupId);
   }
 
   async _deleteSavedLibraryGroup(groupId) {
