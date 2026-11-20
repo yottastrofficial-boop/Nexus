@@ -1560,7 +1560,7 @@ assert.match(canvasInteractions, /hierarchy\.descendants/, "Movimentar um grupo 
 assert.match(template, /data-library-saved-layouts/, "A Biblioteca deve apresentar layouts completos");
 
 assert.match(canvasPlayInteractions, /focusin/);
-assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{actor:sheet.actor,modifiers,key:extra\.key\}\)/);
+assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,context\)/, "A execução deve consultar os gatilhos atuais e aplicar filtros de deduplicação");
 assert.match(template, /<textarea rows="1" data-property-value/);
 assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheet, /valueLabel\.textContent = "Valor"/);
