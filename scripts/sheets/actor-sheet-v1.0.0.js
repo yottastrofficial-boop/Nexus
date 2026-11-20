@@ -2925,8 +2925,24 @@ export class NexusActorSheet extends NexusActorSheetBase {
         if (parent) parent.componentIds = [...new Set([...(parent.componentIds ?? []), sourceComponent.id])];
       }
     }
-    const nextHierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    const movingIds = sourceGroup ? (hierarchy.descendants.get(String(sourceGroup.id)) ?? []) : [sourceComponent.id];
+    const targetIds = targetGroup ? (hierarchy.descendants.get(String(targetGroup.id)) ?? []) : [targetComponent.id];
+    const movingSet = new Set(movingIds);
+    const orderedComponents = [...layout.components].sort((a,b)=>(Number(a.z)||0)-(Number(b.z)||0)||(Number(a.stackOrder)||0)-(Number(b.stackOrder)||0));
+    const moving = orderedComponents.filter(component => movingSet.has(component.id));
+    const rest = orderedComponents.filter(component => !movingSet.has(component.id));
+    const targetIndexes = rest.map((component,index)=>targetIds.includes(component.id)?index:-1).filter(index=>index>=0);
+    if (targetIndexes.length && moving.length) {
+      const insertAt = placement === "after" ? Math.max(...targetIndexes)+1 : placement === "inside" ? Math.max(...targetIndexes)+1 : Math.min(...targetIndexes);
+      rest.splice(insertAt,0,...moving); rest.forEach((component,index)=>{ component.z=index; }); layout.components = rest;
+    }
+    let nextHierarchy = buildGroupHierarchy(layout.groups, layout.components);
     layout.groups = layout.groups.filter(group => (nextHierarchy.descendants.get(String(group.id)) ?? []).length > 0);
+    nextHierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    for (const group of layout.groups) {
+      const members = (nextHierarchy.descendants.get(String(group.id)) ?? []).map(id=>layout.components.find(component=>component.id===id)).filter(Boolean);
+      if (members.length) group.z = Math.min(...members.map(component=>Number(component.z)||0));
+    }
     await this._writeLayouts(layouts, active);
     this.render({ force: true });
   }
