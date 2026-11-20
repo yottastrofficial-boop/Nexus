@@ -2002,6 +2002,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!group) return;
       sheet._captureHistory();
       const key = input.dataset.groupSetting;
+      if (key === "name") {
+        group.name = String(input.value ?? "").trim().slice(0, 48) || "Grupo";
+        await sheet._writeLayouts(layouts, active);
+        sheet._currentLayout = layout;
+        sheet.render({ force: true });
+        return;
+      }
       if (key === "borderRadius") group.borderRadius = clamp(Number(input.value) || 0, 0, 32);
       else if (key === "backgroundColor" || key === "borderColor") group[key] = input.value;
       await sheet._writeLayouts(layouts, active);
