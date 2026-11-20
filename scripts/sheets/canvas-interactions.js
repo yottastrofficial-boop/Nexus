@@ -270,10 +270,15 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     }, true);
     const saveAfterGesture = async touched => { await sheet._saveCanvas(html, touched); };
     const beginGroupMove = (group, p, event) => {
-      if (!group || group.locked || (group.componentIds ?? []).some(id => sheet._currentLayout?.components?.find(component => component.id === id)?.locked)) return false;
-      setSelection(group.componentIds ?? []);
+      if (!group) return false;
+      let ancestorId = sheet._groupHierarchy?.parentById?.get(String(group.id)) ?? "";
+      const visited = new Set();
+      while (ancestorId && !visited.has(ancestorId)) { visited.add(ancestorId); if (groupsById.get(ancestorId)?.locked) return false; ancestorId = sheet._groupHierarchy?.parentById?.get(ancestorId) ?? ""; }
+      const groupMembers = membersByGroupId.get(String(group.id)) ?? [];
+      if (group.locked || groupMembers.some(element => element.classList.contains("is-locked"))) return false;
+      setSelection(groupMembers.map(element => element.dataset.id));
       sheet._selectedGroupId = group.id;
-      const starts = (membersByGroupId.get(group.id) ?? []).map(el => ({ el, ...rectOf(el) }));
+      const starts = groupMembers.map(el => ({ el, ...rectOf(el) }));
       if (!starts.length) return false;
       const bounds = {
         x: Math.min(...starts.map(item => item.x)),
