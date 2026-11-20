@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.68 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.69 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.68-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.69-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.68. Inclui as correções de grupos e Biblioteca registradas em **Unreleased** no changelog; a próxima versão publicada ainda depende da validação e decisão de release.
+> **Versão atual:** 1.0.0.69. Inclui melhorias de seleção, apresentação e Inspector dos grupos compostos, além da atualização do fluxo de Biblioteca. A validação automatizada foi concluída; o teste visual e funcional no Foundry VTT 14 continua necessário.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.68 |
+| Versão atual | 1.0.0.69 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -133,7 +133,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão 1.0.0.68 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
+A versão 1.0.0.69 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
