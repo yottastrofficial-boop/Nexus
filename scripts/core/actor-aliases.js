@@ -112,7 +112,8 @@ export function createUniqueActorAliasKey(category, label, aliases = [], nativeP
 
 /**
  * Move a custom alias payload without replacing an existing destination.
- * The caller owns cloning and persistence so this helper remains pure.
+ * This helper mutates the supplied object; callers must pass a clone when
+ * they need to preserve the original snapshot before persistence.
  *
  * A conflict is explicit: callers must not rename the definition while its
  * payload remains at the old key.
@@ -128,7 +129,6 @@ export function moveActorAliasCustomData(customData, previousKey, nextKey) {
     return { status: "invalid", changed: false };
   }
 
-  const read = path => path.split(".").reduce((value, part) => value?.[part], customData);
   const previousParts = previous.split(".");
   const previousLeaf = previousParts.pop();
   const previousParent = previousParts.reduce((value, part) => value?.[part], customData);
