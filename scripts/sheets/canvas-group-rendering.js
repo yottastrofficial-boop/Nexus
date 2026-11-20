@@ -35,7 +35,7 @@ export function renderCanvasGroups(sheet, root) {
     if (!owner) continue;
     component.dataset.groupId = ownerId;
     component.classList.add("is-group-member");
-    component.style.setProperty("--nexus-group-bg", owner.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
+    if((owner.kind??"container")!=="folder")component.style.setProperty("--nexus-group-bg",owner.backgroundColor??sheet._currentLayout?.cardColor??"#273443");
     component.style.setProperty("--nexus-group-border", owner.borderColor ?? "#52647b");
     component.style.setProperty("--nexus-group-radius", `${Math.min(32,Math.max(0,Number(owner.borderRadius??8)||0))}px`);
   }
@@ -61,6 +61,7 @@ export function renderCanvasGroups(sheet, root) {
     Object.assign(group, { x, y, w: right - x, h: bottom - y });
     const surface = document.createElement("div");
     surface.className = "nexus-group-surface";
+    surface.classList.add("is-" + (["folder","container","section"].includes(group.kind) ? group.kind : "container"));
     if (group.hidden) surface.classList.add("is-layer-hidden");
     if (group.locked) surface.classList.add("is-locked");
     if (sheet._mode !== "appearance") surface.classList.add("is-static");
@@ -79,6 +80,7 @@ export function renderCanvasGroups(sheet, root) {
     surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
     surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
     surface.style.setProperty("--nexus-group-radius", `${safeRadius}px`);
+    if(group.kind==="section"||group.showHeader===true){const heading=document.createElement("div");heading.className="nexus-group-heading";const title=document.createElement("span");title.textContent=String(group.title??group.name??"Grupo").slice(0,48);heading.append(title);surface.append(heading);}
     canvas.append(surface);
     surfaces.set(String(group.id), surface);
   }
