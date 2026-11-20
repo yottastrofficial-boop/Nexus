@@ -810,8 +810,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
-      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme]")??[])];let visibleThemes=0;
-      themeCards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visibleThemes++;});
+      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
+      themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
@@ -1003,10 +1003,46 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     // essa janela e continua funcionando após atualizações do Canvas.
     libraryPanel?.addEventListener("click", async event => {
       const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+      const customThemeCard = target?.closest("[data-library-custom-theme]");
+      if (customThemeCard && libraryPanel.contains(customThemeCard)) {
+        event.preventDefault();
+        await sheet._applyLibraryCustomTheme(customThemeCard.dataset.libraryCustomTheme);
+        return;
+      }
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
         await sheet._applyThemePreset(themeCard.dataset.libraryTheme);
+        return;
+      }
+
+      const exportLibraryButton = target?.closest("[data-library-export-all]");
+      if (exportLibraryButton && libraryPanel.contains(exportLibraryButton)) {
+        event.preventDefault();
+        await sheet._exportLibraryBackupFile();
+        return;
+      }
+      const importLibraryButton = target?.closest("[data-library-import-all-file]");
+      if (importLibraryButton && libraryPanel.contains(importLibraryButton)) {
+        event.preventDefault();
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.accept = ".json,application/json,text/plain";
+        picker.hidden = true;
+        picker.addEventListener("change", async () => {
+          const file = picker.files?.[0];
+          if (!file) { picker.remove(); return; }
+          try {
+            await sheet._importLibraryBackupFile(file);
+          } catch (error) {
+            console.warn("NEXUS | Backup de Biblioteca inválido", error);
+            ui.notifications?.warn?.(error?.message || "Não foi possível importar o backup da Biblioteca.");
+          } finally {
+            picker.remove();
+          }
+        }, { once: true });
+        document.body.append(picker);
+        picker.click();
         return;
       }
 
