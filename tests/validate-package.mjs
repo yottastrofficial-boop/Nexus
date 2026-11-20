@@ -753,7 +753,8 @@ assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a nave
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
 assert.match(interactions, /const guided=el\("div","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
-assert.match(changelog, /Editor de comportamentos/, "O changelog deve documentar as melhorias do editor de comportamentos");
+assert.match(changelog, /Grupos e camadas/, "O changelog deve documentar as melhorias da hierarquia de grupos");
+assert.match(changelog, /Biblioteca de layouts completos/, "O changelog deve documentar o compartilhamento de layouts completos");
 assert.match(css, /nexus-library-saved-groups/);
 
 assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
