@@ -81,3 +81,34 @@ Este documento registra os limites de responsabilidade desejados para a refatora
 ## Critério de conclusão
 
 A versão 1.0.0.2 só deve ser publicada quando os fluxos essenciais tiverem sido validados. Se um teste depender do Foundry real e ainda não tiver sido executado, a limitação deve permanecer explícita e a release não deve ser descrita como integralmente validada.
+
+## Revisão incremental da base 1.0.0.70
+
+Esta seção registra mudanças reais feitas na branch de auditoria, sem declarar a versão publicada como estável.
+
+### Ciclo de vida de eventos
+
+- `scripts/core/listener-scope.js` fornece `createListenerScope()`, um escopo de listeners controlado por `AbortController`.
+- `scripts/sheets/canvas-interactions.js` registra os eventos da ativação atual por esse escopo e o encerra por meio do cleanup da ficha.
+- O encerramento remove listeners locais e globais registrados pelo controlador e impede que uma ativação anterior continue reagindo após a substituição da interface.
+- O escopo é testado com `EventTarget`: o listener responde antes do cancelamento e deixa de responder depois dele.
+
+### Persistência de propriedades do Actor
+
+- `scripts/core/actor-property-writes.js` concentra a fila serializada por Actor e a persistência de expressões de propriedades.
+- O listener da ficha e os métodos da classe usam o mesmo serviço, evitando que a fila dependa do módulo visual.
+- A fila continua sendo local ao cliente. Ela não equivale a uma transação ou lock compartilhado entre usuários diferentes.
+
+### Contratos de dependência
+
+- `activateCanvasInteractions` recebe somente `COMPONENTS`, `clone` e `clamp`, as dependências utilizadas pelo controlador.
+- `activateActorSheetListeners` deixou de receber dependências não utilizadas.
+- Essas reduções diminuem acoplamento e tornam explícito o contrato de cada módulo.
+
+### Limitações ainda abertas
+
+- A suíte automatizada não substitui o teste no Foundry VTT 14.
+- A fila por Actor ainda precisa de validação com múltiplas janelas e usuários.
+- O CSS requer consolidação por domínio, mas alterações de cascata e tema devem ser acompanhadas de comparação visual.
+- A extração de partes do listener da ficha e da classe principal deve ocorrer por domínio, após mapear as variáveis compartilhadas e os pontos de persistência.
+
