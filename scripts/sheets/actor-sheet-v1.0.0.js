@@ -2717,7 +2717,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       layout.components.push({ ...copy, id, x:clamp(origin.x+(Number(item.x)||0),0,layout.width-w), y:clamp(origin.y+(Number(item.y)||0),0,layout.height-h), w, h, z:0, stackOrder:Math.max(-1,...layout.components.map(existing=>Number(existing.stackOrder)||0))+1 });
     }
     const sourceGroups = Array.isArray(composition.groups) && composition.groups.length ? composition.groups : [{
-      id:"root", name:composition.name, parentGroupId:"", componentIds:composition.components.map(item=>item.sourceId).filter(Boolean), ...(composition.groupSettings ?? {})
+      id:"root", name:composition.name, parentGroupId:"", componentIds:composition.components.map((item,index)=>String(item.sourceId ?? `legacy-${index}`)), ...(composition.groupSettings ?? {})
     }];
     const groupIds = new Map(sourceGroups.map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));
     layout.groups ??= [];
