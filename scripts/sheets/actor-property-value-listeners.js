@@ -76,8 +76,7 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
         }
         if (skillFormulaMatch) {
           const formula = String(value ?? "").trim().slice(0, 500);
-          const source = formula.replace(/^\{\{\s*([\s\S]*?)\s*\}\}$/, "$1");
-          const calculated = formula ? evaluateNexusSkillFormula(sheet.actor, skillFormulaMatch[1], formula) : 0;
+            const calculated = formula ? evaluateNexusSkillFormula(sheet.actor, skillFormulaMatch[1], formula) : 0;
           if (formula && (typeof calculated !== "number" || !Number.isFinite(calculated))) {
             globalThis.ui?.notifications?.warn?.("Fórmula inválida. Use caminhos de propriedades numéricas e operadores suportados.");
             return;
