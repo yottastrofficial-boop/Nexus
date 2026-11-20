@@ -93,6 +93,13 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - O encerramento remove listeners locais e globais registrados pelo controlador e impede que uma ativação anterior continue reagindo após a substituição da interface.
 - O escopo é testado com `EventTarget`: o listener responde antes do cancelamento e deixa de responder depois dele.
 
+### Autocomplete e seletor de propriedades
+
+- `scripts/sheets/actor-property-picker-listeners.js` controla o portal de autocomplete, posicionamento, filtragem por contexto e inserção de caminhos/fórmulas.
+- O catálogo de propriedades e o renderer são dependências injetadas; o controlador não define o schema nem a semântica de avaliação.
+- O módulo mantém os eventos namespaced pelo identificador da ficha, permitindo que o ciclo de vida existente encerre seus listeners sem introduzir um segundo mecanismo de registro.
+- A ficha principal de listeners apenas instancia o controlador e fornece suas dependências.
+
 ### Renderização de mídia e previews
 
 - `scripts/sheets/actor-sheet-media.js` concentra a classificação de fontes de mídia e os helpers reutilizáveis de preview de recursos.
