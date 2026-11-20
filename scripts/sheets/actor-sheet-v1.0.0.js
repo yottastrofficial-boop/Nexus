@@ -8,7 +8,7 @@ import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
-import { buildGroupHierarchy, getGroupDescendantComponentIds } from "../core/group-hierarchy.js";
+import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
@@ -2899,57 +2899,32 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout || !sourceId || !targetId || sourceId === targetId) return;
     layout.groups ??= [];
-    const sourceGroup = layout.groups.find(group => group.id === sourceId);
-    const targetGroup = layout.groups.find(group => group.id === targetId);
+    const hierarchy = buildGroupHierarchy(layout.groups, layout.components ?? []);
+    const sourceGroup = hierarchy.groupById.get(String(sourceId));
+    const targetGroup = hierarchy.groupById.get(String(targetId));
     const sourceComponent = layout.components.find(component => component.id === sourceId);
     const targetComponent = layout.components.find(component => component.id === targetId);
-    const sourceParent = sourceComponent ? layout.groups.find(group => group.componentIds.includes(sourceId)) : null;
-
-    // Soltar sobre o centro de uma pasta adiciona o componente àquele grupo.
-    if (placement === "inside" && targetGroup && sourceComponent) {
-      if (targetGroup.componentIds.includes(sourceId)) return;
+    if (!sourceGroup && !sourceComponent) return;
+    if (!targetGroup && !targetComponent) return;
+    const targetParentId = targetGroup
+      ? (placement === "inside" ? String(targetGroup.id) : hierarchy.parentById.get(String(targetGroup.id)) ?? "")
+      : (hierarchy.parentById.get(hierarchy.componentOwner.get(String(targetComponent.id)) ?? "") ?? "");
+    if (sourceGroup) {
+      if (placement === "inside" && !validateGroupParent(layout.groups, sourceGroup.id, targetParentId)) return;
+      if (sourceGroup.id === targetParentId) return;
       this._captureHistory();
-      if (sourceParent) {
-        sourceParent.componentIds = sourceParent.componentIds.filter(id => id !== sourceId);
-        layout.groups = layout.groups.filter(group => group.componentIds.length >= 2);
-      }
-      const destination = layout.groups.find(group => group.id === targetId);
-      if (!destination) return;
-      destination.componentIds.push(sourceId);
-      const members = layout.components.filter(component => destination.componentIds.includes(component.id));
-      sourceComponent.z = Math.min(...members.map(component => Number(component.z) || 0));
-      sourceComponent.stackOrder = Math.max(...members.map(component => Number(component.stackOrder) || 0)) + 1;
-      destination.z = Math.min(...members.map(component => Number(component.z) || 0));
-      destination.stackOrder = Math.min(...members.map(component => Number(component.stackOrder) || 0));
+      sourceGroup.parentGroupId = targetParentId || "";
     } else {
-      // Um grupo arrastado é uma unidade. Um componente filho pode ser reordenado
-      // individualmente; ao sair da pasta, sua associação antiga é removida.
-      const movingIds = sourceGroup ? [...sourceGroup.componentIds] : [sourceId];
-      if (!movingIds.every(id => layout.components.some(component => component.id === id))) return;
-      const movingSet = new Set(movingIds);
-      const targetIds = targetGroup ? [...targetGroup.componentIds] : [targetId];
-      if (targetIds.some(id => movingSet.has(id))) return;
       this._captureHistory();
-      if (!sourceGroup && sourceParent) {
-        sourceParent.componentIds = sourceParent.componentIds.filter(id => id !== sourceId);
-        layout.groups = layout.groups.filter(group => group.componentIds.length >= 2);
-      }
-      const ordered = [...layout.components].sort((a, b) => (Number(a.z) || 0) - (Number(b.z) || 0) || (Number(a.stackOrder) || 0) - (Number(b.stackOrder) || 0));
-      const moving = ordered.filter(component => movingSet.has(component.id));
-      const rest = ordered.filter(component => !movingSet.has(component.id));
-      const indexes = rest.map((component, index) => targetIds.includes(component.id) ? index : -1).filter(index => index >= 0);
-      if (!indexes.length) return;
-      const insertAt = placement === "after" ? Math.max(...indexes) + 1 : Math.min(...indexes);
-      rest.splice(insertAt, 0, ...moving);
-      rest.forEach((component, index) => { component.z = index; });
-      layout.components = rest;
-      for (const group of layout.groups) {
-        const members = rest.filter(component => group.componentIds.includes(component.id));
-        if (!members.length) continue;
-        group.z = Math.min(...members.map(component => component.z));
-        group.stackOrder = Math.min(...members.map(component => Number(component.stackOrder) || 0));
+      for (const group of layout.groups) group.componentIds = (group.componentIds ?? []).filter(id => id !== sourceComponent.id);
+      if (placement === "inside" && targetGroup) targetGroup.componentIds = [...new Set([...(targetGroup.componentIds ?? []), sourceComponent.id])];
+      else if (targetParentId) {
+        const parent = hierarchy.groupById.get(targetParentId);
+        if (parent) parent.componentIds = [...new Set([...(parent.componentIds ?? []), sourceComponent.id])];
       }
     }
+    const nextHierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    layout.groups = layout.groups.filter(group => (nextHierarchy.descendants.get(String(group.id)) ?? []).length > 0);
     await this._writeLayouts(layouts, active);
     this.render({ force: true });
   }
