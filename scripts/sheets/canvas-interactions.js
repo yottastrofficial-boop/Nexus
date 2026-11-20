@@ -1,5 +1,6 @@
 import { findBestAlignmentMatch } from "../core/canvas-geometry.js";
 import { updateCanvasConnectedCorners } from "./canvas-connected-corners.js";
+import { buildGroupHierarchy } from "../core/group-hierarchy.js";
 
 /**
  * Canvas gestures, selection visuals, pointer interactions and keyboard controls.
@@ -97,90 +98,44 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const n=y<=t,s=y>=r.height-t,w=x<=t, east=x>=r.width-t;
       return `${n?"n":s?"s":""}${w?"w":east?"e":""}` || null;
     };
-    // Índices reutilizados durante os gestos; são reconstruídos quando a estrutura dos grupos muda.
+    // Grupos são superfícies independentes; os componentes nunca são reparentados.
     let membersByGroupId = new Map();
     let groupsById = new Map();
     let groupSurfacesById = new Map();
-    // Renderiza superfícies de grupo sem transformar os membros em um único bloco de dados.
     const renderGroups = () => {
-      // Desmonta os contêineres anteriores sem perder os componentes; a reconstrução
-      // mantém as coordenadas absolutas relativas ao Canvas (wrapper ocupa 100%).
       canvas.querySelectorAll(".nexus-group-container").forEach(container => {
         container.querySelectorAll(".nexus-component").forEach(component => canvas.append(component));
         container.remove();
       });
       canvas.querySelectorAll(".nexus-group-surface").forEach(element => element.remove());
-      for (const element of elements()) {
-        delete element.dataset.groupId;
-        element.classList.remove("is-group-member", "is-group-inspecting");
-        element.style.removeProperty("--nexus-group-bg");
-        element.style.removeProperty("--nexus-group-border");
-        element.style.removeProperty("--nexus-group-radius");
-      }
-
       const layouts = sheet._currentLayout?.groups ?? [];
       sheet._activeGroups = layouts;
-      groupsById = new Map(layouts.map(group => [group.id, group]));
+      const componentElements = elements();
+      const hierarchy = buildGroupHierarchy(layouts, componentElements.map(element => ({ id: element.dataset.id })));
+      sheet._groupHierarchy = hierarchy;
+      groupsById = hierarchy.groupById;
       groupSurfacesById = new Map();
-      const groupIdsByComponentId = new Map();
-      membersByGroupId = new Map(layouts.map(group => [group.id, []]));
-      for (const group of layouts) {
-        for (const id of new Set(group.componentIds ?? [])) {
-          let memberships = groupIdsByComponentId.get(id);
-          if (!memberships) groupIdsByComponentId.set(id, memberships = []);
-          memberships.push(group.id);
-        }
-      }
-      for (const element of elements()) {
-        for (const groupId of groupIdsByComponentId.get(element.dataset.id) ?? []) {
-          membersByGroupId.get(groupId)?.push(element);
-        }
-      }
-
-      for (const group of layouts) {
-        const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
+      membersByGroupId = new Map(layouts.map(group => [String(group.id), (hierarchy.descendants.get(String(group.id)) ?? []).map(id => componentElements.find(element => element.dataset.id === id)).filter(Boolean)]));
+      const depthOf = id => { let depth = 0, cursor = hierarchy.parentById.get(String(id)) ?? "", seen = new Set([String(id)]); while (cursor && !seen.has(cursor)) { seen.add(cursor); depth++; cursor = hierarchy.parentById.get(cursor) ?? ""; } return depth; };
+      for (const group of [...layouts].sort((a,b)=>depthOf(a.id)-depthOf(b.id))) {
+        const members = (membersByGroupId.get(String(group.id)) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
         const rects = members.map(rectOf);
-        const x = Math.min(...rects.map(rect => rect.x));
-        const y = Math.min(...rects.map(rect => rect.y));
-        const right = Math.max(...rects.map(rect => rect.x + rect.w));
-        const bottom = Math.max(...rects.map(rect => rect.y + rect.h));
-        // A superfície do grupo coincide exatamente com a caixa envolvente dos filhos.
-        group.x = x; group.y = y; group.w = right - x; group.h = bottom - y;
-
-        const container = document.createElement("div");
-        container.className = "nexus-group-container";
-        container.dataset.groupContainer = group.id;
+        const x = Math.min(...rects.map(rect => rect.x)), y = Math.min(...rects.map(rect => rect.y));
+        const right = Math.max(...rects.map(rect => rect.x + rect.w)), bottom = Math.max(...rects.map(rect => rect.y + rect.h));
+        Object.assign(group, { x, y, w: right-x, h: bottom-y });
         const surface = document.createElement("div");
-        surface.className = `nexus-group-surface${group.hidden ? " is-layer-hidden" : ""}${group.locked ? " is-locked" : ""}`;
-        surface.dataset.groupId = group.id;
-        surface.hidden = !!group.hidden;
+        surface.className = "nexus-group-surface";
+        if (group.hidden) surface.classList.add("is-layer-hidden");
+        if (group.locked) surface.classList.add("is-locked");
+        if (sheet._mode !== "appearance") surface.classList.add("is-static");
+        surface.dataset.groupId = String(group.id); surface.dataset.groupDepth = String(depthOf(group.id)); surface.hidden = !!group.hidden;
         const baseZ = Math.min(...members.map(element => Number(element.style.zIndex) || 1));
-        Object.assign(surface.style, {
-          left: `${x}px`, top: `${y}px`, width: `${right - x}px`, height: `${bottom - y}px`,
-          zIndex: String(Math.max(0, baseZ - 1))
-        });
+        Object.assign(surface.style, { left: `${x}px`, top: `${y}px`, width: `${right-x}px`, height: `${bottom-y}px`, zIndex: String(Math.max(0,baseZ-1)) });
         surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
         surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
-        surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8), 0, 32)}px`);
-        container.append(surface);
-        const handle = document.createElement("div");
-        handle.className = "nexus-group-handle";
-        handle.dataset.groupHandle = String(group.id ?? "");
-    handle.hidden = !!group.hidden;
-        handle.setAttribute("role", "button");
-        handle.setAttribute("tabindex", "0");
-        handle.setAttribute("aria-label", `Selecionar grupo ${String(group.name ?? "Grupo")}`);
-        handle.textContent = String(group.name ?? "Grupo");
-        Object.assign(handle.style, { left: `${x}px`, top: `${y}px`, width: `${Math.min(220, Math.max(88, right - x))}px`, zIndex: String(Math.max(2, baseZ + 2)) });
-        container.append(handle);
-        groupSurfacesById.set(group.id, surface);
-        for (const element of members) {
-          element.dataset.groupId = group.id;
-          element.classList.add("is-group-member");
-          container.append(element);
-        }
-        canvas.insertBefore(container, canvas.firstChild);
+        surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8),0,32)}px`);
+        canvas.append(surface); groupSurfacesById.set(String(group.id), surface);
       }
     };
     const updateConnectedCorners = () => updateCanvasConnectedCorners(canvas);
@@ -244,7 +199,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const component=event.target.closest(".nexus-component");
       const groupSurface=event.target.closest(".nexus-group-surface");
       if(component && !sheet._selectedIds.has(component.dataset.id)) setSelection([component.dataset.id]);
-      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group)setSelection(group.componentIds??[]);}
+      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group)setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);}
       const count=sheet._selectedIds?.size??0;
       contextMenu.querySelector('[data-context-action="group"]').disabled=count<2;
       contextMenu.querySelector('[data-context-action="link"]').disabled=count<2;
@@ -308,7 +263,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       } else {
         const group = (sheet._activeGroups ?? []).find(item => item.id === surface.dataset.groupId);
         if (!group) return;
-        setSelection(group.componentIds ?? []);
+        setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);
       }
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       openComponentInspector();
@@ -335,17 +290,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     canvas.addEventListener("focus", () => { sheet._nexusCanvasKeyboardFocus = true; });
     canvas.addEventListener("pointerdown",event=>{
       if(sheet._mode!=="appearance")return;
-      const groupHandle = event.target.closest("[data-group-handle]");
-      if (groupHandle) {
-        const group = groupsById.get(groupHandle.dataset.groupHandle);
-        if (group) {
-          setSelection(group.componentIds ?? []);
-          sheet._selectedGroupId = group.id;
-          event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
-          openComponentInspector();
-        }
-        return;
-      }
       if(event.target.closest("button,input,textarea,select,[contenteditable='true']"))return;
       // O foco só vai para o Canvas quando o próprio Canvas recebe interação.
       // Cliques em inspetores e menus não passam por este listener.
