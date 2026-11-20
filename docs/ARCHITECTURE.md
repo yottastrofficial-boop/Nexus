@@ -185,3 +185,11 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - A fila impede que operações concorrentes da mesma sessão usem snapshots antigos umas sobre as outras. Ela não é um lock distribuído e não impede conflito entre clientes diferentes.
 - `getActorAliasCustomValue()` prioriza o caminho canônico e consulta `legacyKeys` quando o payload ainda não pôde ser movido por conflito. Isso mantém os dados legíveis sem sobrescrever o destino.
 - Falhas são reportadas pelo serviço central da fila; o controlador não emite uma segunda notificação para o mesmo erro.
+
+
+### Controladores de perícias e recursos da ficha
+
+- `actor-sheet-skill-listeners.js` agrupa os eventos de rolagem e proficiência; os cálculos e a persistência continuam nos métodos da classe da ficha.
+- `actor-sheet-resource-listeners.js` concentra interação por ponteiro, atualização visual dos medidores e envio do valor final ao atualizador da ficha.
+- `actor-sheet-listeners.js` permanece como ponto de composição dos controladores, sem duplicar as regras desses domínios.
+- As dependências usadas por cada controlador são recebidas explicitamente, reduzindo referências implícitas ao escopo do módulo.
