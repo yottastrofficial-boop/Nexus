@@ -1016,6 +1016,32 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
 
+      const copyLibraryButton = target?.closest("[data-library-copy-all]");
+      if (copyLibraryButton && libraryPanel.contains(copyLibraryButton)) {
+        event.preventDefault();
+        await sheet._copyLibraryBackupCode();
+        return;
+      }
+      const importLibraryCodeButton = target?.closest("[data-library-import-all-code]");
+      if (importLibraryCodeButton && libraryPanel.contains(importLibraryCodeButton)) {
+        event.preventDefault();
+        const result = await foundry.applications.api.DialogV2.input({
+          window: { title: "Importar Biblioteca completa" },
+          content: '<label class="nexus-library-card-content-label">Código NEXUS-LIBRARY/1<textarea name="code" rows="12" spellcheck="false" autocomplete="off"></textarea></label><p>O conteúdo será validado antes de ser adicionado à sua Biblioteca pessoal.</p>',
+          ok: { label: "Importar Biblioteca" },
+          rejectClose: false
+        });
+        const code = String(result?.code ?? "").trim();
+        if (!code) return;
+        try {
+          await sheet._importLibraryBackupCode(code);
+        } catch (error) {
+          console.warn("NEXUS | Código de backup inválido", error);
+          ui.notifications?.warn?.(error?.message || "Não foi possível importar o código da Biblioteca.");
+        }
+        return;
+      }
+
       const exportLibraryButton = target?.closest("[data-library-export-all]");
       if (exportLibraryButton && libraryPanel.contains(exportLibraryButton)) {
         event.preventDefault();
