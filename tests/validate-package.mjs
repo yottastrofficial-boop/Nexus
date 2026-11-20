@@ -1853,6 +1853,8 @@ assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases 
   assert.deepEqual(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: ["attributes.old"] }), { value: 18 },
     "O payload legado deve continuar legível quando a migração encontrar conflito");
   assert.equal(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: [] }), undefined);
+  assert.equal(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: "attributes.old" }), undefined,
+    "Uma lista de chaves legadas malformada deve ser ignorada");
   const customData = { custom: { old: { value: 12 } } };
   assert.deepEqual(moveActorAliasCustomData(customData, "custom.old", "custom.new"), { status: "moved", changed: true });
   assert.deepEqual(customData.custom.new, { value: 12 });
