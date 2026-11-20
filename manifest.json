@@ -1,0 +1,51 @@
+{
+  "id": "nexus",
+  "title": "NEXUS RPG",
+  "description": "Sistema NEXUS RPG para Foundry Virtual Tabletop, com ficha modular Canvas.",
+  "version": "1.0.0.71",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Projeto NEXUS"
+    }
+  ],
+  "esmodules": [
+    "scripts/nexus-v1.0.0.js"
+  ],
+  "styles": [
+    "styles/nexus-v1.0.0.css"
+  ],
+  "languages": [
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "player-character": {},
+      "npc": {},
+      "character": {}
+    },
+    "Item": {
+      "feature": {},
+      "equipment": {},
+      "weapon": {},
+      "armor": {}
+    }
+  },
+  "grid": {
+    "distance": 1,
+    "units": "m"
+  },
+  "primaryTokenAttribute": "resources.pv",
+  "url": "https://github.com/yottastrofficial-boop/Nexus",
+  "manifest": "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json",
+  "download": "https://github.com/yottastrofficial-boop/Nexus/releases/download/v1.0.0.71/nexus.zip",
+  "readme": "https://github.com/yottastrofficial-boop/Nexus/blob/main/README.md",
+  "bugs": "https://github.com/yottastrofficial-boop/Nexus/issues"
+}
