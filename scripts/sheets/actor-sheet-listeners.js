@@ -1581,10 +1581,10 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => sheet._updateSystemValue(event.currentTarget));
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-sync-token-portrait]", async event => {
       event.preventDefault();
-      const id = event.currentTarget.dataset.componentTargetId || sheet._componentEditorTargetId || [..    activateActorPropertyPickerListeners(sheet, inspectorNamespace, { collectPropertyPaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker });
-
-";list.style.width="";list._nexusOwnerInput=null;list._nexusOwnerInspector=null;}});
+      const id = event.currentTarget.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      await sheet._syncActorPortraitFromToken(id);
     });
+    activateActorPropertyPickerListeners(sheet, inspectorNamespace, { collectPropertyPaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
       const panelWindow = input.closest(".nexus-panel-window");
