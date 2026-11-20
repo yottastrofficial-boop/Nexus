@@ -2406,6 +2406,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     else if (key === "gridSize") layout.gridSize = clamp(Number(input.value) || 20, 5, 100);
     else if (["canvasColor", "cardColor", "accentColor", "highlightColor", "buttonColor", "scrollColor", "windowHeaderColor", "windowContentColor", "menuColor", "placeholderColor", "fontFamily"].includes(key)) layout[key] = input.value;
     else if (key === "theme") {
+      delete layout.customThemeId;
       layout.theme = input.value;
       Object.assign(layout, clone(THEME_PALETTES[layout.theme] ?? THEME_PALETTES["nexus-dark"]));
       layout.fontFamily = THEME_TOKENS[layout.theme]?.fontFamily ?? "Inter";
@@ -2764,6 +2765,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!layout) return false;
     this._captureHistory();
     layout.theme = "nexus-dark";
+    layout.customThemeId = themeId;
     Object.assign(layout, clone(theme.palette));
     await this._writeLayouts(layouts, active);
     this._currentLayout = layout;
