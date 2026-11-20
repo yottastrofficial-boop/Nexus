@@ -2726,11 +2726,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _ungroupSelection(html) {
     const ids = new Set(this._selectedIds ?? []), layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return;
-    const selectedGroups = new Set((layout.groups ?? []).filter(group => ids.has(group.id) || (group.componentIds ?? []).every(id => ids.has(id))).map(group => group.id));
-    if (!selectedGroups.size) return;
+    const hierarchy = buildGroupHierarchy(layout.groups ?? [], layout.components ?? []);
+    const selectedGroups = (layout.groups ?? []).filter(group => group.id === this._selectedGroupId || ids.has(group.id) || (hierarchy.descendants.get(String(group.id)) ?? []).length > 0 && (hierarchy.descendants.get(String(group.id)) ?? []).every(id => ids.has(id)));
+    if (!selectedGroups.length) return;
     this._captureHistory();
-    layout.groups = (layout.groups ?? []).filter(group => !selectedGroups.has(group.id));
-    await this._writeLayouts(layouts, active); this._selectedGroupId = null; this.render({ force: true });
+    const removed = new Set(selectedGroups.map(group => String(group.id)));
+    for (const group of selectedGroups) {
+      const parentId = hierarchy.parentById.get(String(group.id)) ?? "";
+      if (parentId && !removed.has(parentId)) {
+        const parent = hierarchy.groupById.get(parentId);
+        if (parent) parent.componentIds = [...new Set([...(parent.componentIds ?? []), ...(hierarchy.directComponents.get(String(group.id)) ?? [])])];
+      }
+      for (const childId of hierarchy.children.get(String(group.id)) ?? []) {
+        const child = hierarchy.groupById.get(childId);
+        if (child) child.parentGroupId = removed.has(parentId) ? (hierarchy.parentById.get(parentId) ?? "") : parentId;
+      }
+      if (!parentId) {
+        for (const childId of hierarchy.children.get(String(group.id)) ?? []) {
+          const child = hierarchy.groupById.get(childId);
+          if (child) child.parentGroupId = "";
+        }
+      }
+    }
+    layout.groups = (layout.groups ?? []).filter(group => !removed.has(String(group.id)));
+    this._selectedGroupId = null;
+    await this._writeLayouts(layouts, active);
+    this._selectedIds = new Set(ids);
+    this.render({ force: true });
   }
   async _resetGlobalAppearance(kind) {
     const layouts=await this._readLayouts(),active=this._activeLayoutId(),layout=layouts[active];if(!layout)return;
@@ -2920,28 +2942,24 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     const sourceGroups = clone(this._currentLayout?.groups ?? layout.groups ?? []);
     const validIds = new Set(componentsById.keys());
-    layout.groups = [];
-    for (const group of sourceGroups) {
-      const componentIds = (group.componentIds ?? []).filter(id => validIds.has(id));
-      if (componentIds.length < 2) continue;
-      const members = [], seenMembers = new Set();
-      for (const id of componentIds) {
-        if (seenMembers.has(id)) continue;
-        seenMembers.add(id);
-        const component = componentsById.get(id);
-        if (component) members.push(component);
-      }
+    const validGroupIds = new Set(sourceGroups.map(group => String(group.id)));
+    layout.groups = sourceGroups.map(group => ({
+      ...group,
+      parentGroupId: group.parentGroupId && validGroupIds.has(String(group.parentGroupId)) ? String(group.parentGroupId) : "",
+      componentIds: [...new Set((group.componentIds ?? []).filter(id => validIds.has(id)))]
+    }));
+    let hierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    layout.groups = layout.groups.filter(group => (hierarchy.descendants.get(String(group.id)) ?? []).length > 0);
+    hierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    for (const group of layout.groups) {
+      const members = (hierarchy.descendants.get(String(group.id)) ?? []).map(id => componentsById.get(id)).filter(Boolean);
       if (!members.length) continue;
-
-      let minZ = Infinity, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const component of members) {
-        minZ = Math.min(minZ, Number(component.z) || 0);
-        minX = Math.min(minX, component.x);
-        minY = Math.min(minY, component.y);
-        maxX = Math.max(maxX, component.x + component.w);
-        maxY = Math.max(maxY, component.y + component.h);
-      }
-      layout.groups.push({ ...group, componentIds, z: minZ, x: minX, y: minY, w: maxX - minX, h: maxY - minY });
+      const minZ = Math.min(...members.map(component => Number(component.z) || 0));
+      const minX = Math.min(...members.map(component => component.x));
+      const minY = Math.min(...members.map(component => component.y));
+      const maxX = Math.max(...members.map(component => component.x + component.w));
+      const maxY = Math.max(...members.map(component => component.y + component.h));
+      Object.assign(group, { z:minZ, x:minX, y:minY, w:maxX-minX, h:maxY-minY });
     }
 
     const touched = new Set((touchedIds ?? []).filter(Boolean));
