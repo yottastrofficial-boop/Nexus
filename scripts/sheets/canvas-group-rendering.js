@@ -90,6 +90,15 @@ export function renderCanvasGroups(sheet, root) {
     surface.style.setProperty("--nexus-group-radius", `${safeRadius}px`);
 
     container.append(surface);
+    const handle = document.createElement("div");
+    handle.className = "nexus-group-handle";
+    handle.dataset.groupHandle = String(group.id ?? "");
+    handle.setAttribute("role", "button");
+    handle.setAttribute("tabindex", "0");
+    handle.setAttribute("aria-label", `Selecionar grupo ${String(group.name ?? "Grupo")}`);
+    handle.textContent = String(group.name ?? "Grupo");
+    Object.assign(handle.style, { left: `${x}px`, top: `${y}px`, width: `${Math.min(220, Math.max(88, right - x))}px`, zIndex: String(Math.max(2, baseZ + 2)) });
+    container.append(handle);
     for (const component of members) {
       component.dataset.groupId = String(group.id ?? "");
       component.classList.add("is-group-member");
