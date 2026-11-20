@@ -1280,8 +1280,21 @@ assert.equal(importedGroupFixture.components[0].propertyPresentation.rules[0].co
 assert.deepEqual(importedGroupFixture.components[0].interactions, sharedGroupFixture.components[0].interactions);
 assert.equal(importedGroupFixture.components[1].imageFit, "contain");
 assert.equal(Object.hasOwn(importedGroupFixture.components[0], "id"), false, "IDs antigos não devem ser reutilizados ao importar um grupo");
+assert.ok(importedGroupFixture.components.every(component => typeof component.sourceId === "string" && component.sourceId), "Cada componente importado deve receber um sourceId estável");
+assert.equal(importedGroupFixture.groups.length, 1, "Grupos sem árvore explícita devem receber um grupo raiz compatível");
+assert.deepEqual(importedGroupFixture.groups[0].componentIds, ["old-1", "old-2"], "O grupo raiz legado deve manter todos os componentes");
+const legacyGroupCode = "NEXUS-GROUP/1\\n" + JSON.stringify({
+  format: "nexus-group", version: 1, name: "Grupo legado",
+  components: [{ id: "legacy-a", type: "asset-text", x: 0, y: 0, w: 120, h: 40 }]
+});
+const legacyGroup = parseNexusGroupShareCode(legacyGroupCode, ["asset-text"]);
+assert.equal(legacyGroup.groups[0].name, "Grupo legado");
+assert.deepEqual(legacyGroup.groups[0].componentIds, ["legacy-a"], "NEXUS-GROUP/1 deve criar vínculo de membro válido");
 assert.throws(() => parseNexusGroupShareCode(sharedGroupCode, ["asset-text"]), /não está disponível/, "Tipos de componentes desconhecidos devem ser rejeitados");
 assert.throws(() => parseNexusGroupShareCode('NEXUS-GROUP/1\\n{"format":"nexus-group","version":2,"components":[]}', ["asset-text"]), /versão de compartilhamento/, "Versões de compartilhamento incompatíveis devem ser rejeitadas");
+assert.match(sheet, /groups: imported\.groups/, "A importação deve persistir a hierarquia de subgrupos, não apenas os componentes");
+assert.match(sheet, /_exportSavedGroupFile\(groupId\)/, "A Biblioteca deve exportar grupos como arquivo JSON");
+assert.match(sheetListeners, /data-library-import-group-file/, "A Biblioteca deve oferecer importação de arquivo JSON");
 
 // Property presentation v1.0.0.37.
 assert.equal(evaluateNexusCondition("@level=5", resolveExpressionValue), true, "Single = must act as equality");
