@@ -126,15 +126,28 @@
                   <label class="nexus-inspector-field">Ícone<input type="text" maxlength="120" data-component-setting="layerIcon"></label>
                   <label class="nexus-inspector-field">Imagem<input type="text" maxlength="2048" data-component-setting="layerImage"></label>
                 </section>
-                <section class="nexus-inspector-section" data-group-inspector hidden>
-                  <h4>Grupo</h4><label class="nexus-inspector-field">Nome<input type="text" maxlength="48" data-group-setting="name"></label>
-                  <label class="nexus-inspector-field">Grupo superior<select data-group-parent><option value="">Sem grupo superior</option></select></label>
-                  <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Tipo<select data-group-setting="kind"><option value="folder">Pasta · organização</option><option value="container">Container · superfície</option><option value="section">Seção · título e superfície</option></select></label><label class="nexus-inspector-field">Layout<select data-group-setting="layoutMode"><option value="free">Livre</option><option value="horizontal">Horizontal</option><option value="vertical">Vertical</option><option value="grid">Grade</option></select></label></div>
-                  <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Espaçamento<input type="number" min="0" max="120" data-group-setting="gap"></label><label class="nexus-inspector-field">Margem interna<input type="number" min="0" max="120" data-group-setting="padding"></label><label class="nexus-inspector-field">Colunas<input type="number" min="1" max="12" data-group-setting="columns"></label><label class="nexus-inspector-field">Alinhamento<select data-group-setting="align"><option value="start">Início</option><option value="center">Centro</option><option value="end">Fim</option></select></label></div>
-                  <label class="nexus-inspector-field">Título da seção<input type="text" maxlength="48" data-group-setting="title"></label><label class="nexus-inspector-field"><input type="checkbox" data-group-setting="showHeader"> Exibir cabeçalho</label>
-                  <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Fundo<nexus-color-picker data-group-setting="backgroundColor"></nexus-color-picker></label><label class="nexus-inspector-field">Borda<nexus-color-picker data-group-setting="borderColor"></nexus-color-picker></label><label class="nexus-inspector-field">Arredondamento<input type="number" min="0" max="32" data-group-setting="borderRadius"></label></div>
-                  <small>Layouts automáticos organizam os filhos sem alterar o tamanho dos componentes. O modo Livre preserva as posições individuais.</small>
-                  <button type="button" class="nexus-save-group-library" data-action="save-group-library"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Salvar grupo na Biblioteca</button>
+                <section class="nexus-inspector-section nexus-group-inspector" data-group-inspector hidden>
+                  <header class="nexus-group-inspector-heading"><div><h4>Grupo</h4><small data-group-member-count>Composição selecionada</small></div><button type="button" class="nexus-save-group-library" data-action="save-group-library" title="Salvar grupo reutilizável"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Salvar</button></header>
+                  <div class="nexus-group-inspector-block">
+                    <h5>Identificação</h5>
+                    <label class="nexus-inspector-field">Nome<input type="text" maxlength="48" data-group-setting="name"></label>
+                    <label class="nexus-inspector-field">Grupo superior<select data-group-parent><option value="">Sem grupo superior</option></select></label>
+                    <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Tipo<select data-group-setting="kind"><option value="folder">Pasta</option><option value="container">Container</option><option value="section">Seção</option></select></label><label class="nexus-inspector-field">Organização<select data-group-setting="layoutMode"><option value="free">Livre</option><option value="horizontal">Pilha horizontal</option><option value="vertical">Pilha vertical</option><option value="grid">Grade</option></select></label></div>
+                  </div>
+                  <div class="nexus-group-inspector-block" data-group-setting-block="layout">
+                    <h5>Organização interna</h5>
+                    <div class="nexus-inspector-grid"><label class="nexus-inspector-field" data-group-setting-field="gap">Espaçamento<input type="number" min="0" max="120" step="1" data-group-setting="gap"></label><label class="nexus-inspector-field" data-group-setting-field="padding">Preenchimento<input type="number" min="0" max="120" step="1" data-group-setting="padding"></label><label class="nexus-inspector-field" data-group-setting-field="columns">Colunas<input type="number" min="1" max="12" data-group-setting="columns"></label><label class="nexus-inspector-field" data-group-setting-field="align">Alinhamento<select data-group-setting="align"><option value="start">Início</option><option value="center">Centro</option><option value="end">Fim</option></select></label></div>
+                    <small>Os componentes continuam independentes. Alterar o layout não modifica os valores ou o tamanho funcional dos elementos.</small>
+                  </div>
+                  <div class="nexus-group-inspector-block" data-group-setting-block="section">
+                    <h5>Seção</h5>
+                    <label class="nexus-inspector-field">Título<input type="text" maxlength="48" data-group-setting="title"></label>
+                    <label class="nexus-group-check"><input type="checkbox" data-group-setting="showHeader"> Exibir cabeçalho</label>
+                  </div>
+                  <div class="nexus-group-inspector-block" data-group-setting-block="appearance">
+                    <h5>Aparência</h5>
+                    <div class="nexus-inspector-grid"><label class="nexus-inspector-field">Fundo<nexus-color-picker data-group-setting="backgroundColor"></nexus-color-picker></label><label class="nexus-inspector-field">Borda<nexus-color-picker data-group-setting="borderColor"></nexus-color-picker></label><label class="nexus-inspector-field">Cantos<input type="number" min="0" max="32" data-group-setting="borderRadius"></label></div>
+                  </div>
                 </section>
 
               </div>
