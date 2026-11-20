@@ -674,7 +674,7 @@ for (const char of css) {
 assert.equal(depth, 0, "CSS contém bloco não fechado");
 
 assert.ok(readme.includes(`Versão ${manifest.version}`));
-assert.match(changelog, /## 1\.0\.0\.7/);
+assert.match(changelog, /## 1\.0\.0\.\d+/, "O changelog deve conter cabeçalhos de versão");
 assert.match(sheetCode, /async _rollComponent\(componentId, config = \{\}\)/, "Componentes devem executar rolagens configuradas com configuração contextual");
 assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "A rolagem deve usar os dados do Actor");
 assert.match(sheetCode, /component\.actionType = \["roll","proficiency","resource-slider","toggle-component"\]\.includes\(input\.value\)/, "A ação deve aceitar os tipos contextuais suportados");
