@@ -240,6 +240,7 @@ const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
 const exists = async file => access(path.join(root, file));
 const manifest = JSON.parse(await read("system.json"));
+const stableManifest = JSON.parse(await read("manifest.json"));
 const sheet = await read("scripts/sheets/actor-sheet-v1.0.0.js");
 const template = await read("templates/actors/actor-sheet.hbs");
 const skills = await read("scripts/core/skills.js");
