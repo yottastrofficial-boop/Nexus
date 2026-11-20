@@ -1283,14 +1283,14 @@ assert.equal(Object.hasOwn(importedGroupFixture.components[0], "id"), false, "ID
 assert.ok(importedGroupFixture.components.every(component => typeof component.sourceId === "string" && component.sourceId), "Cada componente importado deve receber um sourceId estável");
 assert.equal(importedGroupFixture.groups.length, 1, "Grupos sem árvore explícita devem receber um grupo raiz compatível");
 assert.deepEqual(importedGroupFixture.groups[0].componentIds, ["old-1", "old-2"], "O grupo raiz legado deve manter todos os componentes");
-const legacyGroupCode = "NEXUS-GROUP/1\\n" + JSON.stringify({
+const legacyGroupCode = "NEXUS-GROUP/1\n" + JSON.stringify({
   format: "nexus-group", version: 1, name: "Grupo legado",
   components: [{ id: "legacy-a", type: "asset-text", x: 0, y: 0, w: 120, h: 40 }]
 });
 const legacyGroup = parseNexusGroupShareCode(legacyGroupCode, ["asset-text"]);
 assert.equal(legacyGroup.groups[0].name, "Grupo legado");
 assert.deepEqual(legacyGroup.groups[0].componentIds, ["legacy-a"], "NEXUS-GROUP/1 deve criar vínculo de membro válido");
-const plainGroupJson = sharedGroupCode.slice("NEXUS-GROUP/2\\n".length);
+const plainGroupJson = sharedGroupCode.slice("NEXUS-GROUP/2\n".length);
 const importedPlainJson = parseNexusGroupShareCode(plainGroupJson, ["asset-text", "asset-image"]);
 assert.equal(importedPlainJson.groups.length, 1, "JSON puro deve manter a estrutura de grupo");
 assert.deepEqual(importedPlainJson.groups[0].componentIds, ["old-1", "old-2"], "JSON puro deve preservar todos os vínculos");
