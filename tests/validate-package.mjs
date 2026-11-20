@@ -1342,7 +1342,7 @@ assert.doesNotMatch(sheet, /Perícias sem fórmula manual devem atualizar quando
 assert.doesNotMatch(sheet, /getNexusDefaultSkillFormula|getNexusDefaultPropertyFormula/, "A ficha não deve consultar fórmulas padrão globais");
 assert.match(sheetListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
 assert.match(sheetListeners, /valueKind === "string"/, "Expressões devem validar o resultado de acordo com o tipo textual");
-assert.ok(template.includes('<span aria-hidden="true">|</span>'), "O vínculo deve apresentar nome e caminho na mesma linha");
+assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve aparecer como indicador discreto abaixo do caminho");
 assert.match(template, /data-property-value-label>Valor:/, "O campo editável deve usar o rótulo compacto Valor");
 assert.match(css, /nexus-data-binding-inline/, "O vínculo deve usar o layout compacto de nome e caminho");
 assert.match(sheetListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
