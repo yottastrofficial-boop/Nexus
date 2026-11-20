@@ -24,4 +24,4 @@ Manter a branch `main` enxuta e utilizável, sem perder o histórico técnico da
 - A limpeza remove arquivos obsoletos da árvore atual, não reescreve o histórico do repositório.
 
 ## Checkpoint atual
-**Nenhuma versão está declarada estável neste momento.** A versão 1.0.0.48 passou pelas verificações automatizadas registradas, mas os fluxos funcionais no Foundry VTT 14 ainda não foram confirmados em runtime. A versão 1.0.0.49 permanece em desenvolvimento até que seus testes automatizados e funcionais sejam concluídos.
+**A versão 1.0.0.70 é o checkpoint de distribuição, mas não está declarada estável.** O pacote e a validação automatizada da release foram concluídos. Entretanto, foram relatados problemas visuais na organização das perícias e duplicidade de ações em determinados fluxos de interação; a validação funcional no Foundry VTT 14 continua pendente. A revisão incremental está em andamento na PR #35 e não altera a release publicada até ser aprovada e testada.
