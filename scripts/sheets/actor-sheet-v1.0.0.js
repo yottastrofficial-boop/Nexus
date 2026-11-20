@@ -2622,8 +2622,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importSavedLayoutCode(code) {
-    if (String(code ?? "").trim().startsWith("NEXUS-PACK/1")) return this._importLibraryPackageCode(code);
-    const imported = parseNexusLayoutShareCode(code, Object.keys(COMPONENTS));
+    const source = String(code ?? "").trim();
+    let format = "";
+    try { const start = source.indexOf("{"), end = source.lastIndexOf("}"); if (start >= 0 && end > start) format = JSON.parse(source.slice(start, end + 1))?.format ?? ""; } catch (_) {}
+    if (source.startsWith("NEXUS-PACK/1") || format === "nexus-package") return this._importLibraryPackageCode(source);
+    const imported = parseNexusLayoutShareCode(source, Object.keys(COMPONENTS));
     const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
     const entry = { id: `liblayout-${foundry.utils.randomID(8)}`, name: imported.name, layout: imported.layout };
     await game.user.setFlag("nexus", "libraryLayouts", [...saved, entry].slice(-100));
@@ -2751,8 +2754,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importSavedGroupCode(code) {
-    if (String(code ?? "").trim().startsWith("NEXUS-PACK/1")) return this._importLibraryPackageCode(code);
-    const imported = parseNexusGroupShareCode(code, Object.keys(COMPONENTS));
+    const source = String(code ?? "").trim();
+    let format = "";
+    try { const start = source.indexOf("{"), end = source.lastIndexOf("}"); if (start >= 0 && end > start) format = JSON.parse(source.slice(start, end + 1))?.format ?? ""; } catch (_) {}
+    if (source.startsWith("NEXUS-PACK/1") || format === "nexus-package") return this._importLibraryPackageCode(source);
+    const imported = parseNexusGroupShareCode(source, Object.keys(COMPONENTS));
     const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
     const entry = {
       id: `libgrp-${foundry.utils.randomID(8)}`,
