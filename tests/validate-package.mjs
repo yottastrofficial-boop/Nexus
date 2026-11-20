@@ -19,7 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
-import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey } from "../scripts/core/actor-aliases.js";
+import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1748,4 +1748,23 @@ assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catÃ
   assert.equal(createUniqueActorAliasKey("custom", "PV", aliases, natives), "custom.pv");
   assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives, "a"), "custom.poder");
   assert.equal(createUniqueActorAliasKey("invalid.category", "Poder", aliases, natives), "");
+  const customData = { custom: { old: { value: 12 } } };
+  assert.equal(moveActorAliasCustomData(customData, "custom.old", "custom.new"), true);
+  assert.deepEqual(customData.custom.new, { value: 12 });
+  assert.equal(customData.custom.old, undefined);
+  assert.equal(moveActorAliasCustomData(customData, "custom.new", "custom.newer"), true);
+  customData.custom.blocked = "keep";
+  assert.equal(moveActorAliasCustomData(customData, "custom.newer", "custom.blocked"), false);
+  assert.equal(customData.custom.blocked, "keep");
+  const layouts = { main: { components: [
+    { dataPath: "custom.old.value" },
+    { currentPath: "attribute.old.value" },
+    { maxPath: "resources.old.max" },
+    { customBinding: "unrelated.path" }
+  ] } };
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "custom.old", "custom.new"), 1);
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "attributes.old", "attributes.new"), 2);
+  assert.deepEqual(layouts.main.components.map(item => item.dataPath ?? item.currentPath ?? item.maxPath ?? item.customBinding), [
+    "custom.new.value", "attribute.new.value", "resources.new.max", "unrelated.path"
+  ]);
 }
