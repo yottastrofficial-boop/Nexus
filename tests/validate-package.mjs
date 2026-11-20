@@ -1271,7 +1271,7 @@ const sharedGroupFixture = {
   ]
 };
 const sharedGroupCode = createNexusGroupShareCode(sharedGroupFixture);
-assert.ok(sharedGroupCode.startsWith("NEXUS-GROUP/1"), "O código de grupo deve identificar o formato e sua versão");
+assert.ok(sharedGroupCode.startsWith("NEXUS-GROUP/2"), "O código de grupo deve identificar o formato e sua versão");
 const importedGroupFixture = parseNexusGroupShareCode(sharedGroupCode, ["asset-text", "asset-image"]);
 assert.equal(importedGroupFixture.name, "Perícias");
 assert.deepEqual(importedGroupFixture.groupSettings, sharedGroupFixture.groupSettings);
