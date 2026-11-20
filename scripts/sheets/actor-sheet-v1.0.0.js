@@ -2629,7 +2629,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const result = {};
       for (const [key, child] of Object.entries(value)) {
         if (typeof child === "string" && ["targetId", "componentId", "sourceComponentId", "actionTargetId", "sourceId", "fromId", "toId"].includes(key)) result[key] = componentIds.get(child) ?? groupIds.get(child) ?? child;
-        else if (key === "componentIds" && Array.isArray(child)) result[key] = child.map(id => componentIds.get(String(id)) ?? String(id));
+        else if (["componentIds", "members"].includes(key) && Array.isArray(child)) result[key] = child.map(id => componentIds.get(String(id)) ?? String(id));
         else result[key] = remapReferences(child);
       }
       return result;
