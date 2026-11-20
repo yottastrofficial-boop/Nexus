@@ -1,3 +1,19 @@
+## 1.0.0.69
+
+### Grupos compostos e experiência do editor
+- Ao selecionar um componente, destaca discretamente os demais membros do seu grupo sem alterar a seleção funcional.
+- Reorganiza o Inspector de grupos em blocos contextuais de identificação, organização interna, seção e aparência.
+- Oculta configurações que não se aplicam ao modo atual, reduzindo ruído e evitando opções sem efeito.
+- Diferencia visualmente Pasta, Container e Seção e passa a renderizar títulos de cabeçalho para grupos do tipo Seção.
+- Atualiza o escopo pessoal da Biblioteca após salvar grupos e força a atualização dos itens pessoais disponíveis.
+- Preserva a hierarquia e a identidade dos componentes; nenhuma regra ou dado do Actor é alterado por estas melhorias.
+
+### Validação
+- JavaScript: sintaxe aprovada.
+- Manifesto, templates, estilos e testes de regressão: aprovados no GitHub Actions.
+- Pacote Foundry: gerado e verificado com sucesso.
+- Teste visual e funcional no Foundry VTT 14 permanece pendente.
+
 ## 1.0.0.68
 
 ### Composição universal de grupos
