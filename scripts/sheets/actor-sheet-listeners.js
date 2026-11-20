@@ -2,13 +2,13 @@ import { validateGroupParent } from "../core/group-hierarchy.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
-import { slugifyActorAlias, createUniqueActorAliasKey } from "../core/actor-aliases.js";
+import { slugifyActorAlias, createUniqueActorAliasKey, replaceActorAliasLayoutReferences } from "../core/actor-aliases.js";
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
  */
 export function activateActorSheetListeners(sheet, html, dependencies) {
-  const { NEXUS_LIBRARY_CATALOG, buildPropertyPickerCatalog, renderPropertyPicker, NEXUS_SKILLS, getNexusSkillModifier, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, getResourceValuePaths, clone, getPath, collectPropertyPaths, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
+  const { NEXUS_LIBRARY_CATALOG, buildPropertyPickerCatalog, renderPropertyPicker, NEXUS_SKILLS, getNexusSkillModifier, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, getResourceValuePaths, clone, getPath, collectPropertyPaths, invalidateNativePropertyCache, getNativePropertyDefinitions, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
 
     const currentRoot = html?.[0];
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -341,8 +341,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           await sheet.actor.setFlag("nexus", "customData", customData);
         }
         const layouts = await sheet._readLayouts();
-        replaceLayoutBindingPaths(layouts, previousKey, nextKey);
-        replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), nextKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
+        replaceActorAliasLayoutReferences(layouts, previousKey, nextKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
       }
       await sheet.actor.setFlag("nexus", "nativeProperties", saved);
@@ -372,8 +371,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet.actor.setFlag("nexus", "customData", customData);
       if (oldKey !== property.defaultKey) {
         const layouts = await sheet._readLayouts();
-        replaceLayoutBindingPaths(layouts, oldKey, property.defaultKey);
-        replaceLayoutBindingPaths(layouts, oldKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), property.defaultKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
+        replaceActorAliasLayoutReferences(layouts, oldKey, property.defaultKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
       }
       await sheet.actor.setFlag("nexus", "nativeProperties", saved);
@@ -449,8 +447,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         // Migra referências de componentes para que a troca do identificador
         // não deixe cartões apontando para o caminho antigo.
         const layouts = await sheet._readLayouts();
-        replaceLayoutBindingPaths(layouts, previousKey, next);
-        replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), next.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
+        replaceActorAliasLayoutReferences(layouts, previousKey, next);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
         alias.key = next;
       }
@@ -515,8 +512,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           }
         }
         const layouts = await sheet._readLayouts();
-        replaceLayoutBindingPaths(layouts, previousKey, defaultKey);
-        replaceLayoutBindingPaths(layouts, previousKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."), defaultKey.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource."));
+        replaceActorAliasLayoutReferences(layouts, previousKey, defaultKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
         alias.key = defaultKey;
       }
