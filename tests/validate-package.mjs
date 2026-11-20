@@ -1403,8 +1403,18 @@ assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: 
 assert.match(interactions, /modifierOptions/);
 assert.match(canvasPlayInteractions, /middleClick/);
 assert.match(canvasPlayInteractions, /pointerDown/);
+assert.match(sheetCode, /executeTriggeredActions, getTriggeredActions, renderInteractionEditor/, "A função de avaliação de gatilhos deve ser injetada no listener da ficha");
+const capturedKeyFlow = normalizeInteraction({ triggers: [{ event: "keyDown", key: "k", modifiers: ["alt"] }], actions: [{ type: "roll", config: { formula: "1d20" } }] });
+assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["alt"] }).length, 1, "Gatilhos de teclado devem comparar tecla sem diferenciar maiúsculas");
+assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
+assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
+assert.match(sheetListeners, /capturedModifiers/, "A captura deve salvar os modificadores junto da tecla");
+assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve ser um indicador pequeno abaixo do caminho");
+assert.match(canvasGroupRendering, /data-group-handle/, "Grupos devem possuir uma alça clicável independente dos espaços vazios");
+assert.match(canvasInteractions, /data-group-handle/, "A alça deve selecionar o grupo e abrir seu Inspector");
+
 assert.match(canvasPlayInteractions, /focusin/);
-assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{actor:sheet.actor,modifiers\}\)/);
+assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{actor:sheet.actor,modifiers,key:extra\.key\}\)/);
 assert.match(template, /<textarea rows="1" data-property-value/);
 assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheet, /valueLabel\.textContent = "Valor"/);
