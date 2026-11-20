@@ -281,7 +281,7 @@ assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(tar
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
 assert.match(sheet, /const lookupPath = normalizeNexusPropertyPath\(path\)/, "Caminhos singulares e abreviados devem usar o normalizador canônico");
 assert.doesNotMatch(sheet, /data-property-value-path/, "O identificador visual de caminho deve ser removido");
-assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
+assert.match(propertyValueListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
 assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
