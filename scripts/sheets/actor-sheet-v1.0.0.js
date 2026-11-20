@@ -2703,7 +2703,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _exportSavedGroupFile(groupId) {
     const group = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === groupId);
     if (!group) return false;
-    const code = createNexusGroupShareCode(group).replace(/^NEXUS-GROUP\\/2\\s*/, "");
+    const code = createNexusGroupShareCode(group).replace("NEXUS-GROUP/2\\n", "");
     const blob = new Blob([code], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
