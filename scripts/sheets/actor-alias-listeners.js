@@ -25,10 +25,8 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
   // The queue is per Actor and local to this client; it is not a cross-client lock.
   const bindSerialized = (selector, eventName, handler) => {
     html.find(selector).on(eventName, event => {
-      serializeActorPropertyWrite(sheet.actor, () => handler(event)).catch(error => {
-        console.error("NEXUS | Falha ao atualizar propriedades e aliases.", error);
-        ui.notifications?.error?.("Não foi possível salvar a alteração. Confira os dados antes de continuar.");
-      });
+      // serializeActorPropertyWrite already reports persistence failures.
+      serializeActorPropertyWrite(sheet.actor, () => handler(event)).catch(() => {});
     });
   };
 
