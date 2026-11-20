@@ -122,11 +122,14 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 - **Agrupar grupos existentes:** abra a árvore de camadas e use Ctrl+clique (Cmd no macOS) ou Shift+clique em cada grupo. Também é possível usar Ctrl/Cmd+clique em uma área livre da superfície do grupo no Canvas.
 - **Criar o grupo pai:** com os grupos selecionados, use a ação **Agrupar seleção**. Os grupos selecionados passam a ser filhos do novo grupo; seus componentes não são desmontados.
+- **Criar grupos em vários níveis:** selecione componentes e/ou grupos completos e use **Agrupar seleção** para criar um grupo pai. Para mover um grupo já existente para dentro de outro, selecione-o e escolha o **Grupo superior** no Inspector.
+- **Nomear e organizar:** selecione o grupo e edite seu nome no Inspector. A árvore de camadas reflete a hierarquia e permite recolher os níveis.
 - **Salvar na Biblioteca:** selecione o grupo pela árvore de camadas, abra **Meus itens → Grupos** e use **Salvar seleção**. O botão do Inspector do grupo continua disponível.
-- **Exportar:** selecione uma composição salva e use **Exportar arquivo JSON**. O arquivo contém dados JSON puros e pode ser importado em outra instalação.
-- **Importar:** use **Importar JSON** para um arquivo ou **Importar código** para um código copiado. O importador mantém a compatibilidade com composições antigas.
+- **Compartilhar componentes:** selecione um componente salvo em Meus Componentes e use **Copiar pacote** ou **Exportar JSON**.
+- **Compartilhar grupos e layouts:** selecione a composição salva e use as ações de copiar ou exportar pacote.
+- **Importar:** use **Importar pacote** para colar um código ou **Importar pacote JSON** para selecionar um arquivo. O formato unificado reconhece componentes, grupos hierárquicos e layouts, mantendo compatibilidade com os formatos antigos.
 
-A inserção cria novos IDs para os componentes e grupos, preserva a hierarquia e remapeia referências internas. O layout atual não é sobrescrito.
+Os pacotes são JSON versionado e preservam configurações e referências internas como dados. Ao inserir uma composição, o NEXUS cria novos IDs e remapeia as referências sem sobrescrever o layout atual.
 
 ## Estado e validação
 
