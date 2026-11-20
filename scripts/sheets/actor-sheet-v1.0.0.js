@@ -8,6 +8,7 @@ import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
+import { buildGroupHierarchy, getGroupDescendantComponentIds } from "../core/group-hierarchy.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
@@ -824,26 +825,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layout = this._normalizeLayout(clone(layouts[activeId] ?? layouts.principal ?? DEFAULT_LAYOUT));
     this._currentLayout = layout;
 
-    // Índices locais evitam procurar o grupo de cada componente repetidamente.
-    // A ordem original dos componentes e a associação ao primeiro grupo são preservadas.
-    const groups = layout.groups ?? [];
-    const components = layout.components ?? [];
-    const groupedIds = new Set();
-    const groupByComponentId = new Map();
-    const groupIdsByComponentId = new Map();
-    const componentLayerById = new Map();
-
-    for (const group of groups) {
-      for (const id of new Set(group.componentIds ?? [])) {
-        groupedIds.add(id);
-        if (!groupByComponentId.has(id)) groupByComponentId.set(id, group);
-        let memberships = groupIdsByComponentId.get(id);
-        if (!memberships) groupIdsByComponentId.set(id, memberships = []);
-        memberships.push(group.id);
-      }
-    }
-
-    const componentLayer = component => ({
+    // A hierarquia é normalizada sem alterar a estrutura salva; grupos antigos continuam válidos.
+    const hierarchy = buildGroupHierarchy(groups, components);
+    const componentLayerById = new Map(components.map(component => [component.id, {
       id: component.id,
       label: component.customLabel || COMPONENTS[component.type]?.label || component.type,
       icon: String(component.layerIcon ?? ""),
@@ -853,59 +837,55 @@ export class NexusActorSheet extends NexusActorSheetBase {
       kind: "component",
       hidden: !!component.hidden,
       locked: !!component.locked
-    });
-
-    for (const component of components) {
-      componentLayerById.set(component.id, componentLayer(component));
-    }
-
-    const childrenByGroupId = new Map(groups.map(group => [group.id, []]));
-    for (const component of components) {
-      const memberships = groupIdsByComponentId.get(component.id);
-      if (!memberships) continue;
-      for (const groupId of memberships) {
-        childrenByGroupId.get(groupId)?.push(component);
+    }]));
+    const layers = hierarchy.rows.map(row => {
+      if (row.kind === "component") {
+        const component = componentLayerById.get(row.id);
+        return component ? { ...component, depth: row.depth, hidden: component.hidden, locked: component.locked } : null;
       }
-    }
-
-    const layers = [
-      ...groups.map(group => {
-        const children = (childrenByGroupId.get(group.id) ?? [])
-          .map(component => ({
-            ...componentLayerById.get(component.id),
-            hidden: !!component.hidden || !!group.hidden,
-            locked: !!component.locked || !!group.locked
-          }))
-          .sort((a, b) => b.z - a.z || b.stackOrder - a.stackOrder);
-        return {
-          id: group.id,
-          icon: String(group.layerIcon ?? ""),
-          image: isImageSource(group.layerImage) ? group.layerImage : "",
-          collapsed: !!this._collapsedLayerGroups?.has(group.id),
-          label: group.name ?? "Grupo",
-          z: children.length ? Math.min(...children.map(child => child.z)) : 0,
-          stackOrder: children.length ? Math.min(...children.map(child => child.stackOrder)) : 0,
-          kind: "group",
-          hidden: !!group.hidden,
-          locked: !!group.locked,
-          componentIds: group.componentIds,
-          children
-        };
-      }),
-      ...components.filter(component => !groupedIds.has(component.id)).map(component => componentLayerById.get(component.id))
-    ].sort((a, b) => b.z - a.z || b.stackOrder - a.stackOrder);
-
-    const rendered = components
-      .map(component => {
-        const group = groupByComponentId.get(component.id);
-        return this._componentContext({
-          ...component,
-          hidden: !!component.hidden || !!group?.hidden,
-          locked: !!component.locked || !!group?.locked,
-          groupId: group?.id ?? ""
-        });
-      })
-      .filter(Boolean);
+      const group = row.group;
+      const children = hierarchy.children.get(row.id) ?? [];
+      const members = row.componentIds.map(id => components.find(component => component.id === id)).filter(Boolean);
+      return {
+        id: row.id,
+        icon: String(group.layerIcon ?? ""),
+        image: isImageSource(group.layerImage) ? group.layerImage : "",
+        collapsed: !!this._collapsedLayerGroups?.has(row.id),
+        label: group.name ?? "Grupo",
+        z: members.length ? Math.min(...members.map(item => Number(item.z) || 0)) : 0,
+        stackOrder: members.length ? Math.min(...members.map(item => Number(item.stackOrder) || 0)) : 0,
+        kind: "group",
+        hidden: !!group.hidden,
+        locked: !!group.locked,
+        componentIds: row.componentIds,
+        directComponentIds: row.directComponentIds,
+        childGroupIds: children,
+        depth: row.depth
+      };
+    }).filter(Boolean);
+    const effectiveGroupState = component => {
+      const ownerId = hierarchy.componentOwner.get(String(component.id));
+      let cursor = ownerId, hidden = false, locked = false;
+      const visited = new Set();
+      while (cursor && !visited.has(cursor)) {
+        visited.add(cursor);
+        const group = hierarchy.groupById.get(cursor);
+        if (!group) break;
+        hidden ||= !!group.hidden;
+        locked ||= !!group.locked;
+        cursor = hierarchy.parentById.get(cursor) ?? "";
+      }
+      return { hidden, locked, groupId: ownerId ?? "" };
+    };
+    const rendered = components.map(component => {
+      const state = effectiveGroupState(component);
+      return this._componentContext({
+        ...component,
+        hidden: !!component.hidden || state.hidden,
+        locked: !!component.locked || state.locked,
+        groupId: state.groupId
+      });
+    }).filter(Boolean);
 
     context.nexus = {
       actor: this.actor,
