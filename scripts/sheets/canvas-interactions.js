@@ -319,7 +319,20 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       sheet._nexusInteractionActive=true;
       canvas.dataset.nexusGestureActive = "true";
       const p=point(event), component=event.target.closest(".nexus-component"), surface=event.target.closest(".nexus-group-surface"), mod=event.ctrlKey||event.metaKey||event.shiftKey;
-      if(surface && !component){const group = groupsById.get(surface.dataset.groupId);if(beginGroupMove(group,p,event))return;}
+      if(surface && !component){
+        const group = groupsById.get(surface.dataset.groupId);
+        if (group && mod) {
+          const groupIds = membersByGroupId.get(String(group.id)) ?? [];
+          const next = new Set(sheet._selectedIds ?? []);
+          const alreadySelected = groupIds.length > 0 && groupIds.every(id => next.has(id));
+          for (const id of groupIds) alreadySelected ? next.delete(id) : next.add(id);
+          sheet._selectedGroupId = null;
+          setSelection([...next]);
+          event.preventDefault();
+          return;
+        }
+        if(beginGroupMove(group,p,event))return;
+      }
       if(!component && !surface){
         // A superfície visível pode ficar coberta pelos componentes do grupo;
         // detectar o vazio pela caixa geométrica garante que o grupo continue arrastável.
