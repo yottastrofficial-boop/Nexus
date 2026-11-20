@@ -2707,24 +2707,36 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const height = Math.max(...components.map(item => (Number(item.y) || 0) + (Number(item.h) || item.definition.h)));
     const origin = this._findFreePosition(layout, Math.min(width, layout.width), Math.min(height, layout.height));
     this._captureHistory();
-    const ids = [];
+    const componentIds = new Map();
     for (const item of components) {
       const id = `cmp-${foundry.utils.randomID(8)}`;
+      if (item.sourceId) componentIds.set(String(item.sourceId), id);
       const w = clamp(Number(item.w) || item.definition.w, 20, Math.min(1000, layout.width));
       const h = clamp(Number(item.h) || item.definition.h, 20, Math.min(1000, layout.height));
-      layout.components.push({ ...clone(item), definition: undefined, id, x: clamp(origin.x + (Number(item.x) || 0), 0, layout.width - w), y: clamp(origin.y + (Number(item.y) || 0), 0, layout.height - h), w, h, z: 0, stackOrder: Math.max(-1, ...layout.components.map(existing => Number(existing.stackOrder) || 0)) + 1 });
-      ids.push(id);
+      const copy = clone(item); delete copy.definition; delete copy.sourceId;
+      layout.components.push({ ...copy, id, x:clamp(origin.x+(Number(item.x)||0),0,layout.width-w), y:clamp(origin.y+(Number(item.y)||0),0,layout.height-h), w, h, z:0, stackOrder:Math.max(-1,...layout.components.map(existing=>Number(existing.stackOrder)||0))+1 });
     }
-    if (ids.length > 1) {
-      layout.groups ??= [];
-      const members = layout.components.filter(item => ids.includes(item.id));
-      const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
-      const right = Math.max(...members.map(item => item.x + item.w)), bottom = Math.max(...members.map(item => item.y + item.h));
-      layout.groups.push({ ...(clone(composition.groupSettings ?? {})), id: `grp-${foundry.utils.randomID(8)}`, name: composition.name, componentIds: ids, x: left, y: top, w: right-left, h: bottom-top, z: 0 });
+    const sourceGroups = Array.isArray(composition.groups) && composition.groups.length ? composition.groups : [{
+      id:"root", name:composition.name, parentGroupId:"", componentIds:composition.components.map(item=>item.sourceId).filter(Boolean), ...(composition.groupSettings ?? {})
+    }];
+    const groupIds = new Map(sourceGroups.map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));
+    layout.groups ??= [];
+    for (const source of sourceGroups) {
+      const copy = clone(source);
+      const oldId = String(copy.id);
+      copy.id = groupIds.get(oldId);
+      copy.parentGroupId = copy.parentGroupId ? groupIds.get(String(copy.parentGroupId)) ?? "" : "";
+      copy.componentIds = (copy.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean);
+      if (oldId === "root" || !copy.name) copy.name = composition.name;
+      layout.groups.push(copy);
     }
+    if (!sourceGroups.length) return false;
+    const rootGroup = layout.groups.find(group => group.id === groupIds.get(String(sourceGroups.find(group => !group.parentGroupId)?.id ?? sourceGroups[0].id)));
+    const hierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    const selectedComponentIds = rootGroup ? hierarchy.descendants.get(String(rootGroup.id)) ?? [] : [...componentIds.values()];
     await this._writeLayouts(layouts, active);
-    this._selectedIds = new Set(ids);
-    this._selectedGroupId = layout.groups?.find(item => item.componentIds?.length === ids.length && item.componentIds.every(id => ids.includes(id)))?.id ?? null;
+    this._selectedIds = new Set(selectedComponentIds);
+    this._selectedGroupId = rootGroup?.id ?? null;
     this.render({ force: true });
     return true;
   }
