@@ -13,6 +13,7 @@ import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { applyGroupLayouts } from "../core/group-composition.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
+import { normalizeActorAliasDefinition } from "../core/actor-aliases.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
@@ -310,24 +311,7 @@ const getAliasDefinitions = actor => {
   return value;
 };
 const getCustomAliasData = actor => actor?.getFlag?.("nexus", "customData") ?? {};
-const normalizeAliasDefinition = alias => {
-  if (!alias || typeof alias !== "object") return null;
-  const category = ["attributes", "resources", "combat", "identity", "custom"].includes(alias.category) ? alias.category : "custom";
-  const originalKey = String(alias.key ?? "").trim().replace(/^system\./, "");
-  let key = originalKey;
-  // Corrige caminhos legados como attributes.attributes.agi sem tocar em nomes legítimos.
-  const repeated = new RegExp(`^(?:${category}\\.){2,}`, "i");
-  if (repeated.test(key)) key = key.replace(repeated, `${category}.`);
-  key = safeAliasKey(key);
-  if (!key) return null;
-  const validTypes = ["attribute", "resource", "number", "text", "url", "image", "boolean"];
-  const type = validTypes.includes(alias.type) ? alias.type : (category === "resources" ? "resource" : category === "attributes" ? "attribute" : category === "identity" ? "text" : "number");
-  const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type) ? "formula" : "manual";
-  const legacyKeys = Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [];
-  // Saved layouts and formulas may still refer to the pre-normalized key.
-  if (originalKey !== key && safeAliasKey(originalKey) && !legacyKeys.includes(originalKey)) legacyKeys.push(originalKey);
-  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys, label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom", calculationMode, formula: String(alias.formula ?? "").slice(0,240) };
-};
+const normalizeAliasDefinition = alias => normalizeActorAliasDefinition(alias, () => foundry.utils.randomID());
 const safeAliasKey = value => {
   const key = String(value ?? "").trim().replace(/^actor\./, "").replace(/^system\./, "");
   return /^[a-zA-Z][a-zA-Z0-9_-]*(?:\.[a-zA-Z][a-zA-Z0-9_-]*)*$/.test(key) && !key.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part)) ? key : "";
