@@ -1,4 +1,21 @@
-## 1.0.0.67
+## 1.0.0.68
+
+### Grupos e Biblioteca
+- Permite selecionar grupos completos com Ctrl/Cmd ou Shift pela árvore de camadas e pelo espaço livre da superfície no Canvas; a seleção combinada pode ser agrupada novamente como um grupo pai.
+- Preserva a identidade do grupo selecionado ao resolver seleções hierárquicas com descendentes compartilhados.
+- Corrige a importação de grupos aninhados, persistindo a árvore de grupos junto aos componentes.
+- Normaliza composições antigas e gera identificadores de origem estáveis para religar os componentes ao grupo durante a inserção.
+- Regenera IDs de componentes e grupos ao inserir uma composição, remapeando referências internas e vínculos de hierarquia.
+- Adiciona ações claras na Biblioteca para salvar a seleção, copiar a configuração, importar código e importar arquivo JSON.
+- Permite exportar grupos como JSON puro e importar tanto JSON puro quanto códigos versionados.
+- Mantém compatibilidade com `NEXUS-GROUP/1` e valida IDs, referências, propriedade direta de componentes e ciclos na hierarquia.
+- Adiciona testes de regressão para grupos aninhados, grupos legados e importação/exportação JSON.
+
+### Validação
+- A suíte automatizada continua sendo executada pelo GitHub Actions.
+- O teste funcional de seleção, movimentação e persistência no Foundry VTT 14 ainda precisa ser realizado em uma instalação real.
+
+## 1.0.0.68
 
 ### Correções
 - Corrige o erro `ReferenceError: groups is not defined` ao preparar o contexto da ficha.
