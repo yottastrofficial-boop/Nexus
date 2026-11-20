@@ -1193,7 +1193,7 @@ assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formu
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
 assert.match(sheet, /propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/);
-assert.match(sheetListeners, /actorPropertyWriteQueues = new WeakMap/, "Gravações de propriedades do mesmo Actor devem ser serializadas");
+assert.match(sheetListeners, /from "\.\.\/core\/actor-property-writes\.js"/, "O listener deve usar o serviço central de gravação serializada");
 assert.match(sheetListeners, /await serializeActorPropertyWrite\(sheet\.actor, async \(\) => \{/, "Edições manuais e fórmulas devem compartilhar a mesma fila de persistência");
 assert.match(sheet, /async _updateSystemValue\(input\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Campos de dados e sliders devem usar a fila comum de gravação");
 assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Alterações de proficiência devem usar a fila comum");
