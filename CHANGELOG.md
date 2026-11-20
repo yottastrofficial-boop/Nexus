@@ -10,7 +10,7 @@
 
 ### Canvas e Inspector
 - Grupos recebem uma alça de título clicável, permitindo selecioná-los e abrir suas propriedades sem depender de encontrar uma área vazia dentro do grupo.
-- O nome da propriedade vinculada passa a aparecer como indicador discreto abaixo do campo de caminho.
+- O nome da propriedade vinculada passa a aparecer como indicador discreto abaixo do campo de caminho. A suíte de regressão acompanha essa apresentação compacta.
 - Ajustado o espaçamento dos gatilhos para acomodar o botão de captura somente quando o tipo selecionado é de teclado.
 
 ### Validação e limites
