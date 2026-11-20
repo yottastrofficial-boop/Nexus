@@ -1339,6 +1339,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
+      if (control.dataset.capturedModifiers !== undefined) applyInteractionEditorChange(component, { ...data, scope: "trigger", field: "modifiers" }, control.dataset.capturedModifiers ? control.dataset.capturedModifiers.split("+") : []);
       if (command === "add-flow" || command === "add-library-flow") activeInteractionId = component.interactions?.at(-1)?.id ?? activeInteractionId;
       if (command === "remove-flow" && activeInteractionId === interactionId) activeInteractionId = component.interactions?.[0]?.id ?? "";
       if (command !== "save-flow") {
@@ -1391,6 +1392,19 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if(nextControl && focusData.selectionStart !== null && typeof nextControl.setSelectionRange === "function") nextControl.setSelectionRange(focusData.selectionStart, focusData.selectionEnd ?? focusData.selectionStart, focusData.selectionDirection);
       }
     };
+    $(document).on(`keydown${inspectorNamespace}`, event => {
+      const capture = document.querySelector(".nexus-interaction-trigger-row [data-interaction-action='capture-key'].is-capturing");
+      if (!capture) return;
+      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey || "Definir tecla…"; event.preventDefault(); return; }
+      if (["Control","Shift","Alt","Meta"].includes(event.key)) return;
+      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
+      const modifiers = [event.ctrlKey ? "ctrl" : null, event.shiftKey ? "shift" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
+      capture.dataset.capturedKey = event.key;
+      capture.dataset.capturedModifiers = modifiers.join("+");
+      capture.classList.remove("is-capturing");
+      capture.textContent = [...modifiers.map(value => value.toUpperCase()), event.key === " " ? "Space" : event.key].join(" + ");
+      persistInteractionEditor(capture, null);
+    });
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
       event.preventDefault(); event.stopPropagation();
       const tab=event.currentTarget,editor=tab.closest("[data-interaction-editor]"),flowId=tab.dataset.interactionFlowTab;
@@ -1404,6 +1418,12 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action], .nexus-component-inspector [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
+      if(button.dataset.interactionAction==="capture-key"){
+        const active=button.classList.contains("is-capturing");
+        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey||"Definir tecla…";});
+        if(!active){button.classList.add("is-capturing");button.textContent="Pressione uma tecla…";button.focus();}
+        return;
+      }
       if(button.dataset.interactionAction==="add-library-flow"){
         const select=button.parentElement?.querySelector("[data-interaction-library-select]");
         button.dataset.templateId=select?.value??"";
