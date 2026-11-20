@@ -586,7 +586,7 @@ const releaseAssetCheckIndex = releaseWorkflow.indexOf("Verify published package
 const stableManifestPublishIndex = releaseWorkflow.indexOf("Publish stable Foundry manifest after the package is available");
 assert.ok(releasePublishIndex >= 0 && releaseAssetCheckIndex > releasePublishIndex && stableManifestPublishIndex > releaseAssetCheckIndex,
   "O manifesto estável só pode ser atualizado depois da publicação e verificação do ZIP");
-assert.match(releaseWorkflow, /\\.assets\\[\\] \\|\\|\\|\\|\\|/);
+assert.match(releaseWorkflow, /STATE.*uploaded/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
