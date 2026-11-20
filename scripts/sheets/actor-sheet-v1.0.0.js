@@ -17,7 +17,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, getComponentInteractions, hasKeyboardInteraction, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -2673,6 +2673,105 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._captureHistory(); await this._writeLayouts(layouts, layoutIdNew);
     this._selectedIds = new Set(); this._selectedGroupId = null; this.render({ force: true });
     ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
+  }
+
+  async _exportLibraryBackupFile() {
+    const snapshot = {
+      name: "Biblioteca NEXUS",
+      components: clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []),
+      groups: clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []),
+      layouts: clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []),
+      assets: [
+        ...clone(NEXUS_LIBRARY_CATALOG.assets ?? []),
+        ...clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? [])
+      ],
+      themes: {
+        ...clone(THEME_PALETTES),
+        ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.id, theme.palette]))
+      },
+      flows: clone(getInteractionLibrary(this.actor))
+    };
+    const code = createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
+    const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob), anchor = document.createElement("a");
+    anchor.href = url; anchor.download = "nexus-biblioteca-completa.json"; anchor.hidden = true;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    ui.notifications?.info?.("Backup completo da Biblioteca exportado em JSON.");
+    return true;
+  }
+
+  async _importLibraryBackupFile(file) {
+    return this._importLibraryBackupCode(typeof file === "string" ? file : await file.text());
+  }
+
+  async _importLibraryBackupCode(source) {
+    const imported = parseNexusLibraryBackup(source, Object.keys(COMPONENTS));
+    const data = imported.collections;
+    const components = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
+    const groups = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    const layouts = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
+    const assets = clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? []);
+    const themes = clone(game.user?.getFlag?.("nexus", "libraryThemes") ?? []);
+    const builtinAssetKeys = new Set((NEXUS_LIBRARY_CATALOG.assets ?? []).map(asset => String(asset.key)));
+    const builtinThemeIds = new Set(Object.keys(THEME_PALETTES));
+
+    for (const item of data.components) {
+      components.push({ ...clone(item), id: foundry.utils.randomID(10), version: 1 });
+    }
+    for (const item of data.groups) {
+      groups.push({ ...clone(item), id: `libgrp-${foundry.utils.randomID(8)}` });
+    }
+    for (const item of data.layouts) {
+      layouts.push({ ...clone(item), id: `liblayout-${foundry.utils.randomID(8)}` });
+    }
+    for (const asset of data.assets) {
+      if (builtinAssetKeys.has(String(asset.key))) continue;
+      const id = foundry.utils.randomID(10);
+      assets.push({ ...clone(asset), id });
+      if (COMPONENTS[asset.type]) {
+        components.push({ id: foundry.utils.randomID(10), version: 1, label: asset.label, type: asset.type, settings: clone(asset.template ?? {}) });
+      }
+    }
+    for (const [themeId, palette] of Object.entries(data.themes)) {
+      if (builtinThemeIds.has(themeId)) continue;
+      themes.push({ id: `libtheme-${foundry.utils.randomID(8)}`, sourceId: themeId, name: themeId, palette: clone(palette) });
+    }
+
+    await game.user.setFlag("nexus", "libraryComponents", components.slice(-200));
+    await game.user.setFlag("nexus", "libraryGroups", groups.slice(-100));
+    await game.user.setFlag("nexus", "libraryLayouts", layouts.slice(-100));
+    await game.user.setFlag("nexus", "libraryAssets", assets.slice(-200));
+    await game.user.setFlag("nexus", "libraryThemes", themes.slice(-100));
+
+    for (const entry of data.flows) {
+      if (entry?.flow) await saveInteractionToLibrary(this.actor, entry.flow);
+    }
+
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryRenderSavedGroups?.();
+    this._libraryRenderSavedLayouts?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`Biblioteca importada: ${data.components.length} componentes, ${data.groups.length} grupos, ${data.layouts.length} layouts, ${data.flows.length} fluxos e catálogos de assets/temas.`);
+    return imported;
+  }
+
+  async _applyLibraryCustomTheme(themeId) {
+    const theme = (game.user?.getFlag?.("nexus", "libraryThemes") ?? []).find(item => item.id === themeId);
+    if (!theme?.palette) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    this._captureHistory();
+    layout.theme = "nexus-dark";
+    Object.assign(layout, clone(theme.palette));
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    applyThemeTokens(this.element, layout);
+    for (const instance of this._nexusPanelWindows?.values?.() ?? []) applyThemeTokens(instance.element, layout);
+    await this.render({ force: true });
+    ui.notifications?.info?.(`Tema "${theme.name ?? "Personalizado"}" aplicado.`);
+    return true;
   }
 
   _getLibraryPackageEntry(kind, id) {
