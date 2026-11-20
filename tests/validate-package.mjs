@@ -18,6 +18,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
+import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
@@ -1681,4 +1682,26 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   assert.equal(scope.listen(target, "nexus-test", () => calls++), false, "An aborted scope must reject new listeners");
   scope.abort();
   assert.equal(calls, 1, "Aborting an already aborted scope must be safe");
+}
+
+
+// Actor property writes must execute sequentially per Actor.
+{
+  const actor = {};
+  const order = [];
+  let releaseFirst;
+  const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+  const first = serializeActorPropertyWrite(actor, async () => {
+    order.push("first-start");
+    await firstGate;
+    order.push("first-end");
+  });
+  const second = serializeActorPropertyWrite(actor, async () => {
+    order.push("second");
+  });
+  await Promise.resolve();
+  assert.deepEqual(order, ["first-start"], "A segunda gravação deve aguardar a primeira");
+  releaseFirst();
+  await Promise.all([first, second]);
+  assert.deepEqual(order, ["first-start", "first-end", "second"], "As gravações devem preservar a ordem por Actor");
 }
