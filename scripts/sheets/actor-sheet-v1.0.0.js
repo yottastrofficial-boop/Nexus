@@ -2782,6 +2782,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderPersonalItems?.();
     this._libraryRenderSavedGroups?.();
     this._libraryRenderSavedLayouts?.();
+    this._libraryRenderCustomThemes?.();
+    this._libraryRenderSavedFlows?.();
     this._libraryApplyFilter?.();
     ui.notifications?.info?.(`Biblioteca importada: ${data.components.length} componentes, ${data.groups.length} grupos, ${data.layouts.length} layouts, ${data.flows.length} fluxos e catálogos de assets/temas.`);
     return imported;
