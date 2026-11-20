@@ -164,6 +164,15 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
         surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8), 0, 32)}px`);
         container.append(surface);
+        const handle = document.createElement("div");
+        handle.className = "nexus-group-handle";
+        handle.dataset.groupHandle = String(group.id ?? "");
+        handle.setAttribute("role", "button");
+        handle.setAttribute("tabindex", "0");
+        handle.setAttribute("aria-label", `Selecionar grupo ${String(group.name ?? "Grupo")}`);
+        handle.textContent = String(group.name ?? "Grupo");
+        Object.assign(handle.style, { left: `${x}px`, top: `${y}px`, width: `${Math.min(220, Math.max(88, right - x))}px`, zIndex: String(Math.max(2, baseZ + 2)) });
+        container.append(handle);
         groupSurfacesById.set(group.id, surface);
         for (const element of members) {
           element.dataset.groupId = group.id;
