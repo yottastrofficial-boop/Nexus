@@ -1758,8 +1758,12 @@ assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O cat√
   assert.equal(customData.custom.blocked, "keep");
   assert.deepEqual(moveActorAliasCustomData(null, "custom.old", "custom.new"), { status: "invalid", changed: false });
   assert.deepEqual(moveActorAliasCustomData(customData, "custom.missing", "custom.new"), { status: "missing", changed: false });
-  assert.deepEqual(moveActorAliasCustomData({ custom: { branch: { value: 3 } } }, "custom.branch", "custom.branch.child"), { status: "conflict", changed: false });
-  assert.deepEqual(moveActorAliasCustomData({ custom: { branch: { value: 3 } } }, "custom.branch.value", "custom.branch"), { status: "conflict", changed: false });
+  const nestedSource = { custom: { branch: { value: 3 } } };
+  assert.deepEqual(moveActorAliasCustomData(nestedSource, "custom.branch", "custom.branch.child"), { status: "conflict", changed: false });
+  assert.deepEqual(nestedSource, { custom: { branch: { value: 3 } } }, "A conflict must not partially mutate the source");
+  const nestedDestination = { custom: { branch: { value: 3 } } };
+  assert.deepEqual(moveActorAliasCustomData(nestedDestination, "custom.branch.value", "custom.branch"), { status: "conflict", changed: false });
+  assert.deepEqual(nestedDestination, { custom: { branch: { value: 3 } } }, "An overlapping destination must preserve the original tree");
   const defaults = [
     createActorAliasDefaultValue({ type: "attribute", label: "For√ßa" }),
     createActorAliasDefaultValue({ type: "resource", label: "PV" }),
