@@ -19,7 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
-import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences } from "../scripts/core/actor-aliases.js";
+import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1749,13 +1749,32 @@ assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O cat�
   assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives, "a"), "custom.poder");
   assert.equal(createUniqueActorAliasKey("invalid.category", "Poder", aliases, natives), "");
   const customData = { custom: { old: { value: 12 } } };
-  assert.equal(moveActorAliasCustomData(customData, "custom.old", "custom.new"), true);
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.old", "custom.new"), { status: "moved", changed: true });
   assert.deepEqual(customData.custom.new, { value: 12 });
   assert.equal(customData.custom.old, undefined);
-  assert.equal(moveActorAliasCustomData(customData, "custom.new", "custom.newer"), true);
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.new", "custom.newer"), { status: "moved", changed: true });
   customData.custom.blocked = "keep";
-  assert.equal(moveActorAliasCustomData(customData, "custom.newer", "custom.blocked"), false);
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.newer", "custom.blocked"), { status: "conflict", changed: false });
   assert.equal(customData.custom.blocked, "keep");
+  assert.deepEqual(moveActorAliasCustomData(null, "custom.old", "custom.new"), { status: "invalid", changed: false });
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.missing", "custom.new"), { status: "missing", changed: false });
+  assert.deepEqual(moveActorAliasCustomData({ custom: { branch: { value: 3 } } }, "custom.branch", "custom.branch.child"), { status: "conflict", changed: false });
+  assert.deepEqual(moveActorAliasCustomData({ custom: { branch: { value: 3 } } }, "custom.branch.value", "custom.branch"), { status: "conflict", changed: false });
+  const defaults = [
+    createActorAliasDefaultValue({ type: "attribute", label: "Força" }),
+    createActorAliasDefaultValue({ type: "resource", label: "PV" }),
+    createActorAliasDefaultValue({ type: "number" }),
+    createActorAliasDefaultValue({ type: "boolean" }),
+    createActorAliasDefaultValue({ type: "text" })
+  ];
+  assert.deepEqual(defaults, [
+    { name: "Força", exib: "Força", exibicao: "Força", value: 0, checkbonus: 0, roll: "" },
+    { name: "PV", exib: "PV", exibicao: "PV", value: 0, max: 0 },
+    0, false, ""
+  ]);
+  const copy = createActorAliasCopyDefinition({ id: "source", key: "custom.old", label: "Antigo", type: "number", source: "actor", targetPath: "attributes.for" }, "custom.antigo_copy", "copy-id");
+  assert.deepEqual(copy, { id: "copy-id", key: "custom.antigo_copy", label: "Antigo (cópia)", type: "number", source: "custom", targetPath: "" });
+  assert.equal(createActorAliasCopyDefinition(null, "custom.x", "id"), null);
   const layouts = { main: { components: [
     { dataPath: "custom.old.value" },
     { currentPath: "attribute.old.value" },
