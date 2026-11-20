@@ -314,7 +314,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
           <section class="nexus-tool-panel nexus-library-panel" data-tool-panel="library" hidden>
             <header class="nexus-library-header">
               <div><span class="nexus-library-eyebrow">BIBLIOTECA</span><h3>Elementos e recursos</h3></div>
-              <div class="nexus-library-header-actions"><span class="nexus-library-count" data-library-count>1 elemento</span><button type="button" data-library-save-component="" aria-label="Salvar componente selecionado na biblioteca"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></button></div>
+              <div class="nexus-library-header-actions"><span class="nexus-library-count" data-library-count>1 elemento</span><button type="button" data-library-save-component="" aria-label="Salvar componente selecionado na biblioteca"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></button><button type="button" data-library-save-layout aria-label="Salvar layout completo na biblioteca" title="Salvar layout completo"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button></div>
             </header>
             <div class="nexus-library-toolbar">
               <label class="nexus-library-search-wrap"><span aria-hidden="true">⌕</span><input type="search" class="nexus-library-search" data-library-search></label>
@@ -323,7 +323,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
             <nav class="nexus-library-section-tabs" aria-label="Categorias da biblioteca">
               <button type="button" class="active" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i> Assets</button>
               <button type="button" data-library-section="flows"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Fluxos</button>
-              <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i> Temas</button>
+              <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i> Temas</button><button type="button" data-library-section="layouts"><i class="fa-solid fa-table-columns" aria-hidden="true"></i> Layouts</button>
             </nav>
             <section class="nexus-library-section-panel" data-library-section-panel="assets">
               <nav class="nexus-library-scope-tabs" aria-label="Origem dos assets">
@@ -356,6 +356,11 @@ remove legacy typography selects                  <label class="nexus-inspector-
             <section class="nexus-library-section-panel" data-library-section-panel="themes" hidden>
               <div class="nexus-library-section-heading"><strong>Temas disponíveis</strong><span>Pré-visualizações e estilos</span></div>
               <div class="nexus-library-assets nexus-library-theme-grid" data-library-themes></div>
+            </section>
+            <section class="nexus-library-section-panel" data-library-section-panel="layouts" hidden>
+              <div class="nexus-library-section-heading"><strong>Layouts completos</strong><span>Modelos reutilizáveis entre fichas e jogadores</span></div>
+              <div class="nexus-library-layout-toolbar"><button type="button" data-library-import-layout><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar layout por código</button><span>Salve o layout atual pelo ícone de exportação no cabeçalho da Biblioteca.</span></div>
+              <div class="nexus-library-layouts" data-library-saved-layouts></div>
             </section>
           </section>
         </div>
