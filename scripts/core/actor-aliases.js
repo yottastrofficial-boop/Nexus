@@ -74,8 +74,8 @@ export function replaceActorAliasLayoutReferences(layouts, previousKey, nextKey)
   const next = isSafeActorAliasKey(nextKey);
   if (!previous || !next || previous === next) return 0;
 
-  const legacyPrevious = previous.replace(/^attributes\\./, "attribute.").replace(/^resources\\./, "resource.");
-  const legacyNext = next.replace(/^attributes\\./, "attribute.").replace(/^resources\\./, "resource.");
+  const legacyPrevious = previous.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource.");
+  const legacyNext = next.replace(/^attributes\./, "attribute.").replace(/^resources\./, "resource.");
   const replacements = [[previous, next]];
   if (legacyPrevious !== previous) replacements.push([legacyPrevious, legacyNext]);
 
