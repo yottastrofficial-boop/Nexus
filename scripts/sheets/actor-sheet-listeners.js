@@ -2005,30 +2005,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       sheet.render({ force: true });
     });
     html.find("[data-group-setting]").on("change", async event => {
-      const input = event.currentTarget;
-      const groupId = sheet._selectedGroupId;
-      if (!groupId) return;
-      const layouts = await sheet._readLayouts();
-      const active = sheet._activeLayoutId();
-      const layout = layouts[active];
-      const group = layout?.groups?.find(item => item.id === groupId);
-      if (!group) return;
-      sheet._captureHistory();
-      const key = input.dataset.groupSetting;
-      if (key === "name") {
-        group.name = String(input.value ?? "").trim().slice(0, 48) || "Grupo";
-        await sheet._writeLayouts(layouts, active);
-        sheet._currentLayout = layout;
-        sheet.render({ force: true });
-        return;
-      }
-      if (key === "borderRadius") group.borderRadius = clamp(Number(input.value) || 0, 0, 32);
-      else if (key === "backgroundColor" || key === "borderColor") group[key] = input.value;
-      await sheet._writeLayouts(layouts, active);
-      const groupNode = html[0].querySelector(`.nexus-group-surface[data-group-id="${groupId}"]`);
-      const cssKey = key === "backgroundColor" ? "--nexus-group-bg" : key === "borderColor" ? "--nexus-group-border" : "--nexus-group-radius";
-      const cssValue = key === "borderRadius" ? `${group.borderRadius}px` : group[key];
-      if (groupNode) groupNode.style.setProperty(cssKey, cssValue);
+      const input=event.currentTarget,groupId=sheet._selectedGroupId;if(!groupId)return;
+      const layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),layout=layouts[active],group=layout?.groups?.find(item=>item.id===groupId);if(!group)return;
+      sheet._captureHistory();const key=input.dataset.groupSetting,value=input.type==="checkbox"?input.checked:input.value;
+      if(key==="name")group.name=String(value??"").trim().slice(0,48)||"Grupo";
+      else if(key==="title")group.title=String(value??"").slice(0,48);
+      else if(key==="kind"){group.kind=["folder","container","section"].includes(value)?value:"container";if(group.kind==="section"&&group.showHeader===undefined)group.showHeader=true;}
+      else if(key==="layoutMode")group.layoutMode=["free","horizontal","vertical","grid"].includes(value)?value:"free";
+      else if(key==="gap"||key==="padding")group[key]=clamp(Number(value)||0,0,120);
+      else if(key==="columns")group.columns=clamp(Math.trunc(Number(value)||2),1,12);
+      else if(key==="align")group.align=["start","center","end"].includes(value)?value:"start";
+      else if(key==="showHeader")group.showHeader=value===true;
+      else if(key==="borderRadius")group.borderRadius=clamp(Number(value)||0,0,32);
+      else if(key==="backgroundColor"||key==="borderColor")group[key]=String(value);
+      sheet._currentLayout=sheet._normalizeLayout(layout);layouts[active]=sheet._currentLayout;
+      await sheet._writeLayouts(layouts,active);sheet.render({force:true});
     });
     html.find("[data-component-setting-reset]").on("click", async event => {
       const id = [...(sheet._selectedIds ?? [])][0]; if (!id) return;
