@@ -287,7 +287,7 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
     else if(data.field==="enabled")flow.enabled=!!value;
     else if(data.field==="conditionJoin")flow.conditionJoin=value==="any"?"any":"all";
     else if(data.field==="onError")flow.execution.onError=value==="continue"?"continue":"stop";
-  }else if(data.scope==="trigger"&&trigger&&data.field==="event")trigger.event=INTERACTION_EVENTS.includes(value)?value:"click";
+  }else if(data.scope==="trigger"&&trigger&&data.field==="event"){trigger.event=INTERACTION_EVENTS.includes(value)?value:"click";if(!["keyDown","keyUp"].includes(trigger.event))trigger.key="";}
   else if(data.scope==="trigger"&&trigger&&data.field==="modifiers")trigger.modifiers=normalizeModifiers(value);
   else if(data.scope==="trigger"&&trigger&&data.field==="key")trigger.key=String(value??"").slice(0,40);
   else if(data.scope==="condition"&&condition){
