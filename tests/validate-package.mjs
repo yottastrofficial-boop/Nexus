@@ -19,6 +19,8 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
+import { activateActorSheetSkillListeners } from "../scripts/sheets/actor-sheet-skill-listeners.js";
+import { activateActorSheetResourceListeners } from "../scripts/sheets/actor-sheet-resource-listeners.js";
 import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
@@ -1813,6 +1815,50 @@ for (const selector of ["[data-resource-slider]", ".nexus-sheet-resource-track",
 }
 assert.match(actorSheetResourceListeners, /await sheet\._updateSystemValue\(input\)/,
   "A persistência dos sliders deve continuar centralizada na ficha");
+
+{
+  const handlers = new Map();
+  const fakeHtml = { find(selector) { return { on(eventName, callback) { handlers.set(`${selector}:${eventName}`, callback); return this; } }; } };
+  const calls = [];
+  const fakeSheet = {
+    actor: {}, _mode: "play",
+    _rollSkill: key => calls.push(["roll", key]),
+    _setSkillProficientLevel: async (key, level) => calls.push(["skill-level", key, level]),
+    _setProficiencyLevel: (id, level) => calls.push(["component-level", id, level]),
+    _runComponentAction: async (id, eventName) => calls.push(["component-action", id, eventName])
+  };
+  activateActorSheetSkillListeners(fakeSheet, fakeHtml, {
+    NEXUS_SKILLS: [{ key: "athletics" }],
+    getNexusSkillModifier: () => ({ proficientLevel: 1 })
+  });
+  handlers.get("[data-skill-roll]:click")({
+    currentTarget: { dataset: { skillRoll: "athletics" } },
+    preventDefault() {}, stopPropagation() {}
+  });
+  await handlers.get("[data-skill-proficiency-toggle]:click")({
+    currentTarget: { dataset: { skillProficiencyToggle: "athletics" }, closest: () => ({ dataset: { id: "component-1" } }) },
+    altKey: false, shiftKey: true, preventDefault() {}, stopPropagation() {}
+  });
+  handlers.get("[data-proficiency-level]:click")({
+    currentTarget: { dataset: { proficiencyLevel: "2" }, closest: () => ({ dataset: { id: "component-2" } }) },
+    preventDefault() {}, stopPropagation() {}
+  });
+  assert.deepEqual(calls, [
+    ["roll", "athletics"],
+    ["skill-level", "athletics", 0],
+    ["component-action", "component-1", "click"],
+    ["component-level", "component-2", 2]
+  ], "Os controles de perícia devem encaminhar rolagens e alterações aos métodos da ficha");
+}
+{
+  const handlers = new Map();
+  const fakeHtml = { find(selector) { return { on(eventName, callback) { handlers.set(`${selector}:${eventName}`, callback); return this; } }; } };
+  const updates = [];
+  const fakeSheet = { _mode: "play", _currentLayout: { components: [] }, _updateSystemValue: async input => updates.push(input.dataset.systemPath) };
+  activateActorSheetResourceListeners(fakeSheet, fakeHtml, { clamp: (value, min, max) => Math.max(min, Math.min(max, value)), updateSheetResourcePreview: () => {} });
+  await handlers.get("[data-resource-slider]:change")({ currentTarget: { dataset: { systemPath: "resources.pv.value" } } });
+  assert.deepEqual(updates, ["resources.pv.value"], "O controlador de recursos deve delegar a persistência à ficha");
+}
 for (const selector of ["[data-skill-roll]", "[data-skill-proficient-level]", "[data-proficiency-level]", "[data-skill-proficiency-toggle]"]) {
   assert.ok(actorSheetSkillListeners.includes(selector), `O controlador de perícias deve manter ${selector}`);
 }
