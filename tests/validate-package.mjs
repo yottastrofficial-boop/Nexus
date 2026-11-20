@@ -993,7 +993,7 @@ assert.match(sheet, /await roll\.evaluate\(\)/, "Rolagens assíncronas devem usa
 assert.doesNotMatch(sheet, /evaluate\(\{\s*async:\s*true\s*\}\)/, "A opção async removida não pode ser usada");
 assert.match(sheetListeners, /await sheet\._writeLayouts\(layouts, active, \{ render: false \}\)/, "Editar um fluxo não deve reconstruir a ficha inteira");
 assert.match(sheetListeners, /behaviorEditor\.dataset\.activeInteractionId = activeInteractionId;[\s\S]*?renderInteractionEditor\(behaviorEditor/, "A aba ativa deve ser restaurada antes de redesenhar o editor");
-assert.match(sheetListeners, /const updatePath = resolvedPath\.virtual && actorRootPath \? updateTargetPath : `system\.\$\{updateTargetPath\}`/, "Propriedades virtuais do Actor devem ser gravadas no caminho system correto");
+assert.match(propertyValueListeners, /const updatePath = resolvedPath\.virtual && actorRootPath \? updateTargetPath : `system\.\$\{updateTargetPath\}`/, "Propriedades virtuais do Actor devem ser gravadas no caminho system correto");
 console.log("NEXUS 1.0.0.15: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
