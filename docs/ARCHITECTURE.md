@@ -168,3 +168,12 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - `activateActorSheetListeners()` delega esse domínio ao controlador especializado; o módulo recebe somente as dependências de leitura, normalização e persistência necessárias.
 - A regra de negócio e os helpers puros permanecem em `scripts/core/actor-aliases.js`; o controlador não passa a ser dono do schema de Actor nem do armazenamento.
 - A extração reduz o controlador geral de eventos sem alterar a classe da ficha nem introduzir um segundo mecanismo de persistência.
+
+
+### Normalização e migração de aliases legados
+
+- `normalizeActorAliasDefinition()` foi movida para `scripts/core/actor-aliases.js`, com geração de ID injetada para manter o serviço independente do ambiente Foundry.
+- Quando uma chave antiga é normalizada (por exemplo, prefixos de categoria repetidos), a chave original é adicionada a `legacyKeys`. Layouts e fórmulas que ainda usam o caminho anterior continuam resolvendo para a definição canônica.
+- `migration-manager.js` reutiliza `moveActorAliasCustomData()` para mover payloads, removendo a lógica de movimentação duplicada.
+- Se o destino já contém dados, a migração preserva ambos os caminhos no armazenamento, mantém o destino canônico e informa a quantidade de conflitos no resultado. A ficha registra o aviso no console; nenhum payload é sobrescrito.
+- Os testes verificam a normalização de caminhos repetidos, a preservação da chave legada, a idempotência e a não sobrescrita em caso de colisão.
