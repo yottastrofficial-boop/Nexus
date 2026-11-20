@@ -101,7 +101,8 @@ Use o endereço do `manifest.json` acima como manifesto de instalação e atuali
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── README.md
-└── system.json        # Manifesto do sistema Foundry
+├── manifest.json      # Canal estável de instalação e atualização
+└── system.json        # Manifesto incluído no pacote Foundry
 ```
 
 ## Documentação
