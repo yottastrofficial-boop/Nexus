@@ -838,7 +838,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       hidden: !!component.hidden,
       locked: !!component.locked
     }]));
-    const layers = hierarchy.rows.map(row => {
+    const visibleLayerRows = [];
+    const collapsedDepths = [];
+    for (const row of hierarchy.rows) {
+      while (collapsedDepths.length && collapsedDepths.at(-1) >= row.depth) collapsedDepths.pop();
+      const hiddenByAncestor = collapsedDepths.length > 0;
+      if (!hiddenByAncestor) visibleLayerRows.push(row);
+      if (!hiddenByAncestor && row.kind === "group" && this._collapsedLayerGroups?.has(row.id)) collapsedDepths.push(row.depth);
+    }
+    const layers = visibleLayerRows.map(row => {
       if (row.kind === "component") {
         const component = componentLayerById.get(row.id);
         return component ? { ...component, depth: row.depth, hidden: component.hidden, locked: component.locked } : null;
