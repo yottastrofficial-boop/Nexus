@@ -719,6 +719,11 @@ const conflictMigration = await migrateLegacyActorData(conflictMigrationDependen
 assert.equal(conflictMigration.aliasDataConflicts, 1, "A colisão de dados precisa ser informada");
 assert.deepEqual(conflictingAliasActor.getFlag("nexus", "customData"), { old: { key: 17 }, new: { key: 99 } }, "A migração não deve sobrescrever nenhum dos dois payloads");
 assert.deepEqual(conflictingAliasActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"]);
+const conflictWrites = conflictingAliasActor.writes;
+const repeatedConflictMigration = await migrateLegacyActorData(conflictMigrationDependencies);
+assert.equal(repeatedConflictMigration.changed, false, "Uma colisão já identificada não deve provocar migração repetida");
+assert.equal(repeatedConflictMigration.aliasDataConflicts, 0);
+assert.equal(conflictingAliasActor.writes, conflictWrites, "A migração de conflito deve permanecer idempotente");
 
 const propertyMigrationDependencies = {
   actor: legacyPropertyActor,
