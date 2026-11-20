@@ -1330,7 +1330,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
         return;
       }
-      sheet._nexusInteractionActive = false; const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); sheet._setSelection(html,group?(sheet._groupHierarchy?.descendants.get(String(group.id))??group.componentIds??[]):[]); sheet._selectedGroupId=group?.id??null;
+      sheet._nexusInteractionActive = false; const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); sheet._selectedGroupId=group?.id??null; sheet._setSelection(html,group?(sheet._groupHierarchy?.descendants.get(String(group.id))??group.componentIds??[]):[]);
     });
     // Renomear pelo duplo clique no nome, sem abrir o editor de componentes.
     html.find(".nexus-layer-list").on("dblclick", ".nexus-layer-name", event => {
