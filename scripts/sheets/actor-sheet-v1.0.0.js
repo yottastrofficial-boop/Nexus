@@ -2693,7 +2693,19 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importLibraryPackageCode(source) {
-    const imported = parseNexusSharePackage(source, Object.keys(COMPONENTS));
+    const rawSource = String(source ?? "").trim();
+    let legacyFormat = "";
+    try {
+      const start = rawSource.indexOf("{"), end = rawSource.lastIndexOf("}");
+      if (start >= 0 && end > start) legacyFormat = JSON.parse(rawSource.slice(start, end + 1))?.format ?? "";
+    } catch (_) {}
+    if (legacyFormat === "nexus-group" || rawSource.startsWith("NEXUS-GROUP/1") || rawSource.startsWith("NEXUS-GROUP/2")) {
+      return this._importSavedGroupCode(rawSource);
+    }
+    if (legacyFormat === "nexus-layout" || rawSource.startsWith("NEXUS-LAYOUT/1")) {
+      return this._importSavedLayoutCode(rawSource);
+    }
+    const imported = parseNexusSharePackage(rawSource, Object.keys(COMPONENTS));
     const id = foundry.utils.randomID(10);
     if (imported.kind === "component") {
       const saved = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
