@@ -2459,23 +2459,62 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _groupSelection(html) {
-    const ids = new Set(this._selectedIds ?? []); if (ids.size < 2) return;
+    const selectedIds = new Set(this._selectedIds ?? []);
+    if (selectedIds.size < 2) return;
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return;
-    // Não deixa grupos antigos parcialmente órfãos: ao reagrupar um membro, incorpora o grupo inteiro.
-    let changed = true;
-    while (changed) { changed = false; for (const group of (layout.groups ?? [])) {
-      if ((group.componentIds ?? []).some(id => ids.has(id))) for (const id of (group.componentIds ?? [])) if (!ids.has(id)) { ids.add(id); changed = true; }
-    }}
-    const memberIds = [...ids];
-    const members = layout.components.filter(c => ids.has(c.id)); if (members.length < 2) return;
-    this._captureHistory();
-    const x = Math.min(...members.map(c => c.x)), y = Math.min(...members.map(c => c.y));
-    const right = Math.max(...members.map(c => c.x + c.w)), bottom = Math.max(...members.map(c => c.y + c.h));
     layout.groups ??= [];
-    const group = { id: `grp-${foundry.utils.randomID(8)}`, name: `Grupo ${layout.groups.length + 1}`, componentIds: members.map(c => c.id), x, y, w: right - x, h: bottom - y, z: Math.min(...members.map(c=>Number(c.z)||0)) };
-    layout.groups = (layout.groups ?? []).filter(g => !g.componentIds?.some(id => ids.has(id)));
-    layout.groups.push(group); await this._writeLayouts(layouts, active); this._selectedGroupId = group.id; this._selectedIds = new Set(memberIds); this.render({ force: true });
+    const hierarchy = buildGroupHierarchy(layout.groups, layout.components ?? []);
+    const selectedGroups = layout.groups.filter(group => {
+      const descendants = hierarchy.descendants.get(String(group.id)) ?? [];
+      return descendants.length > 0 && descendants.every(id => selectedIds.has(id));
+    }).filter(group => {
+      let parentId = hierarchy.parentById.get(String(group.id)) ?? "";
+      while (parentId) {
+        const parent = hierarchy.groupById.get(parentId);
+        const parentIds = hierarchy.descendants.get(parentId) ?? [];
+        if (parent && parentIds.length && parentIds.every(id => selectedIds.has(id))) return false;
+        parentId = hierarchy.parentById.get(parentId) ?? "";
+      }
+      return true;
+    });
+    const selectedGroupIds = new Set(selectedGroups.map(group => String(group.id)));
+    const coveredComponents = new Set(selectedGroups.flatMap(group => hierarchy.descendants.get(String(group.id)) ?? []));
+    const directIds = [...selectedIds].filter(id => !coveredComponents.has(String(id)) && layout.components.some(component => component.id === id));
+    const childCount = selectedGroups.length + directIds.length;
+    if (childCount < 2) {
+      ui.notifications?.warn?.("Selecione pelo menos dois elementos ou grupos completos para criar um grupo.");
+      return;
+    }
+    const parentCandidates = [
+      ...selectedGroups.map(group => hierarchy.parentById.get(String(group.id)) ?? ""),
+      ...directIds.map(id => hierarchy.parentById.get(hierarchy.componentOwner.get(String(id)) ?? "") ?? "")
+    ].filter(Boolean);
+    const commonParent = parentCandidates.length && parentCandidates.every(id => id === parentCandidates[0]) ? parentCandidates[0] : "";
+    this._captureHistory();
+    const id = `grp-${foundry.utils.randomID(8)}`;
+    for (const childGroup of selectedGroups) childGroup.parentGroupId = id;
+    for (const componentId of directIds) {
+      for (const group of layout.groups) group.componentIds = (group.componentIds ?? []).filter(id => id !== componentId);
+    }
+    const group = {
+      id, name: `Grupo ${layout.groups.length + 1}`, parentGroupId: commonParent,
+      componentIds: directIds,
+      z: Math.min(...layout.components.filter(component => selectedIds.has(component.id)).map(component => Number(component.z) || 0))
+    };
+    layout.groups.push(group);
+    const nextHierarchy = buildGroupHierarchy(layout.groups, layout.components);
+    const members = (nextHierarchy.descendants.get(id) ?? []).map(memberId => layout.components.find(component => component.id === memberId)).filter(Boolean);
+    if (members.length) {
+      const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
+      const right = Math.max(...members.map(item => item.x + item.w)), bottom = Math.max(...members.map(item => item.y + item.h));
+      Object.assign(group, { x:left, y:top, w:right-left, h:bottom-top });
+    }
+    layout.groups = layout.groups.filter(item => (nextHierarchy.descendants.get(String(item.id)) ?? []).length > 0);
+    await this._writeLayouts(layouts, active);
+    this._selectedGroupId = id;
+    this._selectedIds = new Set(nextHierarchy.descendants.get(id) ?? []);
+    this.render({ force: true });
   }
 
   async _saveSelectedGroupToLibrary() {
