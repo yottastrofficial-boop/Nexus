@@ -198,11 +198,11 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
 
   if (!groups.length) {
     groups = [{
+      ...(sanitizeJsonValue(payload.groupSettings ?? {})),
       id: "root",
       name: String(payload.name ?? "Grupo importado").trim().slice(0, 48) || "Grupo importado",
       parentGroupId: "",
-      componentIds: components.map(component => component.sourceId),
-      ...(sanitizeJsonValue(payload.groupSettings ?? {}))
+      componentIds: components.map(component => component.sourceId)
     }];
   }
 
