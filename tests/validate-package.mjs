@@ -773,7 +773,7 @@ assert.match(css, /nexus-text-toolbar/);
 assert.match(css, /nexus-proficiency-control/);
 assert.match(css, /nexus-resource-slider-control/);
 assert.match(sheetCode, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
-assert.match(sheetCode, /const selectedGroupIds = new Set\(selectedGroups\.map\(group => group\.id\)\)/, "A seleção parcial não deve destacar os membros irmãos do grupo");
+assert.match(sheetCode, /const selectedGroupComponentIds = new Set\(resolvedGroup \? hierarchy\.descendants\.get\(String\(resolvedGroup\.id\)\)/, "A seleção de grupo deve destacar somente seus descendentes");
 assert.match(sheetCode, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
 assert.match(sheetCode, /_syncActorPortraitFromToken\(componentId\)/, "O retrato do Actor deve poder receber explicitamente a imagem do token");
 assert.match(template, /data-sync-token-portrait/, "O Inspector deve oferecer sincronização explícita do retrato");
