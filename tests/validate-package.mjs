@@ -248,6 +248,7 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const canvasGroupRendering = await read("scripts/sheets/canvas-group-rendering.js");
 const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
@@ -1200,7 +1201,7 @@ assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*r
 assert.match(sheet, /action\?\.type === "update"[\s\S]*?return serializeActorPropertyWrite\(this\.actor/, "Actions de interação também devem serializar alterações de propriedades");
 assert.match(sheetListeners, /data-config-current-value[\s\S]*?serializeActorPropertyWrite\(sheet\.actor/, "Valores de recursos no Inspector devem compartilhar a fila");
 assert.doesNotMatch(sheetListeners, /propertyExpressionQueues = new WeakMap/, "A fila não deve serializar apenas fórmulas e deixar valores manuais concorrentes");
-assert.match(sheetListeners, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
+assert.match(actorPropertyWrites, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
 assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
