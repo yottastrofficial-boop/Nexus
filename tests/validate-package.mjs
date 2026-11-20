@@ -1771,6 +1771,9 @@ assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases 
   });
   assert.equal(normalizedLegacyAlias.key, "attributes.agi");
   assert.deepEqual(normalizedLegacyAlias.legacyKeys, ["attributes.attributes.agi"]);
+  const prefixedAlias = normalizeActorAliasDefinition({ id: "prefixed", category: "attributes", key: "actor.attributes.agi" });
+  assert.equal(prefixedAlias.key, "attributes.agi");
+  assert.deepEqual(prefixedAlias.legacyKeys, [], "Prefixos de acesso não devem virar chaves legadas duplicadas");
   assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.__proto__.value" }, () => "new-id"), null);
   assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.novo" }, () => "generated-id").id, "generated-id");
   const aliases = [{ id: "a", key: "custom.poder", legacyKeys: ["custom.antigo"] }];
