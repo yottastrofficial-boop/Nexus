@@ -1,3 +1,5 @@
+## 1.0.0.69
+
 ## Próxima atualização — organização hierárquica e foco das janelas
 
 ### Canvas e grupos
@@ -18,7 +20,6 @@
 
 ---
 
-## 1.0.0.69
 
 ### Grupos compostos e experiência do editor
 - Ao selecionar um componente, destaca discretamente os demais membros do seu grupo sem alterar a seleção funcional.
