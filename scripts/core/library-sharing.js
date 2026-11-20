@@ -410,15 +410,15 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
   const collections = {
     components: (Array.isArray(snapshot.components) ? snapshot.components : []).map(entry => {
       const parsed = parseNexusSharePackage(createNexusSharePackage("component", entry, componentTypes), componentTypes);
-      return { sourceId: String(entry.id ?? ""), version: 1, label: parsed.payload.label, type: parsed.payload.type, settings: parsed.payload.settings };
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), version: 1, label: parsed.payload.label, type: parsed.payload.type, settings: parsed.payload.settings };
     }),
     groups: (Array.isArray(snapshot.groups) ? snapshot.groups : []).map(entry => {
       const parsed = parseNexusSharePackage(createNexusSharePackage("group", entry, componentTypes), componentTypes);
-      return { sourceId: String(entry.id ?? ""), name: parsed.name, groupSettings: parsed.payload.groupSettings, components: parsed.payload.components, groups: parsed.payload.groups };
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), name: parsed.name, groupSettings: parsed.payload.groupSettings, components: parsed.payload.components, groups: parsed.payload.groups };
     }),
     layouts: (Array.isArray(snapshot.layouts) ? snapshot.layouts : []).map(entry => {
       const parsed = parseNexusSharePackage(createNexusSharePackage("layout", entry, componentTypes), componentTypes);
-      return { sourceId: String(entry.id ?? ""), name: parsed.name, layout: parsed.payload };
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), name: parsed.name, layout: parsed.payload };
     }),
     assets: sanitizeJsonValue(Array.isArray(snapshot.assets) ? snapshot.assets : []),
     themes: sanitizeJsonValue(snapshot.themes && typeof snapshot.themes === "object" && !Array.isArray(snapshot.themes) ? snapshot.themes : {}),
