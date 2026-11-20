@@ -57,20 +57,81 @@ function normalizeShareComponent(component, allowedTypes) {
  * executable code is included or evaluated.
  */
 export function createNexusGroupShareCode(group) {
-  if (!group || !Array.isArray(group.components) || group.components.length < 1 || group.components.length > MAX_COMPONENTS) throw new Error(`O grupo precisa conter entre 1 e ${MAX_COMPONENTS} componentes.`);
-  const components = group.components.map(component => {
-    const copy = { ...component }; delete copy.id; delete copy.definition;
-    return sanitizeJsonValue(copy);
+  if (!group || !Array.isArray(group.components) || group.components.length < 1 || group.components.length > MAX_COMPONENTS) {
+    throw new Error(`O grupo precisa conter entre 1 e ${MAX_COMPONENTS} componentes.`);
+  }
+  const sourceIdMap = new Map();
+  const components = group.components.map((component, index) => {
+    const sourceId = String(component?.sourceId ?? component?.id ?? `component-${index + 1}`);
+    if (!sourceId || sourceIdMap.has(sourceId)) throw new Error("O grupo contém identificadores de componentes ausentes ou duplicados.");
+    if (component?.id) sourceIdMap.set(String(component.id), sourceId);
+    sourceIdMap.set(sourceId, sourceId);
+    const copy = sanitizeJsonValue(component);
+    delete copy.id;
+    delete copy.definition;
+    copy.sourceId = sourceId;
+    return copy;
   });
-  const groups = (group.groups ?? []).map(item => sanitizeJsonValue(item));
+
+  let groups = (Array.isArray(group.groups) ? group.groups : []).map(item => {
+    const copy = sanitizeJsonValue(item);
+    copy.id = String(copy.id ?? "");
+    copy.parentGroupId = String(copy.parentGroupId ?? "");
+    copy.componentIds = [...new Set((copy.componentIds ?? []).map(id => sourceIdMap.get(String(id)) ?? String(id)))];
+    return copy;
+  });
   if (groups.length > 50) throw new Error("O grupo excede o limite de 50 subgrupos.");
-  const payload = { format:"nexus-group", version:2, name:String(group.name ?? "Grupo").trim().slice(0,48)||"Grupo", groupSettings:sanitizeJsonValue(group.groupSettings ?? {}), components, groups };
-  return "NEXUS-GROUP/2\n" + JSON.stringify(payload,null,2);
+  if (!groups.length) {
+    groups = [{
+      id: "root",
+      name: String(group.name ?? "Grupo").trim().slice(0, 48) || "Grupo",
+      parentGroupId: "",
+      componentIds: components.map(component => component.sourceId),
+      ...(sanitizeJsonValue(group.groupSettings ?? {}))
+    }];
+  }
+
+  const groupIds = new Set();
+  for (const item of groups) {
+    if (!item.id || groupIds.has(item.id)) throw new Error("A hierarquia contém grupos sem ID ou com IDs duplicados.");
+    groupIds.add(item.id);
+  }
+  const ownerByComponent = new Map();
+  for (const item of groups) {
+    if (item.parentGroupId && !groupIds.has(item.parentGroupId)) throw new Error("Um grupo aponta para um grupo pai inexistente.");
+    for (const componentId of item.componentIds) {
+      if (!components.some(component => component.sourceId === componentId)) throw new Error("Um grupo referencia um componente inexistente.");
+      if (ownerByComponent.has(componentId)) throw new Error("Um componente não pode pertencer diretamente a mais de um grupo.");
+      ownerByComponent.set(componentId, item.id);
+    }
+  }
+  const parentMap = new Map(groups.map(item => [item.id, item.parentGroupId]));
+  for (const item of groups) {
+    const seen = new Set([item.id]);
+    let cursor = item.parentGroupId;
+    while (cursor) {
+      if (seen.has(cursor)) throw new Error("A hierarquia contém um ciclo.");
+      seen.add(cursor);
+      cursor = parentMap.get(cursor) ?? "";
+    }
+  }
+  const roots = groups.filter(item => !item.parentGroupId);
+  if (roots.length !== 1) throw new Error("A composição precisa possuir exatamente um grupo principal.");
+  const payload = {
+    format: "nexus-group",
+    version: 2,
+    name: String(group.name ?? roots[0].name ?? "Grupo").trim().slice(0, 48) || "Grupo",
+    groupSettings: sanitizeJsonValue(group.groupSettings ?? {}),
+    components,
+    groups
+  };
+  return "NEXUS-GROUP/2\n" + JSON.stringify(payload, null, 2);
 }
 
 /**
- * Parses and validates a NEXUS group code. Only registered component types
- * are accepted; presentation rules and interaction flows remain intact.
+ * Parses a group composition into a stable, self-contained tree.
+ * Legacy v1 groups are wrapped in a root group and receive deterministic
+ * sourceIds so their members can be reconnected when inserted into a Canvas.
  */
 export function parseNexusGroupShareCode(code, componentTypes = []) {
   let source = String(code ?? "").trim();
@@ -85,14 +146,9 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
   const end = source.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Não encontrei um objeto JSON válido no código informado.");
   let payload;
-  try {
-    payload = JSON.parse(source.slice(start, end + 1));
-  } catch (_) {
-    throw new Error("O código não contém um JSON válido. Copie novamente o código completo.");
-  }
-  if (!payload || payload.format !== "nexus-group") {
-    throw new Error("Este código não é uma composição de grupo do NEXUS.");
-  }
+  try { payload = JSON.parse(source.slice(start, end + 1)); }
+  catch (_) { throw new Error("O código não contém um JSON válido. Copie novamente o código completo."); }
+  if (!payload || payload.format !== "nexus-group") throw new Error("Este código não é uma composição de grupo do NEXUS.");
   if (![1, 2].includes(payload.version) || payload.version !== formatVersion) {
     throw new Error(`A versão de compartilhamento ${String(payload.version)} não é compatível.`);
   }
@@ -104,31 +160,80 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
   }
   const allowedTypes = new Set(componentTypes.map(type => String(type)));
   if (!allowedTypes.size) throw new Error("Não foi possível validar os tipos de componentes disponíveis.");
-  const components = payload.components.map(component => normalizeShareComponent(component, allowedTypes));
-  const groups = [];
-  if (formatVersion >= 2) {
+  const sourceIds = new Set();
+  const components = payload.components.map((component, index) => {
+    const normalized = normalizeShareComponent(component, allowedTypes);
+    const sourceId = String(component.sourceId ?? component.id ?? `component-${index + 1}`);
+    if (!sourceId || sourceIds.has(sourceId)) throw new Error("A composição contém IDs de origem ausentes ou duplicados.");
+    sourceIds.add(sourceId);
+    normalized.sourceId = sourceId;
+    return normalized;
+  });
+
+  let groups = [];
+  if (formatVersion === 2) {
     if (!Array.isArray(payload.groups) || payload.groups.length > 50) throw new Error("A hierarquia de grupos é inválida ou excede o limite.");
     const ids = new Set();
-    for (const group of payload.groups) {
-      if (!group || typeof group !== "object" || !group.id || ids.has(String(group.id))) throw new Error("A composição contém um subgrupo inválido.");
+    groups = payload.groups.map(group => {
+      if (!group || typeof group !== "object" || !group.id || ids.has(String(group.id))) {
+        throw new Error("A composição contém um subgrupo inválido.");
+      }
       ids.add(String(group.id));
-    }
-    const componentIds = new Set(components.map(component => String(component.sourceId ?? "")).filter(Boolean));
-    for (const group of payload.groups) {
-      const parentGroupId = String(group.parentGroupId ?? "");
-      if (parentGroupId && !ids.has(parentGroupId)) throw new Error("Um subgrupo referencia um grupo pai inexistente.");
-      if ((group.componentIds ?? []).some(id => !componentIds.has(String(id)))) throw new Error("Um subgrupo referencia um componente inexistente.");
-      groups.push({ ...sanitizeJsonValue(group), id:String(group.id), parentGroupId, componentIds:[...(group.componentIds ?? [])].map(String) });
-    }
-    const parentMap = new Map(groups.map(group => [group.id, group.parentGroupId]));
+      return {
+        ...sanitizeJsonValue(group),
+        id: String(group.id),
+        parentGroupId: String(group.parentGroupId ?? ""),
+        componentIds: [...new Set((group.componentIds ?? []).map(String))]
+      };
+    });
     for (const group of groups) {
-      const seen = new Set([group.id]); let cursor = group.parentGroupId;
-      while (cursor) { if (seen.has(cursor)) throw new Error("A hierarquia contém um ciclo."); seen.add(cursor); cursor = parentMap.get(cursor) ?? ""; }
+      if (group.parentGroupId && !ids.has(group.parentGroupId)) throw new Error("Um subgrupo referencia um grupo pai inexistente.");
+      for (const componentId of group.componentIds) {
+        if (!sourceIds.has(componentId)) throw new Error("Um subgrupo referencia um componente inexistente.");
+      }
     }
   }
-  return { name:String(payload.name ?? "Grupo importado").trim().slice(0,48)||"Grupo importado", groupSettings:sanitizeJsonValue(payload.groupSettings ?? {}), components, groups };
-}
 
+  if (!groups.length) {
+    groups = [{
+      id: "root",
+      name: String(payload.name ?? "Grupo importado").trim().slice(0, 48) || "Grupo importado",
+      parentGroupId: "",
+      componentIds: components.map(component => component.sourceId),
+      ...(sanitizeJsonValue(payload.groupSettings ?? {}))
+    }];
+  }
+
+  const groupIds = new Set(groups.map(group => group.id));
+  const parentMap = new Map(groups.map(group => [group.id, group.parentGroupId]));
+  const roots = groups.filter(group => !group.parentGroupId);
+  if (roots.length !== 1) throw new Error("A composição precisa possuir exatamente um grupo principal.");
+  const componentOwners = new Set();
+  for (const group of groups) {
+    for (const componentId of group.componentIds) {
+      if (componentOwners.has(componentId)) throw new Error("Um componente não pode pertencer diretamente a mais de um grupo.");
+      componentOwners.add(componentId);
+    }
+    const seen = new Set([group.id]);
+    let cursor = group.parentGroupId;
+    while (cursor) {
+      if (!groupIds.has(cursor)) throw new Error("Um grupo aponta para um grupo pai inexistente.");
+      if (seen.has(cursor)) throw new Error("A hierarquia contém um ciclo.");
+      seen.add(cursor);
+      cursor = parentMap.get(cursor) ?? "";
+    }
+  }
+  const root = roots[0];
+  for (const component of components) {
+    if (!componentOwners.has(component.sourceId)) root.componentIds.push(component.sourceId);
+  }
+  return {
+    name: String(payload.name ?? "Grupo importado").trim().slice(0, 48) || "Grupo importado",
+    groupSettings: sanitizeJsonValue(payload.groupSettings ?? {}),
+    components,
+    groups
+  };
+}
 
 const MAX_LAYOUT_COMPONENTS = 250;
 const MAX_LAYOUT_GROUPS = 100;
