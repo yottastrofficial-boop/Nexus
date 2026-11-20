@@ -2746,26 +2746,35 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const builtinAssetKeys = new Set((NEXUS_LIBRARY_CATALOG.assets ?? []).map(asset => String(asset.key)));
     const builtinThemeIds = new Set(Object.keys(THEME_PALETTES));
 
+    let addedComponents = 0, addedGroups = 0, addedLayouts = 0, addedAssets = 0, addedThemes = 0, addedFlows = 0;
     for (const item of data.components) {
+      if (item.sourceId && components.some(saved => saved.sourceId === item.sourceId)) continue;
       components.push({ ...clone(item), id: foundry.utils.randomID(10), version: 1 });
+      addedComponents++;
     }
     for (const item of data.groups) {
+      if (item.sourceId && groups.some(saved => saved.sourceId === item.sourceId)) continue;
       groups.push({ ...clone(item), id: `libgrp-${foundry.utils.randomID(8)}` });
+      addedGroups++;
     }
     for (const item of data.layouts) {
+      if (item.sourceId && layouts.some(saved => saved.sourceId === item.sourceId)) continue;
       layouts.push({ ...clone(item), id: `liblayout-${foundry.utils.randomID(8)}` });
+      addedLayouts++;
     }
     for (const asset of data.assets) {
-      if (builtinAssetKeys.has(String(asset.key))) continue;
-      const id = foundry.utils.randomID(10);
-      assets.push({ ...clone(asset), id });
-      if (COMPONENTS[asset.type]) {
-        components.push({ id: foundry.utils.randomID(10), version: 1, label: asset.label, type: asset.type, settings: clone(asset.template ?? {}) });
+      if (builtinAssetKeys.has(String(asset.key)) || assets.some(saved => saved.key === asset.key)) continue;
+      assets.push({ ...clone(asset), id: foundry.utils.randomID(10) });
+      addedAssets++;
+      if (COMPONENTS[asset.type] && !components.some(saved => saved.sourceId === asset.key)) {
+        components.push({ id: foundry.utils.randomID(10), sourceId: asset.key, version: 1, label: asset.label, type: asset.type, settings: clone(asset.template ?? {}) });
+        addedComponents++;
       }
     }
     for (const [themeId, palette] of Object.entries(data.themes)) {
-      if (builtinThemeIds.has(themeId)) continue;
+      if (builtinThemeIds.has(themeId) || themes.some(saved => saved.sourceId === themeId)) continue;
       themes.push({ id: `libtheme-${foundry.utils.randomID(8)}`, sourceId: themeId, name: themeId, palette: clone(palette) });
+      addedThemes++;
     }
 
     await game.user.setFlag("nexus", "libraryComponents", components.slice(-200));
@@ -2774,8 +2783,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await game.user.setFlag("nexus", "libraryAssets", assets.slice(-200));
     await game.user.setFlag("nexus", "libraryThemes", themes.slice(-100));
 
+    let savedFlows = getInteractionLibrary(this.actor);
     for (const entry of data.flows) {
-      if (entry?.flow) await saveInteractionToLibrary(this.actor, entry.flow);
+      if (!entry?.flow) continue;
+      const signature = JSON.stringify(entry.flow);
+      if (savedFlows.some(saved => JSON.stringify(saved.flow) === signature)) continue;
+      savedFlows = await saveInteractionToLibrary(this.actor, entry.flow);
+      addedFlows++;
     }
 
     this._libraryAssetScope = "personal";
@@ -2785,7 +2799,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderCustomThemes?.();
     this._libraryRenderSavedFlows?.();
     this._libraryApplyFilter?.();
-    ui.notifications?.info?.(`Biblioteca importada: ${data.components.length} componentes, ${data.groups.length} grupos, ${data.layouts.length} layouts, ${data.flows.length} fluxos e catálogos de assets/temas.`);
+    ui.notifications?.info?.(`Biblioteca importada: ${addedComponents} componentes, ${addedGroups} grupos, ${addedLayouts} layouts, ${addedAssets} assets, ${addedThemes} temas e ${addedFlows} fluxos novos.`);
     return imported;
   }
 
