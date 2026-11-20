@@ -2115,23 +2115,24 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const ids = [...(this._selectedIds ?? [])];
     if (ids.length !== 1) {
       ui.notifications?.info?.("Selecione exatamente um componente no Canvas para salvá-lo.");
-      return;
+      return false;
     }
     const layouts = await this._readLayouts(), layout = layouts[this._activeLayoutId()];
     const component = layout?.components?.find(item => item.id === ids[0]);
-    if (!component || !COMPONENTS[component.type]) return;
+    if (!component || !COMPONENTS[component.type]) return false;
     const label = String(component.customLabel || COMPONENTS[component.type].label || "Componente").trim().slice(0, 48);
-    const keys = ["customLabel","binding","customBinding","dataPath","text","localValue","placeholder","rows","columns","cells","resourceLabel","format","w","h","backgroundColor","borderColor","borderRadius","opacity","sheetVariant","sheetCode","sheetHint","currentPath","maxPath","sheetLabel","sheetIcon","sheetContent1","sheetContent2","sheetColor","sheetTrackColor","sheetOrientation","previewCurrent","previewMax","tokenImage","headingFontSize","headingFontFamily","fontSize","fontFamily","textAlign","fontWeight","fontStyle","textTransform","letterSpacing","lineHeight","labelPosition","showLabel","contentStyle","headingStyle","actionType","rollFormula","actionPath","proficiencyLevel","proficiencyLabels","imageFit","imagePosition","imageOpacity","tokenFrameMode","tokenFrameSource","tokenFrameColor","tokenFrameWidth","tokenShape","tokenOverlay","tokenBackgroundColor","layerIcon","layerImage"];
-    const settings = {};
-    for (const key of keys) if (component[key] !== undefined) settings[key] = clone(component[key]);
+    // Preserve every serializable setting, including fields added by future component types.
+    const settings = clone(component);
+    for (const key of ["id", "definition", "x", "y", "z", "stackOrder"]) delete settings[key];
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
-    const next = [...saved, { id: foundry.utils.randomID(10), label, type: component.type, settings }];
-    await game.user.setFlag("nexus", "libraryComponents", next);
+    const next = [...saved, { id: foundry.utils.randomID(10), version: 1, label, type: component.type, settings }];
+    await game.user.setFlag("nexus", "libraryComponents", next.slice(-200));
     ui.notifications?.info?.(`“${label}” foi salvo em Meus Componentes.`);
     this._libraryAssetScope = "personal";
     this._libraryRenderPersonalItems?.();
     this._libraryApplyFilter?.();
     this.render({ force: true });
+    return true;
   }
 
   async _addSavedLibraryComponent(id) {
@@ -2607,6 +2608,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importSavedLayoutCode(code) {
+    if (String(code ?? "").trim().startsWith("NEXUS-PACK/1")) return this._importLibraryPackageCode(code);
     const imported = parseNexusLayoutShareCode(code, Object.keys(COMPONENTS));
     const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
     const entry = { id: `liblayout-${foundry.utils.randomID(8)}`, name: imported.name, layout: imported.layout };
