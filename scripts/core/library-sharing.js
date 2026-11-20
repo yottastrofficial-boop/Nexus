@@ -309,3 +309,89 @@ export function parseNexusLayoutShareCode(code, componentTypes = []) {
   layout.links = Array.isArray(layout.links) ? layout.links : [];
   return { name: String(payload.name ?? layout.name ?? "Layout").trim().slice(0, 48) || "Layout", layout };
 }
+
+
+const SHARE_PACKAGE_KINDS = new Set(["component", "group", "layout"]);
+
+/**
+ * Unified, versioned exchange envelope for reusable NEXUS library entries.
+ * The payload is always inert JSON; importing never evaluates supplied code.
+ */
+export function createNexusSharePackage(kind, entry, componentTypes = []) {
+  const type = String(kind ?? "");
+  if (!SHARE_PACKAGE_KINDS.has(type)) throw new Error("Tipo de pacote NEXUS não reconhecido.");
+  const allowed = new Set(componentTypes.map(String));
+  let payload;
+  let name = String(entry?.name ?? entry?.label ?? type).trim().slice(0, 48) || type;
+
+  if (type === "component") {
+    const componentType = String(entry?.type ?? "");
+    if (!allowed.has(componentType)) throw new Error("O tipo deste componente não está disponível nesta versão do NEXUS.");
+    const settings = sanitizeJsonValue(entry?.settings ?? {});
+    if (!settings || typeof settings !== "object" || Array.isArray(settings)) throw new Error("As configurações do componente são inválidas.");
+    const normalized = normalizeShareComponent({ ...settings, type: componentType }, allowed);
+    delete normalized.type;
+    delete normalized.x;
+    delete normalized.y;
+    payload = { type: componentType, label: name, settings: normalized };
+  } else if (type === "group") {
+    const group = {
+      name,
+      groupSettings: sanitizeJsonValue(entry?.groupSettings ?? {}),
+      components: Array.isArray(entry?.components) ? entry.components : [],
+      groups: Array.isArray(entry?.groups) ? entry.groups : []
+    };
+    const normalized = parseNexusGroupShareCode(createNexusGroupShareCode(group), componentTypes);
+    payload = normalized;
+    name = normalized.name;
+  } else {
+    const layout = entry?.layout ?? entry;
+    const normalized = parseNexusLayoutShareCode(createNexusLayoutShareCode({ ...sanitizeJsonValue(layout), name }), componentTypes);
+    payload = normalized.layout;
+    name = normalized.name;
+  }
+
+  const code = "NEXUS-PACK/1\\n" + JSON.stringify({
+    format: "nexus-package",
+    version: 1,
+    kind: type,
+    name,
+    payload
+  }, null, 2);
+  if (code.length > MAX_SHARE_CODE_LENGTH) throw new Error("O pacote excede o tamanho máximo permitido para compartilhamento.");
+  return code;
+}
+
+export function parseNexusSharePackage(code, componentTypes = []) {
+  let source = String(code ?? "").trim();
+  if (!source || source.length > MAX_SHARE_CODE_LENGTH) throw new Error("O arquivo está vazio ou excede o tamanho máximo permitido.");
+  source = source.replace(/^\\x60{3}(?:json)?\\s*/i, "").replace(/\\s*\\x60{3}$/, "");
+  if (source.startsWith("NEXUS-PACK/1")) source = source.slice("NEXUS-PACK/1".length).trim();
+  const start = source.indexOf("{"), end = source.lastIndexOf("}");
+  if (start < 0 || end < start) throw new Error("Não encontrei um pacote JSON válido.");
+  let raw;
+  try { raw = JSON.parse(source.slice(start, end + 1)); }
+  catch (_) { throw new Error("O pacote não contém um JSON válido."); }
+  if (raw?.format !== "nexus-package" || raw.version !== 1 || !SHARE_PACKAGE_KINDS.has(raw.kind)) {
+    throw new Error("Formato ou versão de pacote NEXUS não reconhecido.");
+  }
+  const name = String(raw.name ?? raw.kind).trim().slice(0, 48) || raw.kind;
+  const allowed = new Set(componentTypes.map(String));
+  let payload;
+  if (raw.kind === "component") {
+    const type = String(raw.payload?.type ?? "");
+    if (!allowed.has(type)) throw new Error("Este pacote utiliza um tipo de componente que não está disponível nesta versão do NEXUS.");
+    const settings = sanitizeJsonValue(raw.payload?.settings ?? {});
+    if (!settings || typeof settings !== "object" || Array.isArray(settings)) throw new Error("As configurações do componente são inválidas.");
+    const normalized = normalizeShareComponent({ ...settings, type }, allowed);
+    delete normalized.type;
+    delete normalized.x;
+    delete normalized.y;
+    payload = { type, label: name, settings: normalized };
+  } else if (raw.kind === "group") {
+    payload = parseNexusGroupShareCode(createNexusGroupShareCode(raw.payload), componentTypes);
+  } else {
+    payload = parseNexusLayoutShareCode(createNexusLayoutShareCode({ ...sanitizeJsonValue(raw.payload), name }), componentTypes).layout;
+  }
+  return { kind: raw.kind, name, payload };
+}
