@@ -250,6 +250,8 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
+  "actor-sheet-listeners deve importar a fila de gravação que utiliza");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
 const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
 const actorPropertyPickerListeners = await read("scripts/sheets/actor-property-picker-listeners.js");
