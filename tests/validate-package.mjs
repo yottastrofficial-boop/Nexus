@@ -15,7 +15,7 @@ import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode } from "../scripts/core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 
 // Nested group hierarchy regression tests.
@@ -64,6 +64,51 @@ import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-
   assert.equal(parsed.layout.width, 900);
   assert.equal(parsed.layout.components[0].id, "cmp-a");
   assert.equal(parsed.layout.groups[0].componentIds[0], "cmp-a");
+}
+
+// Unified package round-trip tests for individual components, nested groups and layouts.
+{
+  const componentCode = createNexusSharePackage("component", {
+    label: "Proficiência",
+    type: "custom-card",
+    settings: { customLabel: "Proficiência", text: "{{skills.for.athletics.proficientLevel}}", w: 180, h: 52, borderRadius: 8 }
+  }, ["custom-card"]);
+  const component = parseNexusSharePackage(componentCode, ["custom-card"]);
+  assert.equal(component.kind, "component");
+  assert.equal(component.payload.settings.text, "{{skills.for.athletics.proficientLevel}}");
+  assert.equal(component.payload.settings.w, 180);
+
+  const groupCode = createNexusSharePackage("group", {
+    name: "Perícia",
+    groupSettings: { backgroundColor: "#18202b" },
+    components: [
+      { sourceId: "proficiency", type: "custom-card", x: 0, y: 0, w: 48, h: 48 },
+      { sourceId: "name", type: "custom-card", x: 54, y: 0, w: 140, h: 48 }
+    ],
+    groups: [
+      { id: "root", name: "Perícia", parentGroupId: "", componentIds: [] },
+      { id: "identity", name: "Identificação", parentGroupId: "root", componentIds: ["name"] },
+      { id: "level", name: "Proficiência", parentGroupId: "root", componentIds: ["proficiency"] }
+    ]
+  }, ["custom-card"]);
+  const group = parseNexusSharePackage(groupCode, ["custom-card"]);
+  assert.equal(group.kind, "group");
+  assert.equal(group.payload.groups.length, 3);
+  assert.equal(group.payload.groups.find(item => item.id === "level").parentGroupId, "root");
+
+  const layoutCode = createNexusSharePackage("layout", {
+    name: "Modelo de perícias",
+    layout: {
+      name: "Modelo de perícias", width: 900, height: 700,
+      components: [{ id: "skill-card", type: "custom-card", x: 10, y: 20, w: 180, h: 52 }],
+      groups: [{ id: "skills", name: "Perícias", parentGroupId: "", componentIds: ["skill-card"] }],
+      links: []
+    }
+  }, ["custom-card"]);
+  const layout = parseNexusSharePackage(layoutCode, ["custom-card"]);
+  assert.equal(layout.kind, "layout");
+  assert.equal(layout.payload.groups[0].name, "Perícias");
+  assert.throws(() => parseNexusSharePackage(componentCode, ["asset-text"]), /não está disponível/, "Pacotes devem rejeitar tipos ausentes no sistema de destino");
 }
 
 // Geometry regression tests for the Canvas smart-alignment search.
