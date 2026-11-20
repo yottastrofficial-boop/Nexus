@@ -19,7 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
-import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition } from "../scripts/core/actor-aliases.js";
+import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1765,6 +1765,14 @@ assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases 
   assert.equal(slugifyActorAlias(""), "novo");
   assert.equal(isSafeActorAliasKey("system.attributes.for"), "attributes.for");
   assert.equal(isSafeActorAliasKey("custom.__proto__.value"), "");
+  const normalizedLegacyAlias = normalizeActorAliasDefinition({
+    id: "legacy-alias", category: "attributes", key: "attributes.attributes.agi",
+    label: "Agilidade", type: "attribute", legacyKeys: []
+  });
+  assert.equal(normalizedLegacyAlias.key, "attributes.agi");
+  assert.deepEqual(normalizedLegacyAlias.legacyKeys, ["attributes.attributes.agi"]);
+  assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.__proto__.value" }, () => "new-id"), null);
+  assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.novo" }, () => "generated-id").id, "generated-id");
   const aliases = [{ id: "a", key: "custom.poder", legacyKeys: ["custom.antigo"] }];
   const natives = [{ id: "n", key: "resources.pv", legacyKeys: ["resources.vida"] }];
   assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives), "custom.poder_2");
