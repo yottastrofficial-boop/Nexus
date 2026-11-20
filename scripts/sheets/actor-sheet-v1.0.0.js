@@ -3224,7 +3224,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         el.classList.toggle("active", !!group && (this._groupHierarchy?.descendants.get(String(group.id)) ?? group.componentIds).every(id => this._selectedIds.has(id)));
       });
     }
-    this._nexusPanelWindows?.get("layers")?.panel?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
+    for (const root of [this._nexusPanelWindows?.get("layers")?.panel, this.element]) root?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
     const activeComponentId = selectedComponentId ?? (this._selectedIds.size === 0 ? this._componentEditorTargetId : null);
     const one = activeComponentId ? componentsById.get(activeComponentId) ?? null : null;
     if (!one && this._selectedIds.size === 0) this._componentEditorTargetId = null;
