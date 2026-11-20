@@ -1,6 +1,7 @@
 import { findBestAlignmentMatch } from "../core/canvas-geometry.js";
 import { updateCanvasConnectedCorners } from "./canvas-connected-corners.js";
 import { buildGroupHierarchy } from "../core/group-hierarchy.js";
+import { createListenerScope } from "../core/listener-scope.js";
 
 /**
  * Canvas gestures, selection visuals, pointer interactions and keyboard controls.
@@ -20,12 +21,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
 
     // Cada ativação do Canvas possui um ciclo de vida próprio.
     // AbortController remove listeners de elementos, documento e janela em conjunto.
-    const listenerController = new AbortController();
-    const listen = (target, type, handler, options = undefined) => {
-      if (!target?.addEventListener) return;
-      const normalized = typeof options === "boolean" ? { capture: options } : { ...(options ?? {}) };
-      target.addEventListener(type, handler, { ...normalized, signal: listenerController.signal });
-    };
+    const listenerScope = createListenerScope();
+    const listen = listenerScope.listen;
     sheet._selectedIds ??= new Set();
     sheet._nexusCanvasKeyboardFocus ??= false;
     const selectionBox = root.querySelector(".nexus-marquee"), guides = root.querySelector(".nexus-guides");
@@ -673,7 +670,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (!directlyActive) return false;
     });
     listen(window,"keydown",keyHandler,true);
-    sheet._nexusKeyCleanup = () => { listenerController.abort(); void flushKeyboardMove(); Hooks.off("preDeleteToken", tokenDeletionGuardId); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
+    sheet._nexusKeyCleanup = () => { listenerScope.abort(); void flushKeyboardMove(); Hooks.off("preDeleteToken", tokenDeletionGuardId); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
     root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;listen(button,"dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
     listen(canvas,"dragover",e=>e.preventDefault());
     listen(canvas,"drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
