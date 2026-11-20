@@ -1230,6 +1230,12 @@ assert.match(sheet, /async _updateSystemValue\(input\) \{\s*return serializeActo
 assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Alterações de proficiência devem usar a fila comum");
 assert.match(sheet, /action\?\.type === "update"[\s\S]*?return serializeActorPropertyWrite\(this\.actor/, "Actions de interação também devem serializar alterações de propriedades");
 assert.match(sheetListeners, /data-config-current-value[\s\S]*?serializeActorPropertyWrite\(sheet\.actor/, "Valores de recursos no Inspector devem compartilhar a fila");
+assert.match(actorAliasListeners, /const bindSerialized = \(selector, eventName, handler\)/,
+  "Mutations do editor de aliases devem passar pelo binder serializado");
+for (const selector of ["[data-alias-create]", "[data-native-property-field]", "[data-native-property-reset]", "[data-alias-field]", "[data-alias-copy]", "[data-alias-reset]", "[data-alias-delete]"]) {
+  assert.ok(actorAliasListeners.includes(`bindSerialized("${selector}"`),
+    `A operação ${selector} deve compartilhar a fila de gravação do Actor`);
+}
 assert.doesNotMatch(sheetListeners, /propertyExpressionQueues = new WeakMap/, "A fila não deve serializar apenas fórmulas e deixar valores manuais concorrentes");
 assert.match(actorPropertyWrites, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
 assert.match(propertyValueListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
