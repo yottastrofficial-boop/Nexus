@@ -2518,40 +2518,46 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _saveSelectedGroupToLibrary() {
-    const layouts = await this._readLayouts();
-    const layout = layouts[this._activeLayoutId()];
+    const layouts = await this._readLayouts(), layout = layouts[this._activeLayoutId()];
     if (!layout) return false;
     const selected = new Set(this._selectedIds ?? []);
-    const group = (layout.groups ?? []).find(item => item.id === this._selectedGroupId)
-      ?? (layout.groups ?? []).find(item => item.componentIds?.length >= 2 && item.componentIds.every(id => selected.has(id)));
-    if (!group) {
-      ui.notifications?.warn?.("Selecione um grupo completo antes de salvá-lo na Biblioteca.");
-      return false;
-    }
-    const members = (layout.components ?? []).filter(item => group.componentIds.includes(item.id));
-    if (members.length < 2) return false;
+    const hierarchy = buildGroupHierarchy(layout.groups ?? [], layout.components ?? []);
+    const group = hierarchy.groupById.get(String(this._selectedGroupId))
+      ?? (layout.groups ?? []).find(item => (hierarchy.descendants.get(String(item.id)) ?? []).length >= 2 && (hierarchy.descendants.get(String(item.id)) ?? []).every(id => selected.has(id)));
+    if (!group) { ui.notifications?.warn?.("Selecione um grupo completo antes de salvá-lo na Biblioteca."); return false; }
+    const groupId = String(group.id), componentIds = hierarchy.descendants.get(groupId) ?? [];
+    const members = (layout.components ?? []).filter(item => componentIds.includes(item.id));
+    if (!members.length) return false;
     const result = await foundry.applications.api.DialogV2.input({
-      window: { title: "Salvar grupo na Biblioteca" },
-      content: `<label class="nexus-library-card-content-label">Nome do grupo<input name="name" type="text" maxlength="48" value="${Handlebars.escapeExpression(String(group.name ?? "Grupo"))}"></label>`,
+      window: { title: "Salvar grupo hierárquico na Biblioteca" },
+      content: `<label class="nexus-library-card-content-label">Nome do grupo<input name="name" type="text" maxlength="48" value="${Handlebars.escapeExpression(String(group.name ?? "Grupo"))}"></label><p>A composição inclui todos os subgrupos e suas configurações.</p>`,
       ok: { label: "Salvar" }, rejectClose: false
     });
     const name = String(result?.name ?? "").trim().slice(0, 48);
     if (!name) return false;
-    const left = Math.min(...members.map(item => item.x));
-    const top = Math.min(...members.map(item => item.y));
-    const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
-    const groupSettings = clone(group);
-    for (const key of ["id", "name", "componentIds", "x", "y", "w", "h", "z"]) delete groupSettings[key];
-    saved.push({
-      id: `libgrp-${foundry.utils.randomID(8)}`, name,
-      groupSettings,
-      components: members.map(item => { const { id, definition, ...data } = clone(item); return { ...data, x: item.x - left, y: item.y - top }; })
+    const left = Math.min(...members.map(item => item.x)), top = Math.min(...members.map(item => item.y));
+    const subtree = (layout.groups ?? []).filter(item => {
+      let cursor = String(item.id), seen = new Set();
+      while (cursor && !seen.has(cursor)) { if (cursor === groupId) return true; seen.add(cursor); cursor = hierarchy.parentById.get(cursor) ?? ""; }
+      return false;
     });
+    const savedGroups = subtree.map(item => {
+      const copy = clone(item);
+      copy.parentGroupId = String(item.id) === groupId ? "" : String(item.parentGroupId ?? "");
+      for (const key of ["x","y","w","h","z","stackOrder"]) delete copy[key];
+      return copy;
+    });
+    const savedComponents = members.map(item => {
+      const { id, definition, ...data } = clone(item);
+      return { ...data, sourceId:id, x:item.x-left, y:item.y-top };
+    });
+    const rootSettings = clone(group);
+    for (const key of ["id","name","parentGroupId","componentIds","x","y","w","h","z","stackOrder"]) delete rootSettings[key];
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    saved.push({ id:`libgrp-${foundry.utils.randomID(8)}`, name, groupSettings:rootSettings, components:savedComponents, groups:savedGroups });
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
-    ui.notifications?.info?.(`Grupo "${name}" salvo na sua Biblioteca pessoal.`);
-    this._libraryRenderSavedGroups?.();
-    this._libraryApplyFilter?.();
-    return true;
+    ui.notifications?.info?.(`Grupo "${name}" e sua hierarquia foram salvos na Biblioteca pessoal.`);
+    this._libraryRenderSavedGroups?.(); this._libraryApplyFilter?.(); return true;
   }
 
   async _saveCurrentLayoutToLibrary() {
