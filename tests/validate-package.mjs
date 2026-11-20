@@ -241,6 +241,7 @@ const read = file => readFile(path.join(root, file), "utf8");
 const exists = async file => access(path.join(root, file));
 const manifest = JSON.parse(await read("system.json"));
 const stableManifest = JSON.parse(await read("manifest.json"));
+const releaseWorkflow = await read(".github/workflows/release.yml");
 const sheet = await read("scripts/sheets/actor-sheet-v1.0.0.js");
 const template = await read("templates/actors/actor-sheet.hbs");
 const skills = await read("scripts/core/skills.js");
@@ -580,6 +581,12 @@ assert.match(stableManifest.version, /^\d+\.\d+\.\d+\.\d+$/, "O manifesto estáv
 assert.match(stableManifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/);
 assert.ok(stableManifest.download.endsWith(`/releases/download/v${stableManifest.version}/nexus.zip`),
   "O manifesto estável só pode apontar para o pacote da própria versão");
+const releasePublishIndex = releaseWorkflow.indexOf("Publish GitHub Release");
+const releaseAssetCheckIndex = releaseWorkflow.indexOf("Verify published package asset");
+const stableManifestPublishIndex = releaseWorkflow.indexOf("Publish stable Foundry manifest after the package is available");
+assert.ok(releasePublishIndex >= 0 && releaseAssetCheckIndex > releasePublishIndex && stableManifestPublishIndex > releaseAssetCheckIndex,
+  "O manifesto estável só pode ser atualizado depois da publicação e verificação do ZIP");
+assert.match(releaseWorkflow, /\\.assets\\[\\] \\|\\|\\|\\|\\|/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
