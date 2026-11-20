@@ -3,14 +3,14 @@ const SAFE_ALIAS_SEGMENT = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
 export function slugifyActorAlias(value) {
   return String(value ?? "")
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "") || "novo";
 }
 
 export function isSafeActorAliasKey(value) {
-  const key = String(value ?? "").trim().replace(/^(?:actor\\.|system\\.)+/, "");
+  const key = String(value ?? "").trim().replace(/^(?:actor\.|system\.)+/, "");
   return key.split(".").length > 0
     && key.split(".").every(segment => SAFE_ALIAS_SEGMENT.test(segment)
       && !["__proto__", "prototype", "constructor"].includes(segment))
