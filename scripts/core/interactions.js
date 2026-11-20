@@ -210,7 +210,8 @@ export function getTriggeredActions(component,eventName="click",context={}) {
 export async function executeTriggeredActions(component,eventName,executeAction,context={}) {
   if(typeof executeAction!=="function")return [];
   const results=[];
-  for(const flow of getComponentInteractions(component).filter(f=>interactionMatches(f,eventName,context))){
+  const skippedInteractionIds = new Set(Array.isArray(context.skipInteractionIds) ? context.skipInteractionIds.map(String) : []);
+  for(const flow of getComponentInteractions(component).filter(f=>!skippedInteractionIds.has(f.id)&&interactionMatches(f,eventName,context))){
     for(const action of flow.actions.filter(a=>a.enabled)){
       try{results.push(await executeAction(action,component,context));}
       catch(error){if(flow.execution.onError!=="continue")throw error;results.push({error});}
