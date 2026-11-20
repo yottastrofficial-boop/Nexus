@@ -1115,8 +1115,8 @@ assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder s
 assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor a ação de excluir fluxos");
 assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
 assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
-assert.match(sheetCode,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
-assert.match(sheetCode,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
+assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
+assert.match(actorPropertyPickerListeners,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
 assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
