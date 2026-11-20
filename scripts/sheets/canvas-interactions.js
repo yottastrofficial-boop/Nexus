@@ -17,6 +17,15 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
 
     const canvas = root.querySelector(".nexus-canvas");
     if (!canvas) return;
+
+    // Cada ativação do Canvas possui um ciclo de vida próprio.
+    // AbortController remove listeners de elementos, documento e janela em conjunto.
+    const listenerController = new AbortController();
+    const listen = (target, type, handler, options = undefined) => {
+      if (!target?.addEventListener) return;
+      const normalized = typeof options === "boolean" ? { capture: options } : { ...(options ?? {}) };
+      target.addEventListener(type, handler, { ...normalized, signal: listenerController.signal });
+    };
     sheet._selectedIds ??= new Set();
     sheet._nexusCanvasKeyboardFocus ??= false;
     const selectionBox = root.querySelector(".nexus-marquee"), guides = root.querySelector(".nexus-guides");
@@ -166,7 +175,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if (cornerFrame) return;
       cornerFrame = requestAnimationFrame(() => { cornerFrame = 0; updateConnectedCorners(); });
     };
-    canvas.addEventListener("nexus:selectionchange", scheduleConnectedCorners);
+    listen(canvas,"nexus:selectionchange", scheduleConnectedCorners);
     const syncGroupBounds = (updateCorners = true) => {
       for (const g of (sheet._activeGroups ?? [])) {
         const members = (membersByGroupId.get(g.id) ?? []).filter(element => !element.hidden);
@@ -196,12 +205,12 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     updateConnectedCorners();
     const sizeReadout = document.createElement("div"); sizeReadout.className = "nexus-resize-readout"; sizeReadout.hidden = true; canvas.append(sizeReadout);
     const inspectorWindow = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
-    inspectorWindow?.addEventListener("pointerdown", event => { if (event.target.closest(".nexus-panel-window")) { sheet._nexusInteractionActive = false; event.stopPropagation(); } }, true);
+    listen(inspectorWindow,"pointerdown", event => { if (event.target.closest(".nexus-panel-window")) { sheet._nexusInteractionActive = false; event.stopPropagation(); } }, true);
     const contextMenu = document.createElement("div"); contextMenu.className = "nexus-context-menu"; contextMenu.hidden = true;
     contextMenu.innerHTML = `<button type="button" data-context-action="add-card">Adicionar card</button><hr><button type="button" data-context-action="edit">Propriedades</button><hr><button type="button" data-context-action="group">Agrupar seleção</button><button type="button" data-context-action="link">Criar vínculo</button><button type="button" data-context-action="ungroup">Desagrupar</button><hr><button type="button" data-context-action="duplicate">Duplicar</button><button type="button" data-context-action="front">Trazer para frente</button><button type="button" data-context-action="back">Enviar para trás</button><hr><button type="button" data-context-action="delete" class="danger">Excluir</button>`;
     root.append(contextMenu);
     const closeContext = () => { contextMenu.hidden = true; };
-    contextMenu.addEventListener("click", async event => {
+    listen(contextMenu,"click", async event => {
       event.preventDefault(); event.stopPropagation();
       const action = event.target.closest("[data-context-action]")?.dataset.contextAction; if (!action) return; closeContext();
       const ids=[...(sheet._selectedIds??[])];
@@ -215,8 +224,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       if(action==="back") await sheet._changeLayer("back");
       if(action==="delete") await sheet._deleteComponents(ids);
     });
-    root.addEventListener("pointerdown", event => { if(!contextMenu.contains(event.target)) closeContext(); }, true);
-    canvas.addEventListener("contextmenu", event => {
+    listen(root,"pointerdown", event => { if(!contextMenu.contains(event.target)) closeContext(); }, true);
+    listen(canvas,"contextmenu", event => {
       if(sheet._mode!=="appearance") return; event.preventDefault(); event.stopPropagation();
       const component=event.target.closest(".nexus-component");
       const groupSurface=event.target.closest(".nexus-group-surface");
@@ -273,7 +282,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       };
       requestAnimationFrame(waitForPanel);
     };
-    root.addEventListener("dblclick", event => {
+    listen(root,"dblclick", event => {
       if (performance.now() < suppressNativeDoubleClickUntil) return;
       if (sheet._mode !== "appearance") return;
       const target = event.target instanceof Element ? event.target : event.target?.parentElement;
@@ -316,8 +325,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       return true;
     };
     canvas.tabIndex = 0;
-    canvas.addEventListener("focus", () => { sheet._nexusCanvasKeyboardFocus = true; });
-    canvas.addEventListener("pointerdown",event=>{
+    listen(canvas,"focus", () => { sheet._nexusCanvasKeyboardFocus = true; });
+    listen(canvas,"pointerdown",event=>{
       if(sheet._mode!=="appearance")return;
       if(event.target.closest("button,input,textarea,select,[contenteditable='true']"))return;
       // O foco só vai para o Canvas quando o próprio Canvas recebe interação.
@@ -460,7 +469,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     // Limita o trabalho pesado de alinhamento/seleção a no máximo um ciclo por frame.
     let pointerMoveFrame = 0;
     let latestPointerMove = null;
-    canvas.addEventListener("pointermove", event => {
+    listen(canvas,"pointermove", event => {
       latestPointerMove = event;
       if (pointerMoveFrame) return;
       pointerMoveFrame = requestAnimationFrame(() => {
@@ -475,9 +484,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       lastCursorTarget = null;
       canvas.style.removeProperty("cursor");
     };
-    canvas.addEventListener("pointerleave", clearInteractionCursor);
+    listen(canvas,"pointerleave", clearInteractionCursor);
     const finish=async(event)=>{if(event?.pointerId != null && canvas.hasPointerCapture?.(event.pointerId)) { try { canvas.releasePointerCapture(event.pointerId); } catch(_error) {} } clearInteractionCursor(); if(!gesture){sheet._nexusInteractionActive=false;delete canvas.dataset.nexusGestureActive;return;}if(gesture.type==="marquee")selectionBox.hidden=true; sheet._suppressComponentClickUntil = gesture.moved ? performance.now() + 260 : 0;if(gesture.group && gesture.type==="group-move"){const rs=gesture.starts.map(s=>rectOf(s.el));const minX=Math.min(...rs.map(r=>r.x)),minY=Math.min(...rs.map(r=>r.y)),maxX=Math.max(...rs.map(r=>r.x+r.w)),maxY=Math.max(...rs.map(r=>r.y+r.h));gesture.group.x=minX;gesture.group.y=minY;gesture.group.w=maxX-minX;gesture.group.h=maxY-minY;}const shouldSave = gesture.moved && gesture.type !== "marquee"; const touchedIds = shouldSave ? gesture.starts.map(item => item.el.dataset.id) : []; gesture=null;sheet._nexusInteractionActive=false;delete canvas.dataset.nexusGestureActive;sizeReadout.hidden=true;clearGuides();renderGroups();scheduleConnectedCorners();if(shouldSave){await saveAfterGesture(touchedIds);sheet._refreshBoundComponents?.();}};
-    canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+    listen(canvas,"pointerup",finish);listen(canvas,"pointercancel",finish);
     const restoreCanvasKeyboardFocus = () => {
       if (!sheet._nexusCanvasKeyboardFocus) return;
       requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -625,8 +634,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       }
     };
     root.tabIndex=0;
-    window.addEventListener("keyup", keyboardMoveKeyUp, true);
-    window.addEventListener("blur", keyboardMoveBlur);
+    listen(window,"keyup", keyboardMoveKeyUp, true);
+    listen(window,"blur", keyboardMoveBlur);
     const activateInteraction = () => { sheet._nexusInteractionActive = true; };
     const deactivateInteraction = event => {
       const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
@@ -652,8 +661,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         sheet._setSelection?.($(sheet.element ?? root), []);
       }
     };
-    root.addEventListener("pointerdown",activateInteraction,true);
-    document.addEventListener("pointerdown",deactivateInteraction,true);
+    listen(root,"pointerdown",activateInteraction,true);
+    listen(document,"pointerdown",deactivateInteraction,true);
     const tokenDeletionGuardId = Hooks.on("preDeleteToken", tokenDocument => {
       if (sheet._mode !== "appearance") return;
       const panelsOpen = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.isConnected)
@@ -663,9 +672,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const directlyActive = controlled.some(token => token?.document?.id === tokenDocument?.id || token?.id === tokenDocument?.id);
       if (!directlyActive) return false;
     });
-    window.addEventListener("keydown",keyHandler,true);
-    sheet._nexusKeyCleanup = () => { void flushKeyboardMove(); Hooks.off("preDeleteToken", tokenDeletionGuardId); window.removeEventListener("keydown",keyHandler,true); window.removeEventListener("keyup",keyboardMoveKeyUp,true); window.removeEventListener("blur",keyboardMoveBlur); document.removeEventListener("pointerdown",deactivateInteraction,true); root.removeEventListener("pointerdown",activateInteraction,true); canvas.removeEventListener("pointerleave",clearInteractionCursor); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
-    root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;button.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
-    canvas.addEventListener("dragover",e=>e.preventDefault());
-    canvas.addEventListener("drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
+    listen(window,"keydown",keyHandler,true);
+    sheet._nexusKeyCleanup = () => { listenerController.abort(); void flushKeyboardMove(); Hooks.off("preDeleteToken", tokenDeletionGuardId); if(pointerMoveFrame)cancelAnimationFrame(pointerMoveFrame); clearInteractionCursor(); };
+    root.querySelectorAll('[data-action="add-component"]').forEach(button=>{button.draggable=true;listen(button,"dragstart",e=>e.dataTransfer.setData("text/plain",button.dataset.type));});
+    listen(canvas,"dragover",e=>e.preventDefault());
+    listen(canvas,"drop",async e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(!COMPONENTS[type])return;const p=point(e),layouts=await sheet._readLayouts(),active=sheet._activeLayoutId(),l=layouts[active];sheet._captureHistory();const w=100,h=100;let x=p.x-w/2,y=p.y-h/2;if(l.snapEnabled){x=Math.round(x/l.gridSize)*l.gridSize;y=Math.round(y/l.gridSize)*l.gridSize;}const id=`cmp-${foundry.utils.randomID(8)}`;l.components.push({id,type,x:clamp(x,0,l.width-w),y:clamp(y,0,l.height-h),w,h,z:0,stackOrder:Math.max(-1,...l.components.map(c=>Number(c.stackOrder)||0))+1});sheet._selectedIds=new Set([id]);await sheet._writeLayouts(layouts,active);sheet.render({ force: true });});
 }
