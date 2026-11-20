@@ -19,6 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
+import { slugifyActorAlias, isSafeActorAliasKey, createUniqueActorAliasKey } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1732,3 +1733,19 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
 assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspectorNamespace/, "A ficha deve delegar o autocomplete de propriedades ao módulo especializado");
 assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
 assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
+
+
+// Actor alias key utilities share collision and safety rules across create/copy/rename.
+{
+  assert.equal(slugifyActorAlias("Força de Vontade"), "forca_de_vontade");
+  assert.equal(slugifyActorAlias(""), "novo");
+  assert.equal(isSafeActorAliasKey("system.attributes.for"), "attributes.for");
+  assert.equal(isSafeActorAliasKey("custom.__proto__.value"), "");
+  const aliases = [{ id: "a", key: "custom.poder", legacyKeys: ["custom.antigo"] }];
+  const natives = [{ id: "n", key: "resources.pv", legacyKeys: ["resources.vida"] }];
+  assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives), "custom.poder_2");
+  assert.equal(createUniqueActorAliasKey("custom", "Antigo", aliases, natives), "custom.antigo_2");
+  assert.equal(createUniqueActorAliasKey("custom", "PV", aliases, natives), "custom.pv");
+  assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives, "a"), "custom.poder");
+  assert.equal(createUniqueActorAliasKey("invalid.category", "Poder", aliases, natives), "");
+}
