@@ -1411,7 +1411,7 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 assert.match(sheetListeners, /capturedModifiers/, "A captura deve salvar os modificadores junto da tecla");
 assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve ser um indicador pequeno abaixo do caminho");
-assert.match(canvasGroupRendering, /data-group-handle/, "Grupos devem possuir uma alça clicável independente dos espaços vazios");
+assert.match(canvasGroupRendering, /groupHandle/, "Grupos devem possuir uma alça clicável independente dos espaços vazios");
 assert.match(canvasInteractions, /data-group-handle/, "A alça deve selecionar o grupo e abrir seu Inspector");
 
 assert.match(canvasPlayInteractions, /focusin/);
