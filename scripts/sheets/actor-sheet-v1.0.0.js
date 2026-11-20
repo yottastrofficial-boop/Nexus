@@ -3005,12 +3005,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const hierarchy = this._groupHierarchy ?? buildGroupHierarchy(groups, components);
     const requestedGroup = groupsById.get(this._selectedGroupId);
     const requestedIds = requestedGroup ? (hierarchy.descendants.get(String(requestedGroup.id)) ?? []) : [];
-    const selectedGroup = requestedGroup && requestedIds.length === this._selectedIds.size && requestedIds.every(id => this._selectedIds.has(id))
+    const resolvedGroup = requestedGroup && requestedIds.length === this._selectedIds.size && requestedIds.every(id => this._selectedIds.has(id))
       ? requestedGroup
       : groups.find(group => { const ids = hierarchy.descendants.get(String(group.id)) ?? []; return ids.length === this._selectedIds.size && ids.every(id => this._selectedIds.has(id)); }) ?? null;
-    this._selectedGroupId = selectedGroup?.id ?? null;
-    const selectedGroupIds = new Set(selectedGroup ? [selectedGroup.id] : []);
-    const selectedGroupComponentIds = new Set(selectedGroup ? hierarchy.descendants.get(String(selectedGroup.id)) ?? [] : []);
+    this._selectedGroupId = resolvedGroup?.id ?? null;
+    const selectedGroupIds = new Set(resolvedGroup ? [resolvedGroup.id] : []);
+    const selectedGroupComponentIds = new Set(resolvedGroup ? hierarchy.descendants.get(String(resolvedGroup.id)) ?? [] : []);
 
     // Aplica diretamente o estado final, evitando limpar e reescrever as mesmas classes.
     for (const el of componentNodes) {
