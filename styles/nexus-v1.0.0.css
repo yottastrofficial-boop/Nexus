@@ -6225,3 +6225,56 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-group-heading > button:hover {
   border-color:var(--nexus-panel-accent,#78b7e8);
 }
+
+
+/* 1.0.0.65 — indicador de propriedade discreto, gatilhos adaptáveis e seleção de grupo. */
+.nexus-panel-window .nexus-data-binding-inline {
+  display:flex !important; flex-direction:column !important; align-items:stretch !important;
+  gap:3px !important; min-width:0 !important;
+}
+.nexus-panel-window .nexus-data-binding-inline > [data-component-path-input] {
+  flex:1 1 auto !important; width:100% !important; min-width:0 !important;
+}
+.nexus-panel-window .nexus-data-binding-inline > [data-component-property-name] {
+  display:block !important; padding-left:2px !important; color:var(--nexus-panel-muted,#9aadc2) !important;
+  font-size:9px !important; line-height:1.2 !important; font-weight:500 !important;
+  overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important;
+}
+.nexus-group-container > .nexus-group-handle {
+  position:absolute !important; display:flex !important; align-items:center !important;
+  min-width:0 !important; height:20px !important; padding:0 8px !important;
+  border:1px solid color-mix(in srgb,var(--nexus-accent-color,#7188a4) 70%,transparent) !important;
+  border-bottom:0 !important; border-radius:6px 6px 0 0 !important;
+  color:var(--nexus-panel-text,#e7edf5) !important; background:var(--nexus-group-bg,#273443) !important;
+  font-size:9px !important; font-weight:700 !important; letter-spacing:.02em !important;
+  overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important;
+  cursor:pointer !important; pointer-events:auto !important; user-select:none !important;
+}
+.nexus-group-container > .nexus-group-handle:hover,
+.nexus-group-container > .nexus-group-handle:focus-visible {
+  outline:2px solid var(--nexus-accent-color,#9fc1e8) !important; outline-offset:1px !important;
+}
+.nexus-group-container > .nexus-group-handle[hidden] { display:none !important; }
+.nexus-group-container > .nexus-group-handle { z-index:2147483002 !important; }
+.nexus-group-container > .nexus-group-surface { pointer-events:none !important; }
+.nexus-group-container > .nexus-component { pointer-events:auto !important; }
+.nexus-panel-window .nexus-interaction-trigger-row {
+  display:grid !important; grid-template-columns:minmax(0,1.15fr) minmax(0,.8fr) 30px !important;
+  gap:6px !important; align-items:center !important;
+}
+.nexus-panel-window .nexus-interaction-trigger-row.is-key-trigger {
+  grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(110px,auto) 30px !important;
+}
+.nexus-panel-window .nexus-interaction-trigger-row select { min-width:0 !important; width:100% !important; }
+.nexus-panel-window .nexus-interaction-trigger-row [data-interaction-action="capture-key"] {
+  min-width:0 !important; max-width:180px !important; min-height:32px !important;
+  padding:4px 8px !important; border:1px solid var(--nexus-panel-border,#43546a) !important;
+  border-radius:5px !important; color:var(--nexus-panel-text,#e7edf5) !important;
+  background:var(--nexus-panel-surface,#263344) !important; font-size:10px !important;
+  overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important;
+}
+.nexus-panel-window .nexus-interaction-trigger-row [data-interaction-action="capture-key"].is-capturing {
+  border-color:var(--nexus-accent-color,#8fc8ff) !important;
+  background:color-mix(in srgb,var(--nexus-accent-color,#8fc8ff) 20%,var(--nexus-panel-surface,#263344)) !important;
+}
+.nexus-interaction-trigger-row [data-interaction-action="capture-key"][hidden] { display:none !important; }
