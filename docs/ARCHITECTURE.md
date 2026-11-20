@@ -142,3 +142,11 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - A geração considera identificadores atuais e históricos (`legacyKeys`) tanto de aliases personalizados quanto de propriedades nativas, evitando reutilizar caminhos que ainda podem ser referenciados por layouts antigos.
 - Criação, cópia e renomeação usam a mesma regra de colisão; o identificador interno (`id`) permanece independente do caminho editável.
 - Os testes cobrem acentos, entradas vazias, prefixos de caminho, segmentos perigosos, colisões com chaves históricas e exclusão do próprio registro durante a renomeação.
+
+### Migração de identificadores de aliases
+
+- `scripts/core/actor-aliases.js` concentra também a movimentação de dados personalizados e a atualização de referências de componentes quando uma chave muda.
+- `moveActorAliasCustomData()` move o payload entre caminhos sem sobrescrever um destino já existente; a função é pura e deixa a persistência sob responsabilidade da ficha.
+- `replaceActorAliasLayoutReferences()` atualiza `dataPath`, `currentPath`, `maxPath` e `customBinding` em todos os layouts, reconhecendo raízes legadas singulares `attribute.` e `resource.`.
+- Os fluxos de renomeação e restauração de aliases/propriedades nativas reutilizam os mesmos helpers, em vez de manter cópias da lógica de movimentação e substituição de caminhos.
+- Testes comportamentais verificam movimentação de payload, proteção contra sobrescrita, migração de referências canônicas e legadas.
