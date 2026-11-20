@@ -1,3 +1,10 @@
+## 1.0.0.67
+
+### Correções
+- Corrige o erro `ReferenceError: groups is not defined` ao preparar o contexto da ficha.
+- Obtém os grupos e componentes diretamente do layout ativo normalizado antes de construir a hierarquia.
+- Adiciona teste de regressão para garantir que os arrays existam antes da montagem das camadas.
+
 ## 1.0.0.66
 
 ### Grupos e camadas
