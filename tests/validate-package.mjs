@@ -19,6 +19,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
+import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
@@ -1709,4 +1710,18 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   releaseFirst();
   await Promise.all([first, second]);
   assert.deepEqual(order, ["first-start", "first-end", "second"], "As gravações devem preservar a ordem por Actor");
+}
+
+
+// Media source classification is shared by sheet previews and token rendering.
+{
+  assert.equal(isMediaSource("https://cdn.example.test/file?id=123"), true, "Signed HTTP URLs may omit a visible extension");
+  assert.equal(isMediaSource("portraits/hero.webp"), true, "Local image paths with supported extensions are accepted");
+  assert.equal(isMediaSource("{{identity.portrait}}"), false, "Unresolved property expressions are not media sources");
+  assert.equal(isMediaSource("javascript:alert(1)"), false, "Executable schemes are not media sources");
+  assert.equal(isImageSource("portraits/hero.webp"), true);
+  assert.equal(isVideoSource("movies/scene.webm"), true);
+  assert.equal(isAudioSource("audio/theme.ogg"), true);
+  assert.equal(isUsableTokenSource(DEFAULT_FOUNDRY_TOKEN_IMAGE), false, "The generic Foundry silhouette is not a custom token image");
+  assert.equal(isUsableTokenSource("portraits/hero.webp"), true);
 }
