@@ -5,7 +5,8 @@ import {
   moveActorAliasCustomData,
   replaceActorAliasLayoutReferences,
   createActorAliasDefaultValue,
-  createActorAliasCopyDefinition
+  createActorAliasCopyDefinition,
+  getActorAliasCustomValue
 } from "../core/actor-aliases.js";
 
 /**
@@ -334,7 +335,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     if (!copy) return;
     aliases.push(copy);
     const customData = clone(getCustomAliasData(sheet.actor));
-    const original = getPath(customData, source.key);
+    const original = getActorAliasCustomValue(customData, source);
     if (original !== undefined) foundry.utils.setProperty(customData, key, clone(original));
     else foundry.utils.setProperty(customData, key, createActorAliasDefaultValue(copy));
     await sheet.actor.setFlag("nexus", "customData", customData);
