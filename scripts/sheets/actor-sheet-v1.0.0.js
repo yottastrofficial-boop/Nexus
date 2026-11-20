@@ -313,7 +313,8 @@ const getCustomAliasData = actor => actor?.getFlag?.("nexus", "customData") ?? {
 const normalizeAliasDefinition = alias => {
   if (!alias || typeof alias !== "object") return null;
   const category = ["attributes", "resources", "combat", "identity", "custom"].includes(alias.category) ? alias.category : "custom";
-  let key = String(alias.key ?? "").trim().replace(/^system\./, "");
+  const originalKey = String(alias.key ?? "").trim().replace(/^system\./, "");
+  let key = originalKey;
   // Corrige caminhos legados como attributes.attributes.agi sem tocar em nomes legítimos.
   const repeated = new RegExp(`^(?:${category}\\.){2,}`, "i");
   if (repeated.test(key)) key = key.replace(repeated, `${category}.`);
@@ -322,7 +323,10 @@ const normalizeAliasDefinition = alias => {
   const validTypes = ["attribute", "resource", "number", "text", "url", "image", "boolean"];
   const type = validTypes.includes(alias.type) ? alias.type : (category === "resources" ? "resource" : category === "attributes" ? "attribute" : category === "identity" ? "text" : "number");
   const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type) ? "formula" : "manual";
-  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys: Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [], label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom", calculationMode, formula: String(alias.formula ?? "").slice(0,240) };
+  const legacyKeys = Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [];
+  // Saved layouts and formulas may still refer to the pre-normalized key.
+  if (originalKey !== key && safeAliasKey(originalKey) && !legacyKeys.includes(originalKey)) legacyKeys.push(originalKey);
+  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys, label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom", calculationMode, formula: String(alias.formula ?? "").slice(0,240) };
 };
 const safeAliasKey = value => {
   const key = String(value ?? "").trim().replace(/^actor\./, "").replace(/^system\./, "");
@@ -815,14 +819,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       getCustomAliasData,
       normalizeAliasDefinition,
       invalidateAliasDefinitionCache,
-      getPath,
-      clone,
-      setProperty: foundry.utils.setProperty
+      clone
     });
 
     try {
       const result = await this._nexusMigrationPromise;
       this._nexusMigrationCompleted = true;
+      if (result?.aliasDataConflicts > 0) {
+        console.warn(`NEXUS | ${result.aliasDataConflicts} conflito(s) de dados durante a normalização de aliases do Actor ${this.actor.name}. Os valores existentes foram preservados.`);
+      }
       return !!result?.changed;
     } catch (error) {
       console.warn("NEXUS | Migração de dados legados adiada; a ficha continuará usando os dados legíveis.", error);
