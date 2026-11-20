@@ -251,6 +251,7 @@ const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
+const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
 assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
   "actor-sheet-listeners deve importar a fila de gravação que utiliza");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
@@ -1801,6 +1802,13 @@ assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módu
 assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
 
 assert.match(sheetListeners, /activateActorAliasListeners/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
+assert.match(sheetListeners, /activateActorSheetSkillListeners\(sheet, html, dependencies\)/,
+  "A ficha deve delegar eventos de perícia e proficiência ao controlador especializado");
+for (const selector of ["[data-skill-roll]", "[data-skill-proficient-level]", "[data-proficiency-level]", "[data-skill-proficiency-toggle]"]) {
+  assert.ok(actorSheetSkillListeners.includes(selector), `O controlador de perícias deve manter ${selector}`);
+}
+assert.match(actorSheetSkillListeners, /const \{ NEXUS_SKILLS, getNexusSkillModifier \} = dependencies/,
+  "O controlador de perícias deve receber explicitamente as dependências que utiliza");
 assert.match(actorAliasListeners, /data-alias-copy/, "O controlador de aliases deve manter o fluxo de cópia");
 assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases deve manter o fluxo de restauração");
 
