@@ -3,7 +3,9 @@ import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
-import { activateActorSheetListeners, serializeActorPropertyWrite } from "./actor-sheet-listeners.js";
+import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
+import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
+import { DEFAULT_FOUNDRY_TOKEN_IMAGE, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } from "./actor-sheet-media.js";
 import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
@@ -11,6 +13,7 @@ import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { applyGroupLayouts } from "../core/group-composition.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
+import { normalizeActorAliasDefinition, getActorAliasCustomValue } from "../core/actor-aliases.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
@@ -308,20 +311,7 @@ const getAliasDefinitions = actor => {
   return value;
 };
 const getCustomAliasData = actor => actor?.getFlag?.("nexus", "customData") ?? {};
-const normalizeAliasDefinition = alias => {
-  if (!alias || typeof alias !== "object") return null;
-  const category = ["attributes", "resources", "combat", "identity", "custom"].includes(alias.category) ? alias.category : "custom";
-  let key = String(alias.key ?? "").trim().replace(/^system\./, "");
-  // Corrige caminhos legados como attributes.attributes.agi sem tocar em nomes legítimos.
-  const repeated = new RegExp(`^(?:${category}\\.){2,}`, "i");
-  if (repeated.test(key)) key = key.replace(repeated, `${category}.`);
-  key = safeAliasKey(key);
-  if (!key) return null;
-  const validTypes = ["attribute", "resource", "number", "text", "url", "image", "boolean"];
-  const type = validTypes.includes(alias.type) ? alias.type : (category === "resources" ? "resource" : category === "attributes" ? "attribute" : category === "identity" ? "text" : "number");
-  const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type) ? "formula" : "manual";
-  return { ...alias, id: alias.id ?? foundry.utils.randomID(), key, category, legacyKeys: Array.isArray(alias.legacyKeys) ? alias.legacyKeys.filter(item => safeAliasKey(item)) : [], label: String(alias.label ?? key.split(".").at(-1)).slice(0,48), type, targetPath: safeAliasKey(alias.targetPath ?? ""), source: alias.source === "actor" ? "actor" : "custom", calculationMode, formula: String(alias.formula ?? "").slice(0,240) };
-};
+const normalizeAliasDefinition = alias => normalizeActorAliasDefinition(alias, () => foundry.utils.randomID());
 const safeAliasKey = value => {
   const key = String(value ?? "").trim().replace(/^actor\./, "").replace(/^system\./, "");
   return /^[a-zA-Z][a-zA-Z0-9_-]*(?:\.[a-zA-Z][a-zA-Z0-9_-]*)*$/.test(key) && !key.split(".").some(part => ["__proto__", "prototype", "constructor"].includes(part)) ? key : "";
@@ -369,7 +359,7 @@ const getNexusRollAliasCandidates = actor => {
       if (!root) return null;
       const raw = alias.targetPath
         ? getPath(actor?.system ?? {}, alias.targetPath)
-        : getPath(getCustomAliasData(actor), alias.key);
+        : getActorAliasCustomValue(getCustomAliasData(actor), alias);
       const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
       const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value") ? root + ".value" : root);
       return target ? { display, target, label: String(alias.label ?? display), alias } : null;
@@ -453,28 +443,6 @@ const resolveAliasPath = (actor, path) => {
 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const DEFAULT_FOUNDRY_TOKEN_IMAGE = "icons/svg/mystery-man.svg";
-const IMAGE_EXTENSIONS = "png|jpe?g|jpe|jfif|pjpeg|pjp|gif|apng|webp|avif|svg|bmp|dib|tif|tiff|ico|heic|heif|jxl";
-const AUDIO_EXTENSIONS = "mp3|ogg|wav|m4a|aac|flac|opus";
-const VIDEO_EXTENSIONS = "mp4|webm|ogv|mov|m4v|mkv|avi|mpeg|mpg|3gp";
-const MEDIA_EXTENSION_PATTERN = new RegExp(`\\.(?:${IMAGE_EXTENSIONS}|${AUDIO_EXTENSIONS}|${VIDEO_EXTENSIONS})(?:[?#].*)?$`, "i");
-const VIDEO_EXTENSION_PATTERN = new RegExp(`\\.(?:${VIDEO_EXTENSIONS})(?:[?#].*)?$`, "i");
-const isMediaSource = value => {
-  const source = String(value ?? "").trim();
-  if (!source || /[{}]/.test(source)) return false;
-  if (/^data:(?:image|audio|video)\/[a-z0-9.+-]+(?:;[^,]*)?,/i.test(source)) return true;
-  // URLs HTTP(S) podem ser links assinados/CDN sem extensão visível; o navegador
-  // confirma o formato durante o carregamento. Caminhos locais exigem extensão.
-  if (/^https?:\/\//i.test(source)) return true;
-  return !/^[a-z][a-z0-9+.-]*:/i.test(source) && MEDIA_EXTENSION_PATTERN.test(source);
-};
-const isVideoSource = value => VIDEO_EXTENSION_PATTERN.test(String(value ?? "")) || /^data:video\//i.test(String(value ?? ""));
-const isAudioSource = value => new RegExp(`\\.(?:${AUDIO_EXTENSIONS})(?:[?#].*)?$`, "i").test(String(value ?? "")) || /^data:audio\//i.test(String(value ?? ""));
-const isImageSource = value => isMediaSource(value) && !isVideoSource(value) && !isAudioSource(value);
-const isUsableTokenSource = value => {
-  const source = String(value ?? "").trim();
-  return source !== DEFAULT_FOUNDRY_TOKEN_IMAGE && (isImageSource(source) || isVideoSource(source));
-};
 const getFoundryDefaultTokenImage = actor => {
   // identity.token.img pode existir como dado real do sistema; não deve ser
   // mascarado pelo caminho virtual que expõe o token padrão do Foundry.
@@ -496,104 +464,6 @@ const getTokenImageSource = (actor, component, boundValue = "") => {
     ? [custom, systemTokenImage, actorImage, bound, prototypeImage]
     : [custom, bound, systemTokenImage, actorImage, prototypeImage];
   return candidates.find(isUsableTokenSource) ?? DEFAULT_FOUNDRY_TOKEN_IMAGE;
-};
-const isSafeLink = value => /^(https?:\/\/|mailto:|\/)/i.test(String(value ?? "").trim());
-
-// Um único renderer mantém a mesma estrutura visual nos previews da biblioteca,
-// no inspetor e no componente inserido na ficha.
-const setPreviewContent = (node, value) => {
-  if (!node) return;
-  node.replaceChildren();
-  const content = String(value ?? "").trim();
-  if (isImageSource(content)) {
-    const img = document.createElement("img");
-    img.src = content;
-    img.alt = "";
-    img.loading = "lazy";
-    node.append(img);
-  } else node.textContent = content;
-  node.hidden = !content;
-};
-
-const createSheetResourcePreview = ({
-  label = "PV", icon = "❤️", current = 32, max = 40,
-  color = "#3198ce", trackColor = "#080d14", orientation = "horizontal", showValues = true
-} = {}) => {
-  const root = document.createElement("div");
-  root.className = `nexus-sheet-resource nexus-sheet-resource-preview${orientation === "vertical" ? " is-vertical" : ""}`;
-  root.style.setProperty("--nexus-resource-color", color);
-  root.style.setProperty("--nexus-resource-track-color", trackColor);
-  const labelNode = document.createElement("span");
-  labelNode.className = "nexus-sheet-resource-label";
-  setPreviewContent(labelNode, label);
-  const iconNode = document.createElement("span");
-  iconNode.className = "nexus-sheet-resource-icon";
-  setPreviewContent(iconNode, icon);
-  const track = document.createElement("div");
-  track.className = "nexus-sheet-resource-track";
-  const fill = document.createElement("i");
-  const currentNumber = Number(current), maxNumber = Number(max);
-  const percent = current == null || current === "" || max == null || max === "" || !Number.isFinite(currentNumber) || !Number.isFinite(maxNumber) || maxNumber <= 0
-    ? 0 : clamp(currentNumber / maxNumber, 0, 1) * 100;
-  fill.style.setProperty("width", orientation === "horizontal" ? `${percent}%` : "100%", "important");
-  fill.style.setProperty("height", orientation === "vertical" ? `${percent}%` : "100%", "important");
-  track.append(fill);
-  root.append(labelNode, iconNode, track);
-  if (showValues) {
-    const values = document.createElement("strong");
-    values.className = "nexus-sheet-resource-values";
-    const currentNode = document.createElement("b");
-    currentNode.textContent = String(current);
-    const separator = document.createElement("span");
-    separator.textContent = "/";
-    const maxNode = document.createElement("b");
-    maxNode.textContent = String(max);
-    values.append(currentNode, separator, maxNode);
-    root.append(values);
-  }
-  return root;
-};
-
-const fitSheetResourcePreview = (stage, component, maxSize = 174) => {
-  if (!stage || !component) return;
-  const preview = stage.querySelector(".nexus-sheet-resource-preview");
-  if (!preview) return;
-  const width = Math.max(1, Number(component.w) || 220);
-  const height = Math.max(1, Number(component.h) || 58);
-  const scale = Math.min(maxSize / width, maxSize / height);
-  preview.style.setProperty("width", `${Math.max(1, width * scale)}px`, "important");
-  preview.style.setProperty("height", `${Math.max(1, height * scale)}px`, "important");
-  preview.style.setProperty("max-width", "100%", "important");
-  preview.style.setProperty("max-height", "100%", "important");
-  stage.dataset.componentWidth = String(width);
-  stage.dataset.componentHeight = String(height);
-};
-
-const updateSheetResourcePreview = (root, settings = {}) => {
-  if (!root) return;
-  const {
-    label = "PV", icon = "❤️", current = 32, max = 40,
-    color = "#3198ce", trackColor = "#080d14", orientation = "horizontal"
-  } = settings;
-  const nodes = root.querySelectorAll(".nexus-sheet-resource-label,.nexus-sheet-resource-icon");
-  setPreviewContent(nodes[0], label);
-  setPreviewContent(nodes[1], icon);
-  const values = root.querySelectorAll(".nexus-sheet-resource-values b");
-  if (values[0]) values[0].textContent = current == null || current === "" ? "—" : String(current);
-  if (values[1]) values[1].textContent = max == null || max === "" ? "—" : String(max);
-  root.style.setProperty("--nexus-resource-color", color);
-  root.style.setProperty("--nexus-resource-track-color", trackColor);
-  root.classList.toggle("is-vertical", orientation === "vertical");
-  const fill = root.querySelector(".nexus-sheet-resource-track > i");
-  const currentNumber = Number(current), maxNumber = Number(max);
-  const percent = current == null || current === "" || max == null || max === "" || !Number.isFinite(currentNumber) || !Number.isFinite(maxNumber) || maxNumber <= 0
-    ? 0 : clamp(currentNumber / maxNumber, 0, 1) * 100;
-  if (fill) {
-    // Regras verticais usam propriedades !important; atualizar com prioridade
-    // evita que a altura fixa da barra prevaleça sobre o valor atual.
-    fill.style.setProperty("width", orientation === "horizontal" ? `${percent}%` : "100%", "important");
-    fill.style.setProperty("height", orientation === "vertical" ? `${percent}%` : "100%", "important");
-  }
 };
 
 
@@ -784,7 +654,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     const normalizedAliases = getAliasDefinitions(this.actor);
     const aliases = normalizedAliases.map(alias => {
-      const stored = getPath(customAliasData, alias.key);
+      const stored = getActorAliasCustomValue(customAliasData, alias);
       const external = alias.targetPath ? resolveNexusBinding(this.actor, alias.targetPath).value : undefined;
       const sourceValue = alias.targetPath ? external : stored;
       const current = sourceValue && typeof sourceValue === "object"
@@ -933,14 +803,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       getCustomAliasData,
       normalizeAliasDefinition,
       invalidateAliasDefinitionCache,
-      getPath,
-      clone,
-      setProperty: foundry.utils.setProperty
+      clone
     });
 
     try {
       const result = await this._nexusMigrationPromise;
       this._nexusMigrationCompleted = true;
+      if (result?.aliasDataConflicts > 0) {
+        console.warn(`NEXUS | ${result.aliasDataConflicts} conflito(s) de dados durante a normalização de aliases do Actor ${this.actor.name}. Os valores existentes foram preservados.`);
+      }
       return !!result?.changed;
     } catch (error) {
       console.warn("NEXUS | Migração de dados legados adiada; a ficha continuará usando os dados legíveis.", error);
@@ -1284,7 +1155,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, renderPropertyPresentationEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, resolveFormulaIdentifier, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, buildPropertyPickerCatalog, renderPropertyPicker, NEXUS_SKILLS, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, resolveFormulaIdentifier, getResourceValuePaths, clone, getPath, collectPropertyPaths, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource, isVideoSource, isImageSource, getFoundryDefaultTokenImage, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -3969,7 +3840,7 @@ if (!hasPath) propertyValueInput.value = "";
       const liveRoot = this.element;
       if (generation !== this._nexusCanvasEditorGeneration || this._mode !== "appearance" || !root.isConnected) return;
       if (liveRoot && liveRoot !== root && !liveRoot.contains?.(root)) return;
-      return activateCanvasInteractions(this, html, { NEXUS_LIBRARY_CATALOG, DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, NexusPanelWindow, buildPropertyPickerCatalog, renderPropertyPicker, activateActorSheetListeners, migrateLegacyActorData, mergeLayoutSnapshots, NEXUS_SKILLS, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, getComponentInteractions, layoutReadSnapshots, layoutWriteQueues, ActorSheetV2, HandlebarsApplicationMixin, NexusActorSheetBase, COMPONENTS, resolveNexusBinding, expandNexusPropertyExpressions, getResourceValuePaths, clone, getPath, collectPropertyPaths, NATIVE_PROPERTY_BASE, nativePropertyDefinitionCache, EMPTY_NATIVE_PROPERTY_LIST, LEGACY_SKILL_PATHS, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, EMPTY_ALIAS_LIST, aliasDefinitionCache, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, expandNexusRollAliases, getNexusRollData, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS, MEDIA_EXTENSION_PATTERN, VIDEO_EXTENSION_PATTERN, isMediaSource, isVideoSource, isAudioSource, isImageSource, isUsableTokenSource, getFoundryDefaultTokenImage, getTokenImageSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview, NexusActorSheet });
+      return activateCanvasInteractions(this, html, { COMPONENTS, clone, clamp });
     }).catch(error => console.error("NEXUS | Falha ao carregar o editor Canvas:", error));
   }
 }

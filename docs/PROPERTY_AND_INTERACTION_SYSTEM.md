@@ -94,7 +94,7 @@ Estrutura conceitual:
 }
 ```
 
-Um fluxo pode conter vários Triggers independentes: qualquer um deles inicia suas Actions. Condições opcionais são avaliadas antes da execução e podem ser combinadas como AND (todas) ou OR (qualquer). As Actions são executadas na ordem em que aparecem e podem ser reordenadas no Inspector. Cada ação mantém sua própria configuração. A política de erro define se uma falha interrompe o fluxo ou permite continuar.
+Um fluxo pode conter vários Triggers independentes: qualquer um deles inicia suas Actions. Condições opcionais são avaliadas antes da execução e podem ser combinadas como AND (todas) ou OR (qualquer). Quando o mesmo fluxo escuta pointerDown e click, os dois eventos gerados pelo mesmo clique primário são tratados como um único gesto e o fluxo executa uma vez; fluxos independentes continuam sendo avaliados normalmente. As Actions são executadas na ordem em que aparecem e podem ser reordenadas no Inspector. Cada ação mantém sua própria configuração. A política de erro define se uma falha interrompe o fluxo ou permite continuar.
 
 Nos gatilhos keyDown e keyUp, a tecla é capturada diretamente pelo botão **Definir tecla** e os modificadores podem ser registrados junto dela (Ctrl, Shift, Alt e Meta). Um componente com atalho configurado recebe foco ao ser clicado e também pode ser alcançado com Tab. A tecla só é processada quando o componente está focado; campos de texto e controles de formulário não disparam atalhos do Canvas. Gatilhos de teclado sem tecla definida permanecem inativos, e a repetição automática do teclado não repete a ação enquanto a tecla está pressionada.
 

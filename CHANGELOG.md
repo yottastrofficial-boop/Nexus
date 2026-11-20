@@ -1,3 +1,24 @@
+## 1.0.0.71
+
+### Estabilização da ficha e integridade de dados
+- Corrige a execução duplicada de interações quando o mesmo fluxo está associado a `pointerDown` e `click`, sem bloquear cliques independentes nem gestos convertidos em arraste.
+- Introduz escopos descartáveis para listeners do Canvas, permitindo encerrar juntos os listeners locais, globais e hooks associados ao ciclo de vida.
+- Centraliza a serialização local de gravações de propriedades por Actor e a persistência de expressões.
+- Extrai os controladores de valores de propriedades, seleção/autocomplete de caminhos e fórmulas, mídia, aliases, perícias e recursos da ficha.
+- Centraliza validação, normalização, colisões, migração de identificadores e leitura compatível de dados legados de aliases.
+- Preserva payloads de aliases em conflitos de migração, prioriza dados canônicos e mantém fallback para chaves históricas.
+- Remove blocos CSS exatamente duplicados e dependências não utilizadas dos contratos de listeners.
+- Amplia os testes de regressão e comportamentais dos fluxos extraídos.
+
+### Validação e limitações
+- GitHub Actions: validação de pacote, sintaxe, regressões e empacotamento aprovados no commit `f5bba318ac6900b2c9fe69cdd64af60b61d1db8f`.
+- A publicação automatizada foi ignorada intencionalmente durante a validação da PR.
+- A serialização por Actor é local ao cliente; não fornece lock distribuído entre usuários ou janelas independentes.
+- Persistência de aliases, dados personalizados e layouts envolve múltiplas gravações e ainda não constitui uma transação única.
+- A validação funcional e visual em uma instalação real do Foundry VTT 14 continua pendente. Esta atualização não deve ser declarada estável nem distribuída como release final antes desses testes.
+
+---
+
 ## 1.0.0.70
 
 ### Biblioteca e compartilhamento

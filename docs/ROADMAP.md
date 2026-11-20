@@ -1,59 +1,51 @@
 # Roadmap
 
-Este documento reúne direções de desenvolvimento discutidas para o NEXUS. Ele não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
+Este documento registra direções e prioridades do NEXUS. Não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Base estável — 1.0.0.1\n\n## Próxima atualização — 1.0.0.2 (em preparação)\n\n- Fortalecer a persistência e separar migrações do preparo de contexto.\n- Corrigir e ampliar os testes de integridade do pacote.\n- Modularizar progressivamente a lógica da ficha, preservando os contratos existentes.\n- Reorganizar CSS e templates sem alterar o comportamento visual intencional.\n- Validar em instalação real do Foundry VTT V14 antes da publicação.\n\n## Base estável — 1.0.0.1
+## Estado atual — 1.0.0.71 em preparação
 
-A versão atual fornece uma ficha Canvas modular, biblioteca de elementos, personalização visual, editor de propriedades e integração inicial com os tipos de documento declarados no manifesto.
+A versão 1.0.0.71 consolida a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica, backup completo e uma rodada de estabilização dos listeners, persistência de propriedades, aliases e controladores de perícias/recursos.
 
-Consulte o [README](../README.md) e o [CHANGELOG](../CHANGELOG.md) para o escopo e as alterações desta versão.
+A validação automatizada de pacote, sintaxe, regressões e empacotamento passou no GitHub Actions. A versão 1.0.0.71 está preparada no manifesto e no changelog, mas ainda não foi publicada como release. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária; portanto, esta versão não está declarada estável.
 
-## Direções planejadas
+## Prioridades imediatas
 
-### Editor de fichas
+1. Executar testes funcionais e visuais no Foundry VTT 14, incluindo múltiplas janelas e usuários.
+2. Validar concorrência e recuperação de falhas na persistência de aliases, dados personalizados e layouts.
+3. Consolidar a composição visual das perícias e a cascata CSS sem perder personalizações de tema.
+4. Reforçar testes comportamentais dos fluxos, reduzindo gradualmente dependência de verificações por texto/regex.
+5. Continuar extrações por domínio apenas quando reduzirem acoplamento sem fragmentar excessivamente os módulos.
+6. Publicar a release somente após a validação funcional e a revisão de compatibilidade.
 
-- Aprimorar a organização livre dos componentes.
-- Oferecer modelos de ficha reutilizáveis.
-- Evoluir os recursos de edição e configuração do Canvas.
+## Arquitetura de módulos e propriedades
 
-### Componentes
-
-- Desenvolver um modo visual de criação de componentes.
-- Estudar um modo avançado com HTML, CSS e JavaScript sob controles de segurança.
-- Manter uma estrutura interna compartilhada entre os modos.
-- Permitir importar, exportar e reutilizar componentes personalizados.
-
-### Arquitetura de módulos e propriedades
-
-- Estruturar um registro central de propriedades.
-- Permitir que módulos registrem atributos, recursos e metadados próprios.
+- Expandir o registro central de propriedades para módulos e metadados completos.
 - Preservar identificadores estáveis quando nomes e apresentações mudarem.
 - Definir regras de dependência, substituição e migração antes de permitir redefinições profundas.
+- Evoluir a invalidação reativa para um grafo global de dependências com cálculo incremental e detecção explícita de ciclos.
+- Consolidar o diálogo universal de rolagem sem duplicar regras de cálculo.
 
-### Design e mídia
+## Editor de fichas e componentes
+
+- Evoluir os modelos de ficha reutilizáveis.
+- Aprimorar a organização livre e hierárquica dos componentes.
+- Manter uma estrutura interna compartilhada entre os modos de edição.
+- Permitir importar, exportar e reutilizar componentes personalizados com validação e compatibilidade.
+
+## Design, mídia e desempenho
 
 - Consolidar a separação entre funcionalidade, formato e estilo.
-- Evoluir temas e herança visual.
+- Evoluir temas e herança visual sem sobrescritas desnecessárias.
 - Ampliar o gerenciamento de imagens, GIFs, vídeos e outros recursos.
-- Planejar cache, miniaturas, carregamento sob demanda e controle de animações.
+- Medir gargalos antes de introduzir cache, carregamento sob demanda ou otimizações de renderização.
 
-### Compatibilidade e qualidade
+## Compatibilidade e qualidade
 
-- Testar os fluxos completos dentro do Foundry VTT.
-- Reforçar compatibilidade com a arquitetura e APIs oficiais.
-- Evitar conflitos com módulos externos.
-- Documentar migrações sempre que alterações afetarem dados existentes.
+- Priorizar APIs públicas compatíveis com Foundry VTT 14.
+- Testar fluxos completos dentro do Foundry, incluindo múltiplas fichas, janelas, Actors e usuários.
+- Preservar dados existentes e documentar migrações.
+- Manter a main e as releases utilizáveis; mudanças estruturais devem ser desenvolvidas em branches e integradas após CI e validação funcional.
 
 ## Critérios para considerar um recurso concluído
 
-Um recurso só deve ser marcado como implementado quando:
-
-1. Seu comportamento estiver presente no código.
-2. Seus dados e estados estiverem definidos.
-3. Os fluxos relevantes tiverem sido testados.
-4. Limitações conhecidas estiverem documentadas.
-5. A documentação e o changelog refletirem o comportamento real.
-
-## Como priorizamos
-
-A prioridade é construir uma fundação confiável. Recursos que dependem de registros, propriedades, componentes ou migrações devem aguardar uma definição arquitetural suficiente para evitar retrabalho e perda de compatibilidade.
+Um recurso só deve ser marcado como implementado quando seu comportamento estiver presente no código, seus dados e estados estiverem definidos, os fluxos relevantes tiverem testes, limitações conhecidas estiverem documentadas e a documentação refletir o comportamento real.

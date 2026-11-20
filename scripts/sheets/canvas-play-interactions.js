@@ -8,11 +8,15 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const modifiersOf = event => [event.shiftKey ? "shift" : null,event.ctrlKey ? "ctrl" : null,event.altKey ? "alt" : null,event.metaKey ? "meta" : null].filter(Boolean);
   const cardOf = event => { const target=event.target instanceof Element?event.target:event.target?.parentElement;const card=target?.closest?.(".nexus-component");return card&&canvas.contains(card)?card:null; };
   const isControlTarget = event => { const target=event.target instanceof Element?event.target:event.target?.parentElement;return !!target?.closest?.("input,textarea,select,button,a,[contenteditable='true']"); };
+  // Um gesto primário pode emitir pointerDown e, em seguida, click.
+  // O mesmo fluxo configurado para ambos deve executar uma única vez.
+  const pointerDownFlows = new Map();
   const dispatch = (event,name,extra={}) => {
     if(sheet._mode!=="play")return false;
     const card=cardOf(event);if(!card)return false;
     const component=sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id),modifiers=modifiersOf(event);
-    if(!getTriggeredActions(component,name,{actor:sheet.actor,modifiers,key:extra.key}).length)return false;
+    const context={actor:sheet.actor,modifiers,key:extra.key,skipInteractionIds:extra.skipInteractionIds};
+    if(!getTriggeredActions(component,name,context).length)return false;
     sheet._runComponentAction(card.dataset.id,name,{...extra,modifiers});return true;
   };
   const stop=(event,name,extra)=>{if(!dispatch(event,name,extra))return false;event.preventDefault();event.stopPropagation();return true;};
@@ -29,7 +33,13 @@ export function activateCanvasPlayInteractions(sheet, html) {
     if(isControlTarget(event))return;
     if(dispatch(event,"keyUp",{key:event.key})){event.preventDefault();event.stopPropagation();}
   };
-  const onClick=event=>{if(event.button===0&&performance.now()>=(sheet._suppressComponentClickUntil??0)&&!isControlTarget(event))stop(event,"click");};
+  const onClick=event=>{
+    if(event.button!==0||performance.now()<(sheet._suppressComponentClickUntil??0)||isControlTarget(event))return;
+    const card=cardOf(event),pending=card&&pointerDownFlows.get(card.dataset.id);
+    const skipInteractionIds=event.detail>0&&pending&&performance.now()-pending.time<1200?pending.ids:[];
+    if(card)pointerDownFlows.delete(card.dataset.id);
+    stop(event,"click",{skipInteractionIds});
+  };
   const onDoubleClick=event=>{if(!isControlTarget(event))stop(event,"doubleClick");};
   const onContextMenu=event=>{if(!isControlTarget(event))stop(event,"rightClick");};
   const onAuxClick=event=>{if(event.button===1&&!isControlTarget(event))stop(event,"middleClick");};
@@ -52,8 +62,13 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onPointerLeave = clearBehaviorCursor;
   const onPointerDown=event=>{
     if(isControlTarget(event))return;
-    dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});
     const card=cardOf(event);
+    if(card&&event.button===0){
+      const component=sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
+      const actions=getTriggeredActions(component,"pointerDown",{actor:sheet.actor,modifiers:modifiersOf(event),key:""});
+      if(actions.length)pointerDownFlows.set(card.dataset.id,{time:performance.now(),x:event.clientX,y:event.clientY,ids:[...new Set(actions.map(action=>action.interactionId))]});
+    }
+    dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});
     const component=card&&sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
     if(card&&hasKeyboardTrigger(component))card.focus?.({preventScroll:true});
   };
@@ -66,5 +81,5 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const listeners=[["keydown",onKeydown],["keyup",onKeyup],["click",onClick],["dblclick",onDoubleClick],["contextmenu",onContextMenu],["auxclick",onAuxClick],["pointerdown",onPointerDown],["pointerup",onPointerUp],["pointermove",onPointerMove],["pointerover",onPointerOver],["focusin",onFocusIn],["focusout",onFocusOut],["change",onChange],["submit",onSubmit]];
   for(const [name,listener] of listeners)canvas.addEventListener(name,listener);
   canvas.addEventListener("pointerleave",onPointerLeave);
-  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);clearBehaviorCursor();};
+  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);pointerDownFlows.clear();clearBehaviorCursor();};
 }

@@ -17,6 +17,12 @@ import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+import { createListenerScope } from "../scripts/core/listener-scope.js";
+import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
+import { activateActorSheetSkillListeners } from "../scripts/sheets/actor-sheet-skill-listeners.js";
+import { activateActorSheetResourceListeners } from "../scripts/sheets/actor-sheet-resource-listeners.js";
+import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
+import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
@@ -246,6 +252,14 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
+const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
+const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resource-listeners.js");
+assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
+  "actor-sheet-listeners deve importar a fila de gravação que utiliza");
+const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
+const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
+const actorPropertyPickerListeners = await read("scripts/sheets/actor-property-picker-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const canvasGroupRendering = await read("scripts/sheets/canvas-group-rendering.js");
 const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
@@ -277,7 +291,7 @@ assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(tar
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
 assert.match(sheet, /const lookupPath = normalizeNexusPropertyPath\(path\)/, "Caminhos singulares e abreviados devem usar o normalizador canônico");
 assert.doesNotMatch(sheet, /data-property-value-path/, "O identificador visual de caminho deve ser removido");
-assert.match(sheetListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
+assert.match(propertyValueListeners, /resolvedPath\.alias && !targetPath/, "Aliases sem caminho físico devem salvar em customData");
 assert.match(sheetListeners, /component\.dataPath = path;/, "O componente deve preservar o identificador do alias");
 assert.match(sheetListeners, /!resolved\.path && !resolved\.alias/, "O editor deve aceitar aliases sem caminho físico em Actor.system");
 assert.doesNotMatch(css, /nexus-property-value-panel/, "O campo de valor não deve criar um painel separado");
@@ -316,7 +330,7 @@ assert.match(canvasInteractions, /export function activateCanvasInteractions/);
 assert.match(canvasInteractions, /deactivateInteraction/);
 assert.match(sheetCode, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
 assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
-assert.match(sheetListeners, /data-property-category/);
+assert.match(actorPropertyPickerListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);
 assert.match(propertyCatalog, /modifier/);
 assert.match(propertyPickerView, /propertyCategory/, "O seletor hierárquico deve marcar as opções de categoria");
@@ -328,7 +342,7 @@ assert.match(propertyPickerView, /heading\.append\(title\)/, "O nome deve ocupar
 assert.match(propertyPickerView, /button\.append\(heading, code\)/, "O caminho deve ficar abaixo do nome");
 assert.match(css, /nexus-property-option-name[\s\S]*nexus-property-option-path/, "O seletor deve exibir nome e caminho em duas linhas compactas");
 assert.match(propertyPickerView, /category\.append\(heading, arrow\)/, "Categorias devem exibir apenas título e indicador de navegação");
-assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
+assert.match(actorPropertyPickerListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
 assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
@@ -635,17 +649,15 @@ const setSafePath = (object, keyPath, value) => {
   for (const part of parts) target = target[part] ??= {};
   target[leaf] = value;
 };
-const normalizedAliases = [{ id: "alias-1", key: "new.key", targetPath: null }];
+const normalizedAliases = [{ id: "alias-1", key: "new.key", legacyKeys: ["old.key"], targetPath: null }];
 const migrationDependencies = {
   actor: fakeActor,
   readLayouts: async () => ({ principal: {} }),
   getAliasDefinitions: () => normalizedAliases,
   getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
-  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key" }),
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key", legacyKeys: [...(raw.legacyKeys ?? []), raw.key] }),
   invalidateAliasDefinitionCache: () => {},
-  getPath: getSafePath,
-  clone: value => structuredClone(value),
-  setProperty: setSafePath
+  clone: value => structuredClone(value)
 };
 const firstMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(firstMigration.changed, true, "Primeira migração deve sinalizar alteração");
@@ -653,6 +665,8 @@ assert.equal(fakeActor.getFlag("nexus", "activeLayout"), "principal");
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "new.key"), 17);
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), undefined);
 assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
+assert.deepEqual(fakeActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"], "O caminho antigo deve continuar resolvível por layouts salvos");
+assert.equal(firstMigration.aliasDataConflicts, 0);
 const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
@@ -692,6 +706,32 @@ const legacyPropertyActor = {
     this.updateCount++;
   }
 };
+
+const conflictingAliasActor = {
+  flags: { nexus: { activeLayout: "principal", aliases: [{ id: "alias-conflict", key: "old.key", label: "Conflito" }], customData: { old: { key: 17 }, new: { key: 99 } } } },
+  writes: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) { this.flags[scope] ??= {}; this.flags[scope][key] = structuredClone(value); this.writes++; }
+};
+const conflictMigrationDependencies = {
+  actor: conflictingAliasActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => [{ id: "alias-conflict", key: "new.key", legacyKeys: ["old.key"], targetPath: "" }],
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key", legacyKeys: [...(raw.legacyKeys ?? []), raw.key] }),
+  invalidateAliasDefinitionCache: () => {},
+  clone: value => structuredClone(value)
+};
+const conflictMigration = await migrateLegacyActorData(conflictMigrationDependencies);
+assert.equal(conflictMigration.aliasDataConflicts, 1, "A colisão de dados precisa ser informada");
+assert.deepEqual(conflictingAliasActor.getFlag("nexus", "customData"), { old: { key: 17 }, new: { key: 99 } }, "A migração não deve sobrescrever nenhum dos dois payloads");
+assert.deepEqual(conflictingAliasActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"]);
+const conflictWrites = conflictingAliasActor.writes;
+const repeatedConflictMigration = await migrateLegacyActorData(conflictMigrationDependencies);
+assert.equal(repeatedConflictMigration.changed, false, "Uma colisão já identificada não deve provocar migração repetida");
+assert.equal(repeatedConflictMigration.aliasDataConflicts, 0);
+assert.equal(conflictingAliasActor.writes, conflictWrites, "A migração de conflito deve permanecer idempotente");
+
 const propertyMigrationDependencies = {
   actor: legacyPropertyActor,
   readLayouts: async () => ({ principal: {} }),
@@ -699,9 +739,7 @@ const propertyMigrationDependencies = {
   getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
   normalizeAliasDefinition: raw => raw,
   invalidateAliasDefinitionCache: () => {},
-  getPath: getSafePath,
-  clone: value => structuredClone(value),
-  setProperty: setSafePath
+  clone: value => structuredClone(value)
 };
 const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
 assert.equal(propertyMigration.propertiesMigrated, true);
@@ -835,7 +873,7 @@ assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser edit�
 assert.match(css, /nexus-text-toolbar/);
 assert.match(css, /nexus-proficiency-control/);
 assert.match(css, /nexus-resource-slider-control/);
-assert.match(sheetCode, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
+assert.match(actorSheetResourceListeners, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
 assert.match(sheetCode, /const selectedGroupComponentIds = new Set\(resolvedGroup \? hierarchy\.descendants\.get\(String\(resolvedGroup\.id\)\)/, "A seleção de grupo deve destacar somente seus descendentes");
 assert.match(sheetCode, /const components = Array\.isArray\(layout\.components\)[\s\S]*?buildGroupHierarchy\([\s\S]*?Array\.isArray\(layout\.groups\)[\s\S]*?components\)/, "O contexto da ficha deve obter grupos e componentes do layout antes de montar a hierarquia");
 assert.match(sheetCode, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
@@ -869,8 +907,8 @@ console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e b
 
 assert.match(sheetCode, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
 assert.match(sheetCode, /new Roll\(formula, getNexusRollData\(this\.actor\)\)/, "Campos próprios devem integrar os dados entregues à rolagem");
-assert.match(sheetCode, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
-assert.match(sheetCode, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
+assert.match(actorPropertyPickerListeners, /focusin\$\{inspectorNamespace\}/, "O visualizador deve abrir ao receber foco no campo de fórmula ou vínculo");
+assert.match(actorPropertyPickerListeners, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
 assert.match(sheetCode, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(canvasInteractions, /const applyKeyboardMoveFrame = \(\) => \{[\s\S]*?syncGroupBounds\(false\)/, "O movimento por teclado deve adiar o cálculo das conexões de cantos durante cada quadro");
 assert.match(sheetCode, /scale<0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
@@ -896,7 +934,7 @@ assert.match(interactions, /triggers:source\.map\(normalizeTrigger\)/);
 assert.match(interactions, /flow\.actions/);
 assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheetCode, /_toggleTargetComponent/);
-assert.match(sheetCode, /setResourceFromTrack/);
+assert.match(actorSheetResourceListeners, /setResourceFromTrack/);
 console.log(`NEXUS ${manifest.version}: catálogo canônico, proficiência assinada e sincronização de temas verificados.`);
 
 
@@ -928,8 +966,8 @@ assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 0, "Proficiência não deve gerar bônus automático sem fórmula ou valor armazenado");
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
-assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
-assert.match(sheetListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
+assert.match(propertyValueListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
+assert.match(propertyValueListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
 
 // Trigger -> Action -> Configuration pipeline.
 const legacyRollActions = getTriggeredActions({ actionType: "roll", rollFormula: "1d20 + 3" }, "click");
@@ -981,7 +1019,7 @@ assert.ok(sheetCode.includes("renderInteractionEditor(interactionEditor, one"));
 assert.ok(sheetCode.includes("data-interaction-action"));
 assert.ok(template.includes("data-interaction-editor"));
 assert.ok(!template.includes('data-component-setting="actionType"'));
-assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
+assert.ok(canvasInteractions.includes('listen(canvas,"contextmenu"'), "O menu contextual deve usar o escopo de listeners descartável");
 assert.ok(canvasPlayInteractions.includes('["pointerover",onPointerOver]'));
 assert.ok(sheetCode.includes("_executeComponentAction"));
 assert.match(sheet, /normalizeInteractionPropertyPath\(config\.path\)/, "Ação update deve normalizar caminhos canônicos");
@@ -989,7 +1027,7 @@ assert.match(sheet, /await roll\.evaluate\(\)/, "Rolagens assíncronas devem usa
 assert.doesNotMatch(sheet, /evaluate\(\{\s*async:\s*true\s*\}\)/, "A opção async removida não pode ser usada");
 assert.match(sheetListeners, /await sheet\._writeLayouts\(layouts, active, \{ render: false \}\)/, "Editar um fluxo não deve reconstruir a ficha inteira");
 assert.match(sheetListeners, /behaviorEditor\.dataset\.activeInteractionId = activeInteractionId;[\s\S]*?renderInteractionEditor\(behaviorEditor/, "A aba ativa deve ser restaurada antes de redesenhar o editor");
-assert.match(sheetListeners, /const updatePath = resolvedPath\.virtual && actorRootPath \? updateTargetPath : `system\.\$\{updateTargetPath\}`/, "Propriedades virtuais do Actor devem ser gravadas no caminho system correto");
+assert.match(propertyValueListeners, /const updatePath = resolvedPath\.virtual && actorRootPath \? updateTargetPath : `system\.\$\{updateTargetPath\}`/, "Propriedades virtuais do Actor devem ser gravadas no caminho system correto");
 console.log("NEXUS 1.0.0.15: editor visual de interações validado.");
 
 assert.ok(!template.includes('data-inspector-tab="behavior"'), "Comportamento deve ser acessado pelo painel independente");
@@ -1093,8 +1131,8 @@ assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-item
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
 assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
-assert.match(sheetCode,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
-assert.ok(sheetCode.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
+assert.match(actorPropertyPickerListeners,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
+assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(sheetCode,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
 assert.match(sheetCode,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
 
@@ -1109,8 +1147,8 @@ assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder s
 assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor a ação de excluir fluxos");
 assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
 assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
-assert.match(sheetCode,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
-assert.match(sheetCode,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
+assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
+assert.match(actorPropertyPickerListeners,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
 assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
@@ -1170,7 +1208,7 @@ assert.match(sheet, /normalizeNexusFormulaIdentifier/, "Fórmulas devem usar um 
 assert.ok(css.includes(".nexus-panel-window .nexus-component-editor > h3") && css.includes("display:flex !important"), "O Inspector deve exibir seu cabeçalho de forma clara");
 assert.ok(css.includes(".nexus-panel-window .nexus-inspector-tab-panel:not([hidden])"), "As abas do Inspector devem organizar o conteúdo em painéis");
 assert.ok(css.includes(".nexus-panel-window .nexus-data-binding"), "O vínculo de dados deve ter uma área visual própria");
-assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
+assert.match(propertyValueListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
 assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
 
@@ -1184,29 +1222,35 @@ assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value + (combat.mb * skills.athletics.proficientLevel)}}"), 7, "A expressão completa entre chaves deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "força + (mb * proficiencia)"), 5, "O atalho de proficiência deve continuar aplicando apenas o sinal do nível");
 assert.match(template, /data-skill-proficiency-toggle/, "O marcador deve expor o controle de alternância");
-assert.match(sheetListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
+assert.match(actorSheetSkillListeners, /_setSkillProficientLevel\(skill\.key, nextLevel\)/, "O marcador deve atualizar a proficiência da perícia vinculada");
 assert.match(sheetCode, /propertyValueInput\.dataset\.propertyKind = propertyType/, "O campo deve preservar o tipo real da propriedade");
 assert.doesNotMatch(sheet, /skillValueMatch/, "O valor da perícia deve ser um campo armazenado, não um atalho para fórmula predefinida");
 assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formula$/)'), "O caminho explícito .formula também deve abrir o editor");
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
 assert.match(sheet, /propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/);
-assert.match(sheetListeners, /actorPropertyWriteQueues = new WeakMap/, "Gravações de propriedades do mesmo Actor devem ser serializadas");
+assert.match(propertyValueListeners, /from "\.\.\/core\/actor-property-writes\.js"/, "O listener deve usar o serviço central de gravação serializada");
 assert.match(sheetListeners, /await serializeActorPropertyWrite\(sheet\.actor, async \(\) => \{/, "Edições manuais e fórmulas devem compartilhar a mesma fila de persistência");
 assert.match(sheet, /async _updateSystemValue\(input\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Campos de dados e sliders devem usar a fila comum de gravação");
 assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Alterações de proficiência devem usar a fila comum");
 assert.match(sheet, /action\?\.type === "update"[\s\S]*?return serializeActorPropertyWrite\(this\.actor/, "Actions de interação também devem serializar alterações de propriedades");
 assert.match(sheetListeners, /data-config-current-value[\s\S]*?serializeActorPropertyWrite\(sheet\.actor/, "Valores de recursos no Inspector devem compartilhar a fila");
+assert.match(actorAliasListeners, /const bindSerialized = \(selector, eventName, handler\)/,
+  "Mutations do editor de aliases devem passar pelo binder serializado");
+for (const selector of ["[data-alias-create]", "[data-native-property-field]", "[data-native-property-reset]", "[data-alias-field]", "[data-alias-copy]", "[data-alias-reset]", "[data-alias-delete]"]) {
+  assert.ok(actorAliasListeners.includes(`bindSerialized("${selector}"`),
+    `A operação ${selector} deve compartilhar a fila de gravação do Actor`);
+}
 assert.doesNotMatch(sheetListeners, /propertyExpressionQueues = new WeakMap/, "A fila não deve serializar apenas fórmulas e deixar valores manuais concorrentes");
-assert.match(sheetListeners, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
-assert.match(sheetListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
+assert.match(actorPropertyWrites, /Falha ao salvar uma propriedade do Actor/, "Falhas de autosave devem ser registradas e notificadas");
+assert.match(propertyValueListeners, /writePropertyExpression\(sheet\.actor, path, String\(value\)\)/);
 assert.ok(sheet.includes('skills.${legacyProficiency[1]}.proficientLevel'), "O caminho legado de proficiência deve depender do nível numérico persistido");
 assert.doesNotMatch(sheetCode, /propertyValueInput\.type = "number"/, "O campo não deve bloquear expressões por usar input numérico");
 assert.match(sheetCode, /const inputValue = skillFormulaMode \? skillFormula[\s\S]*?propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/, "O editor deve exibir apenas expressões salvas manualmente, sem preencher fórmulas padrão");
 assert.match(sheetCode, /skillProficiencyLevel: skillProficiency\?\.proficientLevel/, "Cards devem observar o nível numérico da perícia");
 assert.match(template, /component\.proficiencyIcon/, "O ícone do card deve refletir dinamicamente o nível de proficiência");
-assert.match(sheetListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
-assert.match(sheetListeners, /event\.altKey \? 0/, "Alt+clique deve redefinir a proficiência");
+assert.match(actorSheetSkillListeners, /event\.shiftKey \? -1 : 1/, "Shift+clique deve reduzir o nível de proficiência");
+assert.match(actorSheetSkillListeners, /event\.altKey \? 0/, "Alt+clique deve redefinir a proficiência");
 assert.match(template, /skill\.formatted/, "O valor calculado da perícia deve permanecer visível sem rolagem");
 assert.match(css, /nexus-skill-proficiency-toggle/, "O marcador deve possuir estilo circular próprio");
 
@@ -1467,21 +1511,21 @@ assert.ok(sheetListeners.includes("render: !isPresentationField"), "Alterações
 assert.doesNotMatch(sheetListeners, /pendingPropertyValueSaves/, "Valores de propriedades não devem ser salvos por debounce durante a digitação");
 assert.doesNotMatch(sheetListeners, /baseModifierPath/, "O Inspector deve permitir valores manuais para MB como qualquer outra propriedade");
 assert.doesNotMatch(sheet, /formulaEditable: true/, "O Core não deve marcar propriedades mecânicas com fórmulas predefinidas");
-assert.match(sheetListeners, /previous formula remains intact/, "A fórmula anterior deve permanecer salva se a gravação do novo valor falhar");
-assert.match(sheetListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
+assert.match(propertyValueListeners, /previous formula remains intact/, "A fórmula anterior deve permanecer salva se a gravação do novo valor falhar");
+assert.match(propertyValueListeners, /quotedValue = evaluateNexusExpression\(trimmedValue/, "Literais textuais entre aspas devem ser interpretados pelo motor seguro");
 assert.match(sheet, /addPropertyFormulaDependencies\(component\.dataPath\)/, "Dependências de propriedades devem vir de fórmulas explicitamente configuradas");
 assert.match(sheet, /scanExpressions\(component\)/, "Expressões dos cards devem registrar suas dependências atuais");
 assert.match(sheet, /for \(const dependency of \[\.\.\.dependencies\]\) addPropertyFormulaDependencies\(dependency\)/, "Cards devem acompanhar dependências transitivas de propriedades com fórmula");
 assert.doesNotMatch(sheet, /Perícias sem fórmula manual devem atualizar quando o MB mudar/, "O Core não deve impor dependências mecânicas a propriedades sem fórmula");
 assert.doesNotMatch(sheet, /getNexusDefaultSkillFormula|getNexusDefaultPropertyFormula/, "A ficha não deve consultar fórmulas padrão globais");
-assert.match(sheetListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
-assert.match(sheetListeners, /valueKind === "string"/, "Expressões devem validar o resultado de acordo com o tipo textual");
+assert.match(propertyValueListeners, /valueKind === "number"[\s\S]*String\(value\)\.trim\(\) === ""\) value = 0/, "Valores numéricos vazios devem ser aceitos como zero");
+assert.match(propertyValueListeners, /valueKind === "string"/, "Expressões devem validar o resultado de acordo com o tipo textual");
 assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve aparecer como indicador discreto abaixo do caminho");
 assert.match(template, /data-property-value-label>Valor:/, "O campo editável deve usar o rótulo compacto Valor");
 assert.match(css, /nexus-data-binding-inline/, "O vínculo deve usar o layout compacto de nome e caminho");
-assert.match(sheetListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
-assert.ok(sheetListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
-assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
+assert.match(propertyValueListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
+assert.ok(propertyValueListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
+assert.ok(propertyValueListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-config-current-value], [data-config-max-value]\""), "PV/PM/PE atuais e máximos devem salvar também na janela flutuante");
 assert.ok(sheetListeners.includes("isSheetOwnedControl(input)"), "Eventos globais devem ser isolados à ficha e às suas janelas");
 assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recursos devem atualizar sem Enter");
@@ -1539,7 +1583,7 @@ assert.match(interactions, /nexus-interaction-group-help/);
 assert.match(interactions, /clear-key/);
 assert.match(canvasPlayInteractions, /middleClick/);
 assert.match(canvasPlayInteractions, /pointerDown/);
-assert.match(sheetCode, /executeTriggeredActions, getTriggeredActions, renderInteractionEditor/, "A função de avaliação de gatilhos deve ser injetada no listener da ficha");
+assert.match(sheetCode, /getTriggeredActions, renderInteractionEditor/, "O listener da ficha deve receber as funções de interação que utiliza");
 const capturedKeyFlow = normalizeInteraction({ triggers: [{ event: "keyDown", key: "k", modifiers: ["alt"] }], actions: [{ type: "roll", config: { formula: "1d20" } }] });
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["alt"] }).length, 1, "Gatilhos de teclado devem comparar tecla sem diferenciar maiúsculas");
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
@@ -1560,7 +1604,7 @@ assert.match(canvasInteractions, /hierarchy\.descendants/, "Movimentar um grupo 
 assert.match(template, /data-library-saved-layouts/, "A Biblioteca deve apresentar layouts completos");
 
 assert.match(canvasPlayInteractions, /focusin/);
-assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{actor:sheet.actor,modifiers,key:extra\.key\}\)/);
+assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,context\)/, "A execução deve consultar os gatilhos atuais e aplicar filtros de deduplicação");
 assert.match(template, /<textarea rows="1" data-property-value/);
 assert.match(sheetCode, /skillFormulaMode/);
 assert.match(sheet, /valueLabel\.textContent = "Valor"/);
@@ -1569,14 +1613,14 @@ assert.doesNotMatch(propertyPickerView, /Valor atual:|nexus-property-option-valu
 assert.match(propertyPickerView, /canonicalQuery/);
 assert.match(sheetListeners, /normalizeNexusPropertyPath\(String\(input\.value \?\? ""\)\)/);
 assert.match(template, /Caminho da propriedade/);
-assert.match(sheetListeners, /const skillFormulaMatch = path\.match/);
-assert.match(sheetListeners, /evaluateNexusSkillFormula\(sheet\.actor, skillFormulaMatch\[1\], String\(value\)\)/);
-assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)\.value/);
-assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
+assert.match(propertyValueListeners, /const skillFormulaMatch = path\.match/);
+assert.match(propertyValueListeners, /evaluateNexusSkillFormula\(sheet\.actor, skillFormulaMatch\[1\], String\(value\)\)/);
+assert.match(propertyValueListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)\.value/);
+assert.match(propertyValueListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
 assert.match(css, /max-height:\s*none !important/);
 assert.match(css, /overflow-y:\s*hidden !important/);
-assert.match(sheetListeners, /Math\.min\(input\.scrollHeight, maxHeight\)/);
-assert.match(sheetListeners, /input\.scrollHeight > maxHeight \? "auto" : "hidden"/);
+assert.match(propertyValueListeners, /Math\.min\(input\.scrollHeight, maxHeight\)/);
+assert.match(propertyValueListeners, /input\.scrollHeight > maxHeight \? "auto" : "hidden"/);
 assert.match(css, /nexus-property-option-name[\s\S]*nexus-property-option-path/, "O seletor deve exibir somente nome e caminho");
 assert.doesNotMatch(css, /1\.0\.0\.56 — layout isolado/, "O CSS antigo do buscador deve ser removido");
 
@@ -1584,8 +1628,8 @@ assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressõe
 assert.ok(sheet.includes('flags.nexus.propertyExpressions'), "Expressões persistidas devem invalidar componentes dependentes");
 assert.doesNotMatch(sheet, /dependencies\.add\("identity\.level"\)/, "O Core não deve impor atualização por nível a propriedades sem fórmula");
 assert.match(sheet, /addExpression\(formula\)/, "Referências de fórmulas explícitas devem determinar as dependências dinâmicas");
-assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
-assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
+assert.match(actorPropertyWrites, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
+assert.ok(propertyValueListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
 assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
 assert.match(canvasInteractions, /editorPanelsOpen/, "A proteção de teclado deve considerar todos os painéis abertos");
@@ -1630,4 +1674,274 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   assert.equal(parsed.collections.themes["tema-teste"].canvasColor, "#111111");
   assert.equal(parsed.collections.flows[0].id, "flow-test");
   assert.throws(() => parseNexusLibraryBackup(backup.replace("nexus-library", "other-library"), ["custom-card"]));
+}
+
+
+// A single primary pointer gesture must not execute one flow twice when that
+// flow listens to both pointerDown and click. Independent click flows remain active.
+{
+  const component = {
+    id: "gesture-card",
+    interactions: [
+      {
+        id: "shared-flow",
+        enabled: true,
+        triggers: [{ id: "down", event: "pointerDown" }, { id: "click", event: "click" }],
+        conditions: [],
+        actions: [{ id: "shared-action", type: "execute", enabled: true, config: { operation: "notify", message: "once" } }]
+      },
+      {
+        id: "click-only-flow",
+        enabled: true,
+        triggers: [{ id: "click-only", event: "click" }],
+        conditions: [],
+        actions: [{ id: "click-only-action", type: "execute", enabled: true, config: { operation: "notify", message: "click" } }]
+      }
+    ]
+  };
+  const pointerActions = getTriggeredActions(component, "pointerDown");
+  const skipInteractionIds = [...new Set(pointerActions.map(action => action.interactionId))];
+  assert.deepEqual(skipInteractionIds, ["shared-flow"]);
+  assert.deepEqual(getTriggeredActions(component, "click", { skipInteractionIds }).map(action => action.interactionId), ["click-only-flow"]);
+  const executed = [];
+  await executeTriggeredActions(component, "click", async action => executed.push(action.id), { skipInteractionIds });
+  assert.deepEqual(executed, ["click-only-action"]);
+}
+
+
+// Listener scope regression tests: all registered listeners must be removed together.
+{
+  const scope = createListenerScope();
+  const target = new EventTarget();
+  let calls = 0;
+  assert.equal(scope.listen(target, "nexus-test", () => calls++), true);
+  target.dispatchEvent(new Event("nexus-test"));
+  assert.equal(calls, 1, "A listener must run before its scope is aborted");
+  scope.abort();
+  assert.equal(scope.aborted, true);
+  target.dispatchEvent(new Event("nexus-test"));
+  assert.equal(calls, 1, "Aborting the scope must remove its listeners");
+  assert.equal(scope.listen(target, "nexus-test", () => calls++), false, "An aborted scope must reject new listeners");
+  scope.abort();
+  assert.equal(calls, 1, "Aborting an already aborted scope must be safe");
+}
+
+
+// Actor property writes must execute sequentially per Actor.
+{
+  const actor = {};
+  const order = [];
+  let releaseFirst;
+  const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+  let signalStarted;
+  const started = new Promise(resolve => { signalStarted = resolve; });
+  const first = serializeActorPropertyWrite(actor, async () => {
+    order.push("first-start");
+    signalStarted();
+    await firstGate;
+    order.push("first-end");
+  });
+  const second = serializeActorPropertyWrite(actor, async () => {
+    order.push("second");
+  });
+  await started;
+  assert.deepEqual(order, ["first-start"], "A segunda gravação deve aguardar a primeira");
+  releaseFirst();
+  await Promise.all([first, second]);
+  assert.deepEqual(order, ["first-start", "first-end", "second"], "As gravações devem preservar a ordem por Actor");
+
+  let releaseActorWrite;
+  const actorWriteGate = new Promise(resolve => { releaseActorWrite = resolve; });
+  let actorWriteStarted;
+  const actorStarted = new Promise(resolve => { actorWriteStarted = resolve; });
+  const actorOne = {};
+  const actorTwo = {};
+  const independent = [];
+  const blocked = serializeActorPropertyWrite(actorOne, async () => {
+    independent.push("actor-one-start");
+    actorWriteStarted();
+    await actorWriteGate;
+    independent.push("actor-one-end");
+  });
+  const queued = serializeActorPropertyWrite(actorOne, async () => independent.push("actor-one-next"));
+  const parallel = serializeActorPropertyWrite(actorTwo, async () => independent.push("actor-two"));
+  await actorStarted;
+  await parallel;
+  assert.deepEqual(independent, ["actor-one-start", "actor-two"], "A fila de um Actor não deve bloquear outro Actor");
+  releaseActorWrite();
+  await Promise.all([blocked, queued]);
+  assert.deepEqual(independent, ["actor-one-start", "actor-two", "actor-one-end", "actor-one-next"]);
+
+  const originalConsoleError = console.error;
+  console.error = () => {};
+  try {
+    await assert.rejects(serializeActorPropertyWrite(actorOne, async () => { throw new Error("simulated write failure"); }));
+    let recovered = false;
+    await serializeActorPropertyWrite(actorOne, async () => { recovered = true; });
+    assert.equal(recovered, true, "Uma falha não pode bloquear gravações posteriores");
+  } finally {
+    console.error = originalConsoleError;
+  }
+}
+
+
+// Media source classification is shared by sheet previews and token rendering.
+{
+  assert.equal(isMediaSource("https://cdn.example.test/file?id=123"), true, "Signed HTTP URLs may omit a visible extension");
+  assert.equal(isMediaSource("portraits/hero.webp"), true, "Local image paths with supported extensions are accepted");
+  assert.equal(isMediaSource("{{identity.portrait}}"), false, "Unresolved property expressions are not media sources");
+  assert.equal(isMediaSource("javascript:alert(1)"), false, "Executable schemes are not media sources");
+  assert.equal(isImageSource("portraits/hero.webp"), true);
+  assert.equal(isVideoSource("movies/scene.webm"), true);
+  assert.equal(isAudioSource("audio/theme.ogg"), true);
+  assert.equal(isUsableTokenSource(DEFAULT_FOUNDRY_TOKEN_IMAGE), false, "The generic Foundry silhouette is not a custom token image");
+  assert.equal(isUsableTokenSource("portraits/hero.webp"), true);
+}
+
+
+// Property picker UI must stay isolated from the general Actor sheet listener.
+assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspectorNamespace/, "A ficha deve delegar o autocomplete de propriedades ao módulo especializado");
+assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
+assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
+
+assert.match(sheetListeners, /activateActorAliasListeners/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
+assert.match(sheetListeners, /activateActorSheetSkillListeners\(sheet, html, dependencies\)/,
+  "A ficha deve delegar eventos de perícia e proficiência ao controlador especializado");
+
+assert.match(sheetListeners, /activateActorSheetResourceListeners\(sheet, html, dependencies\)/,
+  "A ficha deve delegar controles de recursos ao controlador especializado");
+for (const selector of ["[data-resource-slider]", ".nexus-sheet-resource-track", ".nexus-asset-meter-track"]) {
+  assert.ok(actorSheetResourceListeners.includes(selector), `O controlador de recursos deve manter ${selector}`);
+}
+assert.match(actorSheetResourceListeners, /await sheet\._updateSystemValue\(input\)/,
+  "A persistência dos sliders deve continuar centralizada na ficha");
+
+{
+  const handlers = new Map();
+  const fakeHtml = { find(selector) { return { on(eventName, callback) { handlers.set(`${selector}:${eventName}`, callback); return this; } }; } };
+  const calls = [];
+  const fakeSheet = {
+    actor: {}, _mode: "play",
+    _rollSkill: key => calls.push(["roll", key]),
+    _setSkillProficientLevel: async (key, level) => calls.push(["skill-level", key, level]),
+    _setProficiencyLevel: (id, level) => calls.push(["component-level", id, level]),
+    _runComponentAction: async (id, eventName) => calls.push(["component-action", id, eventName])
+  };
+  activateActorSheetSkillListeners(fakeSheet, fakeHtml, {
+    NEXUS_SKILLS: [{ key: "athletics" }],
+    getNexusSkillModifier: () => ({ proficientLevel: 1 })
+  });
+  handlers.get("[data-skill-roll]:click")({
+    currentTarget: { dataset: { skillRoll: "athletics" } },
+    preventDefault() {}, stopPropagation() {}
+  });
+  await handlers.get("[data-skill-proficiency-toggle]:click")({
+    currentTarget: { dataset: { skillProficiencyToggle: "athletics" }, closest: () => ({ dataset: { id: "component-1" } }) },
+    altKey: false, shiftKey: true, preventDefault() {}, stopPropagation() {}
+  });
+  handlers.get("[data-proficiency-level]:click")({
+    currentTarget: { dataset: { proficiencyLevel: "2" }, closest: () => ({ dataset: { id: "component-2" } }) },
+    preventDefault() {}, stopPropagation() {}
+  });
+  assert.deepEqual(calls, [
+    ["roll", "athletics"],
+    ["skill-level", "athletics", 0],
+    ["component-action", "component-1", "click"],
+    ["component-level", "component-2", 2]
+  ], "Os controles de perícia devem encaminhar rolagens e alterações aos métodos da ficha");
+}
+{
+  const handlers = new Map();
+  const fakeHtml = { find(selector) { return { on(eventName, callback) { handlers.set(`${selector}:${eventName}`, callback); return this; } }; } };
+  const updates = [];
+  const fakeSheet = { _mode: "play", _currentLayout: { components: [] }, _updateSystemValue: async input => updates.push(input.dataset.systemPath) };
+  activateActorSheetResourceListeners(fakeSheet, fakeHtml, { clamp: (value, min, max) => Math.max(min, Math.min(max, value)), updateSheetResourcePreview: () => {} });
+  await handlers.get("[data-resource-slider]:change")({ currentTarget: { dataset: { systemPath: "resources.pv.value" } } });
+  assert.deepEqual(updates, ["resources.pv.value"], "O controlador de recursos deve delegar a persistência à ficha");
+}
+for (const selector of ["[data-skill-roll]", "[data-skill-proficient-level]", "[data-proficiency-level]", "[data-skill-proficiency-toggle]"]) {
+  assert.ok(actorSheetSkillListeners.includes(selector), `O controlador de perícias deve manter ${selector}`);
+}
+assert.match(actorSheetSkillListeners, /const \{ NEXUS_SKILLS, getNexusSkillModifier \} = dependencies/,
+  "O controlador de perícias deve receber explicitamente as dependências que utiliza");
+assert.match(actorAliasListeners, /data-alias-copy/, "O controlador de aliases deve manter o fluxo de cópia");
+assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases deve manter o fluxo de restauração");
+
+
+
+// Actor alias key utilities share collision and safety rules across create/copy/rename.
+{
+  assert.equal(slugifyActorAlias("Força de Vontade"), "forca_de_vontade");
+  assert.equal(slugifyActorAlias(""), "novo");
+  assert.equal(isSafeActorAliasKey("system.attributes.for"), "attributes.for");
+  assert.equal(isSafeActorAliasKey("custom.__proto__.value"), "");
+  const normalizedLegacyAlias = normalizeActorAliasDefinition({
+    id: "legacy-alias", category: "attributes", key: "attributes.attributes.agi",
+    label: "Agilidade", type: "attribute", legacyKeys: []
+  });
+  assert.equal(normalizedLegacyAlias.key, "attributes.agi");
+  assert.deepEqual(normalizedLegacyAlias.legacyKeys, ["attributes.attributes.agi"]);
+  const prefixedAlias = normalizeActorAliasDefinition({ id: "prefixed", category: "attributes", key: "actor.attributes.agi" });
+  assert.equal(prefixedAlias.key, "attributes.agi");
+  assert.deepEqual(prefixedAlias.legacyKeys, [], "Prefixos de acesso não devem virar chaves legadas duplicadas");
+  assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.__proto__.value" }, () => "new-id"), null);
+  assert.equal(normalizeActorAliasDefinition({ category: "custom", key: "custom.novo" }, () => "generated-id").id, "generated-id");
+  const aliases = [{ id: "a", key: "custom.poder", legacyKeys: ["custom.antigo"] }];
+  const natives = [{ id: "n", key: "resources.pv", legacyKeys: ["resources.vida"] }];
+  assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives), "custom.poder_2");
+  assert.equal(createUniqueActorAliasKey("custom", "Antigo", aliases, natives), "custom.antigo_2");
+  assert.equal(createUniqueActorAliasKey("custom", "PV", aliases, natives), "custom.pv");
+  assert.equal(createUniqueActorAliasKey("custom", "Poder", aliases, natives, "a"), "custom.poder");
+  assert.equal(createUniqueActorAliasKey("invalid.category", "Poder", aliases, natives), "");
+  const legacyPayload = { attributes: { old: { value: 18 }, current: { value: 22 } } };
+  assert.deepEqual(getActorAliasCustomValue(legacyPayload, { key: "attributes.current", legacyKeys: ["attributes.old"] }), { value: 22 },
+    "O caminho canônico deve ter prioridade sobre dados legados");
+  assert.deepEqual(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: ["attributes.old"] }), { value: 18 },
+    "O payload legado deve continuar legível quando a migração encontrar conflito");
+  assert.equal(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: [] }), undefined);
+  assert.equal(getActorAliasCustomValue(legacyPayload, { key: "attributes.missing", legacyKeys: "attributes.old" }), undefined,
+    "Uma lista de chaves legadas malformada deve ser ignorada");
+  const customData = { custom: { old: { value: 12 } } };
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.old", "custom.new"), { status: "moved", changed: true });
+  assert.deepEqual(customData.custom.new, { value: 12 });
+  assert.equal(customData.custom.old, undefined);
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.new", "custom.newer"), { status: "moved", changed: true });
+  customData.custom.blocked = "keep";
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.newer", "custom.blocked"), { status: "conflict", changed: false });
+  assert.equal(customData.custom.blocked, "keep");
+  assert.deepEqual(moveActorAliasCustomData(null, "custom.old", "custom.new"), { status: "invalid", changed: false });
+  assert.deepEqual(moveActorAliasCustomData(customData, "custom.missing", "custom.new"), { status: "missing", changed: false });
+  const nestedSource = { custom: { branch: { value: 3 } } };
+  assert.deepEqual(moveActorAliasCustomData(nestedSource, "custom.branch", "custom.branch.child"), { status: "conflict", changed: false });
+  assert.deepEqual(nestedSource, { custom: { branch: { value: 3 } } }, "A conflict must not partially mutate the source");
+  const nestedDestination = { custom: { branch: { value: 3 } } };
+  assert.deepEqual(moveActorAliasCustomData(nestedDestination, "custom.branch.value", "custom.branch"), { status: "conflict", changed: false });
+  assert.deepEqual(nestedDestination, { custom: { branch: { value: 3 } } }, "An overlapping destination must preserve the original tree");
+  const defaults = [
+    createActorAliasDefaultValue({ type: "attribute", label: "Força" }),
+    createActorAliasDefaultValue({ type: "resource", label: "PV" }),
+    createActorAliasDefaultValue({ type: "number" }),
+    createActorAliasDefaultValue({ type: "boolean" }),
+    createActorAliasDefaultValue({ type: "text" })
+  ];
+  assert.deepEqual(defaults, [
+    { name: "Força", exib: "Força", exibicao: "Força", value: 0, checkbonus: 0, roll: "" },
+    { name: "PV", exib: "PV", exibicao: "PV", value: 0, max: 0 },
+    0, false, ""
+  ]);
+  const copy = createActorAliasCopyDefinition({ id: "source", key: "custom.old", label: "Antigo", type: "number", source: "actor", targetPath: "attributes.for" }, "custom.antigo_copy", "copy-id");
+  assert.deepEqual(copy, { id: "copy-id", key: "custom.antigo_copy", label: "Antigo (cópia)", type: "number", source: "custom", targetPath: "" });
+  assert.equal(createActorAliasCopyDefinition(null, "custom.x", "id"), null);
+  const layouts = { main: { components: [
+    { dataPath: "custom.old.value" },
+    { currentPath: "attribute.old.value" },
+    { maxPath: "resources.old.max" },
+    { customBinding: "unrelated.path" }
+  ] } };
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "custom.old", "custom.new"), 1);
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "attributes.old", "attributes.new"), 1);
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "resources.old", "resources.new"), 1);
+  assert.deepEqual(layouts.main.components.map(item => item.dataPath ?? item.currentPath ?? item.maxPath ?? item.customBinding), [
+    "custom.new.value", "attribute.new.value", "resources.new.max", "unrelated.path"
+  ]);
 }

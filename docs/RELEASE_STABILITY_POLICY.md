@@ -24,4 +24,4 @@ Manter a branch `main` enxuta e utilizável, sem perder o histórico técnico da
 - A limpeza remove arquivos obsoletos da árvore atual, não reescreve o histórico do repositório.
 
 ## Checkpoint atual
-**Nenhuma versão está declarada estável neste momento.** A versão 1.0.0.48 passou pelas verificações automatizadas registradas, mas os fluxos funcionais no Foundry VTT 14 ainda não foram confirmados em runtime. A versão 1.0.0.49 permanece em desenvolvimento até que seus testes automatizados e funcionais sejam concluídos.
+**A versão 1.0.0.70 permanece como último checkpoint de distribuição.** A versão 1.0.0.71 está preparada na branch principal de desenvolvimento, com validação automatizada de pacote, sintaxe, regressões e empacotamento aprovada, mas ainda não foi publicada como release nem declarada estável. A revisão #35 corrige a duplicidade de interações, organiza o ciclo de vida dos listeners, reforça a persistência local e centraliza a compatibilidade de aliases. Permanecem obrigatórios os testes funcionais e visuais no Foundry VTT 14, inclusive cenários com múltiplas janelas e usuários, antes de distribuir a nova versão.
