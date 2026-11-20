@@ -67,6 +67,31 @@ export function normalizeActorAliasDefinition(alias, createId) {
   };
 }
 
+/**
+ * Read stored alias data from its canonical key, falling back to preserved
+ * legacy keys when a migration could not move the payload without conflict.
+ */
+export function getActorAliasCustomValue(customData, alias) {
+  if (!customData || typeof customData !== "object" || !alias || typeof alias !== "object") return undefined;
+  const read = key => {
+    const safeKey = isSafeActorAliasKey(key);
+    if (!safeKey) return undefined;
+    let value = customData;
+    for (const part of safeKey.split(".")) {
+      if (!value || typeof value !== "object" || !Object.hasOwn(value, part)) return undefined;
+      value = value[part];
+    }
+    return value;
+  };
+  const current = read(alias.key);
+  if (current !== undefined) return current;
+  for (const legacyKey of alias.legacyKeys ?? []) {
+    const legacy = read(legacyKey);
+    if (legacy !== undefined) return legacy;
+  }
+  return undefined;
+}
+
 export function createUniqueActorAliasKey(category, label, aliases = [], nativeProperties = [], excludeId = null) {
   const safeCategory = isSafeActorAliasKey(category);
   if (!safeCategory || safeCategory.includes(".")) return "";
