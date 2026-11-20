@@ -31,6 +31,7 @@ export function renderCanvasGroups(sheet, root) {
     while (cursor && !seen.has(cursor)) { seen.add(cursor); depth++; cursor = hierarchy.parentById.get(cursor) ?? ""; }
     return depth;
   };
+  const maxDepth = Math.max(0, ...groups.map(group => depthOf(group.id)));
   const ordered = [...groups].sort((a, b) => depthOf(a.id) - depthOf(b.id));
   const surfaces = new Map();
   for (const group of ordered) {
@@ -50,6 +51,7 @@ export function renderCanvasGroups(sheet, root) {
     if (sheet._mode !== "appearance") surface.classList.add("is-static");
     surface.dataset.groupId = String(group.id);
     surface.dataset.groupDepth = String(depthOf(group.id));
+    surface.style.setProperty("--nexus-group-outline-offset", `${(maxDepth-depthOf(group.id))*2}px`);
     surface.setAttribute("aria-hidden", "true");
     surface.hidden = !!group.hidden;
     const baseZ = Math.min(...members.map(element => readDimension(element.style.zIndex, 1)));
