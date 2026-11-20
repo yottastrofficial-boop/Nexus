@@ -1398,7 +1398,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (event.target.closest(".nexus-layer-name")) return;
       event.preventDefault();
       const row=event.currentTarget, groupId=row.dataset.layerGroup;
-      if(groupId){const group=(sheet._currentLayout?.groups??[]).find(item=>item.id===groupId);sheet._setSelection(html,group?.componentIds??[]);sheet._selectedGroupId=groupId;}
+      if(groupId){const group=(sheet._currentLayout?.groups??[]).find(item=>item.id===groupId);sheet._selectedGroupId=groupId;sheet._setSelection(html,sheet._groupHierarchy?.descendants.get(String(groupId))??group?.componentIds??[]);}
       else sheet._setSelection(html,[row.dataset.layerSelect]);
       const portal=document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);portal?.querySelector('[data-floating-panel="component"]')?.click();
     });
