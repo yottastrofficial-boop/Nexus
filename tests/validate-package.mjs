@@ -642,7 +642,7 @@ const setSafePath = (object, keyPath, value) => {
   for (const part of parts) target = target[part] ??= {};
   target[leaf] = value;
 };
-const normalizedAliases = [{ id: "alias-1", key: "new.key", targetPath: null }];
+const normalizedAliases = [{ id: "alias-1", key: "new.key", legacyKeys: ["old.key"], targetPath: null }];
 const migrationDependencies = {
   actor: fakeActor,
   readLayouts: async () => ({ principal: {} }),
