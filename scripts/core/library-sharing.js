@@ -77,17 +77,18 @@ export function createNexusGroupShareCode(group) {
     const copy = sanitizeJsonValue(item);
     copy.id = String(copy.id ?? "");
     copy.parentGroupId = String(copy.parentGroupId ?? "");
-    copy.componentIds = [...new Set((copy.componentIds ?? []).map(id => sourceIdMap.get(String(id)) ?? String(id)))];
+    if (!Array.isArray(copy.componentIds)) throw new Error("Um grupo possui uma lista de componentes inválida.");
+    copy.componentIds = [...new Set(copy.componentIds.map(id => sourceIdMap.get(String(id)) ?? String(id)))];
     return copy;
   });
   if (groups.length > 50) throw new Error("O grupo excede o limite de 50 subgrupos.");
   if (!groups.length) {
     groups = [{
+      ...(sanitizeJsonValue(group.groupSettings ?? {})),
       id: "root",
       name: String(group.name ?? "Grupo").trim().slice(0, 48) || "Grupo",
       parentGroupId: "",
-      componentIds: components.map(component => component.sourceId),
-      ...(sanitizeJsonValue(group.groupSettings ?? {}))
+      componentIds: components.map(component => component.sourceId)
     }];
   }
 
@@ -149,6 +150,7 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
   try { payload = JSON.parse(source.slice(start, end + 1)); }
   catch (_) { throw new Error("O código não contém um JSON válido. Copie novamente o código completo."); }
   if (!payload || payload.format !== "nexus-group") throw new Error("Este código não é uma composição de grupo do NEXUS.");
+  formatVersion ??= Number(payload.version);
   if (![1, 2].includes(payload.version) || payload.version !== formatVersion) {
     throw new Error(`A versão de compartilhamento ${String(payload.version)} não é compatível.`);
   }
@@ -183,7 +185,7 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
         ...sanitizeJsonValue(group),
         id: String(group.id),
         parentGroupId: String(group.parentGroupId ?? ""),
-        componentIds: [...new Set((group.componentIds ?? []).map(String))]
+        componentIds: [...new Set((Array.isArray(group.componentIds) ? group.componentIds : []).map(String))]
       };
     });
     for (const group of groups) {
