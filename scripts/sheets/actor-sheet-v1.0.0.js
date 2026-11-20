@@ -13,7 +13,7 @@ import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { applyGroupLayouts } from "../core/group-composition.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
-import { normalizeActorAliasDefinition } from "../core/actor-aliases.js";
+import { normalizeActorAliasDefinition, getActorAliasCustomValue } from "../core/actor-aliases.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, getNexusRulebookPropertyValue } from "../core/property-schema.js";
@@ -359,7 +359,7 @@ const getNexusRollAliasCandidates = actor => {
       if (!root) return null;
       const raw = alias.targetPath
         ? getPath(actor?.system ?? {}, alias.targetPath)
-        : getPath(getCustomAliasData(actor), alias.key);
+        : getActorAliasCustomValue(getCustomAliasData(actor), alias);
       const hasValueMember = !!raw && typeof raw === "object" && Object.hasOwn(raw, "value");
       const target = safeAliasKey(["attribute", "resource"].includes(alias.type) && hasValueMember && !root.endsWith(".value") ? root + ".value" : root);
       return target ? { display, target, label: String(alias.label ?? display), alias } : null;
@@ -654,7 +654,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     const normalizedAliases = getAliasDefinitions(this.actor);
     const aliases = normalizedAliases.map(alias => {
-      const stored = getPath(customAliasData, alias.key);
+      const stored = getActorAliasCustomValue(customAliasData, alias);
       const external = alias.targetPath ? resolveNexusBinding(this.actor, alias.targetPath).value : undefined;
       const sourceValue = alias.targetPath ? external : stored;
       const current = sourceValue && typeof sourceValue === "object"
