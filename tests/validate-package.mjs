@@ -254,6 +254,12 @@ assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry i
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
 assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\(\$\(form\)\);/, "O Canvas deve registrar os gatilhos automaticamente após cada renderização da ficha");
+assert.match(template, /data-group-parent/, "O Inspector deve expor a escolha de grupo superior");
+assert.match(sheetListeners, /validateGroupParent\(groups, groupId, parentId\)/, "A mudança de grupo superior deve rejeitar ciclos");
+assert.match(sheet, /createNexusSharePackage, parseNexusSharePackage/, "A ficha deve utilizar o formato unificado de pacotes");
+assert.match(sheetListeners, /data-library-export-saved-component/, "Componentes salvos devem poder ser exportados");
+assert.match(sheetListeners, /data-library-export-layout/, "Layouts salvos devem poder ser exportados como pacotes");
+assert.match(sheetListeners, /_importLibraryPackageFile\(file\)/, "A importação de JSON deve reconhecer os diferentes tipos de pacote");
 assert.match(sheet, /async _prepareContext\(options = \{\}\) \{\s*\/\/ O modo padrão é estado real da ficha, não apenas fallback de apresentação\.\s*this\._mode \?\?= "play";/, "O modo Padrão deve existir no estado interno antes da preparação da ficha");
 assert.match(sheet, /target && typeof target === "object" && Object\.hasOwn\(target, "value"\)/, "Aliases de atributo devem editar o campo value de objetos");
 assert.match(sheet, /Object\.hasOwn\(target, suffix\)/, "Aliases de recurso devem resolver value/max sem substituir o objeto");
