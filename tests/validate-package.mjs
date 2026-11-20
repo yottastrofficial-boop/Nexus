@@ -1631,3 +1631,35 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   assert.equal(parsed.collections.flows[0].id, "flow-test");
   assert.throws(() => parseNexusLibraryBackup(backup.replace("nexus-library", "other-library"), ["custom-card"]));
 }
+
+
+// A single primary pointer gesture must not execute one flow twice when that
+// flow listens to both pointerDown and click. Independent click flows remain active.
+{
+  const component = {
+    id: "gesture-card",
+    interactions: [
+      {
+        id: "shared-flow",
+        enabled: true,
+        triggers: [{ id: "down", event: "pointerDown" }, { id: "click", event: "click" }],
+        conditions: [],
+        actions: [{ id: "shared-action", type: "execute", enabled: true, config: { operation: "notify", message: "once" } }]
+      },
+      {
+        id: "click-only-flow",
+        enabled: true,
+        triggers: [{ id: "click-only", event: "click" }],
+        conditions: [],
+        actions: [{ id: "click-only-action", type: "execute", enabled: true, config: { operation: "notify", message: "click" } }]
+      }
+    ]
+  };
+  const pointerActions = getTriggeredActions(component, "pointerDown");
+  const skipInteractionIds = [...new Set(pointerActions.map(action => action.interactionId))];
+  assert.deepEqual(skipInteractionIds, ["shared-flow"]);
+  assert.deepEqual(getTriggeredActions(component, "click", { skipInteractionIds }).map(action => action.interactionId), ["click-only-flow"]);
+  const executed = [];
+  await executeTriggeredActions(component, "click", async action => executed.push(action.id), { skipInteractionIds });
+  assert.deepEqual(executed, ["click-only-action"]);
+}
