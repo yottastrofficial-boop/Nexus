@@ -199,7 +199,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const groupSurface=event.target.closest(".nexus-group-surface");
       contextMenu.dataset.groupId=groupSurface?.dataset.groupId??"";
       if(component && !sheet._selectedIds.has(component.dataset.id)) setSelection([component.dataset.id]);
-      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group){setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);sheet._selectedGroupId=group.id;}}
+      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group){sheet._selectedGroupId=group.id;setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);}}
       const count=sheet._selectedIds?.size??0;
       contextMenu.querySelector('[data-context-action="group"]').disabled=count<2;
       contextMenu.querySelector('[data-context-action="link"]').disabled=count<2;
@@ -263,8 +263,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       } else {
         const group = (sheet._activeGroups ?? []).find(item => item.id === surface.dataset.groupId);
         if (!group) return;
-        setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);
         sheet._selectedGroupId = group.id;
+        setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);
       }
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       openComponentInspector();
@@ -277,8 +277,8 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       while (ancestorId && !visited.has(ancestorId)) { visited.add(ancestorId); if (groupsById.get(ancestorId)?.locked) return false; ancestorId = sheet._groupHierarchy?.parentById?.get(ancestorId) ?? ""; }
       const groupMembers = membersByGroupId.get(String(group.id)) ?? [];
       if (group.locked || groupMembers.some(element => element.classList.contains("is-locked"))) return false;
-      setSelection(groupMembers.map(element => element.dataset.id));
       sheet._selectedGroupId = group.id;
+      setSelection(groupMembers.map(element => element.dataset.id));
       const starts = groupMembers.map(el => ({ el, ...rectOf(el) }));
       if (!starts.length) return false;
       const bounds = {
