@@ -165,6 +165,15 @@ export function getComponentInteractions(component) {
   const legacy=LEGACY[component?.actionType];
   return legacy?[normalizeInteraction({id:"legacy-"+component.actionType,name:component.actionType==="roll"?"Rolagem":"Alternar componente",trigger:{event:legacy.event},actions:[{id:"legacy-action",type:legacy.type,config:legacy.config(component)}]})]:[];
 }
+
+/** True when a component has an enabled, configured keyboard trigger. */
+export function hasKeyboardInteraction(component) {
+  return getComponentInteractions(component).some(flow =>
+    flow.enabled &&
+    flow.triggers.some(trigger => ["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) &&
+    flow.actions.some(action => action.enabled)
+  );
+}
 const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
 const conditionPasses=(condition,actor)=>{
   if(!condition?.path)return false;
@@ -183,7 +192,12 @@ const conditionPasses=(condition,actor)=>{
 };
 export function interactionMatches(flow,eventName,context={}) {
   const modifiers = normalizeModifiers(context.modifiers);
-  const triggerMatches = flow?.triggers?.some(trigger => trigger.event === eventName && normalizeModifiers(trigger.modifiers).join("+") === modifiers.join("+") && (!trigger.key || String(context.key ?? "").toLocaleLowerCase() === String(trigger.key).toLocaleLowerCase()));
+  const triggerMatches = flow?.triggers?.some(trigger =>
+    trigger.event === eventName &&
+    normalizeModifiers(trigger.modifiers).join("+") === modifiers.join("+") &&
+    (!["keyDown", "keyUp"].includes(trigger.event) || !!String(trigger.key ?? "").trim()) &&
+    (!trigger.key || String(context.key ?? "").toLocaleLowerCase() === String(trigger.key).toLocaleLowerCase())
+  );
   if(!flow?.enabled||!triggerMatches)return false;
   if(!flow.conditions.length)return true;
   const values=flow.conditions.map(c=>conditionPasses(c,context.actor));
@@ -398,9 +412,25 @@ export function renderInteractionEditor(container,component,components=[],librar
   const flowEnabled=control("checkbox",flow.enabled,[],"Ativar fluxo");flowHead.append(field("Ativo",flowEnabled,"flow",flow.id,"enabled"));
   const flowTools=el("div","nexus-interaction-flow-actions");flowTools.append(iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));flowHead.append(flowTools);panel.append(flowHead);
   const guided=el("div","nexus-interaction-guided");
-  const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");triggerHead.append(el("h6","","Gatilhos"),btn("＋","add-trigger",flow.id));triggers.append(triggerHead);
-  for(const [i,tr] of flow.triggers.entries()){const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Tipo de gatilho"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores");bind(select,"trigger",flow.id,"event",{triggerIndex:i});bind(modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});const capture=btn(tr.key?`${tr.key} · ${normalizeModifiers(tr.modifiers).map(x=>x.toUpperCase()).join("+")}`:"Definir tecla…","capture-key",flow.id,{triggerIndex:i});capture.dataset.interactionScope="trigger";capture.dataset.interactionField="key";capture.dataset.capturedKey=tr.key??"";capture.hidden=!["keyDown","keyUp"].includes(tr.event);row.classList.toggle("is-key-trigger",!capture.hidden);row.append(select,modifiers,capture,iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i}));triggers.append(row);}
-  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
+  const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");
+  triggerHead.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
+  triggers.append(triggerHead,el("p","nexus-interaction-group-help","Qualquer gatilho configurado inicia este fluxo. Combine evento, modificadores e tecla quando necessário."));
+  for(const [i,tr] of flow.triggers.entries()){
+    const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores");
+    const eventField=field("Evento",select,"trigger",flow.id,"event",{triggerIndex:i});
+    const modifierField=field("Modificadores",modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});
+    const keyLabel=String(tr.key??"");
+    const captureLabel=keyLabel?(keyLabel===" "?"Espaço":keyLabel)+" · "+normalizeModifiers(tr.modifiers).map(x=>x.toUpperCase()).join("+"):"Definir tecla…";
+    const capture=btn(captureLabel,"capture-key",flow.id,{triggerIndex:i});
+    capture.dataset.interactionScope="trigger";capture.dataset.interactionField="key";capture.dataset.capturedKey=tr.key??"";
+    capture.title=tr.key?"Clique para alterar a tecla":"Clique e pressione a tecla desejada";
+    capture.hidden=!["keyDown","keyUp"].includes(tr.event);
+    const keyField=el("label","nexus-interaction-field");keyField.append(el("span","","Tecla"),capture);keyField.hidden=capture.hidden;
+    const clearKey=iconBtn("Limpar tecla","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.hidden=!tr.key;
+    const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
+    row.classList.toggle("is-key-trigger",!capture.hidden);
+    row.append(eventField,modifierField,keyField,clearKey,remove);triggers.append(row);
+  }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
   for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);

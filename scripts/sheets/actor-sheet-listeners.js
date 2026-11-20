@@ -1458,6 +1458,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const template = getInteractionLibrary(sheet.actor).find(item => item.id === control.dataset.templateId);
         if (!template) { ui.notifications?.warn?.("Selecione um fluxo salvo na Biblioteca."); return; }
         applyInteractionEditorCommand(component, command, { ...data, template: template.flow });
+      } else if (command === "clear-key") {
+        applyInteractionEditorChange(component, { ...data, scope: "trigger", field: "key" }, "");
+        applyInteractionEditorChange(component, { ...data, scope: "trigger", field: "modifiers" }, []);
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
       if (control.dataset.capturedModifiers !== undefined) applyInteractionEditorChange(component, { ...data, scope: "trigger", field: "modifiers" }, control.dataset.capturedModifiers ? control.dataset.capturedModifiers.split("+") : []);
@@ -1470,7 +1473,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (liveComponent) {
           const node = sheet.element?.querySelector?.(`.nexus-component[data-id="${CSS.escape(componentId)}"]`);
           const hasClick = getTriggeredActions(liveComponent, "click", { actor: sheet.actor }).length > 0;
-          if (node) { node.dataset.hasClickInteraction = String(hasClick); node.classList.toggle("is-actionable", hasClick); node.classList.toggle("is-rollable", hasClick); if (hasClick) { node.tabIndex = 0; node.setAttribute("role", "button"); node.setAttribute("aria-label", "Executar interação do componente"); } else { node.removeAttribute("tabindex"); node.removeAttribute("role"); node.removeAttribute("aria-label"); } }
+          const hasKeyboard = getComponentInteractions(liveComponent).some(flow => flow.enabled && flow.triggers.some(trigger => ["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) && flow.actions.some(action => action.enabled));
+          const isInteractive = hasClick || hasKeyboard;
+          if (node) {
+            node.dataset.hasClickInteraction = String(hasClick);
+            node.dataset.hasKeyboardInteraction = String(hasKeyboard);
+            node.classList.toggle("is-actionable", hasClick);
+            node.classList.toggle("is-rollable", hasClick);
+            node.classList.toggle("is-keyboard-actionable", hasKeyboard);
+            if (isInteractive) { node.tabIndex = 0; node.setAttribute("role", "button"); node.setAttribute("aria-label", "Executar interação do componente"); }
+            else { node.removeAttribute("tabindex"); node.removeAttribute("role"); node.removeAttribute("aria-label"); }
+          }
         }
       }
       if (control.dataset.interactionScope?.startsWith("propertyPresentation") || command?.includes("property-rule") || control.dataset.interactionScope?.startsWith("representation") || command?.includes("representation-rule")) {

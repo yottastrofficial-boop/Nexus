@@ -16,8 +16,19 @@ export function activateCanvasPlayInteractions(sheet, html) {
     sheet._runComponentAction(card.dataset.id,name,{...extra,modifiers});return true;
   };
   const stop=(event,name,extra)=>{if(!dispatch(event,name,extra))return false;event.preventDefault();event.stopPropagation();return true;};
-  const onKeydown=event=>{if(sheet._mode!=="play"||isControlTarget(event))return;dispatch(event,"keyDown",{key:event.key});if(["Enter"," "].includes(event.key))stop(event,"click",{key:event.key,keyboard:true});};
-  const onKeyup=event=>{if(!isControlTarget(event))dispatch(event,"keyUp",{key:event.key});};
+  const hasKeyboardTrigger = component => getComponentInteractions(component).some(flow =>
+    flow.enabled && flow.triggers.some(trigger => ["keyDown","keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) &&
+    flow.actions.some(action => action.enabled)
+  );
+  const onKeydown=event=>{
+    if(sheet._mode!=="play"||event.repeat||isControlTarget(event))return;
+    if(dispatch(event,"keyDown",{key:event.key})){event.preventDefault();event.stopPropagation();return;}
+    if(["Enter"," "].includes(event.key))stop(event,"click",{key:event.key,keyboard:true});
+  };
+  const onKeyup=event=>{
+    if(isControlTarget(event))return;
+    if(dispatch(event,"keyUp",{key:event.key})){event.preventDefault();event.stopPropagation();}
+  };
   const onClick=event=>{if(event.button===0&&performance.now()>=(sheet._suppressComponentClickUntil??0)&&!isControlTarget(event))stop(event,"click");};
   const onDoubleClick=event=>{if(!isControlTarget(event))stop(event,"doubleClick");};
   const onContextMenu=event=>{if(!isControlTarget(event))stop(event,"rightClick");};
@@ -39,7 +50,13 @@ export function activateCanvasPlayInteractions(sheet, html) {
     else if (cursorCard === card) clearBehaviorCursor();
   };
   const onPointerLeave = clearBehaviorCursor;
-  const onPointerDown=event=>{if(!isControlTarget(event))dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});};
+  const onPointerDown=event=>{
+    if(isControlTarget(event))return;
+    dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});
+    const card=cardOf(event);
+    const component=card&&sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
+    if(card&&hasKeyboardTrigger(component))card.focus?.({preventScroll:true});
+  };
   const onPointerUp=event=>{if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
   const onPointerOver=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"hover",{pointerType:event.pointerType});};
   const onFocusIn=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"focus");};

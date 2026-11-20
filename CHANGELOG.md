@@ -1,3 +1,12 @@
+## 1.0.0.68
+
+### Comportamentos e experiência do editor
+- Organiza os gatilhos com rótulos explícitos para evento, modificadores e tecla, texto de orientação e ação para limpar uma tecla capturada.
+- Aprimora a captura de atalhos, preservando a combinação de modificadores e exibindo a tecla de forma legível.
+- Torna componentes com atalhos de teclado acessíveis por foco: clicar no componente dá foco, e Tab também permite alcançá-lo.
+- Evita executar atalhos em campos de edição, ignora repetição automática da tecla e desativa gatilhos de teclado sem tecla definida.
+- Refina visualmente os cartões da Biblioteca e os painéis de comportamento, com hierarquia, estados de foco e adaptação a painéis estreitos.
+
 ## 1.0.0.67
 
 ### Grupos e Biblioteca
