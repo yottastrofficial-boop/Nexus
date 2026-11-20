@@ -144,6 +144,7 @@ const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
+const canvasGroupRendering = await read("scripts/sheets/canvas-group-rendering.js");
 const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
 const canvasPlayInteractions = await read("scripts/sheets/canvas-play-interactions.js");
 const themeModule = await read("scripts/core/theme.js");
