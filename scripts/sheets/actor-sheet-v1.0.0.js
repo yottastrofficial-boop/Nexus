@@ -2586,8 +2586,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
     saved.push({ id:`libgrp-${foundry.utils.randomID(8)}`, name, groupSettings:rootSettings, components:savedComponents, groups:savedGroups });
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
-    ui.notifications?.info?.(`Grupo "${name}" e sua hierarquia foram salvos na Biblioteca pessoal.`);
-    this._libraryRenderSavedGroups?.(); this._libraryApplyFilter?.(); return true;
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryRenderSavedGroups?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`Grupo "${name}" e sua hierarquia foram salvos na Biblioteca pessoal. Abra Assets → Meus itens para reutilizá-lo.`);
+    return true;
   }
 
   async _saveCurrentLayoutToLibrary() {
@@ -3156,6 +3160,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const resolvedGroup = requestedGroup && requestedIds.length === this._selectedIds.size && requestedIds.every(id => this._selectedIds.has(id))
       ? requestedGroup
       : groups.find(group => { const ids = hierarchy.descendants.get(String(group.id)) ?? []; return ids.length === this._selectedIds.size && ids.every(id => this._selectedIds.has(id)); }) ?? null;
+    const selectedComponentId = this._selectedIds.size === 1 ? [...this._selectedIds][0] : null;
+    // Ao selecionar um membro, revela discretamente os limites dos irmãos do mesmo grupo.
+    const ownerGroupId = selectedComponentId ? hierarchy.componentOwner.get(String(selectedComponentId)) : null;
+    const relatedGroup = ownerGroupId ? groupsById.get(ownerGroupId) : null;
+    const relatedComponentIds = new Set(relatedGroup ? hierarchy.descendants.get(String(relatedGroup.id)) ?? [] : []);
     this._selectedGroupId = resolvedGroup?.id ?? null;
     const selectedGroupIds = new Set(resolvedGroup ? [resolvedGroup.id] : []);
     const selectedGroupComponentIds = new Set(resolvedGroup ? hierarchy.descendants.get(String(resolvedGroup.id)) ?? [] : []);
@@ -3164,8 +3173,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const el of componentNodes) {
       const selected = this._selectedIds.has(el.dataset.id);
       const memberSelected = selected && selectedGroupComponentIds.has(el.dataset.id);
+      const related = !selected && relatedComponentIds.has(el.dataset.id);
       el.classList.toggle("is-selected", selected);
-      el.classList.toggle("is-group-inspecting", memberSelected);
+      el.classList.toggle("is-group-inspecting", memberSelected || (selected && !!relatedGroup));
+      el.classList.toggle("is-group-related", related);
       el.classList.toggle("is-selection-highlight", selected);
     }
     sheetRoot?.querySelectorAll?.(".nexus-group-surface").forEach(surface => {
