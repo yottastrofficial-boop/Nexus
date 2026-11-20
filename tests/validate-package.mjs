@@ -1763,7 +1763,8 @@ assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catÃ
     { customBinding: "unrelated.path" }
   ] } };
   assert.equal(replaceActorAliasLayoutReferences(layouts, "custom.old", "custom.new"), 1);
-  assert.equal(replaceActorAliasLayoutReferences(layouts, "attributes.old", "attributes.new"), 2);
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "attributes.old", "attributes.new"), 1);
+  assert.equal(replaceActorAliasLayoutReferences(layouts, "resources.old", "resources.new"), 1);
   assert.deepEqual(layouts.main.components.map(item => item.dataPath ?? item.currentPath ?? item.maxPath ?? item.customBinding), [
     "custom.new.value", "attribute.new.value", "resources.new.max", "unrelated.path"
   ]);
