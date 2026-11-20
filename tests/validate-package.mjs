@@ -932,7 +932,7 @@ assert.match(interactions, /triggers:source\.map\(normalizeTrigger\)/);
 assert.match(interactions, /flow\.actions/);
 assert.ok(interactions.includes("toggle-component"), "Ações antigas devem continuar compatíveis");
 assert.match(sheetCode, /_toggleTargetComponent/);
-assert.match(sheetCode, /setResourceFromTrack/);
+assert.match(actorSheetResourceListeners, /setResourceFromTrack/);
 console.log(`NEXUS ${manifest.version}: catálogo canônico, proficiência assinada e sincronização de temas verificados.`);
 
 
