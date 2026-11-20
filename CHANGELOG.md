@@ -1,3 +1,21 @@
+## 1.0.0.70
+
+### Biblioteca e compartilhamento
+- Adiciona backup completo da Biblioteca em formato versionado `NEXUS-LIBRARY/1`, incluindo componentes, grupos, layouts, fluxos, assets e temas.
+- Adiciona exportação JSON e importação de backup pela interface da Biblioteca.
+- Preserva assets e temas personalizados como coleções pessoais; assets importados também ficam disponíveis entre os componentes pessoais.
+- Adiciona aplicação de temas personalizados importados sem alterar o catálogo de temas padrão.
+- Valida estrutura, tipos, cores, limites de tamanho e conteúdo JSON sem executar código importado.
+
+### Organização e foco
+- Mantém a organização hierárquica sem arraste e o tratamento de Escape por janela implementados na etapa anterior.
+
+### Validação
+- Inclui teste de ida e volta do backup completo da Biblioteca.
+- Aguardar CI e teste funcional no Foundry VTT 14 antes de integrar à `main`.
+
+---
+
 ## 1.0.0.69
 
 ## Próxima atualização — organização hierárquica e foco das janelas
