@@ -60,7 +60,7 @@ jobs:
 
   release:
     name: Publish Foundry release
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')) || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
     steps:
