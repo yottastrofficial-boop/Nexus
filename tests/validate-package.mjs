@@ -1290,6 +1290,10 @@ const legacyGroupCode = "NEXUS-GROUP/1\\n" + JSON.stringify({
 const legacyGroup = parseNexusGroupShareCode(legacyGroupCode, ["asset-text"]);
 assert.equal(legacyGroup.groups[0].name, "Grupo legado");
 assert.deepEqual(legacyGroup.groups[0].componentIds, ["legacy-a"], "NEXUS-GROUP/1 deve criar vínculo de membro válido");
+const plainGroupJson = sharedGroupCode.replace(/^NEXUS-GROUP\\/2\\s*/, "");
+const importedPlainJson = parseNexusGroupShareCode(plainGroupJson, ["asset-text", "asset-image"]);
+assert.equal(importedPlainJson.groups.length, 1, "JSON puro deve manter a estrutura de grupo");
+assert.deepEqual(importedPlainJson.groups[0].componentIds, ["old-1", "old-2"], "JSON puro deve preservar todos os vínculos");
 assert.throws(() => parseNexusGroupShareCode(sharedGroupCode, ["asset-text"]), /não está disponível/, "Tipos de componentes desconhecidos devem ser rejeitados");
 assert.throws(() => parseNexusGroupShareCode('NEXUS-GROUP/1\\n{"format":"nexus-group","version":2,"components":[]}', ["asset-text"]), /versão de compartilhamento/, "Versões de compartilhamento incompatíveis devem ser rejeitadas");
 assert.match(sheet, /groups: imported\.groups/, "A importação deve persistir a hierarquia de subgrupos, não apenas os componentes");
