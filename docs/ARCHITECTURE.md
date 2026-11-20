@@ -112,3 +112,12 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - O CSS requer consolidação por domínio, mas alterações de cascata e tema devem ser acompanhadas de comparação visual.
 - A extração de partes do listener da ficha e da classe principal deve ocorrer por domínio, após mapear as variáveis compartilhadas e os pontos de persistência.
 
+### Editor de valores de propriedades
+
+- `scripts/sheets/actor-property-value-listeners.js` contém o ciclo de entrada e salvamento dos campos `data-property-value`.
+- `activateActorSheetListeners` delega esse domínio ao módulo especializado, mantendo os demais eventos do Inspector no controlador geral.
+- O módulo recebe a ficha, o namespace do Inspector, a verificação de propriedade do controle e as dependências de domínio; não mantém estado global próprio.
+- A serialização de gravações e a persistência de expressões continuam centralizadas em `scripts/core/actor-property-writes.js`.
+- A extração preserva o comportamento de fórmulas, literais entre aspas, valores numéricos vazios, aliases, caminhos virtuais, imagens e propriedades somente de leitura.
+- As verificações de regressão foram redirecionadas para o módulo especializado e a validação automatizada do pacote passou.
+
