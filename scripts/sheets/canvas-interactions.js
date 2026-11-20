@@ -325,6 +325,17 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     canvas.addEventListener("focus", () => { sheet._nexusCanvasKeyboardFocus = true; });
     canvas.addEventListener("pointerdown",event=>{
       if(sheet._mode!=="appearance")return;
+      const groupHandle = event.target.closest("[data-group-handle]");
+      if (groupHandle) {
+        const group = groupsById.get(groupHandle.dataset.groupHandle);
+        if (group) {
+          setSelection(group.componentIds ?? []);
+          sheet._selectedGroupId = group.id;
+          event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
+          openComponentInspector();
+        }
+        return;
+      }
       if(event.target.closest("button,input,textarea,select,[contenteditable='true']"))return;
       // O foco só vai para o Canvas quando o próprio Canvas recebe interação.
       // Cliques em inspetores e menus não passam por este listener.
