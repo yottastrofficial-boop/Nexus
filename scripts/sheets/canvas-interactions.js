@@ -109,6 +109,21 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       sheet._activeGroups = layouts;
       const componentElements = elements();
       const hierarchy = buildGroupHierarchy(layouts, componentElements.map(element => ({ id: element.dataset.id })));
+      for (const element of componentElements) {
+        element.classList.remove("is-group-member", "is-group-inspecting");
+        delete element.dataset.groupId;
+        element.style.removeProperty("--nexus-group-bg");
+        element.style.removeProperty("--nexus-group-border");
+        element.style.removeProperty("--nexus-group-radius");
+        const ownerId = hierarchy.componentOwner.get(String(element.dataset.id));
+        const owner = ownerId ? hierarchy.groupById.get(ownerId) : null;
+        if (!owner) continue;
+        element.dataset.groupId = ownerId;
+        element.classList.add("is-group-member");
+        element.style.setProperty("--nexus-group-bg", owner.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
+        element.style.setProperty("--nexus-group-border", owner.borderColor ?? "#52647b");
+        element.style.setProperty("--nexus-group-radius", `${clamp(Number(owner.borderRadius ?? 8),0,32)}px`);
+      }
       sheet._groupHierarchy = hierarchy;
       groupsById = hierarchy.groupById;
       groupSurfacesById = new Map();
