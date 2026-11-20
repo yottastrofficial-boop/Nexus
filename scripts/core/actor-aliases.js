@@ -34,3 +34,63 @@ export function createUniqueActorAliasKey(category, label, aliases = [], nativeP
   while (reserved.has(candidate)) candidate = `${safeCategory}.${base}_${suffix++}`;
   return candidate;
 }
+
+
+/**
+ * Move a custom alias payload without replacing an existing destination.
+ * The caller owns cloning and persistence so this helper remains pure.
+ */
+export function moveActorAliasCustomData(customData, previousKey, nextKey) {
+  const previous = isSafeActorAliasKey(previousKey);
+  const next = isSafeActorAliasKey(nextKey);
+  if (!previous || !next || previous === next) return false;
+
+  const read = path => path.split(".").reduce((value, part) => value?.[part], customData);
+  const value = read(previous);
+  if (value === undefined || read(next) !== undefined) return false;
+
+  const targetParts = next.split(".");
+  let target = customData;
+  for (const part of targetParts.slice(0, -1)) {
+    if (!target[part] || typeof target[part] !== "object" || Array.isArray(target[part])) target[part] = {};
+    target = target[part];
+  }
+  target[targetParts.at(-1)] = value;
+
+  const previousParts = previous.split(".");
+  const leaf = previousParts.pop();
+  const parent = previousParts.reduce((value, part) => value?.[part], customData);
+  if (!parent || typeof parent !== "object" || !Object.hasOwn(parent, leaf)) return false;
+  delete parent[leaf];
+  return true;
+}
+
+/**
+ * Rewrite component bindings when an alias key changes, including singular
+ * legacy roots accepted by older layouts.
+ */
+export function replaceActorAliasLayoutReferences(layouts, previousKey, nextKey) {
+  const previous = isSafeActorAliasKey(previousKey);
+  const next = isSafeActorAliasKey(nextKey);
+  if (!previous || !next || previous === next) return 0;
+
+  const legacyPrevious = previous.replace(/^attributes\\./, "attribute.").replace(/^resources\\./, "resource.");
+  const legacyNext = next.replace(/^attributes\\./, "attribute.").replace(/^resources\\./, "resource.");
+  const replacements = [[previous, next]];
+  if (legacyPrevious !== previous) replacements.push([legacyPrevious, legacyNext]);
+
+  let changed = 0;
+  for (const layout of Object.values(layouts ?? {})) {
+    for (const component of layout?.components ?? []) {
+      for (const property of ["dataPath", "currentPath", "maxPath", "customBinding"]) {
+        const value = component?.[property];
+        if (typeof value !== "string") continue;
+        const replacement = replacements.find(([from]) => value === from || value.startsWith(`${from}.`));
+        if (!replacement) continue;
+        component[property] = `${replacement[1]}${value.slice(replacement[0].length)}`;
+        changed++;
+      }
+    }
+  }
+  return changed;
+}
