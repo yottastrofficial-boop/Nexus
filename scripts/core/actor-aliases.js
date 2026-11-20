@@ -30,7 +30,7 @@ export function normalizeActorAliasDefinition(alias, createId) {
     : "custom";
   const originalKey = String(alias.key ?? "").trim().replace(/^system\./, "");
   let key = originalKey;
-  const repeated = new RegExp("^(?:" + category + "\\\\.){2,}", "i");
+  const repeated = new RegExp("^(?:" + category + "[.]){2,}", "i");
   if (repeated.test(key)) key = key.replace(repeated, category + ".");
   key = isSafeActorAliasKey(key);
   if (!key) return null;
