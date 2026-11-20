@@ -47,6 +47,9 @@ export function moveActorAliasCustomData(customData, previousKey, nextKey) {
   const previous = isSafeActorAliasKey(previousKey);
   const next = isSafeActorAliasKey(nextKey);
   if (!previous || !next || previous === next) return { status: "invalid", changed: false };
+  if (previous.startsWith(`${next}.`) || next.startsWith(`${previous}.`)) {
+    return { status: "conflict", changed: false };
+  }
   if (!customData || typeof customData !== "object" || Array.isArray(customData)) {
     return { status: "invalid", changed: false };
   }
@@ -105,7 +108,7 @@ export function createActorAliasCopyDefinition(source, key, id) {
     ...source,
     id,
     key,
-    label: `${String(source.label ?? "").slice(0, 38)} (cópia)`.slice(0, 48),
+    label: `${String(source.label ?? "")} (cópia)`.slice(0, 48),
     source: "custom",
     targetPath: ""
   };
