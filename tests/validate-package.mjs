@@ -15,7 +15,56 @@ import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode } from "../scripts/core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode } from "../scripts/core/library-sharing.js";
+import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+
+// Nested group hierarchy regression tests.
+{
+  const groups = [
+    { id: "outer", componentIds: ["a"] },
+    { id: "inner", parentGroupId: "outer", componentIds: ["b"] }
+  ];
+  const hierarchy = buildGroupHierarchy(groups, [{ id: "a" }, { id: "b" }, { id: "c" }]);
+  assert.deepEqual(hierarchy.descendants.get("outer"), ["a", "b"]);
+  assert.deepEqual(hierarchy.directComponents.get("outer"), ["a"]);
+  assert.equal(hierarchy.parentById.get("inner"), "outer");
+  assert.equal(hierarchy.rows.find(row => row.id === "inner").depth, 1);
+  assert.equal(hierarchy.rows.find(row => row.id === "c").depth, 0);
+  assert.equal(validateGroupParent(groups, "outer", "inner"), false, "A hierarchy must reject cycles");
+  assert.equal(validateGroupParent(groups, "inner", ""), true, "A group may be promoted to the root");
+}
+{
+  const source = {
+    name: "Grupo externo",
+    groupSettings: { backgroundColor: "#123456" },
+    components: [
+      { sourceId: "a", type: "custom-card", x: 0, y: 0, w: 120, h: 60 },
+      { sourceId: "b", type: "custom-card", x: 140, y: 0, w: 120, h: 60 }
+    ],
+    groups: [
+      { id: "root", name: "Grupo externo", parentGroupId: "", componentIds: ["a"] },
+      { id: "nested", name: "Grupo interno", parentGroupId: "root", componentIds: ["b"] }
+    ]
+  };
+  const code = createNexusGroupShareCode(source);
+  const parsed = parseNexusGroupShareCode(code, ["custom-card"]);
+  assert.equal(parsed.groups.length, 2);
+  assert.equal(parsed.groups.find(group => group.id === "nested").parentGroupId, "root");
+  assert.deepEqual(parsed.groups.find(group => group.id === "root").componentIds, ["a"]);
+}
+{
+  const layout = {
+    name: "Ficha compartilhada", width: 900, height: 700, canvasColor: "#111111",
+    components: [{ id: "cmp-a", type: "custom-card", x: 10, y: 20, w: 120, h: 60, interactions: [{ event: "click" }] }],
+    groups: [{ id: "grp-a", componentIds: ["cmp-a"], parentGroupId: "" }],
+    links: []
+  };
+  const code = createNexusLayoutShareCode(layout);
+  const parsed = parseNexusLayoutShareCode(code, ["custom-card"]);
+  assert.equal(parsed.layout.width, 900);
+  assert.equal(parsed.layout.components[0].id, "cmp-a");
+  assert.equal(parsed.layout.groups[0].componentIds[0], "cmp-a");
+}
 
 // Geometry regression tests for the Canvas smart-alignment search.
 const geometrySource = { x: 0, y: 0, w: 20, h: 20 };
@@ -1410,8 +1459,11 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 assert.match(sheetListeners, /capturedModifiers/, "A captura deve salvar os modificadores junto da tecla");
 assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve ser um indicador pequeno abaixo do caminho");
-assert.match(canvasGroupRendering, /groupHandle/, "Grupos devem possuir uma alça clicável independente dos espaços vazios");
-assert.match(canvasInteractions, /data-group-handle/, "A alça deve selecionar o grupo e abrir seu Inspector");
+assert.doesNotMatch(canvasGroupRendering, /nexus-group-handle|data-group-handle/, "Grupos não devem renderizar alças ou cabeçalhos que consumam espaço");
+assert.doesNotMatch(canvasInteractions, /data-group-handle/, "A seleção de grupos não deve depender de alças visuais");
+assert.match(canvasGroupRendering, /buildGroupHierarchy/, "As superfícies devem respeitar a hierarquia de grupos");
+assert.match(canvasInteractions, /hierarchy\.descendants/, "Movimentar um grupo deve incluir todos os descendentes");
+assert.match(template, /data-library-saved-layouts/, "A Biblioteca deve apresentar layouts completos");
 
 assert.match(canvasPlayInteractions, /focusin/);
 assert.match(canvasPlayInteractions, /getTriggeredActions\(component,name,\{actor:sheet.actor,modifiers,key:extra\.key\}\)/);
