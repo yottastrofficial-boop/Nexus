@@ -3254,7 +3254,21 @@ export class NexusActorSheet extends NexusActorSheetBase {
       inspector.hidden = !one && !selectedGroup; if (empty) empty.hidden = !!one || !!selectedGroup;
       const groupInspector=inspector.querySelector("[data-group-inspector]");
       if(groupInspector){groupInspector.hidden=!selectedGroup;if(selectedGroup){for(const [key,value] of [["name",selectedGroup.name??"Grupo"],["backgroundColor",selectedGroup.backgroundColor??"#273443"],["borderColor",selectedGroup.borderColor??"#52647b"],["borderRadius",selectedGroup.borderRadius??8]]){const field=groupInspector.querySelector(`[data-group-setting="${key}"]`);if(field)field.value=value;}const parentSelect=groupInspector.querySelector("[data-group-parent]");if(parentSelect){const options=[["","Sem grupo superior"]];for(const candidate of groups){if(candidate.id===selectedGroup.id||!validateGroupParent(groups,selectedGroup.id,candidate.id))continue;const depth=(id)=>{let value=0,cursor=hierarchy.parentById.get(String(id))??"";while(cursor&&value<20){value++;cursor=hierarchy.parentById.get(cursor)??"";}return value;};options.push([String(candidate.id),`${"— ".repeat(depth(candidate.id))}${candidate.name??"Grupo"}`]);}parentSelect.replaceChildren(...options.map(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;return option;}));parentSelect.value=String(selectedGroup.parentGroupId??"");}}}
-      if(groupInspector&&selectedGroup){const values={kind:selectedGroup.kind??"container",layoutMode:selectedGroup.layoutMode??"free",gap:selectedGroup.gap??8,padding:selectedGroup.padding??8,columns:selectedGroup.columns??2,align:selectedGroup.align??"start",showHeader:selectedGroup.showHeader??selectedGroup.kind==="section",title:selectedGroup.title??selectedGroup.name??"Grupo"};for(const [key,value] of Object.entries(values)){const field=groupInspector.querySelector('[data-group-setting="'+key+'"]');if(field){if(field.type==="checkbox")field.checked=!!value;else field.value=value;}}}
+      if(groupInspector&&selectedGroup){
+        const values={kind:selectedGroup.kind??"container",layoutMode:selectedGroup.layoutMode??"free",gap:selectedGroup.gap??8,padding:selectedGroup.padding??8,columns:selectedGroup.columns??2,align:selectedGroup.align??"start",showHeader:selectedGroup.showHeader??selectedGroup.kind==="section",title:selectedGroup.title??selectedGroup.name??"Grupo"};
+        for(const [key,value] of Object.entries(values)){const field=groupInspector.querySelector('[data-group-setting="'+key+'"]');if(field){if(field.type==="checkbox")field.checked=!!value;else field.value=value;}}
+        const mode=values.layoutMode,kind=values.kind;
+        groupInspector.querySelectorAll("[data-group-setting-field]").forEach(field=>{
+          const key=field.dataset.groupSettingField;
+          field.hidden=(key==="gap"&&!["horizontal","vertical","grid"].includes(mode))
+            ||(key==="columns"&&mode!=="grid")
+            ||(key==="align"&&mode==="free")
+            ||(key==="padding"&&kind==="folder");
+        });
+        groupInspector.querySelector('[data-group-setting-block="section"]')?.toggleAttribute("hidden",kind!=="section");
+        const memberCount=groupInspector.querySelector("[data-group-member-count]");
+        if(memberCount){const count=hierarchy.descendants.get(String(selectedGroup.id))?.length??0;const childCount=hierarchy.children.get(String(selectedGroup.id))?.length??0;memberCount.textContent=`${count} componentes · ${childCount} subgrupos`;}
+      }
       const tabNav=inspector.querySelector("[data-inspector-tabs]"); if(tabNav)tabNav.hidden=!!selectedGroup;
       const layoutSection=inspector.querySelector("[data-inspector-layout]"); if(layoutSection)layoutSection.hidden=!!selectedGroup;
       const cardStyleSection=inspector.querySelector("[data-inspector-card-style]"); if(cardStyleSection)cardStyleSection.hidden=!!selectedGroup;
