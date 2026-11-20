@@ -184,7 +184,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const action = event.target.closest("[data-context-action]")?.dataset.contextAction; if (!action) return; closeContext();
       const ids=[...(sheet._selectedIds??[])];
       if(action==="add-card"){await sheet._addComponent("custom-card", { template: { customLabel: "Card", text: "" } });return;}
-      if(action==="edit"){sheet._mode="appearance";sheet._selectedGroupId=null;sheet._openAppearancePanels??=new Set();sheet._openAppearancePanels.add("component");sheet.render({force:true});}
+      if(action==="edit"){sheet._mode="appearance";const groupSurface=event.target.closest?.(".nexus-group-surface");if(groupSurface)sheet._selectedGroupId=groupSurface.dataset.groupId;else{sheet._selectedGroupId=null;sheet._componentEditorTargetId=ids.length===1?ids[0]:null;}sheet._openAppearancePanels??=new Set();sheet._openAppearancePanels.add("component");sheet.render({force:true});}
       if(action==="group") await sheet._groupSelection($(root));
       if(action==="link") await sheet._createComponentLink(ids);
       if(action==="ungroup") await sheet._ungroupSelection($(root));
@@ -199,7 +199,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const component=event.target.closest(".nexus-component");
       const groupSurface=event.target.closest(".nexus-group-surface");
       if(component && !sheet._selectedIds.has(component.dataset.id)) setSelection([component.dataset.id]);
-      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group)setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);}
+      else if(groupSurface){const group = groupsById.get(groupSurface.dataset.groupId);if(group){setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);sheet._selectedGroupId=group.id;}}
       const count=sheet._selectedIds?.size??0;
       contextMenu.querySelector('[data-context-action="group"]').disabled=count<2;
       contextMenu.querySelector('[data-context-action="link"]').disabled=count<2;
@@ -264,6 +264,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         const group = (sheet._activeGroups ?? []).find(item => item.id === surface.dataset.groupId);
         if (!group) return;
         setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);
+        sheet._selectedGroupId = group.id;
       }
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       openComponentInspector();
