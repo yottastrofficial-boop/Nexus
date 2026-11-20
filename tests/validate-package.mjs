@@ -1733,6 +1733,11 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
 assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspectorNamespace/, "A ficha deve delegar o autocomplete de propriedades ao módulo especializado");
 assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
 assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
+const actorAliasListeners = await readFile(new URL("../scripts/sheets/actor-alias-listeners.js", import.meta.url), "utf8");
+assert.match(sheetListeners, /activateActorAliasListeners\\(sheet, html, dependencies\\)/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
+assert.match(actorAliasListeners, /data-alias-copy/, "O controlador de aliases deve manter o fluxo de cópia");
+assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases deve manter o fluxo de restauração");
+
 
 
 // Actor alias key utilities share collision and safety rules across create/copy/rename.
