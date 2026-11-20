@@ -120,3 +120,74 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
     components
   };
 }
+
+
+const MAX_LAYOUT_COMPONENTS = 250;
+const MAX_LAYOUT_GROUPS = 100;
+
+/** Full-layout export keeps appearance, dimensions, groups, links and component behavior as inert JSON. */
+export function createNexusLayoutShareCode(layout) {
+  if (!layout || typeof layout !== "object" || !Array.isArray(layout.components)) {
+    throw new Error("O layout informado não possui uma estrutura válida.");
+  }
+  if (layout.components.length > MAX_LAYOUT_COMPONENTS || (layout.groups?.length ?? 0) > MAX_LAYOUT_GROUPS) {
+    throw new Error("O layout excede os limites de componentes ou grupos para compartilhamento.");
+  }
+  const snapshot = sanitizeJsonValue(layout);
+  delete snapshot.id;
+  delete snapshot.definition;
+  snapshot.components = snapshot.components.map(component => {
+    const item = { ...component };
+    delete item.definition;
+    return item;
+  });
+  const payload = { format: "nexus-layout", version: 1, name: String(layout.name ?? "Layout").trim().slice(0, 48) || "Layout", layout: snapshot };
+  const code = "NEXUS-LAYOUT/1\\n" + JSON.stringify(payload, null, 2);
+  if (code.length > MAX_SHARE_CODE_LENGTH) throw new Error("O layout excede o tamanho máximo permitido para compartilhamento.");
+  return code;
+}
+
+export function parseNexusLayoutShareCode(code, componentTypes = []) {
+  let source = String(code ?? "").trim();
+  if (!source || source.length > MAX_SHARE_CODE_LENGTH) throw new Error("O código está vazio ou excede o limite permitido.");
+  source = source.replace(/^\\x60{3}(?:json)?\\s*/i, "").replace(/\\s*\\x60{3}$/, "");
+  if (source.startsWith("NEXUS-LAYOUT/1")) source = source.slice("NEXUS-LAYOUT/1".length).trim();
+  const start = source.indexOf("{"), end = source.lastIndexOf("}");
+  if (start < 0 || end < start) throw new Error("Não encontrei um JSON válido para o layout.");
+  let payload;
+  try { payload = JSON.parse(source.slice(start, end + 1)); }
+  catch (_) { throw new Error("O código do layout não contém um JSON válido."); }
+  if (payload?.format !== "nexus-layout" || payload.version !== 1) throw new Error("Formato ou versão de layout não reconhecido.");
+  const allowed = new Set(componentTypes.map(String));
+  const layout = sanitizeJsonValue(payload.layout);
+  if (!layout || !Array.isArray(layout.components) || layout.components.length > MAX_LAYOUT_COMPONENTS) throw new Error("A lista de componentes do layout é inválida ou excede o limite.");
+  if (!Array.isArray(layout.groups)) layout.groups = [];
+  if (layout.groups.length > MAX_LAYOUT_GROUPS) throw new Error("O layout excede o limite de grupos.");
+  layout.components = layout.components.map(component => {
+    const normalized = normalizeShareComponent(component, allowed);
+    return { ...normalized, id: String(component.id ?? "") };
+  });
+  const ids = new Set(layout.components.map(component => component.id).filter(Boolean));
+  const groupIds = new Set();
+  layout.groups = layout.groups.map(group => {
+    if (!group || typeof group !== "object" || !group.id || groupIds.has(String(group.id))) throw new Error("O layout contém um grupo inválido ou com ID duplicado.");
+    groupIds.add(String(group.id));
+    const componentIds = [...new Set((group.componentIds ?? []).map(String))].filter(id => ids.has(id));
+    return { ...sanitizeJsonValue(group), id: String(group.id), componentIds, parentGroupId: String(group.parentGroupId ?? "") };
+  });
+  for (const group of layout.groups) {
+    if (group.parentGroupId && !groupIds.has(group.parentGroupId)) throw new Error("Um grupo aponta para um grupo pai inexistente.");
+    if (group.componentIds.some(id => !ids.has(id))) throw new Error("Um grupo referencia um componente inexistente.");
+  }
+  const parentMap = new Map(layout.groups.map(group => [group.id, group.parentGroupId]));
+  for (const group of layout.groups) {
+    const seen = new Set([group.id]);
+    let cursor = group.parentGroupId;
+    while (cursor) {
+      if (seen.has(cursor)) throw new Error("A hierarquia do layout contém um ciclo de grupos.");
+      seen.add(cursor); cursor = parentMap.get(cursor) ?? "";
+    }
+  }
+  layout.links = Array.isArray(layout.links) ? layout.links : [];
+  return { name: String(payload.name ?? layout.name ?? "Layout").trim().slice(0, 48) || "Layout", layout };
+}
