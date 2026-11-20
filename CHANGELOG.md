@@ -13,6 +13,7 @@
 - Ajustado o espaçamento dos gatilhos para acomodar o botão de captura somente quando o tipo selecionado é de teclado.
 
 ### Validação e limites
+- A versão utiliza o fluxo automatizado de validação e publicação do pacote Foundry.
 - Incluídos testes de regressão para a dependência ausente, captura e comparação de teclas, modificadores, indicador de propriedade e seleção de grupo.
 - Grupos aninhados e modelos completos de layout compartilháveis ainda exigem uma evolução estrutural do formato de grupos e da Biblioteca; não foram simulados nesta versão para evitar perda ou corrupção de layouts existentes.
 - A validação automatizada não substitui o teste funcional no Foundry VTT 14.
