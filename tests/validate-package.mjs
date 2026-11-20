@@ -17,6 +17,7 @@ import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
 {
@@ -32,6 +33,14 @@ import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-
   assert.equal(hierarchy.rows.find(row => row.id === "c").depth, 0);
   assert.equal(validateGroupParent(groups, "outer", "inner"), false, "A hierarchy must reject cycles");
   assert.equal(validateGroupParent(groups, "inner", ""), true, "A group may be promoted to the root");
+}
+{
+ const legacy=normalizeGroupPresentation({id:"legacy",name:"Grupo antigo"});assert.equal(legacy.kind,"container");assert.equal(legacy.layoutMode,"free");
+ const groups=[{id:"root",name:"Perícias",componentIds:[],kind:"section",layoutMode:"grid",columns:2,gap:10,padding:8},{id:"inner",name:"Força",parentGroupId:"root",componentIds:["a","b"],layoutMode:"horizontal",gap:6}];
+ const components=[{id:"a",x:10,y:10,w:40,h:30},{id:"b",x:100,y:80,w:60,h:30},{id:"outside",x:220,y:20,w:50,h:30}];
+ const result=applyGroupLayouts(groups,components),a=result.components.find(x=>x.id==="a"),b=result.components.find(x=>x.id==="b");
+ assert.ok(b.x>a.x);assert.ok(a.y>=38&&b.y>=38);assert.equal(result.components.find(x=>x.id==="outside").x,220);assert.equal(components[0].x,10);
+ const repeated=applyGroupLayouts(result.groups,result.components);assert.deepEqual(repeated.components.map(x=>[x.id,x.x,x.y]),result.components.map(x=>[x.id,x.x,x.y]));
 }
 {
   const source = {
@@ -255,6 +264,9 @@ assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
 assert.match(sheet, /this\._refreshBoundComponents\(\);\s*this\._activateCanvas\(\$\(form\)\);/, "O Canvas deve registrar os gatilhos automaticamente após cada renderização da ficha");
 assert.match(template, /data-group-parent/, "O Inspector deve expor a escolha de grupo superior");
+assert.match(template,/data-group-setting="layoutMode"/);
+assert.match(template,/data-group-setting="kind"/);
+assert.match(sheet,/applyGroupLayouts\(layout\.groups, layout\.components\)/);
 assert.match(sheetListeners, /validateGroupParent\(groups, groupId, parentId\)/, "A mudança de grupo superior deve rejeitar ciclos");
 assert.match(sheet, /createNexusSharePackage, parseNexusSharePackage/, "A ficha deve utilizar o formato unificado de pacotes");
 assert.match(sheetListeners, /data-library-export-saved-component/, "Componentes salvos devem poder ser exportados");
