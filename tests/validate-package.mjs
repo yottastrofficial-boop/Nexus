@@ -1745,6 +1745,39 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   releaseFirst();
   await Promise.all([first, second]);
   assert.deepEqual(order, ["first-start", "first-end", "second"], "As gravações devem preservar a ordem por Actor");
+
+  let releaseActorWrite;
+  const actorWriteGate = new Promise(resolve => { releaseActorWrite = resolve; });
+  let actorWriteStarted;
+  const actorStarted = new Promise(resolve => { actorWriteStarted = resolve; });
+  const actorOne = {};
+  const actorTwo = {};
+  const independent = [];
+  const blocked = serializeActorPropertyWrite(actorOne, async () => {
+    independent.push("actor-one-start");
+    actorWriteStarted();
+    await actorWriteGate;
+    independent.push("actor-one-end");
+  });
+  const queued = serializeActorPropertyWrite(actorOne, async () => independent.push("actor-one-next"));
+  const parallel = serializeActorPropertyWrite(actorTwo, async () => independent.push("actor-two"));
+  await actorStarted;
+  await parallel;
+  assert.deepEqual(independent, ["actor-one-start", "actor-two"], "A fila de um Actor não deve bloquear outro Actor");
+  releaseActorWrite();
+  await Promise.all([blocked, queued]);
+  assert.deepEqual(independent, ["actor-one-start", "actor-two", "actor-one-end", "actor-one-next"]);
+
+  const originalConsoleError = console.error;
+  console.error = () => {};
+  try {
+    await assert.rejects(serializeActorPropertyWrite(actorOne, async () => { throw new Error("simulated write failure"); }));
+    let recovered = false;
+    await serializeActorPropertyWrite(actorOne, async () => { recovered = true; });
+    assert.equal(recovered, true, "Uma falha não pode bloquear gravações posteriores");
+  } finally {
+    console.error = originalConsoleError;
+  }
 }
 
 
