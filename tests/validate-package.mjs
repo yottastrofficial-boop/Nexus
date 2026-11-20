@@ -1540,7 +1540,7 @@ assert.match(interactions, /nexus-interaction-group-help/);
 assert.match(interactions, /clear-key/);
 assert.match(canvasPlayInteractions, /middleClick/);
 assert.match(canvasPlayInteractions, /pointerDown/);
-assert.match(sheetCode, /executeTriggeredActions, getTriggeredActions, renderInteractionEditor/, "A função de avaliação de gatilhos deve ser injetada no listener da ficha");
+assert.match(sheetCode, /getTriggeredActions, renderInteractionEditor/, "O listener da ficha deve receber as funções de interação que utiliza");
 const capturedKeyFlow = normalizeInteraction({ triggers: [{ event: "keyDown", key: "k", modifiers: ["alt"] }], actions: [{ type: "roll", config: { formula: "1d20" } }] });
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["alt"] }).length, 1, "Gatilhos de teclado devem comparar tecla sem diferenciar maiúsculas");
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
