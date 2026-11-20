@@ -871,7 +871,7 @@ assert.match(template, /data-actor-portrait/, "O retrato do Actor deve ser edit�
 assert.match(css, /nexus-text-toolbar/);
 assert.match(css, /nexus-proficiency-control/);
 assert.match(css, /nexus-resource-slider-control/);
-assert.match(sheetCode, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
+assert.match(actorSheetResourceListeners, /html\.find\("\[data-resource-slider\]"\)\.on\("change"/, "O slider deve persistir o valor ao terminar o arraste");
 assert.match(sheetCode, /const selectedGroupComponentIds = new Set\(resolvedGroup \? hierarchy\.descendants\.get\(String\(resolvedGroup\.id\)\)/, "A seleção de grupo deve destacar somente seus descendentes");
 assert.match(sheetCode, /const components = Array\.isArray\(layout\.components\)[\s\S]*?buildGroupHierarchy\([\s\S]*?Array\.isArray\(layout\.groups\)[\s\S]*?components\)/, "O contexto da ficha deve obter grupos e componentes do layout antes de montar a hierarquia");
 assert.match(sheetCode, /_nexusCanvasKeyboardFocus/, "O Canvas deve preservar o contexto de atalhos após rerender");
