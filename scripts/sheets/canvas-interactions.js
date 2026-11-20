@@ -54,12 +54,9 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         if (!excluded.has(id)) out.push(rect);
       }
       for (const group of sheet._activeGroups ?? []) {
-        const members = [];
-        for (const id of group.componentIds ?? []) {
-          if (excluded.has(id)) continue;
-          const rect = rectsById.get(id);
-          if (rect) members.push(rect);
-        }
+        const members = (membersByGroupId.get(String(group.id)) ?? [])
+          .filter(element => !excluded.has(element.dataset.id) && !element.hidden)
+          .map(element => rectsById.get(element.dataset.id)).filter(Boolean);
         if (!members.length) continue;
         const x = Number.isFinite(group.x) ? group.x : Math.min(...members.map(rect => rect.x));
         const y = Number.isFinite(group.y) ? group.y : Math.min(...members.map(rect => rect.y));
@@ -220,7 +217,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       scheduleConnectedCorners();
       for (const surface of groupSurfacesById.values()) {
         const group = (sheet._activeGroups ?? []).find(item => item.id === surface.dataset.groupId);
-        const hasSelectedMember = !!group && (group.componentIds ?? []).some(id => sheet._selectedIds?.has(id));
+        const hasSelectedMember = !!group && (membersByGroupId.get(String(group.id)) ?? []).some(element => sheet._selectedIds?.has(element.dataset.id));
         surface.classList.toggle("is-selected", surface.dataset.groupId === sheet._selectedGroupId || hasSelectedMember);
       }
     };
