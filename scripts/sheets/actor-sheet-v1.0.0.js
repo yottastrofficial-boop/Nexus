@@ -827,6 +827,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
     // A hierarquia é normalizada sem alterar a estrutura salva; grupos antigos continuam válidos.
     const hierarchy = buildGroupHierarchy(groups, components);
+    this._groupHierarchy = hierarchy;
     const componentLayerById = new Map(components.map(component => [component.id, {
       id: component.id,
       label: component.customLabel || COMPONENTS[component.type]?.label || component.type,
@@ -3004,7 +3005,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       layerRoot.querySelectorAll?.("[data-layer-select]").forEach(el => el.classList.toggle("active", this._selectedIds.has(el.dataset.layerSelect)));
       layerRoot.querySelectorAll?.("[data-layer-group]").forEach(el => {
         const group = groupsById.get(el.dataset.layerGroup);
-        el.classList.toggle("active", !!group && group.componentIds.every(id => this._selectedIds.has(id)));
+        el.classList.toggle("active", !!group && (this._groupHierarchy?.descendants.get(String(group.id)) ?? group.componentIds).every(id => this._selectedIds.has(id)));
       });
     }
     const selectedComponentId = this._selectedIds.size === 1 ? [...this._selectedIds][0] : null;
