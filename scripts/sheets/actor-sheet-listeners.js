@@ -1,4 +1,5 @@
 import { validateGroupParent } from "../core/group-hierarchy.js";
+import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
