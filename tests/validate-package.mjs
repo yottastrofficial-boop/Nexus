@@ -1590,3 +1590,13 @@ assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve s
 assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
 assert.match(canvasInteractions, /editorPanelsOpen/, "A proteção de teclado deve considerar todos os painéis abertos");
 assert.match(canvasInteractions, /editorPanelsOpen && isTypingTarget/, "Delete/Backspace em campos de texto não deve alcançar atalhos do canvas da cena");
+
+assert.match(sheet, /is-group-related/, "Selecionar um componente deve destacar discretamente os demais membros do grupo");
+assert.match(sheet, /this\._libraryAssetScope = "personal"/, "Salvar grupos deve direcionar a Biblioteca para Meus itens");
+assert.match(template, /data-group-setting-block="layout"/, "O Inspector de grupo deve separar configurações de organização");
+assert.match(template, /data-group-setting-block="section"/, "O Inspector deve apresentar opções específicas para Seções");
+assert.match(sheet, /data-group-member-count/, "O Inspector deve resumir a quantidade de membros e subgrupos");
+assert.match(canvasInteractions, /is-group-related/, "O renderizador do Canvas deve limpar estados visuais temporários de grupo");
+assert.match(canvasInteractions, /nexus-group-heading/, "Seções devem renderizar cabeçalho no Canvas");
+assert.match(css, /\.nexus-component\.is-group-related/, "Membros relacionados devem usar destaque sutil");
+assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve usar blocos visuais organizados");
