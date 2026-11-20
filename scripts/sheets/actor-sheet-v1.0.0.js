@@ -825,7 +825,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layout = this._normalizeLayout(clone(layouts[activeId] ?? layouts.principal ?? DEFAULT_LAYOUT));
     this._currentLayout = layout;
 
-    // A hierarquia é normalizada sem alterar a estrutura salva; grupos antigos continuam válidos.
+    // Usa sempre os arrays do layout ativo; grupos antigos continuam válidos.
+    const groups = Array.isArray(layout.groups) ? layout.groups : [];
+    const components = Array.isArray(layout.components) ? layout.components : [];
     const hierarchy = buildGroupHierarchy(groups, components);
     this._groupHierarchy = hierarchy;
     const componentLayerById = new Map(components.map(component => [component.id, {
