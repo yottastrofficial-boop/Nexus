@@ -932,8 +932,8 @@ assert.equal(legacySkillRows.find(skill => skill.key === "athletics").proficient
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").value, 0, "Proficiência não deve gerar bônus automático sem fórmula ou valor armazenado");
 assert.equal(normalizeNexusProficientLevel(-1), -1, "Níveis negativos devem ser preservados");
 assert.equal(legacySkillRows.find(skill => skill.key === "athletics").name, "Atletismo");
-assert.match(sheetListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
-assert.match(sheetListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
+assert.match(propertyValueListeners, /if \(valueKind === "number"\) \{\s*if \(String\(value\)\.trim\(\) === ""\) value = 0;[\s\S]*?value = Number\(value\);\s*\}/, "Propriedades numéricas vazias devem assumir zero e números finitos, inclusive negativos, devem ser preservados");
+assert.match(propertyValueListeners, /const expression = typeof value === "string"[\s\S]*?valueKind === "number" && typeof calculated !== "number"/, "Propriedades numéricas também devem aceitar expressões cujo resultado seja numérico");
 
 // Trigger -> Action -> Configuration pipeline.
 const legacyRollActions = getTriggeredActions({ actionType: "roll", rollFormula: "1d20 + 3" }, "click");
@@ -1174,7 +1174,7 @@ assert.match(sheet, /normalizeNexusFormulaIdentifier/, "Fórmulas devem usar um 
 assert.ok(css.includes(".nexus-panel-window .nexus-component-editor > h3") && css.includes("display:flex !important"), "O Inspector deve exibir seu cabeçalho de forma clara");
 assert.ok(css.includes(".nexus-panel-window .nexus-inspector-tab-panel:not([hidden])"), "As abas do Inspector devem organizar o conteúdo em painéis");
 assert.ok(css.includes(".nexus-panel-window .nexus-data-binding"), "O vínculo de dados deve ter uma área visual própria");
-assert.match(sheetListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
+assert.match(propertyValueListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)/, "A validação de fórmulas deve normalizar atalhos antes de resolver propriedades");
 assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolação {{...}} deve calcular expressões, não apenas caminhos");
 
 
@@ -1195,7 +1195,7 @@ assert.ok(sheet.includes('propertyPath.match(/^skills\\.([a-zA-Z0-9_-]+)\\.formu
 assert.doesNotMatch(sheet, /MB é calculado automaticamente pelo nível/);
 assert.doesNotMatch(sheetCode, /data-property-value-hint/);
 assert.match(sheet, /propertyFormulaMode \? \(storedExpression \?\? effectivePath\.formula \?\?/);
-assert.match(sheetListeners, /from "\.\.\/core\/actor-property-writes\.js"/, "O listener deve usar o serviço central de gravação serializada");
+assert.match(propertyValueListeners, /from "\.\.\/core\/actor-property-writes\.js"/, "O listener deve usar o serviço central de gravação serializada");
 assert.match(sheetListeners, /await serializeActorPropertyWrite\(sheet\.actor, async \(\) => \{/, "Edições manuais e fórmulas devem compartilhar a mesma fila de persistência");
 assert.match(sheet, /async _updateSystemValue\(input\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Campos de dados e sliders devem usar a fila comum de gravação");
 assert.match(sheet, /async _setSkillProficientLevel\(skillKey, rawLevel\) \{\s*return serializeActorPropertyWrite\(this\.actor/, "Alterações de proficiência devem usar a fila comum");
@@ -1576,7 +1576,7 @@ assert.match(template, /Caminho da propriedade/);
 assert.match(propertyValueListeners, /const skillFormulaMatch = path\.match/);
 assert.match(propertyValueListeners, /evaluateNexusSkillFormula\(sheet\.actor, skillFormulaMatch\[1\], String\(value\)\)/);
 assert.match(propertyValueListeners, /resolveNexusBinding\(sheet\.actor, resolveFormulaIdentifier\(identifier\), 1\)\.value/);
-assert.match(sheetListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
+assert.match(propertyValueListeners, /\$\(document\)\.on\(`input\$\{inspectorNamespace\}`, "\[data-property-value\]"/);
 assert.match(css, /max-height:\s*none !important/);
 assert.match(css, /overflow-y:\s*hidden !important/);
 assert.match(propertyValueListeners, /Math\.min\(input\.scrollHeight, maxHeight\)/);
