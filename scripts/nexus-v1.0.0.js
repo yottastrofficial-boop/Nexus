@@ -9,7 +9,7 @@ Hooks.once("init", () => {
     type:Array,
     default:[]
   });
-  console.log("NEXUS | Inicializando sistema 1.0.0.53");
+  console.log("NEXUS | Inicializando sistema 1.0.0.65");
 
   const { DocumentSheetConfig } = foundry.applications.apps;
   DocumentSheetConfig.registerSheet(foundry.documents.Actor, "nexus", NexusActorSheet, {
@@ -20,7 +20,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log("NEXUS | Sistema 1.0.0.53 carregado. Ficha Canvas habilitada.");
+  console.log("NEXUS | Sistema 1.0.0.65 carregado. Ficha Canvas habilitada.");
 });
 
 const NEXUS_ACTOR_TYPES = ["player-character", "npc", "character"];
