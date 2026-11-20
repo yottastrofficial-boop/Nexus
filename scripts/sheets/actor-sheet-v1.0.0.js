@@ -2138,8 +2138,22 @@ export class NexusActorSheet extends NexusActorSheetBase {
   async _addSavedLibraryComponent(id) {
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
     const item = saved.find(entry => entry.id === id);
-    if (!item || !COMPONENTS[item.type]) return;
-    await this._addComponent(item.type, { format: item.settings?.format, template: item.settings });
+    if (!item || !COMPONENTS[item.type]) return false;
+    const componentId = await this._addComponent(item.type, { format: item.settings?.format, template: item.settings });
+    if (!componentId) return false;
+    // Apply the complete saved schema after the default constructor so future
+    // component settings survive library reuse without changing the new placement.
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    const component = layout?.components?.find(entry => entry.id === componentId);
+    if (!component) return false;
+    for (const [key, value] of Object.entries(item.settings ?? {})) {
+      if (["id", "definition", "x", "y", "z", "stackOrder", "type"].includes(key)) continue;
+      component[key] = clone(value);
+    }
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    await this.render({ force: true });
+    return componentId;
   }
 
   async _deleteSavedLibraryComponent(id) {
