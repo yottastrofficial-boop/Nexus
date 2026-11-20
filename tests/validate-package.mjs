@@ -1299,6 +1299,9 @@ assert.throws(() => parseNexusGroupShareCode('NEXUS-GROUP/1\\n{"format":"nexus-g
 assert.match(sheet, /groups: imported\.groups/, "A importação deve persistir a hierarquia de subgrupos, não apenas os componentes");
 assert.match(sheet, /_exportSavedGroupFile\(groupId\)/, "A Biblioteca deve exportar grupos como arquivo JSON");
 assert.match(sheetListeners, /data-library-import-group-file/, "A Biblioteca deve oferecer importação de arquivo JSON");
+assert.match(sheetListeners, /event\.ctrlKey \|\| event\.metaKey \|\| event\.shiftKey/, "A árvore de camadas deve permitir selecionar vários grupos completos");
+assert.match(canvasInteractions, /if \(group && mod\)/, "O Canvas deve permitir selecionar grupos completos por modificador");
+assert.match(sheetListeners, /sheet\._selectedGroupId=groupId;sheet\._setSelection\(html,sheet\._groupHierarchy/, "O duplo clique deve selecionar todos os descendentes do grupo correto");
 
 // Property presentation v1.0.0.37.
 assert.equal(evaluateNexusCondition("@level=5", resolveExpressionValue), true, "Single = must act as equality");
