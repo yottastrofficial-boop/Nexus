@@ -118,6 +118,16 @@ A instalação por manifesto depende de um pacote de distribuição válido e ac
 
 O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Actions. Um componente pode ter vários fluxos independentes; cada fluxo aceita múltiplos Triggers, condições AND/OR e Actions configuráveis e reordenáveis. A execução é sequencial e oferece política de erro. Ações antigas de rolagem e alternância continuam legíveis. Consulte [o contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md).
 
+## Uso dos grupos e da Biblioteca
+
+- **Agrupar grupos existentes:** abra a árvore de camadas e use Ctrl+clique (Cmd no macOS) ou Shift+clique em cada grupo. Também é possível usar Ctrl/Cmd+clique em uma área livre da superfície do grupo no Canvas.
+- **Criar o grupo pai:** com os grupos selecionados, use a ação **Agrupar seleção**. Os grupos selecionados passam a ser filhos do novo grupo; seus componentes não são desmontados.
+- **Salvar na Biblioteca:** selecione o grupo pela árvore de camadas, abra **Meus itens → Grupos** e use **Salvar seleção**. O botão do Inspector do grupo continua disponível.
+- **Exportar:** selecione uma composição salva e use **Exportar arquivo JSON**. O arquivo contém dados JSON puros e pode ser importado em outra instalação.
+- **Importar:** use **Importar JSON** para um arquivo ou **Importar código** para um código copiado. O importador mantém a compatibilidade com composições antigas.
+
+A inserção cria novos IDs para os componentes e grupos, preserva a hierarquia e remapeia referências internas. O layout atual não é sobrescrito.
+
 ## Estado e validação
 
 A versão 1.0.0.68 corrige a preparação do contexto da ficha, garantindo que a hierarquia de grupos use os componentes e grupos do layout ativo.
