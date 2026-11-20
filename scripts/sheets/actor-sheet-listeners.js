@@ -1274,10 +1274,21 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     filterLibrary();
     html.find("[data-layer-group]").on("click", event => {
       if(event.target.closest("[data-layer-disclosure]")){
-        event.preventDefault();event.stopPropagation();const id=event.currentTarget.dataset.layerGroup;sheet._collapsedLayerGroups??=new Set();
+        event.preventDefault();event.stopPropagation();
+        const id=event.currentTarget.dataset.layerGroup, folder=event.currentTarget.closest(".nexus-layer-folder");
+        sheet._collapsedLayerGroups??=new Set();
         if(sheet._collapsedLayerGroups.has(id))sheet._collapsedLayerGroups.delete(id);else sheet._collapsedLayerGroups.add(id);
-        const folder=event.currentTarget.closest(".nexus-layer-folder"),children=folder?.querySelector(".nexus-layer-children"),icon=event.currentTarget.querySelector("[data-layer-disclosure]");
-        if(children)children.hidden=sheet._collapsedLayerGroups.has(id);if(icon)icon.textContent=children?.hidden?"▸":"▾";return;
+        const collapsed=sheet._collapsedLayerGroups.has(id), depth=Number(folder?.dataset.layerDepth)||0;
+        const icon=event.currentTarget.querySelector("[data-layer-disclosure]");
+        if(icon)icon.textContent=collapsed?"▸":"▾";
+        let next=folder?.nextElementSibling;
+        while(next){
+          const nextDepth=Number(next.dataset.layerDepth)||0;
+          if(nextDepth<=depth)break;
+          next.hidden=collapsed;
+          next=next.nextElementSibling;
+        }
+        return;
       }
       sheet._nexusInteractionActive = false; const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); sheet._setSelection(html,group?.componentIds??[]); sheet._selectedGroupId=group?.id??null;
     });
