@@ -1587,7 +1587,7 @@ assert.match(sheet, /propertyExpressions/, "O resolvedor deve avaliar expressõe
 assert.ok(sheet.includes('flags.nexus.propertyExpressions'), "Expressões persistidas devem invalidar componentes dependentes");
 assert.doesNotMatch(sheet, /dependencies\.add\("identity\.level"\)/, "O Core não deve impor atualização por nível a propriedades sem fórmula");
 assert.match(sheet, /addExpression\(formula\)/, "Referências de fórmulas explícitas devem determinar as dependências dinâmicas");
-assert.match(sheetListeners, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
+assert.match(actorPropertyWrites, /setFlag\("nexus", "propertyExpressions"/, "Expressões devem ser persistidas nas flags do ator");
 assert.ok(sheetListeners.includes("evaluateNexusExpression(expression[1].trim()"), "O salvamento deve validar expressões antes de persistir");
 assert.match(canvasInteractions, /preDeleteToken/, "A exclusão de tokens deve ser protegida enquanto os painéis estiverem abertos");
 assert.match(canvasInteractions, /hasDirectlyActiveToken/, "Tokens controlados devem continuar podendo ser excluídos diretamente");
