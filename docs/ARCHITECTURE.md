@@ -134,3 +134,11 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - A extração preserva o comportamento de fórmulas, literais entre aspas, valores numéricos vazios, aliases, caminhos virtuais, imagens e propriedades somente de leitura.
 - As verificações de regressão foram redirecionadas para o módulo especializado e a validação automatizada do pacote passou.
 
+
+
+### Regras reutilizáveis de identificadores de aliases
+
+- `scripts/core/actor-aliases.js` concentra a normalização de rótulos, validação de caminhos e geração de identificadores únicos.
+- A geração considera identificadores atuais e históricos (`legacyKeys`) tanto de aliases personalizados quanto de propriedades nativas, evitando reutilizar caminhos que ainda podem ser referenciados por layouts antigos.
+- Criação, cópia e renomeação usam a mesma regra de colisão; o identificador interno (`id`) permanece independente do caminho editável.
+- Os testes cobrem acentos, entradas vazias, prefixos de caminho, segmentos perigosos, colisões com chaves históricas e exclusão do próprio registro durante a renomeação.
