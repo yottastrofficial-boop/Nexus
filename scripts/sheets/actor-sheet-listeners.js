@@ -256,7 +256,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       invalidateAliasDefinitionCache(sheet.actor);
       await renderDataEditorPreservingState(focusTarget);
     };
-    const slugifyAlias = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "novo";
     const createAlias = async (label, type, valueType, source, targetPath, focusTarget = null) => {
       const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const category = type === "attribute" ? "attributes" : type === "resource" ? "resources" : type === "combat" ? "combat" : type === "identity" ? "identity" : "custom";
@@ -325,7 +324,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
       }
       if (field === "keySuffix") {
-        const suffix = slugifyAlias(input.value);
+        const suffix = slugifyActorAlias(input.value);
         const nextKey = createUniqueActorAliasKey(property.category, suffix, getAliasDefinitions(sheet.actor), definitions, id);
         if (!suffix || !nextKey || nextKey !== `${property.category}.${suffix}`) { ui.notifications?.warn?.("Esse identificador já está em uso ou é inválido."); input.value = property.key.split(".").at(-1); return; }
         const previousKey = property.key;
@@ -432,7 +431,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         alias.formula = formula; alias.calculationMode = formula ? "formula" : "manual";
       }
       else if (field === "keySuffix") {
-        const suffix = slugifyAlias(input.value);
+        const suffix = slugifyActorAlias(input.value);
         const next = createUniqueActorAliasKey(alias.category, suffix, aliases, getNativePropertyDefinitions(sheet.actor), alias.id);
         if (!suffix || !next || next !== `${alias.category}.${suffix}`) { input.value = alias.key.split(".").at(-1); return; }
         const previousKey = alias.key;
