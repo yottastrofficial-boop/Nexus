@@ -340,8 +340,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         override.legacyKeys = [...new Set([...(property.legacyKeys ?? []), previousKey])];
         if (moveResult.changed) await sheet.actor.setFlag("nexus", "customData", customData);
         const layouts = await sheet._readLayouts();
-        replaceActorAliasLayoutReferences(layouts, previousKey, nextKey);
-        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        if (replaceActorAliasLayoutReferences(layouts, previousKey, nextKey) > 0) {
+          await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        }
       }
       await sheet.actor.setFlag("nexus", "nativeProperties", saved);
       invalidateNativePropertyCache(sheet.actor);
@@ -372,8 +373,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet.actor.setFlag("nexus", "customData", customData);
       if (oldKey !== property.defaultKey) {
         const layouts = await sheet._readLayouts();
-        replaceActorAliasLayoutReferences(layouts, oldKey, property.defaultKey);
-        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        if (replaceActorAliasLayoutReferences(layouts, oldKey, property.defaultKey) > 0) {
+          await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        }
       }
       await sheet.actor.setFlag("nexus", "nativeProperties", saved);
       invalidateNativePropertyCache(sheet.actor);
@@ -448,8 +450,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         // Migra referências de componentes para que a troca do identificador
         // não deixe cartões apontando para o caminho antigo.
         const layouts = await sheet._readLayouts();
-        replaceActorAliasLayoutReferences(layouts, previousKey, next);
-        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        if (replaceActorAliasLayoutReferences(layouts, previousKey, next) > 0) {
+          await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        }
         alias.key = next;
       }
       else if (["exibicao", "value", "max", "checkbonus", "roll"].includes(field)) {
@@ -512,8 +515,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
         const layouts = await sheet._readLayouts();
-        replaceActorAliasLayoutReferences(layouts, previousKey, defaultKey);
-        await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        if (replaceActorAliasLayoutReferences(layouts, previousKey, defaultKey) > 0) {
+          await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+        }
         alias.key = defaultKey;
       }
       if (!alias.targetPath) {
