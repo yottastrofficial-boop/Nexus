@@ -6291,9 +6291,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   background:var(--nexus-group-bg,#273443) !important;
   box-shadow:none !important;
   pointer-events:auto !important;
-  cursor:grab !important;
+  cursor:default !important;
 }
-.nexus-group-surface:active { cursor:grabbing !important; }
+.nexus-group-surface:active { cursor:default !important; }
 .nexus-group-surface.is-static { pointer-events:none !important; }
 .nexus-group-surface.is-selected {
   outline:2px solid var(--nexus-highlight-color,#8fc8ff) !important;
@@ -6481,3 +6481,25 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-group-heading span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nexus-group-surface.is-section { padding-top:26px; }
 .nexus-group-surface.is-folder { background:transparent !important; box-shadow:none !important; }
+
+
+/* Organização hierárquica sem alças ou arraste na árvore de camadas. */
+.nexus-layer-commands {
+  display:flex; flex-wrap:wrap; align-items:end; gap:7px; margin:0 0 9px; padding:9px;
+  border:1px solid var(--nexus-panel-border,#43546a); border-radius:7px;
+  background:var(--nexus-panel-surface,#202c3b);
+}
+.nexus-layer-destination { display:flex; flex:1 1 170px; flex-direction:column; gap:4px; min-width:0; color:var(--nexus-panel-muted,#9aadc2); font-size:10px; }
+.nexus-layer-destination select {
+  width:100%; min-width:0; min-height:32px; padding:5px 7px;
+  border:1px solid var(--nexus-panel-border,#43546a); border-radius:5px;
+  color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-bg,#182330);
+}
+.nexus-layer-command-buttons { display:flex; gap:5px; }
+.nexus-layer-command-buttons button {
+  min-height:32px; padding:5px 9px; border:1px solid var(--nexus-panel-border,#43546a);
+  border-radius:5px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-bg,#182330);
+}
+.nexus-layer-command-buttons button:hover { border-color:var(--nexus-accent-color,#8fc8ff); }
+.nexus-layer-list [draggable="true"] { cursor:default !important; }
+.nexus-layer-list .is-dragging { opacity:1 !important; }
