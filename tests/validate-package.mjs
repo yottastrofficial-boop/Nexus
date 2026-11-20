@@ -1692,15 +1692,18 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   const order = [];
   let releaseFirst;
   const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+  let signalStarted;
+  const started = new Promise(resolve => { signalStarted = resolve; });
   const first = serializeActorPropertyWrite(actor, async () => {
     order.push("first-start");
+    signalStarted();
     await firstGate;
     order.push("first-end");
   });
   const second = serializeActorPropertyWrite(actor, async () => {
     order.push("second");
   });
-  await Promise.resolve();
+  await started;
   assert.deepEqual(order, ["first-start"], "A segunda gravação deve aguardar a primeira");
   releaseFirst();
   await Promise.all([first, second]);
