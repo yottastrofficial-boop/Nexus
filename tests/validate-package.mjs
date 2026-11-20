@@ -250,6 +250,7 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
   "actor-sheet-listeners deve importar a fila de gravação que utiliza");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
@@ -1765,7 +1766,7 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
 assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspectorNamespace/, "A ficha deve delegar o autocomplete de propriedades ao módulo especializado");
 assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
 assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
-const actorAliasListeners = await readFile(new URL("../scripts/sheets/actor-alias-listeners.js", import.meta.url), "utf8");
+
 assert.match(sheetListeners, /activateActorAliasListeners/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
 assert.match(actorAliasListeners, /data-alias-copy/, "O controlador de aliases deve manter o fluxo de cópia");
 assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases deve manter o fluxo de restauração");
