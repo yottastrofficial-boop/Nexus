@@ -2687,13 +2687,33 @@ export class NexusActorSheet extends NexusActorSheetBase {
       id: `libgrp-${foundry.utils.randomID(8)}`,
       name: imported.name,
       groupSettings: imported.groupSettings,
-      components: imported.components
+      components: imported.components,
+      groups: imported.groups
     };
     await game.user.setFlag("nexus", "libraryGroups", [...saved, entry].slice(-100));
     this._libraryAssetScope = "personal";
     this._libraryRenderSavedGroups?.();
     this._libraryApplyFilter?.();
     ui.notifications?.info?.(`Grupo "${entry.name}" importado para sua Biblioteca pessoal.`);
+    return true;
+  }
+
+  async _exportSavedGroupFile(groupId) {
+    const group = (game.user?.getFlag?.("nexus", "libraryGroups") ?? []).find(item => item.id === groupId);
+    if (!group) return false;
+    const code = createNexusGroupShareCode(group);
+    const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const safeName = String(group.name ?? "grupo").normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "grupo";
+    anchor.href = url;
+    anchor.download = `nexus-grupo-${safeName}.json`;
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    ui.notifications?.info?.(`Arquivo do grupo "${group.name}" exportado.`);
     return true;
   }
 
@@ -2715,46 +2735,102 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (!composition?.components?.length) return false;
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return false;
-    const components = composition.components.map(item => ({ ...clone(item), definition: COMPONENTS[item.type] })).filter(item => item.definition);
-    if (!components.length) return false;
-    const width = Math.max(...components.map(item => (Number(item.x) || 0) + (Number(item.w) || item.definition.w)));
-    const height = Math.max(...components.map(item => (Number(item.y) || 0) + (Number(item.h) || item.definition.h)));
+
+    // Normalize older library entries before creating any Actor-specific IDs.
+    const sourceComponents = composition.components.map((item, index) => ({
+      ...clone(item),
+      sourceId: String(item.sourceId ?? item.id ?? `legacy-${index + 1}`),
+      definition: COMPONENTS[item.type]
+    })).filter(item => item.definition);
+    if (!sourceComponents.length) return false;
+
+    const componentIds = new Map();
+    for (const item of sourceComponents) {
+      const id = `cmp-${foundry.utils.randomID(8)}`;
+      componentIds.set(item.sourceId, id);
+      if (item.id) componentIds.set(String(item.id), id);
+    }
+    const sourceGroups = Array.isArray(composition.groups) && composition.groups.length
+      ? clone(composition.groups)
+      : [{
+          id: "root",
+          name: composition.name,
+          parentGroupId: "",
+          componentIds: sourceComponents.map(item => item.sourceId),
+          ...(clone(composition.groupSettings ?? {}))
+        }];
+    if (!sourceGroups.length) return false;
+
+    const groupIds = new Map(sourceGroups.map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));
+    const remapReferences = value => {
+      if (Array.isArray(value)) return value.map(remapReferences);
+      if (!value || typeof value !== "object") return value;
+      const result = {};
+      for (const [key, child] of Object.entries(value)) {
+        if (typeof child === "string" && ["targetId", "componentId", "sourceComponentId", "actionTargetId", "sourceId", "fromId", "toId"].includes(key)) {
+          result[key] = componentIds.get(child) ?? groupIds.get(child) ?? child;
+        } else if (["componentIds", "members"].includes(key) && Array.isArray(child)) {
+          result[key] = child.map(id => componentIds.get(String(id)) ?? String(id));
+        } else if (["groupId", "parentGroupId"].includes(key) && typeof child === "string") {
+          result[key] = groupIds.get(child) ?? (child ? child : "");
+        } else {
+          result[key] = remapReferences(child);
+        }
+      }
+      return result;
+    };
+
+    const width = Math.max(...sourceComponents.map(item => (Number(item.x) || 0) + (Number(item.w) || item.definition.w)));
+    const height = Math.max(...sourceComponents.map(item => (Number(item.y) || 0) + (Number(item.h) || item.definition.h)));
     const origin = this._findFreePosition(layout, Math.min(width, layout.width), Math.min(height, layout.height));
     this._captureHistory();
-    const componentIds = new Map();
-    for (const item of components) {
-      const id = `cmp-${foundry.utils.randomID(8)}`;
-      if (item.sourceId) componentIds.set(String(item.sourceId), id);
+
+    let stackOrder = Math.max(-1, ...(layout.components ?? []).map(existing => Number(existing.stackOrder) || 0));
+    for (const item of sourceComponents) {
+      const id = componentIds.get(item.sourceId);
       const w = clamp(Number(item.w) || item.definition.w, 20, Math.min(1000, layout.width));
       const h = clamp(Number(item.h) || item.definition.h, 20, Math.min(1000, layout.height));
-      const copy = clone(item); delete copy.definition; delete copy.sourceId;
-      layout.components.push({ ...copy, id, x:clamp(origin.x+(Number(item.x)||0),0,layout.width-w), y:clamp(origin.y+(Number(item.y)||0),0,layout.height-h), w, h, z:0, stackOrder:Math.max(-1,...layout.components.map(existing=>Number(existing.stackOrder)||0))+1 });
+      const copy = remapReferences(clone(item));
+      delete copy.definition;
+      delete copy.sourceId;
+      delete copy.id;
+      layout.components.push({
+        ...copy,
+        id,
+        x: clamp(origin.x + (Number(item.x) || 0), 0, layout.width - w),
+        y: clamp(origin.y + (Number(item.y) || 0), 0, layout.height - h),
+        w, h, z: 0, stackOrder: ++stackOrder
+      });
     }
-    const sourceGroups = Array.isArray(composition.groups) && composition.groups.length ? composition.groups : [{
-      id:"root", name:composition.name, parentGroupId:"", componentIds:composition.components.map((item,index)=>String(item.sourceId ?? `legacy-${index}`)), ...(composition.groupSettings ?? {})
-    }];
-    const groupIds = new Map(sourceGroups.map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));
+
     layout.groups ??= [];
     for (const source of sourceGroups) {
-      const copy = clone(source);
-      const oldId = String(copy.id);
+      const copy = remapReferences(clone(source));
+      const oldId = String(source.id);
       copy.id = groupIds.get(oldId);
-      copy.parentGroupId = copy.parentGroupId ? groupIds.get(String(copy.parentGroupId)) ?? "" : "";
-      copy.componentIds = (copy.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean);
-      if (oldId === "root" || !copy.name) copy.name = composition.name;
+      copy.parentGroupId = source.parentGroupId ? groupIds.get(String(source.parentGroupId)) ?? "" : "";
+      copy.componentIds = (source.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean);
+      if (oldId === String(sourceGroups.find(group => !group.parentGroupId)?.id) || !copy.name) copy.name = composition.name;
       layout.groups.push(copy);
     }
-    if (!sourceGroups.length) return false;
-    const rootGroup = layout.groups.find(group => group.id === groupIds.get(String(sourceGroups.find(group => !group.parentGroupId)?.id ?? sourceGroups[0].id)));
+
+    const rootSource = sourceGroups.find(group => !group.parentGroupId) ?? sourceGroups[0];
+    const rootGroupId = groupIds.get(String(rootSource.id));
     const hierarchy = buildGroupHierarchy(layout.groups, layout.components);
-    const selectedComponentIds = rootGroup ? hierarchy.descendants.get(String(rootGroup.id)) ?? [] : [...componentIds.values()];
+    const selectedComponentIds = hierarchy.descendants.get(String(rootGroupId)) ?? [];
+    if (!selectedComponentIds.length) {
+      // Roll back the in-memory append rather than leaving an unusable empty group.
+      const addedIds = new Set(componentIds.values());
+      layout.components = layout.components.filter(component => !addedIds.has(String(component.id)));
+      layout.groups = layout.groups.filter(group => !groupIds.has(String(group.id)));
+      return false;
+    }
     await this._writeLayouts(layouts, active);
     this._selectedIds = new Set(selectedComponentIds);
-    this._selectedGroupId = rootGroup?.id ?? null;
+    this._selectedGroupId = rootGroupId;
     this.render({ force: true });
     return true;
   }
-
   async _ungroupSelection(html) {
     const ids = new Set(this._selectedIds ?? []), layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return;
