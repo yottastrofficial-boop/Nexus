@@ -93,11 +93,11 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
   if (!payload || payload.format !== "nexus-group") {
     throw new Error("Este código não é uma composição de grupo do NEXUS.");
   }
-  if (payload.version !== 1) {
+  if (![1, 2].includes(payload.version) || payload.version !== formatVersion) {
     throw new Error(`A versão de compartilhamento ${String(payload.version)} não é compatível.`);
   }
-  if (!Array.isArray(payload.components) || payload.components.length < 2 || payload.components.length > MAX_COMPONENTS) {
-    throw new Error(`O grupo precisa conter entre 2 e ${MAX_COMPONENTS} componentes.`);
+  if (!Array.isArray(payload.components) || payload.components.length < 1 || payload.components.length > MAX_COMPONENTS) {
+    throw new Error(`O grupo precisa conter entre 1 e ${MAX_COMPONENTS} componentes.`);
   }
   if (payload.groupSettings !== undefined && (!payload.groupSettings || typeof payload.groupSettings !== "object" || Array.isArray(payload.groupSettings))) {
     throw new Error("As configurações do grupo possuem formato inválido.");
