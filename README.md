@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.67 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.68 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.67-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.68-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.67. Inclui as correções de grupos e Biblioteca registradas em **Unreleased** no changelog; a próxima versão publicada ainda depende da validação e decisão de release.
+> **Versão atual:** 1.0.0.68. Inclui as correções de grupos e Biblioteca registradas em **Unreleased** no changelog; a próxima versão publicada ainda depende da validação e decisão de release.
 
 ## Visão geral
 
@@ -45,7 +45,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.67 |
+| Versão atual | 1.0.0.68 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -133,7 +133,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão 1.0.0.67 corrige a preparação do contexto da ficha, garantindo que a hierarquia de grupos use os componentes e grupos do layout ativo.
+A versão 1.0.0.68 corrige a preparação do contexto da ficha, garantindo que a hierarquia de grupos use os componentes e grupos do layout ativo.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
@@ -189,3 +189,18 @@ Os comparadores são `=` e `==` (igual), `!=` (diferente), `>` (maior), `>=` (ma
 Texto literal e referências podem coexistir no conteúdo. Imagens e ícones são segmentos próprios, por exemplo `{{image:@retrato}}` e `{{icon:fa-solid fa-star}}`, evitando misturar recursos visuais com operações matemáticas.
 
 A geometria de contato das bordas é compartilhada pelos modos Padrão, Configuração e Aparência; imagens e ícones são interpretados como segmentos próprios do conteúdo.
+
+
+## Composição universal de grupos
+
+Hierarquia (quem pertence a quem), layout (como os filhos são posicionados) e apresentação (como a superfície aparece) são responsabilidades separadas.
+
+- **Pasta:** agrupamento organizacional sem superfície preenchida.
+- **Container:** superfície visual compartilhada.
+- **Seção:** container com cabeçalho e título.
+- **Layouts:** Livre, Horizontal, Vertical e Grade.
+- **Ajustes:** espaçamento, margem interna, número de colunas e alinhamento.
+- **Compatibilidade:** grupos existentes continuam em layout Livre e preservam suas coordenadas.
+- **Hierarquia:** grupos pais sem componentes diretos são preservados quando possuem subgrupos descendentes.
+
+O layout automático organiza componentes filhos sem redimensioná-los. Grupos em modo Livre mantêm suas posições individuais.
