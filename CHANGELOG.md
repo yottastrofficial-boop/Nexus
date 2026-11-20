@@ -15,7 +15,7 @@
 
 ### Validação e limites
 - A versão utiliza o fluxo automatizado de validação e publicação do pacote Foundry. A suíte também foi ajustada para não depender de uma versão histórica específica do changelog.
-- Incluídos testes de regressão para a dependência ausente, captura e comparação de teclas, modificadores, indicador de propriedade e seleção de grupo. As expectativas documentais antigas foram generalizadas para não bloquear versões futuras.
+- Incluídos testes de regressão para a dependência ausente, captura e comparação de teclas, modificadores, indicador de propriedade e seleção de grupo. As expectativas documentais antigas foram generalizadas para não bloquear versões futuras. A suíte foi simplificada para não exigir descrições históricas que não pertencem à versão atual.
 - Grupos aninhados e modelos completos de layout compartilháveis ainda exigem uma evolução estrutural do formato de grupos e da Biblioteca; não foram simulados nesta versão para evitar perda ou corrupção de layouts existentes.
 - A validação automatizada não substitui o teste funcional no Foundry VTT 14.
 
