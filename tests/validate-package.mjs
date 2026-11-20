@@ -1734,7 +1734,7 @@ assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspe
 assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
 assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
 const actorAliasListeners = await readFile(new URL("../scripts/sheets/actor-alias-listeners.js", import.meta.url), "utf8");
-assert.match(sheetListeners, /activateActorAliasListeners\\(sheet, html, dependencies\\)/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
+assert.match(sheetListeners, /activateActorAliasListeners/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
 assert.match(actorAliasListeners, /data-alias-copy/, "O controlador de aliases deve manter o fluxo de cópia");
 assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases deve manter o fluxo de restauração");
 
