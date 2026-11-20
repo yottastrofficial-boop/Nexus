@@ -66,7 +66,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
     if(card&&event.button===0){
       const component=sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
       const actions=getTriggeredActions(component,"pointerDown",{actor:sheet.actor,modifiers:modifiersOf(event),key:""});
-      if(actions.length)pointerDownFlows.set(card.dataset.id,{time:performance.now(),ids:[...new Set(actions.map(action=>action.interactionId))]});
+      if(actions.length)pointerDownFlows.set(card.dataset.id,{time:performance.now(),x:event.clientX,y:event.clientY,ids:[...new Set(actions.map(action=>action.interactionId))]});
     }
     dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});
     const component=card&&sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
