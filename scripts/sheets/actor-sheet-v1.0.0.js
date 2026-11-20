@@ -3093,6 +3093,40 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this.render({ force: true });
   }
 
+  async _setLayerParent(sourceIds, parentId = "") {
+    const ids = [...new Set((Array.isArray(sourceIds) ? sourceIds : [sourceIds]).filter(Boolean).map(String))];
+    if (!ids.length) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    layout.groups ??= [];
+    const hierarchy = buildGroupHierarchy(layout.groups, layout.components ?? []);
+    const destinationId = String(parentId ?? "");
+    const destination = destinationId ? hierarchy.groupById.get(destinationId) : null;
+    if (destinationId && !destination) return false;
+    const movingGroups = ids.map(id => hierarchy.groupById.get(id)).filter(Boolean);
+    const movingComponents = ids.filter(id => layout.components.some(component => component.id === id));
+    if (!movingGroups.length && !movingComponents.length) return false;
+    if (movingGroups.some(group => !validateGroupParent(layout.groups, group.id, destinationId))) {
+      ui.notifications?.warn?.("Esse destino criaria um ciclo na hierarquia.");
+      return false;
+    }
+    if (movingGroups.some(group => group.id === destinationId)) return false;
+    this._captureHistory();
+    for (const group of movingGroups) group.parentGroupId = destinationId;
+    for (const componentId of movingComponents) {
+      for (const group of layout.groups) group.componentIds = (group.componentIds ?? []).filter(id => String(id) !== componentId);
+      if (destination) destination.componentIds = [...new Set([...(destination.componentIds ?? []), componentId])];
+    }
+    const next = buildGroupHierarchy(layout.groups, layout.components);
+    layout.groups = layout.groups.filter(group => (next.descendants.get(String(group.id)) ?? []).length > 0);
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    this._selectedGroupId = movingGroups.length === 1 ? movingGroups[0].id : null;
+    this._selectedIds = new Set(movingComponents);
+    this.render({ force: true });
+    return true;
+  }
+
   async _saveCanvas(html, touchedIds = []) {
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active]; if (!layout) return;
     const componentsById = new Map();
