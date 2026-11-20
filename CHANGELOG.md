@@ -1,3 +1,19 @@
+## 1.0.0.68
+
+### Composição universal de grupos
+- Separa hierarquia, organização espacial e apresentação visual dos grupos.
+- Adiciona os tipos Pasta, Container e Seção, com cabeçalho opcional e título configurável.
+- Adiciona layouts Livre, Horizontal, Vertical e Grade, com espaçamento, margem interna, colunas e alinhamento.
+- Aplica layouts automáticos de dentro para fora, preservando o tamanho dos componentes e tratando grupos aninhados como unidades.
+- Mantém o modo Livre como padrão para grupos existentes, sem reorganizar automaticamente fichas antigas.
+- Corrige a normalização para preservar grupos pais que não possuem componentes diretos, mas contêm subgrupos.
+- Amplia o Inspector de grupos e mantém as configurações de composição nos pacotes compartilhados existentes.
+
+### Validação
+- Inclui testes para compatibilidade de grupos antigos, layout automático, cabeçalho de seção e preservação de coordenadas.
+- Testes automatizados e CI precisam concluir após o commit.
+- Teste visual e funcional dentro do Foundry VTT 14 permanece necessário.
+
 ## 1.0.0.67
 
 ### Comportamentos e experiência do editor
