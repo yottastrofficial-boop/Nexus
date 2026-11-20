@@ -252,6 +252,7 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
+const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resource-listeners.js");
 assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
   "actor-sheet-listeners deve importar a fila de gravação que utiliza");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
@@ -1804,6 +1805,14 @@ assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O cat�
 assert.match(sheetListeners, /activateActorAliasListeners/, "A ficha deve delegar a gestão de aliases ao controlador especializado");
 assert.match(sheetListeners, /activateActorSheetSkillListeners\(sheet, html, dependencies\)/,
   "A ficha deve delegar eventos de perícia e proficiência ao controlador especializado");
+
+assert.match(sheetListeners, /activateActorSheetResourceListeners\(sheet, html, dependencies\)/,
+  "A ficha deve delegar controles de recursos ao controlador especializado");
+for (const selector of ["[data-resource-slider]", ".nexus-sheet-resource-track", ".nexus-asset-meter-track"]) {
+  assert.ok(actorSheetResourceListeners.includes(selector), `O controlador de recursos deve manter ${selector}`);
+}
+assert.match(actorSheetResourceListeners, /await sheet\._updateSystemValue\(input\)/,
+  "A persistência dos sliders deve continuar centralizada na ficha");
 for (const selector of ["[data-skill-roll]", "[data-skill-proficient-level]", "[data-proficiency-level]", "[data-skill-proficiency-toggle]"]) {
   assert.ok(actorSheetSkillListeners.includes(selector), `O controlador de perícias deve manter ${selector}`);
 }
