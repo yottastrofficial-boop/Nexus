@@ -1,4 +1,4 @@
-## 1.0.0.68
+## 1.0.0.67
 
 ### Grupos e Biblioteca
 - Permite selecionar grupos completos com Ctrl/Cmd ou Shift pela árvore de camadas e pelo espaço livre da superfície no Canvas; a seleção combinada pode ser agrupada novamente como um grupo pai.
@@ -15,7 +15,7 @@
 - A suíte automatizada continua sendo executada pelo GitHub Actions.
 - O teste funcional de seleção, movimentação e persistência no Foundry VTT 14 ainda precisa ser realizado em uma instalação real.
 
-## 1.0.0.68
+## 1.0.0.67
 
 ### Correções
 - Corrige o erro `ReferenceError: groups is not defined` ao preparar o contexto da ficha.
