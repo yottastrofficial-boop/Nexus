@@ -2,11 +2,11 @@
 
 Este documento registra direções e prioridades do NEXUS. Não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Estado atual — 1.0.0.71 em preparação
+## Estado atual — 1.0.0.71 publicada
 
 A versão 1.0.0.71 consolida a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica, backup completo e uma rodada de estabilização dos listeners, persistência de propriedades, aliases e controladores de perícias/recursos.
 
-A validação automatizada de pacote, sintaxe, regressões e empacotamento passou no GitHub Actions. A versão 1.0.0.71 está preparada no manifesto e no changelog, mas ainda não foi publicada como release. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária; portanto, esta versão não está declarada estável.
+A validação automatizada de pacote, sintaxe, regressões e empacotamento passou no GitHub Actions, e a release `v1.0.0.71` foi publicada com o pacote `nexus.zip`. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária; portanto, esta versão não está declarada estável.
 
 ## Prioridades imediatas
 
