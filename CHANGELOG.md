@@ -1,4 +1,43 @@
+## 1.0.0.70
+
+### Biblioteca e compartilhamento
+- Adiciona backup completo da Biblioteca em formato versionado `NEXUS-LIBRARY/1`, incluindo componentes, grupos, layouts, fluxos, assets e temas.
+- Adiciona exportação JSON e importação de backup pela interface da Biblioteca.
+- Preserva assets e temas personalizados como coleções pessoais; assets importados também ficam disponíveis entre os componentes pessoais.
+- Adiciona aplicação de temas personalizados importados sem alterar o catálogo de temas padrão.
+- Valida estrutura, tipos, cores, limites de tamanho e conteúdo JSON sem executar código importado.
+
+### Organização e foco
+- Mantém a organização hierárquica sem arraste e o tratamento de Escape por janela implementados na etapa anterior.
+
+### Validação
+- Inclui teste de ida e volta do backup completo da Biblioteca.
+- Aguardar CI e teste funcional no Foundry VTT 14 antes de integrar à `main`.
+
+---
+
 ## 1.0.0.69
+
+## Próxima atualização — organização hierárquica e foco das janelas
+
+### Canvas e grupos
+- Mantém a hierarquia recursiva existente e adiciona uma ação explícita para mover componentes e grupos para qualquer grupo de destino ou para a raiz do Canvas.
+- Substitui o arraste nativo da árvore de camadas por comandos de organização, preservando seleção individual e seleção de grupos completos.
+- Atualiza as opções de destino conforme a seleção e exclui destinos que criariam ciclos hierárquicos.
+- Superfícies de grupo deixam de apresentar cursor de arraste e passam a selecionar o grupo; componentes continuam com suas interações individuais.
+- Adiciona controles para trazer a seleção para frente ou enviá-la para trás.
+
+### Janelas e teclado
+- Faz com que Escape seja tratado primeiro pela janela flutuante em foco, sem propagar o evento para fechar a ficha principal.
+- Permite que popovers e diálogos internos consumam Escape antes do fechamento da janela.
+
+### Validação pendente
+- Aguardar execução do GitHub Actions.
+- Testar no Foundry VTT 14 a movimentação entre níveis, prevenção de ciclos, seleção de grupos aninhados, comandos de camada e fechamento por Escape.
+- A experiência visual e funcional ainda não foi validada em uma instalação real do Foundry.
+
+---
+
 
 ### Grupos compostos e experiência do editor
 - Ao selecionar um componente, destaca discretamente os demais membros do seu grupo sem alterar a seleção funcional.

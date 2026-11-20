@@ -810,8 +810,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
-      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme]")??[])];let visibleThemes=0;
-      themeCards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visibleThemes++;});
+      const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
+      themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
@@ -1003,10 +1003,72 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     // essa janela e continua funcionando após atualizações do Canvas.
     libraryPanel?.addEventListener("click", async event => {
       const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+      const customThemeCard = target?.closest("[data-library-custom-theme]");
+      if (customThemeCard && libraryPanel.contains(customThemeCard)) {
+        event.preventDefault();
+        await sheet._applyLibraryCustomTheme(customThemeCard.dataset.libraryCustomTheme);
+        return;
+      }
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
         await sheet._applyThemePreset(themeCard.dataset.libraryTheme);
+        return;
+      }
+
+      const copyLibraryButton = target?.closest("[data-library-copy-all]");
+      if (copyLibraryButton && libraryPanel.contains(copyLibraryButton)) {
+        event.preventDefault();
+        await sheet._copyLibraryBackupCode();
+        return;
+      }
+      const importLibraryCodeButton = target?.closest("[data-library-import-all-code]");
+      if (importLibraryCodeButton && libraryPanel.contains(importLibraryCodeButton)) {
+        event.preventDefault();
+        const result = await foundry.applications.api.DialogV2.input({
+          window: { title: "Importar Biblioteca completa" },
+          content: '<label class="nexus-library-card-content-label">Código NEXUS-LIBRARY/1<textarea name="code" rows="12" spellcheck="false" autocomplete="off"></textarea></label><p>O conteúdo será validado antes de ser adicionado à sua Biblioteca pessoal.</p>',
+          ok: { label: "Importar Biblioteca" },
+          rejectClose: false
+        });
+        const code = String(result?.code ?? "").trim();
+        if (!code) return;
+        try {
+          await sheet._importLibraryBackupCode(code);
+        } catch (error) {
+          console.warn("NEXUS | Código de backup inválido", error);
+          ui.notifications?.warn?.(error?.message || "Não foi possível importar o código da Biblioteca.");
+        }
+        return;
+      }
+
+      const exportLibraryButton = target?.closest("[data-library-export-all]");
+      if (exportLibraryButton && libraryPanel.contains(exportLibraryButton)) {
+        event.preventDefault();
+        await sheet._exportLibraryBackupFile();
+        return;
+      }
+      const importLibraryButton = target?.closest("[data-library-import-all-file]");
+      if (importLibraryButton && libraryPanel.contains(importLibraryButton)) {
+        event.preventDefault();
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.accept = ".json,application/json,text/plain";
+        picker.hidden = true;
+        picker.addEventListener("change", async () => {
+          const file = picker.files?.[0];
+          if (!file) { picker.remove(); return; }
+          try {
+            await sheet._importLibraryBackupFile(file);
+          } catch (error) {
+            console.warn("NEXUS | Backup de Biblioteca inválido", error);
+            ui.notifications?.warn?.(error?.message || "Não foi possível importar o backup da Biblioteca.");
+          } finally {
+            picker.remove();
+          }
+        }, { once: true });
+        document.body.append(picker);
+        picker.click();
         return;
       }
 
@@ -1369,6 +1431,79 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (fallbackAsset) selectLibraryAsset(fallbackAsset);
     };
     filterLibrary();
+    // Organização por comandos: a hierarquia não depende de arrastar linhas.
+    const layerList = html[0]?.querySelector(".nexus-layer-list");
+    if (layerList && !layerList.querySelector("[data-layer-parent-select]")) {
+      const toolbar = document.createElement("div");
+      toolbar.className = "nexus-layer-commands";
+      toolbar.innerHTML = `
+        <label class="nexus-layer-destination">
+          <span>Mover seleção para</span>
+          <select data-layer-parent-select aria-label="Grupo de destino">
+            <option value="">Canvas (raiz)</option>
+          </select>
+        </label>
+        <div class="nexus-layer-command-buttons">
+          <button type="button" data-layer-command="move" title="Mover para o grupo escolhido">Mover</button>
+          <button type="button" data-layer-command="raise" title="Trazer para frente">↑</button>
+          <button type="button" data-layer-command="lower" title="Enviar para trás">↓</button>
+        </div>`;
+      layerList.before(toolbar);
+      const destination = toolbar.querySelector("[data-layer-parent-select]");
+      const refreshDestinations = () => {
+        const current = destination.value;
+        const groups = sheet._currentLayout?.groups ?? [];
+        const selectedGroupId = sheet._selectedGroupId;
+        const hierarchy = sheet._groupHierarchy;
+        const excluded = new Set();
+        for (const id of sheet._selectedIds ?? []) {
+          const groupId = hierarchy?.componentOwner?.get(String(id));
+          if (groupId) excluded.add(groupId);
+        }
+        if (selectedGroupId) {
+          excluded.add(selectedGroupId);
+          for (const id of hierarchy?.descendants?.get(String(selectedGroupId)) ?? []) {
+            const nested = hierarchy?.componentOwner?.get(String(id));
+            if (nested) excluded.add(nested);
+          }
+          let changed = true;
+          while (changed) { changed = false; for (const group of groups) if (excluded.has(String(group.parentGroupId)) && !excluded.has(String(group.id))) { excluded.add(String(group.id)); changed = true; } }
+        }
+        destination.replaceChildren(new Option("Canvas (raiz)", ""));
+        const byParent = new Map();
+        for (const group of groups) {
+          const parent = String(group.parentGroupId ?? "");
+          if (!byParent.has(parent)) byParent.set(parent, []);
+          byParent.get(parent).push(group);
+        }
+        const append = (parentId, depth) => {
+          for (const group of byParent.get(parentId) ?? []) {
+            if (excluded.has(String(group.id))) continue;
+            const option = new Option(`${"— ".repeat(depth)}${group.name || "Grupo"}`, String(group.id));
+            destination.add(option);
+            append(String(group.id), depth + 1);
+          }
+        };
+        append("", 0);
+        if ([...destination.options].some(option => option.value === current)) destination.value = current;
+      };
+      toolbar._refreshDestinations = refreshDestinations;
+      refreshDestinations();
+      toolbar.addEventListener("click", async event => {
+        const button = event.target.closest("[data-layer-command]");
+        if (!button) return;
+        event.preventDefault();
+        const selected = sheet._selectedGroupId ? [sheet._selectedGroupId] : [...(sheet._selectedIds ?? [])];
+        if (!selected.length) { ui.notifications?.info?.("Selecione um grupo ou componente na árvore."); return; }
+        if (button.dataset.layerCommand === "move") {
+          await sheet._setLayerParent(selected, destination.value);
+        } else if (button.dataset.layerCommand === "raise") {
+          await sheet._changeLayer("front");
+        } else if (button.dataset.layerCommand === "lower") {
+          await sheet._changeLayer("back");
+        }
+      });
+    }
     html.find("[data-layer-group]").on("click", event => {
       if(event.target.closest("[data-layer-disclosure]")){
         event.preventDefault();event.stopPropagation();
@@ -1419,26 +1554,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else sheet._setSelection(html,[row.dataset.layerSelect]);
       const portal=document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);portal?.querySelector('[data-floating-panel="component"]')?.click();
     });
-    html.find("[data-layer-select], [data-layer-group]").attr("draggable", "true").on("dragstart", event => {
-      const row=event.currentTarget, id=row.dataset.layerSelect || row.dataset.layerGroup;
-      event.originalEvent.dataTransfer.setData("text/nexus-layer", id); event.originalEvent.dataTransfer.effectAllowed="move";
-      row.classList.add("is-dragging");
-    }).on("dragend", event => event.currentTarget.classList.remove("is-dragging"))
-      .on("dragover", event => {
-        event.preventDefault(); event.originalEvent.dataTransfer.dropEffect="move";
-        const row=event.currentTarget, rect=row.getBoundingClientRect(), ratio=(event.originalEvent.clientY-rect.top)/Math.max(1,rect.height);
-        const list=row.closest(".nexus-layer-list");
-        if(list){const edge=34, y=event.originalEvent.clientY, box=list.getBoundingClientRect();if(y<box.top+edge)list.scrollTop-=Math.ceil((box.top+edge-y)/4);else if(y>box.bottom-edge)list.scrollTop+=Math.ceil((y-(box.bottom-edge))/4);}
-        row.classList.remove("drop-before","drop-after","drop-inside");
-        row.classList.add(row.dataset.layerGroup && ratio>.25 && ratio<.75 ? "drop-inside" : ratio<.5 ? "drop-before" : "drop-after");
-      }).on("dragleave", event => event.currentTarget.classList.remove("drop-before","drop-after","drop-inside"))
-      .on("drop", async event => {
-        event.preventDefault(); const source=event.originalEvent.dataTransfer.getData("text/nexus-layer"), row=event.currentTarget, target=row.dataset.layerSelect || row.dataset.layerGroup;
-        const rect=row.getBoundingClientRect(), ratio=(event.originalEvent.clientY-rect.top)/Math.max(1,rect.height);
-        const placement=row.dataset.layerGroup && ratio>.25 && ratio<.75 ? "inside" : ratio<.5 ? "before" : "after";
-        row.classList.remove("drop-before","drop-after","drop-inside");
-        if(!source || source===target) return; await sheet._reorderLayer(source,target,placement);
-      });
+    // A árvore usa seleção e comandos explícitos; não habilitar HTML drag-and-drop.
+    html.find("[data-layer-select], [data-layer-group]").removeAttr("draggable");
     const persistInteractionEditor = async (control, command = null, options = {}) => {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";

@@ -15,7 +15,7 @@ import { updateCanvasConnectedCorners } from "../scripts/sheets/canvas-connected
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../scripts/core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
@@ -1600,3 +1600,34 @@ assert.match(canvasInteractions, /is-group-related/, "O renderizador do Canvas d
 assert.match(canvasInteractions, /nexus-group-heading/, "Seções devem renderizar cabeçalho no Canvas");
 assert.match(css, /\.nexus-component\.is-group-related/, "Membros relacionados devem usar destaque sutil");
 assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve usar blocos visuais organizados");
+
+
+// Full-library backup round-trip covers every Library section and keeps data inert.
+{
+  const backup = createNexusLibraryBackup({
+    name: "Biblioteca de teste",
+    components: [{ id: "saved-card", label: "Card pessoal", type: "custom-card", settings: { customLabel: "Card pessoal", text: "Texto" } }],
+    groups: [{
+      name: "Grupo salvo",
+      groupSettings: { backgroundColor: "#223344" },
+      components: [{ sourceId: "member-a", type: "custom-card", x: 0, y: 0, w: 120, h: 60 }],
+      groups: [{ id: "root", name: "Grupo salvo", parentGroupId: "", componentIds: ["member-a"] }]
+    }],
+    layouts: [{
+      name: "Layout salvo",
+      layout: { name: "Layout salvo", width: 900, height: 700, components: [{ id: "cmp-a", type: "custom-card", x: 10, y: 20, w: 120, h: 60 }], groups: [], links: [] }
+    }],
+    assets: [{ key: "asset-test", type: "custom-card", label: "Asset de teste", template: { customLabel: "Teste" } }],
+    themes: { "tema-teste": { canvasColor: "#111111", cardColor: "#222222", accentColor: "#333333", highlightColor: "#444444", buttonColor: "#555555" } },
+    flows: [{ id: "flow-test", name: "Fluxo teste", flow: { name: "Fluxo teste", triggers: [], conditions: [], actions: [] } }]
+  }, ["custom-card"]);
+  const parsed = parseNexusLibraryBackup(backup, ["custom-card"]);
+  assert.equal(parsed.name, "Biblioteca de teste");
+  assert.equal(parsed.collections.components[0].label, "Card pessoal");
+  assert.equal(parsed.collections.groups[0].groups[0].componentIds[0], "member-a");
+  assert.equal(parsed.collections.layouts[0].layout.width, 900);
+  assert.equal(parsed.collections.assets[0].key, "asset-test");
+  assert.equal(parsed.collections.themes["tema-teste"].canvasColor, "#111111");
+  assert.equal(parsed.collections.flows[0].id, "flow-test");
+  assert.throws(() => parseNexusLibraryBackup(backup.replace("nexus-library", "other-library"), ["custom-card"]));
+}

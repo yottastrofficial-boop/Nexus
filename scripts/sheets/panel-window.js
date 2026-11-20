@@ -56,6 +56,7 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
     this._mountPanel();
     const content = this.window?.content ?? this.element?.querySelector(".window-content, .application-content");
     if (this._enterContent && this._enterHandler) this._enterContent.removeEventListener("keydown", this._enterHandler, true);
+    if (this._escapeHandler) window.removeEventListener("keydown", this._escapeHandler, true);
     this._enterContent = content;
     this._enterHandler = event => {
       const field = event.target;
@@ -66,15 +67,27 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
       event.stopImmediatePropagation?.();
       field.dispatchEvent(new Event("change", { bubbles: true }));
     };
+    this._escapeHandler = event => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      const path = event.composedPath?.() ?? [];
+      if (!path.includes(this.element) && !this.element?.contains?.(event.target)) return;
+      // Popovers e diálogos internos têm prioridade sobre o fechamento da janela.
+      if (content?.querySelector(":popover-open, dialog[open]")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+      this.close({ animate: false });
+    };
     content?.addEventListener("keydown", this._enterHandler, true);
+    window.addEventListener("keydown", this._escapeHandler, true);
   }
 
   _onClose(options) {
-    if (this._enterContent && this._enterHandler) {
-      this._enterContent.removeEventListener("keydown", this._enterHandler, true);
-    }
+    if (this._enterContent && this._enterHandler) this._enterContent.removeEventListener("keydown", this._enterHandler, true);
+    if (this._escapeHandler) window.removeEventListener("keydown", this._escapeHandler, true);
     this._enterContent = null;
     this._enterHandler = null;
+    this._escapeHandler = null;
     this.sheet?._onPanelWindowClosed(this.panelKey, this);
     return super._onClose(options);
   }

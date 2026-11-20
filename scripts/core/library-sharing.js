@@ -395,3 +395,89 @@ export function parseNexusSharePackage(code, componentTypes = []) {
   }
   return { kind: raw.kind, name, payload };
 }
+
+
+const MAX_LIBRARY_BACKUP_LENGTH = 1048576;
+
+/**
+ * Creates a portable snapshot of the complete Library surface available in
+ * this system version. Built-in assets and themes are included as catalog
+ * snapshots; personal entries and flows remain independently editable data.
+ */
+export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
+  const allowed = new Set(componentTypes.map(String));
+  if (!allowed.size) throw new Error("Não foi possível validar os componentes desta versão do NEXUS.");
+  const collections = {
+    components: (Array.isArray(snapshot.components) ? snapshot.components : []).map(entry => {
+      const parsed = parseNexusSharePackage(createNexusSharePackage("component", entry, componentTypes), componentTypes);
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), version: 1, label: parsed.payload.label, type: parsed.payload.type, settings: parsed.payload.settings };
+    }),
+    groups: (Array.isArray(snapshot.groups) ? snapshot.groups : []).map(entry => {
+      const parsed = parseNexusSharePackage(createNexusSharePackage("group", entry, componentTypes), componentTypes);
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), name: parsed.name, groupSettings: parsed.payload.groupSettings, components: parsed.payload.components, groups: parsed.payload.groups };
+    }),
+    layouts: (Array.isArray(snapshot.layouts) ? snapshot.layouts : []).map(entry => {
+      const parsed = parseNexusSharePackage(createNexusSharePackage("layout", entry, componentTypes), componentTypes);
+      return { sourceId: String(entry.sourceId ?? entry.id ?? ""), name: parsed.name, layout: parsed.payload };
+    }),
+    assets: sanitizeJsonValue(Array.isArray(snapshot.assets) ? snapshot.assets : []),
+    themes: sanitizeJsonValue(snapshot.themes && typeof snapshot.themes === "object" && !Array.isArray(snapshot.themes) ? snapshot.themes : {}),
+    flows: sanitizeJsonValue(Array.isArray(snapshot.flows) ? snapshot.flows : [])
+  };
+  if (collections.components.length > 200 || collections.groups.length > 100 || collections.layouts.length > 100 ||
+      collections.assets.length > 200 || Object.keys(collections.themes).length > 100 || collections.flows.length > 200) {
+    throw new Error("A Biblioteca excede o limite de itens permitido para backup.");
+  }
+  for (const asset of collections.assets) {
+    if (!asset || typeof asset !== "object" || !allowed.has(String(asset.type ?? "")) ||
+        typeof asset.label !== "string" || !asset.template || typeof asset.template !== "object" || Array.isArray(asset.template)) {
+      throw new Error("O catálogo de assets contém uma definição incompatível.");
+    }
+  }
+  for (const [id, theme] of Object.entries(collections.themes)) {
+    if (!/^[a-zA-Z0-9_-]{1,64}$/.test(id) || !theme || typeof theme !== "object" || Array.isArray(theme)) {
+      throw new Error("O catálogo de temas contém uma definição inválida.");
+    }
+    for (const [key, value] of Object.entries(theme)) {
+      if (typeof value !== "string" || !/^#[0-9a-f]{3,8}$/i.test(value)) {
+        throw new Error("Um tema contém uma cor inválida.");
+      }
+    }
+  }
+  const code = "NEXUS-LIBRARY/1\\n" + JSON.stringify({
+    format: "nexus-library",
+    version: 1,
+    name: String(snapshot.name ?? "Biblioteca NEXUS").trim().slice(0, 64) || "Biblioteca NEXUS",
+    collections
+  }, null, 2);
+  if (code.length > MAX_LIBRARY_BACKUP_LENGTH) throw new Error("O backup da Biblioteca excede 1 MB.");
+  return code;
+}
+
+/** Validates a full-library backup without evaluating imported code. */
+export function parseNexusLibraryBackup(code, componentTypes = []) {
+  let source = String(code ?? "").trim();
+  if (!source || source.length > MAX_LIBRARY_BACKUP_LENGTH) throw new Error("O arquivo está vazio ou excede o limite de 1 MB.");
+  source = source.replace(/^\\x60{3}(?:json)?\\s*/i, "").replace(/\\s*\\x60{3}$/, "");
+  if (source.startsWith("NEXUS-LIBRARY/1")) source = source.slice("NEXUS-LIBRARY/1".length).trim();
+  const start = source.indexOf("{"), end = source.lastIndexOf("}");
+  if (start < 0 || end < start) throw new Error("Não encontrei um backup JSON válido da Biblioteca.");
+  let raw;
+  try { raw = JSON.parse(source.slice(start, end + 1)); }
+  catch (_) { throw new Error("O backup da Biblioteca não contém JSON válido."); }
+  if (raw?.format !== "nexus-library" || raw.version !== 1) throw new Error("Formato ou versão de backup da Biblioteca não reconhecido.");
+  const data = raw.collections;
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("As coleções do backup estão ausentes ou inválidas.");
+  const allowed = new Set(componentTypes.map(String));
+  const normalized = createNexusLibraryBackup({
+    name: raw.name,
+    components: Array.isArray(data.components) ? data.components : [],
+    groups: Array.isArray(data.groups) ? data.groups : [],
+    layouts: Array.isArray(data.layouts) ? data.layouts : [],
+    assets: Array.isArray(data.assets) ? data.assets : [],
+    themes: data.themes && typeof data.themes === "object" ? data.themes : {},
+    flows: Array.isArray(data.flows) ? data.flows : []
+  }, [...allowed]);
+  const parsed = JSON.parse(normalized.slice(normalized.indexOf("{")));
+  return { name: String(parsed.name ?? "Biblioteca NEXUS"), collections: parsed.collections };
+}

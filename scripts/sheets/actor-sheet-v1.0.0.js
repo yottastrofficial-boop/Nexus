@@ -17,7 +17,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, getComponentInteractions, hasKeyboardInteraction, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -2406,6 +2406,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     else if (key === "gridSize") layout.gridSize = clamp(Number(input.value) || 20, 5, 100);
     else if (["canvasColor", "cardColor", "accentColor", "highlightColor", "buttonColor", "scrollColor", "windowHeaderColor", "windowContentColor", "menuColor", "placeholderColor", "fontFamily"].includes(key)) layout[key] = input.value;
     else if (key === "theme") {
+      delete layout.customThemeId;
       layout.theme = input.value;
       Object.assign(layout, clone(THEME_PALETTES[layout.theme] ?? THEME_PALETTES["nexus-dark"]));
       layout.fontFamily = THEME_TOKENS[layout.theme]?.fontFamily ?? "Inter";
@@ -2673,6 +2674,151 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._captureHistory(); await this._writeLayouts(layouts, layoutIdNew);
     this._selectedIds = new Set(); this._selectedGroupId = null; this.render({ force: true });
     ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
+  }
+
+  _buildLibraryBackupCode() {
+    const snapshot = {
+      name: "Biblioteca NEXUS",
+      components: clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []),
+      groups: clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []),
+      layouts: clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []),
+      assets: [
+        ...clone(NEXUS_LIBRARY_CATALOG.assets ?? []),
+        ...clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? [])
+      ],
+      themes: {
+        ...clone(THEME_PALETTES),
+        ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.sourceId ?? theme.id, theme.palette]))
+      },
+      flows: clone(getInteractionLibrary(this.actor))
+    };
+    return createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
+  }
+
+  async _copyLibraryBackupCode() {
+    const code = this._buildLibraryBackupCode();
+    let copied = false;
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(code);
+        copied = true;
+      }
+    } catch (_) {}
+    if (!copied) {
+      const field = document.createElement("textarea");
+      field.value = code; field.setAttribute("readonly", "");
+      field.style.position = "fixed"; field.style.opacity = "0";
+      document.body.append(field); field.select();
+      copied = document.execCommand?.("copy") === true;
+      field.remove();
+    }
+    if (!copied) {
+      ui.notifications?.warn?.("Não foi possível copiar o backup. Tente exportar o arquivo JSON.");
+      return false;
+    }
+    ui.notifications?.info?.("Código completo da Biblioteca copiado.");
+    return true;
+  }
+
+  async _exportLibraryBackupFile() {
+    const code = this._buildLibraryBackupCode();
+    const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob), anchor = document.createElement("a");
+    anchor.href = url; anchor.download = "nexus-biblioteca-completa.json"; anchor.hidden = true;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    ui.notifications?.info?.("Backup completo da Biblioteca exportado em JSON.");
+    return true;
+  }
+
+  async _importLibraryBackupFile(file) {
+    return this._importLibraryBackupCode(typeof file === "string" ? file : await file.text());
+  }
+
+  async _importLibraryBackupCode(source) {
+    const imported = parseNexusLibraryBackup(source, Object.keys(COMPONENTS));
+    const data = imported.collections;
+    const components = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
+    const groups = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
+    const layouts = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
+    const assets = clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? []);
+    const themes = clone(game.user?.getFlag?.("nexus", "libraryThemes") ?? []);
+    const builtinAssetKeys = new Set((NEXUS_LIBRARY_CATALOG.assets ?? []).map(asset => String(asset.key)));
+    const builtinThemeIds = new Set(Object.keys(THEME_PALETTES));
+
+    let addedComponents = 0, addedGroups = 0, addedLayouts = 0, addedAssets = 0, addedThemes = 0, addedFlows = 0;
+    for (const item of data.components) {
+      if (item.sourceId && components.some(saved => saved.sourceId === item.sourceId)) continue;
+      components.push({ ...clone(item), id: foundry.utils.randomID(10), version: 1 });
+      addedComponents++;
+    }
+    for (const item of data.groups) {
+      if (item.sourceId && groups.some(saved => saved.sourceId === item.sourceId)) continue;
+      groups.push({ ...clone(item), id: `libgrp-${foundry.utils.randomID(8)}` });
+      addedGroups++;
+    }
+    for (const item of data.layouts) {
+      if (item.sourceId && layouts.some(saved => saved.sourceId === item.sourceId)) continue;
+      layouts.push({ ...clone(item), id: `liblayout-${foundry.utils.randomID(8)}` });
+      addedLayouts++;
+    }
+    for (const asset of data.assets) {
+      if (builtinAssetKeys.has(String(asset.key)) || assets.some(saved => saved.key === asset.key)) continue;
+      assets.push({ ...clone(asset), id: foundry.utils.randomID(10) });
+      addedAssets++;
+      if (COMPONENTS[asset.type] && !components.some(saved => saved.sourceId === asset.key)) {
+        components.push({ id: foundry.utils.randomID(10), sourceId: asset.key, version: 1, label: asset.label, type: asset.type, settings: clone(asset.template ?? {}) });
+        addedComponents++;
+      }
+    }
+    for (const [themeId, palette] of Object.entries(data.themes)) {
+      if (builtinThemeIds.has(themeId) || themes.some(saved => saved.sourceId === themeId)) continue;
+      themes.push({ id: `libtheme-${foundry.utils.randomID(8)}`, sourceId: themeId, name: themeId, palette: clone(palette) });
+      addedThemes++;
+    }
+
+    await game.user.setFlag("nexus", "libraryComponents", components.slice(-200));
+    await game.user.setFlag("nexus", "libraryGroups", groups.slice(-100));
+    await game.user.setFlag("nexus", "libraryLayouts", layouts.slice(-100));
+    await game.user.setFlag("nexus", "libraryAssets", assets.slice(-200));
+    await game.user.setFlag("nexus", "libraryThemes", themes.slice(-100));
+
+    let savedFlows = getInteractionLibrary(this.actor);
+    for (const entry of data.flows) {
+      if (!entry?.flow) continue;
+      const signature = JSON.stringify(entry.flow);
+      if (savedFlows.some(saved => JSON.stringify(saved.flow) === signature)) continue;
+      savedFlows = await saveInteractionToLibrary(this.actor, entry.flow);
+      addedFlows++;
+    }
+
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryRenderSavedGroups?.();
+    this._libraryRenderSavedLayouts?.();
+    this._libraryRenderCustomThemes?.();
+    this._libraryRenderSavedFlows?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`Biblioteca importada: ${addedComponents} componentes, ${addedGroups} grupos, ${addedLayouts} layouts, ${addedAssets} assets, ${addedThemes} temas e ${addedFlows} fluxos novos.`);
+    return imported;
+  }
+
+  async _applyLibraryCustomTheme(themeId) {
+    const theme = (game.user?.getFlag?.("nexus", "libraryThemes") ?? []).find(item => item.id === themeId);
+    if (!theme?.palette) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    this._captureHistory();
+    layout.theme = "nexus-dark";
+    layout.customThemeId = themeId;
+    Object.assign(layout, clone(theme.palette));
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    applyThemeTokens(this.element, layout);
+    for (const instance of this._nexusPanelWindows?.values?.() ?? []) applyThemeTokens(instance.element, layout);
+    await this.render({ force: true });
+    ui.notifications?.info?.(`Tema "${theme.name ?? "Personalizado"}" aplicado.`);
+    return true;
   }
 
   _getLibraryPackageEntry(kind, id) {
@@ -3093,6 +3239,40 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this.render({ force: true });
   }
 
+  async _setLayerParent(sourceIds, parentId = "") {
+    const ids = [...new Set((Array.isArray(sourceIds) ? sourceIds : [sourceIds]).filter(Boolean).map(String))];
+    if (!ids.length) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
+    layout.groups ??= [];
+    const hierarchy = buildGroupHierarchy(layout.groups, layout.components ?? []);
+    const destinationId = String(parentId ?? "");
+    const destination = destinationId ? hierarchy.groupById.get(destinationId) : null;
+    if (destinationId && !destination) return false;
+    const movingGroups = ids.map(id => hierarchy.groupById.get(id)).filter(Boolean);
+    const movingComponents = ids.filter(id => layout.components.some(component => component.id === id));
+    if (!movingGroups.length && !movingComponents.length) return false;
+    if (movingGroups.some(group => !validateGroupParent(layout.groups, group.id, destinationId))) {
+      ui.notifications?.warn?.("Esse destino criaria um ciclo na hierarquia.");
+      return false;
+    }
+    if (movingGroups.some(group => group.id === destinationId)) return false;
+    this._captureHistory();
+    for (const group of movingGroups) group.parentGroupId = destinationId;
+    for (const componentId of movingComponents) {
+      for (const group of layout.groups) group.componentIds = (group.componentIds ?? []).filter(id => String(id) !== componentId);
+      if (destination) destination.componentIds = [...new Set([...(destination.componentIds ?? []), componentId])];
+    }
+    const next = buildGroupHierarchy(layout.groups, layout.components);
+    layout.groups = layout.groups.filter(group => (next.descendants.get(String(group.id)) ?? []).length > 0);
+    await this._writeLayouts(layouts, active);
+    this._currentLayout = layout;
+    this._selectedGroupId = movingGroups.length === 1 ? movingGroups[0].id : null;
+    this._selectedIds = new Set(movingComponents);
+    this.render({ force: true });
+    return true;
+  }
+
   async _saveCanvas(html, touchedIds = []) {
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active]; if (!layout) return;
     const componentsById = new Map();
@@ -3190,6 +3370,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         el.classList.toggle("active", !!group && (this._groupHierarchy?.descendants.get(String(group.id)) ?? group.componentIds).every(id => this._selectedIds.has(id)));
       });
     }
+    for (const root of [this._nexusPanelWindows?.get("layers")?.panel, this.element]) root?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
     const activeComponentId = selectedComponentId ?? (this._selectedIds.size === 0 ? this._componentEditorTargetId : null);
     const one = activeComponentId ? componentsById.get(activeComponentId) ?? null : null;
     if (!one && this._selectedIds.size === 0) this._componentEditorTargetId = null;

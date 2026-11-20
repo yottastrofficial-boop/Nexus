@@ -52,9 +52,26 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       for(const color of [palette.canvasColor,palette.cardColor,palette.accentColor,palette.highlightColor,palette.buttonColor]){const swatch=document.createElement("i");swatch.style.backgroundColor=color;preview.append(swatch);}
       const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
     }
-    const flowContainer=panel.querySelector("[data-library-flows]");flowContainer?.replaceChildren();
-    const flows=getInteractionLibrary(sheet.actor);
-    if(flowContainer){
+    const renderCustomThemes = () => {
+      themes?.querySelectorAll("[data-library-custom-theme]").forEach(card => card.remove());
+      const customThemes=game.user?.getFlag?.("nexus","libraryThemes")??[];
+      for(const theme of customThemes){
+        if(!theme?.id||!theme.palette)continue;
+        const card=document.createElement("button");card.type="button";card.className="nexus-library-asset nexus-library-theme-asset";
+        const labelText=String(theme.name??"Tema personalizado");card.dataset.libraryAsset=labelText.toLocaleLowerCase("pt-BR");card.dataset.libraryCustomTheme=theme.id;
+        const selected=theme.id===(sheet._currentLayout?.customThemeId??"");card.classList.toggle("is-selected",selected);card.setAttribute("aria-pressed",String(selected));
+        const preview=document.createElement("span");preview.className="nexus-library-preview-stage nexus-theme-swatch";
+        for(const key of ["canvasColor","cardColor","accentColor","highlightColor","buttonColor"]){const swatch=document.createElement("i");swatch.style.backgroundColor=theme.palette[key]??"#52647b";preview.append(swatch);}
+        const meta=document.createElement("span");meta.className="nexus-library-asset-meta";const label=document.createElement("strong");label.textContent=labelText;meta.append(label);card.append(preview,meta);themes?.append(card);
+      }
+    };
+    sheet._libraryRenderCustomThemes=renderCustomThemes;
+    renderCustomThemes();
+    const flowContainer=panel.querySelector("[data-library-flows]");
+    const renderSavedFlows = () => {
+      flowContainer?.replaceChildren();
+      const flows=getInteractionLibrary(sheet.actor);
+      if(!flowContainer)return;
       if(!flows.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum fluxo salvo na biblioteca.";flowContainer.append(empty);}
       for(const entry of flows){
         const card=document.createElement("button");card.type="button";card.className="nexus-library-flow-card";card.dataset.libraryFlowId=entry.id;
@@ -63,7 +80,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const meta=document.createElement("small");meta.textContent=`${entry.flow?.triggers?.length??0} gatilhos · ${entry.flow?.conditions?.length??0} condições · ${entry.flow?.actions?.length??0} ações`;
         card.append(icon,title,meta);flowContainer.append(card);
       }
-    }
+    };
+    sheet._libraryRenderSavedFlows=renderSavedFlows;
+    renderSavedFlows();
     const activateSection=(key)=>{
       sheet._librarySection=key;
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
@@ -71,8 +90,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       if(key==="assets")sheet._libraryApplyFilter?.();
       if(key==="themes"){
         const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
-        const cards=[...panel.querySelectorAll("[data-library-theme]")];let visible=0;
-        cards.forEach(card=>{card.hidden=!!query&&!card.dataset.libraryAsset.includes(query);if(!card.hidden)visible++;});
+        const cards=[...panel.querySelectorAll("[data-library-theme],[data-library-custom-theme]")];let visible=0;
+        cards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visible++;});
         panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"tema":"temas"}`;
       }
       if(key==="flows"){
