@@ -322,7 +322,7 @@ assert.match(canvasInteractions, /export function activateCanvasInteractions/);
 assert.match(canvasInteractions, /deactivateInteraction/);
 assert.match(sheetCode, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
 assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
-assert.match(sheetListeners, /data-property-category/);
+assert.match(actorPropertyPickerListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);
 assert.match(propertyCatalog, /modifier/);
 assert.match(propertyPickerView, /propertyCategory/, "O seletor hierárquico deve marcar as opções de categoria");
@@ -334,7 +334,7 @@ assert.match(propertyPickerView, /heading\.append\(title\)/, "O nome deve ocupar
 assert.match(propertyPickerView, /button\.append\(heading, code\)/, "O caminho deve ficar abaixo do nome");
 assert.match(css, /nexus-property-option-name[\s\S]*nexus-property-option-path/, "O seletor deve exibir nome e caminho em duas linhas compactas");
 assert.match(propertyPickerView, /category\.append\(heading, arrow\)/, "Categorias devem exibir apenas título e indicador de navegação");
-assert.match(sheetListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
+assert.match(actorPropertyPickerListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
 assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
