@@ -2758,20 +2758,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._captureHistory();
     const removed = new Set(selectedGroups.map(group => String(group.id)));
     for (const group of selectedGroups) {
-      const parentId = hierarchy.parentById.get(String(group.id)) ?? "";
-      if (parentId && !removed.has(parentId)) {
-        const parent = hierarchy.groupById.get(parentId);
-        if (parent) parent.componentIds = [...new Set([...(parent.componentIds ?? []), ...(hierarchy.directComponents.get(String(group.id)) ?? [])])];
+      let destinationId = hierarchy.parentById.get(String(group.id)) ?? "";
+      const visited = new Set();
+      while (destinationId && removed.has(destinationId) && !visited.has(destinationId)) {
+        visited.add(destinationId);
+        destinationId = hierarchy.parentById.get(destinationId) ?? "";
+      }
+      const directIds = hierarchy.directComponents.get(String(group.id)) ?? [];
+      if (destinationId) {
+        const destination = hierarchy.groupById.get(destinationId);
+        if (destination) destination.componentIds = [...new Set([...(destination.componentIds ?? []), ...directIds])];
       }
       for (const childId of hierarchy.children.get(String(group.id)) ?? []) {
         const child = hierarchy.groupById.get(childId);
-        if (child) child.parentGroupId = removed.has(parentId) ? (hierarchy.parentById.get(parentId) ?? "") : parentId;
-      }
-      if (!parentId) {
-        for (const childId of hierarchy.children.get(String(group.id)) ?? []) {
-          const child = hierarchy.groupById.get(childId);
-          if (child) child.parentGroupId = "";
-        }
+        if (child) child.parentGroupId = destinationId;
       }
     }
     layout.groups = (layout.groups ?? []).filter(group => !removed.has(String(group.id)));
