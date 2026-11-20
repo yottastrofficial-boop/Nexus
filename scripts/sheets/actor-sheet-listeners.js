@@ -4,6 +4,7 @@ import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
 import { activateActorAliasListeners } from "./actor-alias-listeners.js";
+import { activateActorSheetSkillListeners } from "./actor-sheet-skill-listeners.js";
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -50,33 +51,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (action === "save-group-library") return sheet._saveSelectedGroupToLibrary();
       if (action === "save-library-component") return sheet._saveSelectedLibraryComponent();
     });
-    html.find("[data-skill-roll]").on("click", event => {
-      event.preventDefault(); event.stopPropagation();
-      return sheet._rollSkill(event.currentTarget.dataset.skillRoll);
-    });
-    html.find("[data-skill-proficient-level]").on("change", event => {
-      const input = event.currentTarget;
-      if (input.value === "" || !Number.isFinite(Number(input.value))) return;
-      return sheet._setSkillProficientLevel(input.dataset.skillProficientLevel, Number(input.value));
-    });
-    html.find("[data-proficiency-level]").on("click", event => {
-      event.preventDefault(); event.stopPropagation();
-      const button = event.currentTarget, card = button.closest(".nexus-component");
-      if (card) sheet._setProficiencyLevel(card.dataset.id, Number(button.dataset.proficiencyLevel));
-    });
-    html.find("[data-skill-proficiency-toggle]").on("click", async event => {
-      const button = event.currentTarget;
-      const skill = NEXUS_SKILLS.find(item => item.key === button.dataset.skillProficiencyToggle);
-      if (!skill || sheet._mode !== "play") return;
-      event.preventDefault();
-      event.stopPropagation();
-      const current = getNexusSkillModifier(sheet.actor, skill.key);
-      const currentLevel = Number(current?.proficientLevel) || 0;
-      const nextLevel = event.altKey ? 0 : currentLevel + (event.shiftKey ? -1 : 1);
-      const componentId = button.closest(".nexus-component")?.dataset.id;
-      await sheet._setSkillProficientLevel(skill.key, nextLevel);
-      if (componentId) await sheet._runComponentAction(componentId, "click");
-    });
+    activateActorSheetSkillListeners(sheet, html, dependencies);
     const setResourceFromTrack = (track, event) => {
       if (sheet._mode !== "play") return;
       const card = track.closest(".nexus-component");
