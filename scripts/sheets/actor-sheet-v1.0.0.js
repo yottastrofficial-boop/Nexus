@@ -826,9 +826,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._currentLayout = layout;
 
     // Usa sempre os arrays do layout ativo; grupos antigos continuam válidos.
-    const groups = Array.isArray(layout.groups) ? layout.groups : [];
     const components = Array.isArray(layout.components) ? layout.components : [];
-    const hierarchy = buildGroupHierarchy(groups, components);
+    const hierarchy = buildGroupHierarchy(
+      Array.isArray(layout.groups) ? layout.groups : [],
+      components
+    );
     this._groupHierarchy = hierarchy;
     const componentLayerById = new Map(components.map(component => [component.id, {
       id: component.id,
