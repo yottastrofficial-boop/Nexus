@@ -39,30 +39,76 @@ export function createUniqueActorAliasKey(category, label, aliases = [], nativeP
 /**
  * Move a custom alias payload without replacing an existing destination.
  * The caller owns cloning and persistence so this helper remains pure.
+ *
+ * A conflict is explicit: callers must not rename the definition while its
+ * payload remains at the old key.
  */
 export function moveActorAliasCustomData(customData, previousKey, nextKey) {
   const previous = isSafeActorAliasKey(previousKey);
   const next = isSafeActorAliasKey(nextKey);
-  if (!previous || !next || previous === next) return false;
+  if (!previous || !next || previous === next) return { status: "invalid", changed: false };
+  if (!customData || typeof customData !== "object" || Array.isArray(customData)) {
+    return { status: "invalid", changed: false };
+  }
 
   const read = path => path.split(".").reduce((value, part) => value?.[part], customData);
-  const value = read(previous);
-  if (value === undefined || read(next) !== undefined) return false;
+  const previousParts = previous.split(".");
+  const previousLeaf = previousParts.pop();
+  const previousParent = previousParts.reduce((value, part) => value?.[part], customData);
+  if (!previousParent || typeof previousParent !== "object" || Array.isArray(previousParent)
+    || !Object.hasOwn(previousParent, previousLeaf) || previousParent[previousLeaf] === undefined) {
+    return { status: "missing", changed: false };
+  }
 
-  const targetParts = next.split(".");
+  const nextParts = next.split(".");
   let target = customData;
-  for (const part of targetParts.slice(0, -1)) {
-    if (!target[part] || typeof target[part] !== "object" || Array.isArray(target[part])) target[part] = {};
+  for (const part of nextParts.slice(0, -1)) {
+    if (target[part] !== undefined && (!target[part] || typeof target[part] !== "object" || Array.isArray(target[part]))) {
+      return { status: "conflict", changed: false };
+    }
+    target = target[part] ?? {};
+  }
+  if (Object.hasOwn(target, nextParts.at(-1)) && target[nextParts.at(-1)] !== undefined) {
+    return { status: "conflict", changed: false };
+  }
+
+  const value = previousParent[previousLeaf];
+  target = customData;
+  for (const part of nextParts.slice(0, -1)) {
+    if (!target[part]) target[part] = {};
     target = target[part];
   }
-  target[targetParts.at(-1)] = value;
+  target[nextParts.at(-1)] = value;
+  delete previousParent[previousLeaf];
+  return { status: "moved", changed: true };
+}
 
-  const previousParts = previous.split(".");
-  const leaf = previousParts.pop();
-  const parent = previousParts.reduce((value, part) => value?.[part], customData);
-  if (!parent || typeof parent !== "object" || !Object.hasOwn(parent, leaf)) return false;
-  delete parent[leaf];
-  return true;
+/** Build the initial custom payload for an alias without mutating its owner. */
+export function createActorAliasDefaultValue(alias, label = alias?.label ?? "") {
+  const name = String(label ?? "");
+  const display = String(alias?.exib ?? name);
+  if (alias?.type === "attribute") {
+    return { name, exib: display, exibicao: display, value: 0, checkbonus: 0, roll: "" };
+  }
+  if (alias?.type === "resource") {
+    return { name, exib: display, exibicao: display, value: 0, max: 0 };
+  }
+  if (alias?.type === "number") return 0;
+  if (alias?.type === "boolean") return false;
+  return "";
+}
+
+/** Prepare a copied alias definition with a fresh identity and custom storage. */
+export function createActorAliasCopyDefinition(source, key, id) {
+  if (!source || typeof source !== "object" || !isSafeActorAliasKey(key) || !id) return null;
+  return {
+    ...source,
+    id,
+    key,
+    label: `${String(source.label ?? "").slice(0, 38)} (cópia)`.slice(0, 48),
+    source: "custom",
+    targetPath: ""
+  };
 }
 
 /**
