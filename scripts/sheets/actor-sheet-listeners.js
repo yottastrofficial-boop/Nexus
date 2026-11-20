@@ -1193,9 +1193,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (importGroupButton && libraryPanel.contains(importGroupButton)) {
         event.preventDefault();
         const result = await foundry.applications.api.DialogV2.input({
-          window: { title: "Importar grupo por código" },
-          content: '<label class="nexus-library-card-content-label">Código de compartilhamento<textarea name="code" rows="10" spellcheck="false" autocomplete="off"></textarea></label><p>O código precisa ser de um grupo exportado pelo NEXUS.</p>',
-          ok: { label: "Importar grupo" },
+          window: { title: "Importar pacote NEXUS" },
+          content: '<label class="nexus-library-card-content-label">Código do pacote ou grupo antigo<textarea name="code" rows="10" spellcheck="false" autocomplete="off"></textarea></label><p>Componentes, grupos e layouts são reconhecidos automaticamente.</p>',
+          ok: { label: "Importar" },
           rejectClose: false
         });
         const code = String(result?.code ?? "").trim();
