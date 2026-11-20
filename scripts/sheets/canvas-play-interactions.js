@@ -12,7 +12,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
     if(sheet._mode!=="play")return false;
     const card=cardOf(event);if(!card)return false;
     const component=sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id),modifiers=modifiersOf(event);
-    if(!getTriggeredActions(component,name,{actor:sheet.actor,modifiers}).length)return false;
+    if(!getTriggeredActions(component,name,{actor:sheet.actor,modifiers,key:extra.key}).length)return false;
     sheet._runComponentAction(card.dataset.id,name,{...extra,modifiers});return true;
   };
   const stop=(event,name,extra)=>{if(!dispatch(event,name,extra))return false;event.preventDefault();event.stopPropagation();return true;};
