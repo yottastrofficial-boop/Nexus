@@ -146,7 +146,7 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 ### Migração de identificadores de aliases
 
 - `scripts/core/actor-aliases.js` concentra também a movimentação de dados personalizados e a atualização de referências de componentes quando uma chave muda.
-- `moveActorAliasCustomData()` move o payload entre caminhos sem sobrescrever um destino já existente; a função é pura e deixa a persistência sob responsabilidade da ficha.
+- `moveActorAliasCustomData()` move o payload entre caminhos sem sobrescrever um destino já existente; a função altera apenas o objeto recebido, por isso os chamadores passam um clone e mantêm a persistência sob responsabilidade da ficha.
 - `replaceActorAliasLayoutReferences()` atualiza `dataPath`, `currentPath`, `maxPath` e `customBinding` em todos os layouts, reconhecendo raízes legadas singulares `attribute.` e `resource.`.
 - Os fluxos de renomeação e restauração de aliases/propriedades nativas reutilizam os mesmos helpers, em vez de manter cópias da lógica de movimentação e substituição de caminhos.
 - Testes comportamentais verificam movimentação de payload, proteção contra sobrescrita, migração de referências canônicas e legadas.
@@ -154,7 +154,7 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 
 ### Operações de aliases — integridade e persistência
 
-- `moveActorAliasCustomData()` retorna um resultado explícito (`moved`, `missing`, `conflict` ou `invalid`) para que a interface não conclua uma renomeação quando o destino já possui dados ou quando os caminhos se sobrepõem.
+- `moveActorAliasCustomData()` retorna um resultado explícito (`moved`, `missing`, `conflict` ou `invalid`) para que a interface não conclua uma renomeação quando o destino já possui dados ou quando os caminhos se sobrepõem. A função muta somente o objeto recebido após validar origem e destino; os chamadores fornecem um clone antes de persistir.
 - A validação do destino ocorre antes de qualquer mutação; conflitos não deixam estruturas parcialmente criadas nem sobrescrevem o payload original.
 - `createActorAliasDefaultValue()` concentra os valores iniciais de atributos, recursos e aliases escalares. `createActorAliasCopyDefinition()` prepara a cópia com novo ID, armazenamento personalizado e sem vínculo externo.
 - A renomeação e a restauração só gravam layouts quando pelo menos uma referência de componente realmente foi alterada.
