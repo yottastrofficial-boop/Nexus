@@ -704,7 +704,7 @@ assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a nave
 assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O editor ampliado deve distribuir as configurações em colunas");
 assert.match(interactions, /const guided=el\("div","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
-assert.match(changelog, /Adicionada ação opcional de rolagem configurável no Inspector/);
+assert.match(changelog, /Editor de comportamentos/, "O changelog deve documentar as melhorias do editor de comportamentos");
 assert.match(changelog, /Cards inteligentes e composição/);
 assert.match(css, /nexus-library-saved-groups/);
 
