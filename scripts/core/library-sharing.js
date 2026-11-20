@@ -175,12 +175,15 @@ export function parseNexusLayoutShareCode(code, componentTypes = []) {
     const normalized = normalizeShareComponent(component, allowed);
     return { ...normalized, id: String(component.id ?? "") };
   });
-  const ids = new Set(layout.components.map(component => component.id).filter(Boolean));
+  const componentIdList = layout.components.map(component => String(component.id ?? ""));
+  const ids = new Set(componentIdList.filter(Boolean));
+  if (ids.size !== layout.components.length) throw new Error("O layout contém componentes sem ID ou com IDs duplicados.");
   const groupIds = new Set();
   layout.groups = layout.groups.map(group => {
     if (!group || typeof group !== "object" || !group.id || groupIds.has(String(group.id))) throw new Error("O layout contém um grupo inválido ou com ID duplicado.");
     groupIds.add(String(group.id));
-    const componentIds = [...new Set((group.componentIds ?? []).map(String))].filter(id => ids.has(id));
+    const componentIds = [...new Set((group.componentIds ?? []).map(String))];
+    if (componentIds.some(id => !ids.has(id))) throw new Error("Um grupo referencia um componente inexistente.");
     return { ...sanitizeJsonValue(group), id: String(group.id), componentIds, parentGroupId: String(group.parentGroupId ?? "") };
   });
   for (const group of layout.groups) {
