@@ -54,8 +54,8 @@ A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma com
 
 ### Instalação manual
 
-1. Abra a página do repositório: [NEXUS RPG no GitHub](https://github.com/yottastrofficial-boop/Nexus).
-2. Use **Code → Download ZIP**.
+1. Abra [Releases do NEXUS RPG](https://github.com/yottastrofficial-boop/Nexus/releases).
+2. Baixe o arquivo `nexus.zip) da versão desejada (não use o ZIP automático de **Code → Download ZIP**, que contém o repositório-fonte).
 3. Extraia o conteúdo para a pasta de sistemas do Foundry:
    `Data/systems/nexus/`.
 4. Confirme que o arquivo `system.json` está diretamente dentro da pasta `nexus`.
@@ -83,7 +83,7 @@ O manifesto do sistema está definido em:
 https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/system.json
 ```
 
-A instalação por manifesto depende de um pacote de distribuição válido e acessível. Caso o Foundry não consiga baixar o sistema, utilize a instalação manual acima.
+A instalação por manifesto utiliza o pacote `nexus.zip` anexado à Release correspondente à versão informada em `system.json`. O GitHub Actions valida o pacote, gera o ZIP com `system.json` na raiz e publica o artefato. Caso a publicação ainda não esteja disponível ou o Foundry não consiga baixar o sistema, utilize a instalação manual acima.
 
 ## Estrutura do repositório
 
