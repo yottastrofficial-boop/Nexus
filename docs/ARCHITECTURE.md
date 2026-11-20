@@ -177,3 +177,11 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - `migration-manager.js` reutiliza `moveActorAliasCustomData()` para mover payloads, removendo a lógica de movimentação duplicada.
 - Se o destino já contém dados, a migração preserva ambos os caminhos no armazenamento, mantém o destino canônico e informa a quantidade de conflitos no resultado. A ficha registra o aviso no console; nenhum payload é sobrescrito.
 - Os testes verificam a normalização de caminhos repetidos, a preservação da chave legada, a idempotência e a não sobrescrita em caso de colisão.
+
+
+### Serialização das operações do editor de aliases
+
+- Criação, edição, renomeação, cópia, restauração e exclusão de aliases passam por `serializeActorPropertyWrite()`, compartilhando a fila local por Actor com as demais gravações de propriedades.
+- A fila impede que operações concorrentes da mesma sessão usem snapshots antigos umas sobre as outras. Ela não é um lock distribuído e não impede conflito entre clientes diferentes.
+- `getActorAliasCustomValue()` prioriza o caminho canônico e consulta `legacyKeys` quando o payload ainda não pôde ser movido por conflito. Isso mantém os dados legíveis sem sobrescrever o destino.
+- Falhas são reportadas pelo serviço central da fila; o controlador não emite uma segunda notificação para o mesmo erro.
