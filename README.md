@@ -55,7 +55,7 @@ A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma com
 ### Instalação manual
 
 1. Abra [Releases do NEXUS RPG](https://github.com/yottastrofficial-boop/Nexus/releases).
-2. Baixe o arquivo `nexus.zip) da versão desejada (não use o ZIP automático de **Code → Download ZIP**, que contém o repositório-fonte).
+2. Baixe o arquivo `nexus.zip` da versão desejada (não use o ZIP automático de **Code → Download ZIP**, que contém o repositório-fonte).
 3. Extraia o conteúdo para a pasta de sistemas do Foundry:
    `Data/systems/nexus/`.
 4. Confirme que o arquivo `system.json` está diretamente dentro da pasta `nexus`.
