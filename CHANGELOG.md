@@ -4,6 +4,7 @@
 - Corrigida a injeção de `getTriggeredActions` nos listeners da ficha. O erro interrompia a atualização do editor depois de salvar uma alteração e impedia a verificação dos gatilhos do componente.
 - Adicionada captura direta de teclas para gatilhos `keyDown` e `keyUp`, registrando a tecla e os modificadores pressionados em uma única ação.
 - A captura ignora teclas modificadoras isoladas e pode ser cancelada com Escape; não mantém o teclado em modo de captura depois de registrar uma combinação.
+- Ao trocar um gatilho de teclado por outro tipo de evento, a tecla capturada é limpa para não bloquear o novo evento.
 - A execução no modo de jogo agora compara a tecla capturada e os modificadores configurados.
 - Eventos de foco, perda de foco, alteração e interação continuam disponíveis como tipos de gatilho independentes.
 
