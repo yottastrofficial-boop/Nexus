@@ -110,7 +110,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       const componentElements = elements();
       const hierarchy = buildGroupHierarchy(layouts, componentElements.map(element => ({ id: element.dataset.id })));
       for (const element of componentElements) {
-        element.classList.remove("is-group-member", "is-group-inspecting");
+        element.classList.remove("is-group-member", "is-group-inspecting", "is-group-related");
         delete element.dataset.groupId;
         element.style.removeProperty("--nexus-group-bg");
         element.style.removeProperty("--nexus-group-border");
@@ -139,6 +139,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         Object.assign(group, { x, y, w: right-x, h: bottom-y });
         const surface = document.createElement("div");
         surface.className = "nexus-group-surface";
+         surface.classList.add("is-" + (["folder","container","section"].includes(group.kind) ? group.kind : "container"));
         if (group.hidden) surface.classList.add("is-layer-hidden");
         if (group.locked) surface.classList.add("is-locked");
         if (sheet._mode !== "appearance") surface.classList.add("is-static");
@@ -149,7 +150,14 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
         surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
         surface.style.setProperty("--nexus-group-radius", `${clamp(Number(group.borderRadius ?? 8),0,32)}px`);
-        canvas.append(surface); groupSurfacesById.set(String(group.id), surface);
+        if(group.kind==="section"||group.showHeader===true){
+           const heading=document.createElement("div");
+           heading.className="nexus-group-heading";
+           const title=document.createElement("span");
+           title.textContent=String(group.title??group.name??"Grupo").slice(0,48);
+           heading.append(title);surface.append(heading);
+         }
+         canvas.append(surface); groupSurfacesById.set(String(group.id), surface);
       }
     };
     const updateConnectedCorners = () => updateCanvasConnectedCorners(canvas);
