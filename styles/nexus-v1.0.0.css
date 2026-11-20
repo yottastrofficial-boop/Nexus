@@ -6443,7 +6443,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-sheet[data-mode="appearance"] .nexus-group-surface.is-folder {
   border-style: dashed;
   background: transparent;
-  pointer-events: none;
+  pointer-events: auto;
 }
 .nexus-sheet[data-mode="appearance"] .nexus-group-surface.is-selected {
   outline: 1px solid var(--nexus-highlight-color,#a9c9ef);
@@ -6468,3 +6468,16 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media(max-width:460px) {
   .nexus-group-inspector-block .nexus-inspector-grid { grid-template-columns:minmax(0,1fr); }
 }
+
+
+.nexus-group-heading {
+  position:absolute; top:0; left:0; right:0; min-height:25px; display:flex; align-items:center;
+  padding:3px 9px; overflow:hidden; border-bottom:1px solid color-mix(in srgb,var(--nexus-group-border,#52647b) 70%,transparent);
+  border-radius:var(--nexus-group-radius,8px) var(--nexus-group-radius,8px) 0 0;
+  background:color-mix(in srgb,var(--nexus-group-bg,#273443) 92%,#fff 8%);
+  color:var(--nexus-panel-text,#e7edf5); font-size:10px; font-weight:750; letter-spacing:.035em;
+  pointer-events:none;
+}
+.nexus-group-heading span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nexus-group-surface.is-section { padding-top:26px; }
+.nexus-group-surface.is-folder { background:transparent !important; box-shadow:none !important; }
