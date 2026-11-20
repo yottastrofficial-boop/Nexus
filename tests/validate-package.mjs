@@ -648,11 +648,9 @@ const migrationDependencies = {
   readLayouts: async () => ({ principal: {} }),
   getAliasDefinitions: () => normalizedAliases,
   getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
-  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key" }),
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key", legacyKeys: [...(raw.legacyKeys ?? []), raw.key] }),
   invalidateAliasDefinitionCache: () => {},
-  getPath: getSafePath,
-  clone: value => structuredClone(value),
-  setProperty: setSafePath
+  clone: value => structuredClone(value)
 };
 const firstMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(firstMigration.changed, true, "Primeira migração deve sinalizar alteração");
@@ -660,6 +658,8 @@ assert.equal(fakeActor.getFlag("nexus", "activeLayout"), "principal");
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "new.key"), 17);
 assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), undefined);
 assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
+assert.deepEqual(fakeActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"], "O caminho antigo deve continuar resolvível por layouts salvos");
+assert.equal(firstMigration.aliasDataConflicts, 0);
 const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
@@ -699,6 +699,27 @@ const legacyPropertyActor = {
     this.updateCount++;
   }
 };
+
+const conflictingAliasActor = {
+  flags: { nexus: { activeLayout: "principal", aliases: [{ id: "alias-conflict", key: "old.key", label: "Conflito" }], customData: { old: { key: 17 }, new: { key: 99 } } } },
+  writes: 0,
+  getFlag(scope, key) { return this.flags[scope]?.[key]; },
+  async setFlag(scope, key, value) { this.flags[scope] ??= {}; this.flags[scope][key] = structuredClone(value); this.writes++; }
+};
+const conflictMigrationDependencies = {
+  actor: conflictingAliasActor,
+  readLayouts: async () => ({ principal: {} }),
+  getAliasDefinitions: () => [{ id: "alias-conflict", key: "new.key", legacyKeys: ["old.key"], targetPath: "" }],
+  getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
+  normalizeAliasDefinition: raw => ({ ...raw, key: "new.key", legacyKeys: [...(raw.legacyKeys ?? []), raw.key] }),
+  invalidateAliasDefinitionCache: () => {},
+  clone: value => structuredClone(value)
+};
+const conflictMigration = await migrateLegacyActorData(conflictMigrationDependencies);
+assert.equal(conflictMigration.aliasDataConflicts, 1, "A colisão de dados precisa ser informada");
+assert.deepEqual(conflictingAliasActor.getFlag("nexus", "customData"), { old: { key: 17 }, new: { key: 99 } }, "A migração não deve sobrescrever nenhum dos dois payloads");
+assert.deepEqual(conflictingAliasActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"]);
+
 const propertyMigrationDependencies = {
   actor: legacyPropertyActor,
   readLayouts: async () => ({ principal: {} }),
@@ -706,9 +727,7 @@ const propertyMigrationDependencies = {
   getCustomAliasData: actor => actor.getFlag("nexus", "customData") ?? {},
   normalizeAliasDefinition: raw => raw,
   invalidateAliasDefinitionCache: () => {},
-  getPath: getSafePath,
-  clone: value => structuredClone(value),
-  setProperty: setSafePath
+  clone: value => structuredClone(value)
 };
 const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
 assert.equal(propertyMigration.propertiesMigrated, true);
