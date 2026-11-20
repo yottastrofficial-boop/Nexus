@@ -2,20 +2,20 @@
 
 Este documento registra direções e prioridades do NEXUS. Não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Estado atual — 1.0.0.70
+## Estado atual — 1.0.0.71 em preparação
 
-A versão publicada contém a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica de grupos e backup completo da Biblioteca.
+A versão 1.0.0.71 consolida a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica, backup completo e uma rodada de estabilização dos listeners, persistência de propriedades, aliases e controladores de perícias/recursos.
 
-A versão 1.0.0.70 passou pela validação automatizada de pacote. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária. A versão não está declarada estável enquanto os defeitos relatados na ficha e nas interações não forem verificados.
+A validação automatizada de pacote, sintaxe, regressões e empacotamento passou no GitHub Actions. A versão 1.0.0.71 está preparada no manifesto e no changelog, mas ainda não foi publicada como release. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária; portanto, esta versão não está declarada estável.
 
 ## Prioridades imediatas
 
-1. Corrigir regressões funcionais e eliminar execução duplicada de interações.
-2. Consolidar a composição visual das perícias e a cascata CSS sem perder personalizações de tema.
-3. Reforçar testes comportamentais dos fluxos, reduzindo dependência de verificações por texto/regex.
-4. Revisar persistência, ciclo de vida da ficha, listeners e abertura de múltiplas janelas.
-5. Reduzir acoplamento e tamanho dos módulos centrais por extrações pequenas e testáveis.
-6. Atualizar documentação, changelog e manifesto somente quando o comportamento estiver validado.
+1. Executar testes funcionais e visuais no Foundry VTT 14, incluindo múltiplas janelas e usuários.
+2. Validar concorrência e recuperação de falhas na persistência de aliases, dados personalizados e layouts.
+3. Consolidar a composição visual das perícias e a cascata CSS sem perder personalizações de tema.
+4. Reforçar testes comportamentais dos fluxos, reduzindo gradualmente dependência de verificações por texto/regex.
+5. Continuar extrações por domínio apenas quando reduzirem acoplamento sem fragmentar excessivamente os módulos.
+6. Publicar a release somente após a validação funcional e a revisão de compatibilidade.
 
 ## Arquitetura de módulos e propriedades
 
