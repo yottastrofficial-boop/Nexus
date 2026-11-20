@@ -2,7 +2,7 @@ import { validateGroupParent } from "../core/group-hierarchy.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
-import { slugifyActorAlias, createUniqueActorAliasKey, replaceActorAliasLayoutReferences } from "../core/actor-aliases.js";
+import { slugifyActorAlias, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences } from "../core/actor-aliases.js";
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -334,10 +334,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         override.key = nextKey;
         override.legacyKeys = [...new Set([...(property.legacyKeys ?? []), previousKey])];
         const customData = clone(getCustomAliasData(sheet.actor));
-        const previousMeta = getPath(customData, previousKey);
-        if (previousMeta && typeof previousMeta === "object") {
-          foundry.utils.setProperty(customData, nextKey, previousMeta);
-          const parts = previousKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join(".")); if (parent) delete parent[leaf];
+        if (moveActorAliasCustomData(customData, previousKey, nextKey)) {
           await sheet.actor.setFlag("nexus", "customData", customData);
         }
         const layouts = await sheet._readLayouts();
@@ -361,11 +358,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         override.key = property.defaultKey; override.label = property.defaultLabel;
       }
       const customData = clone(getCustomAliasData(sheet.actor));
-      const previousMeta = getPath(customData, oldKey);
-      if (previousMeta && typeof previousMeta === "object" && oldKey !== property.defaultKey) {
-        foundry.utils.setProperty(customData, property.defaultKey, previousMeta);
-        const parts = oldKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join(".")); if (parent) delete parent[leaf];
-      }
+      if (oldKey !== property.defaultKey) moveActorAliasCustomData(customData, oldKey, property.defaultKey);
       const defaultMeta = getPath(customData, property.defaultKey);
       if (defaultMeta && typeof defaultMeta === "object") { delete defaultMeta.checkbonus; delete defaultMeta.roll; }
       await sheet.actor.setFlag("nexus", "customData", customData);
@@ -435,14 +428,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const previousKey = alias.key;
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
         const customData = clone(getCustomAliasData(sheet.actor));
-        if (!alias.targetPath) {
-          const previous = getPath(customData, previousKey);
-          if (previous !== undefined) {
-            foundry.utils.setProperty(customData, next, previous);
-            const parts = previousKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join("."));
-            if (parent) delete parent[leaf];
-            await sheet.actor.setFlag("nexus", "customData", customData);
-          }
+        if (!alias.targetPath && moveActorAliasCustomData(customData, previousKey, next)) {
+          await sheet.actor.setFlag("nexus", "customData", customData);
         }
         // Migra referências de componentes para que a troca do identificador
         // não deixe cartões apontando para o caminho antigo.
@@ -503,14 +490,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (defaultKey !== alias.key) {
         const previousKey = alias.key;
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
-        if (!alias.targetPath) {
-          const previous = getPath(customData, previousKey);
-          if (previous !== undefined) {
-            foundry.utils.setProperty(customData, defaultKey, previous);
-            const parts = previousKey.split("."), leaf = parts.pop(), parent = getPath(customData, parts.join("."));
-            if (parent) delete parent[leaf];
-          }
-        }
+        if (!alias.targetPath) moveActorAliasCustomData(customData, previousKey, defaultKey);
         const layouts = await sheet._readLayouts();
         replaceActorAliasLayoutReferences(layouts, previousKey, defaultKey);
         await sheet._writeLayouts(layouts, sheet._activeLayoutId());
