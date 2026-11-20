@@ -4,7 +4,7 @@ export const GROUP_KINDS=Object.freeze(["folder","container","section"]);
 export function normalizeGroupPresentation(group={}) {
  const kind=GROUP_KINDS.includes(group.kind)?group.kind:"container";
  return {...group,kind,layoutMode:GROUP_LAYOUT_MODES.includes(group.layoutMode)?group.layoutMode:"free",
- gap:Math.min(120,Math.max(0,Number(group.gap)||0)),padding:Math.min(120,Math.max(0,Number(group.padding)||0)),
+ gap:group.gap===undefined?8:Math.min(120,Math.max(0,Number(group.gap)||0)),padding:group.padding===undefined?8:Math.min(120,Math.max(0,Number(group.padding)||0)),
  columns:Math.min(12,Math.max(1,Math.trunc(Number(group.columns)||2))),
  align:["start","center","end"].includes(group.align)?group.align:"start",
  showHeader:group.showHeader===undefined?kind==="section":group.showHeader===true,
