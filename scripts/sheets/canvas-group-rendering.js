@@ -24,6 +24,21 @@ export function renderCanvasGroups(sheet, root) {
   const groups = Array.isArray(sheet?._currentLayout?.groups) ? sheet._currentLayout.groups : [];
   sheet._activeGroups = groups;
   const hierarchy = buildGroupHierarchy(groups, components.map(element => ({ id: element.dataset.id })));
+  for (const component of components) {
+    component.classList.remove("is-group-member", "is-group-inspecting");
+    delete component.dataset.groupId;
+    component.style.removeProperty("--nexus-group-bg");
+    component.style.removeProperty("--nexus-group-border");
+    component.style.removeProperty("--nexus-group-radius");
+    const ownerId = hierarchy.componentOwner.get(String(component.dataset.id));
+    const owner = ownerId ? hierarchy.groupById.get(ownerId) : null;
+    if (!owner) continue;
+    component.dataset.groupId = ownerId;
+    component.classList.add("is-group-member");
+    component.style.setProperty("--nexus-group-bg", owner.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
+    component.style.setProperty("--nexus-group-border", owner.borderColor ?? "#52647b");
+    component.style.setProperty("--nexus-group-radius", `${Math.min(32,Math.max(0,Number(owner.borderRadius??8)||0))}px`);
+  }
   sheet._groupHierarchy = hierarchy;
   const elementById = new Map(components.map(element => [String(element.dataset.id), element]));
   const depthOf = id => {
