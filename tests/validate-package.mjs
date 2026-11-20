@@ -573,8 +573,13 @@ assert.deepEqual([...loadGroup.children.keys()].sort(), ["base", "bonus", "capac
 assert.ok([...loadGroup.children.values()].every(node => node.entry && node.children.size === 0), "Carga não deve criar subgrupos de propriedade única");
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
-assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith(`/releases/download/v${manifest.version}/nexus.zip`), "URL do pacote deve apontar para a versão atual");
+assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/,
+  "O manifesto embutido deve apontar para o canal estável de atualizações");
+assert.equal(stableManifest.id, manifest.id, "O manifesto estável deve identificar o mesmo sistema");
+assert.match(stableManifest.version, /^\d+\.\d+\.\d+\.\d+$/, "O manifesto estável deve manter uma versão válida");
+assert.match(stableManifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/);
+assert.ok(stableManifest.download.endsWith(`/releases/download/v${stableManifest.version}/nexus.zip`),
+  "O manifesto estável só pode apontar para o pacote da própria versão");
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");
