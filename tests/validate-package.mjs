@@ -17,6 +17,7 @@ import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
 import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
@@ -1662,4 +1663,22 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   const executed = [];
   await executeTriggeredActions(component, "click", async action => executed.push(action.id), { skipInteractionIds });
   assert.deepEqual(executed, ["click-only-action"]);
+}
+
+
+// Listener scope regression tests: all registered listeners must be removed together.
+{
+  const scope = createListenerScope();
+  const target = new EventTarget();
+  let calls = 0;
+  assert.equal(scope.listen(target, "nexus-test", () => calls++), true);
+  target.dispatchEvent(new Event("nexus-test"));
+  assert.equal(calls, 1, "A listener must run before its scope is aborted");
+  scope.abort();
+  assert.equal(scope.aborted, true);
+  target.dispatchEvent(new Event("nexus-test"));
+  assert.equal(calls, 1, "Aborting the scope must remove its listeners");
+  assert.equal(scope.listen(target, "nexus-test", () => calls++), false, "An aborted scope must reject new listeners");
+  scope.abort();
+  assert.equal(calls, 1, "Aborting an already aborted scope must be safe");
 }
