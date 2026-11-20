@@ -3002,14 +3002,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const components = this._currentLayout?.components ?? [];
     const groupsById = new Map(groups.map(group => [group.id, group]));
     const componentsById = new Map(components.map(component => [component.id, component]));
-    const selectedGroups = groups.filter(group => (group.componentIds ?? []).length >= 2 && group.componentIds.every(id => this._selectedIds.has(id)));
-    this._selectedGroupId = selectedGroups.length === 1 ? selectedGroups[0].id : null;
-    const selectedGroupIds = new Set(selectedGroups.map(group => group.id));
+    const hierarchy = this._groupHierarchy ?? buildGroupHierarchy(groups, components);
+    const requestedGroup = groupsById.get(this._selectedGroupId);
+    const requestedIds = requestedGroup ? (hierarchy.descendants.get(String(requestedGroup.id)) ?? []) : [];
+    const selectedGroup = requestedGroup && requestedIds.length === this._selectedIds.size && requestedIds.every(id => this._selectedIds.has(id))
+      ? requestedGroup
+      : groups.find(group => { const ids = hierarchy.descendants.get(String(group.id)) ?? []; return ids.length === this._selectedIds.size && ids.every(id => this._selectedIds.has(id)); }) ?? null;
+    this._selectedGroupId = selectedGroup?.id ?? null;
+    const selectedGroupIds = new Set(selectedGroup ? [selectedGroup.id] : []);
+    const selectedGroupComponentIds = new Set(selectedGroup ? hierarchy.descendants.get(String(selectedGroup.id)) ?? [] : []);
 
     // Aplica diretamente o estado final, evitando limpar e reescrever as mesmas classes.
     for (const el of componentNodes) {
       const selected = this._selectedIds.has(el.dataset.id);
-      const memberSelected = selected && !!el.dataset.groupId && selectedGroupIds.has(el.dataset.groupId);
+      const memberSelected = selected && selectedGroupComponentIds.has(el.dataset.id);
       el.classList.toggle("is-selected", selected);
       el.classList.toggle("is-group-inspecting", memberSelected);
       el.classList.toggle("is-selection-highlight", selected);
