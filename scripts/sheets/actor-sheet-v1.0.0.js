@@ -16,7 +16,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, evaluateComponentRepresentation, renderPropertyPresentationEditor, normalizeInteractionPropertyPath } from "../core/interactions.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode } from "../core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -2513,6 +2513,82 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderSavedGroups?.();
     this._libraryApplyFilter?.();
     return true;
+  }
+
+  async _saveCurrentLayoutToLibrary() {
+    const layouts = await this._readLayouts();
+    const layout = layouts[this._activeLayoutId()];
+    if (!layout) return false;
+    const result = await foundry.applications.api.DialogV2.input({
+      window: { title: "Salvar layout completo na Biblioteca" },
+      content: `<label class="nexus-library-card-content-label">Nome do modelo<input name="name" type="text" maxlength="48" value="${Handlebars.escapeExpression(String(layout.name ?? "Layout"))}"></label><p>Serão salvos dimensões, aparência, componentes, grupos, vínculos e comportamentos.</p>` ,
+      ok: { label: "Salvar modelo" }, rejectClose: false
+    });
+    const name = String(result?.name ?? "").trim().slice(0, 48);
+    if (!name) return false;
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
+    const snapshot = clone(layout); delete snapshot.id;
+    saved.push({ id: `liblayout-${foundry.utils.randomID(8)}`, name, layout: snapshot });
+    await game.user.setFlag("nexus", "libraryLayouts", saved.slice(-100));
+    this._libraryRenderSavedLayouts?.();
+    ui.notifications?.info?.(`Layout "${name}" salvo na Biblioteca pessoal.`);
+    return true;
+  }
+
+  async _copySavedLayoutCode(layoutId) {
+    const entry = (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === layoutId);
+    if (!entry?.layout) return false;
+    const code = createNexusLayoutShareCode({ ...clone(entry.layout), name: entry.name });
+    let copied = false;
+    try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(code); copied = true; } } catch (_) {}
+    if (!copied) { const field = document.createElement("textarea"); field.value = code; field.setAttribute("readonly", ""); field.style.position = "fixed"; field.style.opacity = "0"; document.body.append(field); field.select(); copied = document.execCommand?.("copy") === true; field.remove(); }
+    if (!copied) { ui.notifications?.warn?.("Não foi possível copiar o código do layout."); return false; }
+    ui.notifications?.info?.("Código do layout completo copiado."); return true;
+  }
+
+  async _importSavedLayoutCode(code) {
+    const imported = parseNexusLayoutShareCode(code, Object.keys(COMPONENTS));
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
+    const entry = { id: `liblayout-${foundry.utils.randomID(8)}`, name: imported.name, layout: imported.layout };
+    await game.user.setFlag("nexus", "libraryLayouts", [...saved, entry].slice(-100));
+    this._libraryRenderSavedLayouts?.();
+    ui.notifications?.info?.(`Layout "${entry.name}" importado para a Biblioteca pessoal.`); return true;
+  }
+
+  async _deleteSavedLibraryLayout(layoutId) {
+    const saved = game.user?.getFlag?.("nexus", "libraryLayouts") ?? [];
+    const next = saved.filter(item => item.id !== layoutId);
+    if (next.length === saved.length) return false;
+    await game.user.setFlag("nexus", "libraryLayouts", next); this._libraryRenderSavedLayouts?.(); return true;
+  }
+
+  async _addSavedLayoutToActor(layoutId) {
+    const entry = (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === layoutId);
+    if (!entry?.layout) return false;
+    const layouts = await this._readLayouts(), base = clone(entry.layout);
+    const layoutIdNew = `layout-${foundry.utils.randomID(6)}`;
+    const componentIds = new Map((base.components ?? []).map(component => [String(component.id), `cmp-${foundry.utils.randomID(8)}`]));
+    const groupIds = new Map((base.groups ?? []).map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));
+    const remapReferences = value => {
+      if (Array.isArray(value)) return value.map(remapReferences);
+      if (!value || typeof value !== "object") return value;
+      const result = {};
+      for (const [key, child] of Object.entries(value)) {
+        if (typeof child === "string" && ["targetId", "componentId", "sourceComponentId", "actionTargetId"].includes(key)) result[key] = componentIds.get(child) ?? groupIds.get(child) ?? child;
+        else if (key === "componentIds" && Array.isArray(child)) result[key] = child.map(id => componentIds.get(String(id)) ?? String(id));
+        else result[key] = remapReferences(child);
+      }
+      return result;
+    };
+    base.id = layoutIdNew; base.name = String(entry.name ?? base.name ?? "Layout importado").slice(0, 32);
+    base.components = (base.components ?? []).map(component => ({ ...remapReferences(component), id: componentIds.get(String(component.id)) ?? `cmp-${foundry.utils.randomID(8)}` }));
+    base.groups = (base.groups ?? []).map(group => ({ ...remapReferences(group), id: groupIds.get(String(group.id)) ?? `grp-${foundry.utils.randomID(8)}`, parentGroupId: group.parentGroupId ? groupIds.get(String(group.parentGroupId)) ?? "" : "", componentIds: (group.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean) }));
+    const nameBase = base.name; let name = nameBase, suffix = 2;
+    while (Object.values(layouts).some(item => String(item.name).toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) name = `${nameBase.slice(0, 26)} (${suffix++})`;
+    base.name = name; layouts[layoutIdNew] = this._normalizeLayout(base);
+    this._captureHistory(); await this._writeLayouts(layouts, layoutIdNew);
+    this._selectedIds = new Set(); this._selectedGroupId = null; this.render({ force: true });
+    ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
   }
 
   async _copySavedGroupCode(groupId) {
