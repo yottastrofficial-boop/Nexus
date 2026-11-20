@@ -9,6 +9,7 @@ import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
+import { applyGroupLayouts } from "../core/group-composition.js";
 import { migrateLegacyActorData } from "../core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
@@ -1064,18 +1065,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
     const validIds = new Set(layout.components.map(c => c.id));
     const assignedGroupMembers = new Set();
-    layout.groups = layout.groups.map(group => {
-      const componentIds = [...new Set(group.componentIds ?? [])].filter(id => {
-        if (!validIds.has(id) || assignedGroupMembers.has(id)) return false;
-        assignedGroupMembers.add(id);
-        return true;
-      });
-      return { ...group, componentIds };
-    }).filter(group => group.componentIds.length >= 2);
-    for (const group of layout.groups) {
-      const members = layout.components.filter(c => group.componentIds.includes(c.id));
-      group.z = members.length ? Math.min(...members.map(c => Number(c.z) || 0)) : 0;
-    }
+    layout.groups = layout.groups.map(group => ({ ...group, componentIds:[...new Set(group.componentIds??[])].filter(id=>{if(!validIds.has(id)||assignedGroupMembers.has(id))return false;assignedGroupMembers.add(id);return true;}) }));
+    let hierarchy=buildGroupHierarchy(layout.groups,layout.components);
+    layout.groups=layout.groups.filter(group=>(hierarchy.descendants.get(String(group.id))??[]).length>0);
+    const composed=applyGroupLayouts(layout.groups,layout.components);
+    layout.groups=composed.groups;layout.components=composed.components;
+    hierarchy=buildGroupHierarchy(layout.groups,layout.components);
+    for(const group of layout.groups){const members=(hierarchy.descendants.get(String(group.id))??[]).map(id=>layout.components.find(c=>c.id===id)).filter(Boolean);group.z=members.length?Math.min(...members.map(c=>Number(c.z)||0)):0;}
     return layout;
   }
 
@@ -3241,6 +3237,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       inspector.hidden = !one && !selectedGroup; if (empty) empty.hidden = !!one || !!selectedGroup;
       const groupInspector=inspector.querySelector("[data-group-inspector]");
       if(groupInspector){groupInspector.hidden=!selectedGroup;if(selectedGroup){for(const [key,value] of [["name",selectedGroup.name??"Grupo"],["backgroundColor",selectedGroup.backgroundColor??"#273443"],["borderColor",selectedGroup.borderColor??"#52647b"],["borderRadius",selectedGroup.borderRadius??8]]){const field=groupInspector.querySelector(`[data-group-setting="${key}"]`);if(field)field.value=value;}const parentSelect=groupInspector.querySelector("[data-group-parent]");if(parentSelect){const options=[["","Sem grupo superior"]];for(const candidate of groups){if(candidate.id===selectedGroup.id||!validateGroupParent(groups,selectedGroup.id,candidate.id))continue;const depth=(id)=>{let value=0,cursor=hierarchy.parentById.get(String(id))??"";while(cursor&&value<20){value++;cursor=hierarchy.parentById.get(cursor)??"";}return value;};options.push([String(candidate.id),`${"— ".repeat(depth(candidate.id))}${candidate.name??"Grupo"}`]);}parentSelect.replaceChildren(...options.map(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;return option;}));parentSelect.value=String(selectedGroup.parentGroupId??"");}}}
+      if(groupInspector&&selectedGroup){const values={kind:selectedGroup.kind??"container",layoutMode:selectedGroup.layoutMode??"free",gap:selectedGroup.gap??8,padding:selectedGroup.padding??8,columns:selectedGroup.columns??2,align:selectedGroup.align??"start",showHeader:selectedGroup.showHeader??selectedGroup.kind==="section",title:selectedGroup.title??selectedGroup.name??"Grupo"};for(const [key,value] of Object.entries(values)){const field=groupInspector.querySelector('[data-group-setting="'+key+'"]');if(field){if(field.type==="checkbox")field.checked=!!value;else field.value=value;}}}
       const tabNav=inspector.querySelector("[data-inspector-tabs]"); if(tabNav)tabNav.hidden=!!selectedGroup;
       const layoutSection=inspector.querySelector("[data-inspector-layout]"); if(layoutSection)layoutSection.hidden=!!selectedGroup;
       const cardStyleSection=inspector.querySelector("[data-inspector-card-style]"); if(cardStyleSection)cardStyleSection.hidden=!!selectedGroup;
