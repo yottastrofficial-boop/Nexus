@@ -93,6 +93,7 @@ export function renderCanvasGroups(sheet, root) {
     const handle = document.createElement("div");
     handle.className = "nexus-group-handle";
     handle.dataset.groupHandle = String(group.id ?? "");
+    handle.hidden = !!group.hidden;
     handle.setAttribute("role", "button");
     handle.setAttribute("tabindex", "0");
     handle.setAttribute("aria-label", `Selecionar grupo ${String(group.name ?? "Grupo")}`);
