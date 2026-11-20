@@ -2556,7 +2556,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
     });
     const savedGroups = subtree.map(item => {
       const copy = clone(item);
-      copy.parentGroupId = String(item.id) === groupId ? "" : String(item.parentGroupId ?? "");
+      const isRoot = String(item.id) === groupId;
+      copy.parentGroupId = isRoot ? "" : String(item.parentGroupId ?? "");
+      if (isRoot) copy.name = name;
       for (const key of ["x","y","w","h","z","stackOrder"]) delete copy[key];
       return copy;
     });
