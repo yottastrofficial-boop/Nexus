@@ -339,19 +339,12 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
           event.preventDefault();
           return;
         }
-        if(beginGroupMove(group,p,event))return;
-      }
-      if(!component && !surface){
-        // A superfície visível pode ficar coberta pelos componentes do grupo;
-        // detectar o vazio pela caixa geométrica garante que o grupo continue arrastável.
-        const hitGroup=[...(sheet._activeGroups??[])].reverse().find(group=>{
-          const members = (membersByGroupId.get(group.id) ?? []).filter(element => !element.hidden);
-          if(!members.length)return false;
-          const rs=members.map(rectOf),left=Math.min(...rs.map(r=>r.x)),top=Math.min(...rs.map(r=>r.y));
-          const right=Math.max(...rs.map(r=>r.x+r.w)),bottom=Math.max(...rs.map(r=>r.y+r.h));
-          return p.x>=left&&p.x<=right&&p.y>=top&&p.y<=bottom;
-        });
-        if(hitGroup&&beginGroupMove(hitGroup,p,event))return;
+        if (group) {
+          sheet._selectedGroupId = group.id;
+          setSelection(membersByGroupId.get(String(group.id))?.map(element => element.dataset.id) ?? []);
+          event.preventDefault();
+          return;
+        }
       }
       if(component?.classList.contains("is-locked")) return;
       if(!component){gesture={type:"marquee",start:p,additive:mod,original:new Set(sheet._selectedIds)};selectionBox.hidden=true;Object.assign(selectionBox.style,{left:`${p.x}px`,top:`${p.y}px`,width:"0px",height:"0px"});canvas.setPointerCapture(event.pointerId);event.preventDefault();return;}
