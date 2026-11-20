@@ -789,7 +789,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const layout=entry.layout??{},components=layout.components?.length??0,groups=layout.groups?.length??0;
         const meta=document.createElement("small");meta.textContent=`${components} componentes · ${groups} grupos · ${layout.width??"?"} × ${layout.height??"?"} px`;
         const actions=document.createElement("div");actions.className="nexus-library-layout-actions";
-        for(const [label,attribute] of [["Adicionar à ficha","data-library-add-layout"],["Copiar código","data-library-copy-layout"],["Excluir","data-library-delete-layout"]]){
+        for(const [label,attribute] of [["Adicionar à ficha","data-library-add-layout"],["Copiar pacote","data-library-copy-layout"],["Exportar JSON","data-library-export-layout"],["Excluir","data-library-delete-layout"]]){
           const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute(attribute,entry.id);actions.append(button);
         }
         card.append(title,meta,actions);container.append(card);
@@ -1023,8 +1023,10 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
         const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
         const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar ao Canvas";
+        const copy=document.createElement("button");copy.type="button";copy.dataset.libraryCopySavedComponent="";copy.textContent="Copiar pacote";
+        const exportFile=document.createElement("button");exportFile.type="button";exportFile.dataset.libraryExportSavedComponent="";exportFile.textContent="Exportar JSON";
         const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir da biblioteca";
-        detail.append(heading,summary,add,remove);return;
+        detail.append(heading,summary,add,copy,exportFile,remove);return;
       }
       const savedFlowCard=target?.closest("[data-library-flow-id]");
       if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
@@ -1116,6 +1118,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
 
+      const copySavedComponentButton=target?.closest("[data-library-copy-saved-component]");
+      if(copySavedComponentButton&&libraryPanel.contains(copySavedComponentButton)){
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await sheet._copyLibraryPackage("component",id);return;
+      }
+      const exportSavedComponentButton=target?.closest("[data-library-export-saved-component]");
+      if(exportSavedComponentButton&&libraryPanel.contains(exportSavedComponentButton)){
+        event.preventDefault();
+        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
+        if(id)await sheet._exportLibraryPackageFile("component",id);return;
+      }
       const addSavedComponentButton=target?.closest("[data-library-add-saved-component]");
       if(addSavedComponentButton&&libraryPanel.contains(addSavedComponentButton)){
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
@@ -1143,7 +1156,9 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const addLayoutButton = target?.closest("[data-library-add-layout]");
       if (addLayoutButton && libraryPanel.contains(addLayoutButton)) { event.preventDefault(); await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout); return; }
       const copyLayoutButton = target?.closest("[data-library-copy-layout]");
-      if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copySavedLayoutCode(copyLayoutButton.dataset.libraryCopyLayout); return; }
+      if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copyLibraryPackage("layout",copyLayoutButton.dataset.libraryCopyLayout); return; }
+      const exportLayoutButton = target?.closest("[data-library-export-layout]");
+      if (exportLayoutButton && libraryPanel.contains(exportLayoutButton)) { event.preventDefault(); await sheet._exportLibraryPackageFile("layout",exportLayoutButton.dataset.libraryExportLayout); return; }
       const deleteLayoutButton = target?.closest("[data-library-delete-layout]");
       if (deleteLayoutButton && libraryPanel.contains(deleteLayoutButton)) { event.preventDefault(); await sheet._deleteSavedLibraryLayout(deleteLayoutButton.dataset.libraryDeleteLayout); return; }
       const saveSelectedGroupButton = target?.closest("[data-library-save-selected-group]");
@@ -1163,7 +1178,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const file = picker.files?.[0];
           if (!file) { picker.remove(); return; }
           try {
-            await sheet._importSavedGroupCode(await file.text());
+            await sheet._importLibraryPackageFile(file);
           } catch (error) {
             ui.notifications?.warn?.(error?.message || "Não foi possível importar o arquivo do grupo.");
           } finally {
