@@ -251,6 +251,7 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
 const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
+const actorPropertyPickerListeners = await read("scripts/sheets/actor-property-picker-listeners.js");
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const canvasGroupRendering = await read("scripts/sheets/canvas-group-rendering.js");
 const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
@@ -1725,3 +1726,9 @@ assert.match(css, /\.nexus-group-inspector-block/, "O Inspector de grupos deve u
   assert.equal(isUsableTokenSource(DEFAULT_FOUNDRY_TOKEN_IMAGE), false, "The generic Foundry silhouette is not a custom token image");
   assert.equal(isUsableTokenSource("portraits/hero.webp"), true);
 }
+
+
+// Property picker UI must stay isolated from the general Actor sheet listener.
+assert.match(sheetListeners, /activateActorPropertyPickerListeners\(sheet, inspectorNamespace/, "A ficha deve delegar o autocomplete de propriedades ao módulo especializado");
+assert.match(actorPropertyPickerListeners, /data-property-path-option/, "O módulo especializado deve manter a seleção de caminhos");
+assert.match(actorPropertyPickerListeners, /buildPropertyPickerCatalog/, "O catálogo de propriedades deve ser injetado no controlador");
