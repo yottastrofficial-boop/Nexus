@@ -1,17 +1,10 @@
 import { updateCanvasConnectedCorners, observeCanvasConnectedCorners } from "./canvas-connected-corners.js";
+import { buildGroupHierarchy } from "../core/group-hierarchy.js";
 
-/**
- * Shared visual rendering for Canvas groups.
- *
- * Group surfaces are structural UI, not editor-only decoration. They must be
- * present in Default, Configuration and Appearance modes so grouped components
- * keep the same shared surface outside the visual editor.
- */
 const readDimension = (value, fallback = 0) => {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
-
 const getElementRect = element => ({
   x: readDimension(element.style.left),
   y: readDimension(element.style.top),
@@ -19,68 +12,49 @@ const getElementRect = element => ({
   h: readDimension(element.style.height, element.offsetHeight)
 });
 
+/**
+ * Draws independent group surfaces. Components remain direct Canvas children:
+ * nested groups therefore never reparent, resize, or consume layout spacing.
+ */
 export function renderCanvasGroups(sheet, root) {
   const canvas = root?.querySelector?.(".nexus-canvas");
   if (!canvas) return { rendered: 0, groups: [] };
-
-  const components = [...canvas.querySelectorAll(".nexus-component")];
-
-  // Unwrap old group containers before rebuilding. Component nodes are reused,
-  // preserving their listeners and current form state.
-  for (const container of [...canvas.querySelectorAll(".nexus-group-container")]) {
-    for (const component of [...container.querySelectorAll(".nexus-component")]) {
-      canvas.append(component);
-    }
-    container.remove();
-  }
   canvas.querySelectorAll(".nexus-group-surface").forEach(surface => surface.remove());
-
-  for (const component of components) {
-    delete component.dataset.groupId;
-    component.classList.remove("is-group-member", "is-group-inspecting");
-    component.style.removeProperty("--nexus-group-bg");
-    component.style.removeProperty("--nexus-group-border");
-    component.style.removeProperty("--nexus-group-radius");
-  }
-
+  const components = [...canvas.querySelectorAll(".nexus-component")];
   const groups = Array.isArray(sheet?._currentLayout?.groups) ? sheet._currentLayout.groups : [];
   sheet._activeGroups = groups;
-  const componentById = new Map(components.map(component => [component.dataset.id, component]));
-  let rendered = 0;
-
-  for (const group of groups) {
-    const memberIds = [...new Set(Array.isArray(group?.componentIds) ? group.componentIds : [])];
-    const members = memberIds.map(id => componentById.get(id)).filter(component => component && !component.hidden);
+  const hierarchy = buildGroupHierarchy(groups, components.map(element => ({ id: element.dataset.id })));
+  sheet._groupHierarchy = hierarchy;
+  const elementById = new Map(components.map(element => [String(element.dataset.id), element]));
+  const depthOf = id => {
+    let depth = 0, cursor = hierarchy.parentById.get(String(id)) ?? "", seen = new Set([String(id)]);
+    while (cursor && !seen.has(cursor)) { seen.add(cursor); depth++; cursor = hierarchy.parentById.get(cursor) ?? ""; }
+    return depth;
+  };
+  const ordered = [...groups].sort((a, b) => depthOf(a.id) - depthOf(b.id));
+  const surfaces = new Map();
+  for (const group of ordered) {
+    const ids = hierarchy.descendants.get(String(group.id)) ?? [];
+    const members = ids.map(id => elementById.get(String(id))).filter(element => element && !element.hidden);
     if (!members.length) continue;
-
     const rects = members.map(getElementRect);
     const x = Math.min(...rects.map(rect => rect.x));
     const y = Math.min(...rects.map(rect => rect.y));
     const right = Math.max(...rects.map(rect => rect.x + rect.w));
     const bottom = Math.max(...rects.map(rect => rect.y + rect.h));
-    group.x = x;
-    group.y = y;
-    group.w = right - x;
-    group.h = bottom - y;
-
-    const container = document.createElement("div");
-    container.className = "nexus-group-container";
-    container.dataset.groupContainer = String(group.id ?? "");
-
+    Object.assign(group, { x, y, w: right - x, h: bottom - y });
     const surface = document.createElement("div");
     surface.className = "nexus-group-surface";
     if (group.hidden) surface.classList.add("is-layer-hidden");
     if (group.locked) surface.classList.add("is-locked");
     if (sheet._mode !== "appearance") surface.classList.add("is-static");
-    surface.dataset.groupId = String(group.id ?? "");
+    surface.dataset.groupId = String(group.id);
+    surface.dataset.groupDepth = String(depthOf(group.id));
+    surface.setAttribute("aria-hidden", "true");
     surface.hidden = !!group.hidden;
-
     const baseZ = Math.min(...members.map(element => readDimension(element.style.zIndex, 1)));
     Object.assign(surface.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-      width: `${right - x}px`,
-      height: `${bottom - y}px`,
+      left: `${x}px`, top: `${y}px`, width: `${right - x}px`, height: `${bottom - y}px`,
       zIndex: String(Math.max(0, baseZ - 1))
     });
     const radius = Number(group.borderRadius ?? 8);
@@ -88,28 +62,11 @@ export function renderCanvasGroups(sheet, root) {
     surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
     surface.style.setProperty("--nexus-group-border", group.borderColor ?? "#52647b");
     surface.style.setProperty("--nexus-group-radius", `${safeRadius}px`);
-
-    container.append(surface);
-    const handle = document.createElement("div");
-    handle.className = "nexus-group-handle";
-    handle.dataset.groupHandle = String(group.id ?? "");
-    handle.hidden = !!group.hidden;
-    handle.setAttribute("role", "button");
-    handle.setAttribute("tabindex", "0");
-    handle.setAttribute("aria-label", `Selecionar grupo ${String(group.name ?? "Grupo")}`);
-    handle.textContent = String(group.name ?? "Grupo");
-    Object.assign(handle.style, { left: `${x}px`, top: `${y}px`, width: `${Math.min(220, Math.max(88, right - x))}px`, zIndex: String(Math.max(2, baseZ + 2)) });
-    container.append(handle);
-    for (const component of members) {
-      component.dataset.groupId = String(group.id ?? "");
-      component.classList.add("is-group-member");
-      container.append(component);
-    }
-    canvas.insertBefore(container, canvas.firstChild);
-    rendered += 1;
+    canvas.append(surface);
+    surfaces.set(String(group.id), surface);
   }
-
+  sheet._groupSurfaces = surfaces;
   updateCanvasConnectedCorners(canvas);
   observeCanvasConnectedCorners(canvas);
-  return { rendered, groups };
+  return { rendered: surfaces.size, groups };
 }
