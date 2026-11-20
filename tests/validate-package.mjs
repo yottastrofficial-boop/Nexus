@@ -982,7 +982,7 @@ assert.ok(sheetCode.includes("renderInteractionEditor(interactionEditor, one"));
 assert.ok(sheetCode.includes("data-interaction-action"));
 assert.ok(template.includes("data-interaction-editor"));
 assert.ok(!template.includes('data-component-setting="actionType"'));
-assert.ok(sheetCode.includes('addEventListener("contextmenu"'));
+assert.ok(canvasInteractions.includes('listen(canvas, "contextmenu"'), "O menu contextual deve usar o escopo de listeners descartável");
 assert.ok(canvasPlayInteractions.includes('["pointerover",onPointerOver]'));
 assert.ok(sheetCode.includes("_executeComponentAction"));
 assert.match(sheet, /normalizeInteractionPropertyPath\(config\.path\)/, "Ação update deve normalizar caminhos canônicos");
