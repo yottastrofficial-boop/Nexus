@@ -133,7 +133,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão 1.0.0.68 corrige a preparação do contexto da ficha, garantindo que a hierarquia de grupos use os componentes e grupos do layout ativo.
+A versão 1.0.0.68 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
