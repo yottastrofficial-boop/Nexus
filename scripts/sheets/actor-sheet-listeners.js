@@ -777,9 +777,27 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const label=document.createElement("strong");label.textContent=item.label||definition.label||"Componente";button.append(stage,label);container.append(button);
       }
     };
+    const renderSavedLayouts = () => {
+      const container=libraryPanel?.querySelector("[data-library-saved-layouts]");if(!container)return;
+      const layouts=game.user?.getFlag?.("nexus","libraryLayouts")??[];container.replaceChildren();
+      if(!layouts.length){const empty=document.createElement("p");empty.className="nexus-library-empty";empty.textContent="Nenhum layout salvo. Use o ícone de exportação no cabeçalho para salvar o layout atual.";container.append(empty);return;}
+      for(const entry of layouts){
+        const card=document.createElement("article");card.className="nexus-library-layout-card";card.dataset.librarySavedLayout=entry.id;
+        const title=document.createElement("strong");title.textContent=entry.name||"Layout sem nome";
+        const layout=entry.layout??{},components=layout.components?.length??0,groups=layout.groups?.length??0;
+        const meta=document.createElement("small");meta.textContent=`${components} componentes · ${groups} grupos · ${layout.width??"?"} × ${layout.height??"?"} px`;
+        const actions=document.createElement("div");actions.className="nexus-library-layout-actions";
+        for(const [label,attribute] of [["Adicionar à ficha","data-library-add-layout"],["Copiar código","data-library-copy-layout"],["Excluir","data-library-delete-layout"]]){
+          const button=document.createElement("button");button.type="button";button.textContent=label;button.setAttribute(attribute,entry.id);actions.append(button);
+        }
+        card.append(title,meta,actions);container.append(card);
+      }
+    };
     sheet._libraryRenderSavedGroups=renderSavedGroups;
+    sheet._libraryRenderSavedLayouts=renderSavedLayouts;
     sheet._libraryRenderPersonalItems=()=>{renderSavedComponents();renderSavedGroups();};
     sheet._libraryRenderPersonalItems();
+    renderSavedLayouts();
     const filterLibrary = () => {
       const query=libraryPanel?.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
       const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
@@ -1099,6 +1117,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
         if(id)await sheet._deleteSavedLibraryComponent(id);return;
       }
+      const saveLayoutButton = target?.closest("[data-library-save-layout]");
+      if (saveLayoutButton && libraryPanel.contains(saveLayoutButton)) { event.preventDefault(); await sheet._saveCurrentLayoutToLibrary(); return; }
+      const importLayoutButton = target?.closest("[data-library-import-layout]");
+      if (importLayoutButton && libraryPanel.contains(importLayoutButton)) {
+        event.preventDefault();
+        const result = await foundry.applications.api.DialogV2.input({
+          window: { title: "Importar layout completo" },
+          content: '<label class="nexus-library-card-content-label">Código do layout<textarea name="code" rows="12" spellcheck="false" autocomplete="off"></textarea></label><p>O layout será salvo na Biblioteca pessoal. Depois, use Adicionar à ficha para criar uma nova aba sem substituir a atual.</p>',
+          ok: { label: "Importar layout" }, rejectClose: false
+        });
+        const code = String(result?.code ?? "").trim();
+        if (code) { try { await sheet._importSavedLayoutCode(code); } catch (error) { ui.notifications?.warn?.(error?.message || "Não foi possível importar o layout."); } }
+        return;
+      }
+      const addLayoutButton = target?.closest("[data-library-add-layout]");
+      if (addLayoutButton && libraryPanel.contains(addLayoutButton)) { event.preventDefault(); await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout); return; }
+      const copyLayoutButton = target?.closest("[data-library-copy-layout]");
+      if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copySavedLayoutCode(copyLayoutButton.dataset.libraryCopyLayout); return; }
+      const deleteLayoutButton = target?.closest("[data-library-delete-layout]");
+      if (deleteLayoutButton && libraryPanel.contains(deleteLayoutButton)) { event.preventDefault(); await sheet._deleteSavedLibraryLayout(deleteLayoutButton.dataset.libraryDeleteLayout); return; }
       const importGroupButton = target?.closest("[data-library-import-group]");
       if (importGroupButton && libraryPanel.contains(importGroupButton)) {
         event.preventDefault();
