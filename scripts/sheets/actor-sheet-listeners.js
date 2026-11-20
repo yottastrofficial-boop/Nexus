@@ -1370,7 +1370,20 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         }
         return;
       }
-      sheet._nexusInteractionActive = false; const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup); sheet._selectedGroupId=group?.id??null; sheet._setSelection(html,group?(sheet._groupHierarchy?.descendants.get(String(group.id))??group.componentIds??[]):[]);
+      sheet._nexusInteractionActive = false;
+      const group=(sheet._currentLayout?.groups??[]).find(g=>g.id===event.currentTarget.dataset.layerGroup);
+      if (!group) return;
+      const groupIds = sheet._groupHierarchy?.descendants.get(String(group.id)) ?? group.componentIds ?? [];
+      if (event.ctrlKey || event.metaKey || event.shiftKey) {
+        const next = new Set(sheet._selectedIds ?? []);
+        const alreadySelected = groupIds.length > 0 && groupIds.every(id => next.has(id));
+        for (const id of groupIds) alreadySelected ? next.delete(id) : next.add(id);
+        sheet._selectedGroupId = null;
+        sheet._setSelection(html, [...next]);
+        return;
+      }
+      sheet._selectedGroupId=group.id;
+      sheet._setSelection(html, groupIds);
     });
     // Renomear pelo duplo clique no nome, sem abrir o editor de componentes.
     html.find(".nexus-layer-list").on("dblclick", ".nexus-layer-name", event => {
