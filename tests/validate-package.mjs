@@ -705,7 +705,7 @@ assert.match(css, /nexus-behavior-editor \.nexus-interaction-action-config/, "O 
 assert.match(interactions, /const guided=el\("div","nexus-interaction-guided"\)/, "Gatilhos e condições devem ocupar uma área permanente do fluxo");
 
 assert.match(changelog, /Editor de comportamentos/, "O changelog deve documentar as melhorias do editor de comportamentos");
-assert.match(changelog, /Cards inteligentes e composição/);
+assert.match(changelog, /### Biblioteca e compartilhamento/, "O changelog deve manter o histórico da Biblioteca e do compartilhamento");
 assert.match(css, /nexus-library-saved-groups/);
 
 assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
