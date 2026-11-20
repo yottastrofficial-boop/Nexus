@@ -56,6 +56,7 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
     this._mountPanel();
     const content = this.window?.content ?? this.element?.querySelector(".window-content, .application-content");
     if (this._enterContent && this._enterHandler) this._enterContent.removeEventListener("keydown", this._enterHandler, true);
+    if (this._escapeHandler) window.removeEventListener("keydown", this._escapeHandler, true);
     this._enterContent = content;
     this._enterHandler = event => {
       const field = event.target;
