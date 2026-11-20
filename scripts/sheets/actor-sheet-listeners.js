@@ -2,6 +2,7 @@ import { validateGroupParent } from "../core/group-hierarchy.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
+import { slugifyActorAlias, createUniqueActorAliasKey } from "../core/actor-aliases.js";
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -259,10 +260,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const createAlias = async (label, type, valueType, source, targetPath, focusTarget = null) => {
       const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const category = type === "attribute" ? "attributes" : type === "resource" ? "resources" : type === "combat" ? "combat" : type === "identity" ? "identity" : "custom";
-      const base = slugifyAlias(label);
-      let suffix = base, index = 2, key = `${category}.${suffix}`;
-      const reservedKeys = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
-      while (aliases.some(item => item.key === key) || reservedKeys.includes(key)) key = `${category}.${base}_${index++}`;
+      const key = createUniqueActorAliasKey(category, label, aliases, getNativePropertyDefinitions(sheet.actor));
+      if (!key) return false;
       const id = foundry.utils.randomID();
       const resolvedSource = source === "actor" ? "actor" : "custom";
       const safeTarget = resolvedSource === "actor" ? safeAliasKey(targetPath) : "";
@@ -329,9 +328,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       if (field === "keySuffix") {
         const suffix = slugifyAlias(input.value);
-        const nextKey = `${property.category}.${suffix}`;
-        const collision = [...getAliasDefinitions(sheet.actor), ...definitions.filter(item => item.id !== id)].some(item => [item.key, ...(item.legacyKeys ?? [])].includes(nextKey));
-        if (!suffix || collision) { ui.notifications?.warn?.("Esse identificador já está em uso ou é inválido."); input.value = property.key.split(".").at(-1); return; }
+        const nextKey = createUniqueActorAliasKey(property.category, suffix, getAliasDefinitions(sheet.actor), definitions, id);
+        if (!suffix || !nextKey || nextKey !== `${property.category}.${suffix}`) { ui.notifications?.warn?.("Esse identificador já está em uso ou é inválido."); input.value = property.key.split(".").at(-1); return; }
         const previousKey = property.key;
         override.key = nextKey;
         override.legacyKeys = [...new Set([...(property.legacyKeys ?? []), previousKey])];
@@ -434,9 +432,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       else if (field === "keySuffix") {
         const suffix = slugifyAlias(input.value);
-        const next = `${alias.category}.${suffix}`;
-        const reserved = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
-        if (aliases.some(item => item !== alias && [item.key, ...(item.legacyKeys ?? [])].includes(next)) || reserved.includes(next)) { input.value = alias.key.split(".").at(-1); return; }
+        const next = createUniqueActorAliasKey(alias.category, suffix, aliases, getNativePropertyDefinitions(sheet.actor), alias.id);
+        if (!suffix || !next || next !== `${alias.category}.${suffix}`) { input.value = alias.key.split(".").at(-1); return; }
         const previousKey = alias.key;
         alias.legacyKeys ??= []; if (!alias.legacyKeys.includes(previousKey)) alias.legacyKeys.push(previousKey);
         const customData = clone(getCustomAliasData(sheet.actor));
@@ -478,10 +475,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
       const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
       const source = aliases.find(item => item.id === id); if (!source) return;
-      const base = `${source.key.split(".").at(-1)}_copy`;
-      let suffix = base, index = 2, key = `${source.category}.${suffix}`;
-      const reserved = getNativePropertyDefinitions(sheet.actor).flatMap(item => [item.key, ...(item.legacyKeys ?? [])]);
-      while (aliases.some(item => item.key === key) || reserved.includes(key)) key = `${source.category}.${base}_${index++}`;
+      const key = createUniqueActorAliasKey(source.category, `${source.key.split(".").at(-1)}_copy`, aliases, getNativePropertyDefinitions(sheet.actor));
+      if (!key) return;
       const copy = { ...clone(source), id: foundry.utils.randomID(), key, label: `${source.label} (cópia)`.slice(0,48), source: "custom", targetPath: "" };
       aliases.push(copy);
       const customData = clone(getCustomAliasData(sheet.actor));
