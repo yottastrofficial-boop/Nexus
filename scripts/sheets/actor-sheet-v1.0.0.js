@@ -2496,7 +2496,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
     const parentCandidates = [
       ...selectedGroups.map(group => hierarchy.parentById.get(String(group.id)) ?? ""),
-      ...directIds.map(id => hierarchy.parentById.get(hierarchy.componentOwner.get(String(id)) ?? "") ?? "")
+      ...directIds.map(id => hierarchy.componentOwner.get(String(id)) ?? "")
     ].filter(Boolean);
     const commonParent = parentCandidates.length && parentCandidates.every(id => id === parentCandidates[0]) ? parentCandidates[0] : "";
     this._captureHistory();
