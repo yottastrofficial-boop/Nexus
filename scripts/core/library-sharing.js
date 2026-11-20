@@ -78,7 +78,9 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
     throw new Error("O código está vazio ou excede o limite de tamanho permitido.");
   }
   source = source.replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/, "");
-  const formatVersion = source.startsWith("NEXUS-GROUP/2") ? 2 : 1;\n  if (formatVersion === 2) source = source.slice("NEXUS-GROUP/2".length).trim();\n  else if (source.startsWith("NEXUS-GROUP/1")) source = source.slice("NEXUS-GROUP/1".length).trim();
+  const formatVersion = source.startsWith("NEXUS-GROUP/2") ? 2 : 1;
+  if (formatVersion === 2) source = source.slice("NEXUS-GROUP/2".length).trim();
+  else if (source.startsWith("NEXUS-GROUP/1")) source = source.slice("NEXUS-GROUP/1".length).trim();
   const start = source.indexOf("{");
   const end = source.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Não encontrei um objeto JSON válido no código informado.");
