@@ -1,33 +1,36 @@
-## 1.0.0.65
+## 1.0.0.66
 
-### Editor de comportamentos
-- Corrigida a injeção de `getTriggeredActions` nos listeners da ficha. O erro interrompia a atualização do editor depois de salvar uma alteração e impedia a verificação dos gatilhos do componente.
-- Adicionada captura direta de teclas para gatilhos `keyDown` e `keyUp`, registrando a tecla e os modificadores pressionados em uma única ação.
-- A captura ignora teclas modificadoras isoladas e pode ser cancelada com Escape; não mantém o teclado em modo de captura depois de registrar uma combinação.
-- Ao trocar um gatilho de teclado por outro tipo de evento, a tecla capturada é limpa para não bloquear o novo evento.
-- A execução no modo de jogo agora compara a tecla capturada e os modificadores configurados.
-- Eventos de foco, perda de foco, alteração e interação continuam disponíveis como tipos de gatilho independentes.
+### Grupos e camadas
+- Remove as alças/cabeçalhos visuais dos grupos; eles não consomem altura nem criam espaçamento adicional.
+- Substitui a associação plana por hierarquia real com `parentGroupId` e `componentIds` diretos, mantendo componentes e superfícies como elementos independentes no Canvas.
+- Grupos externos calculam seus limites incluindo todos os descendentes; mover, ocultar e bloquear um grupo respeita sua hierarquia.
+- Superfícies aninhadas preservam a separação visual por contornos em camadas, sem padding ou redimensionamento dos componentes.
+- A árvore de camadas agora representa níveis ilimitados, permite recolher descendentes e arrastar grupos para dentro de outros grupos.
+- Salvar, importar, copiar e inserir grupos na Biblioteca preserva a árvore interna e as configurações dos subgrupos.
+- Grupos legados sem `parentGroupId` continuam sendo interpretados como grupos de nível superior.
 
-### Canvas e Inspector
-- Grupos recebem uma alça de título clicável, permitindo selecioná-los e abrir suas propriedades sem depender de encontrar uma área vazia dentro do grupo.
-- O nome da propriedade vinculada passa a aparecer como indicador discreto abaixo do campo de caminho. A suíte de regressão acompanha essa apresentação compacta.
-- Ajustado o espaçamento dos gatilhos para acomodar o botão de captura somente quando o tipo selecionado é de teclado.
+### Biblioteca de layouts completos
+- Adiciona uma seção Layouts à Biblioteca pessoal.
+- Permite salvar o layout atual completo, incluindo dimensões, tema, aparência, componentes, grupos, vínculos e comportamentos.
+- Permite importar/exportar layouts por código JSON legível e versionado.
+- Inserir um layout da Biblioteca cria uma nova aba na ficha, preservando a aba atual.
+- IDs de componentes e grupos são regenerados durante a inserção, incluindo referências internas e vínculos entre componentes.
+- Limites e validações impedem códigos com tipos de componentes desconhecidos, grupos inexistentes ou ciclos na hierarquia.
 
-### Validação e limites
-- A versão utiliza o fluxo automatizado de validação e publicação do pacote Foundry. A suíte também foi ajustada para não depender de uma versão histórica específica do changelog.
-- Incluídos testes de regressão para a dependência ausente, captura e comparação de teclas, modificadores, indicador de propriedade e seleção de grupo. As expectativas documentais antigas foram generalizadas para não bloquear versões futuras. A suíte foi simplificada para não exigir descrições históricas que não pertencem à versão atual.
-- Grupos aninhados e modelos completos de layout compartilháveis ainda exigem uma evolução estrutural do formato de grupos e da Biblioteca; não foram simulados nesta versão para evitar perda ou corrupção de layouts existentes.
+### Compatibilidade e validação
+- Mantém compatibilidade de importação com códigos antigos `NEXUS-GROUP/1`; novos grupos usam `NEXUS-GROUP/2`.
+- Inclui testes de regressão para hierarquia, prevenção de ciclos, compartilhamento de grupos aninhados e compartilhamento de layouts completos.
 - A validação automatizada não substitui o teste funcional no Foundry VTT 14.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.65 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.66 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.65-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.66-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -35,7 +38,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão atual:** 1.0.0.65. Corrige a injeção do avaliador de gatilhos, adiciona captura direta de atalhos de teclado, melhora a seleção de grupos e compacta o indicador de propriedade. A validação automatizada não substitui o teste funcional no Foundry VTT 14. A validação automatizada não substitui o teste funcional no Foundry VTT 14.
+> **Versão atual:** 1.0.0.66. Adiciona grupos hierárquicos sem cabeçalhos, superfícies independentes, seleção pela árvore de camadas e compartilhamento de grupos aninhados. A Biblioteca passa a salvar, importar, exportar e inserir layouts completos como novas abas, sem sobrescrever o layout atual.
 
 ## Visão geral
 
@@ -66,7 +69,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.65 |
+| Versão atual | 1.0.0.66 |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -141,7 +144,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 
 ## Estado e validação
 
-A versão 1.0.0.65 reduz consultas repetidas ao DOM durante atualizações reativas de texto, agrupa ajustes de escala do Canvas em um único frame e respeita a preferência de movimento reduzido. O pacote é validado pelo CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
+A versão 1.0.0.66 reduz consultas repetidas ao DOM durante atualizações reativas de texto, agrupa ajustes de escala do Canvas em um único frame e respeita a preferência de movimento reduzido. O pacote é validado pelo CI; testes funcionais e visuais em uma instalação real do Foundry VTT 14 continuam necessários.
 
 **Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
