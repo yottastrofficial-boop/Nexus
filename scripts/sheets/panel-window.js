@@ -66,15 +66,25 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
       event.stopImmediatePropagation?.();
       field.dispatchEvent(new Event("change", { bubbles: true }));
     };
+    this._escapeHandler = event => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      // Deixa popovers e controles internos consumirem Escape primeiro.
+      if (content?.querySelector(":popover-open, dialog[open]")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+      this.close({ animate: false });
+    };
     content?.addEventListener("keydown", this._enterHandler, true);
+    content?.addEventListener("keydown", this._escapeHandler, false);
   }
 
   _onClose(options) {
-    if (this._enterContent && this._enterHandler) {
-      this._enterContent.removeEventListener("keydown", this._enterHandler, true);
-    }
+    if (this._enterContent && this._enterHandler) this._enterContent.removeEventListener("keydown", this._enterHandler, true);
+    if (this._enterContent && this._escapeHandler) this._enterContent.removeEventListener("keydown", this._escapeHandler, false);
     this._enterContent = null;
     this._enterHandler = null;
+    this._escapeHandler = null;
     this.sheet?._onPanelWindowClosed(this.panelKey, this);
     return super._onClose(options);
   }
