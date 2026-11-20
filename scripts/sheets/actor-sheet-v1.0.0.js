@@ -3121,6 +3121,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const maxX = Math.max(...members.map(component => component.x + component.w));
       const maxY = Math.max(...members.map(component => component.y + component.h));
       Object.assign(group, { z:minZ, x:minX, y:minY, w:maxX-minX, h:maxY-minY });
+      if (group.layoutMode && group.layoutMode !== "free") {
+        group.layoutOrigin = {
+          x: minX - (Number(group.padding) || 0),
+          y: minY - (Number(group.padding) || 0) - (group.showHeader === true ? 28 : 0)
+        };
+      }
     }
 
     const touched = new Set((touchedIds ?? []).filter(Boolean));
