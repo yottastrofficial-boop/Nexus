@@ -57,28 +57,21 @@ function normalizeShareComponent(component, allowedTypes) {
  * executable code is included or evaluated.
  */
 export function createNexusGroupShareCode(group) {
-  if (!group || !Array.isArray(group.components) || group.components.length < 2) {
-    throw new Error("O código de compartilhamento exige um grupo com pelo menos dois componentes.");
-  }
-  if (group.components.length > MAX_COMPONENTS) {
-    throw new Error(`O grupo excede o limite de ${MAX_COMPONENTS} componentes.`);
-  }
+  if (!group || !Array.isArray(group.components) || group.components.length < 1 || group.components.length > MAX_COMPONENTS) throw new Error(`O grupo precisa conter entre 1 e ${MAX_COMPONENTS} componentes.`);
   const components = group.components.map(component => {
-    const copy = { ...component };
-    delete copy.id;
-    delete copy.definition;
+    const copy = { ...component }; delete copy.id; delete copy.definition;
     return sanitizeJsonValue(copy);
   });
-  const payload = {
-    format: "nexus-group",
-    version: 1,
-    name: String(group.name ?? "Grupo").trim().slice(0, 48) || "Grupo",
-    groupSettings: sanitizeJsonValue(group.groupSettings ?? {}),
-    components
-  };
-  return "NEXUS-GROUP/1\n" + JSON.stringify(payload, null, 2);
+  const groups = (group.groups ?? []).map(item => sanitizeJsonValue(item));
+  if (groups.length > 50) throw new Error("O grupo excede o limite de 50 subgrupos.");
+  const payload = { format:"nexus-group", version:2, name:String(group.name ?? "Grupo").trim().slice(0,48)||"Grupo", groupSettings:sanitizeJsonValue(group.groupSettings ?? {}), components, groups };
+  return "NEXUS-GROUP/2\\n" + JSON.stringify(payload,null,2);
 }
 
+/**
+ * Parses and validates a NEXUS group code. Only registered component types
+ * are accepted; presentation rules and interaction flows remain intact.
+ */
 /**
  * Parses and validates a NEXUS group code. Only registered component types
  * are accepted; presentation rules and interaction flows remain intact.
@@ -89,7 +82,7 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
     throw new Error("O código está vazio ou excede o limite de tamanho permitido.");
   }
   source = source.replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/, "");
-  if (source.startsWith("NEXUS-GROUP/1")) source = source.slice("NEXUS-GROUP/1".length).trim();
+  const formatVersion = source.startsWith("NEXUS-GROUP/2") ? 2 : 1;\n  if (formatVersion === 2) source = source.slice("NEXUS-GROUP/2".length).trim();\n  else if (source.startsWith("NEXUS-GROUP/1")) source = source.slice("NEXUS-GROUP/1".length).trim();
   const start = source.indexOf("{");
   const end = source.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Não encontrei um objeto JSON válido no código informado.");
@@ -114,11 +107,28 @@ export function parseNexusGroupShareCode(code, componentTypes = []) {
   const allowedTypes = new Set(componentTypes.map(type => String(type)));
   if (!allowedTypes.size) throw new Error("Não foi possível validar os tipos de componentes disponíveis.");
   const components = payload.components.map(component => normalizeShareComponent(component, allowedTypes));
-  return {
-    name: String(payload.name ?? "Grupo importado").trim().slice(0, 48) || "Grupo importado",
-    groupSettings: sanitizeJsonValue(payload.groupSettings ?? {}),
-    components
-  };
+  const groups = [];
+  if (formatVersion >= 2) {
+    if (!Array.isArray(payload.groups) || payload.groups.length > 50) throw new Error("A hierarquia de grupos é inválida ou excede o limite.");
+    const ids = new Set();
+    for (const group of payload.groups) {
+      if (!group || typeof group !== "object" || !group.id || ids.has(String(group.id))) throw new Error("A composição contém um subgrupo inválido.");
+      ids.add(String(group.id));
+    }
+    const componentIds = new Set(components.map(component => String(component.sourceId ?? "")).filter(Boolean));
+    for (const group of payload.groups) {
+      const parentGroupId = String(group.parentGroupId ?? "");
+      if (parentGroupId && !ids.has(parentGroupId)) throw new Error("Um subgrupo referencia um grupo pai inexistente.");
+      if ((group.componentIds ?? []).some(id => !componentIds.has(String(id)))) throw new Error("Um subgrupo referencia um componente inexistente.");
+      groups.push({ ...sanitizeJsonValue(group), id:String(group.id), parentGroupId, componentIds:[...(group.componentIds ?? [])].map(String) });
+    }
+    const parentMap = new Map(groups.map(group => [group.id, group.parentGroupId]));
+    for (const group of groups) {
+      const seen = new Set([group.id]); let cursor = group.parentGroupId;
+      while (cursor) { if (seen.has(cursor)) throw new Error("A hierarquia contém um ciclo."); seen.add(cursor); cursor = parentMap.get(cursor) ?? ""; }
+    }
+  }
+  return { name:String(payload.name ?? "Grupo importado").trim().slice(0,48)||"Grupo importado", groupSettings:sanitizeJsonValue(payload.groupSettings ?? {}), components, groups };
 }
 
 
