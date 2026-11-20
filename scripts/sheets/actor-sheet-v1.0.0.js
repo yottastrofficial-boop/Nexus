@@ -2676,7 +2676,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
   }
 
-  async _exportLibraryBackupFile() {
+  _buildLibraryBackupCode() {
     const snapshot = {
       name: "Biblioteca NEXUS",
       components: clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []),
@@ -2688,11 +2688,40 @@ export class NexusActorSheet extends NexusActorSheetBase {
       ],
       themes: {
         ...clone(THEME_PALETTES),
-        ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.id, theme.palette]))
+        ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.sourceId ?? theme.id, theme.palette]))
       },
       flows: clone(getInteractionLibrary(this.actor))
     };
-    const code = createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
+    return createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
+  }
+
+  async _copyLibraryBackupCode() {
+    const code = this._buildLibraryBackupCode();
+    let copied = false;
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(code);
+        copied = true;
+      }
+    } catch (_) {}
+    if (!copied) {
+      const field = document.createElement("textarea");
+      field.value = code; field.setAttribute("readonly", "");
+      field.style.position = "fixed"; field.style.opacity = "0";
+      document.body.append(field); field.select();
+      copied = document.execCommand?.("copy") === true;
+      field.remove();
+    }
+    if (!copied) {
+      ui.notifications?.warn?.("Não foi possível copiar o backup. Tente exportar o arquivo JSON.");
+      return false;
+    }
+    ui.notifications?.info?.("Código completo da Biblioteca copiado.");
+    return true;
+  }
+
+  async _exportLibraryBackupFile() {
+    const code = this._buildLibraryBackupCode();
     const blob = new Blob([code], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob), anchor = document.createElement("a");
     anchor.href = url; anchor.download = "nexus-biblioteca-completa.json"; anchor.hidden = true;
