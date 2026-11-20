@@ -117,6 +117,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
       groupSurfacesById = new Map();
       membersByGroupId = new Map(layouts.map(group => [String(group.id), (hierarchy.descendants.get(String(group.id)) ?? []).map(id => componentElements.find(element => element.dataset.id === id)).filter(Boolean)]));
       const depthOf = id => { let depth = 0, cursor = hierarchy.parentById.get(String(id)) ?? "", seen = new Set([String(id)]); while (cursor && !seen.has(cursor)) { seen.add(cursor); depth++; cursor = hierarchy.parentById.get(cursor) ?? ""; } return depth; };
+      const maxDepth = Math.max(0, ...layouts.map(group => depthOf(group.id)));
       for (const group of [...layouts].sort((a,b)=>depthOf(a.id)-depthOf(b.id))) {
         const members = (membersByGroupId.get(String(group.id)) ?? []).filter(element => !element.hidden);
         if (!members.length) continue;
@@ -130,6 +131,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         if (group.locked) surface.classList.add("is-locked");
         if (sheet._mode !== "appearance") surface.classList.add("is-static");
         surface.dataset.groupId = String(group.id); surface.dataset.groupDepth = String(depthOf(group.id)); surface.hidden = !!group.hidden;
+        surface.style.setProperty("--nexus-group-outline-offset", `${(maxDepth-depthOf(group.id))*2}px`);
         const baseZ = Math.min(...members.map(element => Number(element.style.zIndex) || 1));
         Object.assign(surface.style, { left: `${x}px`, top: `${y}px`, width: `${right-x}px`, height: `${bottom-y}px`, zIndex: String(Math.max(0,baseZ-1)) });
         surface.style.setProperty("--nexus-group-bg", group.backgroundColor ?? sheet._currentLayout?.cardColor ?? "#273443");
