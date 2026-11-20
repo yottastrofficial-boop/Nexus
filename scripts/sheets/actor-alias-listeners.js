@@ -1,3 +1,4 @@
+import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
 import {
   slugifyActorAlias,
   createUniqueActorAliasKey,
@@ -18,6 +19,17 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData,
     normalizeAliasDefinition, safeAliasKey, resolveNexusBinding, evaluateAliasExpression
   } = dependencies;
+
+  // Serialize mutations from this editor with other Actor property writes.
+  // The queue is per Actor and local to this client; it is not a cross-client lock.
+  const bindSerialized = (selector, eventName, handler) => {
+    html.find(selector).on(eventName, event => {
+      serializeActorPropertyWrite(sheet.actor, () => handler(event)).catch(error => {
+        console.error("NEXUS | Falha ao atualizar propriedades e aliases.", error);
+        ui.notifications?.error?.("Não foi possível salvar a alteração. Confira os dados antes de continuar.");
+      });
+    });
+  };
 
   const renderDataEditorPreservingState = async (preferredElement = null) => {
     const root = html?.[0];
@@ -122,7 +134,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     await renderDataEditorPreservingState(focusTarget);
     return true;
   };
-  html.find("[data-alias-create]").on("click", async event => {
+  bindSerialized("[data-alias-create]", "click", async event => {
     const panel = event.currentTarget.closest(".nexus-alias-manager");
     const label = panel?.querySelector("[data-alias-new-name]")?.value.trim();
     const type = panel?.querySelector("[data-alias-new-type]")?.value || "for";
@@ -137,7 +149,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
   html.find("[data-alias-select]").on("change", event => { sheet._selectedAliasId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
   html.find("[data-alias-mode]").on("click", event => { sheet._aliasEditorMode = event.currentTarget.dataset.aliasMode === "native" ? "native" : "custom"; renderDataEditorPreservingState(event.currentTarget); });
   html.find("[data-native-property-select]").on("change", event => { sheet._selectedNativePropertyId = event.currentTarget.value || null; renderDataEditorPreservingState(event.currentTarget); });
-  html.find("[data-native-property-field]").on("change", async event => {
+  bindSerialized("[data-native-property-field]", "change", async event => {
     const input = event.currentTarget, id = input.closest("[data-native-property-row]")?.dataset.nativePropertyRow;
     const definitions = getNativePropertyDefinitions(sheet.actor), property = definitions.find(item => item.id === id); if (!property) return;
     const saved = clone(sheet.actor.getFlag("nexus", "nativeProperties") ?? []);
@@ -188,7 +200,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     invalidateNativePropertyCache(sheet.actor);
     sheet._selectedNativePropertyId = id; renderDataEditorPreservingState(event.currentTarget);
   });
-  html.find("[data-native-property-reset]").on("click", async event => {
+  bindSerialized("[data-native-property-reset]", "click", async event => {
     const id = event.currentTarget.closest("[data-native-property-row]")?.dataset.nativePropertyRow;
     const property = getNativePropertyDefinitions(sheet.actor).find(item => item.id === id); if (!property) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({ window:{title:"Restaurar dado nativo"}, content:`<p>Restaurar <strong>${Handlebars.escapeExpression(property.defaultLabel)}</strong> ao identificador original?</p>`, yes:{label:"Restaurar"}, no:{label:"Cancelar"}, rejectClose:false });
@@ -228,7 +240,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     const sourceRow = panel.querySelector("[data-alias-source-row]"); if (sourceRow) sourceRow.hidden = !custom;
     const targetRow = panel.querySelector("[data-alias-target-row]"); if (targetRow) targetRow.hidden = !custom || panel.querySelector("[data-alias-source]")?.value !== "actor";
   });
-  html.find("[data-alias-field]").on("change", async event => {
+  bindSerialized("[data-alias-field]", "change", async event => {
     const input = event.currentTarget, row = input.closest("[data-alias-row]"), id = row?.dataset.aliasRow;
     const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
     const alias = aliases.find(item => item.id === id); if (!alias) return;
@@ -312,7 +324,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     invalidateAliasDefinitionCache(sheet.actor);
     renderDataEditorPreservingState(event.currentTarget);
   });
-  html.find("[data-alias-copy]").on("click", async event => {
+  bindSerialized("[data-alias-copy]", "click", async event => {
     const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
     const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
     const source = aliases.find(item => item.id === id); if (!source) return;
@@ -329,7 +341,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     await sheet.actor.setFlag("nexus", "aliases", aliases);
     invalidateAliasDefinitionCache(sheet.actor); sheet._selectedAliasId = copy.id; renderDataEditorPreservingState(event.currentTarget);
   });
-  html.find("[data-alias-reset]").on("click", async event => {
+  bindSerialized("[data-alias-reset]", "click", async event => {
     const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
     const aliases = getAliasDefinitions(sheet.actor).map(normalizeAliasDefinition).filter(Boolean);
     const alias = aliases.find(item => item.id === id); if (!alias) return;
@@ -367,7 +379,7 @@ export function activateActorAliasListeners(sheet, html, dependencies) {
     await sheet.actor.setFlag("nexus", "aliases", aliases);
     invalidateAliasDefinitionCache(sheet.actor); renderDataEditorPreservingState(event.currentTarget);
   });
-  html.find("[data-alias-delete]").on("click", async event => {
+  bindSerialized("[data-alias-delete]", "click", async event => {
     const id = event.currentTarget.closest("[data-alias-row]")?.dataset.aliasRow;
     await persistAliases(getAliasDefinitions(sheet.actor).filter(item => item.id !== id), event.currentTarget);
   });
