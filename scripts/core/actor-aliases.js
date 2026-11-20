@@ -44,11 +44,12 @@ export function normalizeActorAliasDefinition(alias, createId) {
   const calculationMode = alias.calculationMode === "formula" && ["attribute", "resource", "number"].includes(type)
     ? "formula"
     : "manual";
-  const legacyKeys = Array.isArray(alias.legacyKeys)
+  const legacyKeys = [...new Set(Array.isArray(alias.legacyKeys)
     ? alias.legacyKeys.map(isSafeActorAliasKey).filter(Boolean)
-    : [];
-  if (originalKey !== key && isSafeActorAliasKey(originalKey) && !legacyKeys.includes(originalKey)) {
-    legacyKeys.push(originalKey);
+    : [])];
+  const safeOriginalKey = isSafeActorAliasKey(originalKey);
+  if (safeOriginalKey && safeOriginalKey !== key && !legacyKeys.includes(safeOriginalKey)) {
+    legacyKeys.push(safeOriginalKey);
   }
 
   return {
