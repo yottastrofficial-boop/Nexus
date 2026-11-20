@@ -160,3 +160,11 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - A renomeação e a restauração só gravam layouts quando pelo menos uma referência de componente realmente foi alterada.
 - O listener usa o mesmo normalizador de slug do serviço de domínio, eliminando a implementação local duplicada.
 - Os testes comportamentais cobrem conflitos, caminhos sobrepostos, ausência de payload, entradas inválidas, preservação do estado em falhas, valores padrão e preparação de cópias.
+
+
+### Controlador de aliases da ficha
+
+- `scripts/sheets/actor-alias-listeners.js` concentra os eventos de criação, edição, renomeação, cópia, restauração e exclusão, além da restauração de foco/rolagem do editor.
+- `activateActorSheetListeners()` delega esse domínio ao controlador especializado; o módulo recebe somente as dependências de leitura, normalização e persistência necessárias.
+- A regra de negócio e os helpers puros permanecem em `scripts/core/actor-aliases.js`; o controlador não passa a ser dono do schema de Actor nem do armazenamento.
+- A extração reduz o controlador geral de eventos sem alterar a classe da ficha nem introduzir um segundo mecanismo de persistência.
