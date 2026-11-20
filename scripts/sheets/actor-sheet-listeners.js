@@ -1087,7 +1087,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         title.textContent = saved.name || "Grupo personalizado";
         heading.append(title);
         const summary = document.createElement("p");
-        summary.textContent = `Composição com ${saved.components?.length ?? 0} elementos independentes.`;
+        const nestedCount = Array.isArray(saved.groups) ? Math.max(0, saved.groups.length - 1) : 0;
+        summary.textContent = `${saved.components?.length ?? 0} componentes · ${nestedCount} subgrupos`;
         const add = document.createElement("button");
         add.type = "button";
         add.dataset.libraryAddGroup = "";
@@ -1095,10 +1096,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const copy = document.createElement("button");
         copy.type = "button";
         copy.dataset.libraryCopyGroupCode = "";
-        copy.textContent = "Copiar código de compartilhamento";
+        copy.textContent = "Copiar configuração";
+        const exportFile = document.createElement("button");
+        exportFile.type = "button";
+        exportFile.dataset.libraryExportGroupFile = "";
+        exportFile.textContent = "Exportar arquivo JSON";
         const remove = document.createElement("button");
         remove.type = "button"; remove.dataset.libraryDeleteSavedGroup = ""; remove.className = "danger"; remove.textContent = "Excluir grupo da biblioteca";
-        detail.append(heading, summary, add, copy, remove);
+        detail.append(heading, summary, add, copy, exportFile, remove);
         return;
       }
 
@@ -1139,6 +1144,34 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copySavedLayoutCode(copyLayoutButton.dataset.libraryCopyLayout); return; }
       const deleteLayoutButton = target?.closest("[data-library-delete-layout]");
       if (deleteLayoutButton && libraryPanel.contains(deleteLayoutButton)) { event.preventDefault(); await sheet._deleteSavedLibraryLayout(deleteLayoutButton.dataset.libraryDeleteLayout); return; }
+      const saveSelectedGroupButton = target?.closest("[data-library-save-selected-group]");
+      if (saveSelectedGroupButton && libraryPanel.contains(saveSelectedGroupButton)) {
+        event.preventDefault();
+        await sheet._saveSelectedGroupToLibrary();
+        return;
+      }
+      const importGroupFileButton = target?.closest("[data-library-import-group-file]");
+      if (importGroupFileButton && libraryPanel.contains(importGroupFileButton)) {
+        event.preventDefault();
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.accept = ".json,application/json,text/plain";
+        picker.hidden = true;
+        picker.addEventListener("change", async () => {
+          const file = picker.files?.[0];
+          if (!file) { picker.remove(); return; }
+          try {
+            await sheet._importSavedGroupCode(await file.text());
+          } catch (error) {
+            ui.notifications?.warn?.(error?.message || "Não foi possível importar o arquivo do grupo.");
+          } finally {
+            picker.remove();
+          }
+        }, { once: true });
+        document.body.append(picker);
+        picker.click();
+        return;
+      }
       const importGroupButton = target?.closest("[data-library-import-group]");
       if (importGroupButton && libraryPanel.contains(importGroupButton)) {
         event.preventDefault();
@@ -1162,6 +1195,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (copySavedGroupButton && libraryPanel.contains(copySavedGroupButton)) {
         const id = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
         if (id) await sheet._copySavedGroupCode(id);
+        return;
+      }
+      const exportSavedGroupButton = target?.closest("[data-library-export-group-file]");
+      if (exportSavedGroupButton && libraryPanel.contains(exportSavedGroupButton)) {
+        event.preventDefault();
+        const id = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
+        if (id) await sheet._exportSavedGroupFile(id);
         return;
       }
       const deleteSavedGroupButton = target?.closest("[data-library-delete-saved-group]");
