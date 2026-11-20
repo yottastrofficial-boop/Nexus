@@ -93,6 +93,12 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - O encerramento remove listeners locais e globais registrados pelo controlador e impede que uma ativação anterior continue reagindo após a substituição da interface.
 - O escopo é testado com `EventTarget`: o listener responde antes do cancelamento e deixa de responder depois dele.
 
+### Renderização de mídia e previews
+
+- `scripts/sheets/actor-sheet-media.js` concentra a classificação de fontes de mídia e os helpers reutilizáveis de preview de recursos.
+- A resolução de imagem do token, que depende do Actor e do resolvedor de propriedades, permanece na fachada da ficha; a classificação de formatos e a construção/atualização do preview são responsabilidades separadas.
+- Os testes cobrem URLs HTTP(S) assinadas sem extensão, caminhos locais por extensão, expressões não resolvidas e esquemas executáveis.
+
 ### Persistência de propriedades do Actor
 
 - `scripts/core/actor-property-writes.js` concentra a fila serializada por Actor e a persistência de expressões de propriedades.
