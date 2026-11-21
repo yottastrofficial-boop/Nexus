@@ -22,3 +22,11 @@ assert.doesNotMatch(renderer, /let depth = 0, cursor = hierarchy\.parentById/,
   "Canvas group rendering must not walk each group's ancestor chain repeatedly");
 
 console.log("Canvas group performance regressions passed.");
+
+const actorSheet = await readFile(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
+assert.match(actorSheet, /pendingActorRulesInitialization = new WeakMap\(\)/,
+  "Rules initialization must be coordinated per Actor, not only per sheet instance");
+assert.match(actorSheet, /pendingActorRulesInitialization\.get\(actor\)/,
+  "A second sheet for the same Actor must await the in-flight initialization");
+assert.match(actorSheet, /pendingActorRulesInitialization\.set\(actor, operation\)/,
+  "The first sheet must publish its initialization Promise before another sheet can start a duplicate write");
