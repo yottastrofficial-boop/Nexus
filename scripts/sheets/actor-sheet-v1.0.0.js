@@ -5,7 +5,7 @@ import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
 import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
-import { DEFAULT_FOUNDRY_TOKEN_IMAGE, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } from "./actor-sheet-media.js";
+import { DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, isSafeLink, setPreviewContent, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } from "./actor-sheet-media.js";
 import { activateCanvasViewport } from "./canvas-viewport.js";
 import { activateCanvasPlayInteractions } from "./canvas-play-interactions.js";
 import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./actor-sheet-rendering.js";
