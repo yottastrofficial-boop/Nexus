@@ -1,4 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { createLibraryDefinition, createLibraryComponentInstance } from "../core/library-models.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
@@ -1202,7 +1203,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   activateListeners(html) {
-    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, buildPropertyPickerCatalog, renderPropertyPicker, NEXUS_SKILLS, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, resolveFormulaIdentifier, getResourceValuePaths, clone, getPath, collectPropertyPaths, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource, isVideoSource, isImageSource, getFoundryDefaultTokenImage, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview });
+    return activateActorSheetListeners(this, html, { NEXUS_LIBRARY_CATALOG, THEME_PALETTES, buildPropertyPickerCatalog, renderPropertyPicker, NEXUS_SKILLS, getNexusSkillModifier, evaluateNexusSkillFormula, evaluateNexusExpression, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, resolveFormulaIdentifier, getResourceValuePaths, clone, getPath, collectPropertyPaths, invalidateNativePropertyCache, getNativePropertyDefinitions, replaceLayoutBindingPaths, invalidateAliasDefinitionCache, getAliasDefinitions, getCustomAliasData, normalizeAliasDefinition, safeAliasKey, evaluateAliasExpression, getNexusRollAliasEntries, resolveAliasPath, clamp, DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource, isVideoSource, isImageSource, getFoundryDefaultTokenImage, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview });
   }
 
   async _setMode(mode) { this._mode = mode; this.render({ force: true }); }
@@ -2058,7 +2059,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const settings = clone(component);
     for (const key of ["id", "definition", "x", "y", "z", "stackOrder"]) delete settings[key];
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
-    const next = [...saved, { id: foundry.utils.randomID(10), version: 1, label, type: component.type, settings }];
+    const definition = createLibraryDefinition({
+      id: foundry.utils.randomID(10), version: 1, label, type: component.type, settings,
+      metadata: { createdAt: new Date().toISOString(), source: "actor-component" }
+    });
+    const next = [...saved, definition];
     await game.user.setFlag("nexus", "libraryComponents", next.slice(-200));
     ui.notifications?.info?.(`“${label}” foi salvo em Meus Componentes.`);
     this._libraryAssetScope = "personal";
@@ -2068,23 +2073,31 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return true;
   }
 
-  async _addSavedLibraryComponent(id) {
+  async _addSavedLibraryComponent(id, overrides = {}) {
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
     const item = saved.find(entry => entry.id === id);
     if (!item || !COMPONENTS[item.type]) return false;
+    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
+    if (!layout) return false;
     const componentId = await this._addComponent(item.type, { format: item.settings?.format, template: item.settings });
     if (!componentId) return false;
-    // Apply the complete saved schema after the default constructor so future
-    // component settings survive library reuse without changing the new placement.
-    const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
-    const component = layout?.components?.find(entry => entry.id === componentId);
+    const currentLayouts = await this._readLayouts(), currentLayout = currentLayouts[active];
+    const component = currentLayout?.components?.find(entry => entry.id === componentId);
     if (!component) return false;
-    for (const [key, value] of Object.entries(item.settings ?? {})) {
-      if (["id", "definition", "x", "y", "z", "stackOrder", "type"].includes(key)) continue;
+    const definition = item.kind === "component" ? item : createLibraryDefinition({
+      id: item.id, type: item.type, label: item.label, version: item.version ?? 1, settings: item.settings ?? {}
+    });
+    const instance = createLibraryComponentInstance(definition, {
+      id: componentId,
+      position: { x: component.x, y: component.y },
+      overrides
+    });
+    for (const [key, value] of Object.entries(instance)) {
+      if (["id", "x", "y", "type"].includes(key)) continue;
       component[key] = clone(value);
     }
-    await this._writeLayouts(layouts, active);
-    this._currentLayout = layout;
+    await this._writeLayouts(currentLayouts, active);
+    this._currentLayout = currentLayout;
     await this.render({ force: true });
     return componentId;
   }
@@ -2905,7 +2918,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return true;
   }
 
-  async _addSavedGroupToCanvas(groupId) {
+  async _addSavedGroupToCanvas(groupId, overrides = {}) {
     const saved = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
     const composition = saved.find(item => item.id === groupId);
     if (!composition?.components?.length) return false;
@@ -2986,7 +2999,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       copy.id = groupIds.get(oldId);
       copy.parentGroupId = source.parentGroupId ? groupIds.get(String(source.parentGroupId)) ?? "" : "";
       copy.componentIds = (source.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean);
-      if (oldId === String(sourceGroups.find(group => !group.parentGroupId)?.id) || !copy.name) copy.name = composition.name;
+      const isRoot = oldId === String(sourceGroups.find(group => !group.parentGroupId)?.id);
+      if (isRoot) {
+        copy.name = String(overrides.name ?? composition.name ?? copy.name ?? "Grupo").trim().slice(0, 48) || "Grupo";
+        for (const key of ["kind", "layoutMode", "gap", "padding", "columns", "align", "backgroundColor", "borderColor", "borderRadius", "showHeader", "title"]) {
+          if (Object.hasOwn(overrides, key)) copy[key] = clone(overrides[key]);
+        }
+      } else if (!copy.name) copy.name = composition.name;
       layout.groups.push(copy);
     }
 
