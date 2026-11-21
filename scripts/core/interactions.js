@@ -25,10 +25,27 @@ const normalizeTrigger = (t,i) => {
   const event=String(t?.event??t??"");
   return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event,modifiers:normalizeModifiers(t?.modifiers),key:String(t?.key??"").slice(0,40),durationMs:Math.max(100,Math.min(5000,Number(t?.durationMs)||600))} : null;
 };
+const legacyConditionExpression = condition => {
+  const path=safePath(condition?.path);
+  if(!path)return "";
+  const reference="@"+path, operator=INTERACTION_OPERATORS.includes(condition.operator)?condition.operator:"equals";
+  const value=String(condition.value??"");
+  if(operator==="isEmpty")return `isEmpty(${reference})`;
+  if(operator==="isNotEmpty")return `isNotEmpty(${reference})`;
+  if(operator==="contains")return `contains(${reference}, ${JSON.stringify(value)})`;
+  const symbols={equals:"==",notEquals:"!=",greaterThan:">",greaterOrEqual:">=",lessThan:"<",lessOrEqual:"<="};
+  const right=["greaterThan","greaterOrEqual","lessThan","lessOrEqual"].includes(operator)&&value.trim()!==""&&Number.isFinite(Number(value))
+    ? String(Number(value))
+    : ["true","false"].includes(value.toLowerCase()) ? value.toLowerCase() : JSON.stringify(value);
+  return `${reference} ${symbols[operator]??"=="} ${right}`;
+};
 const normalizeCondition = (c,i) => {
   if(!c || typeof c!=="object")return null;
   const path=safePath(c.path)??"";
-  return {id:String(c.id??`condition-${i+1}`),expression:String(c.expression??"").slice(0,500),path,operator:INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals",value:String(c.value??"")};
+  const operator=INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals";
+  const value=String(c.value??"");
+  const expression=String(c.expression??"").trim().slice(0,500)||legacyConditionExpression({path,operator,value});
+  return {id:String(c.id??`condition-${i+1}`),expression,path,operator,value};
 };
 const normalizeAction = (a,i) => {
   if(!a || !INTERACTION_ACTIONS.includes(a.type))return null;
@@ -217,8 +234,9 @@ export function interactionMatches(flow,eventName,context={}) {
     (trigger.event !== "hold" || Number(context.durationMs ?? trigger.durationMs) >= trigger.durationMs)
   );
   if(!flow?.enabled||!triggerMatches)return false;
-  if(!flow.conditions.length)return true;
-  const values=flow.conditions.map(c=>conditionPasses(c,context.actor));
+  const activeConditions=flow.conditions.filter(condition=>String(condition.expression??"").trim()||condition.path);
+  if(!activeConditions.length)return true;
+  const values=activeConditions.map(c=>conditionPasses(c,context.actor));
   return flow.conditionJoin==="any"?values.some(Boolean):values.every(Boolean);
 }
 export function getTriggeredActions(component,eventName="click",context={}) {
