@@ -81,7 +81,7 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
     if (identifier === "false") return false;
     if (identifier === "null") return null;
     if (tokens[index]?.value === "(") {
-      const allowed = new Set(["min", "max", "ceil", "floor", "round", "abs", "sign", "if"]);
+      const allowed = new Set(["min", "max", "ceil", "floor", "round", "abs", "sign", "if", "contains", "isempty", "isnotempty"]);
       if (!allowed.has(identifier.toLowerCase())) throw new Error("Unsupported formula function");
       index++;
       const args = [];
