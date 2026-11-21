@@ -1652,6 +1652,8 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 const keyboardOnlyComponent = { interactions: [{ enabled: true, triggers: [{ event: "keyDown", key: "k", modifiers: ["ctrl"] }], actions: [{ enabled: true, type: "roll", config: { formula: "1d20" } }] }] };
 assert.equal(hasKeyboardInteraction(keyboardOnlyComponent), true, "Componentes com gatilho de teclado devem ser navegáveis por foco");
+assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "focus" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de foco devem receber tabindex para executar o fluxo");
+assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "blur" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de perda de foco devem receber tabindex para executar o fluxo");
 assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "keyDown", key: "" }], actions: [{ type: "roll" }] }] }), false, "Gatilho de teclado sem tecla definida não deve ficar ativo como atalho universal");
 assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "keyDown", key: "" }], actions: [{ type: "roll" }] }] }, "keyDown", { key: "x" }).length, 0, "Gatilhos de teclado sem tecla configurada devem ser ignorados");
 assert.match(canvasPlayInteractions, /card\.focus\?\.\(\{preventScroll:true\}\)/, "Clicar em componente com atalho deve dar foco para receber a tecla");
