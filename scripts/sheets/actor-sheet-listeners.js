@@ -592,13 +592,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           if(kind==="textarea"){input=document.createElement("textarea");input.rows=2;}
           else if(kind==="select"){input=document.createElement("select");const values=key==="sheetOrientation"?[["horizontal","Horizontal"],["vertical","Vertical"]]:[["classic","Clássico"],["bar","Barra"],["ring","Circular"]];for(const [value,text] of values){const option=document.createElement("option");option.value=value;option.textContent=text;input.append(option);}}
           else{input=document.createElement("input");input.type=kind;}
-          input.dataset.libraryOverrideKey=key;input.value=String(saved.settings[key]??"");label.append(input);fields.append(label);
+          input.dataset.libraryOverrideKey=key;input.dataset.libraryDefault=String(saved.settings[key]??"");input.value=input.dataset.libraryDefault;label.append(input);fields.append(label);
         }
-        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar configuração à ficha";
+        const reset=document.createElement("button");reset.type="button";reset.dataset.libraryResetOverrides="";reset.textContent="Restaurar valores do modelo";\n        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar configuração à ficha";
         const copy=document.createElement("button");copy.type="button";copy.dataset.libraryCopySavedComponent="";copy.textContent="Copiar pacote";
         const exportFile=document.createElement("button");exportFile.type="button";exportFile.dataset.libraryExportSavedComponent="";exportFile.textContent="Exportar JSON";
         const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir modelo";
-        detail.append(heading,summary,notice,preview,fields,add,copy,exportFile,remove);
+        detail.append(heading,summary,notice,preview,fields,reset,add,copy,exportFile,remove);
         fields.addEventListener("input",event=>{const input=event.target;if(!input.matches("[data-library-override-key]"))return;const key=input.dataset.libraryOverrideKey;if(["customLabel","sheetContent1","text"].includes(key))previewTitle.textContent=input.value||saved.label;});
         return;
       }
@@ -734,10 +734,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const overrides={};
           detail.querySelectorAll("[data-library-override-key]").forEach(input=>{
             const key=input.dataset.libraryOverrideKey;
+            if(input.value===input.dataset.libraryDefault)return;
             overrides[key]=input.type==="number"?(Number(input.value)||0):input.value;
           });
           await sheet._addSavedLibraryComponent(id,overrides);
         }
+        return;
+      }
+      const resetComponentOverrides=target?.closest("[data-library-reset-overrides]");
+      if(resetComponentOverrides&&libraryPanel.contains(resetComponentOverrides)){
+        const detail=libraryPanel.querySelector("[data-library-details]");
+        detail?.querySelectorAll("[data-library-override-key]").forEach(input=>{input.value=input.dataset.libraryDefault??"";input.dispatchEvent(new Event("input",{bubbles:true}));});
         return;
       }
       const deleteSavedComponentButton=target?.closest("[data-library-delete-saved-component]");
