@@ -22,4 +22,6 @@ jobs:
         with:
           node-version: 22
       - name: Validate package and regressions
-        run: node --experimental-default-type=module tests/validate-package.mjs
+        run: |
+          node --experimental-default-type=module tests/validate-package.mjs
+          node --experimental-default-type=module tests/group-render-performance.mjs
