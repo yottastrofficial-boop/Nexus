@@ -1772,7 +1772,9 @@ assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift", "
 assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift"] }).length, 0);
 assert.equal(normalizeInteraction({ triggers: [{ event: "middleClick" }], actions: [] }).triggers[0].event, "middleClick");
 assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: ["alt", "shift", "invalid"] }], actions: [] }).triggers[0].modifiers, ["shift", "alt"]);
-assert.match(interactions, /modifierOptions/);
+assert.doesNotMatch(interactions, /modifierOptions/, "O editor não deve oferecer um seletor genérico de modificadores");
+assert.match(interactions, /Combinação de teclas|Atalho de teclado/, "Atalhos devem ser configurados por captura da combinação completa");
+assert.match(interactions, /findInteractionShortcutConflicts/, "O editor deve identificar conflitos de atalhos no Canvas");
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
 assert.match(interactions, /\["keyDown","Atalho personalizado"\]/, "O editor deve identificar atalhos personalizados");
 assert.match(interactions, /data-interaction-media-preview|interactionMediaPreview/, "Valores de ações devem oferecer prévia de mídia");
