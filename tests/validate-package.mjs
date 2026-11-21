@@ -343,6 +343,7 @@ const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resou
 assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']\.\.\/core\/actor-property-writes\.js["']/,
   "actor-sheet-listeners deve importar a fila de gravação que utiliza");
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
+assert.match(sheetListeners, /input\.value\.trim\(\) === "" \|\| Number\.isFinite\(Number\(input\.value\)\)/, "Campos numéricos vazios devem ser aceitos e normalizados para zero");
 const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
 const actorPropertyPickerListeners = await read("scripts/sheets/actor-property-picker-listeners.js");
 const specializedListenerContracts = [
