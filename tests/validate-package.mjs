@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
-import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
+import { getNexusAttributeInitializationUpdates, migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillModifier, getNexusSkillRows, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../scripts/core/property-schema.js";
@@ -24,6 +24,29 @@ import { activateActorSheetResourceListeners } from "../scripts/sheets/actor-she
 import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, getMediaKind, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
+
+// Attribute initialization must preserve legacy nested storage and metadata.
+{
+  const updates = getNexusAttributeInitializationUpdates({
+    attributes: {
+      for: { value: 7, customLabel: "Força preservada" },
+      des: { value: "", customLabel: "Destreza preservada" },
+      sab: 0, int: 1, car: 2, von: 3
+    }
+  });
+  assert.deepEqual(updates, { "system.attributes.des.value": 0 },
+    "Atributos aninhados devem inicializar somente o campo value, sem substituir o objeto");
+  assert.deepEqual(
+    getNexusAttributeInitializationUpdates({ attributes: { for: 2, des: 3, sab: 0, int: 1, car: 2, von: 3 } }),
+    {},
+    "Atributos escalares válidos não devem receber atualizações desnecessárias"
+  );
+  assert.deepEqual(
+    getNexusAttributeInitializationUpdates({ attributes: { for: undefined, des: 3, sab: 0, int: 1, car: 2, von: 3 } }),
+    { "system.attributes.for": 0 },
+    "Atributos escalares ausentes devem continuar recebendo o valor padrão"
+  );
+}
 
 // Nested group hierarchy regression tests.
 assert.equal(getMediaKind("https://i.imgur.com/fNhOxpm.jpeg"), "image", "URLs diretas de imagem devem ser classificadas");
