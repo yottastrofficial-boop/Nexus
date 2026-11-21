@@ -1109,13 +1109,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const previousName=tab.textContent.trim();
         const input=document.createElement("input");
         input.type="text";input.value=previousName;input.maxLength=60;input.setAttribute("aria-label","Nome do fluxo");
-        input.dataset.interactionScope="flow";input.dataset.interactionField="name";input.dataset.interactionId=flowId;
+        input.dataset.interactionScope="flow";input.dataset.interactionId=flowId;
         input.addEventListener("keydown",keyEvent=>{
           if(keyEvent.key==="Enter"){keyEvent.preventDefault();input.blur();}
           if(keyEvent.key==="Escape"){keyEvent.preventDefault();input.value=previousName;input.dataset.cancelRename="true";input.blur();}
         });
         input.addEventListener("blur",async()=>{
           if(input.dataset.cancelRename==="true"||!input.value.trim()){tab.textContent=previousName;return;}
+          input.dataset.interactionField="name";
           await persistInteractionEditor(input,null);
         },{once:true});
         tab.replaceChildren(input);input.focus();input.select();
