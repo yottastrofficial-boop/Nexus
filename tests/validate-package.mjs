@@ -22,10 +22,15 @@ import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writ
 import { activateActorSheetSkillListeners } from "../scripts/sheets/actor-sheet-skill-listeners.js";
 import { activateActorSheetResourceListeners } from "../scripts/sheets/actor-sheet-resource-listeners.js";
 import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
-import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
+import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, getMediaKind, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
 
 // Nested group hierarchy regression tests.
+assert.equal(getMediaKind("https://i.imgur.com/fNhOxpm.jpeg"), "image", "URLs diretas de imagem devem ser classificadas");
+assert.equal(getMediaKind("https://cdn.example.test/track.mp3?token=abc"), "audio", "URLs de áudio assinadas devem ser classificadas sem query string");
+assert.equal(getMediaKind("https://cdn.example.test/clip.webm#t=2"), "video", "URLs de vídeo com fragmentos devem ser classificadas");
+assert.equal(getMediaKind("https://example.test/page"), "", "URLs sem tipo conhecido não devem ser tratadas como mídia");
+
 {
   const groups = [
     { id: "outer", componentIds: ["a"] },
@@ -1650,6 +1655,8 @@ const capturedKeyFlow = normalizeInteraction({ triggers: [{ event: "keyDown", ke
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["alt"] }).length, 1, "Gatilhos de teclado devem comparar tecla sem diferenciar maiúsculas");
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
+assert.match(interactions, /Atalho personalizado/, "O editor deve identificar atalhos de teclado personalizados");
+assert.match(interactions, /Combinação de teclas/, "O editor deve exibir a combinação capturada");
 const keyboardOnlyComponent = { interactions: [{ enabled: true, triggers: [{ event: "keyDown", key: "k", modifiers: ["ctrl"] }], actions: [{ enabled: true, type: "roll", config: { formula: "1d20" } }] }] };
 assert.equal(hasKeyboardInteraction(keyboardOnlyComponent), true, "Componentes com gatilho de teclado devem ser navegáveis por foco");
 assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "focus" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de foco devem receber tabindex para executar o fluxo");
@@ -1663,6 +1670,9 @@ assert.match(sheetListeners, /capturedModifiers/, "A captura deve salvar os modi
 assert.match(sheetListeners, /renderInteractionMediaPreview/, "A prévia de mídia deve atualizar enquanto o valor é editado");
 assert.match(template, /data-component-media-preview[\s\S]*data-property-alias-conflicts/, "A prévia principal deve ficar logo abaixo do campo de valor e antes das regras");
 assert.match(actorSheetRendering, /renderFontAwesomeTokens/, "Tokens de classes Font Awesome devem ser renderizados como elementos de ícone");
+const mediaModule = await readFile(new URL("../scripts/sheets/actor-sheet-media.js", import.meta.url), "utf8");
+assert.match(mediaModule, /fa-\\\\s\+fa-/, "O parser de Font Awesome deve usar espaço em branco real entre as classes");
+assert.match(actorSheetRendering, /createMedia\(token,token,false,"auto"\)/, "URLs de mídia coladas diretamente devem ser incorporadas automaticamente");
 assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve ser um indicador pequeno abaixo do caminho");
 assert.doesNotMatch(canvasGroupRendering, /nexus-group-handle|data-group-handle/, "Grupos não devem renderizar alças ou cabeçalhos que consumam espaço");
 assert.doesNotMatch(canvasInteractions, /data-group-handle/, "A seleção de grupos não deve depender de alças visuais");
