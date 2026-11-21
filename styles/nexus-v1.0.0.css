@@ -6667,3 +6667,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-panel-window .nexus-behavior-editor .nexus-interaction-guided { grid-template-columns:minmax(0,1fr) !important; }
   .nexus-panel-window .nexus-behavior-editor .nexus-interaction-action-config { grid-template-columns:minmax(0,1fr) !important; }
 }
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-duration[hidden],
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-key[hidden],
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-clear[hidden] { display:none !important; }
