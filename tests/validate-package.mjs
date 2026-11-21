@@ -1413,6 +1413,7 @@ assert.equal(representationDraft.propertyPresentation.rules[0].name, "Regra 2", 
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
 assert.match(interactions, /renderPropertyPresentationEditor/, "As regras de apresentação devem integrar o painel Propriedades");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
+assert.ok(sheetListeners.indexOf("const inspectorNamespace =") < sheetListeners.indexOf("$(document).on(`input${inspectorNamespace}`"), "O namespace do Inspector deve ser inicializado antes do primeiro listener delegado");
 assert.ok(sheetListeners.includes("on(`input${inspectorNamespace}`"), "A edição do conteúdo das regras deve atualizar a prévia durante a digitação");
 assert.ok(sheetListeners.includes("sheet._refreshBoundComponents?.()"), "A prévia das regras deve ser recalculada sem alterar propriedades do Actor");
 assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, "Somente os componentes afetados devem reavaliar suas expressões");
