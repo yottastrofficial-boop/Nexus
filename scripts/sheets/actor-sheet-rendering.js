@@ -119,7 +119,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         if (!node.isConnected || !shouldRefresh(node)) continue;
         const card = node.closest(".nexus-component");
         const component = componentById.get(card?.dataset.id);
-        renderExpressionText(node, !component?.dataPath);
+        renderExpressionText(node, true);
       }
       for (const node of expressionTextNodes) {
         if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, true);
