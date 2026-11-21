@@ -8,16 +8,16 @@ export const DEFAULT_FOUNDRY_TOKEN_IMAGE = "icons/svg/mystery-man.svg";
 const IMAGE_EXTENSIONS = "png|jpe?g|jpe|jfif|pjpeg|pjp|gif|apng|webp|avif|svg|bmp|dib|tif|tiff|ico|heic|heif|jxl";
 const AUDIO_EXTENSIONS = "mp3|ogg|wav|m4a|aac|flac|opus";
 const VIDEO_EXTENSIONS = "mp4|webm|ogv|mov|m4v|mkv|avi|mpeg|mpg|3gp";
-const MEDIA_EXTENSION_PATTERN = new RegExp(\`\\.(?:\${IMAGE_EXTENSIONS}|\${AUDIO_EXTENSIONS}|\${VIDEO_EXTENSIONS})(?:[?#].*)?$ \`.trim(), "i");
-const VIDEO_EXTENSION_PATTERN = new RegExp(\`\\.(?:\${VIDEO_EXTENSIONS})(?:[?#].*)?$\`, "i");
+const MEDIA_EXTENSION_PATTERN = new RegExp("\\.(?:" + IMAGE_EXTENSIONS + "|" + AUDIO_EXTENSIONS + "|" + VIDEO_EXTENSIONS + ")(?:[?#].*)?$", "i");
+const VIDEO_EXTENSION_PATTERN = new RegExp("\\.(?:" + VIDEO_EXTENSIONS + ")(?:[?#].*)?$", "i");
 export const getMediaKind = value => {
   const source = String(value ?? "").trim();
-  const dataType = source.match(/^data:(image|audio|video)\//i)?.[1]?.toLowerCase();
+  const dataType = source.match(/^data:(image|audio|video)\\//i)?.[1]?.toLowerCase();
   if (dataType) return dataType;
   const clean = source.split(/[?#]/)[0].toLowerCase();
-  if (new RegExp(\`\\.(?:\${AUDIO_EXTENSIONS})$\`, "i").test(clean)) return "audio";
-  if (new RegExp(\`\\.(?:\${VIDEO_EXTENSIONS})$\`, "i").test(clean)) return "video";
-  if (new RegExp(\`\\.(?:\${IMAGE_EXTENSIONS})$\`, "i").test(clean)) return "image";
+  if (new RegExp("\\.(?:" + AUDIO_EXTENSIONS + ")$", "i").test(clean)) return "audio";
+  if (new RegExp("\\.(?:" + VIDEO_EXTENSIONS + ")$", "i").test(clean)) return "video";
+  if (new RegExp("\\.(?:" + IMAGE_EXTENSIONS + ")$", "i").test(clean)) return "image";
   return "";
 };
 export const isMediaSource = value => {
