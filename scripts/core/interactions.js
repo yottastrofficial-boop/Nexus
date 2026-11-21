@@ -27,7 +27,7 @@ const normalizeTrigger = (t,i) => {
 const normalizeCondition = (c,i) => {
   if(!c || typeof c!=="object")return null;
   const path=safePath(c.path)??"";
-  return {id:String(c.id??`condition-${i+1}`),path,operator:INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals",value:String(c.value??"")};
+  return {id:String(c.id??`condition-${i+1}`),expression:String(c.expression??"").slice(0,500),path,operator:INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals",value:String(c.value??"")};
 };
 const normalizeAction = (a,i) => {
   if(!a || !INTERACTION_ACTIONS.includes(a.type))return null;
@@ -176,6 +176,11 @@ export function hasKeyboardInteraction(component) {
 }
 const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
 const conditionPasses=(condition,actor)=>{
+  const expression=String(condition?.expression??"").trim();
+  if(expression){
+    return evaluateNexusCondition(expression,identifier=>getPath(actor,identifier))===true;
+  }
+  // Compatibility for flows saved before expression-based conditions.
   if(!condition?.path)return false;
   const actual=getPath(actor,condition.path), expected=condition.value, a=Number(actual), b=Number(expected);
   switch(condition.operator){
@@ -363,7 +368,7 @@ export function applyInteractionEditorCommand(component,command,data={}) {  if (
   if(!flow)return false;
   if(command==="add-trigger")flow.triggers.push({id:newId("trigger"),event:"click"});
   else if(command==="remove-trigger")flow.triggers.splice(Number(data.triggerIndex),1);
-  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),path:"",operator:"equals",value:""});
+  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),expression:""});
   else if(command==="remove-condition")flow.conditions.splice(Number(data.conditionIndex),1);
   else if(command==="add-action")flow.actions.push({id:newId("action"),type:"roll",enabled:true,config:{formula:"1d20"}});
   else if(command==="remove-action")flow.actions.splice(Number(data.actionIndex),1);
@@ -439,7 +444,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
-  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão da condição");expression.placeholder="@resources.pv.value >= 10";expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);
   const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
   for(const [i,action] of flow.actions.entries()){
