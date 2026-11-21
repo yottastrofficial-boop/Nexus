@@ -620,10 +620,33 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const summary = document.createElement("p");
         const nestedCount = Array.isArray(saved.groups) ? Math.max(0, saved.groups.length - 1) : 0;
         summary.textContent = `${saved.components?.length ?? 0} componentes · ${nestedCount} subgrupos`;
+        const note = document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Ajustes abaixo valem somente para a cópia inserida. O grupo salvo não será alterado.";
+        const fields = document.createElement("div");fields.className="nexus-library-definition-fields";
+        const root = (saved.groups??[]).find(item=>!item.parentGroupId)??{};
+        const controls = [
+          ["name","Nome da instância","text",saved.name??"Grupo"],
+          ["layoutMode","Organização","select",root.layoutMode??"free"],
+          ["kind","Tipo de grupo","select",root.kind??"container"],
+          ["gap","Espaçamento (px)","number",root.gap??8],
+          ["padding","Preenchimento (px)","number",root.padding??12],
+          ["columns","Colunas","number",root.columns??2]
+        ];
+        for(const [key,labelText,kind,value] of controls){
+          const label=document.createElement("label");label.className="nexus-library-definition-field";label.textContent=labelText;
+          const input=document.createElement(kind==="select"?"select":"input");
+          if(kind!=="select")input.type=kind;
+          if(key==="layoutMode")for(const [v,l] of [["free","Livre"],["horizontal","Pilha horizontal"],["vertical","Pilha vertical"],["grid","Grade"]]){const option=new Option(l,v);input.add(option);}
+          if(key==="kind")for(const [v,l] of [["folder","Pasta"],["container","Container"],["section","Seção"]]){const option=new Option(l,v);input.add(option);}
+          input.value=String(value);input.dataset.libraryGroupOverride=key;label.append(input);fields.append(label);
+        }
+        const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
+        const previewTitle=document.createElement("strong");previewTitle.textContent=saved.name??"Grupo";preview.append(previewTitle);
+        const previewMeta=document.createElement("small");previewMeta.textContent=`${saved.components?.length??0} componentes · ${nestedCount} subgrupos`;preview.append(previewMeta);
+        fields.addEventListener("input",event=>{if(event.target.dataset.libraryGroupOverride==="name")previewTitle.textContent=event.target.value||"Grupo";});
         const add = document.createElement("button");
         add.type = "button";
         add.dataset.libraryAddGroup = "";
-        add.textContent = "Adicionar grupo ao Canvas";
+        add.textContent = "Adicionar grupo personalizado à ficha";
         const copy = document.createElement("button");
         copy.type = "button";
         copy.dataset.libraryCopyGroupCode = "";
@@ -634,7 +657,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         exportFile.textContent = "Exportar arquivo JSON";
         const remove = document.createElement("button");
         remove.type = "button"; remove.dataset.libraryDeleteSavedGroup = ""; remove.className = "danger"; remove.textContent = "Excluir grupo da biblioteca";
-        detail.append(heading, summary, add, copy, exportFile, remove);
+        detail.append(heading, summary, note, preview, fields, add, copy, exportFile, remove);
         return;
       }
 
@@ -797,8 +820,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const addGroupButton = target?.closest("[data-library-add-group]");
       if (addGroupButton && libraryPanel.contains(addGroupButton)) {
         event.preventDefault();
-        const groupId = libraryPanel.querySelector("[data-library-details]")?.dataset.selectedGroupId;
-        if (groupId) await sheet._addSavedGroupToCanvas(groupId);
+        const detail=libraryPanel.querySelector("[data-library-details]");
+        const groupId=detail?.dataset.selectedGroupId;
+        if(groupId){
+          const overrides={};
+          detail.querySelectorAll("[data-library-group-override]").forEach(input=>{
+            const key=input.dataset.libraryGroupOverride;
+            overrides[key]=input.type==="number"?(Number(input.value)||0):input.value;
+          });
+          await sheet._addSavedGroupToCanvas(groupId,overrides);
+        }
         return;
       }
 
