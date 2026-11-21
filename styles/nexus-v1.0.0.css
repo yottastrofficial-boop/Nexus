@@ -7286,3 +7286,56 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-details,
   .nexus-library-flow-details { max-height: 360px; }
 }
+
+
+/* Biblioteca Explorer — árvore de navegação e coleções genéricas */
+.nexus-library-panel { grid-template-columns: 190px minmax(0,1fr); }
+.nexus-library-section-tabs {
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 3px;
+  overflow: auto;
+  padding: 9px 7px;
+}
+.nexus-library-tree-heading {
+  padding: 12px 8px 5px;
+  color: var(--nexus-panel-muted,#91a3b8);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+.nexus-library-section-tabs > button {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 34px;
+  text-align: left;
+}
+.nexus-library-generic-workspace { min-height: 300px; }
+.nexus-library-generic-items { align-content: start; }
+.nexus-library-generic-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 105px;
+  padding: 12px;
+  border: 1px solid var(--nexus-panel-border,#3c5067);
+  border-radius: 7px;
+  background: var(--nexus-panel-card,#202d3c);
+  color: var(--nexus-panel-text,#e7edf5);
+  text-align: left;
+}
+.nexus-library-generic-item.is-selected {
+  border-color: var(--nexus-panel-accent,#78b7e8);
+  background: var(--nexus-panel-input,#172535);
+}
+.nexus-library-generic-item > i { color: var(--nexus-panel-accent,#78b7e8); font-size: 20px; }
+.nexus-library-generic-item strong { overflow-wrap:anywhere; font-size: 11px; }
+.nexus-library-generic-item small { color: var(--nexus-panel-muted,#a5b6c9); font-size: 9px; }
+@media(max-width:700px) {
+ .nexus-library-panel { grid-template-columns:minmax(0,1fr); }
+ .nexus-library-section-tabs { flex-direction:row; flex-wrap:nowrap; }
+ .nexus-library-tree-heading { display:none; }
+ .nexus-library-section-tabs > button { width:auto; flex:0 0 auto; }
+}
