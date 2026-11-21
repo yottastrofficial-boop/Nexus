@@ -99,6 +99,15 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
         if (args.length !== 3 || typeof args[0] !== "boolean") throw new Error("if requires a boolean and two values");
         return args[0] ? args[1] : args[2];
       }
+      if (name === "contains") {
+        if (args.length !== 2) throw new Error("contains requires two values");
+        return String(args[0] ?? "").includes(String(args[1] ?? ""));
+      }
+      if (name === "isempty" || name === "isnotempty") {
+        if (args.length !== 1) throw new Error(name + " requires one value");
+        const empty = args[0] === null || args[0] === undefined || (typeof args[0] === "string" && args[0].trim() === "");
+        return name === "isempty" ? empty : !empty;
+      }
       if (numbers.some(value => value === null)) throw new Error("Formula function requires numbers");
       if (name === "min" && args.length >= 1) return Math.min(...numbers);
       if (name === "max" && args.length >= 1) return Math.max(...numbers);
