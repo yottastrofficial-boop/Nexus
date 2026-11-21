@@ -1277,9 +1277,9 @@ assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e 
 assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
 assert.match(interactions,/control\("textarea",co\.expression\?\?""/,"Condições devem usar campo de texto expansível");
 assert.match(interactions,/Expressão lógica da condição/,"O campo de condição deve possuir nome acessível");
-assert.match(interactions,/data-interaction-autogrow/,"Condições e fórmulas devem permitir expansão de até cinco linhas");
-assert.match(interactions,/data-interaction-property-input/,"Campos de texto de ações devem oferecer o buscador de propriedades");
-assert.match(interactions,/data-roll-formula-input/,"Fórmulas devem oferecer o buscador de propriedades e aliases");
+assert.match(interactions,/dataset\.interactionAutogrow/,"Condições e fórmulas devem permitir expansão de até cinco linhas");
+assert.match(interactions,/dataset\.interactionPropertyInput/,"Campos de texto de ações devem oferecer o buscador de propriedades");
+assert.match(interactions,/dataset\.rollFormulaInput/,"Fórmulas devem oferecer o buscador de propriedades e aliases");
 assert.match(interactions,/nexus-interaction-trigger-tools/,"Controles de gatilho devem compartilhar uma área de ferramentas alinhada");
 
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
