@@ -313,9 +313,10 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
   else if(data.scope==="trigger"&&trigger&&data.field==="modifiers")trigger.modifiers=normalizeModifiers(value);
   else if(data.scope==="trigger"&&trigger&&data.field==="key")trigger.key=String(value??"").slice(0,40);
   else if(data.scope==="condition"&&condition){
-    if(data.field==="path")condition.path=safePath(value)??"";
+    if(data.field==="expression"){condition.expression=String(value??"").trim().slice(0,500);condition.path="";condition.operator="equals";condition.value="";}
+    else if(data.field==="path")condition.path=safePath(value)??"";
     else if(data.field==="operator")condition.operator=INTERACTION_OPERATORS.includes(value)?value:"equals";
-    else if(data.field==="value")condition.value=String(value).slice(0,120);
+    else if(data.field==="value")condition.value=String(value??"").slice(0,120);
   }else if(data.scope==="action"&&action){
     if(data.field==="type"){action.type=INTERACTION_ACTIONS.includes(value)?value:"roll";action.config=action.type==="roll"?{formula:"1d20"}:{};}
     else if(data.field==="enabled")action.enabled=!!value;
