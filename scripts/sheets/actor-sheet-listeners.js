@@ -464,7 +464,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const paletteFields=[["canvasColor","Fundo da ficha"],["cardColor","Cartões e painéis"],["accentColor","Cor de destaque"],["highlightColor","Realce"],["buttonColor","Botões"]];
         for(const [key,labelText] of paletteFields){
           const label=document.createElement("label");label.className="nexus-library-definition-field";label.textContent=labelText;
-          const input=document.createElement("input");input.type="color";input.value=/^#[0-9a-f]{6}$/i.test(palette[key]??"")?palette[key]:"#52647b";input.dataset-theme-palette-key=key;label.append(input);fields.append(label);
+          const input=document.createElement("input");input.type="color";input.value=/^#[0-9a-f]{6}$/i.test(palette[key]??"")?palette[key]:"#52647b";input.dataset.themePaletteKey=key;label.append(input);fields.append(label);
           const swatch=document.createElement("i");swatch.style.background=input.value;swatches.append(swatch);
           input.addEventListener("input",()=>{swatch.style.background=input.value;});
         }
