@@ -61,7 +61,8 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
 - A primeira execução de CI da PR #42 passou na validação de regressões, sintaxe, manifesto, templates, estilos e geração do pacote.
 - A execução posterior à última alteração precisa confirmar o estado integral desta branch.
 - Testes automatizados também cobrem a preservação de atributos aninhados, a separação entre persistência e atualização visual e hierarquias de grupos profundas.
-- A nova regressão de renderização de grupos e a validação de inicialização compartilhada foram adicionadas ao workflow; o resultado da execução mais recente ainda precisa ser confirmado.
+- As regressões de renderização de grupos e inicialização compartilhada passaram no CI mais recente.
+- Em 2026-11-21, os workflows `Validate NEXUS` e `Validate and Release` passaram no commit `d7393bd`; o pacote foi construído como artefato de validação, mas a publicação da release foi ignorada.
 - Teste manual no Foundry VTT 14 build 360 continua pendente: abertura/fechamento de fichas, edição de propriedades, migração de Actors antigos, múltiplas fichas do mesmo Actor, tokens e layouts grandes.
 
 ## Próximas verificações de prioridade alta
