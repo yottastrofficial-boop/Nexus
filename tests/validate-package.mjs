@@ -1671,7 +1671,7 @@ assert.match(sheetListeners, /renderInteractionMediaPreview/, "A prévia de míd
 assert.match(template, /data-component-media-preview[\s\S]*data-property-alias-conflicts/, "A prévia principal deve ficar logo abaixo do campo de valor e antes das regras");
 assert.match(actorSheetRendering, /renderFontAwesomeTokens/, "Tokens de classes Font Awesome devem ser renderizados como elementos de ícone");
 const mediaModule = await readFile(new URL("../scripts/sheets/actor-sheet-media.js", import.meta.url), "utf8");
-assert.match(mediaModule, /fa-\\s\+fa-/, "O parser de Font Awesome deve usar espaço em branco real entre as classes");
+assert.ok(mediaModule.includes("duotone)\\s+fa-"), "O parser de Font Awesome deve usar espaço em branco real entre as classes");
 assert.match(actorSheetRendering, /createMedia\(token,token,false,"auto"\)/, "URLs de mídia coladas diretamente devem ser incorporadas automaticamente");
 assert.match(template, /<small data-component-property-name/, "O nome da propriedade deve ser um indicador pequeno abaixo do caminho");
 assert.doesNotMatch(canvasGroupRendering, /nexus-group-handle|data-group-handle/, "Grupos não devem renderizar alças ou cabeçalhos que consumam espaço");
