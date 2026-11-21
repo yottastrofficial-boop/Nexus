@@ -1,3 +1,20 @@
+## 1.0.0.76
+
+### Estabilidade de mídia, condições e campos vazios
+- Permite expressões seguras do motor de regras nas condições de gatilhos.
+- Converte condições legadas no formato `path/operator/value` para expressões equivalentes, preservando os valores e operadores existentes.
+- Ignora condições ainda vazias durante a configuração, mantendo as combinações Todas/Qualquer.
+- Adiciona suporte restrito aos operadores `contains`, `isEmpty` e `isNotEmpty`.
+- Reconhece URLs HTTP(S) diretas e URLs resolvidas por propriedades na renderização de conteúdo.
+- Normaliza espaços invisíveis em origens de mídia antes de renderizar.
+- Permite origens diretas ou vinculadas a propriedades nos componentes de imagem e token.
+- Permite limpar o retrato do Actor e mantém o fallback nativo do Foundry para o token.
+- Melhora o contorno visual de grupos aninhados.
+
+### Validação
+- GitHub Actions: validação de pacote, sintaxe, regressões e geração do pacote Foundry aprovadas.
+- Testes funcionais no Foundry VTT 14 build 360 ainda necessários: retrato/token, URLs diretas e interpoladas, expressões de condição, campos vazios e grupos aninhados.
+
 ## 1.0.0.75
 
 ### Estabilização e compatibilidade
