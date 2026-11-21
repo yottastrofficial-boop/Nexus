@@ -444,16 +444,63 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     // essa janela e continua funcionando após atualizações do Canvas.
     libraryPanel?.addEventListener("click", async event => {
       const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+      const renderThemeInspector = (themeId, custom = false) => {
+        const detail=libraryPanel.querySelector("[data-library-theme-details]");
+        if(!detail)return;
+        const palette=custom
+          ? (game.user?.getFlag?.("nexus","libraryThemes")??[]).find(item=>item.id===themeId)?.palette
+          : THEME_PALETTES[themeId];
+        if(!palette)return;
+        detail.dataset.selectedThemeId=themeId;detail.dataset.selectedThemeCustom=String(custom);detail.replaceChildren();
+        const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
+        const title=document.createElement("strong");title.className="nexus-library-detail-title";
+        title.textContent=custom?((game.user?.getFlag?.("nexus","libraryThemes")??[]).find(item=>item.id===themeId)?.name??"Tema personalizado"):(themeId==="nexus-dark"?"NEXUS Escuro":themeId);
+        heading.append(title);
+        const note=document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Edite uma cópia desta paleta. Os temas padrão nunca são sobrescritos.";
+        const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
+        const previewTitle=document.createElement("strong");previewTitle.textContent="Prévia do tema";preview.append(previewTitle);
+        const swatches=document.createElement("div");swatches.className="nexus-library-theme-preview-swatches";
+        const fields=document.createElement("div");fields.className="nexus-library-definition-fields";
+        const paletteFields=[["canvasColor","Fundo da ficha"],["cardColor","Cartões e painéis"],["accentColor","Cor de destaque"],["highlightColor","Realce"],["buttonColor","Botões"]];
+        for(const [key,labelText] of paletteFields){
+          const label=document.createElement("label");label.className="nexus-library-definition-field";label.textContent=labelText;
+          const input=document.createElement("input");input.type="color";input.value=/^#[0-9a-f]{6}$/i.test(palette[key]??"")?palette[key]:"#52647b";input.dataset-theme-palette-key=key;label.append(input);fields.append(label);
+          const swatch=document.createElement("i");swatch.style.background=input.value;swatches.append(swatch);
+          input.addEventListener("input",()=>{swatch.style.background=input.value;});
+        }
+        const apply=document.createElement("button");apply.type="button";apply.dataset.librarySaveThemeCopy="";apply.textContent="Salvar cópia personalizada e aplicar";
+        detail.append(heading,note,preview,swatches,fields,apply);
+      };
       const customThemeCard = target?.closest("[data-library-custom-theme]");
       if (customThemeCard && libraryPanel.contains(customThemeCard)) {
         event.preventDefault();
-        await sheet._applyLibraryCustomTheme(customThemeCard.dataset.libraryCustomTheme);
+        libraryPanel.querySelectorAll("[data-library-custom-theme],[data-library-theme]").forEach(item=>item.classList.toggle("is-selected",item===customThemeCard));
+        renderThemeInspector(customThemeCard.dataset.libraryCustomTheme,true);
         return;
       }
       const themeCard = target?.closest("[data-library-theme]");
       if (themeCard && libraryPanel.contains(themeCard)) {
         event.preventDefault();
-        await sheet._applyThemePreset(themeCard.dataset.libraryTheme);
+        libraryPanel.querySelectorAll("[data-library-custom-theme],[data-library-theme]").forEach(item=>item.classList.toggle("is-selected",item===themeCard));
+        renderThemeInspector(themeCard.dataset.libraryTheme,false);
+        return;
+      }
+      const saveThemeCopyButton=target?.closest("[data-library-save-theme-copy]");
+      if(saveThemeCopyButton&&libraryPanel.contains(saveThemeCopyButton)){
+        event.preventDefault();
+        const detail=libraryPanel.querySelector("[data-library-theme-details]");
+        const sourceId=detail?.dataset.selectedThemeId;
+        const isCustom=detail?.dataset.selectedThemeCustom==="true";
+        const sourcePalette=isCustom?(game.user?.getFlag?.("nexus","libraryThemes")??[]).find(item=>item.id===sourceId)?.palette:THEME_PALETTES[sourceId];
+        if(!sourcePalette)return;
+        const palette={...clone(sourcePalette)};
+        detail.querySelectorAll("[data-theme-palette-key]").forEach(input=>{palette[input.dataset.themePaletteKey]=input.value;});
+        const themes=clone(game.user?.getFlag?.("nexus","libraryThemes")??[]);
+        const id=foundry.utils.randomID(10);
+        themes.push({id,sourceId:sourceId,name:(detail.querySelector(".nexus-library-detail-title")?.textContent??"Tema")+" — personalizado",version:1,palette});
+        await game.user.setFlag("nexus","libraryThemes",themes.slice(-100));
+        sheet._libraryRenderCustomThemes?.();
+        await sheet._applyLibraryCustomTheme(id);
         return;
       }
 
