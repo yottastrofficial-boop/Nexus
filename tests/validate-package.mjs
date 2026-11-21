@@ -1270,7 +1270,7 @@ assert.ok(css.includes(".nexus-interaction-action-head{display:grid"), "Cabeçal
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
 assert.match(interactions,/control\("input",co\.expression\?\?""/,"Condições devem usar um único campo de expressão");
-assert.match(interactions,/Expressão da condição/,"O campo de condição deve possuir nome acessível");
+assert.match(interactions,/Expressão lógica da condição/,"O campo de condição deve possuir nome acessível");
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
 assert.match(css,/\.nexus-panel-window \.nexus-tool-panel\[data-tool-panel="style"\] \.nexus-global-color-grid\{display:flex!important;flex-direction:column!important/, "Aparência deve manter controles de cor em lista alinhada");
 assert.ok(css.includes("height:min(600px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
