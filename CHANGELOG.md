@@ -1,3 +1,20 @@
+## 1.0.0.75
+
+### Estabilização e compatibilidade
+- Corrige a ordem e a remoção dos listeners do Inspector de propriedades.
+- Coordena migrações e inicialização de atributos/perícias por Actor para evitar gravações simultâneas duplicadas no mesmo cliente.
+- Preserva metadados de atributos aninhados durante a inicialização.
+- Separa falhas de persistência de falhas de atualização visual da ficha.
+- Trata rejeições de Promises nos limites dos listeners.
+- Protege operações assíncronas do Floating UI contra resultados obsoletos e limpa timers durante a desmontagem.
+- Torna iterativos os percursos de hierarquia e snapshot de grupos, evitando estouro de pilha em árvores profundas.
+- Reutiliza índices de profundidade na composição e renderização do Canvas.
+- Reduz comparações desnecessárias entre superfícies dispersas por meio de varredura espacial.
+
+### Validação
+- CI valida sintaxe, manifesto, templates, estilos, regressões e geração do pacote Foundry.
+- A validação funcional e visual em instalação real do Foundry VTT 14 build 360 continua necessária, especialmente para persistência de propriedades, migrações e múltiplas fichas do mesmo Actor.
+
 ## 1.0.0.74
 
 ### Mídia, ícones e comportamento
