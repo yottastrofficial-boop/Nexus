@@ -1316,7 +1316,7 @@ assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"
 
 assert.ok(!template.includes("nexus-behavior-header"), "O cabeçalho redundante do painel Comportamento deve ser removido");
 assert.match(interactions,/nexus-interaction-trigger-row/, "Gatilhos devem usar seletor direto dentro de cartão");
-assert.match(interactions,/Combinar condições/, "Combinação E/OU deve ter seletor próprio e compacto");
+assert.match(interactions,/evaluateNexusCondition/, "Condições devem usar o avaliador de expressões lógicas");
 assert.match(interactions,/nexus-interaction-action-active/, "O estado Ativa deve ficar junto ao título da ação");
 assert.match(sheetCode,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
 assert.match(css,/--nexus-scrollbar-thumb-hover/, "Temas devem centralizar estados das barras de rolagem");
