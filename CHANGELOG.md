@@ -1,3 +1,18 @@
+## 1.0.0.72
+
+### Compatibilidade e atualização
+- Publica um pacote com versão própria para que o Foundry reconheça a atualização em vez de reutilizar a versão 1.0.0.71.
+- Inclui a correção do contrato de dependências dos listeners que impedia a inicialização da ficha e a montagem dos menus e painéis flutuantes.
+- Registra `NEXUS_PROPERTY_SCHEMA_VERSION` em `flags.nexus.propertySchemaVersion` após a migração do Actor.
+- Protege Actors gravados por versões mais novas: uma versão antiga do NEXUS não executa migrações nem grava dados nesses Actors.
+- Mantém dados mecânicos, layouts, componentes, grupos e personalizações fora do escopo de cada migração; mudanças futuras exigem migrações explícitas e idempotentes.
+
+### Validação
+- CI automatizado valida sintaxe, contrato de dependências, migrações idempotentes, proteção contra esquemas futuros e empacotamento.
+- Teste funcional/visual no Foundry VTT 14 continua obrigatório antes de declarar esta versão estável.
+
+---
+
 ## 1.0.0.71
 
 ### Correções de manutenção (mesma versão 1.0.0.71)

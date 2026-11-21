@@ -1,4 +1,5 @@
 import { NEXUS_SKILLS, normalizeNexusProficientLevel } from "./skills.js";
+import { NEXUS_PROPERTY_SCHEMA_VERSION } from "./property-schema.js";
 import { moveActorAliasCustomData } from "./actor-aliases.js";
 
 const getActiveLayoutId = (layouts, storedId) =>
@@ -18,8 +19,15 @@ export async function migrateLegacyActorData({
   invalidateAliasDefinitionCache,
   clone
 }) {
+  const storedSchemaVersion = Number(actor?.getFlag?.("nexus", "propertySchemaVersion")) || 0;
+  if (storedSchemaVersion > NEXUS_PROPERTY_SCHEMA_VERSION) {
+    console.warn(`NEXUS | O Actor ${actor.name ?? actor.id ?? "desconhecido"} usa o esquema de propriedades ${storedSchemaVersion}, mais novo que o suportado (${NEXUS_PROPERTY_SCHEMA_VERSION}). A migração foi ignorada para evitar perda de dados.`);
+    return { changed: false, futureSchema: true, propertySchemaVersion: storedSchemaVersion, aliasesMigrated: false, aliasDataConflicts: 0, propertiesMigrated: false };
+  }
+
   const layouts = await readLayouts();
   let changed = false;
+  let schemaVersionMigrated = false;
   let aliasesChanged = false;
   let aliasDataConflicts = 0;
   let propertiesMigrated = false;
@@ -102,5 +110,13 @@ export async function migrateLegacyActorData({
     changed = true;
   }
 
-  return { activeLayout: activeId, aliasesMigrated: aliasesChanged, aliasDataConflicts, propertiesMigrated, changed };
+  // Record the schema only after the compatibility work above has completed.
+  // Future releases must increment the schema and add an explicit, idempotent migration.
+  if (storedSchemaVersion < NEXUS_PROPERTY_SCHEMA_VERSION) {
+    await actor.setFlag("nexus", "propertySchemaVersion", NEXUS_PROPERTY_SCHEMA_VERSION);
+    schemaVersionMigrated = true;
+    changed = true;
+  }
+
+  return { activeLayout: activeId, aliasesMigrated: aliasesChanged, aliasDataConflicts, propertiesMigrated, schemaVersionMigrated, propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION, changed };
 }

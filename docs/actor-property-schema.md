@@ -1,6 +1,7 @@
 # NEXUS Actor Property Schema
 
-**Schema version:** 4  
+**Schema version:** 4
+**Persisted Actor flag:** `flags.nexus.propertySchemaVersion`  
 **Source of mechanics:** `REGRAS NEXUS.pdf` (core rulebook)  
 **Scope:** Actor/personagem properties. Item documents keep their own data model and are not mixed into this registry.
 
@@ -85,6 +86,9 @@ Identity fields include concept, ancestry, lineage, legacy, talent, class, arche
 Personality fields include appearance, traits, flaws, bonds, ideals, motivation and alignment. Conditions are stored as a collection so the system can represent ordinary conditions and cumulative condition levels without inventing parallel numeric attributes.
 
 ## Migration behavior
+
+The migration manager records the supported schema version in `flags.nexus.propertySchemaVersion` only after the compatibility pass completes. Each future schema increment must include an explicit, idempotent migration and regression tests. If an Actor carries a newer schema version than the running system, the migration manager skips writes to that Actor to prevent an older system from downgrading its data.
+
 
 The migration:
 - Normalizes legacy skill proficiency representations into the canonical numeric `proficientLevel` field and removes obsolete boolean fields.

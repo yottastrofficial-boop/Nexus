@@ -24,4 +24,14 @@ Manter a branch `main` enxuta e utilizável, sem perder o histórico técnico da
 - A limpeza remove arquivos obsoletos da árvore atual, não reescreve o histórico do repositório.
 
 ## Checkpoint atual
-**A versão 1.0.0.70 permanece como último checkpoint de distribuição.** A versão 1.0.0.71 está preparada na branch principal de desenvolvimento, com validação automatizada de pacote, sintaxe, regressões e empacotamento aprovada, mas ainda não foi publicada como release nem declarada estável. A revisão #35 corrige a duplicidade de interações, organiza o ciclo de vida dos listeners, reforça a persistência local e centraliza a compatibilidade de aliases. Permanecem obrigatórios os testes funcionais e visuais no Foundry VTT 14, inclusive cenários com múltiplas janelas e usuários, antes de distribuir a nova versão.
+**A versão 1.0.0.70 permanece como último checkpoint funcional confirmado no Foundry VTT.** A versão 1.0.0.71 foi publicada, mas sua validação automatizada não substitui a validação funcional/visual no Foundry. O pacote distribuído deve ser gerado a partir do commit validado da `main`; atualizar o código sem incrementar a versão não garante que o Foundry solicite outro pacote.
+
+A versão 1.0.0.72 prepara uma atualização de compatibilidade: consolida a correção do contrato de dependências dos listeners, registra a versão do esquema de propriedades por Actor e protege dados de Actors gravados por uma versão mais nova do sistema. Ela ainda precisa passar por testes reais de abertura, navegação, edição e persistência no Foundry VTT 14 antes de ser declarada estável.
+
+### Regra obrigatória para futuras atualizações
+- Toda mudança no formato persistido incrementa `NEXUS_PROPERTY_SCHEMA_VERSION` quando aplicável.
+- Toda versão nova do esquema recebe uma migração explícita, idempotente e coberta por testes com Actors antigos.
+- Migrações preservam propriedades desconhecidas, layouts, componentes, grupos, aliases e dados personalizados que não estejam diretamente envolvidos na mudança.
+- Um sistema antigo nunca deve rebaixar um Actor com versão de esquema superior.
+- Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
+- Uma release só é declarada estável após validação funcional no Foundry, não apenas CI verde.
