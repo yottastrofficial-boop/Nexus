@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.71 publicada · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.72 preparada para publicação · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.71-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.72-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão publicada:** 1.0.0.71. Consolida a organização hierárquica do Canvas, o backup completo da Biblioteca e uma rodada de estabilização da ficha: ciclo de vida dos listeners, deduplicação de interações, persistência serializada, aliases legados e controladores especializados. A validação automatizada e a publicação do pacote foram concluídas. O teste visual e funcional em uma instalação real do Foundry VTT 14 continua necessário.
+> **Versão em preparação:** 1.0.0.72. Consolida as correções de inicialização da ficha Canvas, adiciona controle de versão do esquema dos Actors e proteção contra migrações feitas por versões antigas. A publicação depende da aprovação da validação automatizada; o teste visual e funcional em uma instalação real do Foundry VTT 14 continua obrigatório.
 
 ## Visão geral
 
@@ -45,10 +45,10 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.71 |
+| Versão atual | 1.0.0.72 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.71 possui release e pacote publicados. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.72 possui release e pacote publicados. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -134,7 +134,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão 1.0.0.71 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
+A versão 1.0.0.72 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
 
 **Validação funcional pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
