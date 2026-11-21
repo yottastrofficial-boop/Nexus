@@ -1019,7 +1019,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (liveComponent) {
           const node = sheet.element?.querySelector?.(`.nexus-component[data-id="${CSS.escape(componentId)}"]`);
           const hasClick = getTriggeredActions(liveComponent, "click", { actor: sheet.actor }).length > 0;
-          const hasKeyboard = getComponentInteractions(liveComponent).some(flow => flow.enabled && flow.triggers.some(trigger => ["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) && flow.actions.some(action => action.enabled));
+          const hasKeyboard = getComponentInteractions(liveComponent).some(flow => flow.enabled && flow.triggers.some(trigger => ["focus", "blur"].includes(trigger.event) || (["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim())) && flow.actions.some(action => action.enabled));
           const isInteractive = hasClick || hasKeyboard;
           if (node) {
             node.dataset.hasClickInteraction = String(hasClick);
