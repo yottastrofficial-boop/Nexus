@@ -1258,9 +1258,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if (key === "tokenImage") {
         const source=String(input.value ?? "").trim().slice(0,2048);
         const expression=source.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
-        const resolved=expression ? resolveNexusBinding(sheet.actor,expression[1]) : null;
-        if (source && (expression ? (!resolved?.path || !(isImageSource(resolved.value) || isVideoSource(resolved.value))) : !(isImageSource(source) || isVideoSource(source)))) { ui.notifications?.warn?.("Não foi possível reconhecer a imagem. Informe uma imagem ou uma propriedade de imagem válida."); input.value=component.tokenImage??""; return; }
-        if (source) component.tokenImage=expression ? `{{${resolved.path}}}` : source; else delete component.tokenImage;
+        const wrappedUrl=source.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+        const directSource=wrappedUrl?.[1] ?? source;
+        const directMedia=isImageSource(directSource) || isVideoSource(directSource);
+        const reference=expression?.[1] ?? source;
+        const resolved=source && !directMedia ? resolveNexusBinding(sheet.actor,reference) : null;
+        const resolvedValue=String(resolved?.value ?? "").trim();
+        const validBinding=!!(resolved?.path || resolved?.alias) && (!resolvedValue || isImageSource(resolvedValue) || isVideoSource(resolvedValue));
+        if (source && !directMedia && !validBinding) { ui.notifications?.warn?.("Não foi possível reconhecer a imagem. Informe uma imagem ou uma propriedade de imagem válida."); input.value=component.tokenImage??""; return; }
+        if (source) component.tokenImage=directMedia ? directSource : `{{${resolved.path || reference}}}`; else delete component.tokenImage;
       }
       else if (key === "tokenOverlay") component.tokenOverlay=String(input.value).slice(0,24);
       else if (key === "tokenFrameWidth") component.tokenFrameWidth=clamp(Number(input.value)||0,0,16);
