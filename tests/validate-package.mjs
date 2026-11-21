@@ -1330,7 +1330,7 @@ assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-item
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
 assert.match(interactions,/expression:""/,"Novas condições começam com a expressão vazia");
-assert.match(interactions,/expression\.placeholder="@resources\.pv\.value >= 10"/,"Condições devem oferecer um exemplo de expressão comparável às regras");
+assert.doesNotMatch(interactions,/expression\.placeholder/,"Campos de condição não devem exibir placeholders");
 assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
 assert.match(actorSheetRendering,/String\(binding\.value\)\.trim\(\)/,"URLs de mídia vindas de propriedades devem remover espaços invisíveis antes de renderizar");
