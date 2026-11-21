@@ -56,7 +56,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       sheet._nexusMediaObserver = observer;
     }
 
-    const safeUrl = value => { try { const url = new URL(value, window.location.href); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } };
+    const safeUrl = value => { try { const source=String(value??"").trim(); if(!source)return ""; const url = new URL(source, window.location.href); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } };
     const createMedia = (value, label = "", forceImage = false, displayMode = "auto") => {
       const safe = safeUrl(value); if (!safe || displayMode === "text") return null;
       const clean = safe.split(/[?#]/)[0].toLowerCase();
@@ -82,7 +82,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         let resolved=token, forceImage=false;
         if (wrapped && !/^https?:\/\//i.test(token)) {
           const binding=resolveNexusBinding(sheet.actor,token);
-          resolved=binding.value == null ? "" : String(binding.value);
+          resolved=binding.value == null ? "" : String(binding.value).trim();
           forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||token) || binding.alias?.type==="image";
         }
         const explicitUrl=wrapped && /^https?:\/\//i.test(token);
@@ -134,7 +134,7 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
 
     if (!root) return;
     const renderMedia = createMedia ?? ((value, label, forceImage, displayMode = "auto") => {
-      const safe = (() => { try { const url = new URL(value, window.location.href); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } })();
+      const safe = (() => { try { const source=String(value??"").trim(); if(!source)return ""; const url = new URL(source, window.location.href); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } })();
       if (!safe || displayMode === "text") return null;
       const clean=safe.split(/[?#]/)[0].toLowerCase();
       const image=displayMode === "image" || (displayMode === "auto" && (forceImage || /\.(?:png|jpe?g|jpe|jfif|pjpeg|pjp|gif|apng|webp|avif|svg|bmp|dib|tif|tiff|ico|heic|heif|jxl)$/.test(clean) || /^data:image\//i.test(safe)));
