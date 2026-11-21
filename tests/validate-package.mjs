@@ -1212,9 +1212,11 @@ assert.equal(editorDraft.interactions[0].conditions[conditionIndex].expression, 
   "O Inspector deve persistir a expressão integral da condição");
 applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "condition", conditionIndex, field: "expression" }, "");
 assert.equal(editorDraft.interactions[0].conditions[conditionIndex].expression, "", "Uma condição deve poder ser deixada vazia durante a edição");
+assert.equal(editorDraft.interactions[0].actions.length, 1);
+applyInteractionEditorCommand(editorDraft, "add-action", { interactionId: flowId });
 assert.equal(editorDraft.interactions[0].actions.length, 2);
-applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "trigger", triggerIndex: 1, field: "event" }, "rightClick");
-assert.equal(editorDraft.interactions[0].triggers[1].event, "rightClick");
+applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "trigger", triggerIndex: 0, field: "event" }, "rightClick");
+assert.equal(editorDraft.interactions[0].triggers[0].event, "rightClick");
 applyInteractionEditorCommand(editorDraft, "move-action", { interactionId: flowId, actionIndex: 0, direction: 1 });
 assert.equal(editorDraft.interactions[0].actions[1].type, "roll");
 assert.equal(getComponentInteractions(multiFlowComponent)[0].execution.onError, "continue");
