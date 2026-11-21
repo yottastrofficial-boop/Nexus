@@ -1620,6 +1620,8 @@ assert.match(css, /nexus-data-binding-inline/, "O vínculo deve usar o layout co
 assert.match(propertyValueListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
 assert.ok(propertyValueListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
 assert.ok(propertyValueListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
+assert.match(propertyValueListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de propriedades devem ser tratadas no limite do listener");
+assert.match(sheetListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de recursos devem ser tratadas no limite do listener");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-config-current-value], [data-config-max-value]\""), "PV/PM/PE atuais e máximos devem salvar também na janela flutuante");
 assert.ok(sheetListeners.includes("isSheetOwnedControl(input)"), "Eventos globais devem ser isolados à ficha e às suas janelas");
 assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recursos devem atualizar sem Enter");
