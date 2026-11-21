@@ -1,3 +1,18 @@
+## 1.0.0.74
+
+### Mídia, ícones e comportamento
+- Corrige a expressão regular que impedia a conversão de tokens Font Awesome em elementos de ícone nas prévias.
+- Incorpora URLs de imagem, áudio e vídeo coladas diretamente em conteúdo quando a extensão identifica o formato, inclusive URLs com parâmetros e fragmentos.
+- Mantém a prévia de mídia logo abaixo do campo de valor/conteúdo nas propriedades, regras e ações compatíveis.
+- Torna mais claros os gatilhos de foco, segurar e atalhos personalizados, com captura de tecla e modificadores como Ctrl + Shift + S.
+- Remove o texto auxiliar legado de gatilhos, sem alterar a lógica de fluxos independentes.
+
+### Validação
+- Adiciona testes de regressão para classificação de mídia e interface de atalhos.
+- Validação automatizada e teste funcional/visual no Foundry VTT 14 são necessários antes de declarar estabilidade.
+
+---
+
 ## 1.0.0.73
 
 ### Mídia, ícones e propriedades
