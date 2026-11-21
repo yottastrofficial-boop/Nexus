@@ -193,3 +193,39 @@ Esta seção registra mudanças reais feitas na branch de auditoria, sem declara
 - `actor-sheet-resource-listeners.js` concentra interação por ponteiro, atualização visual dos medidores e envio do valor final ao atualizador da ficha.
 - `actor-sheet-listeners.js` permanece como ponto de composição dos controladores, sem duplicar as regras desses domínios.
 - As dependências usadas por cada controlador são recebidas explicitamente, reduzindo referências implícitas ao escopo do módulo.
+
+
+## Biblioteca unificada — fundação 1.0.0.80
+
+A evolução da Biblioteca deve preservar os dados legados enquanto consolida um contrato comum para coleções reutilizáveis. A fundação inicial fica em `scripts/core/library-store.js` e é independente do DOM e do Foundry.
+
+### Coleções previstas no contrato
+
+- `components`: definições reutilizáveis de componentes.
+- `groups`: grupos estruturais com subgrupos e membros.
+- `layouts`: layouts completos de ficha.
+- `templates`: modelos e presets reutilizáveis.
+- `assets`: entradas do catálogo de elementos.
+- `media`: referências e metadados de mídia; os arquivos binários não são embutidos automaticamente no JSON.
+- `themes`: paletas e temas.
+- `styles`: estilos visuais independentes de temas.
+- `rules`: conjuntos de regras serializáveis como dados.
+- `behaviors`: definições de comportamento reutilizáveis.
+- `flows`: fluxos de interação já suportados pelo motor.
+
+### Regras de integridade
+
+- IDs locais e sourceIds são preservados como identidades distintas.
+- Importação padrão ignora conflitos sem sobrescrever silenciosamente itens existentes.
+- Políticas de duplicar ou substituir são explícitas no serviço de merge e deverão ser apresentadas pela interface de importação.
+- Conteúdo importado é tratado como JSON/dado inerte. Strings HTML, CSS ou JavaScript avançadas nunca são executadas pelo importador.
+- Limites de tamanho, profundidade, quantidade e tipos JSON são validados antes de aceitar os dados.
+- Migração de flags antigas é uma operação explícita em memória; a persistência canônica só deve ocorrer depois da integração e validação do adaptador da Biblioteca.
+
+### Compatibilidade
+
+O backup completo passa a usar `NEXUS-LIBRARY/2`, incluindo modelos, mídia, estilos, regras e comportamentos. O parser continua aceitando backups `NEXUS-LIBRARY/1` e preenche as coleções novas com listas vazias quando não existirem.
+
+### Estado real
+
+Esta etapa estabelece o contrato de dados, merge e compatibilidade de backup. A interface unificada, a migração persistente para um único armazenamento e o gerenciamento visual de todas as coleções ainda são etapas seguintes; não devem ser descritos como concluídos.
