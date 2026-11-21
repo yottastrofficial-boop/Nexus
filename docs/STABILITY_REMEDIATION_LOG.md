@@ -42,7 +42,13 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
    - O cálculo da profundidade máxima usa redução, evitando o limite de argumentos de `Math.max(...array)` em layouts grandes.
    - Foi adicionado teste de regressão executado no CI.
 
-8. **Rejeições de persistência na interface**
+8. **Geometria de contato entre superfícies do Canvas**
+   - Substitui a comparação incondicional de todos os pares por uma varredura espacial ordenada pelo eixo horizontal.
+   - Descarta pares cujas caixas não podem se tocar, preservando candidatos de contato lateral, vertical e de canto.
+   - Mantém o pior caso quadrático quando muitas superfícies realmente se sobrepõem, mas evita comparar todas as superfícies distantes em layouts dispersos.
+   - Adiciona testes de contato e de 2.000 superfícies dispersas.
+
+9. **Rejeições de persistência na interface**
    - Os listeners de edição de propriedades e de valores de recursos capturam a rejeição após o helper registrar o erro e notificar o usuário.
    - A fila continua recuperando-se de operações anteriores rejeitadas.
    - A causa raiz de falhas de gravação específicas ainda depende de reprodução no Foundry com os dados reais do Actor.
@@ -61,7 +67,8 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
 - A primeira execução de CI da PR #42 passou na validação de regressões, sintaxe, manifesto, templates, estilos e geração do pacote.
 - A execução posterior à última alteração precisa confirmar o estado integral desta branch.
 - Testes automatizados também cobrem a preservação de atributos aninhados, a separação entre persistência e atualização visual e hierarquias de grupos profundas.
-- As regressões de renderização de grupos e inicialização compartilhada passaram no CI mais recente.
+- As regressões de renderização de grupos e inicialização compartilhada passaram no CI do commit `d7393bd`.
+- A regressão da varredura espacial foi adicionada depois e aguarda a execução do CI mais recente.
 - Em 2026-11-21, os workflows `Validate NEXUS` e `Validate and Release` passaram no commit `d7393bd`; o pacote foi construído como artefato de validação, mas a publicação da release foi ignorada.
 - Teste manual no Foundry VTT 14 build 360 continua pendente: abertura/fechamento de fichas, edição de propriedades, migração de Actors antigos, múltiplas fichas do mesmo Actor, tokens e layouts grandes.
 
