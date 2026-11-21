@@ -7,24 +7,35 @@ export function buildGroupHierarchy(groups = [], components = []) {
   const groupById = new Map(validGroups.map(group => [String(group.id), group]));
   const componentIds = new Set((components ?? []).map(component => String(component.id)));
   const parentById = new Map();
-  for (const group of validGroups) {
-    const parentId = String(group.parentGroupId ?? "");
-    parentById.set(String(group.id), parentId && parentId !== String(group.id) && groupById.has(parentId) ? parentId : "");
-  }
-  // Break corrupt cycles deterministically, preserving the first valid ancestor chain.
+
   for (const group of validGroups) {
     const id = String(group.id);
-    const seen = new Set([id]);
-    let parentId = parentById.get(id);
-    while (parentId) {
-      if (seen.has(parentId)) {
-        parentById.set(id, "");
-        break;
-      }
-      seen.add(parentId);
-      parentId = parentById.get(parentId) ?? "";
-    }
+    const parentId = String(group.parentGroupId ?? "");
+    parentById.set(id, parentId && parentId !== id && groupById.has(parentId) ? parentId : "");
   }
+
+  // Detect and break corrupt cycles iteratively to avoid call-stack growth on deep trees.
+  const processed = new Set();
+  for (const group of validGroups) {
+    const startId = String(group.id);
+    if (processed.has(startId)) continue;
+    const path = [];
+    const indexById = new Map();
+    let cursor = startId;
+
+    while (cursor && groupById.has(cursor) && !processed.has(cursor) && !indexById.has(cursor)) {
+      indexById.set(cursor, path.length);
+      path.push(cursor);
+      cursor = parentById.get(cursor) ?? "";
+    }
+
+    if (cursor && indexById.has(cursor)) {
+      // Root the first node in the detected cycle while preserving its descendants.
+      parentById.set(path[indexById.get(cursor)], "");
+    }
+    for (const id of path) processed.add(id);
+  }
+
   const directComponents = new Map(validGroups.map(group => [String(group.id), []]));
   const componentOwner = new Map();
   for (const group of validGroups) {
@@ -35,46 +46,78 @@ export function buildGroupHierarchy(groups = [], components = []) {
       directComponents.get(id).push(componentId);
     }
   }
+
   const children = new Map(validGroups.map(group => [String(group.id), []]));
   for (const group of validGroups) {
-    const id = String(group.id), parentId = parentById.get(id);
+    const id = String(group.id);
+    const parentId = parentById.get(id);
     if (parentId) children.get(parentId)?.push(id);
   }
-  const descendants = new Map();
-  const collect = (id, stack = new Set()) => {
-    if (descendants.has(id)) return descendants.get(id);
-    if (stack.has(id)) return [];
-    const nextStack = new Set(stack).add(id);
-    const ids = [...(directComponents.get(id) ?? [])];
-    for (const childId of children.get(id) ?? []) ids.push(...collect(childId, nextStack));
-    const unique = [...new Set(ids)];
-    descendants.set(id, unique);
-    return unique;
-  };
-  for (const group of validGroups) collect(String(group.id));
+
   const roots = validGroups.filter(group => !parentById.get(String(group.id))).map(group => String(group.id));
-  const flatten = (id, depth = 0, ancestors = new Set()) => {
-    if (ancestors.has(id)) return [];
+  const postorder = [];
+  const traversal = roots.slice().reverse().map(id => ({ id, expanded: false }));
+  while (traversal.length) {
+    const entry = traversal.pop();
+    if (entry.expanded) {
+      postorder.push(entry.id);
+      continue;
+    }
+    traversal.push({ id: entry.id, expanded: true });
+    const childIds = children.get(entry.id) ?? [];
+    for (let index = childIds.length - 1; index >= 0; index--) {
+      traversal.push({ id: childIds[index], expanded: false });
+    }
+  }
+
+  const descendants = new Map();
+  for (const id of postorder) {
+    const ids = [];
+    const seen = new Set();
+    for (const componentId of directComponents.get(id) ?? []) {
+      if (seen.has(componentId)) continue;
+      seen.add(componentId);
+      ids.push(componentId);
+    }
+    for (const childId of children.get(id) ?? []) {
+      for (const componentId of descendants.get(childId) ?? []) {
+        if (seen.has(componentId)) continue;
+        seen.add(componentId);
+        ids.push(componentId);
+      }
+    }
+    descendants.set(id, ids);
+  }
+
+  const rows = [];
+  const depthById = new Map();
+  const flattenStack = roots.slice().reverse().map(id => ({ id, depth: 0 }));
+  while (flattenStack.length) {
+    const { id, depth } = flattenStack.pop();
     const group = groupById.get(id);
-    if (!group) return [];
-    const next = new Set(ancestors).add(id);
-    const rows = [{
+    if (!group) continue;
+    depthById.set(id, depth);
+    rows.push({
       id, kind: "group", depth, group,
       componentIds: descendants.get(id) ?? [],
       directComponentIds: directComponents.get(id) ?? [],
       children: children.get(id) ?? []
-    }];
-    for (const componentId of directComponents.get(id) ?? []) rows.push({ id: componentId, kind: "component", depth: depth + 1 });
-    for (const childId of children.get(id) ?? []) rows.push(...flatten(childId, depth + 1, next));
-    return rows;
-  };
-  const rows = [];
-  for (const rootId of roots) rows.push(...flatten(rootId));
+    });
+    for (const componentId of directComponents.get(id) ?? []) {
+      rows.push({ id: componentId, kind: "component", depth: depth + 1 });
+    }
+    const childIds = children.get(id) ?? [];
+    for (let index = childIds.length - 1; index >= 0; index--) {
+      flattenStack.push({ id: childIds[index], depth: depth + 1 });
+    }
+  }
+
   for (const component of components ?? []) {
     const id = String(component.id);
     if (!componentOwner.has(id)) rows.push({ id, kind: "component", depth: 0 });
   }
-  return { groupById, parentById, directComponents, children, descendants, roots, rows, componentOwner };
+
+  return { groupById, parentById, directComponents, children, descendants, roots, rows, componentOwner, depthById };
 }
 
 export function getGroupDescendantComponentIds(groupId, hierarchy) {
@@ -97,22 +140,43 @@ export function validateGroupParent(groups = [], groupId, parentGroupId = "") {
 
 export function getGroupTreeSnapshot(groupId, groups = [], components = []) {
   const hierarchy = buildGroupHierarchy(groups, components);
-  const group = hierarchy.groupById.get(String(groupId));
-  if (!group) return null;
+  const rootId = String(groupId);
+  if (!hierarchy.groupById.has(rootId)) return null;
+
   const componentMap = new Map((components ?? []).map(component => [String(component.id), component]));
-  const collect = id => {
-    const current = hierarchy.groupById.get(String(id));
-    if (!current) return null;
-    return {
-      ...Object.fromEntries(Object.entries(current).filter(([key]) => !["id", "parentGroupId", "componentIds", "x", "y", "w", "h", "z", "stackOrder"].includes(key))),
-      componentIds: [...(hierarchy.directComponents.get(String(id)) ?? [])].map(componentId => {
-        const component = componentMap.get(componentId);
-        if (!component) return null;
-        const { id: _id, definition: _definition, ...data } = structuredClone(component);
-        return { sourceId: componentId, ...data };
-      }).filter(Boolean),
-      groups: (hierarchy.children.get(String(id)) ?? []).map(collect).filter(Boolean)
-    };
-  };
-  return collect(String(groupId));
+  const snapshots = new Map();
+  const stack = [{ id: rootId, expanded: false }];
+
+  while (stack.length) {
+    const entry = stack.pop();
+    const id = entry.id;
+    const current = hierarchy.groupById.get(id);
+    if (!current) continue;
+    const childIds = hierarchy.children.get(id) ?? [];
+
+    if (!entry.expanded) {
+      stack.push({ id, expanded: true });
+      for (let index = childIds.length - 1; index >= 0; index--) {
+        stack.push({ id: childIds[index], expanded: false });
+      }
+      continue;
+    }
+
+    const componentSnapshots = (hierarchy.directComponents.get(id) ?? []).map(componentId => {
+      const component = componentMap.get(componentId);
+      if (!component) return null;
+      const { id: _id, definition: _definition, ...data } = structuredClone(component);
+      return { sourceId: componentId, ...data };
+    }).filter(Boolean);
+
+    snapshots.set(id, {
+      ...Object.fromEntries(Object.entries(current).filter(([key]) =>
+        !["id", "parentGroupId", "componentIds", "x", "y", "w", "h", "z", "stackOrder"].includes(key)
+      )),
+      componentIds: componentSnapshots,
+      groups: childIds.map(childId => snapshots.get(childId)).filter(Boolean)
+    });
+  }
+
+  return snapshots.get(rootId) ?? null;
 }

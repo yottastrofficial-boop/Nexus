@@ -14,7 +14,7 @@ const getBounds=(ids,map)=>{const items=ids.map(id=>map.get(String(id))).filter(
 export function applyGroupLayouts(groups=[],components=[]) {
  const nextGroups=(Array.isArray(groups)?groups:[]).map(normalizeGroupPresentation),nextComponents=(Array.isArray(components)?components:[]).map(c=>({...c}));
  const tree=buildGroupHierarchy(nextGroups,nextComponents),map=new Map(nextComponents.map(c=>[String(c.id),c]));
- const depth=id=>{let n=0,cursor=tree.parentById.get(String(id))||"",seen=new Set([String(id)]);while(cursor&&!seen.has(cursor)){seen.add(cursor);n++;cursor=tree.parentById.get(cursor)||"";}return n;};
+ const depth=id=>tree.depthById.get(String(id))??0;
  for(const group of [...nextGroups].sort((a,b)=>depth(b.id)-depth(a.id))){
   if(group.layoutMode==="free")continue;
   const direct=tree.directComponents.get(String(group.id))||[],children=tree.children.get(String(group.id))||[];

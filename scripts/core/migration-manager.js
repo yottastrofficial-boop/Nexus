@@ -6,11 +6,30 @@ const getActiveLayoutId = (layouts, storedId) =>
   layouts[storedId] ? storedId : "principal";
 
 /**
+ * Build default-value updates without flattening legacy nested attribute data.
+ * Scalar attributes remain scalar; object-backed attributes retain their shape.
+ */
+export function getNexusAttributeInitializationUpdates(system = {}) {
+  const updates = {};
+  for (const key of ["for", "des", "sab", "int", "car", "von"]) {
+    const stored = system.attributes?.[key];
+    const nested = stored !== null && typeof stored === "object" && !Array.isArray(stored);
+    const value = nested ? stored.value : stored;
+    if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) {
+      updates[`system.attributes.${key}${nested ? ".value" : ""}`] = 0;
+    }
+  }
+  return updates;
+}
+
+/**
  * Applies one-time compatibility migrations for persisted Actor flags.
  * Context preparation remains read-only; this function is called explicitly
  * from the sheet render lifecycle and is safe to retry after partial failure.
  */
-export async function migrateLegacyActorData({
+const pendingActorMigrations = new WeakMap();
+
+async function performLegacyActorDataMigration({
   actor,
   readLayouts,
   getAliasDefinitions,
@@ -75,7 +94,7 @@ export async function migrateLegacyActorData({
     if (!Array.isArray(system.conditions)) updates["system.conditions"] = [];
 
     if (Object.keys(updates).length) {
-      await actor.update(updates);
+      await actor.update(updates, { render: false });
       propertiesMigrated = true;
       changed = true;
     }
@@ -119,4 +138,25 @@ export async function migrateLegacyActorData({
   }
 
   return { activeLayout: activeId, aliasesMigrated: aliasesChanged, aliasDataConflicts, propertiesMigrated, schemaVersionMigrated, propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION, changed };
+}
+
+
+/**
+ * Share an in-flight migration between sheet instances for the same Actor.
+ * This prevents duplicate reads and competing writes when multiple sheets
+ * for one Actor are opened at the same time in the same client.
+ */
+export function migrateLegacyActorData(dependencies) {
+  const actor = dependencies?.actor;
+  if (!actor || (typeof actor !== "object" && typeof actor !== "function")) {
+    return performLegacyActorDataMigration(dependencies);
+  }
+  const pending = pendingActorMigrations.get(actor);
+  if (pending) return pending;
+
+  const operation = performLegacyActorDataMigration(dependencies);
+  pendingActorMigrations.set(actor, operation);
+  return operation.finally(() => {
+    if (pendingActorMigrations.get(actor) === operation) pendingActorMigrations.delete(actor);
+  });
 }

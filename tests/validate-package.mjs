@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
-import { migrateLegacyActorData } from "../scripts/core/migration-manager.js";
+import { getNexusAttributeInitializationUpdates, migrateLegacyActorData } from "../scripts/core/migration-manager.js";
 import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillModifier, getNexusSkillRows, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../scripts/core/property-schema.js";
@@ -16,7 +16,7 @@ import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
-import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+import { buildGroupHierarchy, getGroupTreeSnapshot, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
 import { activateActorSheetSkillListeners } from "../scripts/sheets/actor-sheet-skill-listeners.js";
@@ -24,6 +24,29 @@ import { activateActorSheetResourceListeners } from "../scripts/sheets/actor-she
 import { slugifyActorAlias, isSafeActorAliasKey, normalizeActorAliasDefinition, createUniqueActorAliasKey, moveActorAliasCustomData, replaceActorAliasLayoutReferences, createActorAliasDefaultValue, createActorAliasCopyDefinition, getActorAliasCustomValue } from "../scripts/core/actor-aliases.js";
 import { isMediaSource, isImageSource, isVideoSource, isAudioSource, isUsableTokenSource, getMediaKind, DEFAULT_FOUNDRY_TOKEN_IMAGE } from "../scripts/sheets/actor-sheet-media.js";
 import { applyGroupLayouts, normalizeGroupPresentation } from "../scripts/core/group-composition.js";
+
+// Attribute initialization must preserve legacy nested storage and metadata.
+{
+  const updates = getNexusAttributeInitializationUpdates({
+    attributes: {
+      for: { value: 7, customLabel: "Força preservada" },
+      des: { value: "", customLabel: "Destreza preservada" },
+      sab: 0, int: 1, car: 2, von: 3
+    }
+  });
+  assert.deepEqual(updates, { "system.attributes.des.value": 0 },
+    "Atributos aninhados devem inicializar somente o campo value, sem substituir o objeto");
+  assert.deepEqual(
+    getNexusAttributeInitializationUpdates({ attributes: { for: 2, des: 3, sab: 0, int: 1, car: 2, von: 3 } }),
+    {},
+    "Atributos escalares válidos não devem receber atualizações desnecessárias"
+  );
+  assert.deepEqual(
+    getNexusAttributeInitializationUpdates({ attributes: { for: undefined, des: 3, sab: 0, int: 1, car: 2, von: 3 } }),
+    { "system.attributes.for": 0 },
+    "Atributos escalares ausentes devem continuar recebendo o valor padrão"
+  );
+}
 
 // Nested group hierarchy regression tests.
 assert.equal(getMediaKind("https://i.imgur.com/fNhOxpm.jpeg"), "image", "URLs diretas de imagem devem ser classificadas");
@@ -44,6 +67,39 @@ assert.equal(getMediaKind("https://example.test/page"), "", "URLs sem tipo conhe
   assert.equal(hierarchy.rows.find(row => row.id === "c").depth, 0);
   assert.equal(validateGroupParent(groups, "outer", "inner"), false, "A hierarchy must reject cycles");
   assert.equal(validateGroupParent(groups, "inner", ""), true, "A group may be promoted to the root");
+}
+{
+  const cyclic = buildGroupHierarchy([
+    { id: "cycle-a", parentGroupId: "cycle-b" },
+    { id: "cycle-b", parentGroupId: "cycle-a" }
+  ], []);
+  assert.deepEqual(cyclic.roots, ["cycle-a"], "A hierarquia corrompida deve ser reparada de forma determinística");
+  assert.equal(cyclic.parentById.get("cycle-a"), "");
+  assert.equal(cyclic.parentById.get("cycle-b"), "cycle-a");
+}
+{
+  const count = 2500;
+  const deepGroups = Array.from({ length: count }, (_, index) => ({
+    id: `deep-${index}`,
+    parentGroupId: index === 0 ? "" : `deep-${index - 1}`,
+    componentIds: index === count - 1 ? ["deep-component"] : []
+  }));
+  const deepComponents = [{ id: "deep-component", type: "custom-card", x: 0, y: 0, w: 20, h: 20 }];
+  const deepHierarchy = buildGroupHierarchy(deepGroups, deepComponents);
+  assert.equal(deepHierarchy.rows.filter(row => row.kind === "group").length, count,
+    "Hierarquias profundas devem ser percorridas sem recursão de pilha");
+  assert.equal(deepHierarchy.depthById.get(`deep-${count - 1}`), count - 1,
+    "A profundidade dos grupos deve ser calculada uma única vez");
+  assert.deepEqual(deepHierarchy.descendants.get("deep-0"), ["deep-component"]);
+  assert.equal(applyGroupLayouts(deepGroups, deepComponents).groups.length, count,
+    "A composição visual também deve suportar hierarquias profundas sem recalcular cadeias de ancestrais");
+  const deepSnapshot = getGroupTreeSnapshot("deep-0", deepGroups, deepComponents);
+  let snapshotDepth = 0, snapshotCursor = deepSnapshot;
+  while (snapshotCursor?.groups?.length) {
+    snapshotDepth++;
+    snapshotCursor = snapshotCursor.groups[0];
+  }
+  assert.equal(snapshotDepth, count - 1, "Snapshots profundos devem ser construídos sem recursão");
 }
 {
  const legacy=normalizeGroupPresentation({id:"legacy",name:"Grupo antigo"});assert.equal(legacy.kind,"container");assert.equal(legacy.layoutMode,"free");
@@ -259,6 +315,7 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const migrationManager = await read("scripts/core/migration-manager.js");
 const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
 assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
 const sheetDependencyBlock = sheet.match(/activateActorSheetListeners\(this, html, \{([\s\S]*?)\}\);/)?.[1] ?? "";
@@ -676,7 +733,16 @@ assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationSta
 const prepareContext = sheet.slice(prepareStart, migrationStart);
 assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
 assert.match(sheetCode, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
-assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
+assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?this\._scheduleNexusRefresh\(\)/, "A ficha deve agendar uma única atualização após migrar dados legados");
+assert.match(sheet, /_nexusRulesDataPromise/, "A inicialização de atributos e perícias deve compartilhar operações simultâneas");
+assert.match(sheet, /this\.actor\.update\(updates, \{ render: false \}\)/, "A inicialização não deve provocar uma renderização automática redundante");
+assert.match(sheet, /_scheduleNexusRefresh\(\)[\s\S]*?if \(this\._nexusRefreshScheduled\) return/, "As atualizações posteriores à migração devem ser coalescidas");
+assert.match(sheet, /if \(this\.rendered\) void this\.render\(\{ force: true \}\)/, "O refresh agendado deve respeitar o estado de renderização da ApplicationV2");
+assert.match(sheet, /_nexusRefreshGeneration = \(this\._nexusRefreshGeneration \?\? 0\) \+ 1/, "O fechamento deve invalidar refreshes pendentes");
+assert.match(sheet, /floatingGeneration !== this\._nexusFloatingGeneration/, "Painéis assíncronos antigos não devem abrir após uma nova renderização ou fechamento");
+assert.match(sheet, /if \(pendingLayoutClick\) clearTimeout\(pendingLayoutClick\)/, "O timer de troca de página deve ser limpo ao desmontar o Floating UI");
+assert.match(migrationManager, /actor\.update\(updates, \{ render: false \}\)/, "A migração deve evitar renderização automática durante a gravação");
+assert.match(migrationManager, /pendingActorMigrations = new WeakMap\(\)/, "Migrações concorrentes do mesmo Actor devem compartilhar uma única operação");
 
 
 // Exercise the legacy migration manager with a minimal Actor-like document.
@@ -729,6 +795,35 @@ assert.equal(secondMigration.changed, false, "Migração repetida não deve sina
 assert.equal(secondMigration.schemaVersionMigrated, false, "A versão do esquema não deve ser gravada novamente");
 
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
+
+// Concurrent sheets for one Actor must share the same in-flight migration.
+{
+  let releaseMigration;
+  const migrationGate = new Promise(resolve => { releaseMigration = resolve; });
+  let layoutReads = 0;
+  const concurrentActor = {
+    flags: { nexus: { activeLayout: "principal", aliases: [], propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION } },
+    getFlag(scope, key) { return this.flags[scope]?.[key]; },
+    async setFlag(scope, key, value) { this.flags[scope] ??= {}; this.flags[scope][key] = structuredClone(value); }
+  };
+  const concurrentDependencies = {
+    actor: concurrentActor,
+    readLayouts: async () => { layoutReads++; await migrationGate; return { principal: {} }; },
+    getAliasDefinitions: () => [],
+    getCustomAliasData: () => ({}),
+    normalizeAliasDefinition: value => value,
+    invalidateAliasDefinitionCache: () => {},
+    clone: value => structuredClone(value)
+  };
+  const first = migrateLegacyActorData(concurrentDependencies);
+  const second = migrateLegacyActorData(concurrentDependencies);
+  assert.equal(layoutReads, 1, "Duas fichas do mesmo Actor não devem iniciar migrações simultâneas");
+  releaseMigration();
+  const [firstResult, secondResult] = await Promise.all([first, second]);
+  assert.strictEqual(firstResult, secondResult, "As fichas devem compartilhar o resultado da mesma migração");
+  assert.equal(layoutReads, 1, "A migração compartilhada deve ler os layouts uma única vez");
+}
+
 
 // Property migration normalizes legacy proficiency fields but preserves manually stored mechanical values.
 const legacyPropertyActor = {
@@ -1413,6 +1508,9 @@ assert.equal(representationDraft.propertyPresentation.rules[0].name, "Regra 2", 
 assert.equal(representationDraft.representation.rules[0].output, "level + mb");
 assert.match(interactions, /renderPropertyPresentationEditor/, "As regras de apresentação devem integrar o painel Propriedades");
 assert.match(sheetCode, /Hooks\.on\("updateActor"/, "A atualização reativa deve responder a eventos reais do Actor");
+assert.ok(sheetListeners.indexOf("const inspectorNamespace =") < sheetListeners.indexOf("$(document).on(`input${inspectorNamespace}`"), "O namespace do Inspector deve ser inicializado antes do primeiro listener delegado");
+assert.ok(sheetListeners.indexOf("$(document).off(inspectorNamespace)") < sheetListeners.indexOf("$(document).on(`input${inspectorNamespace}`"), "Listeners antigos devem ser removidos antes do registro dos novos");
+assert.equal((sheetListeners.match(/\$\(document\)\.off\(inspectorNamespace\)/g) ?? []).length, 1, "O namespace não deve ser limpo novamente depois de registrar o primeiro listener");
 assert.ok(sheetListeners.includes("on(`input${inspectorNamespace}`"), "A edição do conteúdo das regras deve atualizar a prévia durante a digitação");
 assert.ok(sheetListeners.includes("sheet._refreshBoundComponents?.()"), "A prévia das regras deve ser recalculada sem alterar propriedades do Actor");
 assert.match(sheetCode, /_refreshRichExpressions\?\.\(refreshedComponentIds\)/, "Somente os componentes afetados devem reavaliar suas expressões");
@@ -1584,6 +1682,10 @@ assert.match(css, /nexus-data-binding-inline/, "O vínculo deve usar o layout co
 assert.match(propertyValueListeners, /String\(value\)\.trim\(\) === ""\) value = 0/, "Campos numéricos vazios devem ser persistidos como zero");
 assert.ok(propertyValueListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
 assert.ok(propertyValueListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
+assert.match(propertyValueListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de propriedades devem ser tratadas no limite do listener");
+assert.match(sheet, /_refreshBoundComponentsSafely\(changes = null\)[\s\S]*?catch \(error\)[\s\S]*?A gravação foi concluída/, "Falhas de atualização visual não devem ser reportadas como falhas de persistência");
+assert.ok(propertyValueListeners.includes("sheet._refreshBoundComponentsSafely()"), "O Inspector deve atualizar prévias sem confundir falhas visuais com falhas de gravação");
+assert.match(sheetListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de recursos devem ser tratadas no limite do listener");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-config-current-value], [data-config-max-value]\""), "PV/PM/PE atuais e máximos devem salvar também na janela flutuante");
 assert.ok(sheetListeners.includes("isSheetOwnedControl(input)"), "Eventos globais devem ser isolados à ficha e às suas janelas");
 assert.ok(sheetListeners.includes("pendingResourceValueSaves"), "Valores de recursos devem atualizar sem Enter");

@@ -12,7 +12,7 @@ import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./ac
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { applyGroupLayouts } from "../core/group-composition.js";
-import { migrateLegacyActorData } from "../core/migration-manager.js";
+import { getNexusAttributeInitializationUpdates, migrateLegacyActorData } from "../core/migration-manager.js";
 import { normalizeActorAliasDefinition, getActorAliasCustomValue } from "../core/actor-aliases.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
@@ -25,6 +25,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
 const layoutReadSnapshots = new WeakMap();
+const pendingActorRulesInitialization = new WeakMap();
 const layoutWriteQueues = new Map();
 
 const ActorSheetV2 = foundry.applications.sheets.ActorSheetV2;
@@ -830,50 +831,80 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _ensureNexusRulesData() {
+    const actor = this.actor;
+    if (!actor || (typeof actor !== "object" && typeof actor !== "function")) return false;
     if (this._nexusRulesDataReady) return false;
-    const system = this.actor.system ?? {};
-    const updates = {};
-    for (const key of ["for", "des", "sab", "int", "car", "von"]) {
-      const value = system.attributes?.[key];
-      if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
+
+    const pending = pendingActorRulesInitialization.get(actor);
+    if (pending) {
+      const result = await pending;
+      if (result.ready) this._nexusRulesDataReady = true;
+      return result.migrated;
     }
-    for (const skill of NEXUS_SKILLS) {
-      const current = system.skills?.[skill.key];
-      const legacy = system.skills?.[skill.legacyKey];
-      const hasCanonicalLevel = current?.proficientLevel !== undefined
-        && current?.proficientLevel !== null
-        && current?.proficientLevel !== "";
-      if (!hasCanonicalLevel) {
-        const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
-        const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
-        const stored = currentLegacyLevel ?? legacyLevel ?? 0;
-        updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
-      } else {
-        const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
-        if (typeof current.proficientLevel !== "number" || current.proficientLevel !== normalizedLevel) {
-          updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
+
+    const operation = (async () => {
+      try {
+        const system = actor.system ?? {};
+        const updates = getNexusAttributeInitializationUpdates(system);
+        for (const skill of NEXUS_SKILLS) {
+          const current = system.skills?.[skill.key];
+          const legacy = system.skills?.[skill.legacyKey];
+          const hasCanonicalLevel = current?.proficientLevel !== undefined
+            && current?.proficientLevel !== null
+            && current?.proficientLevel !== "";
+          if (!hasCanonicalLevel) {
+            const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
+            const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
+            const stored = currentLegacyLevel ?? legacyLevel ?? 0;
+            updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
+          } else {
+            const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
+            if (typeof current.proficientLevel !== "number" || current.proficientLevel !== normalizedLevel) {
+              updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
+            }
+          }
+          const forcedDeletion = () => new foundry.data.operators.ForcedDeletion();
+          if (current && Object.hasOwn(current, "proficiency")) {
+            updates["system.skills." + skill.key + ".proficiency"] = forcedDeletion();
+          }
+          if (current && Object.hasOwn(current, "proficient")) {
+            updates["system.skills." + skill.key + ".proficient"] = forcedDeletion();
+          }
+          if (current && Object.hasOwn(current, "opposed")) {
+            updates["system.skills." + skill.key + ".opposed"] = forcedDeletion();
+          }
+          if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
         }
+        if (Object.keys(updates).length) await this.actor.update(updates, { render: false });
+        return { ready: true, migrated: Object.keys(updates).length > 0 };
+      } catch (error) {
+        console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
+        return { ready: false, migrated: false };
       }
-      const forcedDeletion = () => new foundry.data.operators.ForcedDeletion();
-      if (current && Object.hasOwn(current, "proficiency")) {
-        updates["system.skills." + skill.key + ".proficiency"] = forcedDeletion();
-      }
-      if (current && Object.hasOwn(current, "proficient")) {
-        updates["system.skills." + skill.key + ".proficient"] = forcedDeletion();
-      }
-      if (current && Object.hasOwn(current, "opposed")) {
-        updates["system.skills." + skill.key + ".opposed"] = forcedDeletion();
-      }
-      if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
-    }
+    })();
+
+    this._nexusRulesDataPromise = operation;
+    pendingActorRulesInitialization.set(actor, operation);
     try {
-      if (Object.keys(updates).length) await this.actor.update(updates);
-      this._nexusRulesDataReady = true;
-      return Object.keys(updates).length > 0;
-    } catch (error) {
-      console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
-      return false;
+      const result = await operation;
+      if (result.ready) this._nexusRulesDataReady = true;
+      return result.migrated;
+    } finally {
+      if (pendingActorRulesInitialization.get(actor) === operation) pendingActorRulesInitialization.delete(actor);
+      if (this._nexusRulesDataPromise === operation) this._nexusRulesDataPromise = null;
     }
+  }
+
+  _scheduleNexusRefresh() {
+    if (this._nexusRefreshScheduled) return;
+    this._nexusRefreshScheduled = true;
+    const generation = (this._nexusRefreshGeneration ?? 0) + 1;
+    this._nexusRefreshGeneration = generation;
+    queueMicrotask(() => {
+      if (this._nexusRefreshGeneration !== generation) return;
+      this._nexusRefreshScheduled = false;
+      if (this.rendered) void this.render({ force: true });
+    });
   }
 
   _getHeaderControls() {
@@ -1105,12 +1136,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (migrated) {
       // The first render was prepared from the legacy snapshot. Refresh once
       // after migration so moved alias values appear without requiring a reopen.
-      queueMicrotask(() => this.render({ force: true }));
+      this._scheduleNexusRefresh();
       return;
     }
     const rulesDataMigrated = await this._ensureNexusRulesData();
     if (rulesDataMigrated) {
-      queueMicrotask(() => this.render({ force: true }));
+      this._scheduleNexusRefresh();
       return;
     }
     const form = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
@@ -1266,6 +1297,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
       for (const dependency of dependencies) if (overlaps(changed, dependency)) return true;
     }
     return false;
+  }
+
+  _refreshBoundComponentsSafely(changes = null) {
+    try {
+      this._refreshBoundComponents(changes);
+      return true;
+    } catch (error) {
+      console.error("NEXUS | A gravação foi concluída, mas a atualização visual dos componentes falhou.", error);
+      globalThis.ui?.notifications?.warn?.("O valor foi salvo, mas a ficha não conseguiu atualizar uma ou mais prévias. Reabra a ficha se a exibição não for atualizada.");
+      return false;
+    }
   }
 
   _refreshBoundComponents(changes = null) {
@@ -3502,6 +3544,8 @@ if (!hasPath) propertyValueInput.value = "";
   _mountFloatingUI(html) {
     const root = html[0];
     this._nexusFloatingCleanup?.({ preserveWindows: true });
+    const floatingGeneration = (this._nexusFloatingGeneration ?? 0) + 1;
+    this._nexusFloatingGeneration = floatingGeneration;
     const app = root.closest(".application, .window-app, .app") || root;
     document.querySelector(`[data-nexus-floating-for="${this.id}"]`)?.remove();
     const leftRail = root.querySelector(".nexus-appearance-rail");
@@ -3698,6 +3742,7 @@ if (!hasPath) propertyValueInput.value = "";
           console.error("NEXUS | Falha ao carregar a Biblioteca", error);
           return;
         }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) return;
         this._libraryApplyFilter?.();
         this._libraryRestoreSelection?.();
       }
@@ -3722,6 +3767,15 @@ if (!hasPath) propertyValueInput.value = "";
       this._nexusPanelWindows.set(key, instance);
       this._openAppearancePanels.add(key);
       instance.render({ force: true }).then(() => {
+        if (this._nexusPanelWindows.get(key) !== instance) {
+          instance.close();
+          return;
+        }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) {
+          // A newer sheet render now owns this still-open panel; preserve it.
+          applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+          return;
+        }
         applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
         focusPanelWindow(instance);
         syncRailFocus(false);
@@ -3778,6 +3832,9 @@ if (!hasPath) propertyValueInput.value = "";
     window.addEventListener("scroll", positionRails, true);
 
     this._nexusFloatingCleanup = ({ preserveWindows = true } = {}) => {
+      if (this._nexusFloatingGeneration === floatingGeneration) this._nexusFloatingGeneration += 1;
+      if (pendingLayoutClick) clearTimeout(pendingLayoutClick);
+      pendingLayoutClick = null;
       resizeObserver?.disconnect(); moveObserver?.disconnect();
       window.removeEventListener("resize", positionRails);
       window.removeEventListener("scroll", positionRails, true);
@@ -3819,6 +3876,8 @@ if (!hasPath) propertyValueInput.value = "";
   }
 
   _onClose(options) {
+    this._nexusRefreshGeneration = (this._nexusRefreshGeneration ?? 0) + 1;
+    this._nexusRefreshScheduled = false;
     this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
     this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
     this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;

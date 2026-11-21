@@ -71,7 +71,7 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
           } else {
             await writePropertyExpression(sheet.actor, path, String(value));
           }
-          sheet._refreshBoundComponents();
+          sheet._refreshBoundComponentsSafely();
           return;
         }
         if (skillFormulaMatch) {
@@ -82,7 +82,7 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
             return;
           }
           await sheet.actor.update({ [`system.skills.${skillFormulaMatch[1]}.formula`]: formula }, { render: false });
-          sheet._refreshBoundComponents();
+          sheet._refreshBoundComponentsSafely();
           return;
         }
         const existingExpression = getPath(sheet.actor.getFlag?.("nexus", "propertyExpressions") ?? sheet.actor.flags?.nexus?.propertyExpressions ?? {}, path);
@@ -90,7 +90,7 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
         if (resolvedPath.readOnly) {
           if (String(value ?? "").trim() === "" && typeof existingExpression === "string") {
             await writePropertyExpression(sheet.actor, path, null);
-            sheet._refreshBoundComponents();
+            sheet._refreshBoundComponentsSafely();
             return;
           }
           input.value = String(resolveNexusBinding(sheet.actor, path).value ?? "");
@@ -148,7 +148,7 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
         if (typeof existingExpression === "string") {
           await writePropertyExpression(sheet.actor, path, null);
         }
-        sheet._refreshBoundComponents();
-        });
+        sheet._refreshBoundComponentsSafely();
+        }).catch(() => {});
       });
 }
