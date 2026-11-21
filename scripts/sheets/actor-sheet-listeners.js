@@ -1078,7 +1078,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`keydown${inspectorNamespace}`, event => {
       const capture = document.querySelector(".nexus-interaction-trigger-row [data-interaction-action='capture-key'].is-capturing");
       if (!capture) return;
-      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey ? [...String(capture.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>value.toUpperCase()), capture.dataset.capturedKey===" "?"Espaço":capture.dataset.capturedKey].join(" + ") : "Definir combinação…"; event.preventDefault(); return; }
+      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey ? [...String(capture.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), capture.dataset.capturedKey===" "?"Espaço":capture.dataset.capturedKey].join(" + ") : "Definir combinação…"; event.preventDefault(); return; }
       if (["Control","Shift","Alt","Meta"].includes(event.key)) return;
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       const modifiers = [event.ctrlKey ? "ctrl" : null, event.shiftKey ? "shift" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
@@ -1143,7 +1143,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       if(button.dataset.interactionAction==="capture-key"){
         const active=button.classList.contains("is-capturing");
-        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>value.toUpperCase()),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…";});
+        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…";});
         if(!active){button.classList.add("is-capturing");button.textContent="Pressione uma tecla…";button.focus();}
         return;
       }
