@@ -831,49 +831,69 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   async _ensureNexusRulesData() {
     if (this._nexusRulesDataReady) return false;
-    const system = this.actor.system ?? {};
-    const updates = {};
-    for (const key of ["for", "des", "sab", "int", "car", "von"]) {
-      const value = system.attributes?.[key];
-      if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
-    }
-    for (const skill of NEXUS_SKILLS) {
-      const current = system.skills?.[skill.key];
-      const legacy = system.skills?.[skill.legacyKey];
-      const hasCanonicalLevel = current?.proficientLevel !== undefined
-        && current?.proficientLevel !== null
-        && current?.proficientLevel !== "";
-      if (!hasCanonicalLevel) {
-        const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
-        const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
-        const stored = currentLegacyLevel ?? legacyLevel ?? 0;
-        updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
-      } else {
-        const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
-        if (typeof current.proficientLevel !== "number" || current.proficientLevel !== normalizedLevel) {
-          updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
+    if (this._nexusRulesDataPromise) return this._nexusRulesDataPromise;
+
+    const operation = (async () => {
+      try {
+        const system = this.actor.system ?? {};
+        const updates = {};
+        for (const key of ["for", "des", "sab", "int", "car", "von"]) {
+          const value = system.attributes?.[key];
+          if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
         }
+        for (const skill of NEXUS_SKILLS) {
+          const current = system.skills?.[skill.key];
+          const legacy = system.skills?.[skill.legacyKey];
+          const hasCanonicalLevel = current?.proficientLevel !== undefined
+            && current?.proficientLevel !== null
+            && current?.proficientLevel !== "";
+          if (!hasCanonicalLevel) {
+            const currentLegacyLevel = current?.opposed === true ? -1 : current?.proficiency ?? current?.proficient;
+            const legacyLevel = legacy?.opposed === true ? -1 : legacy?.proficientLevel ?? legacy?.proficiency ?? legacy?.proficient;
+            const stored = currentLegacyLevel ?? legacyLevel ?? 0;
+            updates["system.skills." + skill.key + ".proficientLevel"] = normalizeNexusProficientLevel(stored);
+          } else {
+            const normalizedLevel = normalizeNexusProficientLevel(current.proficientLevel);
+            if (typeof current.proficientLevel !== "number" || current.proficientLevel !== normalizedLevel) {
+              updates["system.skills." + skill.key + ".proficientLevel"] = normalizedLevel;
+            }
+          }
+          const forcedDeletion = () => new foundry.data.operators.ForcedDeletion();
+          if (current && Object.hasOwn(current, "proficiency")) {
+            updates["system.skills." + skill.key + ".proficiency"] = forcedDeletion();
+          }
+          if (current && Object.hasOwn(current, "proficient")) {
+            updates["system.skills." + skill.key + ".proficient"] = forcedDeletion();
+          }
+          if (current && Object.hasOwn(current, "opposed")) {
+            updates["system.skills." + skill.key + ".opposed"] = forcedDeletion();
+          }
+          if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
+        }
+        if (Object.keys(updates).length) await this.actor.update(updates, { render: false });
+        this._nexusRulesDataReady = true;
+        return Object.keys(updates).length > 0;
+      } catch (error) {
+        console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
+        return false;
       }
-      const forcedDeletion = () => new foundry.data.operators.ForcedDeletion();
-      if (current && Object.hasOwn(current, "proficiency")) {
-        updates["system.skills." + skill.key + ".proficiency"] = forcedDeletion();
-      }
-      if (current && Object.hasOwn(current, "proficient")) {
-        updates["system.skills." + skill.key + ".proficient"] = forcedDeletion();
-      }
-      if (current && Object.hasOwn(current, "opposed")) {
-        updates["system.skills." + skill.key + ".opposed"] = forcedDeletion();
-      }
-      if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
-    }
+    })();
+
+    this._nexusRulesDataPromise = operation;
     try {
-      if (Object.keys(updates).length) await this.actor.update(updates);
-      this._nexusRulesDataReady = true;
-      return Object.keys(updates).length > 0;
-    } catch (error) {
-      console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
-      return false;
+      return await operation;
+    } finally {
+      if (this._nexusRulesDataPromise === operation) this._nexusRulesDataPromise = null;
     }
+  }
+
+  _scheduleNexusRefresh() {
+    if (this._nexusRefreshScheduled) return;
+    this._nexusRefreshScheduled = true;
+    queueMicrotask(() => {
+      this._nexusRefreshScheduled = false;
+      if (this.element?.isConnected) void this.render({ force: true });
+    });
   }
 
   _getHeaderControls() {
@@ -1105,12 +1125,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     if (migrated) {
       // The first render was prepared from the legacy snapshot. Refresh once
       // after migration so moved alias values appear without requiring a reopen.
-      queueMicrotask(() => this.render({ force: true }));
+      this._scheduleNexusRefresh();
       return;
     }
     const rulesDataMigrated = await this._ensureNexusRulesData();
     if (rulesDataMigrated) {
-      queueMicrotask(() => this.render({ force: true }));
+      this._scheduleNexusRefresh();
       return;
     }
     const form = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
