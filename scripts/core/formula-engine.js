@@ -60,7 +60,7 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
     if (token.type === "operator" && token.value === "(") {
       nesting += 1;
       if (nesting > maxDepth) throw new Error("Expression nesting limit exceeded");
-      const value = comparison();
+      const value = logicalOr();
       if (tokens[index++]?.value !== ")") throw new Error("Unclosed expression parenthesis");
       nesting -= 1;
       return value;
