@@ -25,6 +25,7 @@ import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutS
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
 const layoutReadSnapshots = new WeakMap();
+const pendingActorRulesInitialization = new WeakMap();
 const layoutWriteQueues = new Map();
 
 const ActorSheetV2 = foundry.applications.sheets.ActorSheetV2;
@@ -830,12 +831,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _ensureNexusRulesData() {
+    const actor = this.actor;
+    if (!actor || (typeof actor !== "object" && typeof actor !== "function")) return false;
     if (this._nexusRulesDataReady) return false;
-    if (this._nexusRulesDataPromise) return this._nexusRulesDataPromise;
+
+    const pending = pendingActorRulesInitialization.get(actor);
+    if (pending) {
+      const result = await pending;
+      if (result.ready) this._nexusRulesDataReady = true;
+      return result.migrated;
+    }
 
     const operation = (async () => {
       try {
-        const system = this.actor.system ?? {};
+        const system = actor.system ?? {};
         const updates = getNexusAttributeInitializationUpdates(system);
         for (const skill of NEXUS_SKILLS) {
           const current = system.skills?.[skill.key];
@@ -866,19 +875,22 @@ export class NexusActorSheet extends NexusActorSheetBase {
           }
           if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
         }
-        if (Object.keys(updates).length) await this.actor.update(updates, { render: false });
-        this._nexusRulesDataReady = true;
-        return Object.keys(updates).length > 0;
+        if (Object.keys(updates).length) await actor.update(updates, { render: false });
+        return { ready: true, migrated: Object.keys(updates).length > 0 };
       } catch (error) {
         console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
-        return false;
+        return { ready: false, migrated: false };
       }
     })();
 
     this._nexusRulesDataPromise = operation;
+    pendingActorRulesInitialization.set(actor, operation);
     try {
-      return await operation;
+      const result = await operation;
+      if (result.ready) this._nexusRulesDataReady = true;
+      return result.migrated;
     } finally {
+      if (pendingActorRulesInitialization.get(actor) === operation) pendingActorRulesInitialization.delete(actor);
       if (this._nexusRulesDataPromise === operation) this._nexusRulesDataPromise = null;
     }
   }
