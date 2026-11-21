@@ -8,6 +8,7 @@ const normalizeModifiers = raw => [...new Set((Array.isArray(raw) ? raw : String
 export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
 export const INTERACTION_OPERATORS = Object.freeze(["equals","notEquals","greaterThan","greaterOrEqual","lessThan","lessOrEqual","contains","isEmpty","isNotEmpty"]);
 import { NEXUS_SKILLS } from "./skills.js";
+import { normalizeNexusPropertyPath } from "./property-paths.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "./formula-engine.js";
 
 const LEGACY = {
@@ -174,7 +175,18 @@ export function hasKeyboardInteraction(component) {
     flow.actions.some(action => action.enabled)
   );
 }
-const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
+const getPath=(actor,path)=>{
+  const normalized=normalizeNexusPropertyPath(path)||safePath(path);
+  if(!normalized)return undefined;
+  if(["name","img","uuid","id","_id"].includes(normalized))return actor?.[normalized];
+  if(normalized==="identity.portrait.img")return actor?.img??"";
+  if(normalized==="identity.token.img"||normalized==="token.img"){
+    return actor?.system?.identity?.token?.img||actor?.prototypeToken?.texture?.src||actor?.prototypeToken?.img||actor?.img||"";
+  }
+  if(normalized.startsWith("prototypeToken."))return normalized.split(".").reduce((value,key)=>value?.[key],actor?.prototypeToken);
+  const value=normalized.split(".").reduce((current,key)=>current?.[key],actor?.system??{});
+  return value&&typeof value==="object"&&Object.hasOwn(value,"value")?value.value:value;
+};
 const conditionPasses=(condition,actor)=>{
   const expression=String(condition?.expression??"").trim();
   if(expression){
