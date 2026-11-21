@@ -6496,3 +6496,18 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-sheet[data-mode="appearance"] .nexus-group-surface {
   border-color:var(--nexus-group-border,var(--nexus-component-border,#53677f)) !important;
 }
+
+
+/* O editor de condições usa uma única expressão e um controle de remoção. */
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row {
+  grid-template-columns:minmax(0,1fr) 30px !important;
+}
+@media(max-width:680px) {
+  .nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row {
+    grid-template-columns:minmax(0,1fr) 30px !important;
+  }
+}
+.nexus-sheet[data-mode="appearance"] .nexus-component.is-group-member.is-group-related:not(.is-selected):not(.is-group-inspecting) {
+  outline:1px solid color-mix(in srgb,var(--nexus-accent-color,#78b7e8) 32%,transparent) !important;
+  outline-offset:1px !important;
+}
