@@ -61,8 +61,11 @@ O Inspector separa as áreas de Dados, Comportamento, Aparência e Avançado. A 
 O contrato de interação separa três responsabilidades:
 
 1. **Trigger** — evento que inicia a interação, como `click`, `change`, `submit` ou `hover`.
-2. **Action** — operação executada em resposta ao evento.
-3. **Configuration** — parâmetros específicos daquela operação.
+2. **Condition** — expressão booleana segura, avaliada antes das ações.
+3. **Action** — operação executada em resposta ao evento.
+4. **Configuration** — parâmetros específicos daquela operação.
+
+As condições novas utilizam expressões no mesmo formato do motor de regras, por exemplo `@resources.pv.value >= 10`, `@identity.level == 3` ou `@attributes.for.value < @progression.mb.value`. O fluxo mantém a combinação Todas (E) / Qualquer (OU) entre condições. Fluxos antigos com os campos `path`, `operator` e `value` continuam sendo lidos pelo caminho de compatibilidade; novas condições são salvas como `expression`.
 
 Estrutura conceitual:
 
@@ -168,6 +171,7 @@ A arquitetura segue incremental: o registro atual não equivale ainda a um siste
 - Preservação de modificadores e valores negativos nas rolagens.
 - Motor de interações com vários Triggers por fluxo, condições AND/OR e Actions sequenciais.
 - Editor visual no Inspector para criar, configurar, ativar, remover e reordenar fluxos, Triggers e Actions.
+- Condições por expressões booleanas seguras, com leitura compatível de condições antigas.
 - Executores controlados para rolagem, cálculo, atualização, abertura, alternância, encadeamento e operações permitidas.
 - Compatibilidade de leitura para ações antigas de rolagem e alternância.
 
