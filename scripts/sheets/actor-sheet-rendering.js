@@ -155,7 +155,8 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
       const component=componentById.get(card.dataset.id); if(!component || component.type==="token" || component.type==="asset-image") return;
       const definition=COMPONENTS[component.type] ?? {};
       const rawPath=String(component.dataPath ?? definition.path ?? "").trim(); if(!rawPath) return;
-      const directMedia=isMediaSource(rawPath)?rawPath:"";
+      const wrappedMedia=rawPath.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+       const directMedia=isMediaSource(wrappedMedia?.[1]??rawPath)?(wrappedMedia?.[1]??rawPath):"";
        const binding=directMedia?{value:directMedia,path:""}:resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;
       if(raw===undefined || raw===null || typeof raw==="object") return;
       const value=String(raw).trim(); if(!value || !isMediaSource(value)) return;
