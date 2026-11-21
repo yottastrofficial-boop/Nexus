@@ -254,12 +254,12 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
-assert.match(sheet, /import \{[^}]*\\bisMediaSource\\b[^}]*\} from ["']\.\/actor-sheet-media\.js["']/,
-  "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
-assert.match(sheet, /activateActorSheetListeners\(this, html, \{[\s\S]*?\\bisMediaSource,/,
+const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
+assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
+assert.ok(sheet.includes("activateActorSheetListeners(this, html, {") && sheet.includes("DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource,"),
   "A ficha deve fornecer isMediaSource aos listeners");
-assert.match(sheetListeners, /const \{[^}]*\\bisMediaSource\\b[^}]*\} = dependencies;/,
-  "Os listeners devem extrair isMediaSource das dependências recebidas");
+const listenerDependencies = sheetListeners.split("\n").find(line => line.includes("} = dependencies;")) ?? "";
+assert.ok(listenerDependencies.includes("isMediaSource"), "Os listeners devem extrair isMediaSource das dependências recebidas");
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
 const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resource-listeners.js");
