@@ -32,7 +32,17 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
    - A profundidade dos grupos é calculada uma vez e reutilizada na composição visual.
    - Foram adicionados testes com 2.500 níveis, além de um teste de ciclo corrompido.
 
-6. **Rejeições de persistência na interface**
+6. **Inicialização de atributos/perícias entre múltiplas fichas**
+   - A Promise de inicialização agora é compartilhada por Actor, não apenas por instância de ficha.
+   - Duas fichas abertas para o mesmo Actor aguardam a mesma operação e não iniciam gravações duplicadas.
+   - Falhas continuam permitindo nova tentativa; somente uma inicialização concluída marca a ficha como pronta.
+
+7. **Renderização de grupos do Canvas**
+   - A renderização usa o índice de profundidade pré-calculado pela hierarquia, eliminando percursos repetidos pelos ancestrais.
+   - O cálculo da profundidade máxima usa redução, evitando o limite de argumentos de `Math.max(...array)` em layouts grandes.
+   - Foi adicionado teste de regressão executado no CI.
+
+8. **Rejeições de persistência na interface**
    - Os listeners de edição de propriedades e de valores de recursos capturam a rejeição após o helper registrar o erro e notificar o usuário.
    - A fila continua recuperando-se de operações anteriores rejeitadas.
    - A causa raiz de falhas de gravação específicas ainda depende de reprodução no Foundry com os dados reais do Actor.
@@ -51,6 +61,7 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
 - A primeira execução de CI da PR #42 passou na validação de regressões, sintaxe, manifesto, templates, estilos e geração do pacote.
 - A execução posterior à última alteração precisa confirmar o estado integral desta branch.
 - Testes automatizados também cobrem a preservação de atributos aninhados, a separação entre persistência e atualização visual e hierarquias de grupos profundas.
+- A nova regressão de renderização de grupos e a validação de inicialização compartilhada foram adicionadas ao workflow; o resultado da execução mais recente ainda precisa ser confirmado.
 - Teste manual no Foundry VTT 14 build 360 continua pendente: abertura/fechamento de fichas, edição de propriedades, migração de Actors antigos, múltiplas fichas do mesmo Actor, tokens e layouts grandes.
 
 ## Próximas verificações de prioridade alta
