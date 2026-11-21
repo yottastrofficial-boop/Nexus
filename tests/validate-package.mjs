@@ -681,6 +681,8 @@ assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?this\._scheduleNexusRefresh\(
 assert.match(sheet, /_nexusRulesDataPromise/, "A inicialização de atributos e perícias deve compartilhar operações simultâneas");
 assert.match(sheet, /this\.actor\.update\(updates, \{ render: false \}\)/, "A inicialização não deve provocar uma renderização automática redundante");
 assert.match(sheet, /_scheduleNexusRefresh\(\)[\s\S]*?if \(this\._nexusRefreshScheduled\) return/, "As atualizações posteriores à migração devem ser coalescidas");
+assert.match(sheet, /if \(this\.rendered\) void this\.render\(\{ force: true \}\)/, "O refresh agendado deve respeitar o estado de renderização da ApplicationV2");
+assert.match(sheet, /_nexusRefreshGeneration = \(this\._nexusRefreshGeneration \?\? 0\) \+ 1/, "O fechamento deve invalidar refreshes pendentes");
 assert.match(sheet, /floatingGeneration !== this\._nexusFloatingGeneration/, "Painéis assíncronos antigos não devem abrir após uma nova renderização ou fechamento");
 assert.match(sheet, /if \(pendingLayoutClick\) clearTimeout\(pendingLayoutClick\)/, "O timer de troca de página deve ser limpo ao desmontar o Floating UI");
 assert.match(migrationManager, /actor\.update\(updates, \{ render: false \}\)/, "A migração deve evitar renderização automática durante a gravação");
