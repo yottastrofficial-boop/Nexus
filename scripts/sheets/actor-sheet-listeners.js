@@ -1134,7 +1134,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       if(button.dataset.interactionAction==="capture-key"){
         const active=button.classList.contains("is-capturing");
-        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");setShortcutLabel(item,item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…";});
+        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");setShortcutLabel(item,item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…");});
         if(!active){button.classList.add("is-capturing");button.textContent="Pressione uma tecla…";button.focus();}
         return;
       }
