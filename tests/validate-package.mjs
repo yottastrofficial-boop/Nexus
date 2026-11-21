@@ -1816,7 +1816,7 @@ assert.match(sheet, /valueLabel\.textContent = "Valor"/);
 assert.doesNotMatch(sheet, /Fórmula da perícia|Fórmula da propriedade|Valor\/Conteúdo da propriedade/);
 assert.doesNotMatch(propertyPickerView, /Valor atual:|nexus-property-option-value/);
 assert.match(propertyPickerView, /canonicalQuery/);
-assert.match(sheetListeners, /normalizeNexusPropertyPath\(String\(input\.value \?\? ""\)\)/);
+assert.match(sheetListeners, /normalizeNexusPropertyPath\(rawPath\)/);
 assert.match(template, /Caminho da propriedade/);
 assert.match(propertyValueListeners, /const skillFormulaMatch = path\.match/);
 assert.match(propertyValueListeners, /evaluateNexusSkillFormula\(sheet\.actor, skillFormulaMatch\[1\], String\(value\)\)/);
