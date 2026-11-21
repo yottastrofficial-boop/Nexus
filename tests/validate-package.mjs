@@ -1143,6 +1143,17 @@ assert.deepEqual(executedActions, ["toggle", "roll"], "As ações devem executar
 assert.equal(getTriggeredActions({
   interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
 }, "click").length, 0, "Um trigger diferente não deve executar no clique");
+assert.equal(evaluateNexusCondition("true AND true", () => undefined), true);
+assert.equal(evaluateNexusCondition("true AND false", () => undefined), false);
+assert.equal(evaluateNexusCondition("true OR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("NOT false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true XOR true", () => undefined), false);
+assert.equal(evaluateNexusCondition("true XOR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true NAND true", () => undefined), false);
+assert.equal(evaluateNexusCondition("true NOR false", () => undefined), false);
+assert.equal(evaluateNexusCondition("(@resources.pv.value >= 10) AND NOT (@resources.pm.value > 5)", path => ({ "resources.pv.value": 12, "resources.pm.value": 3 }[path])), true);
+assert.equal(evaluateNexusCondition("true && !false || false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true AND 3", () => undefined), null, "Operadores lógicos devem exigir operandos booleanos");
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
 
 const multiFlowComponent = { interactions: [{
@@ -1773,8 +1784,11 @@ assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift"] }
 assert.equal(normalizeInteraction({ triggers: [{ event: "middleClick" }], actions: [] }).triggers[0].event, "middleClick");
 assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: ["alt", "shift", "invalid"] }], actions: [] }).triggers[0].modifiers, ["shift", "alt"]);
 assert.doesNotMatch(interactions, /modifierOptions/, "O editor não deve oferecer um seletor genérico de modificadores");
-assert.match(interactions, /Combinação de teclas|Atalho de teclado/, "Atalhos devem ser configurados por captura da combinação completa");
+assert.match(interactions, /nexus-interaction-keycap/, "Atalhos devem ser exibidos como teclas no próprio botão");
 assert.match(interactions, /findInteractionShortcutConflicts/, "O editor deve identificar conflitos de atalhos no Canvas");
+assert.match(interactions, /duplicate-flow/, "O editor deve permitir duplicar fluxos");
+assert.match(interactions, /nexus-interaction-action-order/, "Ações devem exibir sua ordem separada do título");
+assert.doesNotMatch(interactions, /Todas \(E\)|Qualquer \(OU\)/, "A interface não deve expor o seletor Todas/Qualquer");
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
 assert.match(interactions, /\["keyDown","Atalho personalizado"\]/, "O editor deve identificar atalhos personalizados");
 assert.match(interactions, /data-interaction-media-preview|interactionMediaPreview/, "Valores de ações devem oferecer prévia de mídia");
