@@ -547,6 +547,11 @@ export function renderInteractionEditor(container,component,components=[],librar
   const advanced=el("details","nexus-interaction-execution"),summary=el("summary","","Execução avançada"),error=control("select",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]],"Se uma ação falhar");advanced.append(summary,field("Se uma ação falhar",error,"flow",flow.id,"onError"));panel.append(advanced);panels.append(panel);
  }
  container.append(panels);
+ for(const area of container.querySelectorAll("[data-interaction-autogrow]")){
+  const lineHeight=Number.parseFloat(getComputedStyle(area).lineHeight)||18,maxHeight=lineHeight*5+14;
+  area.style.height="auto";area.style.height=Math.min(area.scrollHeight,maxHeight)+"px";
+  area.style.overflowY=area.scrollHeight>maxHeight?"auto":"hidden";
+ }
 }
 export function renderInteractionMediaPreview(container, rawValue) {
   if (!container) return;
