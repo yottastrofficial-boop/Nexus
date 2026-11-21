@@ -240,6 +240,8 @@ const root = process.cwd();
 const read = file => readFile(path.join(root, file), "utf8");
 const exists = async file => access(path.join(root, file));
 const manifest = JSON.parse(await read("system.json"));
+const stableManifest = JSON.parse(await read("manifest.json"));
+const releaseWorkflow = await read(".github/workflows/release.yml");
 const sheet = await read("scripts/sheets/actor-sheet-v1.0.0.js");
 const template = await read("templates/actors/actor-sheet.hbs");
 const skills = await read("scripts/core/skills.js");
@@ -252,6 +254,12 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
+assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
+assert.ok(sheet.includes("activateActorSheetListeners(this, html, {") && sheet.includes("DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource,"),
+  "A ficha deve fornecer isMediaSource aos listeners");
+const listenerDependencies = sheetListeners.split("\n").find(line => line.includes("} = dependencies;")) ?? "";
+assert.ok(listenerDependencies.includes("isMediaSource"), "Os listeners devem extrair isMediaSource das dependências recebidas");
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
 const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resource-listeners.js");
@@ -572,8 +580,19 @@ assert.deepEqual([...loadGroup.children.keys()].sort(), ["base", "bonus", "capac
 assert.ok([...loadGroup.children.values()].every(node => node.entry && node.children.size === 0), "Carga não deve criar subgrupos de propriedade única");
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
 assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
-assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/system\.json$/);
-assert.ok(manifest.download.endsWith(`/releases/download/v${manifest.version}/nexus.zip`), "URL do pacote deve apontar para a versão atual");
+assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/,
+  "O manifesto embutido deve apontar para o canal estável de atualizações");
+assert.equal(stableManifest.id, manifest.id, "O manifesto estável deve identificar o mesmo sistema");
+assert.match(stableManifest.version, /^\d+\.\d+\.\d+\.\d+$/, "O manifesto estável deve manter uma versão válida");
+assert.match(stableManifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/);
+assert.ok(stableManifest.download.endsWith(`/releases/download/v${stableManifest.version}/nexus.zip`),
+  "O manifesto estável só pode apontar para o pacote da própria versão");
+const releasePublishIndex = releaseWorkflow.indexOf("Publish GitHub Release");
+const releaseAssetCheckIndex = releaseWorkflow.indexOf("Verify published package asset");
+const stableManifestPublishIndex = releaseWorkflow.indexOf("Publish stable Foundry manifest after the package is available");
+assert.ok(releasePublishIndex >= 0 && releaseAssetCheckIndex > releasePublishIndex && stableManifestPublishIndex > releaseAssetCheckIndex,
+  "O manifesto estável só pode ser atualizado depois da publicação e verificação do ZIP");
+assert.match(releaseWorkflow, /STATE.*uploaded/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
 const libraryCatalog = await read("assets/library/catalog.js");

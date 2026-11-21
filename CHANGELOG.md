@@ -12,7 +12,7 @@
 
 ### Validação e limitações
 - GitHub Actions: validação de pacote, sintaxe, regressões e empacotamento aprovados no commit `f5bba318ac6900b2c9fe69cdd64af60b61d1db8f`.
-- A publicação automatizada foi ignorada intencionalmente durante a validação da PR.
+- A publicação foi ignorada durante a validação da PR e concluída após a integração: release `v1.0.0.71` publicada com o asset `nexus.zip`.
 - A serialização por Actor é local ao cliente; não fornece lock distribuído entre usuários ou janelas independentes.
 - Persistência de aliases, dados personalizados e layouts envolve múltiplas gravações e ainda não constitui uma transação única.
 - A validação funcional e visual em uma instalação real do Foundry VTT 14 continua pendente. Esta atualização não deve ser declarada estável nem distribuída como release final antes desses testes.

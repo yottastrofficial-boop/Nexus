@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.71 em preparação · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.71 publicada · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-> **Versão em preparação:** 1.0.0.71. Consolida a organização hierárquica do Canvas, o backup completo da Biblioteca e uma rodada de estabilização da ficha: ciclo de vida dos listeners, deduplicação de interações, persistência serializada, aliases legados e controladores especializados. A validação automatizada está em execução; o teste visual e funcional no Foundry VTT 14 continua necessário. A release 1.0.0.71 ainda não foi publicada.
+> **Versão publicada:** 1.0.0.71. Consolida a organização hierárquica do Canvas, o backup completo da Biblioteca e uma rodada de estabilização da ficha: ciclo de vida dos listeners, deduplicação de interações, persistência serializada, aliases legados e controladores especializados. A validação automatizada e a publicação do pacote foram concluídas. O teste visual e funcional em uma instalação real do Foundry VTT 14 continua necessário.
 
 ## Visão geral
 
@@ -48,7 +48,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Versão atual | 1.0.0.71 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.71 está em preparação e ainda não possui pacote de release publicado. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.71 possui release e pacote publicados. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -80,10 +80,10 @@ Data/
 O manifesto do sistema está definido em:
 
 ```text
-https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/system.json
+https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json
 ```
 
-A instalação por manifesto utiliza o pacote `nexus.zip` anexado à Release correspondente à versão informada em `system.json`. O GitHub Actions valida o pacote, gera o ZIP com `system.json` na raiz e publica o artefato. Caso a publicação ainda não esteja disponível ou o Foundry não consiga baixar o sistema, utilize a instalação manual acima.
+Use o endereço do `manifest.json` acima como manifesto de instalação e atualização. Ele funciona como canal estável: o fluxo de publicação só o atualiza depois de confirmar que `nexus.zip` está anexado e disponível na Release correspondente. O `system.json` dentro do pacote continua sendo o manifesto que o Foundry carrega. Se uma instalação antiga estiver cadastrada diretamente pelo endereço de `system.json`, substitua a origem pelo endereço estável acima para receber as próximas atualizações sem a janela entre a atualização do manifesto e o envio do ZIP.
 
 ## Estrutura do repositório
 
@@ -101,7 +101,8 @@ A instalação por manifesto utiliza o pacote `nexus.zip` anexado à Release cor
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── README.md
-└── system.json        # Manifesto do sistema Foundry
+├── manifest.json      # Canal estável de instalação e atualização
+└── system.json        # Manifesto incluído no pacote Foundry
 ```
 
 ## Documentação
@@ -135,7 +136,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 A versão 1.0.0.71 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
 
-**Validação pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
+**Validação funcional pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
 
 Consulte o [CHANGELOG](CHANGELOG.md) para os detalhes registrados desta versão.
 
