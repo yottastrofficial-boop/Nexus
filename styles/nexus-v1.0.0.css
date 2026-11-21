@@ -7115,3 +7115,38 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-workspace,.nexus-library-theme-workspace,.nexus-library-flow-workspace { grid-template-columns:minmax(0,1fr); }
   .nexus-library-theme-workspace .nexus-library-theme-details,.nexus-library-flow-details { position:static; }
 }
+
+
+/* Explorer hierarchy: left navigation, central browser, right contextual inspector. */
+.nexus-library-panel {
+  display:grid; grid-template-columns:154px minmax(0,1fr);
+  grid-template-rows:auto auto minmax(0,1fr); gap:0 12px; min-height:0;
+}
+.nexus-library-header,.nexus-library-toolbar { grid-column:1/-1; }
+.nexus-library-section-tabs {
+  grid-column:1; grid-row:3; display:flex; flex-direction:column; align-items:stretch; gap:4px;
+  padding:10px 8px 10px 0; border:0; border-right:1px solid var(--nexus-panel-border,#3c5067);
+}
+.nexus-library-section-tabs button {
+  display:flex; align-items:center; justify-content:flex-start; gap:9px; width:100%; min-height:34px;
+  padding:7px 9px; border:1px solid transparent; border-radius:6px; text-align:left;
+}
+.nexus-library-section-tabs button.active {
+  border-color:var(--nexus-panel-border,#40566d); background:var(--nexus-panel-surface,#263749);
+  box-shadow:inset 2px 0 var(--nexus-highlight-color,#78b7e8);
+}
+.nexus-library-section-panel { grid-column:2; grid-row:3; min-width:0; min-height:0; overflow:auto; padding:10px 2px 10px 0; }
+.nexus-library-section-panel[hidden] { display:none !important; }
+.nexus-library-personal { display:grid; grid-template-columns:repeat(auto-fill,minmax(125px,1fr)); gap:9px; }
+.nexus-library-personal-group { display:contents; }
+.nexus-library-personal-group > .nexus-library-section-heading { display:none; }
+.nexus-library-personal-grid,.nexus-library-saved-groups { display:contents; }
+.nexus-library-group-heading { grid-column:1/-1; }
+.nexus-library-assets .nexus-library-asset-meta,.nexus-library-personal-card > strong,.nexus-library-saved-group > strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nexus-library-details { max-height:calc(100vh - 280px); overflow:auto; }
+@media(max-width:720px) {
+  .nexus-library-panel { grid-template-columns:1fr; grid-template-rows:auto auto auto minmax(0,1fr); }
+  .nexus-library-section-tabs { grid-column:1; grid-row:3; flex-direction:row; overflow-x:auto; border:0; border-bottom:1px solid var(--nexus-panel-border,#3c5067); padding:6px 0; }
+  .nexus-library-section-tabs button { width:auto; flex:0 0 auto; }
+  .nexus-library-section-panel { grid-column:1; grid-row:4; }
+}
