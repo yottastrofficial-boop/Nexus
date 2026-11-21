@@ -681,6 +681,8 @@ assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?this\._scheduleNexusRefresh\(
 assert.match(sheet, /_nexusRulesDataPromise/, "A inicialização de atributos e perícias deve compartilhar operações simultâneas");
 assert.match(sheet, /this\.actor\.update\(updates, \{ render: false \}\)/, "A inicialização não deve provocar uma renderização automática redundante");
 assert.match(sheet, /_scheduleNexusRefresh\(\)[\s\S]*?if \(this\._nexusRefreshScheduled\) return/, "As atualizações posteriores à migração devem ser coalescidas");
+assert.match(sheet, /floatingGeneration !== this\._nexusFloatingGeneration/, "Painéis assíncronos antigos não devem abrir após uma nova renderização ou fechamento");
+assert.match(sheet, /if \(pendingLayoutClick\) clearTimeout\(pendingLayoutClick\)/, "O timer de troca de página deve ser limpo ao desmontar o Floating UI");
 assert.match(migrationManager, /actor\.update\(updates, \{ render: false \}\)/, "A migração deve evitar renderização automática durante a gravação");
 assert.match(migrationManager, /pendingActorMigrations = new WeakMap\(\)/, "Migrações concorrentes do mesmo Actor devem compartilhar uma única operação");
 
