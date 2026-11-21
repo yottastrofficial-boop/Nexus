@@ -6581,6 +6581,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   font-size: 10px !important;
   line-height: 1.4 !important;
 }
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-row [hidden] { display:none !important; }
 .nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-row .nexus-interaction-field,
 .nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row .nexus-interaction-field {
   display: flex !important;
