@@ -1287,6 +1287,17 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return false;
   }
 
+  _refreshBoundComponentsSafely(changes = null) {
+    try {
+      this._refreshBoundComponents(changes);
+      return true;
+    } catch (error) {
+      console.error("NEXUS | A gravação foi concluída, mas a atualização visual dos componentes falhou.", error);
+      globalThis.ui?.notifications?.warn?.("O valor foi salvo, mas a ficha não conseguiu atualizar uma ou mais prévias. Reabra a ficha se a exibição não for atualizada.");
+      return false;
+    }
+  }
+
   _refreshBoundComponents(changes = null) {
     const root = this.element?.querySelector?.(".nexus-sheet") ?? this.element;
     if (!root) return;
