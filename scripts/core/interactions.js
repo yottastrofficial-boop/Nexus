@@ -433,7 +433,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     const keyField=el("label","nexus-interaction-field");keyField.append(el("span","","Tecla"),capture);keyField.hidden=capture.hidden;
     const clearKey=iconBtn("Limpar tecla","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.hidden=!tr.key;
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
-    row.classList.toggle("is-key-trigger",!capture.hidden);
+    row.classList.toggle("is-key-trigger",!capture.hidden);\n    row.classList.toggle("is-hold-trigger",tr.event==="hold");
     row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
