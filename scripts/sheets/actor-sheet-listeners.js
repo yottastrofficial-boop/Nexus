@@ -594,7 +594,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           else{input=document.createElement("input");input.type=kind;}
           input.dataset.libraryOverrideKey=key;input.dataset.libraryDefault=String(saved.settings[key]??"");input.value=input.dataset.libraryDefault;label.append(input);fields.append(label);
         }
-        const reset=document.createElement("button");reset.type="button";reset.dataset.libraryResetOverrides="";reset.textContent="Restaurar valores do modelo";\n        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar configuração à ficha";
+        const reset=document.createElement("button");reset.type="button";reset.dataset.libraryResetOverrides="";reset.textContent="Restaurar valores do modelo";
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar configuração à ficha";
         const copy=document.createElement("button");copy.type="button";copy.dataset.libraryCopySavedComponent="";copy.textContent="Copiar pacote";
         const exportFile=document.createElement("button");exportFile.type="button";exportFile.dataset.libraryExportSavedComponent="";exportFile.textContent="Exportar JSON";
         const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir modelo";
