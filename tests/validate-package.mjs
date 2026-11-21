@@ -1154,6 +1154,11 @@ assert.equal(evaluateNexusCondition("true NOR false", () => undefined), false);
 assert.equal(evaluateNexusCondition("(@resources.pv.value >= 10) AND NOT (@resources.pm.value > 5)", path => ({ "resources.pv.value": 12, "resources.pm.value": 3 }[path])), true);
 assert.equal(evaluateNexusCondition("true && !false || false", () => undefined), true);
 assert.equal(evaluateNexusCondition("true AND 3", () => undefined), null, "Operadores lógicos devem exigir operandos booleanos");
+assert.equal(evaluateNexusCondition("true OR false AND false", () => undefined), true, "AND deve ter precedência sobre OR");
+assert.equal(evaluateNexusCondition("NOT (true AND false)", () => undefined), true, "Parênteses devem agrupar expressões booleanas");
+assert.equal(evaluateNexusCondition("false NOR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true NAND false", () => undefined), true);
+
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
 
 const multiFlowComponent = { interactions: [{
@@ -1166,6 +1171,8 @@ const multiFlowComponent = { interactions: [{
 }] };
 const conditionActor = { system: { identity: { level: 4 } } };
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
+assert.equal(normalizeInteraction({ actions: [{ type: "roll", name: "Ataque especial" }] }).actions[0].name, "Ataque especial",
+  "O nome personalizado da ação deve ser preservado na normalização");
 assert.equal(normalizeInteraction(multiFlowComponent.interactions[0]).conditions[0].expression, "@identity.level >= 3",
   "Condições antigas devem ser convertidas para expressões sem perder o operador");
 assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "" }], actions: [{ type: "roll" }] }] }, "click").length, 1,
@@ -1787,6 +1794,9 @@ assert.doesNotMatch(interactions, /modifierOptions/, "O editor não deve oferece
 assert.match(interactions, /nexus-interaction-keycap/, "Atalhos devem ser exibidos como teclas no próprio botão");
 assert.match(interactions, /findInteractionShortcutConflicts/, "O editor deve identificar conflitos de atalhos no Canvas");
 assert.match(interactions, /duplicate-flow/, "O editor deve permitir duplicar fluxos");
+assert.match(interactions, /edit-flow-name/, "O nome do fluxo deve ser editado a partir da barra de ferramentas");
+assert.match(interactions, /nexus-interaction-flow-enabled/, "O estado ativo do fluxo deve ficar na barra de ferramentas");
+
 assert.match(interactions, /nexus-interaction-action-order/, "Ações devem exibir sua ordem separada do título");
 assert.doesNotMatch(interactions, /Todas \(E\)|Qualquer \(OU\)/, "A interface não deve expor o seletor Todas/Qualquer");
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
