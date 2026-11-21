@@ -16,7 +16,8 @@
 ### Limitações e validação
 - A nova estrutura é a fundação de dados; a interface unificada e a migração persistente para armazenamento canônico ainda não estão concluídas.
 - Conteúdo avançado permanece dado inerte durante importação; nenhuma string de código é executada pelo parser.
-- CI e validação de pacote serão executadas nesta branch. Teste funcional no Foundry VTT 14 build 360 continua necessário.
+- Esta versão será empacotada e validada pelo workflow de release da `main` antes da publicação do manifesto.
+- Teste funcional no Foundry VTT 14 build 360 continua necessário; esta publicação disponibiliza a etapa atual para teste, não representa a conclusão da Biblioteca unificada.
 
 ## 1.0.0.79
 
