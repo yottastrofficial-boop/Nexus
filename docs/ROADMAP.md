@@ -2,7 +2,7 @@
 
 Este documento registra direções e prioridades do NEXUS. Não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
 
-## Estado atual — 1.0.0.71 publicada
+## Estado atual — 1.0.0.79 publicada; 1.0.0.80 em desenvolvimento
 
 A versão 1.0.0.71 consolida a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica, backup completo e uma rodada de estabilização dos listeners, persistência de propriedades, aliases e controladores de perícias/recursos.
 
@@ -49,3 +49,23 @@ A validação automatizada de pacote, sintaxe, regressões e empacotamento passo
 ## Critérios para considerar um recurso concluído
 
 Um recurso só deve ser marcado como implementado quando seu comportamento estiver presente no código, seus dados e estados estiverem definidos, os fluxos relevantes tiverem testes, limitações conhecidas estiverem documentadas e a documentação refletir o comportamento real.
+
+## Biblioteca funcional — implementação incremental
+
+### Fundação iniciada na 1.0.0.80
+- Contrato unificado para componentes, grupos, layouts, modelos, assets, mídia, temas, estilos, regras, comportamentos e fluxos.
+- Normalização de dados JSON com limites de profundidade, tamanho e quantidade.
+- Migração explícita em memória das flags legadas para o novo formato.
+- Merge com políticas de conflito skip, duplicate e replace; a interface deve exigir escolha explícita antes de substituir definições.
+- Backup completo NEXUS-LIBRARY/2, com leitura retrocompatível de NEXUS-LIBRARY/1.
+
+### Próximas etapas obrigatórias
+1. Adaptador de persistência canônica com migração segura e verificação de integridade antes de gravar.
+2. Interface unificada para pesquisar, filtrar, categorizar, favoritar, renomear, duplicar, excluir e visualizar entradas.
+3. Salvar/importar/exportar individualmente cada tipo de entrada, mantendo relações internas e IDs remapeados na instanciação.
+4. Versões de definições e atualização opcional das instâncias, sem propagar mudanças silenciosamente.
+5. Separar referências de mídia e metadados dos arquivos binários, respeitando permissões e limitações do Foundry.
+6. Definir schemas próprios para regras, estilos e comportamentos antes de habilitar edição/execução avançada.
+7. Testar migração, importação parcial, conflito, backup antigo, backup novo e recuperação após falha no Foundry V14.
+
+A etapa 1.0.0.80 não declara a Biblioteca completa; ela inicia a fundação de dados e o formato de intercâmbio.

@@ -509,7 +509,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     capture.dataset.capturedModifiers=normalizeModifiers(tr.modifiers).join("+");
     capture.title=tr.key?"Clique para alterar a combinação":"Clique e pressione a combinação desejada";
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
-    capture.classList.add("nexus-interaction-keycap");capture.setAttribute("aria-label","Combinação de teclas");
+    capture.classList.add("nexus-interaction-keycap");capture.replaceChildren(el("span","nexus-interaction-keycap-label",captureLabel));capture.setAttribute("aria-label",captureLabel==="Definir combinação…"?"Definir combinação de teclas":captureLabel);
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
     const keyField=el("div","nexus-interaction-trigger-key");keyField.append(capture);keyField.hidden=capture.hidden;
     const triggerTools=el("div","nexus-interaction-trigger-tools");
