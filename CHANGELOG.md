@@ -1,3 +1,24 @@
+## 1.0.0.78
+
+### Editor de comportamento e expressões
+- Reorganiza a barra de fluxos: adicionar, ativar/desativar, renomear, salvar na biblioteca, duplicar e excluir ficam juntos, ao lado das abas.
+- Permite renomear o fluxo pela ação de edição na barra, sem manter um campo de nome grande dentro do painel.
+- Exibe atalhos diretamente no botão de captura (ex.: Shift + C), sem legenda auxiliar abaixo.
+- Alinha os gatilhos em colunas consistentes e padroniza o botão de adicionar em Gatilhos, Condições e Ações.
+- Remove o seletor visual Todas/Qualquer; expressões de condição passam a aceitar AND, OR, NOT, XOR, NAND e NOR, além de &&, || e !.
+- Preserva a semântica de combinação antiga dos fluxos salvos para compatibilidade.
+- Permite editar o nome de cada ação; ordem numérica, tipo, setas de reordenação e exclusão ficam na mesma linha.
+- Mantém ações, gatilhos e condições existentes e adiciona duplicação de fluxos com novos identificadores internos.
+- Padroniza a cor de fundo e a borda das superfícies de grupos, independentemente da profundidade e das cores individuais anteriormente salvas.
+
+### Referências futuras
+- A resolução de propriedades de outros atores e itens por UUID ou aliases legíveis não faz parte desta versão. A base atual continua usando caminhos de propriedades seguros; referências cruzadas exigirão um resolvedor contextual e identificadores estáveis.
+
+### Validação
+- Testes automatizados adicionados para precedência e operadores booleanos.
+- Validação estática e teste de pacote Foundry pendentes na CI.
+- Teste visual e funcional no Foundry VTT 14 build 360 ainda necessário.
+
 ## 1.0.0.77
 
 ### Grupos e editor de comportamento
