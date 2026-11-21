@@ -256,11 +256,11 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
 assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
-const sheetDependencyBlock = sheet.match(/activateActorSheetListeners\\(this, html, \\{([\\s\\S]*?)\\}\\);/)?.[1] ?? "";
+const sheetDependencyBlock = sheet.match(/activateActorSheetListeners\(this, html, \{([\s\S]*?)\}\);/)?.[1] ?? "";
 assert.ok(sheetDependencyBlock, "A ficha deve declarar o contrato de dependências dos listeners");
-const dependencyNames = source => [...source.matchAll(/\\b([A-Za-z_$][\\w$]*)\\b/g)].map(match => match[1]);
+const dependencyNames = source => [...source.matchAll(/\b([A-Za-z_$][\w$]*)\b/g)].map(match => match[1]);
 const passedSheetDependencies = new Set(dependencyNames(sheetDependencyBlock));
-const listenerDependencyBlock = sheetListeners.match(/const\\s*\\{([\\s\\S]*?)\\}\\s*=\\s*dependencies;/)?.[1] ?? "";
+const listenerDependencyBlock = sheetListeners.match(/const\s*\{([\s\S]*?)\}\s*=\s*dependencies;/)?.[1] ?? "";
 const extractedSheetDependencies = new Set(dependencyNames(listenerDependencyBlock));
 for (const dependency of extractedSheetDependencies) {
   assert.ok(passedSheetDependencies.has(dependency), `Os listeners extraem ${dependency}, mas a ficha não o fornece`);
@@ -291,7 +291,7 @@ const specializedListenerContracts = [
   ["actor-sheet-resource-listeners.js", actorSheetResourceListeners]
 ];
 for (const [moduleName, moduleSource] of specializedListenerContracts) {
-  const moduleDependencies = moduleSource.match(/const\\s*\\{([\\s\\S]*?)\\}\\s*=\\s*dependencies;/)?.[1] ?? "";
+  const moduleDependencies = moduleSource.match(/const\s*\{([\s\S]*?)\}\s*=\s*dependencies;/)?.[1] ?? "";
   assert.ok(moduleDependencies, `${moduleName} deve declarar suas dependências explicitamente`);
   for (const dependency of dependencyNames(moduleDependencies)) {
     assert.ok(passedSheetDependencies.has(dependency), `${moduleName} exige ${dependency}, mas a ficha não fornece essa dependência`);
