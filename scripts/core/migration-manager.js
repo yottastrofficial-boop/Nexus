@@ -10,7 +10,9 @@ const getActiveLayoutId = (layouts, storedId) =>
  * Context preparation remains read-only; this function is called explicitly
  * from the sheet render lifecycle and is safe to retry after partial failure.
  */
-export async function migrateLegacyActorData({
+const pendingActorMigrations = new WeakMap();
+
+async function performLegacyActorDataMigration({
   actor,
   readLayouts,
   getAliasDefinitions,
@@ -119,4 +121,25 @@ export async function migrateLegacyActorData({
   }
 
   return { activeLayout: activeId, aliasesMigrated: aliasesChanged, aliasDataConflicts, propertiesMigrated, schemaVersionMigrated, propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION, changed };
+}
+
+
+/**
+ * Share an in-flight migration between sheet instances for the same Actor.
+ * This prevents duplicate reads and competing writes when multiple sheets
+ * for one Actor are opened at the same time in the same client.
+ */
+export function migrateLegacyActorData(dependencies) {
+  const actor = dependencies?.actor;
+  if (!actor || (typeof actor !== "object" && typeof actor !== "function")) {
+    return performLegacyActorDataMigration(dependencies);
+  }
+  const pending = pendingActorMigrations.get(actor);
+  if (pending) return pending;
+
+  const operation = performLegacyActorDataMigration(dependencies);
+  pendingActorMigrations.set(actor, operation);
+  return operation.finally(() => {
+    if (pendingActorMigrations.get(actor) === operation) pendingActorMigrations.delete(actor);
+  });
 }
