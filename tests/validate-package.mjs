@@ -6,7 +6,7 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillModifier, getNexusSkillRows, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction, findInteractionShortcutConflicts } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { activateCanvasViewport } from "../scripts/sheets/canvas-viewport.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
@@ -2165,3 +2165,15 @@ const futureMigration = await migrateLegacyActorData({ actor: futureActor, readL
 assert.equal(futureMigration.futureSchema, true, "Um esquema futuro deve ser protegido de migração por código antigo");
 assert.equal(futureMigration.changed, false);
 assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravações");
+
+/* Keyboard shortcut conflict detection: same key/modifier/phase conflicts across Canvas components. */
+{
+  const source = { id:"source", customLabel:"Sombra", interactions:[{ id:"flow-a", triggers:[{ id:"key-a", event:"keyDown", key:"C", modifiers:["shift"] }], actions:[{ type:"roll" }] }] };
+  const duplicate = { id:"duplicate", customLabel:"Outra habilidade", interactions:[{ id:"flow-b", triggers:[{ id:"key-b", event:"keyDown", key:"c", modifiers:["shift"] }], actions:[{ type:"roll" }] }] };
+  const differentModifier = { id:"other", customLabel:"Outra tecla", interactions:[{ id:"flow-c", triggers:[{ id:"key-c", event:"keyDown", key:"C", modifiers:[] }], actions:[{ type:"roll" }] }] };
+  const trigger = source.interactions[0].triggers[0];
+  const conflicts = findInteractionShortcutConflicts([source,duplicate,differentModifier],"source","flow-a","key-a",trigger);
+  assert.equal(conflicts.length,1);
+  assert.equal(conflicts[0].componentLabel,"Outra habilidade");
+  assert.equal(findInteractionShortcutConflicts([source,duplicate],"source","flow-a","key-a",{event:"keyUp",key:"C",modifiers:["shift"]}).length,0);
+}
