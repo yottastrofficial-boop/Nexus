@@ -1664,15 +1664,15 @@ const surface40=(left,top,width,height)=>({hidden:false,classList:classList40(),
 const a40=surface40(0,0,100,100),b40=surface40(100,0,100,100),g40=surface40(200,0,100,100);
 const canvas40={querySelectorAll(selector){if(selector===".nexus-component")return[a40,b40];if(selector===".nexus-component:not(.is-group-member)")return[a40,b40];if(selector===".nexus-group-surface")return[g40];return[];}};
 const geometry40=updateCanvasConnectedCorners(canvas40);
-assert.equal(geometry40.surfaces,3);
+assert.equal(geometry40.surfaces,2,"O cálculo de cantos conectados considera apenas componentes independentes");
 assert.equal(a40.classList.contains("nexus-component-touching-right"),true);
-assert.equal(a40.classList.contains("nexus-component-corner-square-tr"),true,"Contato lateral completo deve achatar o canto superior direito que realmente toca a outra borda");
-assert.equal(a40.classList.contains("nexus-component-corner-square-br"),true,"Contato lateral completo deve achatar o canto inferior direito que realmente toca a outra borda");
+assert.equal(a40.classList.contains("nexus-component-corner-square-tr"),true,"Contato lateral completo deve achatar o canto superior direito do componente vizinho");
+assert.equal(a40.classList.contains("nexus-component-corner-square-br"),true,"Contato lateral completo deve achatar o canto inferior direito do componente vizinho");
 assert.equal(b40.classList.contains("nexus-component-touching-left"),true);
 assert.equal(b40.classList.contains("nexus-component-corner-square-tl"),true);
 assert.equal(b40.classList.contains("nexus-component-corner-square-bl"),true);
-assert.equal(b40.classList.contains("nexus-component-touching-right"),true);
-assert.equal(g40.classList.contains("nexus-group-touching-left"),true);
+assert.equal(b40.classList.contains("nexus-component-touching-right"),false);
+assert.equal(g40.classList.contains("nexus-group-touching-left"),false,"Grupos preservam seus quatro cantos arredondados");
 
 const partialA40=surface40(0,0,100,100),partialB40=surface40(100,50,100,100);
 const partialCanvas40={querySelectorAll(selector){if(selector===".nexus-component"||selector===".nexus-component:not(.is-group-member)")return[partialA40,partialB40];if(selector===".nexus-group-surface")return[];return[];}};
