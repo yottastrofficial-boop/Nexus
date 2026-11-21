@@ -736,6 +736,35 @@ assert.equal(secondMigration.schemaVersionMigrated, false, "A versão do esquema
 
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
 
+// Concurrent sheets for one Actor must share the same in-flight migration.
+{
+  let releaseMigration;
+  const migrationGate = new Promise(resolve => { releaseMigration = resolve; });
+  let layoutReads = 0;
+  const concurrentActor = {
+    flags: { nexus: { activeLayout: "principal", aliases: [], propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION } },
+    getFlag(scope, key) { return this.flags[scope]?.[key]; },
+    async setFlag(scope, key, value) { this.flags[scope] ??= {}; this.flags[scope][key] = structuredClone(value); }
+  };
+  const concurrentDependencies = {
+    actor: concurrentActor,
+    readLayouts: async () => { layoutReads++; await migrationGate; return { principal: {} }; },
+    getAliasDefinitions: () => [],
+    getCustomAliasData: () => ({}),
+    normalizeAliasDefinition: value => value,
+    invalidateAliasDefinitionCache: () => {},
+    clone: value => structuredClone(value)
+  };
+  const first = migrateLegacyActorData(concurrentDependencies);
+  const second = migrateLegacyActorData(concurrentDependencies);
+  assert.equal(layoutReads, 1, "Duas fichas do mesmo Actor não devem iniciar migrações simultâneas");
+  releaseMigration();
+  const [firstResult, secondResult] = await Promise.all([first, second]);
+  assert.strictEqual(firstResult, secondResult, "As fichas devem compartilhar o resultado da mesma migração");
+  assert.equal(layoutReads, 1, "A migração compartilhada deve ler os layouts uma única vez");
+}
+
+
 // Property migration normalizes legacy proficiency fields but preserves manually stored mechanical values.
 const legacyPropertyActor = {
   system: {
