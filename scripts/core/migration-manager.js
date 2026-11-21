@@ -6,6 +6,23 @@ const getActiveLayoutId = (layouts, storedId) =>
   layouts[storedId] ? storedId : "principal";
 
 /**
+ * Build default-value updates without flattening legacy nested attribute data.
+ * Scalar attributes remain scalar; object-backed attributes retain their shape.
+ */
+export function getNexusAttributeInitializationUpdates(system = {}) {
+  const updates = {};
+  for (const key of ["for", "des", "sab", "int", "car", "von"]) {
+    const stored = system.attributes?.[key];
+    const nested = stored !== null && typeof stored === "object" && !Array.isArray(stored);
+    const value = nested ? stored.value : stored;
+    if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) {
+      updates[`system.attributes.${key}${nested ? ".value" : ""}`] = 0;
+    }
+  }
+  return updates;
+}
+
+/**
  * Applies one-time compatibility migrations for persisted Actor flags.
  * Context preparation remains read-only; this function is called explicitly
  * from the sheet render lifecycle and is safe to retry after partial failure.
