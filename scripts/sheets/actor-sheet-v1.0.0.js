@@ -2623,7 +2623,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
         ...clone(THEME_PALETTES),
         ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.sourceId ?? theme.id, theme.palette]))
       },
-      flows: clone(getInteractionLibrary(this.actor))
+      flows: clone(getInteractionLibrary(this.actor)),
+      templates: clone(game.user?.getFlag?.("nexus", "libraryTemplates") ?? []),
+      media: clone(game.user?.getFlag?.("nexus", "libraryMedia") ?? []),
+      styles: clone(game.user?.getFlag?.("nexus", "libraryStyles") ?? []),
+      rules: clone(game.user?.getFlag?.("nexus", "libraryRules") ?? []),
+      behaviors: clone(game.user?.getFlag?.("nexus", "libraryBehaviors") ?? [])
     };
     return createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
   }
@@ -2676,6 +2681,11 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
     const assets = clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? []);
     const themes = clone(game.user?.getFlag?.("nexus", "libraryThemes") ?? []);
+    const templates = clone(game.user?.getFlag?.("nexus", "libraryTemplates") ?? []);
+    const media = clone(game.user?.getFlag?.("nexus", "libraryMedia") ?? []);
+    const styles = clone(game.user?.getFlag?.("nexus", "libraryStyles") ?? []);
+    const rules = clone(game.user?.getFlag?.("nexus", "libraryRules") ?? []);
+    const behaviors = clone(game.user?.getFlag?.("nexus", "libraryBehaviors") ?? []);
     const builtinAssetKeys = new Set((NEXUS_LIBRARY_CATALOG.assets ?? []).map(asset => String(asset.key)));
     const builtinThemeIds = new Set(Object.keys(THEME_PALETTES));
 
@@ -2715,6 +2725,27 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await game.user.setFlag("nexus", "libraryLayouts", layouts.slice(-100));
     await game.user.setFlag("nexus", "libraryAssets", assets.slice(-200));
     await game.user.setFlag("nexus", "libraryThemes", themes.slice(-100));
+    const mergeGeneric = (target, incoming, prefix) => {
+      let added = 0;
+      for (const item of incoming ?? []) {
+        if (!item || typeof item !== "object") continue;
+        const sourceId = String(item.sourceId ?? item.id ?? "");
+        if (sourceId && target.some(saved => String(saved.sourceId ?? saved.id ?? "") === sourceId)) continue;
+        target.push({ ...clone(item), id: `${prefix}-${foundry.utils.randomID(8)}` });
+        added++;
+      }
+      return added;
+    };
+    const addedTemplates = mergeGeneric(templates, data.templates, "libtemplate");
+    const addedMedia = mergeGeneric(media, data.media, "libmedia");
+    const addedStyles = mergeGeneric(styles, data.styles, "libstyle");
+    const addedRules = mergeGeneric(rules, data.rules, "librule");
+    const addedBehaviors = mergeGeneric(behaviors, data.behaviors, "libbehavior");
+    await game.user.setFlag("nexus", "libraryTemplates", templates.slice(-100));
+    await game.user.setFlag("nexus", "libraryMedia", media.slice(-200));
+    await game.user.setFlag("nexus", "libraryStyles", styles.slice(-200));
+    await game.user.setFlag("nexus", "libraryRules", rules.slice(-200));
+    await game.user.setFlag("nexus", "libraryBehaviors", behaviors.slice(-200));
 
     let savedFlows = getInteractionLibrary(this.actor);
     for (const entry of data.flows) {
@@ -2732,7 +2763,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderCustomThemes?.();
     this._libraryRenderSavedFlows?.();
     this._libraryApplyFilter?.();
-    ui.notifications?.info?.(`Biblioteca importada: ${addedComponents} componentes, ${addedGroups} grupos, ${addedLayouts} layouts, ${addedAssets} assets, ${addedThemes} temas e ${addedFlows} fluxos novos.`);
+    ui.notifications?.info?.(`Biblioteca importada: ${addedComponents} componentes, ${addedGroups} grupos, ${addedLayouts} layouts, ${addedAssets} assets, ${addedThemes} temas, ${addedTemplates} modelos, ${addedMedia} mídias, ${addedStyles} estilos, ${addedRules} regras, ${addedBehaviors} comportamentos e ${addedFlows} fluxos novos.`);
     return imported;
   }
 
