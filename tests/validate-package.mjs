@@ -987,7 +987,7 @@ assert.match(sheetCode, /component\.actionType = \["roll","proficiency","resourc
 assert.match(template, /data-action-type="{{component.actionType}}"/, "O card deve expor sua ação configurada");
 assert.match(sheetCode, /if \(!sheet\._selectedIds\.has\(id\)\) setSelection\(\[id\]\)/, "Arrastar um membro não deve reduzir a seleção de grupo");
 assert.match(sheetCode, /_saveSelectedGroupToLibrary\(\)/, "Grupos devem poder ser salvos na Biblioteca");
-assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId\)/, "Grupos salvos devem poder ser inseridos no Canvas");
+assert.match(sheetCode, /_addSavedGroupToCanvas\(groupId(?:, overrides = \{\})?\)/, "Grupos salvos devem poder ser inseridos no Canvas");
 assert.match(sheetCode, /showPopover\(\)/, "O seletor de cores deve abrir na camada superior");
 assert.match(template, /data-text-style-command="align-left"/, "O Inspector deve oferecer ferramentas de alinhamento por ícones");
 assert.match(propertySchema, /exib: "PV"/, "A propriedade PV deve possuir abreviação própria");
