@@ -13,6 +13,10 @@ import { activateActorSheetResourceListeners } from "./actor-sheet-resource-list
 export function activateActorSheetListeners(sheet, html, dependencies) {
   const { NEXUS_LIBRARY_CATALOG, NEXUS_SKILLS, collectPropertyPaths, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, clone, getPath, getResourceValuePaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
 
+    const currentRoot = html?.[0];
+    const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
+    sheet._nexusInspectorNamespace = inspectorNamespace;
+    $(document).off(inspectorNamespace);
     $(document).on(`input${inspectorNamespace}`, "[data-interaction-media-input], [data-property-value], [data-inspector-media-input]", event => {
       const input = event.currentTarget;
       const preview = input.dataset.interactionMediaInput !== undefined
@@ -23,10 +27,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           : input.closest(".nexus-property-value-field")?.nextElementSibling;
       if (preview) renderInteractionMediaPreview(preview, input.value);
     });
-    const currentRoot = html?.[0];
-    const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
-    sheet._nexusInspectorNamespace = inspectorNamespace;
-    $(document).off(inspectorNamespace);
     const isSheetOwnedControl = input => currentRoot?.contains(input) || [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.contains(input));
     // Remove detached property-option portals left by a previous ApplicationV2 render.
     document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
