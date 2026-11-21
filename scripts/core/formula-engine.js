@@ -12,7 +12,7 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
   if (!source || source.length > maxLength || typeof resolveProperty !== "function") return null;
 
   const tokens = [];
-  const pattern = /\s*(?:(\d+(?:\.\d*)?|\.\d+)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)|(>=|<=|==|!=|=|[(),+*/%<>-]))\s*/gy;
+  const pattern = /\s*(?:(\d+(?:\.\d*)?|\.\d+)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@?[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)|(>=|<=|==|!=|&&|\\|\\||=|[(),+*/%<>!^-]))\s*/gy;
   let cursor = 0;
   while (cursor < source.length) {
     pattern.lastIndex = cursor;
@@ -170,9 +170,44 @@ function evaluateExpression(expression, resolveProperty, options = {}) {
       default: return false;
     }
   };
+  const isLogical = value => typeof value === "boolean";
+  const logicalNot = () => {
+    const token=tokens[index],word=token?.type==="identifier"?token.value.toUpperCase():"";
+    if(word==="NOT"||token?.value==="!"){index++;const value=logicalNot();if(!isLogical(value))throw new Error("NOT requires a boolean");return !value;}
+    return comparison();
+  };
+  const logicalAnd = () => {
+    let value=logicalNot();
+    while(true){
+      const token=tokens[index],word=token?.type==="identifier"?token.value.toUpperCase():"";
+      const op=word==="AND"||token?.value==="&&"?"AND":word==="NAND"?"NAND":"";
+      if(!op)break;index++;const right=logicalNot();
+      if(!isLogical(value)||!isLogical(right))throw new Error(op+" requires booleans");
+      value=op==="AND"?(value&&right):!(value&&right);
+    }
+    return value;
+  };
+  const logicalXor = () => {
+    let value=logicalAnd();
+    while(tokens[index]?.type==="identifier"&&tokens[index].value.toUpperCase()==="XOR"){
+      index++;const right=logicalAnd();if(!isLogical(value)||!isLogical(right))throw new Error("XOR requires booleans");value=value!==right;
+    }
+    return value;
+  };
+  const logicalOr = () => {
+    let value=logicalXor();
+    while(true){
+      const token=tokens[index],word=token?.type==="identifier"?token.value.toUpperCase():"";
+      const op=word==="OR"||token?.value==="||"?"OR":word==="NOR"?"NOR":"";
+      if(!op)break;index++;const right=logicalXor();
+      if(!isLogical(value)||!isLogical(right))throw new Error(op+" requires booleans");
+      value=op==="OR"?(value||right):!(value||right);
+    }
+    return value;
+  };
 
   try {
-    const result = comparison();
+    const result = logicalOr();
     if (index !== tokens.length) return null;
     if (typeof result === "number" && !Number.isFinite(result)) return null;
     return result;
