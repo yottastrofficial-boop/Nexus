@@ -65,7 +65,7 @@ O contrato de interação separa três responsabilidades:
 3. **Action** — operação executada em resposta ao evento.
 4. **Configuration** — parâmetros específicos daquela operação.
 
-As condições novas utilizam expressões no mesmo formato do motor de regras, por exemplo `@resources.pv.value >= 10`, `@identity.level == 3` ou `@attributes.for.value < @progression.mb.value`. O fluxo mantém a combinação Todas (E) / Qualquer (OU) entre condições. Fluxos antigos com os campos `path`, `operator` e `value` continuam sendo lidos pelo caminho de compatibilidade; novas condições são salvas como `expression`.
+As condições novas utilizam expressões no mesmo formato do motor de regras, por exemplo `@resources.pv.value >= 10`, `@identity.level == 3`, `@attributes.for.value < @progression.mb.value`, `contains(@identity.lineage, "elf")` ou `isEmpty(@identity.legacy)`. O fluxo mantém a combinação Todas (E) / Qualquer (OU) entre condições; linhas de condição ainda vazias são ignoradas durante a configuração. Fluxos antigos com os campos `path`, `operator` e `value` continuam sendo lidos e convertidos para expressões equivalentes; novas condições são salvas como `expression`.
 
 Estrutura conceitual:
 
