@@ -128,7 +128,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       sheet._captureHistory();
       await sheet.actor.update({ [`system.${path}`]: value }, { render: false });
       sheet._refreshBoundComponents();
-      });
+      }).catch(() => {});
     });
     activateActorAliasListeners(sheet, html, dependencies);
     html.find("[data-table-cell]").on("change", async event => {
