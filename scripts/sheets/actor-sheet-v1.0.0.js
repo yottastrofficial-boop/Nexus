@@ -455,10 +455,12 @@ const getFoundryDefaultTokenImage = actor => {
 const getTokenImageSource = (actor, component, boundValue = "") => {
   const customRaw = String(component?.tokenImage ?? "").trim();
   const customBinding = customRaw.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
+  const wrappedMedia = customRaw.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
   const customReference = customBinding ? customBinding[1] : customRaw;
-  const customValue = customRaw && !isMediaSource(customRaw)
+  const customSource = wrappedMedia?.[1] ?? customRaw;
+  const customValue = customRaw && !isMediaSource(customSource)
     ? resolveNexusBinding(actor, customReference).value
-    : customRaw;
+    : customSource;
   const custom = String(customValue ?? "").trim();
   const bound = String(boundValue ?? "").trim();
   const usesImplicitTokenPath = !component?.dataPath || ["img", "identity.token.img"].includes(String(component.dataPath));
@@ -1099,7 +1101,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     };
     const currentResourcePath = sheetResource ? safeResourcePath(component.currentPath ?? (String(component.sheetCode).toUpperCase() === "REC" ? "" : "resources.pv.value")) : "";
     const maximumResourcePath = sheetResource ? safeResourcePath(component.maxPath ?? (String(component.sheetCode).toUpperCase() === "REC" ? "" : "resources.pv.max")) : "";
-    const directMediaSource = isMediaSource(genericRaw) ? genericRaw : "";
+    const wrappedDataMedia = genericRaw.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+    const directMediaSource = isMediaSource(wrappedDataMedia?.[1] ?? genericRaw) ? (wrappedDataMedia?.[1] ?? genericRaw) : "";
     const raw = sheetResource
       ? resolveNexusBinding(this.actor, currentResourcePath).value
       : (def.path === "name" || bindingPath === "name") ? this.actor.name : def.kind === "token" ? getTokenImageSource(this.actor, component, directMediaSource || (bindingPath ? resolveNexusBinding(this.actor, bindingPath).value : "")) : bindingPath ? resolveNexusBinding(this.actor, bindingPath).value ?? getPath(this.actor.system, bindingPath) : def.kind === "asset-image" ? (directMediaSource || this.actor.img) : null;
