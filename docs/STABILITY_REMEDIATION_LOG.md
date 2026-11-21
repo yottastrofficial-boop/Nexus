@@ -27,7 +27,12 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
    - Uma renderização antiga não pode abrir uma janela depois que o Floating UI foi substituído ou fechado.
    - O timer de troca de página é cancelado durante a limpeza.
 
-5. **Rejeições de persistência na interface**
+5. **Hierarquias e snapshots de grupos**
+   - Detecção de ciclos, coleta de descendentes, achatamento de linhas e construção de snapshots foram convertidos para percursos iterativos.
+   - A profundidade dos grupos é calculada uma vez e reutilizada na composição visual.
+   - Foram adicionados testes com 2.500 níveis, além de um teste de ciclo corrompido.
+
+6. **Rejeições de persistência na interface**
    - Os listeners de edição de propriedades e de valores de recursos capturam a rejeição após o helper registrar o erro e notificar o usuário.
    - A fila continua recuperando-se de operações anteriores rejeitadas.
    - A causa raiz de falhas de gravação específicas ainda depende de reprodução no Foundry com os dados reais do Actor.
@@ -45,7 +50,7 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
 
 - A primeira execução de CI da PR #42 passou na validação de regressões, sintaxe, manifesto, templates, estilos e geração do pacote.
 - A execução posterior à última alteração precisa confirmar o estado integral desta branch.
-- Testes automatizados também cobrem a preservação de atributos aninhados e a separação entre persistência e atualização visual.
+- Testes automatizados também cobrem a preservação de atributos aninhados, a separação entre persistência e atualização visual e hierarquias de grupos profundas.
 - Teste manual no Foundry VTT 14 build 360 continua pendente: abertura/fechamento de fichas, edição de propriedades, migração de Actors antigos, múltiplas fichas do mesmo Actor, tokens e layouts grandes.
 
 ## Próximas verificações de prioridade alta
@@ -54,7 +59,7 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
 - Verificar o comportamento de `setFlag` durante a migração e o número efetivo de renderizações.
 - Testar ciclos de fórmulas, aliases e interações com limites de profundidade.
 - Testar ciclos de vida dos listeners, timers, observers e janelas flutuantes.
-- Testar hierarquias extensas de grupos e layouts com grande número de componentes.
+- Testar layouts com grande número de componentes e medir a performance no Foundry em execução.
 - Comparar APIs efetivamente utilizadas com o Foundry VTT 14.360.
 
 Este registro descreve somente mudanças já realizadas e verificações ainda pendentes; não declara a release pronta.
