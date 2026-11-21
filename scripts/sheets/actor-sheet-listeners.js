@@ -1297,13 +1297,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="actionTargetId") component.actionTargetId = String(input.value ?? "").trim().slice(0,100);
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
-        const path = normalizeNexusPropertyPath(String(input.value ?? ""));
-        const resolved = resolveNexusBinding(sheet.actor, path);
-        const validPath = !!path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        const rawPath=String(input.value ?? "").trim();
+        const wrappedMedia=rawPath.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+        const directMediaSource=["asset-image","token"].includes(component.type) && isMediaSource(wrappedMedia?.[1] ?? rawPath);
+        const path=directMediaSource ? String(wrappedMedia?.[1] ?? rawPath).trim() : normalizeNexusPropertyPath(rawPath);
+        const resolved=path && !directMediaSource ? resolveNexusBinding(sheet.actor,path) : null;
+        const validPath=!!path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        // Imagens e tokens aceitam URL/caminho de mídia direto ou uma propriedade do Actor.
         // Um alias personalizado pode não possuir caminho físico em Actor.system.
-        if (path && (!validPath || (!resolved.path && !resolved.alias))) return;
-        component.dataPath = path;
-        input.value = path;
+        if(rawPath && !directMediaSource && (!validPath || (!resolved?.path && !resolved?.alias))) return;
+        component.dataPath=path;
+        input.value=path;
         if(component.type==="resource-meter"){component.customBinding=path;component.binding="custom";}
       }
       else if(key==="customLabel") { const title=String(input.value).trim().slice(0,48); component.customLabel=title; if (["level","attribute"].includes(COMPONENTS[component.type]?.variant) || ["level","attribute"].includes(component.sheetVariant)) component.text=title; }
