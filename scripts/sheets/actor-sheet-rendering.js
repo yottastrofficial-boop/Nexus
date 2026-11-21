@@ -103,12 +103,12 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
     for (const node of assetTextNodes) {
       const card = node.closest(".nexus-component");
       const component = componentById.get(card?.dataset.id);
-      renderExpressionText(node, !component?.dataPath);
+      renderExpressionText(node, true);
     }
     root.querySelectorAll(".nexus-component-content, .nexus-component-heading").forEach(container => {
       const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT); const nodes=[];
-      while(walker.nextNode()) if(/\{\{[^{}]+\}\}/.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
-      for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,false);}
+      while(walker.nextNode()) if(/\{\{[^{}]+\}\}|https?:\/\/[^\s<>]+/i.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
+      for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,true);}
     });
     // Os wrappers são criados pelo TreeWalker acima. Mantê-los em cache evita
     // consultas globais ao DOM a cada atualização de propriedade do Actor.
@@ -122,7 +122,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         renderExpressionText(node, !component?.dataPath);
       }
       for (const node of expressionTextNodes) {
-        if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, false);
+        if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, true);
       }
       renderFontAwesomeTokens(root);
     };
@@ -155,7 +155,8 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
       const component=componentById.get(card.dataset.id); if(!component || component.type==="token" || component.type==="asset-image") return;
       const definition=COMPONENTS[component.type] ?? {};
       const rawPath=String(component.dataPath ?? definition.path ?? "").trim(); if(!rawPath) return;
-      const binding=resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;
+      const directMedia=isMediaSource(rawPath)?rawPath:"";
+       const binding=directMedia?{value:directMedia,path:""}:resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;
       if(raw===undefined || raw===null || typeof raw==="object") return;
       const value=String(raw).trim(); if(!value || !isMediaSource(value)) return;
       const forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||rawPath) || binding.alias?.type==="image";
