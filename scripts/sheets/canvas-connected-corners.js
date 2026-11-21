@@ -5,6 +5,27 @@
 const cornerNames = ["tl", "tr", "br", "bl"];
 const sideNames = ["top", "right", "bottom", "left"];
 const observerByCanvas = new WeakMap();
+/**
+ * Enumerate only surface pairs whose bounding boxes can touch.
+ * A horizontal sweep avoids comparing every distant pair on large canvases.
+ * Returned indices refer to the original rectangles array.
+ */
+export function* iterateCanvasContactPairs(rectangles = [], tolerance = 2.5) {
+  const ordered = rectangles
+    .map((rect, index) => ({ rect, index }))
+    .sort((a, b) => a.rect.left - b.rect.left || a.index - b.index);
+
+  for (let i = 0; i < ordered.length; i++) {
+    const a = ordered[i];
+    for (let j = i + 1; j < ordered.length; j++) {
+      const b = ordered[j];
+      if (b.rect.left > a.rect.right + tolerance) break;
+      if (b.rect.top > a.rect.bottom + tolerance || b.rect.bottom < a.rect.top - tolerance) continue;
+      yield [a.index, b.index];
+    }
+  }
+}
+
 const getRect = node => {
   const rect = node.getBoundingClientRect();
   return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height };
@@ -37,7 +58,7 @@ export function updateCanvasConnectedCorners(canvas, tolerance = 2.5) {
     return horizontal || vertical;
   };
   let contacts = 0;
-  for (let i = 0; i < visible.length; i++) for (let j = i + 1; j < visible.length; j++) {
+  for (const [i, j] of iterateCanvasContactPairs(visible.map(item => item.rect), tolerance)) {
     const a = visible[i], b = visible[j];
     const overlapX = Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left);
     const overlapY = Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top);
