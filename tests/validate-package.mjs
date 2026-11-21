@@ -1345,6 +1345,8 @@ const canvasGroups = await readFile(new URL("../scripts/sheets/canvas-group-rend
 const canvasCorners = await readFile(new URL("../scripts/sheets/canvas-connected-corners.js", import.meta.url), "utf8");
 assert.match(sheetCode,/renderCanvasGroups\(this, form\)/,"Grupos devem ser renderizados também no Modo Padrão");
 assert.match(canvasGroups,/nexus-group-surface/,"O renderizador compartilhado deve criar a superfície visual do grupo");
+assert.match(canvasGroups,/depthOf\(group\.id\) > 0\) surface\.classList\.add\("is-nested"\)/,"Grupos internos devem ser identificados para evitar bordas sobrepostas");
+assert.match(css,/\.nexus-group-surface\.is-nested:not\(\.is-folder\)/,"Grupos aninhados devem ter contorno deslocado sem duplicar a borda do pai");
 assert.match(canvasGroups,/is-group-member/,"O renderizador compartilhado deve marcar os componentes pertencentes a grupos");
 assert.ok(css.includes(".nexus-group-surface.is-static"),"Superfícies de grupo no Modo Padrão não devem bloquear controles");
 
