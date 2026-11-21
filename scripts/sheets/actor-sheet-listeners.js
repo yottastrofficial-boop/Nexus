@@ -469,7 +469,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           input.addEventListener("input",()=>{swatch.style.background=input.value;});
         }
         const apply=document.createElement("button");apply.type="button";apply.dataset.librarySaveThemeCopy="";apply.textContent="Salvar cópia personalizada e aplicar";
-        detail.append(heading,note,preview,swatches,fields,apply);
+        const applyOriginal=document.createElement("button");applyOriginal.type="button";applyOriginal.dataset.libraryApplyThemeOriginal="";applyOriginal.textContent=custom?"Aplicar tema salvo":"Aplicar tema padrão";
+        detail.append(heading,note,preview,swatches,fields,applyOriginal,apply);
       };
       const customThemeCard = target?.closest("[data-library-custom-theme]");
       if (customThemeCard && libraryPanel.contains(customThemeCard)) {
@@ -483,6 +484,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         event.preventDefault();
         libraryPanel.querySelectorAll("[data-library-custom-theme],[data-library-theme]").forEach(item=>item.classList.toggle("is-selected",item===themeCard));
         renderThemeInspector(themeCard.dataset.libraryTheme,false);
+        return;
+      }
+      const applyThemeOriginalButton=target?.closest("[data-library-apply-theme-original]");
+      if(applyThemeOriginalButton&&libraryPanel.contains(applyThemeOriginalButton)){
+        event.preventDefault();
+        const detail=libraryPanel.querySelector("[data-library-theme-details]");
+        const id=detail?.dataset.selectedThemeId;
+        if(!id)return;
+        if(detail.dataset.selectedThemeCustom==="true")await sheet._applyLibraryCustomTheme(id);
+        else await sheet._applyThemePreset(id);
         return;
       }
       const saveThemeCopyButton=target?.closest("[data-library-save-theme-copy]");
