@@ -1143,6 +1143,22 @@ assert.deepEqual(executedActions, ["toggle", "roll"], "As ações devem executar
 assert.equal(getTriggeredActions({
   interactions: [{ trigger: { event: "hover" }, actions: [{ type: "roll", config: {} }] }]
 }, "click").length, 0, "Um trigger diferente não deve executar no clique");
+assert.equal(evaluateNexusCondition("true AND true", () => undefined), true);
+assert.equal(evaluateNexusCondition("true AND false", () => undefined), false);
+assert.equal(evaluateNexusCondition("true OR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("NOT false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true XOR true", () => undefined), false);
+assert.equal(evaluateNexusCondition("true XOR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true NAND true", () => undefined), false);
+assert.equal(evaluateNexusCondition("true NOR false", () => undefined), false);
+assert.equal(evaluateNexusCondition("(@resources.pv.value >= 10) AND NOT (@resources.pm.value > 5)", path => ({ "resources.pv.value": 12, "resources.pm.value": 3 }[path])), true);
+assert.equal(evaluateNexusCondition("true && !false || false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true AND 3", () => undefined), null, "Operadores lógicos devem exigir operandos booleanos");
+assert.equal(evaluateNexusCondition("true OR false AND false", () => undefined), true, "AND deve ter precedência sobre OR");
+assert.equal(evaluateNexusCondition("NOT (true AND false)", () => undefined), true, "Parênteses devem agrupar expressões booleanas");
+assert.equal(evaluateNexusCondition("false NOR false", () => undefined), true);
+assert.equal(evaluateNexusCondition("true NAND false", () => undefined), true);
+
 console.log("NEXUS: proficiência assinada, valores negativos e pipeline de interações verificados.");
 
 const multiFlowComponent = { interactions: [{
@@ -1155,6 +1171,8 @@ const multiFlowComponent = { interactions: [{
 }] };
 const conditionActor = { system: { identity: { level: 4 } } };
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
+assert.equal(normalizeInteraction({ actions: [{ type: "roll", name: "Ataque especial" }] }).actions[0].name, "Ataque especial",
+  "O nome personalizado da ação deve ser preservado na normalização");
 assert.equal(normalizeInteraction(multiFlowComponent.interactions[0]).conditions[0].expression, "@identity.level >= 3",
   "Condições antigas devem ser convertidas para expressões sem perder o operador");
 assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "" }], actions: [{ type: "roll" }] }] }, "click").length, 1,
@@ -1252,7 +1270,7 @@ assert.ok(css.includes(".nexus-interaction-action-head{display:grid"), "Cabeçal
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
 assert.match(interactions,/control\("input",co\.expression\?\?""/,"Condições devem usar um único campo de expressão");
-assert.match(interactions,/Expressão da condição/,"O campo de condição deve possuir nome acessível");
+assert.match(interactions,/Expressão lógica da condição/,"O campo de condição deve possuir nome acessível");
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
 assert.match(css,/\.nexus-panel-window \.nexus-tool-panel\[data-tool-panel="style"\] \.nexus-global-color-grid\{display:flex!important;flex-direction:column!important/, "Aparência deve manter controles de cor em lista alinhada");
 assert.ok(css.includes("height:min(600px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
@@ -1298,7 +1316,7 @@ assert.ok(css.includes("grid-template-columns:minmax(0,1fr) minmax(130px,160px)"
 
 assert.ok(!template.includes("nexus-behavior-header"), "O cabeçalho redundante do painel Comportamento deve ser removido");
 assert.match(interactions,/nexus-interaction-trigger-row/, "Gatilhos devem usar seletor direto dentro de cartão");
-assert.match(interactions,/Combinar condições/, "Combinação E/OU deve ter seletor próprio e compacto");
+assert.match(interactions,/evaluateNexusCondition/, "Condições devem usar o avaliador de expressões lógicas");
 assert.match(interactions,/nexus-interaction-action-active/, "O estado Ativa deve ficar junto ao título da ação");
 assert.match(sheetCode,/--nexus-state-success/, "Temas devem expor cores semânticas de estado");
 assert.match(css,/--nexus-scrollbar-thumb-hover/, "Temas devem centralizar estados das barras de rolagem");
@@ -1312,7 +1330,7 @@ assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-item
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
 assert.match(interactions,/expression:""/,"Novas condições começam com a expressão vazia");
-assert.match(interactions,/expression\.placeholder="@resources\.pv\.value >= 10"/,"Condições devem oferecer um exemplo de expressão comparável às regras");
+assert.doesNotMatch(interactions,/expression\.placeholder/,"Campos de condição não devem exibir placeholders");
 assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
 assert.match(actorSheetRendering,/String\(binding\.value\)\.trim\(\)/,"URLs de mídia vindas de propriedades devem remover espaços invisíveis antes de renderizar");
@@ -1773,8 +1791,14 @@ assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift"] }
 assert.equal(normalizeInteraction({ triggers: [{ event: "middleClick" }], actions: [] }).triggers[0].event, "middleClick");
 assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: ["alt", "shift", "invalid"] }], actions: [] }).triggers[0].modifiers, ["shift", "alt"]);
 assert.doesNotMatch(interactions, /modifierOptions/, "O editor não deve oferecer um seletor genérico de modificadores");
-assert.match(interactions, /Combinação de teclas|Atalho de teclado/, "Atalhos devem ser configurados por captura da combinação completa");
+assert.match(interactions, /nexus-interaction-keycap/, "Atalhos devem ser exibidos como teclas no próprio botão");
 assert.match(interactions, /findInteractionShortcutConflicts/, "O editor deve identificar conflitos de atalhos no Canvas");
+assert.match(interactions, /duplicate-flow/, "O editor deve permitir duplicar fluxos");
+assert.match(interactions, /edit-flow-name/, "O nome do fluxo deve ser editado a partir da barra de ferramentas");
+assert.match(interactions, /nexus-interaction-flow-enabled/, "O estado ativo do fluxo deve ficar na barra de ferramentas");
+
+assert.match(interactions, /nexus-interaction-action-order/, "Ações devem exibir sua ordem separada do título");
+assert.doesNotMatch(interactions, /Todas \(E\)|Qualquer \(OU\)/, "A interface não deve expor o seletor Todas/Qualquer");
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
 assert.match(interactions, /\["keyDown","Atalho personalizado"\]/, "O editor deve identificar atalhos personalizados");
 assert.match(interactions, /data-interaction-media-preview|interactionMediaPreview/, "Valores de ações devem oferecer prévia de mídia");
@@ -1794,7 +1818,7 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 assert.match(interactions, /Atalho personalizado/, "O editor deve identificar atalhos de teclado personalizados");
-assert.match(interactions, /Atalho de teclado/, "O editor deve exibir a combinação capturada");
+assert.match(interactions, /nexus-interaction-keycap/, "O editor deve exibir a combinação capturada no próprio botão");
 const keyboardOnlyComponent = { interactions: [{ enabled: true, triggers: [{ event: "keyDown", key: "k", modifiers: ["ctrl"] }], actions: [{ enabled: true, type: "roll", config: { formula: "1d20" } }] }] };
 assert.equal(hasKeyboardInteraction(keyboardOnlyComponent), true, "Componentes com gatilho de teclado devem ser navegáveis por foco");
 assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "focus" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de foco devem receber tabindex para executar o fluxo");

@@ -51,7 +51,7 @@ const normalizeAction = (a,i) => {
   if(!a || !INTERACTION_ACTIONS.includes(a.type))return null;
   const config=a.config && typeof a.config==="object" && !Array.isArray(a.config)?{...a.config}:{};
   for(const key of ["path","targetPath"])if(config[key]!==undefined)config[key]=safePath(config[key]);
-  return {id:String(a.id??`action-${i+1}`),type:a.type,enabled:a.enabled!==false,config};
+  return {id:String(a.id??`action-${i+1}`),name:String(a.name??"").trim().slice(0,60),type:a.type,enabled:a.enabled!==false,config};
 };
 export function normalizeInteraction(raw) {
   if(!raw || typeof raw!=="object")return null;
@@ -348,7 +348,8 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
     else if(data.field==="operator")condition.operator=INTERACTION_OPERATORS.includes(value)?value:"equals";
     else if(data.field==="value")condition.value=String(value??"").slice(0,120);
   }else if(data.scope==="action"&&action){
-    if(data.field==="type"){action.type=INTERACTION_ACTIONS.includes(value)?value:"roll";action.config=action.type==="roll"?{formula:"1d20"}:{};}
+    if(data.field==="name")action.name=String(value??"").trim().slice(0,60);
+    else if(data.field==="type"){action.type=INTERACTION_ACTIONS.includes(value)?value:"roll";action.config=action.type==="roll"?{formula:"1d20"}:{};}
     else if(data.field==="enabled")action.enabled=!!value;
     else if(data.field.startsWith("config.")){
       const key=data.field.slice(7);action.config[key]=["path","targetPath"].includes(key)?safePath(value):String(value).slice(0,500);
@@ -395,6 +396,13 @@ export function applyInteractionEditorCommand(component,command,data={}) {  if (
   const flows=ensureEditableInteractions(component),flow=flows.find(f=>f.id===data.interactionId);
   if(command==="add-flow"){flows.push(createInteractionFlow());return true;}
   if(command==="add-library-flow"&&data.template){flows.push(instantiateInteractionTemplate(data.template));return true;}
+  if(command==="duplicate-flow"&&flow){
+    const copy=structuredClone(flow);copy.id=newId("interaction");copy.name=(flow.name||"Fluxo")+" (cópia)";
+    copy.triggers=copy.triggers.map(item=>({...item,id:newId("trigger")}));
+    copy.conditions=copy.conditions.map(item=>({...item,id:newId("condition")}));
+    copy.actions=copy.actions.map(item=>({...item,id:newId("action"),config:{...item.config}}));
+    flows.push(copy);return true;
+  }
   if(command==="remove-flow"&&flow){component.interactions=flows.filter(f=>f.id!==flow.id);return true;}
   if(!flow)return false;
   if(command==="add-trigger")flow.triggers.push({id:newId("trigger"),event:"click"});
@@ -465,20 +473,23 @@ export function findInteractionShortcutConflicts(components = [], sourceComponen
 export function renderInteractionEditor(container,component,components=[],library=[],actor=null){
  if(!container)return;const previous=container.dataset.activeInteractionId??"",flows=getComponentInteractions(component),activeId=flows.some(x=>x.id===previous)?previous:(flows[0]?.id??"");
  container.replaceChildren();container.dataset.activeInteractionId=activeId;
- const heading=el("div","nexus-interaction-editor-heading"),title=el("strong","nexus-interaction-editor-title","Fluxos"),toolbar=el("div","nexus-interaction-editor-toolbar");
- if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";toolbar.append(select,btn("Inserir","add-library-flow",""));}
- toolbar.append(btn("＋ Novo fluxo","add-flow",""));heading.append(title,toolbar);
- container.append(heading);
- if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(empty);return;}
- const tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
+ const flowbar=el("div","nexus-interaction-flowbar"),tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
  for(const flow of flows){const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");tab.type="button";tab.dataset.interactionFlowTab=flow.id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected",String(flow.id===activeId));tab.classList.toggle("active",flow.id===activeId);tabs.append(tab);}
- heading.append(tabs);
+ const flowTools=el("div","nexus-interaction-flow-tools");
+ const addFlowButton=btn("+","add-flow","");addFlowButton.title="Adicionar fluxo";addFlowButton.setAttribute("aria-label","Adicionar fluxo");flowTools.append(addFlowButton);
+ if(activeId){
+  const activeFlow=flows.find(item=>item.id===activeId);
+  const enabled=control("checkbox",activeFlow?.enabled!==false,[],"Ativar fluxo");enabled.dataset.interactionScope="flow";enabled.dataset.interactionField="enabled";enabled.dataset.interactionId=activeId;enabled.dataset.componentId=String(component.id??"");
+  const enabledLabel=el("label","nexus-interaction-flow-enabled");enabledLabel.append(enabled,el("span","","Ativo"));flowTools.append(enabledLabel);
+  flowTools.append(iconBtn("Editar nome do fluxo","fa-pen","edit-flow-name",activeId),iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",activeId),iconBtn("Duplicar fluxo","fa-copy","duplicate-flow",activeId),iconBtn("Excluir fluxo","fa-trash","remove-flow",activeId));
+ }
+ if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";flowTools.append(select,btn("Inserir","add-library-flow",""));}
+ flowbar.append(tabs,flowTools);container.append(flowbar);
+ if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(empty);return;}
  const panels=el("div","nexus-interaction-flows");
  for(const flow of flows){
   const panel=el("section","nexus-interaction-flow");panel.dataset.interactionId=flow.id;panel.dataset.interactionFlowPanel=flow.id;panel.hidden=flow.id!==activeId;panel.setAttribute("role","tabpanel");
-  const flowHead=el("div","nexus-interaction-flow-heading"),name=control("input",flow.name,[],"Nome do fluxo");name.className="nexus-interaction-flow-name";name.placeholder="Nome do fluxo";bind(name,"flow",flow.id,"name");flowHead.append(name);
-  const flowEnabled=control("checkbox",flow.enabled,[],"Ativar fluxo");flowHead.append(field("Ativo",flowEnabled,"flow",flow.id,"enabled"));
-  const flowTools=el("div","nexus-interaction-flow-actions");flowTools.append(iconBtn("Salvar na biblioteca","fa-bookmark","save-flow",flow.id),iconBtn("Excluir fluxo","fa-trash","remove-flow",flow.id));flowHead.append(flowTools);panel.append(flowHead);
+  const flowHead=el("div","nexus-interaction-flow-heading");flowHead.append(el("strong","nexus-interaction-flow-name",flow.name||"Novo fluxo"));panel.append(flowHead);
   const guided=el("div","nexus-interaction-guided");
   const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");
   triggerHead.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
@@ -498,7 +509,9 @@ export function renderInteractionEditor(container,component,components=[],librar
     capture.dataset.capturedModifiers=normalizeModifiers(tr.modifiers).join("+");
     capture.title=tr.key?"Clique para alterar a combinação":"Clique e pressione a combinação desejada";
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
-    const keyField=el("label","nexus-interaction-field");keyField.classList.add("nexus-interaction-trigger-key");keyField.append(el("span","","Atalho de teclado"),capture);keyField.hidden=capture.hidden;
+    capture.classList.add("nexus-interaction-keycap");capture.setAttribute("aria-label","Combinação de teclas");
+    capture.hidden=!["keyDown","keyUp"].includes(tr.event);
+    const keyField=el("div","nexus-interaction-trigger-key");keyField.append(capture);keyField.hidden=capture.hidden;
     const clearKey=iconBtn("Limpar atalho","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.classList.add("nexus-interaction-trigger-clear");clearKey.hidden=!tr.key;
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});remove.classList.add("nexus-interaction-trigger-remove");
     row.classList.toggle("is-key-trigger",!capture.hidden);
@@ -512,17 +525,20 @@ export function renderInteractionEditor(container,component,components=[],librar
       row.append(warning);
     }
     triggers.append(row);
-  }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
-  const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
-  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão da condição");expression.placeholder="@resources.pv.value >= 10";expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"),btn("＋ Adicionar","add-condition",flow.id));conditions.append(conditionHead);
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão lógica da condição");expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);
   const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
   for(const [i,action] of flow.actions.entries()){
-   const card=el("article","nexus-interaction-action"),head=el("div","nexus-interaction-action-head"),actionTitle=el("strong","nexus-interaction-action-title",(actions.find(x=>x[0]===action.type)?.[1]??"Ação")+" · "+String(i+1).padStart(2,"0"));
-   const active=control("checkbox",action.enabled!==false,[],"Ativar ação"),activeLabel=el("label","nexus-interaction-action-active");activeLabel.append(active,el("span","","Ativo"));bind(active,"action",flow.id,"enabled",{actionIndex:i});
-   const tools=el("div","nexus-interaction-action-tools"),up=iconBtn("Mover ação para cima","fa-arrow-up","move-action",flow.id,{actionIndex:i,direction:-1}),down=iconBtn("Mover ação para baixo","fa-arrow-down","move-action",flow.id,{actionIndex:i,direction:1});up.disabled=i===0;down.disabled=i===flow.actions.length-1;tools.append(up,down,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
-   head.append(actionTitle,activeLabel,tools);card.append(head);
-   const type=control("select",action.type,actions,"Tipo de ação");card.append(field("Tipo",type,"action",flow.id,"type",{actionIndex:i}));
+   const card=el("article","nexus-interaction-action"),head=el("div","nexus-interaction-action-head");
+   const order=el("span","nexus-interaction-action-order",String(i+1).padStart(2,"0"));
+   const actionTitle=control("input",action.name||(actions.find(x=>x[0]===action.type)?.[1]??"Ação"),[],"Nome da ação");actionTitle.className="nexus-interaction-action-title";bind(actionTitle,"action",flow.id,"name",{actionIndex:i});
+   const type=control("select",action.type,actions,"Tipo de ação");type.classList.add("nexus-interaction-action-type");bind(type,"action",flow.id,"type",{actionIndex:i});
+   const tools=el("div","nexus-interaction-action-tools"),up=iconBtn("Mover ação para cima","fa-arrow-up","move-action",flow.id,{actionIndex:i,direction:-1}),down=iconBtn("Mover ação para baixo","fa-arrow-down","move-action",flow.id,{actionIndex:i,direction:1});up.disabled=i===0;down.disabled=i===flow.actions.length-1;
+   tools.append(up,down,iconBtn("Remover ação","fa-trash","remove-action",flow.id,{actionIndex:i}));
+   head.append(order,actionTitle,type,tools);card.append(head);
+   const active=control("checkbox",action.enabled!==false,[],"Ativar ação");active.dataset.interactionScope="action";active.dataset.interactionField="enabled";active.dataset.interactionId=flow.id;active.dataset.actionIndex=String(i);active.dataset.componentId=String(component.id??"");
+   const activeLabel=el("label","nexus-interaction-action-active");activeLabel.append(active,el("span","","Ativa"));card.append(activeLabel);
    const config=el("div","nexus-interaction-action-config");buildActionConfig(config,{...flow,componentId:component.id},action,i,components);card.append(config);actionGroup.append(card);
   }
   panel.append(actionGroup);
