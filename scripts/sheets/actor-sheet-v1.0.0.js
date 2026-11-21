@@ -3522,6 +3522,8 @@ if (!hasPath) propertyValueInput.value = "";
   _mountFloatingUI(html) {
     const root = html[0];
     this._nexusFloatingCleanup?.({ preserveWindows: true });
+    const floatingGeneration = (this._nexusFloatingGeneration ?? 0) + 1;
+    this._nexusFloatingGeneration = floatingGeneration;
     const app = root.closest(".application, .window-app, .app") || root;
     document.querySelector(`[data-nexus-floating-for="${this.id}"]`)?.remove();
     const leftRail = root.querySelector(".nexus-appearance-rail");
@@ -3718,6 +3720,7 @@ if (!hasPath) propertyValueInput.value = "";
           console.error("NEXUS | Falha ao carregar a Biblioteca", error);
           return;
         }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) return;
         this._libraryApplyFilter?.();
         this._libraryRestoreSelection?.();
       }
@@ -3742,6 +3745,10 @@ if (!hasPath) propertyValueInput.value = "";
       this._nexusPanelWindows.set(key, instance);
       this._openAppearancePanels.add(key);
       instance.render({ force: true }).then(() => {
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected || this._nexusPanelWindows.get(key) !== instance) {
+          instance.close();
+          return;
+        }
         applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
         focusPanelWindow(instance);
         syncRailFocus(false);
@@ -3798,6 +3805,9 @@ if (!hasPath) propertyValueInput.value = "";
     window.addEventListener("scroll", positionRails, true);
 
     this._nexusFloatingCleanup = ({ preserveWindows = true } = {}) => {
+      if (this._nexusFloatingGeneration === floatingGeneration) this._nexusFloatingGeneration += 1;
+      if (pendingLayoutClick) clearTimeout(pendingLayoutClick);
+      pendingLayoutClick = null;
       resizeObserver?.disconnect(); moveObserver?.disconnect();
       window.removeEventListener("resize", positionRails);
       window.removeEventListener("scroll", positionRails, true);
