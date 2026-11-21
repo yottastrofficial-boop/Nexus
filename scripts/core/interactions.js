@@ -380,7 +380,7 @@ const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interacti
 const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flowId,extra);b.classList.add("is-icon");b.title=label;const glyph=el("i","fa-solid "+icon);glyph.setAttribute("aria-hidden","true");b.append(glyph);return b;};
 const control=(type,value,options=[],aria="")=>{const input=el(type);if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}if(type==="checkbox")input.checked=!!value;else input.value=String(value??"");if(aria)input.setAttribute("aria-label",aria);return input;};
 const field=(label,input,scope,id,key,extra={})=>{const wrap=el("label","nexus-interaction-field");if(label)wrap.append(el("span","",label));bind(input,scope,id,key,extra);wrap.append(input);return wrap;};
-const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hold","Segurar"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Atalho de teclado"],["keyUp","Atalho de teclado (ao soltar)"],["interact","Interação encadeada"]];
+const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hold","Segurar"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Atalho personalizado"],["keyUp","Atalho personalizado (ao soltar)"],["interact","Interação encadeada"]];
 const modifierOptions=[["","Nenhum"],["shift","Shift"],["ctrl","Ctrl"],["alt","Alt"],["meta","Meta"],["ctrl+shift","Ctrl + Shift"],["ctrl+alt","Ctrl + Alt"],["shift+alt","Shift + Alt"],["ctrl+shift+alt","Ctrl + Shift + Alt"],["ctrl+meta","Ctrl + Meta"],["shift+meta","Shift + Meta"],["alt+meta","Alt + Meta"],["ctrl+shift+meta","Ctrl + Shift + Meta"],["ctrl+alt+meta","Ctrl + Alt + Meta"],["shift+alt+meta","Shift + Alt + Meta"],["ctrl+shift+alt+meta","Ctrl + Shift + Alt + Meta"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
@@ -421,7 +421,7 @@ export function renderInteractionEditor(container,component,components=[],librar
   for(const [i,tr] of flow.triggers.entries()){
     const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores");
     const eventField=field("Tipo",select,"trigger",flow.id,"event",{triggerIndex:i});
-    const modifierField=field("Modificadores",modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});
+    const modifierField=field(["keyDown","keyUp"].includes(tr.event)?"Modificadores do atalho":"Modificadores",modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});
     const duration=control("number",tr.durationMs??600,[],"Duração mínima em milissegundos");duration.min="100";duration.max="5000";duration.step="50";
     const durationField=field("Duração (ms)",duration,"trigger",flow.id,"durationMs",{triggerIndex:i});durationField.hidden=tr.event!=="hold";
     const keyLabel=String(tr.key??"");
@@ -430,7 +430,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     capture.dataset.interactionScope="trigger";capture.dataset.interactionField="key";capture.dataset.capturedKey=tr.key??"";
     capture.title=tr.key?"Clique para alterar a tecla":"Clique e pressione a tecla desejada";
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
-    const keyField=el("label","nexus-interaction-field");keyField.append(el("span","","Tecla"),capture);keyField.hidden=capture.hidden;
+    const keyField=el("label","nexus-interaction-field");keyField.append(el("span","","Combinação de teclas"),capture);keyField.hidden=capture.hidden;
     const clearKey=iconBtn("Limpar tecla","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.hidden=!tr.key;
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
     row.classList.toggle("is-key-trigger",!capture.hidden);
