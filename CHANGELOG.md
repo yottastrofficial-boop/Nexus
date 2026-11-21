@@ -1,5 +1,12 @@
 ## 1.0.0.71
 
+### Correções de manutenção (mesma versão 1.0.0.71)
+- Corrige a dependência `isMediaSource` ausente na ativação dos listeners da ficha, que impedia a renderização de Actors.
+- Reduz operações repetidas na preparação da ficha: indexa componentes por ID, reutiliza o estado herdado dos grupos e calcula linhas de perícias uma vez por ciclo.
+- Introduz `manifest.json` como canal estável de instalação e atualização. O workflow só sincroniza esse manifesto depois de confirmar que o ZIP da release foi enviado.
+- O pacote da release `v1.0.0.71` será reconstruído com essas correções, sem alterar o número da versão.
+- A validação funcional e visual no Foundry VTT 14 ainda precisa ser confirmada após a instalação do pacote atualizado.
+
 ### Estabilização da ficha e integridade de dados
 - Corrige a execução duplicada de interações quando o mesmo fluxo está associado a `pointerDown` e `click`, sem bloquear cliques independentes nem gestos convertidos em arraste.
 - Introduz escopos descartáveis para listeners do Canvas, permitindo encerrar juntos os listeners locais, globais e hooks associados ao ciclo de vida.
