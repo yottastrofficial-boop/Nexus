@@ -103,7 +103,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (previousTimer) clearTimeout(previousTimer);
       const timer = setTimeout(() => {
         pendingResourceValueSaves.delete(input);
-        if (input.isConnected && input.value !== "" && Number.isFinite(Number(input.value))) $(input).trigger("change");
+        if (input.isConnected && (input.value.trim() === "" || Number.isFinite(Number(input.value)))) $(input).trigger("change");
       }, 180);
       pendingResourceValueSaves.set(input, timer);
     });
