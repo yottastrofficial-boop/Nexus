@@ -260,6 +260,11 @@ assert.ok(sheet.includes("activateActorSheetListeners(this, html, {") && sheet.i
   "A ficha deve fornecer isMediaSource aos listeners");
 const listenerDependencies = sheetListeners.split("\n").find(line => line.includes("} = dependencies;")) ?? "";
 assert.ok(listenerDependencies.includes("isMediaSource"), "Os listeners devem extrair isMediaSource das dependências recebidas");
+const propertyPickerDependencies = ["collectPropertyPaths", "getNexusRollAliasEntries", "buildPropertyPickerCatalog", "renderPropertyPicker"];
+for (const dependency of propertyPickerDependencies) {
+  assert.ok(sheet.includes(` ${dependency},`), `A ficha deve fornecer ${dependency} aos listeners`);
+  assert.ok(listenerDependencies.includes(dependency), `Os listeners devem extrair ${dependency} das dependências recebidas`);
+}
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
 const actorSheetResourceListeners = await read("scripts/sheets/actor-sheet-resource-listeners.js");
