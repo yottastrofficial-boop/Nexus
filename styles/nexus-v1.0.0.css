@@ -6511,3 +6511,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   outline:1px solid color-mix(in srgb,var(--nexus-accent-color,#78b7e8) 32%,transparent) !important;
   outline-offset:1px !important;
 }
+
+@media(max-width:680px) {
+  .nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row input:first-child {
+    grid-column:auto !important;
+  }
+}
