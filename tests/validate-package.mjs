@@ -715,9 +715,13 @@ assert.equal(getSafePath(fakeActor.getFlag("nexus", "customData"), "old.key"), u
 assert.equal(fakeActor.getFlag("nexus", "aliases")[0].key, "new.key");
 assert.deepEqual(fakeActor.getFlag("nexus", "aliases")[0].legacyKeys, ["old.key"], "O caminho antigo deve continuar resolvível por layouts salvos");
 assert.equal(firstMigration.aliasDataConflicts, 0);
+assert.equal(firstMigration.propertySchemaVersion, NEXUS_PROPERTY_SCHEMA_VERSION);
+assert.equal(firstMigration.schemaVersionMigrated, true);
+assert.equal(fakeActor.getFlag("nexus", "propertySchemaVersion"), NEXUS_PROPERTY_SCHEMA_VERSION, "A versão do esquema deve ser registrada após a migração");
 const migrationWriteCount = fakeActor.writes;
 const secondMigration = await migrateLegacyActorData(migrationDependencies);
 assert.equal(secondMigration.changed, false, "Migração repetida não deve sinalizar alteração");
+assert.equal(secondMigration.schemaVersionMigrated, false, "A versão do esquema não deve ser gravada novamente");
 
 assert.equal(fakeActor.writes, migrationWriteCount, "Migração repetida não deve gravar novamente");
 
@@ -791,6 +795,7 @@ const propertyMigrationDependencies = {
 };
 const propertyMigration = await migrateLegacyActorData(propertyMigrationDependencies);
 assert.equal(propertyMigration.propertiesMigrated, true);
+assert.equal(legacyPropertyActor.getFlag("nexus", "propertySchemaVersion"), NEXUS_PROPERTY_SCHEMA_VERSION, "Actors legados devem receber a versão do esquema após a normalização");
 assert.equal(legacyPropertyActor.system.skills.athletics.proficientLevel, 1);
 assert.equal(legacyPropertyActor.system.skills.athletics.proficient, undefined);
 assert.equal(legacyPropertyActor.system.skills.stealth.proficientLevel, -1, "A antiga marcação opposed deve migrar para nível negativo");
@@ -1993,3 +1998,10 @@ assert.match(actorAliasListeners, /data-alias-reset/, "O controlador de aliases 
     "custom.new.value", "attribute.new.value", "resources.new.max", "unrelated.path"
   ]);
 }
+
+// A newer Actor schema must never be rewritten by an older NEXUS release.
+const futureActor = { name: "Actor futuro", flags: { nexus: { propertySchemaVersion: NEXUS_PROPERTY_SCHEMA_VERSION + 1 } }, writes: 0, getFlag(scope, key) { return this.flags[scope]?.[key]; }, async setFlag() { this.writes++; } };
+const futureMigration = await migrateLegacyActorData({ actor: futureActor, readLayouts: async () => { throw new Error("Não deve ler layouts de esquema futuro"); }, getAliasDefinitions: () => [], getCustomAliasData: () => ({}), normalizeAliasDefinition: value => value, invalidateAliasDefinitionCache: () => {}, clone: value => structuredClone(value) });
+assert.equal(futureMigration.futureSchema, true, "Um esquema futuro deve ser protegido de migração por código antigo");
+assert.equal(futureMigration.changed, false);
+assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravações");
