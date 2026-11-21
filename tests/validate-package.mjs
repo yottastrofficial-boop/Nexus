@@ -256,14 +256,24 @@ const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
 const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
 assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
-assert.ok(sheet.includes("activateActorSheetListeners(this, html, {") && sheet.includes("DEFAULT_FOUNDRY_TOKEN_IMAGE, isMediaSource,"),
-  "A ficha deve fornecer isMediaSource aos listeners");
-const listenerDependencies = sheetListeners.split("\n").find(line => line.includes("} = dependencies;")) ?? "";
-assert.ok(listenerDependencies.includes("isMediaSource"), "Os listeners devem extrair isMediaSource das dependências recebidas");
-const propertyPickerDependencies = ["collectPropertyPaths", "getNexusRollAliasEntries", "buildPropertyPickerCatalog", "renderPropertyPicker"];
-for (const dependency of propertyPickerDependencies) {
-  assert.ok(sheet.includes(` ${dependency},`), `A ficha deve fornecer ${dependency} aos listeners`);
-  assert.ok(listenerDependencies.includes(dependency), `Os listeners devem extrair ${dependency} das dependências recebidas`);
+const sheetDependencyBlock = sheet.match(/activateActorSheetListeners\(this, html, \{([\s\S]*?)\}\);/)?.[1] ?? "";
+assert.ok(sheetDependencyBlock, "A ficha deve declarar o contrato de dependências dos listeners");
+const dependencyNames = source => [...source.matchAll(/\b([A-Za-z_$][\w$]*)\b/g)].map(match => match[1]);
+const passedSheetDependencies = new Set(dependencyNames(sheetDependencyBlock));
+const listenerDependencyBlock = sheetListeners.match(/const\s*\{([\s\S]*?)\}\s*=\s*dependencies;/)?.[1] ?? "";
+const extractedSheetDependencies = new Set(dependencyNames(listenerDependencyBlock));
+for (const dependency of extractedSheetDependencies) {
+  assert.ok(passedSheetDependencies.has(dependency), `Os listeners extraem ${dependency}, mas a ficha não o fornece`);
+}
+const requiredDirectListenerDependencies = [
+  "isMediaSource",
+  "collectPropertyPaths", "getNexusRollAliasEntries", "buildPropertyPickerCatalog", "renderPropertyPicker",
+  "getTriggeredActions", "renderInteractionEditor", "saveInteractionToLibrary", "deleteInteractionFromLibrary",
+  "renderPropertyPresentationEditor", "getResourceValuePaths", "getTokenImageSource"
+];
+for (const dependency of requiredDirectListenerDependencies) {
+  assert.ok(passedSheetDependencies.has(dependency), `A ficha deve fornecer ${dependency} aos listeners`);
+  assert.ok(extractedSheetDependencies.has(dependency), `Os listeners devem extrair ${dependency} das dependências recebidas`);
 }
 const actorAliasListeners = await read("scripts/sheets/actor-alias-listeners.js");
 const actorSheetSkillListeners = await read("scripts/sheets/actor-sheet-skill-listeners.js");
@@ -273,6 +283,20 @@ assert.match(sheetListeners, /import \{ serializeActorPropertyWrite \} from ["']
 const propertyValueListeners = await read("scripts/sheets/actor-property-value-listeners.js");
 const actorPropertyWrites = await read("scripts/core/actor-property-writes.js");
 const actorPropertyPickerListeners = await read("scripts/sheets/actor-property-picker-listeners.js");
+const specializedListenerContracts = [
+  ["actor-property-picker-listeners.js", actorPropertyPickerListeners],
+  ["actor-property-value-listeners.js", propertyValueListeners],
+  ["actor-alias-listeners.js", actorAliasListeners],
+  ["actor-sheet-skill-listeners.js", actorSheetSkillListeners],
+  ["actor-sheet-resource-listeners.js", actorSheetResourceListeners]
+];
+for (const [moduleName, moduleSource] of specializedListenerContracts) {
+  const moduleDependencies = moduleSource.match(/const\s*\{([\s\S]*?)\}\s*=\s*dependencies;/)?.[1] ?? "";
+  assert.ok(moduleDependencies, `${moduleName} deve declarar suas dependências explicitamente`);
+  for (const dependency of dependencyNames(moduleDependencies)) {
+    assert.ok(passedSheetDependencies.has(dependency), `${moduleName} exige ${dependency}, mas a ficha não fornece essa dependência`);
+  }
+}
 const canvasInteractions = await read("scripts/sheets/canvas-interactions.js");
 const canvasGroupRendering = await read("scripts/sheets/canvas-group-rendering.js");
 const canvasViewportSource = await read("scripts/sheets/canvas-viewport.js");
