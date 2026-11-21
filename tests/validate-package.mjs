@@ -1818,7 +1818,7 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 assert.match(interactions, /Atalho personalizado/, "O editor deve identificar atalhos de teclado personalizados");
-assert.match(interactions, /Atalho de teclado/, "O editor deve exibir a combinação capturada");
+assert.match(interactions, /nexus-interaction-keycap/, "O editor deve exibir a combinação capturada no próprio botão");
 const keyboardOnlyComponent = { interactions: [{ enabled: true, triggers: [{ event: "keyDown", key: "k", modifiers: ["ctrl"] }], actions: [{ enabled: true, type: "roll", config: { formula: "1d20" } }] }] };
 assert.equal(hasKeyboardInteraction(keyboardOnlyComponent), true, "Componentes com gatilho de teclado devem ser navegáveis por foco");
 assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "focus" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de foco devem receber tabindex para executar o fluxo");
