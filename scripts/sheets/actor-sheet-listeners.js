@@ -125,7 +125,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!Number.isFinite(value)) return;
       sheet._captureHistory();
       await sheet.actor.update({ [`system.${path}`]: value }, { render: false });
-      sheet._refreshBoundComponents();
+      sheet._refreshBoundComponentsSafely();
       }).catch(() => {});
     });
     activateActorAliasListeners(sheet, html, dependencies);
