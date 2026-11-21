@@ -472,6 +472,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const applyOriginal=document.createElement("button");applyOriginal.type="button";applyOriginal.dataset.libraryApplyThemeOriginal="";applyOriginal.textContent=custom?"Aplicar tema salvo":"Aplicar tema padrão";
         detail.append(heading,note,preview,swatches,fields,applyOriginal,apply);
       };
+      const layoutCard = target?.closest("[data-library-saved-layout]");
+      if (layoutCard && libraryPanel.contains(layoutCard) && !target?.closest(".nexus-library-layout-actions")) {
+        event.preventDefault();
+        libraryPanel.querySelectorAll("[data-library-saved-layout]").forEach(item => item.classList.toggle("is-selected", item === layoutCard));
+        const entry = (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === layoutCard.dataset.librarySavedLayout);
+        const detail = libraryPanel.querySelector("[data-library-layout-details]");
+        if (entry && detail) {
+          detail.dataset.selectedLayoutId = entry.id;
+          detail.replaceChildren();
+          const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
+          const title = document.createElement("strong"); title.className = "nexus-library-detail-title"; title.textContent = entry.name || "Layout sem nome"; heading.append(title);
+          const layout = entry.layout ?? {};
+          const summary = document.createElement("p"); summary.className = "nexus-library-definition-note";
+          summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
+          const note = document.createElement("p"); note.className = "nexus-library-definition-note";
+          note.textContent = "O layout será aplicado como uma cópia; o arquivo salvo na Biblioteca permanece inalterado.";
+          detail.append(heading, summary, note);
+        }
+        return;
+      }
       const customThemeCard = target?.closest("[data-library-custom-theme]");
       if (customThemeCard && libraryPanel.contains(customThemeCard)) {
         event.preventDefault();
