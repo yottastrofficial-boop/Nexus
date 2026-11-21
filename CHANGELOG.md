@@ -1,3 +1,15 @@
+## 1.0.0.75
+
+### Correção crítica da ficha
+- Corrige erro de inicialização do `inspectorNamespace`: o listener de prévia de mídia era registrado antes da declaração `const`, causando `ReferenceError` e interrompendo a renderização da ficha.
+- Adiciona teste de regressão garantindo que o namespace seja inicializado antes de qualquer listener que o utilize.
+
+### Compatibilidade
+- Preserva dados, layouts, propriedades, componentes e configurações existentes.
+- Mantém a estrutura de ficha e os formatos persistidos; não requer migração de Actors.
+
+---
+
 ## 1.0.0.74
 
 ### Mídia, ícones e comportamento
