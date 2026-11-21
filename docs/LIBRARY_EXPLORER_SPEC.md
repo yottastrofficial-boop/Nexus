@@ -52,17 +52,17 @@ Esta etapa adiciona o contrato de definição/instância para componentes, perso
 
 A janela da Biblioteca utiliza uma composição única em três regiões:
 
-- **Navegação à esquerda:** alternância vertical entre Assets, Fluxos, Temas e Layouts.
-- **Área central:** grade/lista de itens da seção ativa, com busca e filtros globais.
-- **Inspector à direita:** painel contextual para prévia, detalhes e configuração. Os painéis de Assets, Fluxos e Temas mantêm seus editores próprios, mas compartilham a mesma largura, superfície, bordas, rolagem e hierarquia visual. Layouts agora também possuem painel de detalhes.
+- **Navegação à esquerda:** árvore visual para Assets padrão, itens pessoais, Fluxos, Temas, Layouts, Modelos de ficha, Assets salvos, Mídia, Estilos visuais, Regras e Comportamentos.
+- **Área central:** cartões de itens com busca compartilhada; Assets, Fluxos, Temas e Layouts mantêm os renderizadores específicos existentes. As coleções complementares usam uma listagem genérica.
+- **Inspector à direita:** painel contextual para prévia, detalhes e configuração. Assets, Fluxos e Temas mantêm seus editores existentes; Layouts apresentam resumo; coleções complementares exibem metadados em modo somente leitura.
 
-A navegação lateral é uma primeira etapa da hierarquia visual. Pastas e coleções adicionais somente devem ser exibidas quando conectadas a dados e ações reais; não apresentar categorias vazias como se já fossem funcionais.
+A navegação é uma árvore visual de categorias, mas ainda não representa pastas personalizáveis. Coleções complementares são carregadas por `readNexusLibraryStore`, com fallback para flags legadas quando o armazenamento canônico ainda não existe. Conteúdo importado permanece inerte.
 
 A interface usa o mesmo padrão de grade e seleção para itens. Em larguras menores, o inspector passa para baixo da listagem para evitar colunas impraticáveis.
 
 ### Limitações ainda abertas
 
-- O catálogo central ainda não agrega todas as coleções do armazenamento unificado.
-- Favoritos, recentes, pastas personalizadas e filtros por etiquetas ainda não estão implementados como recursos completos.
+- Favoritos, recentes, pastas personalizadas e filtros por etiquetas ainda não estão implementados.
+- As coleções complementares têm inspector somente leitura; editores específicos e ações de aplicação ainda não existem.
 - Layouts têm resumo contextual, mas não editor de overrides.
 - A validação visual/funcional no Foundry VTT 14 continua obrigatória.
