@@ -1363,6 +1363,19 @@ assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder s
 assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor a ação de excluir fluxos");
 assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
 assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
+assert.match(template,/data-library-section="collection:templates"/,"A navegação deve expor modelos de ficha");
+assert.match(template,/data-library-section="collection:media"/,"A navegação deve expor mídia");
+assert.match(template,/data-library-section="collection:styles"/,"A navegação deve expor estilos visuais");
+assert.match(template,/data-library-section="collection:rules"/,"A navegação deve expor regras");
+assert.match(template,/data-library-section="collection:behaviors"/,"A navegação deve expor comportamentos");
+assert.match(template,/data-library-section-panel="collection"/,"Coleções complementares devem compartilhar um único painel");
+assert.match(libraryView,/readNexusLibraryStore\(game\.user, legacyFlags\)/,"Coleções devem ser lidas pelo contrato unificado com fallback legado");
+assert.match(libraryView,/data-library-entry/,"Itens das coleções devem possuir seleção contextual");
+assert.match(libraryView,/genericCollectionLabels/,"Coleções complementares devem usar rótulos centralizados");
+assert.match(sheetListeners,/data-library-entry/,"A pesquisa global deve incluir itens das coleções complementares");
+assert.match(css,/nexus-library-tree-heading/,"A navegação deve ter hierarquia visual de pastas");
+assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
+
 assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
 assert.doesNotMatch(interactions,/property\.dataset\.interactionPropertyInput/,"Condições por expressão não devem depender de um seletor de caminho separado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
