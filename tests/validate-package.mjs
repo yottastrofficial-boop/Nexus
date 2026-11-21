@@ -1242,7 +1242,8 @@ assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dad
 assert.ok(css.includes(".nexus-interaction-action-head{display:grid"), "Cabeçalho da ação deve alinhar título, ativo e ferramentas");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
-assert.match(interactions,/control\("select",co\.operator,operators,"Operador"\)/, "Operador deve ter nome acessível sem legenda visual");
+assert.match(interactions,/control\("input",co\.expression\?\?""/,"Condições devem usar um único campo de expressão");
+assert.match(interactions,/Expressão da condição/,"O campo de condição deve possuir nome acessível");
 assert.match(interactions,/control\("input",co\.value,\[\],"Valor"\)/, "Valor deve ter nome acessível sem legenda visual");
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
 assert.match(css,/\.nexus-panel-window \.nexus-tool-panel\[data-tool-panel="style"\] \.nexus-global-color-grid\{display:flex!important;flex-direction:column!important/, "Aparência deve manter controles de cor em lista alinhada");
