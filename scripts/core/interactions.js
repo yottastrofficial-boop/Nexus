@@ -476,7 +476,7 @@ export function renderInteractionEditor(container,component,components=[],librar
  const flowbar=el("div","nexus-interaction-flowbar"),tabs=el("nav","nexus-interaction-flow-tabs");tabs.setAttribute("role","tablist");tabs.setAttribute("aria-label","Fluxos");
  for(const flow of flows){const tab=el("button","nexus-interaction-flow-tab",flow.name||"Novo fluxo");tab.type="button";tab.dataset.interactionFlowTab=flow.id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected",String(flow.id===activeId));tab.classList.toggle("active",flow.id===activeId);tabs.append(tab);}
  const flowTools=el("div","nexus-interaction-flow-tools");
- flowTools.append(btn("+","add-flow",""));
+ const addFlowButton=btn("+","add-flow","");addFlowButton.title="Adicionar fluxo";addFlowButton.setAttribute("aria-label","Adicionar fluxo");flowTools.append(addFlowButton);
  if(activeId){
   const activeFlow=flows.find(item=>item.id===activeId);
   const enabled=control("checkbox",activeFlow?.enabled!==false,[],"Ativar fluxo");enabled.dataset.interactionScope="flow";enabled.dataset.interactionField="enabled";enabled.dataset.interactionId=activeId;enabled.dataset.componentId=String(component.id??"");
