@@ -485,7 +485,7 @@ export function renderInteractionEditor(container,component,components=[],librar
  }
  if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";flowTools.append(select,btn("Inserir","add-library-flow",""));}
  flowbar.append(tabs,flowTools);container.append(flowbar);
- if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(empty);return;}
+ if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"));container.append(empty);return;}
  const panels=el("div","nexus-interaction-flows");
  for(const flow of flows){
   const panel=el("section","nexus-interaction-flow");panel.dataset.interactionId=flow.id;panel.dataset.interactionFlowPanel=flow.id;panel.hidden=flow.id!==activeId;panel.setAttribute("role","tabpanel");
