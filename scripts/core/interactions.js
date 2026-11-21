@@ -166,11 +166,11 @@ export function getComponentInteractions(component) {
   return legacy?[normalizeInteraction({id:"legacy-"+component.actionType,name:component.actionType==="roll"?"Rolagem":"Alternar componente",trigger:{event:legacy.event},actions:[{id:"legacy-action",type:legacy.type,config:legacy.config(component)}]})]:[];
 }
 
-/** True when a component has an enabled, configured keyboard trigger. */
+/** True when a component needs keyboard focus for a keyboard, focus, or blur trigger. */
 export function hasKeyboardInteraction(component) {
   return getComponentInteractions(component).some(flow =>
     flow.enabled &&
-    flow.triggers.some(trigger => ["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) &&
+    flow.triggers.some(trigger => ["focus", "blur"].includes(trigger.event) || (["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim())) &&
     flow.actions.some(action => action.enabled)
   );
 }
