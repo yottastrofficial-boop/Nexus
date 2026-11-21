@@ -22,7 +22,12 @@ Correções críticas e de alta prioridade realizadas na branch `fix/critical-hi
    - Solicitações de atualização visual são coalescidas por instância.
    - A inicialização de atributos/perícias compartilha a operação em andamento por instância da ficha.
 
-4. **Rejeições de persistência na interface**
+4. **Ciclo de vida dos painéis flutuantes**
+   - Operações assíncronas de abertura de painéis verificam a geração da interface antes de continuar.
+   - Uma renderização antiga não pode abrir uma janela depois que o Floating UI foi substituído ou fechado.
+   - O timer de troca de página é cancelado durante a limpeza.
+
+5. **Rejeições de persistência na interface**
    - Os listeners de edição de propriedades e de valores de recursos capturam a rejeição após o helper registrar o erro e notificar o usuário.
    - A fila continua recuperando-se de operações anteriores rejeitadas.
    - A causa raiz de falhas de gravação específicas ainda depende de reprodução no Foundry com os dados reais do Actor.
