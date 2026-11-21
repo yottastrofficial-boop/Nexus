@@ -6478,3 +6478,11 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row {
   grid-template-columns:minmax(0,1fr) 30px !important;
 }
+
+/* Grupos aninhados preservam a superfície de card sem sobrepor a borda do pai. */
+.nexus-group-surface.is-nested:not(.is-folder) {
+  border-color:transparent !important;
+  outline:1px solid color-mix(in srgb,var(--nexus-group-border,#53677f) 58%,transparent) !important;
+  outline-offset:2px !important;
+  box-shadow:none !important;
+}
