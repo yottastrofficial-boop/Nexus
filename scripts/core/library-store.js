@@ -60,6 +60,7 @@ export function createEmptyNexusLibraryStore() {
 /** Validates and normalizes the unified store while retaining unknown future-safe metadata. */
 export function normalizeNexusLibraryStore(raw = {}) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("A Biblioteca possui um formato inválido.");
+  if (Number(raw.schemaVersion ?? NEXUS_LIBRARY_SCHEMA_VERSION) > NEXUS_LIBRARY_SCHEMA_VERSION) throw new Error("Esta Biblioteca foi criada por uma versão mais nova do NEXUS.");
   const source = raw.collections && typeof raw.collections === "object" ? raw.collections : raw;
   const store = createEmptyNexusLibraryStore();
   for (const name of NEXUS_LIBRARY_COLLECTIONS) {
@@ -135,7 +136,7 @@ export function mergeNexusLibraryStores(currentRaw, incomingRaw, options = {}) {
         target[conflictIndex] = candidate; replaced++;
       } else if (mode === "duplicate") {
         candidate.id = String(createId(collection, target.length));
-        candidate.sourceId = candidate.sourceId ? `${candidate.sourceId}-copy-${target.length + 1}` : undefined;
+        if (candidate.sourceId) candidate.sourceId = `${candidate.sourceId}-copy-${target.length + 1}`;
         target.push(candidate); added++;
       } else skipped++;
     }
