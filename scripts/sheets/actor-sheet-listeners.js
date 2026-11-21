@@ -253,6 +253,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
+      const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
+      genericCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleGeneric++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
@@ -262,7 +264,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
       libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
       const count=libraryPanel?.querySelector("[data-library-count]");
-      if(count)count.textContent=activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
+      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
       const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
     const resourcePaths = (() => {
