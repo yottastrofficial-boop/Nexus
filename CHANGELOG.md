@@ -1,3 +1,24 @@
+## 1.0.0.73
+
+### Mídia, ícones e propriedades
+- Move a prévia de mídia da propriedade para imediatamente abaixo do campo Valor no Inspector, antes das regras de apresentação.
+- Adiciona prévias individuais para conteúdos de regras e valores de ações que aceitam imagens, áudio e vídeo.
+- Atualiza as prévias enquanto os valores são editados, sem exigir nova seleção do componente.
+- Renderiza tokens de classes Font Awesome, como `fa-solid fa-circle`, como elementos de ícone em vez de texto literal.
+- Mantém imagens, áudio e vídeo em elementos próprios, com controles nativos para mídia reproduzível.
+
+### Comportamentos
+- Remove `nexus-interaction-group-help` do editor.
+- Adiciona o gatilho Segurar com duração configurável de 100 a 5000 ms.
+- Torna mais claro o gatilho de teclado, com captura de combinações como Ctrl + Shift + S.
+- Preserva gatilhos existentes de foco, perda de foco, hover, pressionar, soltar e cliques.
+
+### Validação
+- Adiciona testes para duração de hold, combinações de teclado, prévias por campo, ordem do Inspector e renderização de Font Awesome.
+- A validação funcional/visual no Foundry VTT 14 ainda precisa ser realizada após a instalação.
+
+---
+
 ## 1.0.0.72
 
 ### Compatibilidade e atualização
