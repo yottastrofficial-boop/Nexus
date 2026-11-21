@@ -12,7 +12,7 @@ import { renderActorSheetRichMedia, renderActorSheetAdaptiveContent } from "./ac
 import { renderCanvasGroups } from "./canvas-group-rendering.js";
 import { buildGroupHierarchy, getGroupDescendantComponentIds, validateGroupParent } from "../core/group-hierarchy.js";
 import { applyGroupLayouts } from "../core/group-composition.js";
-import { migrateLegacyActorData } from "../core/migration-manager.js";
+import { getNexusAttributeInitializationUpdates, migrateLegacyActorData } from "../core/migration-manager.js";
 import { normalizeActorAliasDefinition, getActorAliasCustomValue } from "../core/actor-aliases.js";
 import { mergeLayoutSnapshots } from "../core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusSkillRows, getNexusSkillModifier, evaluateNexusSkillFormula } from "../core/skills.js";
@@ -836,11 +836,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const operation = (async () => {
       try {
         const system = this.actor.system ?? {};
-        const updates = {};
-        for (const key of ["for", "des", "sab", "int", "car", "von"]) {
-          const value = system.attributes?.[key];
-          if (value === undefined || value === null || value === "" || !Number.isFinite(Number(value))) updates["system.attributes." + key] = 0;
-        }
+        const updates = getNexusAttributeInitializationUpdates(system);
         for (const skill of NEXUS_SKILLS) {
           const current = system.skills?.[skill.key];
           const legacy = system.skills?.[skill.legacyKey];
