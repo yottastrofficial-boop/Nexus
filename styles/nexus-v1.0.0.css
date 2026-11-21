@@ -6951,3 +6951,100 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
     grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto !important;
   }
 }
+
+
+/* 1.0.0.80 — alinhamento fino dos painéis de comportamento. */
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-guided {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  align-items:stretch !important;
+  gap:10px !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-guided > .nexus-interaction-group {
+  box-sizing:border-box !important;
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:10px !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-trigger-group,
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-group {
+  flex:none !important;
+  align-self:stretch !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group-heading {
+  display:flex !important;
+  width:100% !important;
+  min-width:0 !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  box-sizing:border-box !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group-heading > h6 {
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-group-heading > .nexus-interaction-button {
+  display:inline-flex !important;
+  flex:0 0 32px !important;
+  width:32px !important;
+  min-width:32px !important;
+  height:30px !important;
+  min-height:30px !important;
+  margin:0 0 0 auto !important;
+  padding:0 !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-keycap {
+  display:flex !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:36px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-sizing:border-box !important;
+  padding:7px 9px !important;
+  color:var(--nexus-panel-text,#e7edf5) !important;
+  -webkit-text-fill-color:var(--nexus-panel-text,#e7edf5) !important;
+  font:700 11px/1.2 ui-monospace,Consolas,monospace !important;
+  letter-spacing:.035em !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-keycap-label {
+  display:block !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  color:inherit !important;
+  -webkit-text-fill-color:inherit !important;
+  font:inherit !important;
+  text-align:center !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-keycap.is-capturing {
+  border-color:#e5b66d !important;
+  background:#5a4528 !important;
+  color:#fff1d8 !important;
+  -webkit-text-fill-color:#fff1d8 !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-keycap.is-capturing .nexus-interaction-keycap-label {
+  color:#fff1d8 !important;
+  -webkit-text-fill-color:#fff1d8 !important;
+}
+.nexus-panel-window .nexus-behavior-editor .nexus-interaction-condition-row {
+  width:100% !important;
+  min-width:0 !important;
+  grid-template-columns:minmax(0,1fr) 30px !important;
+}
+@media(max-width:620px) {
+  .nexus-panel-window .nexus-behavior-editor .nexus-interaction-guided {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+}
