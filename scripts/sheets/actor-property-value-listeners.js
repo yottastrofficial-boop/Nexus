@@ -149,6 +149,6 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
           await writePropertyExpression(sheet.actor, path, null);
         }
         sheet._refreshBoundComponents();
-        });
+        }).catch(() => {});
       });
 }
