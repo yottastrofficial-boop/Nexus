@@ -1638,7 +1638,7 @@ assert.equal(normalizeInteraction({ triggers: [{ event: "middleClick" }], action
 assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: ["alt", "shift", "invalid"] }], actions: [] }).triggers[0].modifiers, ["shift", "alt"]);
 assert.match(interactions, /modifierOptions/);
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
-assert.match(interactions, /\["keyDown","Atalho de teclado"\]/, "O editor deve identificar atalhos de teclado");
+assert.match(interactions, /\["keyDown","Atalho personalizado"\]/, "O editor deve identificar atalhos personalizados");
 assert.match(interactions, /data-interaction-media-preview|interactionMediaPreview/, "Valores de ações devem oferecer prévia de mídia");
 const holdFlow = normalizeInteraction({ triggers: [{ event: "hold", durationMs: 850 }], actions: [{ type: "roll", config: { formula: "1d20" } }] });
 assert.equal(holdFlow.triggers[0].durationMs, 850);
