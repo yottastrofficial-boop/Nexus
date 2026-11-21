@@ -435,6 +435,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
     row.classList.toggle("is-key-trigger",!capture.hidden);
     row.classList.toggle("is-hold-trigger",tr.event==="hold");
+    row.classList.toggle("is-standard-trigger",!["keyDown","keyUp","hold"].includes(tr.event));
     row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
