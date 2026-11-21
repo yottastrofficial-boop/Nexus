@@ -115,6 +115,9 @@ export function activateActorPropertyValueListeners(sheet, inspectorNamespace, i
           const imagePath = String(value).trim().slice(0, 2048);
           if (targetPath === "prototypeToken.texture.src" && !imagePath) {
             await sheet.actor.update({ "prototypeToken.texture.src": DEFAULT_FOUNDRY_TOKEN_IMAGE }, { render: false });
+          } else if (targetPath === "img" && !imagePath) {
+            // A portrait may intentionally be empty; only the token needs a Foundry fallback.
+            await sheet.actor.update({ img: "" }, { render: false });
           } else if (!isMediaSource(imagePath)) {
             globalThis.ui?.notifications?.warn?.("Imagem inválida. Informe uma imagem válida ou uma propriedade que contenha uma imagem.");
             input.value = path === "img" || path === "identity.portrait.img" ? (sheet.actor.img ?? "") : getFoundryDefaultTokenImage(sheet.actor);
