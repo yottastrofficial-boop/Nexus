@@ -1013,7 +1013,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       } else if (command) applyInteractionEditorCommand(component, command, data);
       else applyInteractionEditorChange(component, { ...data, scope: control.dataset.interactionScope, field: control.dataset.interactionField }, control.type === "checkbox" ? control.checked : control.value);
       if (control.dataset.capturedModifiers !== undefined) applyInteractionEditorChange(component, { ...data, scope: "trigger", field: "modifiers" }, control.dataset.capturedModifiers ? control.dataset.capturedModifiers.split("+") : []);
-      if (command === "add-flow" || command === "add-library-flow") activeInteractionId = component.interactions?.at(-1)?.id ?? activeInteractionId;
+      if (command === "add-flow" || command === "add-library-flow" || command === "duplicate-flow") activeInteractionId = component.interactions?.at(-1)?.id ?? activeInteractionId;
       if (command === "remove-flow" && activeInteractionId === interactionId) activeInteractionId = component.interactions?.[0]?.id ?? "";
       if (command !== "save-flow") {
         await sheet._writeLayouts(layouts, active, { render: false });
@@ -1101,6 +1101,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action], .nexus-component-inspector [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
+      if(button.dataset.interactionAction==="edit-flow-name"){
+        const editor=button.closest("[data-interaction-editor]");
+        const flowId=button.dataset.interactionId;
+        const tab=editor?.querySelector(`[data-interaction-flow-tab="${CSS.escape(flowId)}"]`);
+        if(!tab)return;
+        const previousName=tab.textContent.trim();
+        const input=document.createElement("input");
+        input.type="text";input.value=previousName;input.maxLength=60;input.setAttribute("aria-label","Nome do fluxo");
+        input.dataset.interactionScope="flow";input.dataset.interactionField="name";input.dataset.interactionId=flowId;
+        input.addEventListener("keydown",keyEvent=>{
+          if(keyEvent.key==="Enter"){keyEvent.preventDefault();input.blur();}
+          if(keyEvent.key==="Escape"){keyEvent.preventDefault();input.value=previousName;input.dataset.cancelRename="true";input.blur();}
+        });
+        input.addEventListener("blur",async()=>{
+          if(input.dataset.cancelRename==="true"||!input.value.trim()){tab.textContent=previousName;return;}
+          await persistInteractionEditor(input,null);
+        },{once:true});
+        tab.replaceChildren(input);input.focus();input.select();
+        return;
+      }
       if(button.dataset.interactionAction==="edit-flow-name"){
         const editor=button.closest("[data-interaction-editor]");
         const flowId=button.dataset.interactionId;
