@@ -41,12 +41,11 @@ export function renderCanvasGroups(sheet, root) {
   }
   sheet._groupHierarchy = hierarchy;
   const elementById = new Map(components.map(element => [String(element.dataset.id), element]));
-  const depthOf = id => {
-    let depth = 0, cursor = hierarchy.parentById.get(String(id)) ?? "", seen = new Set([String(id)]);
-    while (cursor && !seen.has(cursor)) { seen.add(cursor); depth++; cursor = hierarchy.parentById.get(cursor) ?? ""; }
-    return depth;
-  };
-  const maxDepth = Math.max(0, ...groups.map(group => depthOf(group.id)));
+  // Reuse the canonical depth index built by buildGroupHierarchy. Walking
+  // parent chains here for every group made deep layouts quadratic and the
+  // spread-based Math.max could exceed the argument limit on large layouts.
+  const depthOf = id => hierarchy.depthById.get(String(id)) ?? 0;
+  const maxDepth = groups.reduce((max, group) => Math.max(max, depthOf(group.id)), 0);
   const ordered = [...groups].sort((a, b) => depthOf(a.id) - depthOf(b.id));
   const surfaces = new Map();
   for (const group of ordered) {
