@@ -1650,6 +1650,8 @@ assert.match(propertyValueListeners, /String\(value\)\.trim\(\) === ""\) value =
 assert.ok(propertyValueListeners.includes("$(document).on(`input${inspectorNamespace}`, \"[data-property-value]\""), "O editor deve receber eventos depois de ser movido para a janela flutuante");
 assert.ok(propertyValueListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-property-value]\""), "O salvamento de propriedades deve ser delegado ao documento");
 assert.match(propertyValueListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de propriedades devem ser tratadas no limite do listener");
+assert.match(sheet, /_refreshBoundComponentsSafely\(changes = null\)[\s\S]*?catch \(error\)[\s\S]*?A gravação foi concluída/, "Falhas de atualização visual não devem ser reportadas como falhas de persistência");
+assert.ok(propertyValueListeners.includes("sheet._refreshBoundComponentsSafely()"), "O Inspector deve atualizar prévias sem confundir falhas visuais com falhas de gravação");
 assert.match(sheetListeners, /serializeActorPropertyWrite\(sheet\.actor, async[\s\S]*?\}\)\.catch\(\(\) => \{\}\)/, "Falhas de persistência de recursos devem ser tratadas no limite do listener");
 assert.ok(sheetListeners.includes("$(document).on(`change${inspectorNamespace}`, \"[data-config-current-value], [data-config-max-value]\""), "PV/PM/PE atuais e máximos devem salvar também na janela flutuante");
 assert.ok(sheetListeners.includes("isSheetOwnedControl(input)"), "Eventos globais devem ser isolados à ficha e às suas janelas");
