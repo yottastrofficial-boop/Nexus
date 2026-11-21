@@ -13,12 +13,14 @@ import { activateActorSheetResourceListeners } from "./actor-sheet-resource-list
 export function activateActorSheetListeners(sheet, html, dependencies) {
   const { NEXUS_LIBRARY_CATALOG, NEXUS_SKILLS, collectPropertyPaths, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, clone, getPath, getResourceValuePaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
 
-    $(document).on(`input${inspectorNamespace}`, "[data-interaction-media-input], [data-property-value]", event => {
+    $(document).on(`input${inspectorNamespace}`, "[data-interaction-media-input], [data-property-value], [data-inspector-media-input]", event => {
       const input = event.currentTarget;
       const preview = input.dataset.interactionMediaInput !== undefined
         ? (input.closest(".nexus-property-presentation-rule")?.querySelector("[data-interaction-media-preview]")
           ?? input.closest(".nexus-interaction-action-config")?.querySelector("[data-interaction-media-preview]"))
-        : input.closest(".nexus-property-value-field")?.nextElementSibling;
+        : input.dataset.inspectorMediaInput !== undefined
+          ? input.closest("label")?.nextElementSibling
+          : input.closest(".nexus-property-value-field")?.nextElementSibling;
       if (preview) renderInteractionMediaPreview(preview, input.value);
     });
     const currentRoot = html?.[0];
