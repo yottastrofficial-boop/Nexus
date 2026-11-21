@@ -1312,7 +1312,7 @@ assert.match(interactions,/expression\.placeholder="@resources\.pv\.value >= 10"
 assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
 assert.ok(actorSheetRendering.includes("allowPlainUrls ?") && actorSheetRendering.includes("https?:"),"O renderer deve localizar URLs HTTP(S) sem exigir {{...}}");
-assert.match(sheet,/const directMediaSource = isMediaSource\(genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
+assert.match(sheet,/const directMediaSource = isMediaSource\(wrappedDataMedia\?\.\[1\] \?\? genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
 assert.match(sheetListeners, /const directMediaSource=\["asset-image","token"\]\.includes\(component\.type\)/, "O Inspector deve aceitar mídia direta em caminhos de imagem e token");
 
 assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
