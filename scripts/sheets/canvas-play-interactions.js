@@ -11,6 +11,8 @@ export function activateCanvasPlayInteractions(sheet, html) {
   // Um gesto primário pode emitir pointerDown e, em seguida, click.
   // O mesmo fluxo configurado para ambos deve executar uma única vez.
   const pointerDownFlows = new Map();
+  const holdTimers = new Map();
+  const clearHoldTimers = id => { for (const timer of holdTimers.get(id) ?? []) clearTimeout(timer); holdTimers.delete(id); };
   const dispatch = (event,name,extra={}) => {
     if(sheet._mode!=="play")return false;
     const card=cardOf(event);if(!card)return false;
@@ -21,7 +23,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
   };
   const stop=(event,name,extra)=>{if(!dispatch(event,name,extra))return false;event.preventDefault();event.stopPropagation();return true;};
   const hasKeyboardTrigger = component => getComponentInteractions(component).some(flow =>
-    flow.enabled && flow.triggers.some(trigger => ["keyDown","keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) &&
+    flow.enabled && flow.triggers.some(trigger => ["focus","blur"].includes(trigger.event) || (["keyDown","keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim())) &&
     flow.actions.some(action => action.enabled)
   );
   const onKeydown=event=>{
@@ -43,10 +45,11 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onDoubleClick=event=>{if(!isControlTarget(event))stop(event,"doubleClick");};
   const onContextMenu=event=>{if(!isControlTarget(event))stop(event,"rightClick");};
   const onAuxClick=event=>{if(event.button===1&&!isControlTarget(event))stop(event,"middleClick");};
-  const pointerBehaviorEvents = new Set(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","interact"]);
+  const pointerBehaviorEvents = new Set(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hold","interact"]);
   let cursorCard = null;
   const clearBehaviorCursor = () => { cursorCard?.style.removeProperty("cursor"); cursorCard = null; };
   const onPointerMove = event => {
+    const movingCard=cardOf(event);for(const id of holdTimers.keys())if(id!==movingCard?.dataset.id)clearHoldTimers(id);if(movingCard){const pending=pointerDownFlows.get(movingCard.dataset.id);if(pending&&Math.hypot(event.clientX-pending.x,event.clientY-pending.y)>8)clearHoldTimers(movingCard.dataset.id);}
     if (sheet._mode !== "play") { clearBehaviorCursor(); return; }
     const card = cardOf(event);
     if (cursorCard && cursorCard !== card) clearBehaviorCursor();
@@ -59,27 +62,40 @@ export function activateCanvasPlayInteractions(sheet, html) {
     if (actionable) { card.style.setProperty("cursor", "pointer", "important"); cursorCard = card; }
     else if (cursorCard === card) clearBehaviorCursor();
   };
-  const onPointerLeave = clearBehaviorCursor;
+  const onPointerLeave = () => { for(const id of holdTimers.keys())clearHoldTimers(id); clearBehaviorCursor(); };
   const onPointerDown=event=>{
     if(isControlTarget(event))return;
     const card=cardOf(event);
     if(card&&event.button===0){
+      clearHoldTimers(card.dataset.id);
       const component=sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
       const actions=getTriggeredActions(component,"pointerDown",{actor:sheet.actor,modifiers:modifiersOf(event),key:""});
       if(actions.length)pointerDownFlows.set(card.dataset.id,{time:performance.now(),x:event.clientX,y:event.clientY,ids:[...new Set(actions.map(action=>action.interactionId))]});
+      const holdTriggers=getComponentInteractions(component).filter(flow=>flow.enabled&&flow.actions.some(action=>action.enabled))
+        .flatMap(flow=>flow.triggers.filter(trigger=>trigger.event==="hold").map(trigger=>({durationMs:trigger.durationMs??600})));
+      const fired=new Set();
+      const timers=holdTriggers.map(trigger=>setTimeout(()=>{
+        const pending=getTriggeredActions(component,"hold",{actor:sheet.actor,modifiers:modifiersOf(event),durationMs:trigger.durationMs,skipInteractionIds:[...fired]});
+        const ids=[...new Set(pending.map(action=>action.interactionId))];
+        if(ids.length){sheet._runComponentAction(card.dataset.id,"hold",{modifiers:modifiersOf(event),durationMs:trigger.durationMs,skipInteractionIds:[...fired]});ids.forEach(id=>fired.add(id));}
+      },trigger.durationMs));
+      if(timers.length)holdTimers.set(card.dataset.id,timers);
     }
     dispatch(event,"pointerDown",{button:event.button,pointerType:event.pointerType});
     const component=card&&sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
     if(card&&hasKeyboardTrigger(component))card.focus?.({preventScroll:true});
   };
-  const onPointerUp=event=>{if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
+  const onPointerUp=event=>{for(const id of holdTimers.keys())clearHoldTimers(id);if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
   const onPointerOver=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"hover",{pointerType:event.pointerType});};
   const onFocusIn=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"focus");};
   const onFocusOut=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"blur");};
   const onChange=event=>dispatch(event,"change",{fieldName:event.target?.name??""});
   const onSubmit=event=>stop(event,"submit");
+  const onDocumentPointerRelease = () => { for(const id of holdTimers.keys())clearHoldTimers(id); };
+  document.addEventListener("pointerup",onDocumentPointerRelease,true);
+  document.addEventListener("pointercancel",onDocumentPointerRelease,true);
   const listeners=[["keydown",onKeydown],["keyup",onKeyup],["click",onClick],["dblclick",onDoubleClick],["contextmenu",onContextMenu],["auxclick",onAuxClick],["pointerdown",onPointerDown],["pointerup",onPointerUp],["pointermove",onPointerMove],["pointerover",onPointerOver],["focusin",onFocusIn],["focusout",onFocusOut],["change",onChange],["submit",onSubmit]];
   for(const [name,listener] of listeners)canvas.addEventListener(name,listener);
   canvas.addEventListener("pointerleave",onPointerLeave);
-  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);pointerDownFlows.clear();clearBehaviorCursor();};
+  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);document.removeEventListener("pointerup",onDocumentPointerRelease,true);document.removeEventListener("pointercancel",onDocumentPointerRelease,true);pointerDownFlows.clear();for(const id of holdTimers.keys())clearHoldTimers(id);clearBehaviorCursor();};
 }

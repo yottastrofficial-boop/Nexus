@@ -42,7 +42,15 @@ export const setPreviewContent = (node, value) => {
     img.alt = "";
     img.loading = "lazy";
     node.append(img);
-  } else node.textContent = content;
+  } else {
+    const icon = content.match(/^(fa-(?:solid|regular|brands|light|thin|duotone)\\s+fa-[a-z0-9-]+)$/i);
+    if (icon) {
+      const glyph = document.createElement("i");
+      glyph.className = icon[1];
+      glyph.setAttribute("aria-hidden", "true");
+      node.append(glyph);
+    } else node.textContent = content;
+  }
   node.hidden = !content;
 };
 

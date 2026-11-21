@@ -11,8 +11,18 @@ import { activateActorSheetResourceListeners } from "./actor-sheet-resource-list
  * Kept separate from the sheet class so the lifecycle facade stays focused.
  */
 export function activateActorSheetListeners(sheet, html, dependencies) {
-  const { NEXUS_LIBRARY_CATALOG, NEXUS_SKILLS, collectPropertyPaths, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, clone, getPath, getResourceValuePaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
+  const { NEXUS_LIBRARY_CATALOG, NEXUS_SKILLS, collectPropertyPaths, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, clone, getPath, getResourceValuePaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
 
+    $(document).on(`input${inspectorNamespace}`, "[data-interaction-media-input], [data-property-value], [data-inspector-media-input]", event => {
+      const input = event.currentTarget;
+      const preview = input.dataset.interactionMediaInput !== undefined
+        ? (input.closest(".nexus-property-presentation-rule")?.querySelector("[data-interaction-media-preview]")
+          ?? input.closest(".nexus-interaction-action-config")?.querySelector("[data-interaction-media-preview]"))
+        : input.dataset.inspectorMediaInput !== undefined
+          ? input.closest("label")?.nextElementSibling
+          : input.closest(".nexus-property-value-field")?.nextElementSibling;
+      if (preview) renderInteractionMediaPreview(preview, input.value);
+    });
     const currentRoot = html?.[0];
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     sheet._nexusInspectorNamespace = inspectorNamespace;
@@ -1011,7 +1021,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if (liveComponent) {
           const node = sheet.element?.querySelector?.(`.nexus-component[data-id="${CSS.escape(componentId)}"]`);
           const hasClick = getTriggeredActions(liveComponent, "click", { actor: sheet.actor }).length > 0;
-          const hasKeyboard = getComponentInteractions(liveComponent).some(flow => flow.enabled && flow.triggers.some(trigger => ["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) && flow.actions.some(action => action.enabled));
+          const hasKeyboard = getComponentInteractions(liveComponent).some(flow => flow.enabled && flow.triggers.some(trigger => ["focus", "blur"].includes(trigger.event) || (["keyDown", "keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim())) && flow.actions.some(action => action.enabled));
           const isInteractive = hasClick || hasKeyboard;
           if (node) {
             node.dataset.hasClickInteraction = String(hasClick);

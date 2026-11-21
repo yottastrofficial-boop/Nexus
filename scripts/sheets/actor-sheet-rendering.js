@@ -1,3 +1,29 @@
+const renderFontAwesomeTokens = root => {
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (/\bfa-(?:solid|regular|brands|light|thin|duotone)\s+fa-[a-z0-9-]+\b/i.test(node.textContent ?? "")
+      && !node.parentElement?.closest("script,style,textarea,input,code,pre")) nodes.push(node);
+  }
+  for (const node of nodes) {
+    const source = node.textContent ?? "";
+    const pattern = /\bfa-(?:solid|regular|brands|light|thin|duotone)\s+fa-[a-z0-9-]+\b/gi;
+    const fragment = document.createDocumentFragment();
+    let cursor = 0, match;
+    while ((match = pattern.exec(source))) {
+      if (match.index > cursor) fragment.append(document.createTextNode(source.slice(cursor, match.index)));
+      const icon = document.createElement("i");
+      icon.className = match[0];
+      icon.setAttribute("aria-hidden", "true");
+      fragment.append(icon);
+      cursor = pattern.lastIndex;
+    }
+    if (cursor < source.length) fragment.append(document.createTextNode(source.slice(cursor)));
+    node.replaceWith(fragment);
+  }
+};
 export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, isMediaSource, COMPONENTS } = {}) {
 
     sheet._nexusMediaObserver?.disconnect();
@@ -98,8 +124,10 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       for (const node of expressionTextNodes) {
         if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, false);
       }
+      renderFontAwesomeTokens(root);
     };
     sheet._renderAdaptiveContent(root, createMedia);
+    renderFontAwesomeTokens(root);
 }
 
 export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { resolveNexusBinding, isMediaSource, COMPONENTS } = {}) {
