@@ -75,7 +75,7 @@ export async function migrateLegacyActorData({
     if (!Array.isArray(system.conditions)) updates["system.conditions"] = [];
 
     if (Object.keys(updates).length) {
-      await actor.update(updates);
+      await actor.update(updates, { render: false });
       propertiesMigrated = true;
       changed = true;
     }
