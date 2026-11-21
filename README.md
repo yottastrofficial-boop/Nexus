@@ -48,7 +48,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Versão atual | 1.0.0.73 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.73 possui release e pacote publicados. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.73 está em preparação e ainda depende de publicação da release e validação funcional no Foundry. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
