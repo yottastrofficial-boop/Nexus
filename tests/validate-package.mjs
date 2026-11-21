@@ -91,6 +91,8 @@ assert.equal(getMediaKind("https://example.test/page"), "", "URLs sem tipo conhe
   assert.equal(deepHierarchy.depthById.get(`deep-${count - 1}`), count - 1,
     "A profundidade dos grupos deve ser calculada uma única vez");
   assert.deepEqual(deepHierarchy.descendants.get("deep-0"), ["deep-component"]);
+  assert.equal(applyGroupLayouts(deepGroups, deepComponents).groups.length, count,
+    "A composição visual também deve suportar hierarquias profundas sem recalcular cadeias de ancestrais");
   const deepSnapshot = getGroupTreeSnapshot("deep-0", deepGroups, deepComponents);
   let snapshotDepth = 0, snapshotCursor = deepSnapshot;
   while (snapshotCursor?.groups?.length) {
