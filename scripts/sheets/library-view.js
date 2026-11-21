@@ -1,6 +1,7 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
+import { readNexusLibraryStore } from "../core/library-store.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
 
@@ -83,10 +84,93 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     };
     sheet._libraryRenderSavedFlows=renderSavedFlows;
     renderSavedFlows();
+    const genericCollectionLabels = {
+      templates: "Modelos de ficha", assets: "Assets salvos", media: "Mídia",
+      styles: "Estilos visuais", rules: "Regras", behaviors: "Comportamentos"
+    };
+    const genericCollectionIcons = {
+      templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
+      styles: "fa-solid fa-swatchbook", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears"
+    };
+    const renderGenericCollection = collection => {
+      const container = panel.querySelector("[data-library-generic-items]");
+      const detail = panel.querySelector("[data-library-generic-details]");
+      if (!container || !detail || !genericCollectionLabels[collection]) return;
+      const legacyFlags = Object.fromEntries([
+        "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
+        "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
+      ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
+      let entries = [];
+      try {
+        const { store } = readNexusLibraryStore(game.user, legacyFlags);
+        entries = store.collections[collection] ?? [];
+      } catch (error) {
+        console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error);
+      }
+      const query = searchInput?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
+      container.replaceChildren();
+      const visible = entries.filter(entry => {
+        const haystack = [entry.name,entry.label,entry.title,entry.description,entry.type,entry.sourceId]
+          .filter(value => value !== undefined && value !== null).join(" ").toLocaleLowerCase("pt-BR");
+        return !query || haystack.includes(query);
+      });
+      for (const entry of visible) {
+        const card = document.createElement("button");
+        card.type = "button"; card.className = "nexus-library-generic-item";
+        card.dataset.libraryEntry = entry.id; card.dataset.libraryCollection = collection;
+        const icon = document.createElement("i"); icon.className = genericCollectionIcons[collection]; icon.setAttribute("aria-hidden","true");
+        const title = document.createElement("strong"); title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome");
+        const meta = document.createElement("small"); meta.textContent = String(entry.type ?? entry.sourceId ?? "Item salvo");
+        card.append(icon,title,meta); container.append(card);
+      }
+      if (!visible.length) {
+        const empty = document.createElement("p"); empty.className = "nexus-library-empty";
+        empty.textContent = entries.length ? "Nenhum item corresponde à pesquisa." : "Esta coleção ainda não possui itens salvos.";
+        container.append(empty);
+      }
+      panel.querySelector("[data-library-collection-heading]").textContent = genericCollectionLabels[collection];
+      panel.querySelector("[data-library-collection-count]").textContent = `${visible.length} de ${entries.length} itens`;
+      detail.dataset.selectedCollection = collection;
+      detail.dataset.selectedEntry = "";
+      detail.innerHTML = '<div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do item</strong><p>Selecione um item para consultar os dados armazenados. O editor específico desta coleção ainda não está disponível.</p></div>';
+    };
+    panel.addEventListener("click", event => {
+      const card = event.target.closest("[data-library-entry]");
+      if (!card || !panel.contains(card)) return;
+      const collection = card.dataset.libraryCollection;
+      const legacyFlags = Object.fromEntries([
+        "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
+        "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
+      ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
+      try {
+        const { store } = readNexusLibraryStore(game.user, legacyFlags);
+        const entry = store.collections[collection]?.find(item => item.id === card.dataset.libraryEntry);
+        if (!entry) return;
+        panel.querySelectorAll("[data-library-entry]").forEach(item => item.classList.toggle("is-selected", item === card));
+        const detail = panel.querySelector("[data-library-generic-details]");
+        detail.dataset.selectedCollection = collection; detail.dataset.selectedEntry = entry.id; detail.replaceChildren();
+        const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
+        const title = document.createElement("strong"); title.className = "nexus-library-detail-title";
+        title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome"); heading.append(title);
+        const description = document.createElement("p"); description.className = "nexus-library-definition-note";
+        description.textContent = String(entry.description ?? "Conteúdo salvo na Biblioteca NEXUS.");
+        const metadata = document.createElement("small"); metadata.className = "nexus-library-definition-note";
+        metadata.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
+        const status = document.createElement("p"); status.className = "nexus-library-definition-note";
+        status.textContent = "Prévia e edição específicas ainda não estão disponíveis para esta coleção. Os dados originais não foram modificados.";
+        detail.append(heading,description,metadata,status);
+      } catch (error) { console.warn("NEXUS | Falha ao abrir detalhes da coleção", error); }
+    });
     const activateSection=(key)=>{
       sheet._librarySection=key;
       panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
-      panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{section.hidden=section.dataset.librarySectionPanel!==key;});
+      panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{
+        const isGeneric = key.startsWith("collection:");
+        section.hidden = isGeneric
+          ? section.dataset.librarySectionPanel !== "collection"
+          : section.dataset.librarySectionPanel !== key;
+      });
+      if(key.startsWith("collection:")) renderGenericCollection(key.slice("collection:".length));
       if(key==="assets")sheet._libraryApplyFilter?.();
       if(key==="themes"){
         const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
@@ -101,7 +185,14 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         panel.querySelector("[data-library-count]").textContent=`${visible} ${visible===1?"fluxo":"fluxos"}`;
       }
     };
-    panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>activateSection(button.dataset.librarySection)));
+    panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>{
+      if (button.dataset.libraryScope) {
+        sheet._libraryAssetScope = button.dataset.libraryScope;
+        panel.querySelectorAll("[data-library-scope]").forEach(item => item.classList.toggle("active", item === button));
+      }
+      activateSection(button.dataset.librarySection);
+    }));
+    panel.querySelector("[data-library-section-panel='collection']")?.setAttribute("data-library-section-panel","collection");
     activateSection(sheet._librarySection ?? "assets");
     panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
       sheet._libraryAssetScope=button.dataset.libraryScope;
