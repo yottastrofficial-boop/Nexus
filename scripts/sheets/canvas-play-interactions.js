@@ -91,8 +91,11 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onFocusOut=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"blur");};
   const onChange=event=>dispatch(event,"change",{fieldName:event.target?.name??""});
   const onSubmit=event=>stop(event,"submit");
+  const onDocumentPointerRelease = () => { for(const id of holdTimers.keys())clearHoldTimers(id); };
+  document.addEventListener("pointerup",onDocumentPointerRelease,true);
+  document.addEventListener("pointercancel",onDocumentPointerRelease,true);
   const listeners=[["keydown",onKeydown],["keyup",onKeyup],["click",onClick],["dblclick",onDoubleClick],["contextmenu",onContextMenu],["auxclick",onAuxClick],["pointerdown",onPointerDown],["pointerup",onPointerUp],["pointermove",onPointerMove],["pointerover",onPointerOver],["focusin",onFocusIn],["focusout",onFocusOut],["change",onChange],["submit",onSubmit]];
   for(const [name,listener] of listeners)canvas.addEventListener(name,listener);
   canvas.addEventListener("pointerleave",onPointerLeave);
-  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);pointerDownFlows.clear();for(const id of holdTimers.keys())clearHoldTimers(id);clearBehaviorCursor();};
+  sheet._nexusPlayCleanup=()=>{for(const [name,listener] of listeners)canvas.removeEventListener(name,listener);canvas.removeEventListener("pointerleave",onPointerLeave);document.removeEventListener("pointerup",onDocumentPointerRelease,true);document.removeEventListener("pointercancel",onDocumentPointerRelease,true);pointerDownFlows.clear();for(const id of holdTimers.keys())clearHoldTimers(id);clearBehaviorCursor();};
 }
