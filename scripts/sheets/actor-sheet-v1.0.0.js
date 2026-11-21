@@ -890,9 +890,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
   _scheduleNexusRefresh() {
     if (this._nexusRefreshScheduled) return;
     this._nexusRefreshScheduled = true;
+    const generation = (this._nexusRefreshGeneration ?? 0) + 1;
+    this._nexusRefreshGeneration = generation;
     queueMicrotask(() => {
+      if (this._nexusRefreshGeneration !== generation) return;
       this._nexusRefreshScheduled = false;
-      if (this.element?.isConnected) void this.render({ force: true });
+      if (this.rendered) void this.render({ force: true });
     });
   }
 
@@ -3854,6 +3857,8 @@ if (!hasPath) propertyValueInput.value = "";
   }
 
   _onClose(options) {
+    this._nexusRefreshGeneration = (this._nexusRefreshGeneration ?? 0) + 1;
+    this._nexusRefreshScheduled = false;
     this._nexusCanvasEditorGeneration = (this._nexusCanvasEditorGeneration ?? 0) + 1;
     this._nexusKeyCleanup?.(); this._nexusKeyCleanup = null;
     this._nexusPlayCleanup?.(); this._nexusPlayCleanup = null;
