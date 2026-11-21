@@ -1101,6 +1101,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-action], .nexus-component-inspector [data-interaction-action]", async event => {
       event.preventDefault(); event.stopPropagation();
       const button=event.currentTarget;
+      if(button.dataset.interactionAction==="edit-flow-name"){
+        const editor=button.closest("[data-interaction-editor]");
+        const flowId=button.dataset.interactionId;
+        const tab=editor?.querySelector(`[data-interaction-flow-tab="${CSS.escape(flowId)}"]`);
+        if(!tab)return;
+        const previousName=tab.textContent.trim();
+        const input=document.createElement("input");
+        input.type="text";input.value=previousName;input.maxLength=60;input.setAttribute("aria-label","Nome do fluxo");
+        input.dataset.interactionScope="flow";input.dataset.interactionField="name";input.dataset.interactionId=flowId;
+        input.addEventListener("keydown",keyEvent=>{
+          if(keyEvent.key==="Enter"){keyEvent.preventDefault();input.blur();}
+          if(keyEvent.key==="Escape"){keyEvent.preventDefault();input.value=previousName;input.dataset.cancelRename="true";input.blur();}
+        });
+        input.addEventListener("blur",async()=>{
+          if(input.dataset.cancelRename==="true"||!input.value.trim()){tab.textContent=previousName;return;}
+          await persistInteractionEditor(input,null);
+        },{once:true});
+        tab.replaceChildren(input);input.focus();input.select();
+        return;
+      }
       if(button.dataset.interactionAction==="capture-key"){
         const active=button.classList.contains("is-capturing");
         document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>value.toUpperCase()),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…";});
