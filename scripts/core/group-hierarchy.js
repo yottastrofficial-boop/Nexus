@@ -140,22 +140,43 @@ export function validateGroupParent(groups = [], groupId, parentGroupId = "") {
 
 export function getGroupTreeSnapshot(groupId, groups = [], components = []) {
   const hierarchy = buildGroupHierarchy(groups, components);
-  const group = hierarchy.groupById.get(String(groupId));
-  if (!group) return null;
+  const rootId = String(groupId);
+  if (!hierarchy.groupById.has(rootId)) return null;
+
   const componentMap = new Map((components ?? []).map(component => [String(component.id), component]));
-  const collect = id => {
-    const current = hierarchy.groupById.get(String(id));
-    if (!current) return null;
-    return {
-      ...Object.fromEntries(Object.entries(current).filter(([key]) => !["id", "parentGroupId", "componentIds", "x", "y", "w", "h", "z", "stackOrder"].includes(key))),
-      componentIds: [...(hierarchy.directComponents.get(String(id)) ?? [])].map(componentId => {
-        const component = componentMap.get(componentId);
-        if (!component) return null;
-        const { id: _id, definition: _definition, ...data } = structuredClone(component);
-        return { sourceId: componentId, ...data };
-      }).filter(Boolean),
-      groups: (hierarchy.children.get(String(id)) ?? []).map(collect).filter(Boolean)
-    };
-  };
-  return collect(String(groupId));
+  const snapshots = new Map();
+  const stack = [{ id: rootId, expanded: false }];
+
+  while (stack.length) {
+    const entry = stack.pop();
+    const id = entry.id;
+    const current = hierarchy.groupById.get(id);
+    if (!current) continue;
+    const childIds = hierarchy.children.get(id) ?? [];
+
+    if (!entry.expanded) {
+      stack.push({ id, expanded: true });
+      for (let index = childIds.length - 1; index >= 0; index--) {
+        stack.push({ id: childIds[index], expanded: false });
+      }
+      continue;
+    }
+
+    const componentSnapshots = (hierarchy.directComponents.get(id) ?? []).map(componentId => {
+      const component = componentMap.get(componentId);
+      if (!component) return null;
+      const { id: _id, definition: _definition, ...data } = structuredClone(component);
+      return { sourceId: componentId, ...data };
+    }).filter(Boolean);
+
+    snapshots.set(id, {
+      ...Object.fromEntries(Object.entries(current).filter(([key]) =>
+        !["id", "parentGroupId", "componentIds", "x", "y", "w", "h", "z", "stackOrder"].includes(key)
+      )),
+      componentIds: componentSnapshots,
+      groups: childIds.map(childId => snapshots.get(childId)).filter(Boolean)
+    });
+  }
+
+  return snapshots.get(rootId) ?? null;
 }
