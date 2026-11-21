@@ -1313,6 +1313,7 @@ assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode
 assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
 assert.ok(actorSheetRendering.includes("allowPlainUrls ?") && actorSheetRendering.includes("https?:"),"O renderer deve localizar URLs HTTP(S) sem exigir {{...}}");
 assert.match(sheet,/const directMediaSource = isMediaSource\(genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
+assert.match(sheetListeners, /const directMediaSource=\["asset-image","token"\]\.includes\(component\.type\)/, "O Inspector deve aceitar mídia direta em caminhos de imagem e token");
 
 assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
 assert.match(template,/data-library-section="flows"/,"Biblioteca deve possuir área própria para Fluxos");
