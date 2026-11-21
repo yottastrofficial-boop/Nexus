@@ -6,7 +6,7 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillModifier, getNexusSkillRows, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction, findInteractionShortcutConflicts } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, createInteractionFlow, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction, findInteractionShortcutConflicts } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { activateCanvasViewport } from "../scripts/sheets/canvas-viewport.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
@@ -1173,6 +1173,10 @@ const conditionActor = { system: { identity: { level: 4 } } };
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
 assert.equal(normalizeInteraction({ actions: [{ type: "roll", name: "Ataque especial" }] }).actions[0].name, "Ataque especial",
   "O nome personalizado da ação deve ser preservado na normalização");
+const emptyBehaviorFlow=createInteractionFlow();
+assert.deepEqual(emptyBehaviorFlow.triggers,[],"Um novo fluxo deve começar sem gatilhos");
+assert.deepEqual(emptyBehaviorFlow.conditions,[],"Um novo fluxo deve começar sem condições");
+assert.deepEqual(emptyBehaviorFlow.actions,[],"Um novo fluxo deve começar sem ações");
 assert.equal(normalizeInteraction(multiFlowComponent.interactions[0]).conditions[0].expression, "@identity.level >= 3",
   "Condições antigas devem ser convertidas para expressões sem perder o operador");
 assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "" }], actions: [{ type: "roll" }] }] }, "click").length, 1,
@@ -1269,8 +1273,13 @@ assert.ok(css.includes("width:min(400px,calc(100vw - 24px))"), "Estrutura de dad
 assert.ok(css.includes(".nexus-interaction-action-head{display:grid"), "Cabeçalho da ação deve alinhar título, ativo e ferramentas");
 assert.ok(css.includes("width:min(900px,calc(100vw - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma largura");
 assert.match(interactions,/condition-row/, "Condição deve renderizar linha sem legendas redundantes");
-assert.match(interactions,/control\("input",co\.expression\?\?""/,"Condições devem usar um único campo de expressão");
+assert.match(interactions,/control\("textarea",co\.expression\?\?""/,"Condições devem usar campo de texto expansível");
 assert.match(interactions,/Expressão lógica da condição/,"O campo de condição deve possuir nome acessível");
+assert.match(interactions,/data-interaction-autogrow/,"Condições e fórmulas devem permitir expansão de até cinco linhas");
+assert.match(interactions,/data-interaction-property-input/,"Campos de texto de ações devem oferecer o buscador de propriedades");
+assert.match(interactions,/data-roll-formula-input/,"Fórmulas devem oferecer o buscador de propriedades e aliases");
+assert.match(interactions,/nexus-interaction-trigger-tools/,"Controles de gatilho devem compartilhar uma área de ferramentas alinhada");
+
 assert.match(css,/\.nexus-panel-window \.nexus-behavior-editor \.nexus-interaction-actions\{display:flex!important;flex-direction:column!important/, "A lista de ações deve ocupar uma única coluna");
 assert.match(css,/\.nexus-panel-window \.nexus-tool-panel\[data-tool-panel="style"\] \.nexus-global-color-grid\{display:flex!important;flex-direction:column!important/, "Aparência deve manter controles de cor em lista alinhada");
 assert.ok(css.includes("height:min(600px,calc(100vh - 24px))"), "Comportamento e Biblioteca devem compartilhar a mesma altura");
