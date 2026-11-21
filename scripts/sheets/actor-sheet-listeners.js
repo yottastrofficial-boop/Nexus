@@ -28,8 +28,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           : input.closest(".nexus-property-value-field")?.nextElementSibling;
       if (preview) renderInteractionMediaPreview(preview, input.value);
     });
-    sheet._nexusInspectorNamespace = inspectorNamespace;
-    $(document).off(inspectorNamespace);
     const isSheetOwnedControl = input => currentRoot?.contains(input) || [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.contains(input));
     // Remove detached property-option portals left by a previous ApplicationV2 render.
     document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
