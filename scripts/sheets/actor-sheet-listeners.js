@@ -18,6 +18,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     sheet._nexusInspectorNamespace = inspectorNamespace;
     // Remove listeners from the previous render before registering the new delegated handlers.
     $(document).off(inspectorNamespace);
+    $(document).on(`input${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-autogrow]", event => {
+      const area=event.currentTarget;
+      const lineHeight=Number.parseFloat(getComputedStyle(area).lineHeight)||18;
+      const maxHeight=lineHeight*5+14;
+      area.style.height="auto";
+      const nextHeight=Math.min(area.scrollHeight,maxHeight);
+      area.style.height=nextHeight+"px";
+      area.style.overflowY=area.scrollHeight>maxHeight?"auto":"hidden";
+    });
     $(document).on(`input${inspectorNamespace}`, "[data-interaction-media-input], [data-property-value], [data-inspector-media-input]", event => {
       const input = event.currentTarget;
       const preview = input.dataset.interactionMediaInput !== undefined
@@ -1085,7 +1094,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       capture.dataset.capturedKey = event.key;
       capture.dataset.capturedModifiers = modifiers.join("+");
       capture.classList.remove("is-capturing");
-      capture.textContent = [...modifiers.map(value => value.toUpperCase()), event.key === " " ? "Espaço" : event.key].join(" + ");
+      capture.textContent = [...modifiers.map(value => ({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), event.key === " " ? "Espaço" : event.key].join(" + ");
       persistInteractionEditor(capture, null);
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
@@ -1109,28 +1118,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const previousName=tab.textContent.trim();
         const input=document.createElement("input");
         input.type="text";input.value=previousName;input.maxLength=60;input.setAttribute("aria-label","Nome do fluxo");
-        input.dataset.interactionScope="flow";input.dataset.interactionId=flowId;
-        input.addEventListener("keydown",keyEvent=>{
-          if(keyEvent.key==="Enter"){keyEvent.preventDefault();input.blur();}
-          if(keyEvent.key==="Escape"){keyEvent.preventDefault();input.value=previousName;input.dataset.cancelRename="true";input.blur();}
-        });
-        input.addEventListener("blur",async()=>{
-          if(input.dataset.cancelRename==="true"||!input.value.trim()){tab.textContent=previousName;return;}
-          input.dataset.interactionField="name";
-          await persistInteractionEditor(input,null);
-        },{once:true});
-        tab.replaceChildren(input);input.focus();input.select();
-        return;
-      }
-      if(button.dataset.interactionAction==="edit-flow-name"){
-        const editor=button.closest("[data-interaction-editor]");
-        const flowId=button.dataset.interactionId;
-        const tab=editor?.querySelector(`[data-interaction-flow-tab="${CSS.escape(flowId)}"]`);
-        if(!tab)return;
-        const previousName=tab.textContent.trim();
-        const input=document.createElement("input");
-        input.type="text";input.value=previousName;input.maxLength=60;input.setAttribute("aria-label","Nome do fluxo");
         input.dataset.interactionScope="flow";input.dataset.interactionField="name";input.dataset.interactionId=flowId;
+        input.dataset.componentId=editor.dataset.componentId??"";
         input.addEventListener("keydown",keyEvent=>{
           if(keyEvent.key==="Enter"){keyEvent.preventDefault();input.blur();}
           if(keyEvent.key==="Escape"){keyEvent.preventDefault();input.value=previousName;input.dataset.cancelRename="true";input.blur();}
