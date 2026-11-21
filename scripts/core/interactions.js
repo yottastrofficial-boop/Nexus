@@ -178,7 +178,7 @@ const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],acto
 const conditionPasses=(condition,actor)=>{
   const expression=String(condition?.expression??"").trim();
   if(expression){
-    return evaluateNexusCondition(expression,identifier=>getPath(actor,identifier))===true;
+    return evaluateNexusCondition(expression,identifier=>getPath(actor,identifier) ?? null)===true;
   }
   // Compatibility for flows saved before expression-based conditions.
   if(!condition?.path)return false;
