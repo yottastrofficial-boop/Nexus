@@ -2,7 +2,7 @@
  * Interaction Engine do NEXUS: fluxos com múltiplos Triggers, condições e Actions.
  * O motor não avalia JavaScript arbitrário.
  */
-export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hover","change","submit","focus","blur","keyDown","keyUp","interact"]);
+export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hold","hover","change","submit","focus","blur","keyDown","keyUp","interact"]);
 export const INTERACTION_MODIFIERS = Object.freeze(["ctrl","shift","alt","meta"]);
 const normalizeModifiers = raw => [...new Set((Array.isArray(raw) ? raw : String(raw ?? "").split("+")).map(value => String(value).trim().toLowerCase()).filter(value => INTERACTION_MODIFIERS.includes(value)))].sort((a,b) => INTERACTION_MODIFIERS.indexOf(a) - INTERACTION_MODIFIERS.indexOf(b));
 export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
@@ -22,7 +22,7 @@ export const normalizeInteractionPropertyPath = raw => {
 const safePath = normalizeInteractionPropertyPath;
 const normalizeTrigger = (t,i) => {
   const event=String(t?.event??t??"");
-  return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event,modifiers:normalizeModifiers(t?.modifiers),key:String(t?.key??"").slice(0,40)} : null;
+  return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event,modifiers:normalizeModifiers(t?.modifiers),key:String(t?.key??"").slice(0,40),durationMs:Math.max(100,Math.min(5000,Number(t?.durationMs)||600))} : null;
 };
 const normalizeCondition = (c,i) => {
   if(!c || typeof c!=="object")return null;
@@ -196,7 +196,8 @@ export function interactionMatches(flow,eventName,context={}) {
     trigger.event === eventName &&
     normalizeModifiers(trigger.modifiers).join("+") === modifiers.join("+") &&
     (!["keyDown", "keyUp"].includes(trigger.event) || !!String(trigger.key ?? "").trim()) &&
-    (!trigger.key || String(context.key ?? "").toLocaleLowerCase() === String(trigger.key).toLocaleLowerCase())
+    (!trigger.key || String(context.key ?? "").toLocaleLowerCase() === String(trigger.key).toLocaleLowerCase()) &&
+    (trigger.event !== "hold" || Number(context.durationMs ?? trigger.durationMs) >= trigger.durationMs)
   );
   if(!flow?.enabled||!triggerMatches)return false;
   if(!flow.conditions.length)return true;
@@ -379,12 +380,12 @@ const btn=(label,command,flowId,extra={})=>{const b=el("button","nexus-interacti
 const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flowId,extra);b.classList.add("is-icon");b.title=label;const glyph=el("i","fa-solid "+icon);glyph.setAttribute("aria-hidden","true");b.append(glyph);return b;};
 const control=(type,value,options=[],aria="")=>{const input=el(type);if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}if(type==="checkbox")input.checked=!!value;else input.value=String(value??"");if(aria)input.setAttribute("aria-label",aria);return input;};
 const field=(label,input,scope,id,key,extra={})=>{const wrap=el("label","nexus-interaction-field");if(label)wrap.append(el("span","",label));bind(input,scope,id,key,extra);wrap.append(input);return wrap;};
-const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Tecla pressionada"],["keyUp","Tecla solta"],["interact","Interação encadeada"]];
+const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hold","Segurar"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Atalho de teclado"],["keyUp","Atalho de teclado (ao soltar)"],["interact","Interação encadeada"]];
 const modifierOptions=[["","Nenhum"],["shift","Shift"],["ctrl","Ctrl"],["alt","Alt"],["meta","Meta"],["ctrl+shift","Ctrl + Shift"],["ctrl+alt","Ctrl + Alt"],["shift+alt","Shift + Alt"],["ctrl+shift+alt","Ctrl + Shift + Alt"],["ctrl+meta","Ctrl + Meta"],["shift+meta","Shift + Meta"],["alt+meta","Alt + Meta"],["ctrl+shift+meta","Ctrl + Shift + Meta"],["ctrl+alt+meta","Ctrl + Alt + Meta"],["shift+alt+meta","Shift + Alt + Meta"],["ctrl+shift+alt+meta","Ctrl + Shift + Alt + Meta"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
 const buildActionConfig=(parent,flow,action,index,components)=>{
- const add=(label,key,value,opts=null)=>{const input=control(opts?"select":"input",value,opts??[],label);if(key==="formula")input.dataset.rollFormulaInput="";parent.append(field(label,input,"action",flow.id,"config."+key,{actionIndex:index}));};
+ const add=(label,key,value,opts=null)=>{const input=control(opts?"select":"input",value,opts??[],label);if(key==="formula")input.dataset.rollFormulaInput="";const wrapped=field(label,input,"action",flow.id,"config."+key,{actionIndex:index});parent.append(wrapped);if(key==="value"){input.dataset.interactionMediaInput="";const preview=el("div","nexus-data-media-preview");preview.dataset.interactionMediaPreview="";renderInteractionMediaPreview(preview,value);parent.append(preview);}};
  if(action.type==="roll"){if(action.config.mode==="skill")add("Perícia","skillKey",action.config.skillKey??"athletics",NEXUS_SKILLS.map(x=>[x.key,x.name]));else add("Fórmula","formula",action.config.formula??"1d20");}
  if(action.type==="calculate"){add("Fórmula","formula",action.config.formula??"");add("Salvar resultado em","targetPath",action.config.targetPath??"");}
  if(action.type==="update"){add("Propriedade","path",action.config.path??"");add("Operação","operation",action.config.operation??"set",[["set","Definir"],["add","Somar"],["subtract","Subtrair"]]);add("Valor","value",action.config.value??"0");}
@@ -416,11 +417,13 @@ export function renderInteractionEditor(container,component,components=[],librar
   const guided=el("div","nexus-interaction-guided");
   const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");
   triggerHead.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
-  triggers.append(triggerHead,el("p","nexus-interaction-group-help","Qualquer gatilho configurado inicia este fluxo. Combine evento, modificadores e tecla quando necessário."));
+  triggers.append(triggerHead);
   for(const [i,tr] of flow.triggers.entries()){
     const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores");
-    const eventField=field("Evento",select,"trigger",flow.id,"event",{triggerIndex:i});
+    const eventField=field("Tipo",select,"trigger",flow.id,"event",{triggerIndex:i});
     const modifierField=field("Modificadores",modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});
+    const duration=control("number",tr.durationMs??600,[],"Duração mínima em milissegundos");duration.min="100";duration.max="5000";duration.step="50";
+    const durationField=field("Duração (ms)",duration,"trigger",flow.id,"durationMs",{triggerIndex:i});durationField.hidden=tr.event!=="hold";
     const keyLabel=String(tr.key??"");
     const captureLabel=keyLabel?(keyLabel===" "?"Espaço":keyLabel)+" · "+normalizeModifiers(tr.modifiers).map(x=>x.toUpperCase()).join("+"):"Definir tecla…";
     const capture=btn(captureLabel,"capture-key",flow.id,{triggerIndex:i});
@@ -431,7 +434,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     const clearKey=iconBtn("Limpar tecla","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.hidden=!tr.key;
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
     row.classList.toggle("is-key-trigger",!capture.hidden);
-    row.append(eventField,modifierField,keyField,clearKey,remove);triggers.append(row);
+    row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
   for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
@@ -449,6 +452,26 @@ export function renderInteractionEditor(container,component,components=[],librar
   const advanced=el("details","nexus-interaction-execution"),summary=el("summary","","Execução avançada"),error=control("select",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]],"Se uma ação falhar");advanced.append(summary,field("Se uma ação falhar",error,"flow",flow.id,"onError"));panel.append(advanced);panels.append(panel);
  }
  container.append(panels);
+}
+export function renderInteractionMediaPreview(container, rawValue) {
+  if (!container) return;
+  container.replaceChildren();
+  const source = String(rawValue ?? "").trim();
+  const clean = source.split(/[?#]/)[0].toLowerCase();
+  const dataType = source.match(/^data:(image|audio|video)\//i)?.[1]?.toLowerCase();
+  const image = dataType === "image" || /\.(?:png|jpe?g|gif|apng|webp|avif|svg|bmp|tiff?|ico|heic|heif|jxl)$/i.test(clean);
+  const audio = dataType === "audio" || /\.(?:mp3|ogg|wav|m4a|aac|flac|opus)$/i.test(clean);
+  const video = dataType === "video" || /\.(?:mp4|webm|ogv|mov|m4v|mkv|avi|mpeg|mpg|3gp)$/i.test(clean);
+  const safeProtocol = /^(https?:\/\/|data:(?:image|audio|video)\/)/i.test(source);
+  const safeRelative = !/^[a-z][a-z0-9+.-]*:/i.test(source) && !/[{}]/.test(source);
+  if (!source || !(image || audio || video) || !(safeProtocol || safeRelative)) { container.hidden = true; return; }
+  const media = document.createElement(image ? "img" : audio ? "audio" : "video");
+  media.className = "nexus-data-media-preview-content";
+  if (image) { media.alt = "Prévia da mídia"; media.loading = "lazy"; }
+  else { media.controls = true; media.preload = "metadata"; }
+  media.src = source;
+  container.append(media);
+  container.hidden = false;
 }
 export function renderPropertyPresentationEditor(container, component, propertyPath = "") {
   if (!container) return;
@@ -489,8 +512,11 @@ export function renderPropertyPresentationEditor(container, component, propertyP
       content.setAttribute("aria-label", "Conteúdo exibido"); content.dataset.interactionScope = "propertyPresentationRule";
       content.dataset.interactionField = "content"; content.dataset.ruleIndex = String(index); content.dataset.componentId = String(component?.id ?? "");
       const contentField = document.createElement("label"); contentField.className = "nexus-property-presentation-field";
-      contentField.append(document.createTextNode("Conteúdo exibido"), content);
-      row.append(head, conditionField, contentField); rules.append(row);
+      contentField.append(document.createTextNode("Valor / conteúdo exibido"), content);
+      content.dataset.interactionMediaInput = "";
+      const mediaPreview = document.createElement("div"); mediaPreview.className = "nexus-data-media-preview"; mediaPreview.dataset.interactionMediaPreview = "";
+      renderInteractionMediaPreview(mediaPreview, content.value);
+      row.append(head, conditionField, contentField, mediaPreview); rules.append(row);
     });
     container.append(rules);
   }
