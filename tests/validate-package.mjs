@@ -2262,14 +2262,14 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
     styles:[{ id:"style-1", sourceId:"style:card", name:"Cartão", tokens:{ radius:"8px" } }],
     rules:[{ id:"rule-1", sourceId:"rule:damage", name:"Dano", expression:"1d6" }],
     behaviors:[{ id:"behavior-1", sourceId:"behavior:inspect", name:"Inspecionar", flow:{ triggers:[], conditions:[], actions:[] } }]
-  }, Object.keys(COMPONENTS));
+  }, ["pv"]);
   assert.match(backupCode,/NEXUS-LIBRARY\/2/);
-  const restored = parseNexusLibraryBackup(backupCode,Object.keys(COMPONENTS));
+  const restored = parseNexusLibraryBackup(backupCode,["pv"]);
   assert.equal(restored.collections.templates.length,1);
   assert.equal(restored.collections.media.length,1);
   assert.equal(restored.collections.styles.length,1);
   assert.equal(restored.collections.rules.length,1);
   assert.equal(restored.collections.behaviors.length,1);
   const legacyCode = backupCode.replace("NEXUS-LIBRARY/2","NEXUS-LIBRARY/1").replace('"version": 2','"version": 1');
-  assert.equal(parseNexusLibraryBackup(legacyCode,Object.keys(COMPONENTS)).collections.rules.length,1);
+  assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }
