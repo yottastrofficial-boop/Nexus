@@ -1203,7 +1203,7 @@ applyInteractionEditorCommand(editorDraft, "add-flow");
 const flowId = editorDraft.interactions[0].id;
 applyInteractionEditorCommand(editorDraft, "add-trigger", { interactionId: flowId });
 applyInteractionEditorCommand(editorDraft, "add-action", { interactionId: flowId });
-assert.equal(editorDraft.interactions[0].triggers.length, 2);
+assert.equal(editorDraft.interactions[0].triggers.length, 1, "Adicionar gatilho deve criar somente um gatilho no fluxo vazio");
 assert.equal(editorDraft.interactions[0].conditions[0]?.expression, undefined);
 applyInteractionEditorCommand(editorDraft, "add-condition", { interactionId: flowId });
 const conditionIndex = editorDraft.interactions[0].conditions.length - 1;
