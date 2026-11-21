@@ -1,3 +1,23 @@
+## 1.0.0.80
+
+### Comportamentos
+- Renderiza a combinação salva no próprio botão de atalho, em um elemento de texto explícito; mantém a label durante captura, Escape e persistência.
+- Alinha os cabeçalhos de gatilhos e condições com o botão + fixado à direita.
+- Força os painéis de gatilhos e condições a usar a mesma largura de grid, box sizing e espaçamento.
+- Mantém a edição de condição sem um controle Ativo fictício: condições são expressões avaliadas no fluxo; a ativação individual pertence às ações e a ativação geral pertence ao fluxo.
+
+### Biblioteca — fundação
+- Adiciona `scripts/core/library-store.js`, serviço independente do DOM com contrato unificado de coleções.
+- Define coleções para componentes, grupos, layouts, modelos, assets, mídia, temas, estilos, regras, comportamentos e fluxos.
+- Adiciona normalização JSON, limites de profundidade/tamanho/quantidade, migração explícita das flags legadas e merge com políticas skip, duplicate e replace.
+- Expande backup para `NEXUS-LIBRARY/2`, preservando leitura retrocompatível de `NEXUS-LIBRARY/1`.
+- Backup e restauração agora carregam também modelos, mídia, estilos, regras e comportamentos armazenados nas coleções pessoais.
+
+### Limitações e validação
+- A nova estrutura é a fundação de dados; a interface unificada e a migração persistente para armazenamento canônico ainda não estão concluídas.
+- Conteúdo avançado permanece dado inerte durante importação; nenhuma string de código é executada pelo parser.
+- CI e validação de pacote serão executadas nesta branch. Teste funcional no Foundry VTT 14 build 360 continua necessário.
+
 ## 1.0.0.79
 
 ### Refinamento do editor de comportamento
