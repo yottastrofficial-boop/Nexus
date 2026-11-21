@@ -259,6 +259,7 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const migrationManager = await read("scripts/core/migration-manager.js");
 const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
 assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
 const sheetDependencyBlock = sheet.match(/activateActorSheetListeners\(this, html, \{([\s\S]*?)\}\);/)?.[1] ?? "";
@@ -676,7 +677,12 @@ assert.ok(actorSheetStart >= 0 && prepareStart > actorSheetStart && migrationSta
 const prepareContext = sheet.slice(prepareStart, migrationStart);
 assert.doesNotMatch(prepareContext, /\.setFlag\(|\.update\(/, "_prepareContext não deve gravar dados persistentes");
 assert.match(sheetCode, /const migrated = await this\._migrateLegacyActorData\(\)/, "Migração controlada não está ligada ao ciclo de renderização");
-assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?queueMicrotask\(\(\) => this\.render\(\{ force: true \}\)\)/, "A ficha deve atualizar a primeira renderização após migrar dados legados");
+assert.match(sheetCode, /if \(migrated\) \{[\s\S]*?this\._scheduleNexusRefresh\(\)/, "A ficha deve agendar uma única atualização após migrar dados legados");
+assert.match(sheet, /_nexusRulesDataPromise/, "A inicialização de atributos e perícias deve compartilhar operações simultâneas");
+assert.match(sheet, /this\.actor\.update\(updates, \{ render: false \}\)/, "A inicialização não deve provocar uma renderização automática redundante");
+assert.match(sheet, /_scheduleNexusRefresh\(\)[\s\S]*?if \(this\._nexusRefreshScheduled\) return/, "As atualizações posteriores à migração devem ser coalescidas");
+assert.match(migrationManager, /actor\.update\(updates, \{ render: false \}\)/, "A migração deve evitar renderização automática durante a gravação");
+assert.match(migrationManager, /pendingActorMigrations = new WeakMap\(\)/, "Migrações concorrentes do mesmo Actor devem compartilhar uma única operação");
 
 
 // Exercise the legacy migration manager with a minimal Actor-like document.
