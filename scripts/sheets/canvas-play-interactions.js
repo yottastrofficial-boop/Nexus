@@ -49,7 +49,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
   let cursorCard = null;
   const clearBehaviorCursor = () => { cursorCard?.style.removeProperty("cursor"); cursorCard = null; };
   const onPointerMove = event => {
-    const movingCard=cardOf(event);if(movingCard){const pending=pointerDownFlows.get(movingCard.dataset.id);if(pending&&Math.hypot(event.clientX-pending.x,event.clientY-pending.y)>8)clearHoldTimers(movingCard.dataset.id);}
+    const movingCard=cardOf(event);for(const id of holdTimers.keys())if(id!==movingCard?.dataset.id)clearHoldTimers(id);if(movingCard){const pending=pointerDownFlows.get(movingCard.dataset.id);if(pending&&Math.hypot(event.clientX-pending.x,event.clientY-pending.y)>8)clearHoldTimers(movingCard.dataset.id);}
     if (sheet._mode !== "play") { clearBehaviorCursor(); return; }
     const card = cardOf(event);
     if (cursorCard && cursorCard !== card) clearBehaviorCursor();
@@ -85,7 +85,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
     const component=card&&sheet._currentLayout?.components?.find(item=>item.id===card.dataset.id);
     if(card&&hasKeyboardTrigger(component))card.focus?.({preventScroll:true});
   };
-  const onPointerUp=event=>{const card=cardOf(event);if(card)clearHoldTimers(card.dataset.id);if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
+  const onPointerUp=event=>{for(const id of holdTimers.keys())clearHoldTimers(id);if(!isControlTarget(event))dispatch(event,"pointerUp",{button:event.button,pointerType:event.pointerType});};
   const onPointerOver=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"hover",{pointerType:event.pointerType});};
   const onFocusIn=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"focus");};
   const onFocusOut=event=>{const card=cardOf(event);if(card&&!(event.relatedTarget instanceof Node&&card.contains(event.relatedTarget)))dispatch(event,"blur");};
