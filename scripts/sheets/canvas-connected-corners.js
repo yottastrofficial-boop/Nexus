@@ -43,7 +43,8 @@ export function updateCanvasConnectedCorners(canvas, tolerance = 2.5) {
   }
   const components = allComponents.filter(node => !node.classList.contains("is-group-member"));
   const groups = [...canvas.querySelectorAll(".nexus-group-surface")];
-  const surfaces = [...components.map(node => ({ node, prefix: "nexus-component" })), ...groups.map(node => ({ node, prefix: "nexus-group" }))];
+  // Group surfaces are independent rounded containers. Component contact logic must not square their corners.
+  const surfaces = components.map(node => ({ node, prefix: "nexus-component" }));
   for (const { node, prefix } of surfaces) node.classList.remove(
     ...cornerNames.map(name => prefix + "-corner-square-" + name),
     ...sideNames.map(side => prefix + "-touching-" + side)
