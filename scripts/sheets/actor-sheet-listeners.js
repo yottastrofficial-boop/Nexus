@@ -1084,17 +1084,18 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         if(nextControl && focusData.selectionStart !== null && typeof nextControl.setSelectionRange === "function") nextControl.setSelectionRange(focusData.selectionStart, focusData.selectionEnd ?? focusData.selectionStart, focusData.selectionDirection);
       }
     };
+    const setShortcutLabel=(button,label)=>{const node=button.querySelector(".nexus-interaction-keycap-label");if(node)node.textContent=label;else button.textContent=label;button.setAttribute("aria-label",label);};
     $(document).on(`keydown${inspectorNamespace}`, event => {
       const capture = document.querySelector(".nexus-interaction-trigger-row [data-interaction-action='capture-key'].is-capturing");
       if (!capture) return;
-      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey ? [...String(capture.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), capture.dataset.capturedKey===" "?"Espaço":capture.dataset.capturedKey].join(" + ") : "Definir combinação…"; event.preventDefault(); return; }
+      if (event.key === "Escape") { capture.classList.remove("is-capturing"); setShortcutLabel(capture, capture.dataset.capturedKey ? [...String(capture.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), capture.dataset.capturedKey===" "?"Espaço":capture.dataset.capturedKey].join(" + ") : "Definir combinação…"); event.preventDefault(); return; }
       if (["Control","Shift","Alt","Meta"].includes(event.key)) return;
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       const modifiers = [event.ctrlKey ? "ctrl" : null, event.shiftKey ? "shift" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
       capture.dataset.capturedKey = event.key;
       capture.dataset.capturedModifiers = modifiers.join("+");
       capture.classList.remove("is-capturing");
-      capture.textContent = [...modifiers.map(value => ({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), event.key === " " ? "Espaço" : event.key].join(" + ");
+      setShortcutLabel(capture, [...modifiers.map(value => ({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[value]??value)), event.key === " " ? "Espaço" : event.key].join(" + "));
       persistInteractionEditor(capture, null);
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
