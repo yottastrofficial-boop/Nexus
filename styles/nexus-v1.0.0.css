@@ -7048,3 +7048,34 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
     grid-template-columns:minmax(0,1fr) !important;
   }
 }
+
+
+/* Library inspector: edit a draft instance without mutating its saved definition. */
+.nexus-library-definition-note {
+  display:block; padding:8px 9px; border:1px solid var(--nexus-panel-border,#40566d);
+  border-radius:6px; color:var(--nexus-panel-muted,#9aadc2); background:var(--nexus-panel-surface,#202e3e);
+  font-size:10px; line-height:1.45;
+}
+.nexus-library-definition-preview {
+  display:flex; flex-direction:column; justify-content:center; gap:5px; min-height:76px; padding:12px;
+  border:1px solid var(--nexus-highlight-color,#78b7e8); border-radius:8px;
+  color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-card-color,#263749);
+}
+.nexus-library-definition-preview strong { font-size:13px; }
+.nexus-library-definition-preview small { color:var(--nexus-panel-muted,#9aadc2); font-size:9px; }
+.nexus-library-definition-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.nexus-library-definition-field { display:flex; flex-direction:column; gap:5px; min-width:0; color:var(--nexus-panel-muted,#aebdd0); font-size:10px; }
+.nexus-library-definition-field:has(textarea),.nexus-library-definition-field:has(input[data-library-override-key="dataPath"]),
+.nexus-library-definition-field:has(input[data-library-override-key="currentPath"]),
+.nexus-library-definition-field:has(input[data-library-override-key="maxPath"]) { grid-column:1/-1; }
+.nexus-library-definition-field :is(input,select,textarea) {
+  width:100%; min-width:0; min-height:30px; padding:6px 8px; border:1px solid var(--nexus-panel-border,#40566d);
+  border-radius:5px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-input-color,#111e2b);
+}
+.nexus-library-definition-field input[type="color"] { min-height:34px; padding:3px; }
+.nexus-library-definition-field textarea { resize:vertical; }
+.nexus-library-details [data-library-add-saved-component] { width:100%; min-height:36px; border:1px solid var(--nexus-highlight-color,#78b7e8); border-radius:6px; color:#fff; background:var(--nexus-button-color,#315b7d); font-weight:700; }
+.nexus-library-details [data-library-copy-saved-component],
+.nexus-library-details [data-library-export-saved-component],
+.nexus-library-details [data-library-delete-saved-component] { min-height:30px; border:1px solid var(--nexus-panel-border,#40566d); border-radius:5px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-surface,#202e3e); }
+.nexus-library-details [data-library-delete-saved-component] { border-color:#80545a; }
