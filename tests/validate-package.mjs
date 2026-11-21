@@ -1166,6 +1166,10 @@ assert.equal(getTriggeredActions(expressionConditionFlow, "click", { actor: { sy
   "Condições devem avaliar expressões booleanas no formato do motor de regras");
 assert.equal(getTriggeredActions(expressionConditionFlow, "click", { actor: { system: { resources: { pv: { value: 9 } } } } }).length, 0,
   "Condições por expressão devem bloquear ações quando a comparação for falsa");
+assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "@mb >= 2" }], actions: [{ type: "roll" }] }] }, "click", { actor: { system: { progression: { mb: { value: 3 } } } } }).length, 1,
+  "Condições devem resolver os mesmos aliases canônicos de propriedades usados pelas fórmulas");
+assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: '@name == "Teste"' }], actions: [{ type: "roll" }] }] }, "click", { actor: { name: "Teste", system: {} } }).length, 1,
+  "Condições também devem resolver propriedades nativas do Actor fora de system");
 assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "@resources.pv.value >= 10" }], actions: [{ type: "roll" }] }] }, "click", { actor: { system: { resources: { pv: { value: "" } } } } }).length, 0,
   "Valores vazios não devem satisfazer comparações numéricas por acidente");
 const editorDraft = { interactions: [] };
