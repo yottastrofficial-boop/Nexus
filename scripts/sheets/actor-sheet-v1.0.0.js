@@ -3745,8 +3745,13 @@ if (!hasPath) propertyValueInput.value = "";
       this._nexusPanelWindows.set(key, instance);
       this._openAppearancePanels.add(key);
       instance.render({ force: true }).then(() => {
-        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected || this._nexusPanelWindows.get(key) !== instance) {
+        if (this._nexusPanelWindows.get(key) !== instance) {
           instance.close();
+          return;
+        }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) {
+          // A newer sheet render now owns this still-open panel; preserve it.
+          applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
           return;
         }
         applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
