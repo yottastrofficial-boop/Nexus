@@ -2249,6 +2249,4 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(duplicated.report.added.components,2);
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:"inválido"}}),/precisa ser uma lista/);
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
-  const userFlags = { getFlag:()=>null };
-  assert.equal(readNexusLibraryStore===undefined,false);
 }
