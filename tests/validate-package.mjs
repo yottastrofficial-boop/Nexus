@@ -315,6 +315,7 @@ const propertySchema = await read("scripts/core/property-schema.js");
 const propertyPickerView = await read("scripts/sheets/property-picker-view.js");
 const panelWindow = await read("scripts/sheets/panel-window.js");
 const sheetListeners = await read("scripts/sheets/actor-sheet-listeners.js");
+const actorSheetRendering = await read("scripts/sheets/actor-sheet-rendering.js");
 const migrationManager = await read("scripts/core/migration-manager.js");
 const mediaImport = sheet.split("\n").find(line => line.startsWith("import {") && line.includes("actor-sheet-media.js")) ?? "";
 assert.ok(mediaImport.includes("isMediaSource"), "A ficha deve importar isMediaSource antes de repassá-lo aos listeners");
@@ -1156,12 +1157,31 @@ const conditionActor = { system: { identity: { level: 4 } } };
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: conditionActor }).length, 2);
 assert.equal(getTriggeredActions(multiFlowComponent, "doubleClick", { actor: conditionActor }).length, 2);
 assert.equal(getTriggeredActions(multiFlowComponent, "click", { actor: { system: { identity: { level: 1 } } } }).length, 0);
+const expressionConditionFlow = { interactions: [{
+  id: "expression-condition", triggers: [{ event: "click" }],
+  conditions: [{ expression: "@resources.pv.value >= 10" }],
+  actions: [{ type: "execute", config: { operation: "notify" } }]
+}] };
+assert.equal(getTriggeredActions(expressionConditionFlow, "click", { actor: { system: { resources: { pv: { value: 12 } } } } }).length, 1,
+  "Condições devem avaliar expressões booleanas no formato do motor de regras");
+assert.equal(getTriggeredActions(expressionConditionFlow, "click", { actor: { system: { resources: { pv: { value: 9 } } } } }).length, 0,
+  "Condições por expressão devem bloquear ações quando a comparação for falsa");
+assert.equal(getTriggeredActions({ interactions: [{ triggers: [{ event: "click" }], conditions: [{ expression: "@resources.pv.value >= 10" }], actions: [{ type: "roll" }] }] }, "click", { actor: { system: { resources: { pv: { value: "" } } } } }).length, 0,
+  "Valores vazios não devem satisfazer comparações numéricas por acidente");
 const editorDraft = { interactions: [] };
 applyInteractionEditorCommand(editorDraft, "add-flow");
 const flowId = editorDraft.interactions[0].id;
 applyInteractionEditorCommand(editorDraft, "add-trigger", { interactionId: flowId });
 applyInteractionEditorCommand(editorDraft, "add-action", { interactionId: flowId });
 assert.equal(editorDraft.interactions[0].triggers.length, 2);
+assert.equal(editorDraft.interactions[0].conditions[0]?.expression, undefined);
+applyInteractionEditorCommand(editorDraft, "add-condition", { interactionId: flowId });
+const conditionIndex = editorDraft.interactions[0].conditions.length - 1;
+applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "condition", conditionIndex, field: "expression" }, "@identity.level >= 5");
+assert.equal(editorDraft.interactions[0].conditions[conditionIndex].expression, "@identity.level >= 5",
+  "O Inspector deve persistir a expressão integral da condição");
+applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "condition", conditionIndex, field: "expression" }, "");
+assert.equal(editorDraft.interactions[0].conditions[conditionIndex].expression, "", "Uma condição deve poder ser deixada vazia durante a edição");
 assert.equal(editorDraft.interactions[0].actions.length, 2);
 applyInteractionEditorChange(editorDraft, { interactionId: flowId, scope: "trigger", triggerIndex: 1, field: "event" }, "rightClick");
 assert.equal(editorDraft.interactions[0].triggers[1].event, "rightClick");
@@ -1283,11 +1303,12 @@ assert.match(interactions,/nexus-interaction-condition-row/, "Condições devem 
 assert.match(css,/nexus-library-preview-stage\{display:grid!important;place-items:center!important;width:100%!important/, "Miniaturas da Biblioteca devem usar área ampliada");
 assert.match(css,/nexus-library-saved-group-preview\{position:relative!important;width:100%!important;height:104px!important/, "Composições salvas devem ter prévia ampliada");
 
-assert.match(interactions,/path:"",operator:"equals",value:""/,"Novas condições começam sem propriedade ou valor predefinidos");
-assert.match(actorPropertyPickerListeners,/data-interaction-property-input/,"Condições usam o buscador compartilhado de propriedades");
+assert.match(interactions,/expression:""/,"Novas condições começam com a expressão vazia");
+assert.match(interactions,/expression\.placeholder="@resources\.pv\.value >= 10"/,"Condições devem oferecer um exemplo de expressão comparável às regras");
 assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
-assert.match(sheetCode,/explicitUrl=wrapped/,"URLs explícitas em expressões têm tratamento de link separado");
-assert.match(sheetCode,/resolvedIsMedia=wrapped && !explicitUrl && isMediaSource\(resolved\)/,"Valores simples de propriedades não devem virar links locais");
+assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
+assert.match(actorSheetRendering,/https\?:\\\/\\\/\[\^\\s<>\]\+/,"O renderer deve localizar URLs HTTP(S) sem exigir {{...}}");
+assert.match(sheet,/const directMediaSource = isMediaSource\(genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
 
 assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
 assert.match(template,/data-library-section="flows"/,"Biblioteca deve possuir área própria para Fluxos");
@@ -1301,7 +1322,7 @@ assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor 
 assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
 assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
 assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
-assert.match(actorPropertyPickerListeners,/data-interaction-property-input/,"Condições devem usar o seletor compartilhado");
+assert.doesNotMatch(interactions,/property\.dataset\.interactionPropertyInput/,"Condições por expressão não devem depender de um seletor de caminho separado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
 assert.match(interactions,/dataset\.rollFormulaInput/,"Campos de fórmula do editor de fluxos devem usar o buscador compartilhado");
 assert.doesNotMatch(interactions,/const list=el\("div","nexus-property-options"\)/,"O editor de fluxos não deve criar um segundo buscador de propriedades");
