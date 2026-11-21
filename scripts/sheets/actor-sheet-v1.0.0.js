@@ -1,5 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides } from "../core/library-models.js";
+import { createLibraryDefinition, createLibraryComponentInstance } from "../core/library-models.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
@@ -2918,7 +2918,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return true;
   }
 
-  async _addSavedGroupToCanvas(groupId) {
+  async _addSavedGroupToCanvas(groupId, overrides = {}) {
     const saved = game.user?.getFlag?.("nexus", "libraryGroups") ?? [];
     const composition = saved.find(item => item.id === groupId);
     if (!composition?.components?.length) return false;
@@ -2999,7 +2999,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       copy.id = groupIds.get(oldId);
       copy.parentGroupId = source.parentGroupId ? groupIds.get(String(source.parentGroupId)) ?? "" : "";
       copy.componentIds = (source.componentIds ?? []).map(id => componentIds.get(String(id))).filter(Boolean);
-      if (oldId === String(sourceGroups.find(group => !group.parentGroupId)?.id) || !copy.name) copy.name = composition.name;
+      const isRoot = oldId === String(sourceGroups.find(group => !group.parentGroupId)?.id);
+      if (isRoot) {
+        copy.name = String(overrides.name ?? composition.name ?? copy.name ?? "Grupo").trim().slice(0, 48) || "Grupo";
+        for (const key of ["kind", "layoutMode", "gap", "padding", "columns", "align", "backgroundColor", "borderColor", "borderRadius", "showHeader", "title"]) {
+          if (Object.hasOwn(overrides, key)) copy[key] = clone(overrides[key]);
+        }
+      } else if (!copy.name) copy.name = composition.name;
       layout.groups.push(copy);
     }
 
