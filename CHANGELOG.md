@@ -16,7 +16,7 @@
 
 ### Validação
 - Testes automatizados adicionados para precedência e operadores booleanos.
-- Validação estática e teste de pacote Foundry pendentes na CI.
+- GitHub Actions: validação estática, regressões e geração do pacote Foundry aprovadas.
 - Teste visual e funcional no Foundry VTT 14 build 360 ainda necessário.
 
 ## 1.0.0.77
