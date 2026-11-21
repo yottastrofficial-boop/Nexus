@@ -525,11 +525,35 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
         const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
         const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
-        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar ao Canvas";
+        const notice=document.createElement("small");notice.className="nexus-library-definition-note";notice.textContent="Você está editando uma cópia de configuração. O modelo salvo permanece intacto.";
+        const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
+        const previewTitle=document.createElement("strong");previewTitle.textContent=String(saved.settings?.customLabel||saved.settings?.sheetContent1||saved.settings?.text||saved.label||"Prévia");preview.append(previewTitle);
+        const previewMeta=document.createElement("small");previewMeta.textContent="Pré-visualização da configuração que será inserida";preview.append(previewMeta);
+        const fields=document.createElement("div");fields.className="nexus-library-definition-fields";
+        const editableFields=[
+          ["customLabel","Nome exibido","text"],["text","Texto","textarea"],["sheetContent1","Rótulo","text"],
+          ["sheetContent2","Ícone","text"],["dataPath","Caminho da propriedade","text"],
+          ["currentPath","Caminho do valor atual","text"],["maxPath","Caminho do valor máximo","text"],
+          ["resourceLabel","Nome do recurso","text"],["sheetColor","Cor principal","color"],
+          ["sheetTrackColor","Cor de fundo da barra","color"],["sheetOrientation","Orientação","select"],
+          ["format","Formato","select"],["w","Largura (px)","number"],["h","Altura (px)","number"]
+        ];
+        for(const [key,labelText,kind] of editableFields){
+          if(!Object.hasOwn(saved.settings??{},key))continue;
+          const label=document.createElement("label");label.className="nexus-library-definition-field";label.textContent=labelText;
+          let input;
+          if(kind==="textarea"){input=document.createElement("textarea");input.rows=2;}
+          else if(kind==="select"){input=document.createElement("select");const values=key==="sheetOrientation"?[["horizontal","Horizontal"],["vertical","Vertical"]]:[["classic","Clássico"],["bar","Barra"],["ring","Circular"]];for(const [value,text] of values){const option=document.createElement("option");option.value=value;option.textContent=text;input.append(option);}}
+          else{input=document.createElement("input");input.type=kind;}
+          input.dataset.libraryOverrideKey=key;input.value=String(saved.settings[key]??"");label.append(input);fields.append(label);
+        }
+        const add=document.createElement("button");add.type="button";add.dataset.libraryAddSavedComponent="";add.textContent="Adicionar configuração à ficha";
         const copy=document.createElement("button");copy.type="button";copy.dataset.libraryCopySavedComponent="";copy.textContent="Copiar pacote";
         const exportFile=document.createElement("button");exportFile.type="button";exportFile.dataset.libraryExportSavedComponent="";exportFile.textContent="Exportar JSON";
-        const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir da biblioteca";
-        detail.append(heading,summary,add,copy,exportFile,remove);return;
+        const remove=document.createElement("button");remove.type="button";remove.dataset.libraryDeleteSavedComponent="";remove.textContent="Excluir modelo";
+        detail.append(heading,summary,notice,preview,fields,add,copy,exportFile,remove);
+        fields.addEventListener("input",event=>{const input=event.target;if(!input.matches("[data-library-override-key]"))return;const key=input.dataset.libraryOverrideKey;if(["customLabel","sheetContent1","text"].includes(key))previewTitle.textContent=input.value||saved.label;});
+        return;
       }
       const savedFlowCard=target?.closest("[data-library-flow-id]");
       if(savedFlowCard&&libraryPanel.contains(savedFlowCard)){
@@ -634,8 +658,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       const addSavedComponentButton=target?.closest("[data-library-add-saved-component]");
       if(addSavedComponentButton&&libraryPanel.contains(addSavedComponentButton)){
-        const id=libraryPanel.querySelector("[data-library-details]")?.dataset.selectedComponentId;
-        if(id)await sheet._addSavedLibraryComponent(id);return;
+        const detail=libraryPanel.querySelector("[data-library-details]");
+        const id=detail?.dataset.selectedComponentId;
+        if(id){
+          const overrides={};
+          detail.querySelectorAll("[data-library-override-key]").forEach(input=>{
+            const key=input.dataset.libraryOverrideKey;
+            overrides[key]=input.type==="number"?(Number(input.value)||0):input.value;
+          });
+          await sheet._addSavedLibraryComponent(id,overrides);
+        }
+        return;
       }
       const deleteSavedComponentButton=target?.closest("[data-library-delete-saved-component]");
       if(deleteSavedComponentButton&&libraryPanel.contains(deleteSavedComponentButton)){
