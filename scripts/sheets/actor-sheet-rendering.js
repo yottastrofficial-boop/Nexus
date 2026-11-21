@@ -87,7 +87,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         }
         const explicitUrl=wrapped && /^https?:\/\//i.test(token);
         const resolvedIsMedia=wrapped && !explicitUrl && isMediaSource(resolved);
-        const media=explicitUrl ? createMedia(token,token,false,"link") : resolvedIsMedia ? createMedia(resolved,token,forceImage) : (!wrapped ? createMedia(token,token,false,"link") : null);
+        const media=explicitUrl ? createMedia(token,token,false,"auto") : resolvedIsMedia ? createMedia(resolved,token,forceImage) : (!wrapped ? createMedia(token,token,false,"auto") : null);
         node.append(media ?? document.createTextNode(wrapped ? (resolved || match[0]) : match[0]));
         cursor=pattern.lastIndex;
       }
