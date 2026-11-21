@@ -16,7 +16,7 @@ import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../scripts/core/property-paths.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../scripts/core/library-sharing.js";
-import { buildGroupHierarchy, validateGroupParent } from "../scripts/core/group-hierarchy.js";
+import { buildGroupHierarchy, getGroupTreeSnapshot, validateGroupParent } from "../scripts/core/group-hierarchy.js";
 import { createListenerScope } from "../scripts/core/listener-scope.js";
 import { serializeActorPropertyWrite } from "../scripts/core/actor-property-writes.js";
 import { activateActorSheetSkillListeners } from "../scripts/sheets/actor-sheet-skill-listeners.js";
@@ -67,6 +67,37 @@ assert.equal(getMediaKind("https://example.test/page"), "", "URLs sem tipo conhe
   assert.equal(hierarchy.rows.find(row => row.id === "c").depth, 0);
   assert.equal(validateGroupParent(groups, "outer", "inner"), false, "A hierarchy must reject cycles");
   assert.equal(validateGroupParent(groups, "inner", ""), true, "A group may be promoted to the root");
+}
+{
+  const cyclic = buildGroupHierarchy([
+    { id: "cycle-a", parentGroupId: "cycle-b" },
+    { id: "cycle-b", parentGroupId: "cycle-a" }
+  ], []);
+  assert.deepEqual(cyclic.roots, ["cycle-a"], "A hierarquia corrompida deve ser reparada de forma determinística");
+  assert.equal(cyclic.parentById.get("cycle-a"), "");
+  assert.equal(cyclic.parentById.get("cycle-b"), "cycle-a");
+}
+{
+  const count = 2500;
+  const deepGroups = Array.from({ length: count }, (_, index) => ({
+    id: `deep-${index}`,
+    parentGroupId: index === 0 ? "" : `deep-${index - 1}`,
+    componentIds: index === count - 1 ? ["deep-component"] : []
+  }));
+  const deepComponents = [{ id: "deep-component", type: "custom-card", x: 0, y: 0, w: 20, h: 20 }];
+  const deepHierarchy = buildGroupHierarchy(deepGroups, deepComponents);
+  assert.equal(deepHierarchy.rows.filter(row => row.kind === "group").length, count,
+    "Hierarquias profundas devem ser percorridas sem recursão de pilha");
+  assert.equal(deepHierarchy.depthById.get(`deep-${count - 1}`), count - 1,
+    "A profundidade dos grupos deve ser calculada uma única vez");
+  assert.deepEqual(deepHierarchy.descendants.get("deep-0"), ["deep-component"]);
+  const deepSnapshot = getGroupTreeSnapshot("deep-0", deepGroups, deepComponents);
+  let snapshotDepth = 0, snapshotCursor = deepSnapshot;
+  while (snapshotCursor?.groups?.length) {
+    snapshotDepth++;
+    snapshotCursor = snapshotCursor.groups[0];
+  }
+  assert.equal(snapshotDepth, count - 1, "Snapshots profundos devem ser construídos sem recursão");
 }
 {
  const legacy=normalizeGroupPresentation({id:"legacy",name:"Grupo antigo"});assert.equal(legacy.kind,"container");assert.equal(legacy.layoutMode,"free");
