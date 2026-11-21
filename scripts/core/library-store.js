@@ -47,7 +47,8 @@ function cloneJson(value, depth = 0) {
 
 const makeId = (prefix, index) => `${prefix}-${index + 1}`;
 const entryIdentity = entry => String(entry?.sourceId ?? entry?.id ?? "").trim();
-const stableFingerprint = entry => JSON.stringify(entry, Object.keys(entry ?? {}).sort());
+const stableValue = value => Array.isArray(value) ? value.map(stableValue) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stableValue(value[key])])) : value;
+const stableFingerprint = entry => JSON.stringify(stableValue(entry));
 
 export function createEmptyNexusLibraryStore() {
   return {
