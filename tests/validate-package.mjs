@@ -6,7 +6,7 @@ import { mergeLayoutSnapshots } from "../scripts/core/layout-merge.js";
 import { NEXUS_SKILLS, NEXUS_ATTRIBUTES, normalizeNexusProficientLevel, getNexusBaseModifier, getNexusAttributeValue, getNexusSkillModifier, getNexusSkillRows, evaluateNexusSkillFormula, getNexusDefaultSkillFormula } from "../scripts/core/skills.js";
 import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, NEXUS_PROPERTY_SCHEMA_VERSION, getNexusRulebookPropertyValue, getNexusDefaultPropertyFormula } from "../scripts/core/property-schema.js";
 import { buildPropertyPickerCatalog, findPropertyPickerNode } from "../scripts/core/property-catalog.js";
-import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction } from "../scripts/core/interactions.js";
+import { getTriggeredActions, executeTriggeredActions, getComponentInteractions, hasKeyboardInteraction, applyInteractionEditorCommand, applyInteractionEditorChange, instantiateInteractionTemplate, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, normalizeComponentRepresentation, normalizeInteractionPropertyPath, normalizeInteraction, findInteractionShortcutConflicts } from "../scripts/core/interactions.js";
 import { activateCanvasInteractions } from "../scripts/sheets/canvas-interactions.js";
 import { activateCanvasViewport } from "../scripts/sheets/canvas-viewport.js";
 import { findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
@@ -1664,15 +1664,15 @@ const surface40=(left,top,width,height)=>({hidden:false,classList:classList40(),
 const a40=surface40(0,0,100,100),b40=surface40(100,0,100,100),g40=surface40(200,0,100,100);
 const canvas40={querySelectorAll(selector){if(selector===".nexus-component")return[a40,b40];if(selector===".nexus-component:not(.is-group-member)")return[a40,b40];if(selector===".nexus-group-surface")return[g40];return[];}};
 const geometry40=updateCanvasConnectedCorners(canvas40);
-assert.equal(geometry40.surfaces,3);
+assert.equal(geometry40.surfaces,2,"O cálculo de cantos conectados considera apenas componentes independentes");
 assert.equal(a40.classList.contains("nexus-component-touching-right"),true);
-assert.equal(a40.classList.contains("nexus-component-corner-square-tr"),true,"Contato lateral completo deve achatar o canto superior direito que realmente toca a outra borda");
-assert.equal(a40.classList.contains("nexus-component-corner-square-br"),true,"Contato lateral completo deve achatar o canto inferior direito que realmente toca a outra borda");
+assert.equal(a40.classList.contains("nexus-component-corner-square-tr"),true,"Contato lateral completo deve achatar o canto superior direito do componente vizinho");
+assert.equal(a40.classList.contains("nexus-component-corner-square-br"),true,"Contato lateral completo deve achatar o canto inferior direito do componente vizinho");
 assert.equal(b40.classList.contains("nexus-component-touching-left"),true);
 assert.equal(b40.classList.contains("nexus-component-corner-square-tl"),true);
 assert.equal(b40.classList.contains("nexus-component-corner-square-bl"),true);
-assert.equal(b40.classList.contains("nexus-component-touching-right"),true);
-assert.equal(g40.classList.contains("nexus-group-touching-left"),true);
+assert.equal(b40.classList.contains("nexus-component-touching-right"),false);
+assert.equal(g40.classList.contains("nexus-group-touching-left"),false,"Grupos preservam seus quatro cantos arredondados");
 
 const partialA40=surface40(0,0,100,100),partialB40=surface40(100,50,100,100);
 const partialCanvas40={querySelectorAll(selector){if(selector===".nexus-component"||selector===".nexus-component:not(.is-group-member)")return[partialA40,partialB40];if(selector===".nexus-group-surface")return[];return[];}};
@@ -1772,7 +1772,9 @@ assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift", "
 assert.equal(getTriggeredActions(modifierFlow, "click", { modifiers: ["shift"] }).length, 0);
 assert.equal(normalizeInteraction({ triggers: [{ event: "middleClick" }], actions: [] }).triggers[0].event, "middleClick");
 assert.deepEqual(normalizeInteraction({ triggers: [{ event: "click", modifiers: ["alt", "shift", "invalid"] }], actions: [] }).triggers[0].modifiers, ["shift", "alt"]);
-assert.match(interactions, /modifierOptions/);
+assert.doesNotMatch(interactions, /modifierOptions/, "O editor não deve oferecer um seletor genérico de modificadores");
+assert.match(interactions, /Combinação de teclas|Atalho de teclado/, "Atalhos devem ser configurados por captura da combinação completa");
+assert.match(interactions, /findInteractionShortcutConflicts/, "O editor deve identificar conflitos de atalhos no Canvas");
 assert.match(interactions, /\["hold","Segurar"\]/, "O editor deve oferecer gatilho de pressionamento prolongado");
 assert.match(interactions, /\["keyDown","Atalho personalizado"\]/, "O editor deve identificar atalhos personalizados");
 assert.match(interactions, /data-interaction-media-preview|interactionMediaPreview/, "Valores de ações devem oferecer prévia de mídia");
@@ -1792,7 +1794,7 @@ assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown",
 assert.equal(getTriggeredActions({ interactions: [capturedKeyFlow] }, "keyDown", { key: "K", modifiers: ["ctrl"] }).length, 0, "Gatilhos de teclado devem exigir os modificadores configurados");
 assert.match(interactions, /capture-key/, "O editor deve oferecer captura direta de tecla");
 assert.match(interactions, /Atalho personalizado/, "O editor deve identificar atalhos de teclado personalizados");
-assert.match(interactions, /Combinação de teclas/, "O editor deve exibir a combinação capturada");
+assert.match(interactions, /Atalho de teclado/, "O editor deve exibir a combinação capturada");
 const keyboardOnlyComponent = { interactions: [{ enabled: true, triggers: [{ event: "keyDown", key: "k", modifiers: ["ctrl"] }], actions: [{ enabled: true, type: "roll", config: { formula: "1d20" } }] }] };
 assert.equal(hasKeyboardInteraction(keyboardOnlyComponent), true, "Componentes com gatilho de teclado devem ser navegáveis por foco");
 assert.equal(hasKeyboardInteraction({ interactions: [{ triggers: [{ event: "focus" }], actions: [{ type: "roll" }] }] }), true, "Componentes com gatilho de foco devem receber tabindex para executar o fluxo");
@@ -2165,3 +2167,15 @@ const futureMigration = await migrateLegacyActorData({ actor: futureActor, readL
 assert.equal(futureMigration.futureSchema, true, "Um esquema futuro deve ser protegido de migração por código antigo");
 assert.equal(futureMigration.changed, false);
 assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravações");
+
+/* Keyboard shortcut conflict detection: same key/modifier/phase conflicts across Canvas components. */
+{
+  const source = { id:"source", customLabel:"Sombra", interactions:[{ id:"flow-a", triggers:[{ id:"key-a", event:"keyDown", key:"C", modifiers:["shift"] }], actions:[{ type:"roll" }] }] };
+  const duplicate = { id:"duplicate", customLabel:"Outra habilidade", interactions:[{ id:"flow-b", triggers:[{ id:"key-b", event:"keyDown", key:"c", modifiers:["shift"] }], actions:[{ type:"roll" }] }] };
+  const differentModifier = { id:"other", customLabel:"Outra tecla", interactions:[{ id:"flow-c", triggers:[{ id:"key-c", event:"keyDown", key:"C", modifiers:[] }], actions:[{ type:"roll" }] }] };
+  const trigger = source.interactions[0].triggers[0];
+  const conflicts = findInteractionShortcutConflicts([source,duplicate,differentModifier],"source","flow-a","key-a",trigger);
+  assert.equal(conflicts.length,1);
+  assert.equal(conflicts[0].componentLabel,"Outra habilidade");
+  assert.equal(findInteractionShortcutConflicts([source,duplicate],"source","flow-a","key-a",{event:"keyUp",key:"C",modifiers:["shift"]}).length,0);
+}

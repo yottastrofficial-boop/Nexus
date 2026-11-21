@@ -1078,14 +1078,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`keydown${inspectorNamespace}`, event => {
       const capture = document.querySelector(".nexus-interaction-trigger-row [data-interaction-action='capture-key'].is-capturing");
       if (!capture) return;
-      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey || "Definir tecla…"; event.preventDefault(); return; }
+      if (event.key === "Escape") { capture.classList.remove("is-capturing"); capture.textContent = capture.dataset.capturedKey ? [...String(capture.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>value.toUpperCase()), capture.dataset.capturedKey===" "?"Espaço":capture.dataset.capturedKey].join(" + ") : "Definir combinação…"; event.preventDefault(); return; }
       if (["Control","Shift","Alt","Meta"].includes(event.key)) return;
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation?.();
       const modifiers = [event.ctrlKey ? "ctrl" : null, event.shiftKey ? "shift" : null, event.altKey ? "alt" : null, event.metaKey ? "meta" : null].filter(Boolean);
       capture.dataset.capturedKey = event.key;
       capture.dataset.capturedModifiers = modifiers.join("+");
       capture.classList.remove("is-capturing");
-      capture.textContent = [...modifiers.map(value => value.toUpperCase()), event.key === " " ? "Space" : event.key].join(" + ");
+      capture.textContent = [...modifiers.map(value => value.toUpperCase()), event.key === " " ? "Espaço" : event.key].join(" + ");
       persistInteractionEditor(capture, null);
     });
     $(document).on(`click${inspectorNamespace}`, ".nexus-behavior-editor [data-interaction-flow-tab]", event => {
@@ -1103,7 +1103,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const button=event.currentTarget;
       if(button.dataset.interactionAction==="capture-key"){
         const active=button.classList.contains("is-capturing");
-        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey||"Definir tecla…";});
+        document.querySelectorAll(".nexus-interaction-trigger-row .is-capturing").forEach(item=>{item.classList.remove("is-capturing");item.textContent=item.dataset.capturedKey?[...String(item.dataset.capturedModifiers||"").split("+").filter(Boolean).map(value=>value.toUpperCase()),item.dataset.capturedKey===" "?"Espaço":item.dataset.capturedKey].join(" + "):"Definir combinação…";});
         if(!active){button.classList.add("is-capturing");button.textContent="Pressione uma tecla…";button.focus();}
         return;
       }

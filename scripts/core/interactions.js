@@ -417,7 +417,6 @@ const iconBtn=(label,icon,command,flowId,extra={})=>{const b=btn("",command,flow
 const control=(type,value,options=[],aria="")=>{const input=el(type);if(type==="select")for(const [v,l] of options){const o=el("option","",l);o.value=v;input.append(o);}if(type==="checkbox")input.checked=!!value;else input.value=String(value??"");if(aria)input.setAttribute("aria-label",aria);return input;};
 const field=(label,input,scope,id,key,extra={})=>{const wrap=el("label","nexus-interaction-field");if(label)wrap.append(el("span","",label));bind(input,scope,id,key,extra);wrap.append(input);return wrap;};
 const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["rightClick","Clique direito"],["middleClick","Clique do meio"],["pointerDown","Pressionar botão"],["pointerUp","Soltar botão"],["hold","Segurar"],["hover","Passar o cursor"],["change","Alterar valor"],["submit","Enviar formulário"],["focus","Receber foco"],["blur","Perder foco"],["keyDown","Atalho personalizado"],["keyUp","Atalho personalizado (ao soltar)"],["interact","Interação encadeada"]];
-const modifierOptions=[["","Nenhum"],["shift","Shift"],["ctrl","Ctrl"],["alt","Alt"],["meta","Meta"],["ctrl+shift","Ctrl + Shift"],["ctrl+alt","Ctrl + Alt"],["shift+alt","Shift + Alt"],["ctrl+shift+alt","Ctrl + Shift + Alt"],["ctrl+meta","Ctrl + Meta"],["shift+meta","Shift + Meta"],["alt+meta","Alt + Meta"],["ctrl+shift+meta","Ctrl + Shift + Meta"],["ctrl+alt+meta","Ctrl + Alt + Meta"],["shift+alt+meta","Shift + Alt + Meta"],["ctrl+shift+alt+meta","Ctrl + Shift + Alt + Meta"]];
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
 const buildActionConfig=(parent,flow,action,index,components)=>{
@@ -433,6 +432,36 @@ const collectInteractionPropertyPaths=actor=>{
  const walk=(value,prefix="",depth=0)=>{if(!value||typeof value!=="object"||depth>6)return;for(const [key,child] of Object.entries(value)){if(["__proto__","prototype","constructor"].includes(key))continue;const path=prefix?prefix+"."+key:key;if(["number","string","boolean"].includes(typeof child))paths.add(path);else if(child&&typeof child==="object"){if(Object.hasOwn(child,"value"))paths.add(path+".value");if(Object.hasOwn(child,"max"))paths.add(path+".max");walk(child,path,depth+1);}}};
  walk(actor?.system??{});return [...paths].filter(p=>/^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(p)).sort((a,b)=>a.localeCompare(b,"pt-BR"));
 };
+/**
+ * Detects duplicate NEXUS keyboard shortcuts in the current Canvas.
+ * keyDown and keyUp are treated as separate phases; legacy modifier data remains supported.
+ */
+export function findInteractionShortcutConflicts(components = [], sourceComponentId, sourceFlowId, sourceTriggerId, sourceTrigger) {
+  if (!sourceTrigger || !["keyDown", "keyUp"].includes(sourceTrigger.event) || !String(sourceTrigger.key ?? "").trim()) return [];
+  const key = String(sourceTrigger.key).toLocaleLowerCase();
+  const modifiers = normalizeModifiers(sourceTrigger.modifiers).join("+");
+  const candidates = Array.isArray(components) ? components : [];
+  const conflicts = [];
+  const seen = new Set();
+  for (const candidate of candidates) {
+    if (!candidate?.id) continue;
+    for (const flow of getComponentInteractions(candidate)) {
+      for (const trigger of flow.triggers) {
+        if (String(candidate.id) === String(sourceComponentId) &&
+            flow.id === sourceFlowId && trigger.id === sourceTriggerId) continue;
+        if (trigger.event !== sourceTrigger.event ||
+            String(trigger.key ?? "").toLocaleLowerCase() !== key ||
+            normalizeModifiers(trigger.modifiers).join("+") !== modifiers) continue;
+        const identity = [candidate.id, flow.id, trigger.id].join(":");
+        if (seen.has(identity)) continue;
+        seen.add(identity);
+        const label = String(candidate.customLabel || candidate.text || candidate.name || candidate.type || "Componente").trim();
+        conflicts.push({ componentId: String(candidate.id), componentLabel: label, flowName: flow.name || "Fluxo sem nome", event: trigger.event });
+      }
+    }
+  }
+  return conflicts;
+}
 export function renderInteractionEditor(container,component,components=[],library=[],actor=null){
  if(!container)return;const previous=container.dataset.activeInteractionId??"",flows=getComponentInteractions(component),activeId=flows.some(x=>x.id===previous)?previous:(flows[0]?.id??"");
  container.replaceChildren();container.dataset.activeInteractionId=activeId;
@@ -455,24 +484,34 @@ export function renderInteractionEditor(container,component,components=[],librar
   triggerHead.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
   triggers.append(triggerHead);
   for(const [i,tr] of flow.triggers.entries()){
-    const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Evento"),modifiers=control("select",(tr.modifiers??[]).join("+"),modifierOptions,"Modificadores");
-    const eventField=field("Tipo",select,"trigger",flow.id,"event",{triggerIndex:i});
-    const modifierField=field(["keyDown","keyUp"].includes(tr.event)?"Modificadores do atalho":"Modificadores",modifiers,"trigger",flow.id,"modifiers",{triggerIndex:i});
+    const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Tipo de interação");
+    const eventField=field("Interação",select,"trigger",flow.id,"event",{triggerIndex:i});
+    eventField.classList.add("nexus-interaction-trigger-event");
     const duration=control("number",tr.durationMs??600,[],"Duração mínima em milissegundos");duration.min="100";duration.max="5000";duration.step="50";
-    const durationField=field("Duração (ms)",duration,"trigger",flow.id,"durationMs",{triggerIndex:i});durationField.hidden=tr.event!=="hold";
+    const durationField=field("Duração mínima (ms)",duration,"trigger",flow.id,"durationMs",{triggerIndex:i});
+    durationField.classList.add("nexus-interaction-trigger-duration");durationField.hidden=tr.event!=="hold";
     const keyLabel=String(tr.key??"");
-    const captureLabel=keyLabel?(keyLabel===" "?"Espaço":keyLabel)+" · "+normalizeModifiers(tr.modifiers).map(x=>x.toUpperCase()).join("+"):"Definir tecla…";
+    const modifiers=normalizeModifiers(tr.modifiers).map(x=>({ctrl:"Ctrl",shift:"Shift",alt:"Alt",meta:"Meta"}[x]));
+    const captureLabel=keyLabel?[...modifiers,keyLabel===" "?"Espaço":keyLabel].join(" + "):"Definir combinação…";
     const capture=btn(captureLabel,"capture-key",flow.id,{triggerIndex:i});
     capture.dataset.interactionScope="trigger";capture.dataset.interactionField="key";capture.dataset.capturedKey=tr.key??"";
-    capture.title=tr.key?"Clique para alterar a tecla":"Clique e pressione a tecla desejada";
+    capture.dataset.capturedModifiers=normalizeModifiers(tr.modifiers).join("+");
+    capture.title=tr.key?"Clique para alterar a combinação":"Clique e pressione a combinação desejada";
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
-    const keyField=el("label","nexus-interaction-field");keyField.append(el("span","","Combinação de teclas"),capture);keyField.hidden=capture.hidden;
-    const clearKey=iconBtn("Limpar tecla","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.hidden=!tr.key;
-    const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});
+    const keyField=el("label","nexus-interaction-field");keyField.classList.add("nexus-interaction-trigger-key");keyField.append(el("span","","Atalho de teclado"),capture);keyField.hidden=capture.hidden;
+    const clearKey=iconBtn("Limpar atalho","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.classList.add("nexus-interaction-trigger-clear");clearKey.hidden=!tr.key;
+    const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});remove.classList.add("nexus-interaction-trigger-remove");
     row.classList.toggle("is-key-trigger",!capture.hidden);
     row.classList.toggle("is-hold-trigger",tr.event==="hold");
     row.classList.toggle("is-standard-trigger",!["keyDown","keyUp","hold"].includes(tr.event));
-    row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
+    row.append(eventField,durationField,keyField,clearKey,remove);
+    const conflicts=findInteractionShortcutConflicts(components,component.id,flow.id,tr.id,tr);
+    if(conflicts.length){
+      const warning=el("small","nexus-interaction-shortcut-conflict","Conflito de atalho: "+conflicts.map(item=>item.componentLabel+" · "+item.flowName).join("; "));
+      warning.title="A mesma combinação está configurada em outro fluxo do Canvas.";
+      row.append(warning);
+    }
+    triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
   for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão da condição");expression.placeholder="@resources.pv.value >= 10";expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}

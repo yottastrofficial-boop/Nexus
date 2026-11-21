@@ -1,3 +1,18 @@
+## 1.0.0.77
+
+### Grupos e editor de comportamento
+- Corrige o cálculo de cantos conectados para preservar os quatro cantos arredondados das superfícies de grupos.
+- Remove contornos externos duplicados e padroniza bordas e fundos de grupos aninhados, sem inserir espaçamento artificial entre grupos adjacentes.
+- Uniformiza o desenho de Gatilhos, Condições e Ações no editor de Comportamento, com cartões, cabeçalhos, campos e espaçamentos consistentes.
+- Remove o seletor genérico de modificadores dos gatilhos. Atalhos de teclado passam a ser configurados pela captura da combinação completa (por exemplo, Shift + C).
+- Sinaliza conflitos quando a mesma combinação e fase (pressionar/soltar) já está atribuída a outro fluxo de componente no mesmo Canvas.
+- Mantém a leitura de modificadores de atalhos já salvos para compatibilidade com fluxos existentes.
+
+### Validação
+- GitHub Actions: validação estática, regressões, sintaxe e geração do pacote Foundry aprovadas.
+- O aviso de conflito cobre os atalhos NEXUS presentes no Canvas; não declara detectar todos os atalhos globais registrados por módulos externos do Foundry.
+- Teste visual e funcional real no Foundry VTT 14 build 360 ainda necessário para confirmar cantos, grupos aninhados, editor em diferentes larguras e execução de atalhos.
+
 ## 1.0.0.76
 
 ### Estabilidade de mídia, condições e campos vazios
