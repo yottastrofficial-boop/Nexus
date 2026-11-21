@@ -875,7 +875,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
           }
           if (legacy) updates["system.skills." + skill.legacyKey] = forcedDeletion();
         }
-        if (Object.keys(updates).length) await actor.update(updates, { render: false });
+        if (Object.keys(updates).length) await this.actor.update(updates, { render: false });
         return { ready: true, migrated: Object.keys(updates).length > 0 };
       } catch (error) {
         console.warn("NEXUS | Não foi possível inicializar os atributos e perícias do Actor.", error);
