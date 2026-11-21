@@ -1,4 +1,5 @@
 import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
+import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
@@ -2251,6 +2252,30 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
 }
 
+
+/* Library definitions are immutable models; Actor instances own their overrides. */
+{
+  const definition = createLibraryDefinition({
+    id:"definition-health", type:"sheet-resource", label:"Barra de Vida", version:3,
+    settings:{ sheetContent1:"PV", sheetColor:"#d94b4b", currentPath:"resources.pv.value", w:220, h:58, x:12, y:14 }
+  });
+  assert.equal(Object.hasOwn(definition.settings,"x"),false);
+  const instance = createLibraryComponentInstance(definition,{
+    id:"instance-health", position:{x:120,y:80},
+    overrides:{sheetContent1:"Vida",sheetColor:"#22aa66"}
+  });
+  assert.equal(instance.id,"instance-health");
+  assert.equal(instance.x,120);
+  assert.equal(instance.sheetContent1,"Vida");
+  assert.equal(instance.sheetColor,"#22aa66");
+  assert.equal(instance.libraryDefinitionId,"definition-health");
+  assert.equal(instance.libraryDefinitionVersion,3);
+  assert.equal(definition.settings.sheetContent1,"PV");
+  assert.equal(definition.settings.sheetColor,"#d94b4b");
+  assert.deepEqual(instance.libraryOverrides,{sheetContent1:"Vida",sheetColor:"#22aa66"});
+  assert.deepEqual(collectLibraryInstanceOverrides(definition,instance),{sheetContent1:"Vida",sheetColor:"#22aa66"});
+  assert.throws(()=>createLibraryComponentInstance({id:"broken",type:"x"}),/definição do componente é inválida/);
+}
 
 /* Version 2 library backups include reusable rule, behavior, style, media and template collections. */
 {
