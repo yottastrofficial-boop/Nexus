@@ -1,3 +1,4 @@
+import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
@@ -2213,4 +2214,41 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(conflicts.length,1);
   assert.equal(conflicts[0].componentLabel,"Outra habilidade");
   assert.equal(findInteractionShortcutConflicts([source,duplicate],"source","flow-a","key-a",{event:"keyUp",key:"C",modifiers:["shift"]}).length,0);
+}
+
+
+/* Unified library store: legacy migration, collection preservation and safe conflict handling. */
+{
+  const legacy = migrateLegacyNexusLibrary({
+    libraryComponents: [{ id:"old-component", sourceId:"component:health", type:"pv", label:"Vida", settings:{ color:"#d94b4b" } }],
+    libraryGroups: [{ id:"old-group", sourceId:"group:combat", name:"Combate" }],
+    libraryLayouts: [{ id:"old-layout", sourceId:"layout:pc", name:"Personagem", layout:{ components:[], groups:[] } }],
+    libraryThemes: [{ id:"old-theme", sourceId:"theme:dark-custom", name:"Escuro", palette:{ canvasColor:"#101010" } }],
+    libraryRules: [{ id:"rule-1", sourceId:"rule:damage", name:"Dano", expression:"1d6" }],
+    interactionLibrary: [{ id:"flow-1", name:"Ao clicar", flow:{ id:"flow-1", triggers:[], conditions:[], actions:[] } }]
+  });
+  assert.equal(legacy.schemaVersion, 1);
+  assert.equal(legacy.collections.components.length, 1);
+  assert.equal(legacy.collections.groups.length, 1);
+  assert.equal(legacy.collections.layouts.length, 1);
+  assert.equal(legacy.collections.themes.length, 1);
+  assert.equal(legacy.collections.rules.length, 1);
+  assert.equal(legacy.collections.flows.length, 1);
+  const incoming = createEmptyNexusLibraryStore();
+  incoming.collections.components.push({ id:"imported", sourceId:"component:health", label:"Vida atualizada", settings:{ color:"#00ff00" } });
+  incoming.collections.components.push({ id:"new", sourceId:"component:mana", label:"Mana", settings:{ color:"#3366ff" } });
+  const skipped = mergeNexusLibraryStores(legacy, incoming);
+  assert.equal(skipped.store.collections.components.length, 2);
+  assert.equal(skipped.report.skipped.components, 1);
+  assert.equal(skipped.report.added.components, 1);
+  const replaced = mergeNexusLibraryStores(legacy, incoming, { conflictMode:"replace" });
+  assert.equal(replaced.store.collections.components.find(item=>item.sourceId==="component:health").label,"Vida atualizada");
+  assert.equal(replaced.report.replaced.components,1);
+  const duplicated = mergeNexusLibraryStores(legacy, incoming, { conflictMode:"duplicate", createId:(collection,index)=>`copy-${index}` });
+  assert.equal(duplicated.store.collections.components.length,3);
+  assert.equal(duplicated.report.added.components,2);
+  assert.throws(()=>normalizeNexusLibraryStore({collections:{components:"inválido"}}),/precisa ser uma lista/);
+  assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
+  const userFlags = { getFlag:()=>null };
+  assert.equal(readNexusLibraryStore===undefined,false);
 }
