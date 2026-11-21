@@ -23,7 +23,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
   };
   const stop=(event,name,extra)=>{if(!dispatch(event,name,extra))return false;event.preventDefault();event.stopPropagation();return true;};
   const hasKeyboardTrigger = component => getComponentInteractions(component).some(flow =>
-    flow.enabled && flow.triggers.some(trigger => ["keyDown","keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim()) &&
+    flow.enabled && flow.triggers.some(trigger => ["focus","blur"].includes(trigger.event) || (["keyDown","keyUp"].includes(trigger.event) && !!String(trigger.key ?? "").trim())) &&
     flow.actions.some(action => action.enabled)
   );
   const onKeydown=event=>{
@@ -45,7 +45,7 @@ export function activateCanvasPlayInteractions(sheet, html) {
   const onDoubleClick=event=>{if(!isControlTarget(event))stop(event,"doubleClick");};
   const onContextMenu=event=>{if(!isControlTarget(event))stop(event,"rightClick");};
   const onAuxClick=event=>{if(event.button===1&&!isControlTarget(event))stop(event,"middleClick");};
-  const pointerBehaviorEvents = new Set(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","interact"]);
+  const pointerBehaviorEvents = new Set(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hold","interact"]);
   let cursorCard = null;
   const clearBehaviorCursor = () => { cursorCard?.style.removeProperty("cursor"); cursorCard = null; };
   const onPointerMove = event => {
