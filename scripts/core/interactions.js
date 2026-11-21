@@ -8,6 +8,7 @@ const normalizeModifiers = raw => [...new Set((Array.isArray(raw) ? raw : String
 export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
 export const INTERACTION_OPERATORS = Object.freeze(["equals","notEquals","greaterThan","greaterOrEqual","lessThan","lessOrEqual","contains","isEmpty","isNotEmpty"]);
 import { NEXUS_SKILLS } from "./skills.js";
+import { normalizeNexusPropertyPath } from "./property-paths.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "./formula-engine.js";
 
 const LEGACY = {
@@ -24,10 +25,27 @@ const normalizeTrigger = (t,i) => {
   const event=String(t?.event??t??"");
   return INTERACTION_EVENTS.includes(event) ? {id:String(t?.id??`trigger-${i+1}`),event,modifiers:normalizeModifiers(t?.modifiers),key:String(t?.key??"").slice(0,40),durationMs:Math.max(100,Math.min(5000,Number(t?.durationMs)||600))} : null;
 };
+const legacyConditionExpression = condition => {
+  const path=safePath(condition?.path);
+  if(!path)return "";
+  const reference="@"+path, operator=INTERACTION_OPERATORS.includes(condition.operator)?condition.operator:"equals";
+  const value=String(condition.value??"");
+  if(operator==="isEmpty")return `isEmpty(${reference})`;
+  if(operator==="isNotEmpty")return `isNotEmpty(${reference})`;
+  if(operator==="contains")return `contains(${reference}, ${JSON.stringify(value)})`;
+  const symbols={equals:"==",notEquals:"!=",greaterThan:">",greaterOrEqual:">=",lessThan:"<",lessOrEqual:"<="};
+  const right=["greaterThan","greaterOrEqual","lessThan","lessOrEqual"].includes(operator)&&value.trim()!==""&&Number.isFinite(Number(value))
+    ? String(Number(value))
+    : ["true","false"].includes(value.toLowerCase()) ? value.toLowerCase() : JSON.stringify(value);
+  return `${reference} ${symbols[operator]??"=="} ${right}`;
+};
 const normalizeCondition = (c,i) => {
   if(!c || typeof c!=="object")return null;
   const path=safePath(c.path)??"";
-  return {id:String(c.id??`condition-${i+1}`),path,operator:INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals",value:String(c.value??"")};
+  const operator=INTERACTION_OPERATORS.includes(c.operator)?c.operator:"equals";
+  const value=String(c.value??"");
+  const expression=String(c.expression??"").trim().slice(0,500)||legacyConditionExpression({path,operator,value});
+  return {id:String(c.id??`condition-${i+1}`),expression,path,operator,value};
 };
 const normalizeAction = (a,i) => {
   if(!a || !INTERACTION_ACTIONS.includes(a.type))return null;
@@ -174,8 +192,24 @@ export function hasKeyboardInteraction(component) {
     flow.actions.some(action => action.enabled)
   );
 }
-const getPath=(actor,path)=>safePath(path)?.split(".").reduce((v,k)=>v?.[k],actor?.system??{});
+const getPath=(actor,path)=>{
+  const normalized=normalizeNexusPropertyPath(path)||safePath(path);
+  if(!normalized)return undefined;
+  if(["name","img","uuid","id","_id"].includes(normalized))return actor?.[normalized];
+  if(normalized==="identity.portrait.img")return actor?.img??"";
+  if(normalized==="identity.token.img"||normalized==="token.img"){
+    return actor?.system?.identity?.token?.img||actor?.prototypeToken?.texture?.src||actor?.prototypeToken?.img||actor?.img||"";
+  }
+  if(normalized.startsWith("prototypeToken."))return normalized.split(".").reduce((value,key)=>value?.[key],actor?.prototypeToken);
+  const value=normalized.split(".").reduce((current,key)=>current?.[key],actor?.system??{});
+  return value&&typeof value==="object"&&Object.hasOwn(value,"value")?value.value:value;
+};
 const conditionPasses=(condition,actor)=>{
+  const expression=String(condition?.expression??"").trim();
+  if(expression){
+    return evaluateNexusCondition(expression,identifier=>getPath(actor,identifier) ?? null)===true;
+  }
+  // Compatibility for flows saved before expression-based conditions.
   if(!condition?.path)return false;
   const actual=getPath(actor,condition.path), expected=condition.value, a=Number(actual), b=Number(expected);
   switch(condition.operator){
@@ -200,8 +234,9 @@ export function interactionMatches(flow,eventName,context={}) {
     (trigger.event !== "hold" || Number(context.durationMs ?? trigger.durationMs) >= trigger.durationMs)
   );
   if(!flow?.enabled||!triggerMatches)return false;
-  if(!flow.conditions.length)return true;
-  const values=flow.conditions.map(c=>conditionPasses(c,context.actor));
+  const activeConditions=flow.conditions.filter(condition=>String(condition.expression??"").trim()||condition.path);
+  if(!activeConditions.length)return true;
+  const values=activeConditions.map(c=>conditionPasses(c,context.actor));
   return flow.conditionJoin==="any"?values.some(Boolean):values.every(Boolean);
 }
 export function getTriggeredActions(component,eventName="click",context={}) {
@@ -308,9 +343,10 @@ export function applyInteractionEditorChange(component,data,value) {  if (data.s
   else if(data.scope==="trigger"&&trigger&&data.field==="modifiers")trigger.modifiers=normalizeModifiers(value);
   else if(data.scope==="trigger"&&trigger&&data.field==="key")trigger.key=String(value??"").slice(0,40);
   else if(data.scope==="condition"&&condition){
-    if(data.field==="path")condition.path=safePath(value)??"";
+    if(data.field==="expression"){condition.expression=String(value??"").trim().slice(0,500);condition.path="";condition.operator="equals";condition.value="";}
+    else if(data.field==="path")condition.path=safePath(value)??"";
     else if(data.field==="operator")condition.operator=INTERACTION_OPERATORS.includes(value)?value:"equals";
-    else if(data.field==="value")condition.value=String(value).slice(0,120);
+    else if(data.field==="value")condition.value=String(value??"").slice(0,120);
   }else if(data.scope==="action"&&action){
     if(data.field==="type"){action.type=INTERACTION_ACTIONS.includes(value)?value:"roll";action.config=action.type==="roll"?{formula:"1d20"}:{};}
     else if(data.field==="enabled")action.enabled=!!value;
@@ -363,7 +399,7 @@ export function applyInteractionEditorCommand(component,command,data={}) {  if (
   if(!flow)return false;
   if(command==="add-trigger")flow.triggers.push({id:newId("trigger"),event:"click"});
   else if(command==="remove-trigger")flow.triggers.splice(Number(data.triggerIndex),1);
-  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),path:"",operator:"equals",value:""});
+  else if(command==="add-condition")flow.conditions.push({id:newId("condition"),expression:""});
   else if(command==="remove-condition")flow.conditions.splice(Number(data.conditionIndex),1);
   else if(command==="add-action")flow.actions.push({id:newId("action"),type:"roll",enabled:true,config:{formula:"1d20"}});
   else if(command==="remove-action")flow.actions.splice(Number(data.actionIndex),1);
@@ -439,7 +475,7 @@ export function renderInteractionEditor(container,component,components=[],librar
     row.append(eventField,modifierField,durationField,keyField,clearKey,remove);triggers.append(row);
   }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"));
   const join=control("select",flow.conditionJoin,[["all","Todas (E)"],["any","Qualquer (OU)"]],"Combinar condições");join.classList.add("nexus-interaction-condition-join");bind(join,"flow",flow.id,"conditionJoin");conditionHead.append(join,btn("＋","add-condition",flow.id));conditions.append(conditionHead);
-  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),property=control("input",co.path,[],"Propriedade");property.dataset.componentPathInput="";property.dataset.interactionPropertyInput="";property.placeholder="Buscar propriedade…";property.setAttribute("aria-autocomplete","list");const operator=control("select",co.operator,operators,"Operador"),value=control("input",co.value,[],"Valor");value.placeholder="Valor";bind(property,"condition",flow.id,"path",{conditionIndex:i});bind(operator,"condition",flow.id,"operator",{conditionIndex:i});bind(value,"condition",flow.id,"value",{conditionIndex:i});row.append(property,operator,value,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão da condição");expression.placeholder="@resources.pv.value >= 10";expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);
   const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
   for(const [i,action] of flow.actions.entries()){

@@ -56,7 +56,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
       sheet._nexusMediaObserver = observer;
     }
 
-    const safeUrl = value => { try { const url = new URL(value, window.location.href); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } };
+    const safeUrl = value => { try { const source=String(value??"").trim(); if(!source)return ""; const url = new URL(source, window.location.href); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } };
     const createMedia = (value, label = "", forceImage = false, displayMode = "auto") => {
       const safe = safeUrl(value); if (!safe || displayMode === "text") return null;
       const clean = safe.split(/[?#]/)[0].toLowerCase();
@@ -82,7 +82,7 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         let resolved=token, forceImage=false;
         if (wrapped && !/^https?:\/\//i.test(token)) {
           const binding=resolveNexusBinding(sheet.actor,token);
-          resolved=binding.value == null ? "" : String(binding.value);
+          resolved=binding.value == null ? "" : String(binding.value).trim();
           forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||token) || binding.alias?.type==="image";
         }
         const explicitUrl=wrapped && /^https?:\/\//i.test(token);
@@ -103,12 +103,12 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
     for (const node of assetTextNodes) {
       const card = node.closest(".nexus-component");
       const component = componentById.get(card?.dataset.id);
-      renderExpressionText(node, !component?.dataPath);
+      renderExpressionText(node, true);
     }
     root.querySelectorAll(".nexus-component-content, .nexus-component-heading").forEach(container => {
       const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT); const nodes=[];
-      while(walker.nextNode()) if(/\{\{[^{}]+\}\}/.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
-      for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,false);}
+      while(walker.nextNode()) if(/\{\{[^{}]+\}\}|https?:\/\/[^\s<>]+/i.test(walker.currentNode.textContent??"")) nodes.push(walker.currentNode);
+      for(const textNode of nodes){const wrapper=document.createElement("span");textNode.replaceWith(wrapper);wrapper.append(document.createTextNode(textNode.textContent));renderExpressionText(wrapper,true);}
     });
     // Os wrappers são criados pelo TreeWalker acima. Mantê-los em cache evita
     // consultas globais ao DOM a cada atualização de propriedade do Actor.
@@ -119,10 +119,10 @@ export function renderActorSheetRichMedia(sheet, root, { resolveNexusBinding, is
         if (!node.isConnected || !shouldRefresh(node)) continue;
         const card = node.closest(".nexus-component");
         const component = componentById.get(card?.dataset.id);
-        renderExpressionText(node, !component?.dataPath);
+        renderExpressionText(node, true);
       }
       for (const node of expressionTextNodes) {
-        if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, false);
+        if (node.isConnected && shouldRefresh(node)) renderExpressionText(node, true);
       }
       renderFontAwesomeTokens(root);
     };
@@ -134,7 +134,7 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
 
     if (!root) return;
     const renderMedia = createMedia ?? ((value, label, forceImage, displayMode = "auto") => {
-      const safe = (() => { try { const url = new URL(value, window.location.href); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } })();
+      const safe = (() => { try { const source=String(value??"").trim(); if(!source)return ""; const url = new URL(source, window.location.href); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch (_) { return ""; } })();
       if (!safe || displayMode === "text") return null;
       const clean=safe.split(/[?#]/)[0].toLowerCase();
       const image=displayMode === "image" || (displayMode === "auto" && (forceImage || /\.(?:png|jpe?g|jpe|jfif|pjpeg|pjp|gif|apng|webp|avif|svg|bmp|dib|tif|tiff|ico|heic|heif|jxl)$/.test(clean) || /^data:image\//i.test(safe)));
@@ -155,7 +155,9 @@ export function renderActorSheetAdaptiveContent(sheet, root, createMedia, { reso
       const component=componentById.get(card.dataset.id); if(!component || component.type==="token" || component.type==="asset-image") return;
       const definition=COMPONENTS[component.type] ?? {};
       const rawPath=String(component.dataPath ?? definition.path ?? "").trim(); if(!rawPath) return;
-      const binding=resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;
+      const wrappedMedia=rawPath.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+       const directMedia=isMediaSource(wrappedMedia?.[1]??rawPath)?(wrappedMedia?.[1]??rawPath):"";
+       const binding=directMedia?{value:directMedia,path:""}:resolveNexusBinding(sheet.actor,rawPath), raw=binding.value;
       if(raw===undefined || raw===null || typeof raw==="object") return;
       const value=String(raw).trim(); if(!value || !isMediaSource(value)) return;
       const forceImage=binding.path==="img" || /\.(?:img|image|portrait|avatar|token)$/i.test(binding.path||rawPath) || binding.alias?.type==="image";

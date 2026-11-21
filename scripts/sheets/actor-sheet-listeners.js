@@ -103,7 +103,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (previousTimer) clearTimeout(previousTimer);
       const timer = setTimeout(() => {
         pendingResourceValueSaves.delete(input);
-        if (input.isConnected && input.value !== "" && Number.isFinite(Number(input.value))) $(input).trigger("change");
+        if (input.isConnected && (input.value.trim() === "" || Number.isFinite(Number(input.value)))) $(input).trigger("change");
       }, 180);
       pendingResourceValueSaves.set(input, timer);
     });
@@ -1258,9 +1258,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if (key === "tokenImage") {
         const source=String(input.value ?? "").trim().slice(0,2048);
         const expression=source.match(/^\{\{\s*([^{}]+?)\s*\}\}$/);
-        const resolved=expression ? resolveNexusBinding(sheet.actor,expression[1]) : null;
-        if (source && (expression ? (!resolved?.path || !(isImageSource(resolved.value) || isVideoSource(resolved.value))) : !(isImageSource(source) || isVideoSource(source)))) { ui.notifications?.warn?.("Não foi possível reconhecer a imagem. Informe uma imagem ou uma propriedade de imagem válida."); input.value=component.tokenImage??""; return; }
-        if (source) component.tokenImage=expression ? `{{${resolved.path}}}` : source; else delete component.tokenImage;
+        const wrappedUrl=source.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+        const directSource=wrappedUrl?.[1] ?? source;
+        const directMedia=isImageSource(directSource) || isVideoSource(directSource);
+        const reference=expression?.[1] ?? source;
+        const resolved=source && !directMedia ? resolveNexusBinding(sheet.actor,reference) : null;
+        const resolvedValue=String(resolved?.value ?? "").trim();
+        const validBinding=!!(resolved?.path || resolved?.alias) && (!resolvedValue || isImageSource(resolvedValue) || isVideoSource(resolvedValue));
+        if (source && !directMedia && !validBinding) { ui.notifications?.warn?.("Não foi possível reconhecer a imagem. Informe uma imagem ou uma propriedade de imagem válida."); input.value=component.tokenImage??""; return; }
+        if (source) component.tokenImage=directMedia ? directSource : `{{${resolved.path || reference}}}`; else delete component.tokenImage;
       }
       else if (key === "tokenOverlay") component.tokenOverlay=String(input.value).slice(0,24);
       else if (key === "tokenFrameWidth") component.tokenFrameWidth=clamp(Number(input.value)||0,0,16);
@@ -1297,13 +1303,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       else if(key==="actionTargetId") component.actionTargetId = String(input.value ?? "").trim().slice(0,100);
       else if(key==="rollFormula") component.rollFormula = String(input.value ?? "").trim().slice(0, 500);
       else if(key==="dataPath") {
-        const path = normalizeNexusPropertyPath(String(input.value ?? ""));
-        const resolved = resolveNexusBinding(sheet.actor, path);
-        const validPath = !!path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        const rawPath=String(input.value ?? "").trim();
+        const wrappedMedia=rawPath.match(/^\{\{\s*(https?:\/\/[^{}]+?)\s*\}\}$/i);
+        const directMediaSource=["asset-image","token"].includes(component.type) && isMediaSource(wrappedMedia?.[1] ?? rawPath);
+        const path=directMediaSource ? String(wrappedMedia?.[1] ?? rawPath).trim() : normalizeNexusPropertyPath(rawPath);
+        const resolved=path && !directMediaSource ? resolveNexusBinding(sheet.actor,path) : null;
+        const validPath=!!path && /^[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$/.test(path);
+        // Imagens e tokens aceitam URL/caminho de mídia direto ou uma propriedade do Actor.
         // Um alias personalizado pode não possuir caminho físico em Actor.system.
-        if (path && (!validPath || (!resolved.path && !resolved.alias))) return;
-        component.dataPath = path;
-        input.value = path;
+        if(rawPath && !directMediaSource && (!validPath || (!resolved?.path && !resolved?.alias))) return;
+        component.dataPath=path;
+        input.value=path;
         if(component.type==="resource-meter"){component.customBinding=path;component.binding="custom";}
       }
       else if(key==="customLabel") { const title=String(input.value).trim().slice(0,48); component.customLabel=title; if (["level","attribute"].includes(COMPONENTS[component.type]?.variant) || ["level","attribute"].includes(component.sheetVariant)) component.text=title; }

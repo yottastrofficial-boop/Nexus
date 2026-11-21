@@ -66,6 +66,7 @@ export function renderCanvasGroups(sheet, root) {
     if (sheet._mode !== "appearance") surface.classList.add("is-static");
     surface.dataset.groupId = String(group.id);
     surface.dataset.groupDepth = String(depthOf(group.id));
+    if (depthOf(group.id) > 0) surface.classList.add("is-nested");
     surface.style.setProperty("--nexus-group-outline-offset", `${(maxDepth-depthOf(group.id))*2}px`);
     surface.setAttribute("aria-hidden", "true");
     surface.hidden = !!group.hidden;
