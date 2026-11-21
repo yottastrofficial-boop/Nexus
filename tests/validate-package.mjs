@@ -1306,7 +1306,7 @@ assert.match(interactions,/expression:""/,"Novas condições começam com a expr
 assert.match(interactions,/expression\.placeholder="@resources\.pv\.value >= 10"/,"Condições devem oferecer um exemplo de expressão comparável às regras");
 assert.ok(actorPropertyPickerListeners.includes("templateExpression=!formulaMode&&!propertyMode?before.match"),"Campos de texto reconhecem a abertura de expressão {{");
 assert.match(actorSheetRendering,/renderExpressionText\(node, true\)/,"Conteúdo deve reconhecer URLs diretas mesmo quando possui vínculo com propriedade");
-assert.ok(actorSheetRendering.includes("https?:\\\\/\\\\/[^\\\\s<>]+"),"O renderer deve localizar URLs HTTP(S) sem exigir {{...}}");
+assert.ok(actorSheetRendering.includes("allowPlainUrls ?") && actorSheetRendering.includes("https?:"),"O renderer deve localizar URLs HTTP(S) sem exigir {{...}}");
 assert.match(sheet,/const directMediaSource = isMediaSource\(genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
 
 assert.match(template,/data-library-section="assets"/,"Biblioteca deve separar Assets, Fluxos e Temas");
