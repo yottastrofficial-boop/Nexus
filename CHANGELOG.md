@@ -1,3 +1,23 @@
+## 1.0.0.79
+
+### Refinamento do editor de comportamento
+- Novo fluxo começa vazio, sem gatilho, condição ou ação predefinidos.
+- Remove o botão duplicado "Novo fluxo" do estado vazio; o botão + da barra é o único ponto de criação.
+- Reorganiza gatilhos com seletor e combinação de teclas em colunas proporcionais; remove o painel escurecido e a legenda "Interação".
+- Corrige a exibição dos atalhos para combinações legíveis, como "Shift + C".
+- Alinha gatilhos e condições em colunas simétricas, sem cartões internos escurecidos.
+- Padroniza os botões + de gatilhos, condições e ações.
+- Condições e fórmulas passam a usar campos expansíveis até cinco linhas, com rolagem após esse limite.
+- Remove a legenda "Fórmula" e mantém nome acessível no campo.
+- Habilita o buscador de propriedades em expressões de condição com {{...}}, fórmulas e demais campos textuais de configuração de ações.
+- Remove a divisória inferior da barra de fluxos.
+- Transforma o estado ativo do fluxo em um controle visual de alternância ligado ao checkbox real.
+
+### Validação
+- Testes de regressão adicionados para fluxo inicialmente vazio e campos expansíveis com buscador de propriedades.
+- Validação automatizada e teste de pacote Foundry serão executados pela CI.
+- Teste visual e funcional no Foundry VTT 14 build 360 permanece necessário.
+
 ## 1.0.0.78
 
 ### Editor de comportamento e expressões

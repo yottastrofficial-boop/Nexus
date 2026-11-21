@@ -257,7 +257,7 @@ export async function executeTriggeredActions(component,eventName,executeAction,
   return results;
 }
 export function createInteractionFlow() {
-  return normalizeInteraction({id:newId("interaction"),name:"Novo fluxo",triggers:[{id:newId("trigger"),event:"click"}],actions:[{id:newId("action"),type:"roll",config:{formula:"1d20"}}]});
+  return normalizeInteraction({id:newId("interaction"),name:"Novo fluxo",triggers:[],conditions:[],actions:[]});
 }
 export function instantiateInteractionTemplate(template) {
   const flow=normalizeInteraction(structuredClone(template?.flow??template));
@@ -428,7 +428,7 @@ const events=[["click","Clique esquerdo"],["doubleClick","Duplo clique"],["right
 const actions=[["roll","Rolagem"],["calculate","Calcular"],["update","Atualizar propriedade"],["open","Abrir"],["toggle","Alternar componente"],["interact","Interagir com componente"],["execute","Executar operação"]];
 const operators=[["equals","Igual a"],["notEquals","Diferente de"],["greaterThan","Maior que"],["greaterOrEqual","Maior ou igual"],["lessThan","Menor que"],["lessOrEqual","Menor ou igual"],["contains","Contém"],["isEmpty","Está vazio"],["isNotEmpty","Não está vazio"]];
 const buildActionConfig=(parent,flow,action,index,components)=>{
- const add=(label,key,value,opts=null)=>{const input=control(opts?"select":"input",value,opts??[],label);if(key==="formula")input.dataset.rollFormulaInput="";const wrapped=field(label,input,"action",flow.id,"config."+key,{actionIndex:index});parent.append(wrapped);if(key==="value"){input.dataset.interactionMediaInput="";const preview=el("div","nexus-data-media-preview");preview.dataset.interactionMediaPreview="";renderInteractionMediaPreview(preview,value);parent.append(preview);}};
+ const add=(label,key,value,opts=null)=>{const isFormula=key==="formula";const input=control(opts?"select":isFormula?"textarea":"input",value,opts??[],label);if(isFormula){input.dataset.rollFormulaInput="";input.rows=1;input.dataset.interactionAutogrow="";}else if(!opts)input.dataset.interactionPropertyInput="";const wrapped=field(isFormula?"":label,input,"action",flow.id,"config."+key,{actionIndex:index});parent.append(wrapped);if(key==="value"){input.dataset.interactionMediaInput="";const preview=el("div","nexus-data-media-preview");preview.dataset.interactionMediaPreview="";renderInteractionMediaPreview(preview,value);parent.append(preview);}};
  if(action.type==="roll"){if(action.config.mode==="skill")add("Perícia","skillKey",action.config.skillKey??"athletics",NEXUS_SKILLS.map(x=>[x.key,x.name]));else add("Fórmula","formula",action.config.formula??"1d20");}
  if(action.type==="calculate"){add("Fórmula","formula",action.config.formula??"");add("Salvar resultado em","targetPath",action.config.targetPath??"");}
  if(action.type==="update"){add("Propriedade","path",action.config.path??"");add("Operação","operation",action.config.operation??"set",[["set","Definir"],["add","Somar"],["subtract","Subtrair"]]);add("Valor","value",action.config.value??"0");}
@@ -485,18 +485,18 @@ export function renderInteractionEditor(container,component,components=[],librar
  }
  if(library.length){const select=control("select","",[["","Fluxo salvo…"],...library.map(x=>[x.id,x.name])],"Selecionar fluxo salvo");select.dataset.interactionLibrarySelect="";flowTools.append(select,btn("Inserir","add-library-flow",""));}
  flowbar.append(tabs,flowTools);container.append(flowbar);
- if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"),btn("＋ Criar fluxo","add-flow",""));container.append(empty);return;}
+ if(!flows.length){const empty=el("div","nexus-interaction-empty-state");empty.append(el("strong","","Nenhum fluxo configurado"));container.append(empty);return;}
  const panels=el("div","nexus-interaction-flows");
  for(const flow of flows){
   const panel=el("section","nexus-interaction-flow");panel.dataset.interactionId=flow.id;panel.dataset.interactionFlowPanel=flow.id;panel.hidden=flow.id!==activeId;panel.setAttribute("role","tabpanel");
   const flowHead=el("div","nexus-interaction-flow-heading");flowHead.append(el("strong","nexus-interaction-flow-name",flow.name||"Novo fluxo"));panel.append(flowHead);
   const guided=el("div","nexus-interaction-guided");
   const triggers=el("section","nexus-interaction-group nexus-interaction-trigger-group"),triggerHead=el("div","nexus-interaction-group-heading");
-  triggerHead.append(el("h6","","Gatilhos"),btn("＋ Adicionar","add-trigger",flow.id));
+  const addTrigger=btn("+","add-trigger",flow.id);addTrigger.title="Adicionar gatilho";triggerHead.append(el("h6","","Gatilhos"),addTrigger);
   triggers.append(triggerHead);
   for(const [i,tr] of flow.triggers.entries()){
     const row=el("div","nexus-interaction-trigger-row"),select=control("select",tr.event,events,"Tipo de interação");
-    const eventField=field("Interação",select,"trigger",flow.id,"event",{triggerIndex:i});
+    const eventField=field("",select,"trigger",flow.id,"event",{triggerIndex:i});
     eventField.classList.add("nexus-interaction-trigger-event");
     const duration=control("number",tr.durationMs??600,[],"Duração mínima em milissegundos");duration.min="100";duration.max="5000";duration.step="50";
     const durationField=field("Duração mínima (ms)",duration,"trigger",flow.id,"durationMs",{triggerIndex:i});
@@ -512,12 +512,14 @@ export function renderInteractionEditor(container,component,components=[],librar
     capture.classList.add("nexus-interaction-keycap");capture.setAttribute("aria-label","Combinação de teclas");
     capture.hidden=!["keyDown","keyUp"].includes(tr.event);
     const keyField=el("div","nexus-interaction-trigger-key");keyField.append(capture);keyField.hidden=capture.hidden;
+    const triggerTools=el("div","nexus-interaction-trigger-tools");
     const clearKey=iconBtn("Limpar atalho","fa-xmark","clear-key",flow.id,{triggerIndex:i});clearKey.classList.add("nexus-interaction-trigger-clear");clearKey.hidden=!tr.key;
     const remove=iconBtn("Remover gatilho","fa-trash","remove-trigger",flow.id,{triggerIndex:i});remove.classList.add("nexus-interaction-trigger-remove");
+    triggerTools.append(clearKey,remove);
     row.classList.toggle("is-key-trigger",!capture.hidden);
     row.classList.toggle("is-hold-trigger",tr.event==="hold");
     row.classList.toggle("is-standard-trigger",!["keyDown","keyUp","hold"].includes(tr.event));
-    row.append(eventField,durationField,keyField,clearKey,remove);
+    row.append(eventField,durationField,keyField,triggerTools);
     const conflicts=findInteractionShortcutConflicts(components,component.id,flow.id,tr.id,tr);
     if(conflicts.length){
       const warning=el("small","nexus-interaction-shortcut-conflict","Conflito de atalho: "+conflicts.map(item=>item.componentLabel+" · "+item.flowName).join("; "));
@@ -525,10 +527,10 @@ export function renderInteractionEditor(container,component,components=[],librar
       row.append(warning);
     }
     triggers.append(row);
-  }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");conditionHead.append(el("h6","","Condições"),btn("＋ Adicionar","add-condition",flow.id));conditions.append(conditionHead);
-  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("input",co.expression??"",[],"Expressão lógica da condição");expression.autocomplete="off";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
+  }  const conditions=el("section","nexus-interaction-group nexus-interaction-condition-group"),conditionHead=el("div","nexus-interaction-group-heading");const addCondition=btn("+","add-condition",flow.id);addCondition.title="Adicionar condição";conditionHead.append(el("h6","","Condições"),addCondition);conditions.append(conditionHead);
+  for(const [i,co] of flow.conditions.entries()){const row=el("div","nexus-interaction-condition-row"),expression=control("textarea",co.expression??"",[],"Expressão lógica da condição");expression.autocomplete="off";expression.rows=1;expression.dataset.interactionAutogrow="";bind(expression,"condition",flow.id,"expression",{conditionIndex:i});row.append(expression,iconBtn("Remover condição","fa-trash","remove-condition",flow.id,{conditionIndex:i}));conditions.append(row);}
   guided.append(triggers,conditions);panel.append(guided);
-  const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");actionHead.append(el("h6","","Ações"),btn("＋ Adicionar ação","add-action",flow.id));actionGroup.append(actionHead);
+  const actionGroup=el("section","nexus-interaction-group nexus-interaction-actions"),actionHead=el("div","nexus-interaction-group-heading");const addAction=btn("+","add-action",flow.id);addAction.title="Adicionar ação";actionHead.append(el("h6","","Ações"),addAction);actionGroup.append(actionHead);
   for(const [i,action] of flow.actions.entries()){
    const card=el("article","nexus-interaction-action"),head=el("div","nexus-interaction-action-head");
    const order=el("span","nexus-interaction-action-order",String(i+1).padStart(2,"0"));
@@ -545,6 +547,11 @@ export function renderInteractionEditor(container,component,components=[],librar
   const advanced=el("details","nexus-interaction-execution"),summary=el("summary","","Execução avançada"),error=control("select",flow.execution.onError,[["stop","Interromper o fluxo"],["continue","Continuar próximas ações"]],"Se uma ação falhar");advanced.append(summary,field("Se uma ação falhar",error,"flow",flow.id,"onError"));panel.append(advanced);panels.append(panel);
  }
  container.append(panels);
+ for(const area of container.querySelectorAll("[data-interaction-autogrow]")){
+  const lineHeight=Number.parseFloat(getComputedStyle(area).lineHeight)||18,maxHeight=lineHeight*5+14;
+  area.style.height="auto";area.style.height=Math.min(area.scrollHeight,maxHeight)+"px";
+  area.style.overflowY=area.scrollHeight>maxHeight?"auto":"hidden";
+ }
 }
 export function renderInteractionMediaPreview(container, rawValue) {
   if (!container) return;
