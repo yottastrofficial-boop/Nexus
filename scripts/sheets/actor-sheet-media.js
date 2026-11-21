@@ -12,7 +12,7 @@ const MEDIA_EXTENSION_PATTERN = new RegExp("\\.(?:" + IMAGE_EXTENSIONS + "|" + A
 const VIDEO_EXTENSION_PATTERN = new RegExp("\\.(?:" + VIDEO_EXTENSIONS + ")(?:[?#].*)?$", "i");
 export const getMediaKind = value => {
   const source = String(value ?? "").trim();
-  const dataType = source.match(/^data:(image|audio|video)\\//i)?.[1]?.toLowerCase();
+  const dataType = source.match(/^data:(image|audio|video)\//i)?.[1]?.toLowerCase();
   if (dataType) return dataType;
   const clean = source.split(/[?#]/)[0].toLowerCase();
   if (new RegExp("\\.(?:" + AUDIO_EXTENSIONS + ")$", "i").test(clean)) return "audio";
