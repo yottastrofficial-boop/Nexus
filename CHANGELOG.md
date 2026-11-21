@@ -1,17 +1,3 @@
-## Próxima versão — Biblioteca Explorer (em desenvolvimento)
-
-### Interface
-- Reorganiza a Biblioteca como uma janela única estilo Explorador de Arquivos, com navegação vertical à esquerda, área de itens ao centro e inspector contextual à direita.
-- Padroniza grade, seleção, superfícies, espaçamento e largura dos painéis de detalhes entre Assets, Fluxos, Temas e Layouts.
-- Adiciona inspector de resumo para layouts salvos.
-- Mantém a interface responsiva: em larguras menores, o inspector passa abaixo da listagem.
-
-### Escopo ainda pendente
-- Unificar as coleções do armazenamento no catálogo visual.
-- Implementar pastas hierárquicas, favoritos, recentes e filtros completos.
-- Ampliar o inspector de layouts e conectar modelos, mídia, estilos, regras e comportamentos.
-- Validar a experiência no Foundry VTT 14 build 360.
-
 ## 1.0.0.80
 
 ### Comportamentos
@@ -32,6 +18,20 @@
 - Conteúdo avançado permanece dado inerte durante importação; nenhuma string de código é executada pelo parser.
 - Esta versão será empacotada e validada pelo workflow de release da `main` antes da publicação do manifesto.
 - Teste funcional no Foundry VTT 14 build 360 continua necessário; esta publicação disponibiliza a etapa atual para teste, não representa a conclusão da Biblioteca unificada.
+
+## Próxima versão — Biblioteca Explorer (em desenvolvimento)
+
+### Interface
+- Reorganiza a Biblioteca como uma janela única estilo Explorador de Arquivos, com navegação vertical à esquerda, área de itens ao centro e inspector contextual à direita.
+- Padroniza grade, seleção, superfícies, espaçamento e largura dos painéis de detalhes entre Assets, Fluxos, Temas e Layouts.
+- Adiciona inspector de resumo para layouts salvos.
+- Mantém a interface responsiva: em larguras menores, o inspector passa abaixo da listagem.
+
+### Escopo ainda pendente
+- Unificar as coleções do armazenamento no catálogo visual.
+- Implementar pastas hierárquicas, favoritos, recentes e filtros completos.
+- Ampliar o inspector de layouts e conectar modelos, mídia, estilos, regras e comportamentos.
+- Validar a experiência no Foundry VTT 14 build 360.
 
 ## 1.0.0.79
 
