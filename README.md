@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.85 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.87 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Versão atual em validação funcional:** 1.0.0.85. Reconstrói a Biblioteca em uma janela Explorer com navegação, cards e inspector padronizados, além de persistência unificada para componentes, grupos, layouts e demais coleções. A validação automatizada passou; a conferência visual final ainda depende de teste no Foundry VTT 14 build 360.
+**Versão atual em validação funcional:** 1.0.0.85. Evolui a Biblioteca Explorer com área Lógica, Inspector contextual, visualização em grade/lista e tamanhos configuráveis de miniatura. A validação automatizada é executada no GitHub Actions; a conferência visual final ainda depende de teste no Foundry VTT 14 build 360.
 
 ## Visão geral
 
