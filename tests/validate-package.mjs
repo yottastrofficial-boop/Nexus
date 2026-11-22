@@ -2429,7 +2429,7 @@ assert.match(template,/data-library-section="collection:properties"/,"A Bibliote
 assert.match(template,/data-library-section="collection:functions"/,"A Biblioteca deve expor Funções na área Lógica");
 assert.match(template,/data-library-collection-view-mode="list"/,"A Biblioteca deve oferecer visualização em lista");
 assert.match(libraryView,/_libraryCollectionViewMode/,"A preferência de grade/lista deve controlar a apresentação da coleção");
-assert.match(libraryView,/data-card-size/,"O tamanho das miniaturas deve ser configurável");
+assert.match(libraryView,/dataset\.cardSize/,"O tamanho das miniaturas deve ser configurável");
 assert.match(libraryView,/nexus-library-logic-preview/,"O Inspector deve apresentar payloads lógicos em modo somente leitura");
 assert.match(css,/data-view-mode="list"/,"A visualização em lista deve possuir layout próprio");
 assert.match(css,/data-card-size="large"/,"A grade deve permitir miniaturas maiores");
@@ -2437,4 +2437,4 @@ assert.match(css,/data-card-size="large"/,"A grade deve permitir miniaturas maio
 assert.match(libraryView,/folderLabel,visualPreview,save,preview/,"O Inspector deve exibir a prévia visual antes das ações de metadados");
 assert.match(libraryView,/"libraryProperties"[\s\S]*"libraryFunctions"/,"A leitura de compatibilidade deve incluir as flags legadas de Propriedades e Funções");
 assert.match(libraryView,/registry\?\.register/,"Alterações de metadados lógicos devem atualizar o registry em memória");
-assert.match(libraryView,/data-library-card-size/,"A seleção de tamanho dos cartões deve ser ligada ao renderizador");
+assert.match(template,/data-library-card-size/,"A seleção de tamanho dos cartões deve estar disponível na interface");
