@@ -7708,3 +7708,5 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-panel-window:has(.nexus-library-panel) .nexus-library-save-configured:hover {
   filter:brightness(1.12);
 }
+
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-panel[hidden] { display:none !important; }
