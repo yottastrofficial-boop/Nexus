@@ -7887,3 +7887,63 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   white-space:normal !important;
   overflow-wrap:anywhere !important;
 }
+
+
+/* v1.0.0.87 — controles de visualização e área Lógica da Biblioteca. */
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-view-controls {
+  display:inline-flex !important; align-items:center !important; gap:3px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-view-controls button {
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  gap:5px !important; min-height:28px !important; padding:4px 8px !important;
+  border:1px solid var(--nexus-panel-border,#52647b) !important; border-radius:5px !important;
+  background:var(--nexus-panel-card,#26394d) !important; color:var(--nexus-panel-text,#e6edf5) !important;
+  font-size:9px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-view-controls button.active {
+  border-color:var(--nexus-panel-accent,#78b7e8) !important;
+  background:var(--nexus-panel-accent-soft,rgba(80,145,195,.22)) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-card-size="small"] {
+  grid-template-columns:repeat(auto-fill,minmax(104px,1fr)) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-card-size="medium"] {
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr)) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-card-size="large"] {
+  grid-template-columns:repeat(auto-fill,minmax(188px,1fr)) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] {
+  display:flex !important; flex-direction:column !important; gap:5px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-card {
+  display:grid !important; grid-template-columns:minmax(0,1fr) auto !important;
+  grid-template-rows:minmax(0,1fr) !important; aspect-ratio:auto !important; min-height:54px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item {
+  display:grid !important; grid-template-columns:30px minmax(0,1fr) !important;
+  grid-template-rows:auto auto !important; justify-items:start !important; align-content:center !important;
+  min-height:52px !important; height:auto !important; padding:7px 10px !important; text-align:left !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item > i {
+  grid-column:1 !important; grid-row:1 / span 2 !important; align-self:center !important; font-size:18px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item > strong,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item > small {
+  grid-column:2 !important; text-align:left !important; white-space:normal !important; overflow-wrap:anywhere !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-logic-preview {
+  display:flex !important; flex-direction:column !important; gap:6px !important; min-width:0 !important;
+  margin:8px 0 !important; padding:9px !important; border:1px solid var(--nexus-panel-border,#52647b) !important;
+  border-radius:7px !important; background:var(--nexus-panel-card,#26394d) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-logic-preview > strong { font-size:11px !important; }
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-logic-preview > small,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-logic-dependencies {
+  color:var(--nexus-panel-muted,#9aadc2) !important; font-size:9px !important; overflow-wrap:anywhere !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-logic-preview pre {
+  max-height:220px !important; overflow:auto !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important;
+  margin:0 !important; padding:8px !important; border-radius:5px !important;
+  background:rgba(0,0,0,.18) !important; font-size:9px !important; line-height:1.4 !important;
+}
