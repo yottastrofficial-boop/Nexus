@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.80 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.81 · Foundry VTT 14
 </p>
 
 <p align="center">
