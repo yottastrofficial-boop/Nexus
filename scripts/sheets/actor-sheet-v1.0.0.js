@@ -2615,7 +2615,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = game.user?.getFlag?.("nexus", "libraryLayouts") ?? [];
     const next = saved.filter(item => item.id !== layoutId);
     if (next.length === saved.length) return false;
-    await game.user.setFlag("nexus", "libraryLayouts", next); this._libraryRenderSavedLayouts?.(); return true;
+    await game.user.setFlag("nexus", "libraryLayouts", next); await writeNexusLibraryCollection(game.user, "layouts", next); this._libraryRenderSavedLayouts?.(); return true;
   }
 
   async _addSavedLayoutToActor(layoutId, overrides = {}) {
