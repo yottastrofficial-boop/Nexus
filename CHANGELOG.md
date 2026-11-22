@@ -610,7 +610,7 @@ A geometria de contato das bordas é compartilhada pelos modos Padrão, Configur
 ## Em desenvolvimento — auditoria e hardening da base
 
 - Corrige a identificação por assinatura de AVIF e valida o cabeçalho de contêiner JPEG XL.
-- Serializa gravações de coleções e atualizações read-modify-write da Biblioteca por usuário para evitar sobrescrita por snapshots concorrentes.
+- Serializa gravações de coleções e atualizações read-modify-write da Biblioteca por usuário; remove gravações duplicadas de flags legadas.
 - Preserva metadados compatíveis desconhecidos no envelope da Biblioteca.
 - Impede que a execução manual do workflow publique uma release; publicação exige push explícito com marcador [release] na main.
 - Adiciona regressões automatizadas para fórmulas, Biblioteca, propriedades, isolamento de componentes e identificação de mídia.
