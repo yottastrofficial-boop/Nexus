@@ -91,7 +91,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     };
     const genericCollectionIcons = {
       templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
-      styles: "fa-solid fa-swatchbook", properties: "fa-solid fa-list-check", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears", functions: "fa-solid fa-function"
+      styles: "fa-solid fa-swatchbook", properties: "fa-solid fa-list-check", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears", functions: "fa-solid fa-code"
     };
     const getLegacyLibraryFlags = () => Object.fromEntries([
       "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
