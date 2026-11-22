@@ -2424,3 +2424,12 @@ assert.match(css,/nexus-library-asset-meta strong[\s\S]*white-space:normal!impor
 assert.match(css,/v1\.0\.0\.86[\s\S]*?\.nexus-library-asset\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)\s*!important;[\s\S]*?grid-template-rows:minmax\(0,1fr\) auto\s*!important;/,"Cards de assets devem usar uma única coluna para manter o título abaixo da prévia");
 assert.match(css,/\.nexus-library-asset > \.nexus-library-preview-stage\s*\{[\s\S]*?grid-column:1\s*!important;[\s\S]*?grid-row:1\s*!important;/,"A prévia deve ocupar a primeira linha do card");
 assert.match(css,/\.nexus-library-asset > \.nexus-library-asset-meta\s*\{[\s\S]*?grid-column:1\s*!important;[\s\S]*?grid-row:2\s*!important;/,"O título deve ocupar a segunda linha do card");
+
+assert.match(template,/data-library-section="collection:properties"/,"A Biblioteca deve expor Propriedades na área Lógica");
+assert.match(template,/data-library-section="collection:functions"/,"A Biblioteca deve expor Funções na área Lógica");
+assert.match(template,/data-library-collection-view-mode="list"/,"A Biblioteca deve oferecer visualização em lista");
+assert.match(libraryView,/_libraryCollectionViewMode/,"A preferência de grade/lista deve controlar a apresentação da coleção");
+assert.match(libraryView,/data-card-size/,"O tamanho das miniaturas deve ser configurável");
+assert.match(libraryView,/nexus-library-logic-preview/,"O Inspector deve apresentar payloads lógicos em modo somente leitura");
+assert.match(css,/data-view-mode="list"/,"A visualização em lista deve possuir layout próprio");
+assert.match(css,/data-card-size="large"/,"A grade deve permitir miniaturas maiores");
