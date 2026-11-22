@@ -489,8 +489,22 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const summary = document.createElement("p"); summary.className = "nexus-library-definition-note";
           summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
           const note = document.createElement("p"); note.className = "nexus-library-definition-note";
-          note.textContent = "O layout será aplicado como uma cópia; o arquivo salvo na Biblioteca permanece inalterado.";
-          detail.append(heading, summary, note);
+          note.textContent = "Ajuste esta cópia antes de adicioná-la. O modelo salvo permanece inalterado.";
+          const editor = document.createElement("div"); editor.className = "nexus-library-layout-overrides";
+          const fields = [["name","Nome", "text", entry.name ?? layout.name ?? ""],["width","Largura", "number", layout.width ?? 1200],["height","Altura", "number", layout.height ?? 700]];
+          for (const [key,label,type,value] of fields) {
+            const field = document.createElement("label"); field.textContent = label;
+            const input = document.createElement("input"); input.type = type; input.dataset.libraryLayoutOverride = key; input.value = String(value); field.append(input); editor.append(field);
+          }
+          for (const [key,label] of [["canvasColor","Fundo"],["cardColor","Cartões"],["accentColor","Destaque"]]) {
+            const color = document.createElement("label"); color.textContent = label;
+            const input = document.createElement("input"); input.type = "color"; input.dataset.libraryLayoutOverride = key;
+            input.value = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(layout[key] ?? "")) ? layout[key] : "#263749";
+            color.append(input); editor.append(color);
+          }
+          const actions = document.createElement("div"); actions.className = "nexus-library-layout-actions";
+          const apply = document.createElement("button"); apply.type = "button"; apply.dataset.libraryAddLayout = entry.id; apply.textContent = "Adicionar cópia à ficha"; actions.append(apply);
+          detail.append(heading, summary, note, editor, actions);
         }
         return;
       }
@@ -801,7 +815,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       const addLayoutButton = target?.closest("[data-library-add-layout]");
-      if (addLayoutButton && libraryPanel.contains(addLayoutButton)) { event.preventDefault(); await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout); return; }
+      if (addLayoutButton && libraryPanel.contains(addLayoutButton)) {
+        event.preventDefault();
+        const detail = libraryPanel.querySelector("[data-library-layout-details]");
+        const overrides = Object.fromEntries([...(detail?.querySelectorAll("[data-library-layout-override]") ?? [])].map(input => [input.dataset.libraryLayoutOverride, input.value]));
+        await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout, detail?.dataset.selectedLayoutId === addLayoutButton.dataset.libraryAddLayout ? overrides : {});
+        return;
+      }
       const copyLayoutButton = target?.closest("[data-library-copy-layout]");
       if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copyLibraryPackage("layout",copyLayoutButton.dataset.libraryCopyLayout); return; }
       const exportLayoutButton = target?.closest("[data-library-export-layout]");
