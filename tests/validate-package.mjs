@@ -1,4 +1,5 @@
 import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
+import { createEmptyLibraryPreferences, normalizeLibraryPreferences, createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder } from "../scripts/core/library-preferences.js";
 import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
@@ -2265,6 +2266,32 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
 }
 
+
+/* Library organization: custom folders, favorites, recent history and safe reassignment. */
+{
+  let preferences = createEmptyLibraryPreferences();
+  const created = createLibraryFolder(preferences, { id: "folder-assets", name: "Meus medidores", collection: "assets" });
+  preferences = created.preferences;
+  assert.equal(created.folder.name, "Meus medidores");
+  assert.throws(() => createLibraryFolder(preferences, { id: "duplicate", name: "meus medidores", collection: "assets" }), /Já existe uma pasta/);
+  preferences = assignLibraryEntryFolder(preferences, "assets", "meter-1", "folder-assets");
+  assert.equal(preferences.assignments["assets:meter-1"], "folder-assets");
+  assert.throws(() => assignLibraryEntryFolder(preferences, "media", "portrait-1", "folder-assets"), /não pertence/);
+  preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
+  assert.ok(preferences.favorites.includes("assets:meter-1"));
+  preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
+  assert.equal(preferences.favorites.includes("assets:meter-1"), false);
+  preferences = recordLibraryRecent(preferences, "assets", "meter-1");
+  preferences = recordLibraryRecent(preferences, "media", "portrait-1");
+  preferences = recordLibraryRecent(preferences, "assets", "meter-1");
+  assert.deepEqual(preferences.recent.slice(0, 2), ["assets:meter-1", "media:portrait-1"]);
+  preferences = removeLibraryFolder(preferences, "folder-assets");
+  assert.equal(preferences.assignments["assets:meter-1"], undefined);
+  assert.equal(preferences.folders.length, 0);
+  const malformed = normalizeLibraryPreferences({ folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
+  assert.deepEqual(malformed.favorites, []);
+  assert.deepEqual(malformed.recent, ["assets:a"]);
+}
 
 /* Library definitions are immutable models; Actor instances own their overrides. */
 {
