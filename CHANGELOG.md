@@ -1,3 +1,24 @@
+## 1.0.0.83
+
+### Biblioteca — navegação, nomenclatura e apresentação
+
+- Corrige a seleção exclusiva das origens da Biblioteca: elementos NEXUS, módulos, extras e conteúdo pessoal.
+- Remove listeners duplicados que podiam disputar a seleção da origem e o estado ativo dos botões laterais.
+- Corrige a filtragem entre elementos padrão e elementos pessoais, evitando que os dois conjuntos apareçam/ocultem incorretamente.
+- Introduz filtros de origem nas coleções: NEXUS, módulos, extras e criados por mim, com classificação por metadados de origem.
+- Padroniza os cartões em proporção quadrada, com miniaturas contidas e nomes legíveis.
+- Isola a rolagem das grades para impedir que cabeçalhos, cards e inspector disputem a mesma área e cortem itens.
+- Torna as ações de salvar elemento e salvar composição mais explícitas na interface.
+- Remove a nota interna `nexus-library-definition-note` dos inspetores.
+- Renomeia os conceitos visíveis para termos mais claros: Elementos, Composições, Automações, Aparências, Modelos de ficha e Interações.
+- Preserva os identificadores internos e o formato dos dados para não quebrar fichas, módulos ou conteúdo já salvo.
+
+### Validação e limites
+
+- Testes automatizados de navegação por origem, exclusividade do estado ativo, proporção quadrada, rolagem independente e remoção da nota interna.
+- Validação de pacote aprovada no GitHub Actions.
+- A confirmação de aparência e comportamento no Foundry VTT 14 build 360 ainda depende de teste no cliente real.
+
 ## 1.0.0.82
 
 ### Biblioteca — reconstrução da interface e persistência
