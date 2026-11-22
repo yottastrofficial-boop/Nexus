@@ -322,8 +322,10 @@
 .nexus-resource-ring strong { font-size: 18px; }
 .nexus-resource-ring small { font-size: 9px; color: #aebdd0; }
 
-.application.nexus-window { min-width: 800px !important; min-height: 800px !important; }
-.application.nexus-window .window-content { min-width: 800px !important; min-height: 800px !important; }
+/* A ficha mantém a largura mínima de edição, mas a moldura pode colapsar
+   quando o ApplicationV2 é minimizado pelo cabeçalho nativo do Foundry. */
+.application.nexus-window { min-width: 800px !important; }
+.application.nexus-window .window-content { min-width: 0 !important; min-height: 0 !important; }
 
 /* v1.1 — reorganização do editor, biblioteca em árvore e edição contextual */
 :root {
@@ -8142,13 +8144,14 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-logic-preview pre,
 .nexus-library-safe-preview { max-width:100%; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
 .nexus-library-assets .nexus-library-asset,
-.nexus-library-assets .nexus-library-theme-asset {
+.nexus-library-theme-asset {
   box-sizing:border-box;
   width:100%;
   min-width:0;
   aspect-ratio:1 / 1;
 }
-.nexus-library-assets .nexus-library-preview-stage { width:100%; min-width:0; aspect-ratio:1 / 1; }
+.nexus-library-assets .nexus-library-preview-stage,
+.nexus-library-theme-asset .nexus-library-preview-stage { width:100%; min-width:0; aspect-ratio:1 / 1; }
 .nexus-library-assets .nexus-library-asset-meta { min-width:0; width:100%; text-align:center; }
 @media(max-width:760px) {
   .nexus-library-generic-workspace,
