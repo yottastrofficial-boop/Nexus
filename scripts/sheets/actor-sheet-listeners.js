@@ -419,6 +419,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           
         </div>
         <button type="button" data-library-add>Adicionar ao Canvas</button>`;
+      appendSaveConfiguredButton(detail);
       const defaultResourceCode = String(asset.template?.sheetCode ?? asset.template?.sheetContent1 ?? "PV").toUpperCase();
       const defaultResourceColor = asset.template?.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[defaultResourceCode] ?? "#d94b4b";
       const colorField = detail.querySelector("[data-resource-color]"); if (colorField) colorField.value = defaultResourceColor;
