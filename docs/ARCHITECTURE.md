@@ -229,3 +229,10 @@ O backup completo passa a usar `NEXUS-LIBRARY/2`, incluindo modelos, mídia, est
 ### Estado real
 
 Esta etapa estabelece o contrato de dados, merge e compatibilidade de backup. A interface unificada, a migração persistente para um único armazenamento e o gerenciamento visual de todas as coleções ainda são etapas seguintes; não devem ser descritos como concluídos.
+
+
+## Núcleo de Lógica e mídia — diretrizes aprovadas
+
+A Biblioteca passa a organizar Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões sob uma única área de trabalho chamada Lógica. A unificação é de navegação, metadados, dependências e ferramentas; cada subtipo mantém schema, editor e executor próprios. Ver docs/LOGIC_WORKSPACE_SPEC.md.
+
+A camada de mídia possui registry independente da UI e do Foundry. Identificação, decodificação e armazenamento são responsabilidades distintas. O registry inicial está em scripts/core/media-format-registry.js; a estratégia e as limitações de upload estão em docs/MEDIA_COMPATIBILITY_SPEC.md. O registry não equivale a decodificadores já incorporados: os adaptadores WASM serão adicionados e validados em etapas próprias.
