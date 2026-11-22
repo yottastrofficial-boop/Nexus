@@ -2409,3 +2409,10 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   const legacyCode = backupCode.replace("NEXUS-LIBRARY/2","NEXUS-LIBRARY/1").replace('"version": 2','"version": 1');
   assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }
+
+assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Padrão<\/span>/,"A origem padrão deve manter o nome Padrão");
+assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Pessoais<\/span>/,"A origem pessoal deve ser nomeada Pessoais");
+assert.match(template,/data-library-origin-filter="core">Padrão<\/button>/,"O filtro padrão deve usar o mesmo nome da navegação");
+assert.match(template,/data-library-origin-filter="mine">Pessoais<\/button>/,"O filtro pessoal deve usar o mesmo nome da navegação");
+assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
+assert.match(css,/nexus-library-asset-meta strong[\s\S]*white-space:normal!important/,"Os títulos dos cartões devem permanecer visíveis em até duas linhas");
