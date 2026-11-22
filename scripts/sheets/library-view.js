@@ -86,8 +86,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     sheet._libraryRenderSavedFlows=renderSavedFlows;
     renderSavedFlows();
     const genericCollectionLabels = {
-      templates: "Modelos e predefinições", assets: "Elementos salvos", media: "Mídia",
-      styles: "Estilos", rules: "Regras", behaviors: "Interações"
+      templates: "Predefinições", assets: "Componentes salvos", media: "Mídia",
+      styles: "Estilos visuais", rules: "Regras", behaviors: "Comportamentos"
     };
     const genericCollectionIcons = {
       templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
