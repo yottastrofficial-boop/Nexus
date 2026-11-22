@@ -18,6 +18,7 @@ const COLLECTION_LIMITS = Object.freeze({
 const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 const MAX_DEPTH = 16;
 const MAX_STRING = 100_000;
+const collectionWriteQueues = new WeakMap();
 
 function cloneJson(value, depth = 0) {
   if (depth > MAX_DEPTH) throw new Error("A Biblioteca contém uma estrutura profunda demais.");
@@ -60,9 +61,20 @@ export function createEmptyNexusLibraryStore() {
 /** Validates and normalizes the unified store while retaining unknown future-safe metadata. */
 export function normalizeNexusLibraryStore(raw = {}) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("A Biblioteca possui um formato inválido.");
-  if (Number(raw.schemaVersion ?? NEXUS_LIBRARY_SCHEMA_VERSION) > NEXUS_LIBRARY_SCHEMA_VERSION) throw new Error("Esta Biblioteca foi criada por uma versão mais nova do NEXUS.");
+  if (Number(raw.schemaVersion ?? NEXUS_LIBRARY_SCHEMA_VERSION) > NEXUS_LIBRARY_SCHEMA_VERSION) {
+    throw new Error("Esta Biblioteca foi criada por uma versão mais nova do NEXUS.");
+  }
   const source = raw.collections && typeof raw.collections === "object" ? raw.collections : raw;
   const store = createEmptyNexusLibraryStore();
+
+  // Metadados adicionados por versões compatíveis devem sobreviver à normalização.
+  if (raw.collections && typeof raw.collections === "object") {
+    for (const [key, value] of Object.entries(raw)) {
+      if (key === "schemaVersion" || key === "collections" || NEXUS_LIBRARY_COLLECTIONS.includes(key) || FORBIDDEN_KEYS.has(key)) continue;
+      store[key] = cloneJson(value);
+    }
+  }
+
   for (const name of NEXUS_LIBRARY_COLLECTIONS) {
     const entries = source[name] ?? [];
     if (!Array.isArray(entries)) throw new Error(`A coleção "${name}" precisa ser uma lista.`);
@@ -164,7 +176,6 @@ export async function writeNexusLibraryStore(user, raw) {
   return store;
 }
 
-
 const LEGACY_LIBRARY_FLAG_BY_COLLECTION = Object.freeze({
   components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",
   templates: "libraryTemplates", assets: "libraryAssets", media: "libraryMedia",
@@ -189,16 +200,30 @@ export function readNexusLibraryCollection(user, collection) {
 /**
  * Saves a collection atomically in the canonical store and mirrors its legacy
  * flag for compatibility with older NEXUS builds and existing sheet listeners.
+ * Writes for one user are serialized to prevent stale snapshots overwriting
+ * another collection when two UI operations finish at nearly the same time.
  */
-export async function writeNexusLibraryCollection(user, collection, entries) {
+export function writeNexusLibraryCollection(user, collection, entries) {
   if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error(`Coleção desconhecida: ${collection}`);
   if (!Array.isArray(entries)) throw new Error(`A coleção "${collection}" precisa ser uma lista.`);
-  const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
-  store.collections[collection] = entries;
-  const saved = await writeNexusLibraryStore(user, store);
-  const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
-  if (legacyFlag && typeof user?.setFlag === "function") {
-    await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
+  if (!user || (typeof user !== "object" && typeof user !== "function")) {
+    throw new Error("Não foi possível identificar o usuário da Biblioteca.");
   }
-  return saved.collections[collection];
+
+  const previous = collectionWriteQueues.get(user) ?? Promise.resolve();
+  const operation = previous.catch(() => {}).then(async () => {
+    const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
+    store.collections[collection] = entries;
+    const saved = await writeNexusLibraryStore(user, store);
+    const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
+    if (legacyFlag && typeof user?.setFlag === "function") {
+      await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
+    }
+    return saved.collections[collection];
+  });
+
+  collectionWriteQueues.set(user, operation);
+  return operation.finally(() => {
+    if (collectionWriteQueues.get(user) === operation) collectionWriteQueues.delete(user);
+  });
 }

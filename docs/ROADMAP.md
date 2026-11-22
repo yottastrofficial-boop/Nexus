@@ -3,16 +3,17 @@
 Este documento registra prioridades e decisões de arquitetura; não declara recursos planejados como concluídos.
 
 ## Estado de referência
-- Código-base consultado: main no commit 1fe51ecbe5d89d6f67d584c707150bf7df153165.
+- Código-base auditado: branch main no commit 4c80cbe3fadf2617ce5ca19f499c0af2ee73d89a, antes desta rodada.
 - Versão distribuída indicada por system.json e manifest.json: 1.0.0.84.
 - Foundry declarado: V14.
-- A Biblioteca já possui armazenamento unificado, preferências, modelos de definição/instância, compartilhamento e interface Explorer em evolução.
-- Propriedades, fórmulas e interações já possuem implementações e documentação próprias; a próxima etapa consolida contratos e navegação, não presume ausência dessas funções.
+- A Biblioteca possui armazenamento unificado, preferências, modelos de definição/instância, compartilhamento e interface Explorer em evolução; a consolidação da interface ainda não está concluída.
+- Propriedades, fórmulas e interações possuem implementações e documentação próprias; a área Lógica ainda precisa de integração de interface e contratos de dependência.
 - A ficha principal, templates e CSS ainda concentram responsabilidades e exigem extração gradual.
+- O registry de mídia identifica formatos e organiza adaptadores; decodificação, conversão, preview especializado e storage adapters ainda não estão concluídos.
 
 ## Prioridades aprovadas
 1. Auditar árvore, imports, estado persistido, dependências e testes antes de substituições.
-2. Consolidar **Lógica** para Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões, mantendo modelos e executores especializados.
+2. Consolidar Lógica para Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões, mantendo modelos e executores especializados.
 3. Formalizar contratos de ativos, referências, dependências, permissões e versões.
 4. Refatorar dados/propriedades/regras antes de reconstruir componentes e fichas.
 5. Reconstruir a Biblioteca como Explorador com Inspector contextual e editores por tipo.

@@ -24,5 +24,6 @@ jobs:
       - name: Validate package and regressions
         run: |
           node --experimental-default-type=module tests/media-format-registry.mjs
+          node --experimental-default-type=module tests/core-regressions.mjs
           node --experimental-default-type=module tests/validate-package.mjs
           node --experimental-default-type=module tests/group-render-performance.mjs

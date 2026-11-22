@@ -605,3 +605,14 @@ A geometria de contato das bordas é compartilhada pelos modos Padrão, Configur
 - Adiciona testes de regressão para JXL, Opus, contêineres e carregamento sob demanda de adaptadores.
 - Documenta a área unificada Lógica e a estratégia de compatibilidade de mídia via WASM e storage adapters.
 - A decodificação JXL/AV1/Opus por WASM, a interface da Biblioteca reformulada e as migrações permanecem em etapas futuras.
+
+
+## Em desenvolvimento — auditoria e hardening da base
+
+- Corrige a identificação por assinatura de AVIF e valida o cabeçalho de contêiner JPEG XL.
+- Serializa gravações de coleções da Biblioteca por usuário para evitar sobrescrita por snapshots concorrentes.
+- Preserva metadados compatíveis desconhecidos no envelope da Biblioteca.
+- Impede que a execução manual do workflow publique uma release; publicação exige push explícito com marcador [release] na main.
+- Adiciona regressões automatizadas para fórmulas, Biblioteca, propriedades, isolamento de componentes e identificação de mídia.
+- Registra o escopo da auditoria e as funcionalidades que ainda permanecem planejadas.
+- Nenhuma regra mecânica ou versão estável foi alterada.
