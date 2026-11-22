@@ -1,3 +1,22 @@
+## 1.0.0.81
+
+### Biblioteca — janela unificada estilo Explorador
+
+- Consolida a Biblioteca em navegação lateral, área central de itens e inspector contextual.
+- Expõe categorias de modelos de ficha, assets salvos, mídia, estilos visuais, regras e comportamentos, lendo o armazenamento unificado com fallback para as flags legadas.
+- Adiciona pastas personalizadas por coleção, atribuição de itens a pastas e navegação pelas pastas na barra lateral.
+- Adiciona favoritos e itens recentes, com filtros dedicados.
+- Permite editar metadados seguros (nome, descrição, etiquetas e pasta) sem executar conteúdo importado.
+- Adiciona prévias seguras para mídia compatível, amostras de cores, expressões de regras e resumo de comportamentos.
+- Adiciona overrides de nome, dimensões e cores ao inserir um layout salvo; o modelo original permanece intacto.
+- Padroniza os painéis de detalhes e os controles da Biblioteca em diferentes larguras.
+
+### Validação e limites
+
+- Testes automatizados de organização da Biblioteca, preservação de modelos, overrides e regressões de pacote.
+- Conteúdos executáveis importados permanecem inertes.
+- A renderização visual e o fluxo de uso ainda precisam de confirmação em uma instância real do Foundry VTT 14 build 360.
+
 ## 1.0.0.80
 
 ### Comportamentos
