@@ -1,5 +1,6 @@
 import { validateGroupParent } from "../core/group-hierarchy.js";
 import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
+import { writeNexusLibraryCollection } from "../core/library-store.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
@@ -559,6 +560,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const id=foundry.utils.randomID(10);
         themes.push({id,sourceId:sourceId,name:(detail.querySelector(".nexus-library-detail-title")?.textContent??"Tema")+" — personalizado",version:1,palette});
         await game.user.setFlag("nexus","libraryThemes",themes.slice(-100));
+        await writeNexusLibraryCollection(game.user, "themes", themes.slice(-100));
         sheet._libraryRenderCustomThemes?.();
         await sheet._applyLibraryCustomTheme(id);
         return;
