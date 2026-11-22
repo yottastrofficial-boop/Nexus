@@ -1,3 +1,18 @@
+## 1.0.0.87
+
+### Biblioteca e área Lógica
+- Agrupa Propriedades, Regras, Comportamentos, Fluxos e Funções sob a seção Lógica da navegação, preservando seus tipos e contratos especializados.
+- Adiciona Propriedades e Funções às coleções visíveis da Biblioteca, incluindo leitura das flags legadas.
+- O Inspector passa a apresentar a prévia visual de mídia/estilos e uma representação somente leitura do payload lógico, com esquema, estado, dependências e permissões.
+- Alterações de metadados dos ativos lógicos atualizam também o registry em memória quando possível.
+- Adiciona alternância entre grade e lista e controle de tamanho das miniaturas nas coleções.
+- Mantém os payloads como dados inertes; a prévia não executa HTML, CSS, JavaScript ou expressões.
+
+### Correções e validação
+- Corrige a ausência da prévia contextual no Inspector genérico.
+- Adiciona testes de regressão para navegação Lógica, preview seguro, compatibilidade legada e modos de visualização.
+- A validação visual/funcional no Foundry VTT 14 build 360 continua necessária antes de considerar a interface confirmada.
+
 ## 1.0.0.86
 
 ### Biblioteca — correção da apresentação dos cartões
