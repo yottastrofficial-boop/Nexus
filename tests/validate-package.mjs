@@ -1,6 +1,6 @@
 import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
 import { createEmptyLibraryPreferences, normalizeLibraryPreferences, createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder } from "../scripts/core/library-preferences.js";
-import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides } from "../scripts/core/library-models.js";
+import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides, applyLibraryLayoutOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
@@ -2300,6 +2300,21 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   const malformed = normalizeLibraryPreferences({ folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
   assert.deepEqual(malformed.favorites, []);
   assert.deepEqual(malformed.recent, ["assets:a"]);
+}
+
+/* Saved layouts remain immutable when inspector overrides are applied to a new Actor layout. */
+{
+  const source = { id:"saved", name:"Modelo", width:1200, height:700, canvasColor:"#111111", components:[{id:"original"}] };
+  const customized = applyLibraryLayoutOverrides(source, { name:"Minha ficha", width:1500, height:900, canvasColor:"#222222" });
+  assert.equal(customized.name,"Minha ficha");
+  assert.equal(customized.width,1500);
+  assert.equal(customized.height,900);
+  assert.equal(customized.canvasColor,"#222222");
+  assert.equal(source.name,"Modelo");
+  assert.equal(source.width,1200);
+  assert.equal(source.canvasColor,"#111111");
+  assert.throws(()=>applyLibraryLayoutOverrides(source,{canvasColor:"red"}),/cor canvasColor é inválida/);
+  assert.equal(applyLibraryLayoutOverrides(source,{width:9000}).width,5000);
 }
 
 /* Library definitions are immutable models; Actor instances own their overrides. */
