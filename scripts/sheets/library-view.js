@@ -99,6 +99,22 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    const renderCustomFolderTree = collection => {
+      const container = panel.querySelector("[data-library-custom-folders]");
+      const heading = panel.querySelector("[data-library-custom-folder-heading]");
+      if (!container) return;
+      container.replaceChildren();
+      const folders = getLibraryPreferences().folders.filter(folder => !folder.collection || folder.collection === collection);
+      if (heading) heading.hidden = !folders.length;
+      for (const folder of folders) {
+        const button = document.createElement("button"); button.type = "button";
+        button.className = "nexus-library-custom-folder";
+        button.dataset.libraryCustomFolder = folder.id;
+        button.textContent = folder.name;
+        button.classList.toggle("active", panel.querySelector("[data-library-collection-folder]")?.value === folder.id);
+        container.append(button);
+      }
+    };
     const renderGenericCollection = (collection, keepSelection = false) => {
       const container = panel.querySelector("[data-library-generic-items]");
       const detail = panel.querySelector("[data-library-generic-details]");
@@ -107,6 +123,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       try { entries = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store.collections[collection] ?? []; }
       catch (error) { console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error); }
       const preferences = getLibraryPreferences();
+      renderCustomFolderTree(collection);
       const query = searchInput?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
       const filter = panel.querySelector("[data-library-collection-filter].active")?.dataset.libraryCollectionFilter ?? "all";
       const folderId = panel.querySelector("[data-library-collection-folder]")?.value ?? "";
@@ -228,6 +245,14 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       detail.append(heading,form);
     };
     panel.addEventListener("click", async event => {
+      const customFolder = event.target.closest("[data-library-custom-folder]");
+      if (customFolder && panel.contains(customFolder)) {
+        const select = panel.querySelector("[data-library-collection-folder]");
+        if (select) select.value = customFolder.dataset.libraryCustomFolder;
+        const collection = detailCollection();
+        if (collection) renderGenericCollection(collection);
+        return;
+      }
       const favorite = event.target.closest("[data-library-favorite]");
       if (favorite && panel.contains(favorite)) {
         event.preventDefault();
