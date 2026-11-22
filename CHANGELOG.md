@@ -1,3 +1,13 @@
+## Em desenvolvimento — revisão da Biblioteca e do Inspector
+
+- Reorganiza o Inspector em seções compactas com navegação por ícones para aparência, dados, interações e opções avançadas.
+- Atualiza o Inspector após salvar metadados para evitar exibir dados antigos.
+- Substitui filtros textuais repetidos por seletores compactos e mantém os controles de grade/lista por ícones.
+- Consolida regras visuais da grade, cartões e rolagem com uma camada de estilos compartilhada.
+- Torna a predefinição de barra neutra e sem vínculo automático com PV; remove o marcador de proficiência da Biblioteca sem remover a mecânica das perícias.
+- Acrescenta testes estáticos para os novos contratos da Biblioteca.
+- A validação visual e funcional no Foundry VTT 14 build 360 continua pendente; esta etapa não altera a versão estável nem o manifesto.
+
 ## 1.0.0.87
 
 ### Biblioteca e área Lógica
