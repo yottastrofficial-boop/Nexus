@@ -390,6 +390,15 @@ remove legacy typography selects                  <label class="nexus-inspector-
             </section>
             <section class="nexus-library-section-panel nexus-library-generic-panel" data-library-section-panel="collection" hidden>
               <div class="nexus-library-section-heading"><strong data-library-collection-heading>Modelos de ficha</strong><span data-library-collection-count>Conteúdo salvo na Biblioteca</span></div>
+              <div class="nexus-library-collection-toolbar">
+                <div class="nexus-library-collection-filters" role="group" aria-label="Filtrar itens">
+                  <button type="button" class="active" data-library-collection-filter="all">Todos</button>
+                  <button type="button" data-library-collection-filter="favorites">Favoritos</button>
+                  <button type="button" data-library-collection-filter="recent">Recentes</button>
+                </div>
+                <select data-library-collection-folder aria-label="Filtrar por pasta"><option value="">Todas as pastas</option></select>
+                <label class="nexus-library-folder-create"><input type="text" maxlength="80" placeholder="Nova pasta" data-library-folder-name><button type="button" data-library-create-folder>Criar pasta</button></label>
+              </div>
               <div class="nexus-library-workspace nexus-library-generic-workspace">
                 <div class="nexus-library-main"><div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items></div></div>
                 <aside class="nexus-library-details" data-library-generic-details><div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do item</strong><p>Selecione um item para consultar os dados armazenados.</p></div></aside>
