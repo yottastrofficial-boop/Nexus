@@ -66,3 +66,8 @@ A interface usa o mesmo padrão de grade e seleção para itens. Em larguras men
 - As coleções complementares têm inspector somente leitura; editores específicos e ações de aplicação ainda não existem.
 - Layouts têm resumo contextual, mas não editor de overrides.
 - A validação visual/funcional no Foundry VTT 14 continua obrigatória.
+
+
+## Área unificada Lógica
+
+A navegação da Biblioteca agrupa Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões sob a categoria **Lógica**. Essa união não altera o tipo semântico dos ativos: cada subtipo mantém seu próprio schema, editor contextual e executor. Os metadados comuns (origem, namespace, versão, permissões e dependências) são compartilhados. A especificação completa está em docs/LOGIC_WORKSPACE_SPEC.md.
