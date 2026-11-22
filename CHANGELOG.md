@@ -1,3 +1,18 @@
+## 1.0.0.84
+
+### Biblioteca — nomenclatura final e títulos dos cartões
+
+- Padroniza as origens como **Padrão**, **Pessoais**, **Módulos** e **Complementos**, mantendo os mesmos termos na navegação e nos filtros.
+- Mantém a distinção entre tipo de conteúdo e origem: componentes, composições, modelos, temas, fluxos, regras, estilos visuais, comportamentos e mídia.
+- Ajusta os nomes visíveis das coleções para a terminologia aprovada, sem alterar IDs internos ou formatos persistidos.
+- Reforça a exibição dos títulos abaixo das prévias quadradas, com quebra em até duas linhas para evitar que nomes desapareçam ou sejam cortados.
+- Preserva o layout de três áreas: navegação, grade de conteúdos e painel de detalhes/configuração.
+
+### Validação e limites
+
+- Acrescenta verificações automatizadas para os nomes Padrão/Pessoais e para a presença dos títulos nos cartões.
+- A aparência final ainda precisa ser conferida no Foundry VTT 14 build 360; testes automatizados não substituem a inspeção no cliente real.
+
 ## 1.0.0.83
 
 ### Biblioteca — navegação, nomenclatura e apresentação
