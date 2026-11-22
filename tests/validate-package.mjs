@@ -1399,7 +1399,7 @@ assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configu
 assert.match(template,/data-library-scope="core"/,"A navegação deve oferecer a origem NEXUS");
 assert.match(template,/data-library-scope="modules"/,"A navegação deve oferecer a origem módulos");
 assert.match(template,/data-library-scope="extras"/,"A navegação deve oferecer a origem extras");
-assert.match(template,/data-library-origin-filter="mine"/,"Coleções devem permitir filtrar conteúdos criados pelo usuário");
+assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="mine">Pessoais<\/option>/,"Coleções devem permitir filtrar conteúdos criados pelo usuário");
 assert.match(libraryView,/data-library-origin-filter/,"O filtro de origem deve ser aplicado às coleções");
 assert.match(libraryView,/sameScope=button\.dataset\.libraryScope/,"A navegação deve manter uma única origem ativa por vez");
 assert.match(css,/aspect-ratio:1 \/ 1 !important/,"Os cartões da Biblioteca devem ter prévias quadradas");
@@ -2420,8 +2420,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
 
 assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Padrão<\/span>/,"A origem padrão deve manter o nome Padrão");
 assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Pessoais<\/span>/,"A origem pessoal deve ser nomeada Pessoais");
-assert.match(template,/data-library-origin-filter="core">Padrão<\/button>/,"O filtro padrão deve usar o mesmo nome da navegação");
-assert.match(template,/data-library-origin-filter="mine">Pessoais<\/button>/,"O filtro pessoal deve usar o mesmo nome da navegação");
+assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="core">Padrão<\/option>/,"O filtro padrão deve usar o mesmo nome da navegação");
+assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="mine">Pessoais<\/option>/,"O filtro pessoal deve usar o mesmo nome da navegação");
 assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
 assert.match(css,/nexus-library-asset-meta strong[\s\S]*white-space:normal!important/,"Os títulos dos cartões devem permanecer visíveis em até duas linhas");
 
