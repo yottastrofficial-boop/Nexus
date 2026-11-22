@@ -266,8 +266,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
       libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=scope!=="personal"||(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query));});
       const count=libraryPanel?.querySelector("[data-library-count]");
-      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
-      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
+      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"elemento":"elementos"}`:`${visible} ${visible===1?"elemento":"elementos"}`;
+      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus elementos e composições":"Elementos disponíveis";
     };
     const resourcePaths = (() => {
       const paths = [];
