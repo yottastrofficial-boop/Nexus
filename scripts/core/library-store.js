@@ -8,12 +8,12 @@
 export const NEXUS_LIBRARY_SCHEMA_VERSION = 2;
 export const NEXUS_LIBRARY_COLLECTIONS = Object.freeze([
   "components", "groups", "layouts", "templates", "assets", "media",
-  "themes", "styles", "rules", "behaviors", "flows"
+  "themes", "styles", "properties", "rules", "behaviors", "flows", "functions"
 ]);
 const COLLECTION_LIMITS = Object.freeze({
   components: 500, groups: 250, layouts: 100, templates: 100,
   assets: 500, media: 500, themes: 100, styles: 250,
-  rules: 250, behaviors: 500, flows: 500
+  properties: 500, rules: 250, behaviors: 500, flows: 500, functions: 250
 });
 const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 const MAX_DEPTH = 16;
@@ -111,8 +111,8 @@ export function migrateLegacyNexusLibrary(flags = {}) {
   const mapping = {
     components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",
     assets: "libraryAssets", themes: "libraryThemes", styles: "libraryStyles",
-    rules: "libraryRules", behaviors: "libraryBehaviors", media: "libraryMedia",
-    templates: "libraryTemplates"
+    properties: "libraryProperties", rules: "libraryRules", behaviors: "libraryBehaviors",
+    media: "libraryMedia", templates: "libraryTemplates", functions: "libraryFunctions"
   };
   for (const [collection, flag] of Object.entries(mapping)) {
     if (Array.isArray(flags[flag])) store.collections[collection] = cloneJson(flags[flag]);
@@ -212,8 +212,9 @@ export function updateNexusLibraryStore(user, updater) {
 const LEGACY_LIBRARY_FLAG_BY_COLLECTION = Object.freeze({
   components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",
   templates: "libraryTemplates", assets: "libraryAssets", media: "libraryMedia",
-  themes: "libraryThemes", styles: "libraryStyles", rules: "libraryRules",
-  behaviors: "libraryBehaviors", flows: "interactionLibrary"
+  themes: "libraryThemes", styles: "libraryStyles", properties: "libraryProperties",
+  rules: "libraryRules", behaviors: "libraryBehaviors", flows: "interactionLibrary",
+  functions: "libraryFunctions"
 });
 
 /** Reads every legacy collection only when the canonical store has not been created yet. */
