@@ -2433,3 +2433,8 @@ assert.match(libraryView,/data-card-size/,"O tamanho das miniaturas deve ser con
 assert.match(libraryView,/nexus-library-logic-preview/,"O Inspector deve apresentar payloads lógicos em modo somente leitura");
 assert.match(css,/data-view-mode="list"/,"A visualização em lista deve possuir layout próprio");
 assert.match(css,/data-card-size="large"/,"A grade deve permitir miniaturas maiores");
+
+assert.match(libraryView,/folderLabel,visualPreview,save,preview/,"O Inspector deve exibir a prévia visual antes das ações de metadados");
+assert.match(libraryView,/"libraryProperties"[\s\S]*"libraryFunctions"/,"A leitura de compatibilidade deve incluir as flags legadas de Propriedades e Funções");
+assert.match(libraryView,/registry\?\.register/,"Alterações de metadados lógicos devem atualizar o registry em memória");
+assert.match(libraryView,/data-library-card-size/,"A seleção de tamanho dos cartões deve ser ligada ao renderizador");
