@@ -43,7 +43,9 @@ jobs:
           done
 
       - name: Validate manifest, templates, styles and regressions
-        run: node tests/validate-package.mjs
+        run: |
+          node --experimental-default-type=module tests/media-format-registry.mjs
+          node tests/validate-package.mjs
 
       - name: Build Foundry package
         run: |
