@@ -2451,5 +2451,7 @@ assert.match(template,/data-library-origin-filter/,"A origem deve ser selecionad
 assert.match(template,/data-library-collection-filter/,"Favoritos e recentes devem ser selecionados por controle compacto");
 assert.doesNotMatch(template,/data-library-origin-filter="core"/,"A interface não deve manter botões textuais repetidos para a origem");
 assert.match(css,/scrollbar-gutter:stable/,"A Biblioteca deve reservar espaço para a barra de rolagem");
+assert.match(css,/\.application\.nexus-window \{ min-width: 800px !important; \}/,"A janela deve manter apenas a largura mínima, sem impor altura mínima que bloqueie a minimização");
+assert.doesNotMatch(css,/\.application\.nexus-window \{ min-width: 800px !important; min-height: 800px !important; \}/,"A janela não deve impor altura mínima fixa ao estado minimizado");
 assert.match(css,/nexus-library-detail-tabs/,"O Inspector deve possuir navegação lateral compacta");
 assert.match(css,/nexus-library-generic-items\[data-view-mode="list"\]/,"A lista deve possuir apresentação própria");
