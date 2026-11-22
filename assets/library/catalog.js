@@ -1,4 +1,4 @@
-/** Catálogo inicial enxuto do NEXUS. A biblioteca mantém apenas o componente de barra de vida aprovado. */
+/** Catálogo inicial de componentes visuais neutros e reutilizáveis. */
 export const NEXUS_LIBRARY_CATALOG = {
   categories: [
     { id: "core", label: "Padrão NEXUS", icon: "fa-solid fa-cube" }
@@ -11,35 +11,18 @@ export const NEXUS_LIBRARY_CATALOG = {
       category: "core",
       preview: "bar",
       template: {
-        sheetCode: "PV",
-        sheetContent1: "PV",
-        sheetContent2: "❤️",
-        sheetColor: "#d94b4b",
-        sheetTrackColor: "#080d14",
+        sheetCode: "",
+        sheetContent1: "Recurso",
+        sheetContent2: "",
+        sheetColor: "#78b7e8",
+        sheetTrackColor: "#182432",
         sheetOrientation: "horizontal",
-        currentPath: "resources.pv.value",
-        maxPath: "resources.pv.max",
+        currentPath: "",
+        maxPath: "",
         w: 220,
         h: 58
       },
-      keywords: "pontos de vida PV saúde recurso indicador barra"
-    },
-    {
-      key: "core-skill-proficiency",
-      type: "sheet-proficiency",
-      label: "Marcador de proficiência",
-      category: "core",
-      preview: "proficiency",
-      template: {
-        actionType: "proficiency",
-        actionPath: "skills.athletics.proficientLevel",
-        sheetVariant: "proficiency",
-        customLabel: "Proficiência",
-        showLabel: false,
-        w: 44,
-        h: 44
-      },
-      keywords: "perícia habilidade proficiência domínio marcador"
+      keywords: "recurso indicador barra progresso valor atual máximo"
     }
   ],
   themes: []
