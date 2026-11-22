@@ -1,5 +1,6 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
+import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
@@ -2045,6 +2046,27 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await this.render({ force: true });
     return id;
   }
+  async _saveLibraryDefinitionFromTemplate(type, template = {}, label = "") {
+    if (!COMPONENTS[type]) throw new Error(`Tipo de componente não registrado: ${String(type)}`);
+    const settings = clone(template);
+    for (const key of ["id", "definition", "x", "y", "z", "stackOrder"]) delete settings[key];
+    const cleanLabel = String(label || settings.customLabel || settings.sheetContent1 || settings.text || COMPONENTS[type].label || "Componente").trim().slice(0, 48);
+    const saved = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
+    const definition = createLibraryDefinition({
+      id: foundry.utils.randomID(10), version: 1, label: cleanLabel, type, settings,
+      metadata: { createdAt: new Date().toISOString(), source: "library-configurator" }
+    });
+    saved.push(definition);
+    const next = saved.slice(-200);
+    await game.user.setFlag("nexus", "libraryComponents", next);
+    await writeNexusLibraryCollection(game.user, "components", next);
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryApplyFilter?.();
+    ui.notifications?.info?.(`"${cleanLabel}" foi salvo como modelo reutilizável.`);
+    return definition;
+  }
+
   async _saveSelectedLibraryComponent() {
     const ids = [...(this._selectedIds ?? [])];
     if (ids.length !== 1) {
@@ -2065,6 +2087,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     });
     const next = [...saved, definition];
     await game.user.setFlag("nexus", "libraryComponents", next.slice(-200));
+    await writeNexusLibraryCollection(game.user, "components", next.slice(-200));
     ui.notifications?.info?.(`“${label}” foi salvo em Meus Componentes.`);
     this._libraryAssetScope = "personal";
     this._libraryRenderPersonalItems?.();
@@ -2108,6 +2131,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = saved.filter(item => item.id !== id);
     if (next.length === saved.length) return;
     await game.user.setFlag("nexus", "libraryComponents", next);
+    await writeNexusLibraryCollection(game.user, "components", next);
     this._libraryRenderPersonalItems?.();
     this._libraryApplyFilter?.();
     this.render({ force: true });
@@ -2533,6 +2557,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
     saved.push({ id:`libgrp-${foundry.utils.randomID(8)}`, name, groupSettings:rootSettings, components:savedComponents, groups:savedGroups });
     await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
+    await writeNexusLibraryCollection(game.user, "groups", saved.slice(-100));
     this._libraryAssetScope = "personal";
     this._libraryRenderPersonalItems?.();
     this._libraryRenderSavedGroups?.();
@@ -2556,6 +2581,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const snapshot = clone(layout); delete snapshot.id;
     saved.push({ id: `liblayout-${foundry.utils.randomID(8)}`, name, layout: snapshot });
     await game.user.setFlag("nexus", "libraryLayouts", saved.slice(-100));
+    await writeNexusLibraryCollection(game.user, "layouts", saved.slice(-100));
     this._libraryRenderSavedLayouts?.();
     ui.notifications?.info?.(`Layout "${name}" salvo na Biblioteca pessoal.`);
     return true;
@@ -2581,6 +2607,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
     const entry = { id: `liblayout-${foundry.utils.randomID(8)}`, name: imported.name, layout: imported.layout };
     await game.user.setFlag("nexus", "libraryLayouts", [...saved, entry].slice(-100));
+    await writeNexusLibraryCollection(game.user, "layouts", [...saved, entry].slice(-100));
     this._libraryRenderSavedLayouts?.();
     ui.notifications?.info?.(`Layout "${entry.name}" importado para a Biblioteca pessoal.`); return true;
   }
@@ -2589,7 +2616,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const saved = game.user?.getFlag?.("nexus", "libraryLayouts") ?? [];
     const next = saved.filter(item => item.id !== layoutId);
     if (next.length === saved.length) return false;
-    await game.user.setFlag("nexus", "libraryLayouts", next); this._libraryRenderSavedLayouts?.(); return true;
+    await game.user.setFlag("nexus", "libraryLayouts", next); await writeNexusLibraryCollection(game.user, "layouts", next); this._libraryRenderSavedLayouts?.(); return true;
   }
 
   async _addSavedLayoutToActor(layoutId, overrides = {}) {
@@ -2734,10 +2761,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
 
     await game.user.setFlag("nexus", "libraryComponents", components.slice(-200));
+    await writeNexusLibraryCollection(game.user, "components", components.slice(-200));
     await game.user.setFlag("nexus", "libraryGroups", groups.slice(-100));
+    await writeNexusLibraryCollection(game.user, "groups", groups.slice(-100));
     await game.user.setFlag("nexus", "libraryLayouts", layouts.slice(-100));
+    await writeNexusLibraryCollection(game.user, "layouts", layouts.slice(-100));
     await game.user.setFlag("nexus", "libraryAssets", assets.slice(-200));
+    await writeNexusLibraryCollection(game.user, "assets", assets.slice(-200));
     await game.user.setFlag("nexus", "libraryThemes", themes.slice(-100));
+    await writeNexusLibraryCollection(game.user, "themes", themes.slice(-100));
     const mergeGeneric = (target, incoming, prefix) => {
       let added = 0;
       for (const item of incoming ?? []) {
@@ -2755,10 +2787,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const addedRules = mergeGeneric(rules, data.rules, "librule");
     const addedBehaviors = mergeGeneric(behaviors, data.behaviors, "libbehavior");
     await game.user.setFlag("nexus", "libraryTemplates", templates.slice(-100));
+    await writeNexusLibraryCollection(game.user, "templates", templates.slice(-100));
     await game.user.setFlag("nexus", "libraryMedia", media.slice(-200));
+    await writeNexusLibraryCollection(game.user, "media", media.slice(-200));
     await game.user.setFlag("nexus", "libraryStyles", styles.slice(-200));
+    await writeNexusLibraryCollection(game.user, "styles", styles.slice(-200));
     await game.user.setFlag("nexus", "libraryRules", rules.slice(-200));
+    await writeNexusLibraryCollection(game.user, "rules", rules.slice(-200));
     await game.user.setFlag("nexus", "libraryBehaviors", behaviors.slice(-200));
+    await writeNexusLibraryCollection(game.user, "behaviors", behaviors.slice(-200));
 
     let savedFlows = getInteractionLibrary(this.actor);
     for (const entry of data.flows) {
@@ -2855,16 +2892,19 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const saved = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
       saved.push({ id, label: imported.payload.label ?? imported.name, type: imported.payload.type, settings: imported.payload.settings });
       await game.user.setFlag("nexus", "libraryComponents", saved.slice(-200));
+      await writeNexusLibraryCollection(game.user, "components", saved.slice(-200));
       this._libraryAssetScope = "personal"; this._libraryRenderPersonalItems?.();
     } else if (imported.kind === "group") {
       const saved = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
       saved.push({ id: `libgrp-${id}`, name: imported.name, groupSettings: imported.payload.groupSettings, components: imported.payload.components, groups: imported.payload.groups });
       await game.user.setFlag("nexus", "libraryGroups", saved.slice(-100));
+      await writeNexusLibraryCollection(game.user, "groups", saved.slice(-100));
       this._libraryAssetScope = "personal"; this._libraryRenderPersonalItems?.();
     } else if (imported.kind === "layout") {
       const saved = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
       saved.push({ id: `liblayout-${id}`, name: imported.name, layout: imported.payload });
       await game.user.setFlag("nexus", "libraryLayouts", saved.slice(-100));
+      await writeNexusLibraryCollection(game.user, "layouts", saved.slice(-100));
       this._libraryRenderSavedLayouts?.();
     }
     this._libraryApplyFilter?.();
@@ -2895,6 +2935,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       groups: imported.groups
     };
     await game.user.setFlag("nexus", "libraryGroups", [...saved, entry].slice(-100));
+    await writeNexusLibraryCollection(game.user, "groups", [...saved, entry].slice(-100));
     this._libraryAssetScope = "personal";
     this._libraryRenderSavedGroups?.();
     this._libraryApplyFilter?.();
@@ -2912,6 +2953,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const next = saved.filter(item => item.id !== groupId);
     if (next.length === saved.length) return false;
     await game.user.setFlag("nexus", "libraryGroups", next);
+    await writeNexusLibraryCollection(game.user, "groups", next);
     this._libraryRenderSavedGroups?.();
     this._libraryApplyFilter?.();
     ui.notifications?.info?.("Grupo removido da Biblioteca pessoal.");

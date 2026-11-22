@@ -290,7 +290,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors" };
           const legacyFlag = legacyFlagByCollection[collection];
           if (legacyFlag) await game.user.setFlag("nexus", legacyFlag, store.collections[collection]);
-          if (game.user.getFlag?.("nexus", "libraryStore")) await writeNexusLibraryStore(game.user, store);
+          await writeNexusLibraryStore(game.user, store);
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
           renderGenericCollection(collection, true);
@@ -313,7 +313,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     });
     const activateSection=(key)=>{
       sheet._librarySection=key;
-      panel.querySelectorAll("[data-library-section]").forEach(button=>{const active=button.dataset.librarySection===key;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+      panel.querySelectorAll("[data-library-section]").forEach(button=>{const sameSection=button.dataset.librarySection===key;const sameScope=!button.dataset.libraryScope||button.dataset.libraryScope===sheet._libraryAssetScope;const active=sameSection&&sameScope;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{
         const isGeneric = key.startsWith("collection:");
         section.hidden = isGeneric

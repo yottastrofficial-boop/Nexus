@@ -1,4 +1,4 @@
-import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
+import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores, readNexusLibraryCollection, writeNexusLibraryCollection } from "../scripts/core/library-store.js";
 import { createEmptyLibraryPreferences, normalizeLibraryPreferences, createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder } from "../scripts/core/library-preferences.js";
 import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides, applyLibraryLayoutOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
@@ -704,7 +704,7 @@ assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de
 assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
-assert.match(template, /data-library-count>1 elemento</, "A contagem inicial da Biblioteca deve refletir o único asset");
+assert.match(template, /data-library-count>0 itens</, "A contagem inicial da Biblioteca deve começar em estado neutro até a coleção ser renderizada");
 assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
 
 
@@ -1388,6 +1388,15 @@ assert.match(libraryView,/renderCustomFolderTree/,"A navegação deve refletir a
 assert.match(sheetListeners,/data-library-layout-override/,"O inspector de layouts deve expor overrides");
 assert.match(sheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
 assert.match(css,/nexus-library-layout-overrides/,"Os controles de override devem seguir o padrão visual do inspector");
+assert.match(template,/nexus-library-body/,"A Biblioteca deve ter uma área de navegação independente da área de conteúdo");
+assert.match(template,/nexus-library-views/,"Todas as categorias devem compartilhar o mesmo contêiner de visualização");
+assert.match(css,/nexus-library-workspace\s*\{[\s\S]*grid-template-columns: minmax\(0,1fr\) minmax\(225px,275px\)/,"Todas as categorias devem manter grade central e inspector em colunas independentes");
+assert.match(sheetListeners,/data-library-save-configured-asset/,"A configuração de um asset deve poder ser salva como modelo antes da inserção");
+assert.match(sheet,/async _saveLibraryDefinitionFromTemplate/,"A ficha deve salvar configurações de cards como definições reutilizáveis");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "components"/,"Cards devem ser persistidos no armazenamento unificado");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "groups"/,"Blocos e grupos devem ser persistidos no armazenamento unificado");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configurações completas de ficha devem ser persistidas no armazenamento unificado");
+
 
 
 assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
@@ -2281,6 +2290,26 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
 }
 
+
+/* Library repository writes cards and blocks to one canonical store while keeping legacy readers working. */
+{
+  const flags = { nexus: { libraryComponents: [{ id:"legacy-card", type:"custom-card", settings:{ text:"old" } }] } };
+  const user = {
+    getFlag(scope,key) { return flags[scope]?.[key]; },
+    async setFlag(scope,key,value) { flags[scope] ??= {}; flags[scope][key] = structuredClone(value); return value; }
+  };
+  const initial = readNexusLibraryCollection(user,"components");
+  assert.equal(initial.migrated,true);
+  assert.equal(initial.entries[0].id,"legacy-card");
+  const cards = [...initial.entries,{ id:"new-card", type:"custom-card", settings:{ text:"saved card", w:240, h:120 } }];
+  await writeNexusLibraryCollection(user,"components",cards);
+  assert.equal(flags.nexus.libraryStore.collections.components.length,2);
+  assert.equal(flags.nexus.libraryComponents.length,2);
+  const blocks = [{ id:"block-1", name:"Bloco", components:[{type:"custom-card",text:"A"}], groups:[{id:"root"}] }];
+  await writeNexusLibraryCollection(user,"groups",blocks);
+  assert.deepEqual(readNexusLibraryCollection(user,"groups").entries,blocks);
+  assert.deepEqual(flags.nexus.libraryGroups,blocks);
+}
 
 /* Library organization: custom folders, favorites, recent history and safe reassignment. */
 {

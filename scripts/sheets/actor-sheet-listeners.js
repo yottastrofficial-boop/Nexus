@@ -1,5 +1,6 @@
 import { validateGroupParent } from "../core/group-hierarchy.js";
 import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
+import { writeNexusLibraryCollection } from "../core/library-store.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
@@ -318,6 +319,14 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       updateSheetResourcePreview(livePreview?.querySelector(".nexus-sheet-resource-preview"), settings);
       fitSheetResourcePreview(livePreview, { w: 220, h: 58 }, 160);
     };
+    const appendSaveConfiguredButton = detail => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "nexus-library-save-configured";
+      button.dataset.librarySaveConfiguredAsset = "";
+      button.textContent = "Salvar configuração como modelo";
+      detail.append(button);
+    };
     const selectLibraryAsset = card => {
       if (!card) return;
       sheet._librarySelectedType = card.dataset.assetType || null;
@@ -338,6 +347,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           </div>
           <label class="nexus-library-card-content-label">Conteúdo<textarea rows="4" maxlength="500" placeholder="Escreva o conteúdo do card…" data-card-text></textarea></label>
           <button type="button" data-library-add>Adicionar card ao Canvas</button>`;
+        appendSaveConfiguredButton(detail);
         return;
       }
       if (asset.type === "sheet-attribute") {
@@ -349,6 +359,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           </div>
           <div class="nexus-library-content-picker"><label>Propriedade vinculada<input type="text" value="attributes.for" data-attribute-path list="nexus-attribute-paths"></label><datalist id="nexus-attribute-paths">${pathOptions}</datalist></div>
           <button type="button" data-library-add>Adicionar ao Canvas</button>`;
+        appendSaveConfiguredButton(detail);
         const preset = detail.querySelector("[data-attribute-preset]");
         const name = detail.querySelector("[data-attribute-label]");
         const path = detail.querySelector("[data-attribute-path]");
@@ -374,6 +385,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         detail.innerHTML = `<div class="nexus-library-live-preview is-skill-proficiency"><button type="button" class="nexus-skill-proficiency-toggle is-proficient" disabled><span class="nexus-skill-proficiency-indicator"></span></button></div>
           <div class="nexus-library-config-section"><strong>Vínculo da proficiência</strong><label>Perícia<select data-proficiency-skill></select></label><small>O marcador alterna entre não proficiente e proficiente, seguindo a regra-base do NEXUS.</small></div>
           <button type="button" data-library-add>Adicionar marcador ao Canvas</button>`;
+        appendSaveConfiguredButton(detail);
         const select = detail.querySelector("[data-proficiency-skill]");
         for (const skill of NEXUS_SKILLS) {
           const option = document.createElement("option");
@@ -387,6 +399,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       }
       if (asset.type !== "sheet-resource") {
         detail.innerHTML = `<div class="nexus-library-detail-heading"><strong class="nexus-library-detail-title">${asset.label}</strong></div><button type="button" data-library-add>Adicionar à ficha</button>`;
+        appendSaveConfiguredButton(detail);
         return;
       }
       detail.innerHTML = `
@@ -407,6 +420,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           
         </div>
         <button type="button" data-library-add>Adicionar ao Canvas</button>`;
+      appendSaveConfiguredButton(detail);
       const defaultResourceCode = String(asset.template?.sheetCode ?? asset.template?.sheetContent1 ?? "PV").toUpperCase();
       const defaultResourceColor = asset.template?.sheetColor ?? ({ PV: "#d94b4b", PM: "#3979d8", PE: "#39a86b" })[defaultResourceCode] ?? "#d94b4b";
       const colorField = detail.querySelector("[data-resource-color]"); if (colorField) colorField.value = defaultResourceColor;
@@ -546,6 +560,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const id=foundry.utils.randomID(10);
         themes.push({id,sourceId:sourceId,name:(detail.querySelector(".nexus-library-detail-title")?.textContent??"Tema")+" — personalizado",version:1,palette});
         await game.user.setFlag("nexus","libraryThemes",themes.slice(-100));
+        await writeNexusLibraryCollection(game.user, "themes", themes.slice(-100));
         sheet._libraryRenderCustomThemes?.();
         await sheet._applyLibraryCustomTheme(id);
         return;
@@ -609,6 +624,35 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
 
       const saveComponentButton=target?.closest("[data-library-save-component]");
       if(saveComponentButton&&libraryPanel.contains(saveComponentButton)){event.preventDefault();await sheet._saveSelectedLibraryComponent();return;}
+      const saveConfiguredAssetButton = target?.closest("[data-library-save-configured-asset]");
+      if (saveConfiguredAssetButton && libraryPanel.contains(saveConfiguredAssetButton)) {
+        event.preventDefault();
+        const detail = libraryPanel.querySelector("[data-library-details]");
+        const type = detail?.dataset.selectedType;
+        const asset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === detail?.dataset.selectedAssetKey);
+        if (!type || !asset) return;
+        let template = clone(asset.template ?? {});
+        let label = asset.label;
+        if (type === "custom-card") {
+          template = { customLabel: detail.querySelector("[data-card-label]")?.value.trim() || "Card", text: detail.querySelector("[data-card-text]")?.value ?? "", w: Number(detail.querySelector("[data-card-width]")?.value) || 220, h: Number(detail.querySelector("[data-card-height]")?.value) || 120 };
+          label = template.customLabel;
+        } else if (type === "sheet-attribute") {
+          label = detail.querySelector("[data-attribute-label]")?.value.trim() || "Atributo";
+          template = { ...template, text: label, dataPath: detail.querySelector("[data-attribute-path]")?.value.trim() || "attributes.for", attributePreset: detail.querySelector("[data-attribute-preset]")?.value || "custom", sheetCode: label.slice(0,8).toUpperCase(), w: asset.template?.w ?? 112, h: asset.template?.h ?? 88 };
+        } else if (type === "sheet-proficiency") {
+          const skillKey = detail.querySelector("[data-proficiency-skill]")?.value ?? "";
+          if (!NEXUS_SKILLS.some(skill => skill.key === skillKey)) { ui.notifications?.warn?.("Selecione uma perícia válida antes de salvar."); return; }
+          label = `Proficiência · ${NEXUS_SKILLS.find(skill => skill.key === skillKey)?.name}`;
+          template = { ...template, actionType: "proficiency", actionPath: `skills.${skillKey}.proficient`, sheetVariant: "proficiency", customLabel: "Proficiência", showLabel: false, w: 44, h: 44 };
+        } else if (type === "sheet-resource") {
+          const orientation = detail.querySelector("[data-resource-orientation]")?.value || "horizontal";
+          label = detail.querySelector("[data-resource-content1]")?.value.trim() || "Recurso";
+          template = { ...template, sheetVariant: "resource", sheetCode: label.toUpperCase(), sheetContent1: label, sheetContent2: detail.querySelector("[data-resource-content2]")?.value.trim() || "", sheetColor: detail.querySelector("[data-resource-color]")?.value || "#d94b4b", sheetTrackColor: detail.querySelector("[data-resource-track-color]")?.value || "#080d14", sheetOrientation: orientation, currentPath: detail.querySelector("[data-resource-current]")?.value || "resources.pv.value", maxPath: detail.querySelector("[data-resource-max]")?.value || "resources.pv.max", w: orientation === "vertical" ? 100 : 220, h: orientation === "vertical" ? 190 : 58 };
+        }
+        try { await sheet._saveLibraryDefinitionFromTemplate(type, template, label); }
+        catch (error) { ui.notifications?.error?.(`Não foi possível salvar o modelo: ${error.message}`); }
+        return;
+      }
       const savedComponentCard=target?.closest("[data-library-saved-component]");
       if(savedComponentCard&&libraryPanel.contains(savedComponentCard)){
         event.preventDefault();
