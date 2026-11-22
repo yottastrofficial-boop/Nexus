@@ -194,3 +194,8 @@ A evolução deve continuar incremental. Não se deve reconstruir a ficha inteir
 - Caminhos completos também podem ser utilizados, como `attributes.for.value` e `skills.athletics.proficientLevel`.
 - `skills.<pericia>.description` aceita uma descrição personalizada por personagem; sem valor personalizado, usa a descrição padrão do catálogo.
 - O avaliador é restrito a expressões aritméticas seguras; não executa JavaScript arbitrário. Fórmulas inválidas não substituem o valor calculado padrão.
+
+
+## Organização futura na área Lógica
+
+Propriedades, regras, comportamentos e fluxos passam a ser administrados em uma única área de trabalho da Biblioteca chamada **Lógica**, sem fundir seus modelos de dados ou seus executores. Propriedades continuam definindo dados; regras avaliam/calculem/validam; comportamentos associam eventos; fluxos organizam gatilhos, condições e ações. O contrato de envelope comum, dependências, permissões e migração está em docs/LOGIC_WORKSPACE_SPEC.md.
