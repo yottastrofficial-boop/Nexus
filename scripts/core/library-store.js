@@ -163,3 +163,42 @@ export async function writeNexusLibraryStore(user, raw) {
   await user.setFlag("nexus", "libraryStore", store);
   return store;
 }
+
+
+const LEGACY_LIBRARY_FLAG_BY_COLLECTION = Object.freeze({
+  components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",
+  templates: "libraryTemplates", assets: "libraryAssets", media: "libraryMedia",
+  themes: "libraryThemes", styles: "libraryStyles", rules: "libraryRules",
+  behaviors: "libraryBehaviors", flows: "interactionLibrary"
+});
+
+/** Reads every legacy collection only when the canonical store has not been created yet. */
+export function getLegacyNexusLibraryFlags(user) {
+  return Object.fromEntries(Object.values(LEGACY_LIBRARY_FLAG_BY_COLLECTION).map(flag => [
+    flag, user?.getFlag?.("nexus", flag)
+  ]));
+}
+
+/** Returns one collection from the canonical store, migrating legacy flags in memory when needed. */
+export function readNexusLibraryCollection(user, collection) {
+  if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error(`Coleção desconhecida: ${collection}`);
+  const { store, migrated } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
+  return { entries: store.collections[collection], store, migrated };
+}
+
+/**
+ * Saves a collection atomically in the canonical store and mirrors its legacy
+ * flag for compatibility with older NEXUS builds and existing sheet listeners.
+ */
+export async function writeNexusLibraryCollection(user, collection, entries) {
+  if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error(`Coleção desconhecida: ${collection}`);
+  if (!Array.isArray(entries)) throw new Error(`A coleção "${collection}" precisa ser uma lista.`);
+  const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
+  store.collections[collection] = entries;
+  const saved = await writeNexusLibraryStore(user, store);
+  const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
+  if (legacyFlag && typeof user?.setFlag === "function") {
+    await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
+  }
+  return saved.collections[collection];
+}
