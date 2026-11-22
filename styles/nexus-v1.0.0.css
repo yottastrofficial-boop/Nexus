@@ -7451,3 +7451,12 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-collection-toolbar > select { flex:1; }
   .nexus-library-generic-items { grid-template-columns:repeat(auto-fill,minmax(115px,1fr)); }
 }
+
+.nexus-library-type-preview { display:flex; flex-wrap:wrap; align-items:center; gap:7px; padding:10px 12px; border-bottom:1px solid #303f50; }
+.nexus-library-type-preview:empty { display:none; }
+.nexus-library-type-preview img,.nexus-library-type-preview video { display:block; max-width:100%; max-height:190px; object-fit:contain; border-radius:5px; }
+.nexus-library-type-preview audio { width:100%; max-width:100%; }
+.nexus-library-type-preview p { margin:0; color:#aebdce; font-size:10px; }
+.nexus-library-type-preview code { max-width:100%; padding:8px; overflow-wrap:anywhere; color:#cbd8e8; background:#111a25; border-radius:5px; font-size:10px; }
+.nexus-library-style-swatch { display:grid; justify-items:center; gap:3px; min-width:48px; color:#aebdce; font-size:8px; }
+.nexus-library-style-swatch i { width:32px; height:32px; border:1px solid #61748a; border-radius:6px; }
