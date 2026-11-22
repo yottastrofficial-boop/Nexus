@@ -1383,6 +1383,12 @@ assert.match(template,/data-library-collection-filter="favorites"/,"A Biblioteca
 assert.match(template,/data-library-collection-filter="recent"/,"A Biblioteca deve oferecer filtro de recentes");
 assert.match(template,/data-library-create-folder/,"A interface deve expor a criação de pastas");
 assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
+assert.match(template,/data-library-custom-folders/,"Pastas personalizadas devem aparecer na navegação lateral");
+assert.match(libraryView,/renderCustomFolderTree/,"A navegação deve refletir as pastas salvas");
+assert.match(sheetListeners,/data-library-layout-override/,"O inspector de layouts deve expor overrides");
+assert.match(actorSheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
+assert.match(css,/nexus-library-layout-overrides/,"Os controles de override devem seguir o padrão visual do inspector");
+
 
 assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
 
