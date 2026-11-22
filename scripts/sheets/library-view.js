@@ -192,6 +192,35 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const save = document.createElement("button"); save.type = "button"; save.dataset.librarySaveMetadata = ""; save.textContent = "Salvar metadados";
       const info = document.createElement("small"); info.className = "nexus-library-definition-note";
       info.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
+      const visualPreview = document.createElement("div"); visualPreview.className = "nexus-library-type-preview";
+      if (collection === "media") {
+        const source = String(entry.path ?? entry.url ?? entry.src ?? "");
+        const safeSource = /^(https?:\/\/|[\w./-]+$)/i.test(source) && !/^javascript:/i.test(source);
+        const kind = String(entry.kind ?? entry.mediaType ?? source.split(/[?#]/)[0].split(".").pop() ?? "").toLowerCase();
+        if (safeSource && /\.(png|jpe?g|gif|webp|avif|svg)(?:[?#]|$)/i.test(source)) {
+          const image = document.createElement("img"); image.src = source; image.alt = String(entry.name ?? "Prévia de mídia"); image.loading = "lazy"; visualPreview.append(image);
+        } else if (safeSource && /\.(mp3|ogg|wav|m4a)(?:[?#]|$)/i.test(source)) {
+          const audio = document.createElement("audio"); audio.controls = true; audio.preload = "none"; audio.src = source; visualPreview.append(audio);
+        } else if (safeSource && /\.(mp4|webm|ogv)(?:[?#]|$)/i.test(source)) {
+          const video = document.createElement("video"); video.controls = true; video.preload = "none"; video.src = source; visualPreview.append(video);
+        } else {
+          const note = document.createElement("p"); note.textContent = source ? `Prévia indisponível para este formato (${kind || "tipo não identificado"}).` : "Este item ainda não possui um caminho de mídia."; visualPreview.append(note);
+        }
+      } else if (collection === "styles") {
+        const tokens = entry.tokens ?? entry.palette ?? {};
+        for (const [key,value] of Object.entries(tokens).slice(0,16)) {
+          if (typeof value !== "string" || !/^#(?:[0-9a-f]{3,8})$/i.test(value)) continue;
+          const swatch = document.createElement("span"); swatch.className = "nexus-library-style-swatch";
+          const color = document.createElement("i"); color.style.backgroundColor = value;
+          const label = document.createElement("small"); label.textContent = key;
+          swatch.append(color,label); visualPreview.append(swatch);
+        }
+      } else if (collection === "rules" && typeof entry.expression === "string") {
+        const expression = document.createElement("code"); expression.textContent = entry.expression; visualPreview.append(expression);
+      } else if (collection === "behaviors") {
+        const flow = entry.flow ?? {};
+        const summary = document.createElement("p"); summary.textContent = `${flow.triggers?.length ?? 0} gatilhos · ${flow.conditions?.length ?? 0} condições · ${flow.actions?.length ?? 0} ações`; visualPreview.append(summary);
+      }
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
       preview.textContent = JSON.stringify(safeSummary,null,2);
