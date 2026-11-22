@@ -473,7 +473,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const title=document.createElement("strong");title.className="nexus-library-detail-title";
         title.textContent=custom?((game.user?.getFlag?.("nexus","libraryThemes")??[]).find(item=>item.id===themeId)?.name??"Tema personalizado"):(themeId==="nexus-dark"?"NEXUS Escuro":themeId);
         heading.append(title);
-        const note=document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Edite uma cópia desta paleta. Os temas padrão nunca são sobrescritos.";
         const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
         const previewTitle=document.createElement("strong");previewTitle.textContent="Prévia do tema";preview.append(previewTitle);
         const swatches=document.createElement("div");swatches.className="nexus-library-theme-preview-swatches";
@@ -501,7 +500,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
           const title = document.createElement("strong"); title.className = "nexus-library-detail-title"; title.textContent = entry.name || "Layout sem nome"; heading.append(title);
           const layout = entry.layout ?? {};
-          const summary = document.createElement("p"); summary.className = "nexus-library-definition-note";
+          const summary = document.createElement("p"); summary.className = "nexus-library-summary-meta";
           summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
           const note = document.createElement("p"); note.className = "nexus-library-definition-note";
           note.textContent = "Ajuste esta cópia antes de adicioná-la. O modelo salvo permanece inalterado.";
@@ -519,7 +518,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           }
           const actions = document.createElement("div"); actions.className = "nexus-library-layout-actions";
           const apply = document.createElement("button"); apply.type = "button"; apply.dataset.libraryAddLayout = entry.id; apply.textContent = "Adicionar cópia à ficha"; actions.append(apply);
-          detail.append(heading, summary, note, editor, actions);
+          detail.append(heading, summary, editor, actions);
         }
         return;
       }
