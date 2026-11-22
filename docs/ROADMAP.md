@@ -4,9 +4,9 @@ Este documento registra prioridades e decisões de arquitetura; não declara rec
 
 ## Estado de referência
 - Código-base auditado: branch main no commit 4c80cbe3fadf2617ce5ca19f499c0af2ee73d89a, antes desta rodada.
-- Versão em preparação para distribuição: 1.0.0.85 (Foundry V14).
+- Versão em preparação para distribuição: 1.0.0.87 (Foundry V14).
 - Foundry declarado: V14.
-- A Biblioteca possui armazenamento unificado, preferências, modelos de definição/instância, compartilhamento e interface Explorer em evolução; a consolidação da interface ainda não está concluída.
+- A Biblioteca possui armazenamento unificado, preferências, modelos de definição/instância, compartilhamento e interface Explorer. A 1.0.0.87 inicia a área Lógica visível e acrescenta modos de visualização e Inspector contextual; editores especializados completos ainda estão pendentes.
 - Propriedades, fórmulas e interações mantêm seus contratos; a infraestrutura de ativos, dependências e runtime da Lógica foi implementada. A interface unificada e os schemas específicos ainda precisam evoluir.
 - A ficha principal, templates e CSS ainda concentram responsabilidades e exigem extração gradual.
 - A mídia possui registry, capacidades nativas, pipeline com fallback, contrato de Worker, storage Foundry/externo e cache IndexedDB; binários FFmpeg/libjxl e conversão efetiva permanecem pendentes.
@@ -46,3 +46,12 @@ Este documento registra prioridades e decisões de arquitetura; não declara rec
 3. Integrar e testar um decoder libjxl e um core FFmpeg customizado com AV1/Opus.
 4. Configurar/testar um backend externo compartilhado para originais que o Foundry não aceite.
 5. Validar os fluxos no Foundry VTT 14 build 360 antes de declarar estabilidade funcional.
+
+
+## Entregue na 1.0.0.87 — primeira etapa visual da Lógica
+- A navegação da Biblioteca agrupa os cinco subtipos de Lógica sem fundir seus contratos.
+- Propriedades e Funções passam a ser navegáveis junto de Regras e Comportamentos; Fluxos permanecem com seu editor/listagem existente.
+- O Inspector exibe previews visuais e payloads lógicos como texto inerte, além de metadados de dependências e permissões.
+- Coleções genéricas passam a oferecer grade/lista e três tamanhos de miniatura.
+- A edição de metadados tenta sincronizar o registry em memória, sem alterar o payload do ativo.
+- Próximo passo: editores especializados e criação/edição validada de payloads por subtipo, seguida de testes reais no Foundry.
