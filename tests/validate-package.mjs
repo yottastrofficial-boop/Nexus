@@ -2421,6 +2421,6 @@ assert.match(template,/data-library-origin-filter="mine">Pessoais<\/button>/,"O 
 assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
 assert.match(css,/nexus-library-asset-meta strong[\s\S]*white-space:normal!important/,"Os títulos dos cartões devem permanecer visíveis em até duas linhas");
 
-assert.match(css,/v1\.0\.0\.86[\s\S]*?\.nexus-library-asset\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)!important;[\s\S]*?grid-template-rows:minmax\(0,1fr\) auto!important;/,"Cards de assets devem usar uma única coluna para manter o título abaixo da prévia");
-assert.match(css,/\.nexus-library-asset > \.nexus-library-preview-stage\s*\{[\s\S]*?grid-column:1!important;[\s\S]*?grid-row:1!important;/,"A prévia deve ocupar a primeira linha do card");
-assert.match(css,/\.nexus-library-asset > \.nexus-library-asset-meta\s*\{[\s\S]*?grid-column:1!important;[\s\S]*?grid-row:2!important;/,"O título deve ocupar a segunda linha do card");
+assert.match(css,/v1\.0\.0\.86[\s\S]*?\.nexus-library-asset\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)\s*!important;[\s\S]*?grid-template-rows:minmax\(0,1fr\) auto\s*!important;/,"Cards de assets devem usar uma única coluna para manter o título abaixo da prévia");
+assert.match(css,/\.nexus-library-asset > \.nexus-library-preview-stage\s*\{[\s\S]*?grid-column:1\s*!important;[\s\S]*?grid-row:1\s*!important;/,"A prévia deve ocupar a primeira linha do card");
+assert.match(css,/\.nexus-library-asset > \.nexus-library-asset-meta\s*\{[\s\S]*?grid-column:1\s*!important;[\s\S]*?grid-row:2\s*!important;/,"O título deve ocupar a segunda linha do card");
