@@ -1,3 +1,9 @@
+## 1.0.0.88 — build para teste no Foundry VTT 14
+
+- Prepara a publicação da etapa atual da Biblioteca, incluindo o menu contextual para excluir pastas pessoais sem remover os itens armazenados.
+- Mantém a versão identificada como build de teste; a validação visual e funcional no Foundry VTT 14 build 360 continua pendente.
+- O manifesto estável será atualizado somente depois que o GitHub Actions validar e anexar `nexus.zip` à Release `v1.0.0.88`.
+
 ## Em desenvolvimento — revisão da Biblioteca e do Inspector
 
 - Reorganiza o Inspector em seções compactas com navegação por ícones para aparência, dados, interações e opções avançadas.
