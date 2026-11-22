@@ -95,7 +95,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     };
     const getLegacyLibraryFlags = () => Object.fromEntries([
       "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
-      "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
+      "libraryMedia","libraryThemes","libraryStyles","libraryProperties","libraryRules","libraryBehaviors","libraryFunctions","interactionLibrary"
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
@@ -289,7 +289,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
       preview.textContent = JSON.stringify(safeSummary,null,2);
-      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,preview);
+      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,visualPreview,save,preview);
       detail.append(heading,form);
     };
     panel.addEventListener("click", async event => {
@@ -336,7 +336,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             entry.tags = value("tags").split(",").map(tag => tag.trim()).filter(Boolean).slice(0,20);
             return store;
           });
-          const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors" };
+          if (["properties","rules","behaviors","functions"].includes(collection)) {
+            const updatedAsset = savedStore.collections[collection]?.find(item => String(item.id) === entryId);
+            try { if (updatedAsset) game.nexus?.logic?.registry?.register?.(updatedAsset, { replace: true }); }
+            catch (registryError) { console.warn("NEXUS | Não foi possível atualizar o registro lógico após editar metadados.", registryError); }
+          }
+          const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors", properties:"libraryProperties", functions:"libraryFunctions" };
           const legacyFlag = legacyFlagByCollection[collection];
           if (legacyFlag) {
             try { await game.user.setFlag("nexus", legacyFlag, savedStore.collections[collection]); }
