@@ -8158,3 +8158,20 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-workspace:has([data-library-generic-items]) { grid-template-columns:minmax(0,1fr); }
   .nexus-library-details { max-height:320px; }
 }
+
+/* Biblioteca — menu contextual de pastas pessoais. */
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-panel { position:relative !important; }
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-folder-context-menu {
+  position:absolute; z-index:1300; min-width:156px; padding:4px;
+  border:1px solid var(--nexus-panel-border,#52647b); border-radius:7px;
+  background:var(--nexus-panel-surface,#202d3c); box-shadow:0 8px 24px #0008;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-folder-context-menu button {
+  display:flex; align-items:center; width:100%; min-height:32px; padding:7px 9px;
+  border:1px solid transparent; border-radius:5px; color:var(--nexus-panel-text,#e7edf5);
+  background:transparent; text-align:left; font-size:10px; cursor:pointer;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-folder-context-menu button:hover,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-folder-context-menu button:focus-visible {
+  border-color:var(--nexus-panel-accent,#78b7e8); background:var(--nexus-panel-hover,#30445a); outline:none;
+}
