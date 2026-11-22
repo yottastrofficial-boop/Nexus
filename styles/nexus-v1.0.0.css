@@ -7710,3 +7710,83 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 }
 
 .nexus-panel-window:has(.nexus-library-panel) .nexus-library-panel[hidden] { display:none !important; }
+
+
+/* Library layout correction: independent scroll regions prevent clipped cards and headers. */
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-main {
+  display:flex !important; flex:1 1 auto !important; flex-direction:column !important;
+  min-width:0 !important; min-height:0 !important; height:100% !important;
+  overflow:hidden !important; padding:0 4px 4px 0 !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-section-heading,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-collection-toolbar,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-layout-toolbar { flex:0 0 auto !important; }
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-assets,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-flow-grid,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-layouts,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items {
+  flex:1 1 0 !important; min-width:0 !important; min-height:0 !important;
+  max-height:100% !important; overflow:auto !important; overscroll-behavior:contain !important;
+  align-content:start !important; padding:2px 5px 8px 2px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-assets,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-flow-grid,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-layouts,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal-grid,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-saved-groups,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-items {
+  grid-template-columns:repeat(auto-fill,minmax(126px,1fr)) !important;
+  align-items:start !important; gap:10px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-asset,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal-card,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-saved-group,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-card {
+  width:100% !important; min-width:0 !important; min-height:0 !important;
+  aspect-ratio:1 / 1 !important; height:auto !important; max-height:none !important;
+  overflow:hidden !important; box-sizing:border-box !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-asset,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal-card,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-saved-group {
+  display:grid !important; grid-template-rows:minmax(0,1fr) auto !important; align-items:stretch !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-preview-stage,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal-preview,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-saved-group-preview {
+  width:100% !important; height:100% !important; min-height:0 !important; max-height:none !important;
+  aspect-ratio:1 / 1 !important; overflow:hidden !important; box-sizing:border-box !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-asset-meta,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-personal-card > strong,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-saved-group > strong {
+  display:block !important; min-width:0 !important; width:100% !important; height:32px !important;
+  padding:7px 8px !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  white-space:nowrap !important; text-align:center !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-card {
+  display:grid !important; grid-template-rows:minmax(0,1fr) auto !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-item {
+  display:flex !important; flex-direction:column !important; align-items:center !important;
+  justify-content:center !important; gap:8px !important; min-width:0 !important; min-height:0 !important;
+  width:100% !important; height:100% !important; overflow:hidden !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-item > i { font-size:26px !important; }
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-item > strong,
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-generic-item > small {
+  display:block !important; width:100% !important; min-width:0 !important; overflow:hidden !important;
+  text-overflow:ellipsis !important; white-space:nowrap !important; text-align:center !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-origin-filters {
+  display:flex !important; flex-wrap:wrap !important; gap:4px !important; min-width:0 !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-origin-filters button {
+  min-height:27px !important; padding:4px 8px !important; font-size:9px !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-origin-filters button.active {
+  border-color:var(--nexus-panel-accent,#78b7e8) !important; background:var(--nexus-panel-card,#2c4962) !important;
+}
+.nexus-panel-window:has(.nexus-library-panel) [data-library-source-empty] { flex:0 0 auto !important; }
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-definition-note { display:none !important; }
