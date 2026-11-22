@@ -5,7 +5,7 @@
  * Conteúdo HTML/CSS/JS avançado, quando suportado futuramente, permanece texto
  * inerte durante importação; este serviço nunca executa conteúdo importado.
  */
-export const NEXUS_LIBRARY_SCHEMA_VERSION = 1;
+export const NEXUS_LIBRARY_SCHEMA_VERSION = 2;
 export const NEXUS_LIBRARY_COLLECTIONS = Object.freeze([
   "components", "groups", "layouts", "templates", "assets", "media",
   "themes", "styles", "rules", "behaviors", "flows"

@@ -16,7 +16,29 @@ const DEFAULT_FORMATS = [
   { id: "mp4", label: "MP4", kind: "video", extensions: ["mp4", "m4v"], mimeTypes: ["video/mp4", "audio/mp4"], codecs: ["h264", "hevc", "av1", "aac", "opus"], containers: ["mp4"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: true },
   { id: "ogg", label: "Ogg", kind: "audio", extensions: ["ogg", "oga", "ogv"], mimeTypes: ["audio/ogg", "video/ogg"], codecs: ["opus", "vorbis", "theora"], containers: ["ogg"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: true },
   { id: "wav", label: "WAV", kind: "audio", extensions: ["wav"], mimeTypes: ["audio/wav", "audio/x-wav"], codecs: ["pcm"], containers: ["riff-wave"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: true },
-  { id: "pdf", label: "PDF", kind: "document", extensions: ["pdf"], mimeTypes: ["application/pdf"], codecs: [], containers: ["pdf"], decoder: "pdf-viewer", foundryUpload: true }
+  { id: "pdf", label: "PDF", kind: "document", extensions: ["pdf"], mimeTypes: ["application/pdf"], codecs: [], containers: ["pdf"], decoder: "pdf-viewer", foundryUpload: true },
+  { id: "svg", label: "SVG", kind: "image", extensions: ["svg"], mimeTypes: ["image/svg+xml"], codecs: ["svg"], containers: ["svg"], decoder: "browser-sanitized", foundryUpload: null },
+  { id: "bmp", label: "Bitmap", kind: "image", extensions: ["bmp"], mimeTypes: ["image/bmp"], codecs: ["bmp"], containers: ["bmp"], decoder: "browser-or-wasm", foundryUpload: null },
+  { id: "tiff", label: "TIFF", kind: "image", extensions: ["tif", "tiff"], mimeTypes: ["image/tiff"], codecs: ["tiff"], containers: ["tiff"], decoder: "wasm-adapter", foundryUpload: null },
+  { id: "heif", label: "HEIF / HEIC", kind: "image", extensions: ["heic", "heif"], mimeTypes: ["image/heic", "image/heif"], codecs: ["hevc", "av1"], containers: ["heif"], decoder: "browser-or-wasm", foundryUpload: null },
+  { id: "mp3", label: "MP3", kind: "audio", extensions: ["mp3"], mimeTypes: ["audio/mpeg"], codecs: ["mp3"], containers: ["mpeg-audio"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: null },
+  { id: "flac", label: "FLAC", kind: "audio", extensions: ["flac"], mimeTypes: ["audio/flac", "audio/x-flac"], codecs: ["flac"], containers: ["flac"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: null },
+  { id: "aac", label: "AAC", kind: "audio", extensions: ["aac"], mimeTypes: ["audio/aac"], codecs: ["aac"], containers: ["adts"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: null },
+  { id: "m4a", label: "M4A", kind: "audio", extensions: ["m4a"], mimeTypes: ["audio/mp4"], codecs: ["aac", "alac", "opus"], containers: ["mp4"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: null },
+  { id: "mov", label: "QuickTime MOV", kind: "video", extensions: ["mov"], mimeTypes: ["video/quicktime"], codecs: ["h264", "hevc", "prores"], containers: ["mov"], decoder: "browser-or-ffmpeg-wasm", foundryUpload: null },
+  { id: "mkv", label: "Matroska", kind: "video", extensions: ["mkv"], mimeTypes: ["video/x-matroska"], codecs: ["h264", "hevc", "av1", "vp9", "opus"], containers: ["matroska"], decoder: "ffmpeg-wasm", foundryUpload: null },
+  { id: "avi", label: "AVI", kind: "video", extensions: ["avi"], mimeTypes: ["video/x-msvideo"], codecs: ["mpeg4", "h264", "mjpeg"], containers: ["avi"], decoder: "ffmpeg-wasm", foundryUpload: null },
+  { id: "font-woff2", label: "WOFF2", kind: "font", extensions: ["woff2"], mimeTypes: ["font/woff2"], codecs: [], containers: ["woff2"], decoder: "font-face", foundryUpload: null },
+  { id: "font-woff", label: "WOFF", kind: "font", extensions: ["woff"], mimeTypes: ["font/woff"], codecs: [], containers: ["woff"], decoder: "font-face", foundryUpload: null },
+  { id: "font-ttf", label: "TrueType", kind: "font", extensions: ["ttf"], mimeTypes: ["font/ttf", "application/x-font-ttf"], codecs: [], containers: ["sfnt"], decoder: "font-face", foundryUpload: null },
+  { id: "font-otf", label: "OpenType", kind: "font", extensions: ["otf"], mimeTypes: ["font/otf", "application/x-font-opentype"], codecs: [], containers: ["sfnt"], decoder: "font-face", foundryUpload: null },
+  { id: "model-gltf", label: "glTF / GLB", kind: "model", extensions: ["gltf", "glb"], mimeTypes: ["model/gltf+json", "model/gltf-binary"], codecs: [], containers: ["gltf", "glb"], decoder: "threejs-adapter", foundryUpload: null },
+  { id: "model-obj", label: "Wavefront OBJ", kind: "model", extensions: ["obj"], mimeTypes: ["text/plain"], codecs: [], containers: ["obj"], decoder: "threejs-adapter", foundryUpload: null },
+  { id: "model-stl", label: "STL", kind: "model", extensions: ["stl"], mimeTypes: ["model/stl"], codecs: [], containers: ["stl"], decoder: "threejs-adapter", foundryUpload: null },
+  { id: "archive-zip", label: "ZIP", kind: "archive", extensions: ["zip"], mimeTypes: ["application/zip"], codecs: ["deflate", "deflate64"], containers: ["zip"], decoder: "archive-adapter", foundryUpload: null },
+  { id: "archive-7z", label: "7-Zip", kind: "archive", extensions: ["7z"], mimeTypes: ["application/x-7z-compressed"], codecs: [], containers: ["7z"], decoder: "archive-adapter", foundryUpload: null },
+  { id: "archive-rar", label: "RAR", kind: "archive", extensions: ["rar"], mimeTypes: ["application/vnd.rar", "application/x-rar-compressed"], codecs: [], containers: ["rar"], decoder: "archive-adapter", foundryUpload: null },
+  { id: "archive-gzip", label: "GZIP", kind: "archive", extensions: ["gz"], mimeTypes: ["application/gzip"], codecs: ["deflate"], containers: ["gzip"], decoder: "archive-adapter", foundryUpload: null }
 ];
 
 const ascii = (bytes, start, end) => String.fromCharCode(...bytes.slice(start, end));
@@ -142,7 +164,7 @@ export function detectMediaDescriptor({ name = "", mimeType = "", bytes = null, 
     codec: String(codec ?? "").trim().toLowerCase() || (format.codecs.length === 1 ? format.codecs[0] : null),
     container: signature?.container ?? format.containers[0] ?? null,
     confidence: signature?.confidence ?? (registry.findByExtension(extension) ? "extension" : "mime"),
-    foundryUpload: format.foundryUpload === true,
+    foundryUpload: format.foundryUpload === true ? true : format.foundryUpload === false ? false : null,
     decoder: format.decoder ?? null
   });
 }

@@ -2278,7 +2278,7 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
     libraryRules: [{ id:"rule-1", sourceId:"rule:damage", name:"Dano", expression:"1d6" }],
     interactionLibrary: [{ id:"flow-1", name:"Ao clicar", flow:{ id:"flow-1", triggers:[], conditions:[], actions:[] } }]
   });
-  assert.equal(legacy.schemaVersion, 1);
+  assert.equal(legacy.schemaVersion, 2);
   assert.equal(legacy.collections.components.length, 1);
   assert.equal(legacy.collections.groups.length, 1);
   assert.equal(legacy.collections.layouts.length, 1);
@@ -2396,16 +2396,20 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
     templates:[{ id:"template-1", sourceId:"template:pc", name:"Personagem" }],
     media:[{ id:"media-1", sourceId:"media:portrait", name:"Retrato", path:"portraits/hero.webp" }],
     styles:[{ id:"style-1", sourceId:"style:card", name:"Cartão", tokens:{ radius:"8px" } }],
+    properties:[{ id:"property-1", name:"Foco", path:"system.custom.focus" }],
     rules:[{ id:"rule-1", sourceId:"rule:damage", name:"Dano", expression:"1d6" }],
-    behaviors:[{ id:"behavior-1", sourceId:"behavior:inspect", name:"Inspecionar", flow:{ triggers:[], conditions:[], actions:[] } }]
+    behaviors:[{ id:"behavior-1", sourceId:"behavior:inspect", name:"Inspecionar", flow:{ triggers:[], conditions:[], actions:[] } }],
+    functions:[{ id:"function-1", name:"Dobro", operation:"multiply" }]
   }, ["pv"]);
   assert.match(backupCode,/NEXUS-LIBRARY\/2/);
   const restored = parseNexusLibraryBackup(backupCode,["pv"]);
   assert.equal(restored.collections.templates.length,1);
   assert.equal(restored.collections.media.length,1);
   assert.equal(restored.collections.styles.length,1);
+  assert.equal(restored.collections.properties.length,1);
   assert.equal(restored.collections.rules.length,1);
   assert.equal(restored.collections.behaviors.length,1);
+  assert.equal(restored.collections.functions.length,1);
   const legacyCode = backupCode.replace("NEXUS-LIBRARY/2","NEXUS-LIBRARY/1").replace('"version": 2','"version": 1');
   assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }

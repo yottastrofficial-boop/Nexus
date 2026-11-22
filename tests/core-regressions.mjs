@@ -23,6 +23,9 @@ const normalized = normalizeNexusLibraryStore({
   collections: { components: [{ id: "component-1", label: "PV" }] }
 });
 assert.deepEqual(normalized.metadata, { origin: "future-compatible", revision: 2 });
+assert.equal(normalized.schemaVersion, 2);
+assert.deepEqual(normalized.collections.properties, []);
+assert.deepEqual(normalized.collections.functions, []);
 const merged = mergeNexusLibraryStores(normalized, { schemaVersion: 1, collections: { rules: [{ id: "imported-rule" }] } });
 assert.deepEqual(merged.store.metadata, normalized.metadata, "a mesclagem deve preservar os metadados atuais");
 

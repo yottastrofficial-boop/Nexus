@@ -1,12 +1,47 @@
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 import { createMediaFormatRegistry } from "./core/media-format-registry.js";
+import { createLogicRegistry } from "./core/logic-registry.js";
+import { createLogicRuntime } from "./core/logic-runtime.js";
+import { loadLogicLibrary, saveLogicAsset, deleteLogicAsset } from "./core/logic-library.js";
+import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter, installNexusMediaWorkerRuntime } from "./core/media-service.js";
+import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndexedDbMediaCache, createMediaCacheKey } from "./core/media-storage.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
+  game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
+  game.nexus.media.pipeline = createMediaProcessingPipeline({
+    capabilityService: game.nexus.media.capabilities,
+    adapters: [createBrowserMediaAdapter(game.nexus.media.capabilities)]
+  });
+  game.nexus.media.storage = createMediaStorageRouter([
+    createFoundryMediaStorageAdapter({
+      FilePicker: foundry.applications.apps.FilePicker,
+      extensions: CONST.UPLOADABLE_FILE_EXTENSIONS
+    })
+  ]);
+  game.nexus.media.createWorkerAdapter = createWorkerMediaAdapter;
+  game.nexus.media.installWorkerRuntime = installNexusMediaWorkerRuntime;
+  game.nexus.media.createCacheKey = createMediaCacheKey;
+  if (globalThis.indexedDB?.open) {
+    try { game.nexus.media.cache = createIndexedDbMediaCache(); }
+    catch (error) { console.warn("NEXUS | Cache local de mídia indisponível.", error); }
+  }
+
+  game.nexus.logic = {};
+  game.nexus.logic.registry = createLogicRegistry();
+  game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
+  game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
+  game.nexus.logic.loadLibrary = () => loadLogicLibrary(game.user, game.nexus.logic.registry);
+  game.nexus.logic.save = async asset => {
+    const saved = await saveLogicAsset(game.user, asset);
+    game.nexus.logic.registry.register(saved, { replace: true });
+    return saved;
+  };
+  game.nexus.logic.remove = id => deleteLogicAsset(game.user, game.nexus.logic.registry, id);
 
   game.settings.register("nexus","interactionLibrary",{
     name:"Biblioteca de fluxos",
@@ -26,6 +61,13 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
+  try {
+    const report = game.nexus?.logic?.loadLibrary?.();
+    if (report?.errors?.length) console.warn("NEXUS | Alguns ativos da Lógica não puderam ser carregados.", report.errors);
+    console.info("NEXUS | Ativos lógicos carregados:", report?.loaded?.length ?? 0);
+  } catch (error) {
+    console.error("NEXUS | Falha ao carregar a Biblioteca de Lógica.", error);
+  }
   console.log(`NEXUS | Sistema ${game.system.version} carregado. Ficha Canvas habilitada.`);
 });
 

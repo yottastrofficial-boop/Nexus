@@ -236,3 +236,11 @@ Esta etapa estabelece o contrato de dados, merge e compatibilidade de backup. A 
 A Biblioteca passa a organizar Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões sob uma única área de trabalho chamada Lógica. A unificação é de navegação, metadados, dependências e ferramentas; cada subtipo mantém schema, editor e executor próprios. Ver docs/LOGIC_WORKSPACE_SPEC.md.
 
 A camada de mídia possui registry independente da UI e do Foundry. Identificação, decodificação e armazenamento são responsabilidades distintas. O registry inicial está em scripts/core/media-format-registry.js; a estratégia e as limitações de upload estão em docs/MEDIA_COMPATIBILITY_SPEC.md. O registry não equivale a decodificadores já incorporados: os adaptadores WASM serão adicionados e validados em etapas próprias.
+
+
+## Serviços centrais — versão 1.0.0.85
+
+- Lógica: `logic-registry.js`, `logic-library.js` e `logic-runtime.js` separam o envelope de ativos, persistência e execução declarativa. O runtime utiliza o parser de expressões existente e executores explicitamente registrados.
+- Biblioteca: schema 2 adiciona coleções `properties` e `functions`; backups são compatíveis com a versão anterior e incluem as novas coleções.
+- Mídia: `media-service.js` separa capacidades nativas, pipeline e Workers; `media-storage.js` separa upload Foundry, storage externo e cache local.
+- A interface da Lógica, decoders WASM especializados e teste funcional em instalação real Foundry continuam como etapas pendentes. Nenhuma delas deve ser presumida concluída por CI.

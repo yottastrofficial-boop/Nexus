@@ -426,13 +426,16 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
     templates: sanitizeJsonValue(Array.isArray(snapshot.templates) ? snapshot.templates : []),
     media: sanitizeJsonValue(Array.isArray(snapshot.media) ? snapshot.media : []),
     styles: sanitizeJsonValue(Array.isArray(snapshot.styles) ? snapshot.styles : []),
+    properties: sanitizeJsonValue(Array.isArray(snapshot.properties) ? snapshot.properties : []),
     rules: sanitizeJsonValue(Array.isArray(snapshot.rules) ? snapshot.rules : []),
-    behaviors: sanitizeJsonValue(Array.isArray(snapshot.behaviors) ? snapshot.behaviors : [])
+    behaviors: sanitizeJsonValue(Array.isArray(snapshot.behaviors) ? snapshot.behaviors : []),
+    functions: sanitizeJsonValue(Array.isArray(snapshot.functions) ? snapshot.functions : [])
   };
   if (collections.components.length > 200 || collections.groups.length > 100 || collections.layouts.length > 100 ||
       collections.assets.length > 200 || Object.keys(collections.themes).length > 100 || collections.flows.length > 200 ||
       collections.templates.length > 100 || collections.media.length > 200 || collections.styles.length > 200 ||
-      collections.rules.length > 200 || collections.behaviors.length > 200) {
+      collections.properties.length > 200 || collections.rules.length > 200 ||
+      collections.behaviors.length > 200 || collections.functions.length > 200) {
     throw new Error("A Biblioteca excede o limite de itens permitido para backup.");
   }
   for (const asset of collections.assets) {
@@ -488,8 +491,10 @@ export function parseNexusLibraryBackup(code, componentTypes = []) {
     templates: Array.isArray(data.templates) ? data.templates : [],
     media: Array.isArray(data.media) ? data.media : [],
     styles: Array.isArray(data.styles) ? data.styles : [],
+    properties: Array.isArray(data.properties) ? data.properties : [],
     rules: Array.isArray(data.rules) ? data.rules : [],
-    behaviors: Array.isArray(data.behaviors) ? data.behaviors : []
+    behaviors: Array.isArray(data.behaviors) ? data.behaviors : [],
+    functions: Array.isArray(data.functions) ? data.functions : []
   }, [...allowed]);
   const parsed = JSON.parse(normalized.slice(normalized.indexOf("{")));
   return { name: String(parsed.name ?? "Biblioteca NEXUS"), collections: parsed.collections };

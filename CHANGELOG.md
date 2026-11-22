@@ -1,3 +1,26 @@
+## 1.0.0.85
+
+### Núcleo Lógica
+- Adiciona registry de ativos tipados: Propriedades, Regras, Comportamentos, Fluxos e Funções.
+- Adiciona validação plugável por subtipo, dependências tipadas, detecção de referências ausentes e ciclos.
+- Adiciona persistência da Lógica na Biblioteca, com leitura compatível das coleções antigas e proteção contra exclusão de ativos referenciados.
+- Adiciona runtime declarativo com condições avaliadas pelo parser seguro, ações/funções registradas explicitamente, permissões, limites e diagnóstico.
+- Evolui o armazenamento da Biblioteca para schema 2 e inclui coleções de Propriedades e Funções nos backups.
+
+### Infraestrutura de mídia
+- Adiciona serviço de capabilities nativas e decodificação de imagem via createImageBitmap quando suportada pelo ambiente.
+- Adiciona pipeline de adaptadores sob demanda, com fallback quando um adaptador não consegue processar o arquivo.
+- Adiciona contrato de Workers de mesma origem para processamentos pesados, com timeout e mensagens correlacionadas.
+- Adiciona adaptador de upload Foundry usando FilePicker.upload e respeitando CONST.UPLOADABLE_FILE_EXTENSIONS.
+- Adiciona roteador para storage externo configurado, cache IndexedDB local e chave de cache SHA-256.
+- Expõe os serviços em game.nexus.logic e game.nexus.media.
+
+### Limitações e validação
+- Não inclui binários FFmpeg/libdav1d/libopus/libjxl; decodificação AV1/JXL via WASM permanece pendente.
+- Nenhum backend externo vem configurado por padrão.
+- A interface unificada Lógica ainda não está implementada.
+- A versão precisa de teste funcional no Foundry VTT 14 build 360; CI automatizado não substitui essa validação.
+
 ## 1.0.0.84
 
 ### Biblioteca — nomenclatura final e títulos dos cartões

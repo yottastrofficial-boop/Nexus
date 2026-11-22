@@ -1,7 +1,7 @@
 # NEXUS — Compatibilidade e processamento de mídia
 
 ## Estado
-Diretriz aprovada e investigação técnica inicial. O registry e os testes de identificação são a primeira fundação de código. Decodificação, conversão, interface e armazenamento compartilhado ainda não estão concluídos.
+Infraestrutura-base implementada na 1.0.0.85: registry, detecção, capacidades nativas, pipeline de adaptadores, contrato de Worker local, armazenamento Foundry/externo e cache IndexedDB. Decoders FFmpeg/libjxl e UI de mídia continuam pendentes.
 
 ## Objetivo
 O NEXUS terá camada própria e extensível para identificar, pré-visualizar, analisar, reproduzir e, quando permitido, converter formatos. “Suporte integral” significa capacidades verificáveis por família: identificar, ler, pré-visualizar, reproduzir, extrair metadados e converter quando possível. Não existe decodificador universal para todo formato existente; arquivos proprietários, criptografados ou sem implementação disponível podem continuar sem suporte.
@@ -51,3 +51,22 @@ Registrar licença, versões, origem, configuração de build, hashes e avisos. 
 - Formato incompatível com upload Foundry informa e oferece storage alternativo.
 - Arquivos malformados/grandes não travam a ficha.
 - Falha de WASM não impede o uso dos demais recursos.
+
+
+## Implementação da infraestrutura — 1.0.0.85
+
+- `scripts/core/media-service.js` inspeciona arquivos por assinatura/MIME/extensão, consulta capacidades nativas, decodifica imagens quando `createImageBitmap` suporta o formato e oferece pipeline de adaptadores com carregamento sob demanda e fallback quando um decoder falha.
+- O contrato `createWorkerMediaAdapter()` envia arquivos para Workers de mesma origem, com mensagens correlacionadas, timeout e encerramento explícito. `installNexusMediaWorkerRuntime()` padroniza o protocolo para Workers especializados.
+- `scripts/core/media-storage.js` oferece adaptador Foundry via API pública `FilePicker.upload`, roteador para backends externos configurados, cache IndexedDB local com descarte por antiguidade e chave de cache baseada em SHA-256.
+- A inicialização expõe os serviços em `game.nexus.media`; módulos podem registrar adaptadores locais e backends externos.
+
+### Cobertura real desta versão
+
+- O adaptador nativo usa capacidades reais do navegador e não presume que um formato é decodificável só porque foi identificado.
+- O adaptador Foundry só aceita extensões presentes em `CONST.UPLOADABLE_FILE_EXTENSIONS`.
+- O adaptador externo é apenas um contrato plugável: nenhum provedor externo vem configurado por padrão.
+- O Worker é uma infraestrutura de execução; nenhum binário FFmpeg/libdav1d/libopus/libjxl é distribuído nesta versão.
+- AV1 e Opus só são considerados codecs identificados quando há metadados reais fornecidos por um probe/adaptador; o contêiner por si só não basta.
+- JXL só pode ser pré-visualizado nativamente quando o ambiente oferece decoder compatível ou por um adaptador libjxl registrado.
+
+Assim, a versão conclui a infraestrutura extensível e os caminhos de integração, mas não declara suporte de decodificação universal ou conversão FFmpeg/JXL já entregue.

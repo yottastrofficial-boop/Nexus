@@ -35,3 +35,8 @@ A versão 1.0.0.72 prepara uma atualização de compatibilidade: consolida a cor
 - Um sistema antigo nunca deve rebaixar um Actor com versão de esquema superior.
 - Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
 - Uma release só é declarada estável após validação funcional no Foundry, não apenas CI verde.
+
+
+## Atualização de infraestrutura 1.0.0.85
+
+A 1.0.0.85 entrega uma etapa de infraestrutura para Lógica e Mídia e pode ser instalada para validação. Os workflows automatizados devem passar antes da publicação do pacote. Esta versão ainda não deve ser descrita como funcionalmente confirmada no Foundry VTT 14 build 360 até que abertura de mundo, carregamento da ficha, persistência, biblioteca e armazenamento sejam testados no cliente real. A existência de uma release/manifesto atualizado não substitui esse teste.

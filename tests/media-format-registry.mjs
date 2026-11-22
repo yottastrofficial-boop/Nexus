@@ -4,6 +4,11 @@ import { createMediaFormatRegistry, detectMediaDescriptor, sniffMediaSignature }
 const registry = createMediaFormatRegistry();
 assert.equal(registry.getFormat("jpeg-xl").foundryUpload, false);
 assert.equal(registry.findByExtension("portrait.JXL").id, "jpeg-xl");
+assert.equal(registry.findByExtension("vector.svg").id, "svg");
+assert.equal(registry.findByExtension("archive.zip").kind, "archive");
+assert.equal(registry.findByExtension("model.glb").kind, "model");
+assert.equal(registry.findByExtension("unknown-font.woff2").kind, "font");
+assert.equal(registry.getFormat("archive-zip").foundryUpload, null, "Upload desconhecido deve permanecer não classificado");
 assert.equal(registry.findByMimeType("audio/opus; codecs=opus").id, "opus");
 
 const jxlContainer = Uint8Array.from([0, 0, 0, 12, 0x4a, 0x58, 0x4c, 0x20, 13, 10, 135, 10]);

@@ -35,3 +35,27 @@ Os cinco PDFs-base do NEXUS v0.1 foram localizados na Biblioteca do projeto. Est
 
 ## Próxima etapa
 Prosseguir com auditoria orientada a dependências da ficha/Canvas e dos executores de interações. Antes de extrair ou remover qualquer bloco, mapear todos os leitores/escritores de dados persistidos e cobrir as rotas afetadas com testes. Em seguida, integrar a Biblioteca/Lógica por incrementos pequenos, mantendo os contratos atuais e leitores de compatibilidade.
+
+
+## Continuação — infraestrutura 1.0.0.85
+
+### Lógica
+
+- Criado `logic-registry.js`: envelope comum, schemas registráveis, IDs estáveis, dependências tipadas, topological sort e detecção de ciclos.
+- Criado `logic-library.js`: leitura compatível das coleções antigas, persistência canônica, exclusão protegida por dependentes e carregamento de fluxos legados com payload preservado.
+- Criado `logic-runtime.js`: dispatch de comportamentos, avaliação de condições com o parser seguro, execução sequencial, permissões, limites e relatórios.
+- Biblioteca schema 2: coleções `properties` e `functions`; backups atualizados.
+
+### Mídia
+
+- Criado `media-service.js`: inspeção, capabilities, decoder nativo de imagem e pipeline com adaptadores lazy/fallback.
+- Adicionado contrato de Worker local com timeout, correlação de mensagens e runtime helper.
+- Criado `media-storage.js`: upload Foundry pela API pública, backend externo plugável, IndexedDB cache e cache key SHA-256.
+- Entry point expõe os serviços em `game.nexus.logic` e `game.nexus.media`.
+
+### Limitações mantidas explícitas
+
+- Nenhum binário WASM FFmpeg/libjxl está incluído; AV1/JXL não são declarados decodificados por fallback.
+- Nenhum backend externo está configurado por padrão.
+- A interface unificada Lógica ainda não foi construída.
+- O teste funcional real no Foundry V14 build 360 continua pendente.

@@ -1,7 +1,7 @@
 # NEXUS — Núcleo de Lógica e Configuração
 
 ## Estado
-Diretriz aprovada para orientar a refatoração. Descreve a arquitetura-alvo, não a implementação concluída.
+Arquitetura aprovada. A infraestrutura de dados e execução foi implementada na 1.0.0.85; a interface unificada e os editores especializados continuam pendentes.
 
 ## Organização unificada
 Regras, comportamentos, fluxos e propriedades técnicas serão administrados em um único ambiente da Biblioteca chamado **Lógica**. A unificação é de navegação, descoberta, dependências e ferramentas comuns. Os conceitos continuam sendo tipos distintos, com schemas, editores e executores especializados.
@@ -74,3 +74,19 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - Importação detecta dependências e conflitos.
 - Execução independente da UI e sem JavaScript arbitrário.
 - Dados antigos permanecem legíveis durante a migração.
+
+
+## Implementação da infraestrutura — 1.0.0.85
+
+- `scripts/core/logic-registry.js` normaliza ativos com envelope comum, IDs/namespace estáveis, payload JSON inerte, validação de schemas registrada por tipo, referências tipadas e origem.
+- O grafo de dependências identifica referências ausentes, incompatibilidade de tipo e ciclos; a remoção de ativos referenciados exige decisão explícita.
+- `scripts/core/logic-library.js` carrega coleções legadas sem persistir migrações automaticamente, grava ativos nas coleções canônicas e preserva compatibilidade com as flags antigas.
+- `scripts/core/logic-runtime.js` executa fluxos declarativos em sequência, avalia condições pelo parser seguro existente, aplica permissões por callback, limita ações/condições/tempo e retorna diagnóstico por ação.
+- Funções e ações são registradas explicitamente por código confiável; o runtime não interpreta JavaScript importado.
+- O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
+
+### Limitações restantes
+
+- A interface ainda não apresenta Propriedades, Regras, Comportamentos, Fluxos e Funções em uma única área visual Lógica.
+- Os schemas específicos de cada subtipo precisam ser registrados pelo Core ou por módulos; o registry fornece o contrato e a validação plugável.
+- A execução de ações depende de executores registrados e de um verificador de permissões configurado pelo sistema/módulo.
