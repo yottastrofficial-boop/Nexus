@@ -1375,6 +1375,15 @@ assert.match(libraryView,/data-library-entry/,"Itens das coleções devem possui
 assert.match(libraryView,/genericCollectionLabels/,"Coleções complementares devem usar rótulos centralizados");
 assert.match(sheetListeners,/data-library-entry/,"A pesquisa global deve incluir itens das coleções complementares");
 assert.match(css,/nexus-library-tree-heading/,"A navegação deve ter hierarquia visual de pastas");
+assert.match(libraryView,/createLibraryFolder/,"A Biblioteca deve criar pastas personalizadas");
+assert.match(libraryView,/toggleLibraryFavorite/,"A Biblioteca deve permitir favoritar itens");
+assert.match(libraryView,/recordLibraryRecent/,"A seleção deve alimentar a lista de recentes");
+assert.match(libraryView,/data-library-save-metadata/,"O inspector deve salvar metadados editáveis");
+assert.match(libraryView,/data-library-collection-filter="favorites"/,"A Biblioteca deve oferecer filtro de favoritos");
+assert.match(libraryView,/data-library-collection-filter="recent"/,"A Biblioteca deve oferecer filtro de recentes");
+assert.match(template,/data-library-create-folder/,"A interface deve expor a criação de pastas");
+assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
+
 assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
 
 assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
