@@ -1,3 +1,16 @@
+## 1.0.0.86
+
+### Biblioteca — correção da apresentação dos cartões
+- Corrige a estrutura dos cartões para manter a prévia quadrada na parte superior e o título em uma faixa separada abaixo.
+- Neutraliza regras antigas de grid com duas colunas que podiam reposicionar o título ao lado do visualizador.
+- Aplica a mesma orientação vertical aos cartões das coleções genéricas, mantendo o nome legível e quebrando linhas quando necessário.
+- Mantém navegação, seleção, dados persistidos e configurações dos itens sem alterações.
+
+### Validação e limites
+- Acrescenta verificações automatizadas para a ordem vertical entre prévia e título.
+- A confirmação visual final ainda depende de abrir a Biblioteca no Foundry VTT 14 build 360.
+- Esta versão corrige a apresentação da Biblioteca; a área visual unificada Lógica e seus editores especializados continuam como próxima etapa.
+
 ## 1.0.0.85
 
 ### Núcleo Lógica
