@@ -34,7 +34,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
         preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
         fitSheetResourcePreview(preview,{w:78,h:78},78);
-      }else if(asset.type==="sheet-proficiency"){const marker=document.createElement("span");marker.className="nexus-library-proficiency-preview";const dot=document.createElement("i");marker.append(dot);preview.append(marker);}else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
+      }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
       else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
       else if(asset.type==="custom-card"){const area=document.createElement("span");area.className="nexus-library-area-preview";area.textContent="+";preview.append(area);}
       else if(asset.type==="sheet-section"){const marker=document.createElement("span");marker.className="nexus-library-marker-preview";marker.textContent="SEÇÃO";preview.append(marker);}
@@ -289,8 +289,47 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
       preview.textContent = JSON.stringify(safeSummary,null,2);
-      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,visualPreview,save,preview);
-      detail.append(heading,form);
+      const tabs = document.createElement("nav"); tabs.className = "nexus-library-detail-tabs"; tabs.setAttribute("aria-label", "Seções dos detalhes");
+      const makeTab = (key, icon, label, active = false) => {
+        const button = document.createElement("button"); button.type = "button"; button.className = "nexus-library-detail-tab";
+        button.dataset.libraryDetailTab = key; button.title = label; button.setAttribute("aria-label", label); button.setAttribute("aria-pressed", String(active));
+        const glyph = document.createElement("i"); glyph.className = icon; glyph.setAttribute("aria-hidden", "true"); button.append(glyph); return button;
+      };
+      const makePanel = (key, label, active = false) => {
+        const section = document.createElement("section"); section.className = "nexus-library-detail-panel"; section.dataset.libraryDetailPanel = key;
+        section.setAttribute("aria-label", label); section.hidden = !active; return section;
+      };
+      const appearancePanel = makePanel("appearance", "Aparência", true);
+      const dataPanel = makePanel("data", "Dados");
+      const behaviorPanel = makePanel("behavior", "Interações");
+      const advancedPanel = makePanel("advanced", "Avançado");
+      tabs.append(makeTab("appearance", "fa-solid fa-palette", "Aparência", true), makeTab("data", "fa-solid fa-database", "Dados"), makeTab("behavior", "fa-solid fa-diagram-project", "Interações"), makeTab("advanced", "fa-solid fa-sliders", "Avançado"));
+      appearancePanel.append(visualPreview);
+      dataPanel.append(nameLabel, descriptionLabel, tagsLabel, folderLabel);
+      if (collection === "properties") {
+        const payload = entry.payload ?? entry;
+        const details = document.createElement("dl"); details.className = "nexus-library-property-summary";
+        for (const [labelText, value] of [["Caminho", payload.path ?? payload.key], ["Tipo", payload.valueType ?? payload.type], ["Valor padrão", payload.defaultValue]]) {
+          if (value === undefined || value === null || value === "") continue;
+          const term = document.createElement("dt"); term.textContent = labelText;
+          const description = document.createElement("dd"); description.textContent = typeof value === "object" ? JSON.stringify(value) : String(value);
+          details.append(term, description);
+        }
+        if (details.childElementCount) dataPanel.append(details);
+      }
+      behaviorPanel.append(...Array.from(visualPreview.querySelectorAll(".nexus-library-logic-preview")));
+      advancedPanel.append(preview);
+      form.append(tabs, appearancePanel, dataPanel, behaviorPanel, advancedPanel, save);
+      tabs.addEventListener("click", event => {
+        const button = event.target.closest("[data-library-detail-tab]");
+        if (!button || !tabs.contains(button)) return;
+        const selected = button.dataset.libraryDetailTab;
+        tabs.querySelectorAll("[data-library-detail-tab]").forEach(tab => {
+          const active = tab === button; tab.classList.toggle("active", active); tab.setAttribute("aria-pressed", String(active));
+        });
+        form.querySelectorAll("[data-library-detail-panel]").forEach(section => { section.hidden = section.dataset.libraryDetailPanel !== selected; });
+      });
+      detail.append(heading, form);
     };
     panel.addEventListener("click", async event => {
       const customFolder = event.target.closest("[data-library-custom-folder]");
@@ -350,6 +389,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
           renderGenericCollection(collection, true);
+          const refreshedCard = panel.querySelector('[data-library-entry="' + entryId + '"][data-library-collection="' + collection + '"]');
+          if (refreshedCard) await showGenericDetails(collection, entryId, refreshedCard);
           ui.notifications.info("Metadados salvos.");
         } catch (error) { ui.notifications.error(`Não foi possível salvar: ${error.message}`); }
         return;
