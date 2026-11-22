@@ -1,3 +1,22 @@
+## 1.0.0.82
+
+### Biblioteca — reconstrução da interface e persistência
+
+- Reconstrói a janela da Biblioteca com estrutura fixa e consistente: barra superior, busca/filtros, navegação lateral, área central de cards e inspector contextual.
+- Todas as categorias passam a usar o mesmo padrão de layout, com rolagem independente e limites explícitos para miniaturas, cards e detalhes.
+- Corrige a sobreposição vertical e a disputa entre regras antigas de grid/flex que causavam a navegação e os cards a ocuparem áreas incompatíveis.
+- Permite salvar a configuração de um asset diretamente do inspector como modelo reutilizável, antes mesmo de inseri-lo na ficha.
+- Centraliza a persistência de componentes/cards, grupos/blocos, layouts, temas e coleções no armazenamento unificado da Biblioteca.
+- Mantém sincronização das flags legadas para compatibilidade com leitores existentes e migração progressiva.
+- Salvamento de metadados das coleções passa a criar/atualizar sempre o armazenamento canônico.
+- Mantém a separação entre modelo e instância: alterações aplicadas na ficha não modificam o modelo salvo.
+- Adiciona testes de regressão para persistência canônica e compatibilidade legada.
+
+### Validação e limites
+
+- Validação de pacote, sintaxe, templates, estilos e testes de regressão automatizados aprovada.
+- A aparência e os fluxos precisam de confirmação visual dentro do Foundry VTT 14 build 360; o screenshot do cliente real ainda é necessário para validar dimensões, rolagem, foco e interação.
+
 ## 1.0.0.81
 
 ### Biblioteca — janela unificada estilo Explorador
