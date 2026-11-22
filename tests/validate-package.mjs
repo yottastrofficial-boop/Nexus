@@ -1386,7 +1386,7 @@ assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar 
 assert.match(template,/data-library-custom-folders/,"Pastas personalizadas devem aparecer na navegação lateral");
 assert.match(libraryView,/renderCustomFolderTree/,"A navegação deve refletir as pastas salvas");
 assert.match(sheetListeners,/data-library-layout-override/,"O inspector de layouts deve expor overrides");
-assert.match(actorSheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
+assert.match(sheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
 assert.match(css,/nexus-library-layout-overrides/,"Os controles de override devem seguir o padrão visual do inspector");
 
 
