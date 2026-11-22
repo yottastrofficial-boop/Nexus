@@ -249,7 +249,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
         const text=card.dataset.libraryAsset??"",matchText=!query||text.includes(query),matchTag=tag==="all"||text.includes(tag);
         const matchFolder=card.dataset.libraryCategory===(sheet._libraryFolder??"core");
-        card.hidden=scope!=="core"||!(matchText&&matchTag&&matchFolder);if(!card.hidden)visible++;
+        const matchSource=(card.dataset.librarySource??"core")===scope;
+        card.hidden=scope==="personal"||!(matchText&&matchTag&&matchFolder&&matchSource);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
@@ -263,10 +264,10 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
       const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
-      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
+      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=scope!=="personal"||(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query));});
       const count=libraryPanel?.querySelector("[data-library-count]");
-      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
-      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
+      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"elemento":"elementos"}`:`${visible} ${visible===1?"elemento":"elementos"}`;
+      const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Pessoais":"Padrão";
     };
     const resourcePaths = (() => {
       const paths = [];
@@ -472,7 +473,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const title=document.createElement("strong");title.className="nexus-library-detail-title";
         title.textContent=custom?((game.user?.getFlag?.("nexus","libraryThemes")??[]).find(item=>item.id===themeId)?.name??"Tema personalizado"):(themeId==="nexus-dark"?"NEXUS Escuro":themeId);
         heading.append(title);
-        const note=document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Edite uma cópia desta paleta. Os temas padrão nunca são sobrescritos.";
         const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
         const previewTitle=document.createElement("strong");previewTitle.textContent="Prévia do tema";preview.append(previewTitle);
         const swatches=document.createElement("div");swatches.className="nexus-library-theme-preview-swatches";
@@ -500,10 +500,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
           const title = document.createElement("strong"); title.className = "nexus-library-detail-title"; title.textContent = entry.name || "Layout sem nome"; heading.append(title);
           const layout = entry.layout ?? {};
-          const summary = document.createElement("p"); summary.className = "nexus-library-definition-note";
+          const summary = document.createElement("p"); summary.className = "nexus-library-summary-meta";
           summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
-          const note = document.createElement("p"); note.className = "nexus-library-definition-note";
-          note.textContent = "Ajuste esta cópia antes de adicioná-la. O modelo salvo permanece inalterado.";
           const editor = document.createElement("div"); editor.className = "nexus-library-layout-overrides";
           const fields = [["name","Nome", "text", entry.name ?? layout.name ?? ""],["width","Largura", "number", layout.width ?? 1200],["height","Altura", "number", layout.height ?? 700]];
           for (const [key,label,type,value] of fields) {
@@ -518,7 +516,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           }
           const actions = document.createElement("div"); actions.className = "nexus-library-layout-actions";
           const apply = document.createElement("button"); apply.type = "button"; apply.dataset.libraryAddLayout = entry.id; apply.textContent = "Adicionar cópia à ficha"; actions.append(apply);
-          detail.append(heading, summary, note, editor, actions);
+          detail.append(heading, summary, editor, actions);
         }
         return;
       }
@@ -663,7 +661,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
         const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
         const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
-        const notice=document.createElement("small");notice.className="nexus-library-definition-note";notice.textContent="Você está editando uma cópia de configuração. O modelo salvo permanece intacto.";
+        
         const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
         const previewTitle=document.createElement("strong");previewTitle.textContent=String(saved.settings?.customLabel||saved.settings?.sheetContent1||saved.settings?.text||saved.label||"Prévia");preview.append(previewTitle);
         const previewMeta=document.createElement("small");previewMeta.textContent="Pré-visualização da configuração que será inserida";preview.append(previewMeta);
@@ -759,7 +757,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const summary = document.createElement("p");
         const nestedCount = Array.isArray(saved.groups) ? Math.max(0, saved.groups.length - 1) : 0;
         summary.textContent = `${saved.components?.length ?? 0} componentes · ${nestedCount} subgrupos`;
-        const note = document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Ajustes abaixo valem somente para a cópia inserida. O grupo salvo não será alterado.";
         const fields = document.createElement("div");fields.className="nexus-library-definition-fields";
         const root = (saved.groups??[]).find(item=>!item.parentGroupId)??{};
         const controls = [

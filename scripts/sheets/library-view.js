@@ -28,7 +28,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
       card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
-      card.dataset.libraryCategory=asset.category;card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
+      card.dataset.libraryCategory=asset.category;card.dataset.librarySource=asset.source??"core";card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
       const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
       if(asset.type==="sheet-resource"){
         const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
@@ -86,7 +86,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     sheet._libraryRenderSavedFlows=renderSavedFlows;
     renderSavedFlows();
     const genericCollectionLabels = {
-      templates: "Modelos de ficha", assets: "Assets salvos", media: "Mídia",
+      templates: "Predefinições", assets: "Componentes salvos", media: "Mídia",
       styles: "Estilos visuais", rules: "Regras", behaviors: "Comportamentos"
     };
     const genericCollectionIcons = {
@@ -146,6 +146,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         if (query && !haystack.includes(query)) return false;
         if (filter === "favorites" && !preferences.favorites.includes(key)) return false;
         if (filter === "recent" && !preferences.recent.includes(key)) return false;
+        const sourceId = String(entry.sourceId ?? "");
+        const origin = entry.origin === "module" || entry.moduleId || sourceId.startsWith("module:") || sourceId.startsWith("module.") ? "module"
+          : entry.origin === "extra" || entry.isExtra || sourceId.startsWith("extra:") || sourceId.startsWith("extra.") ? "extra"
+          : entry.origin === "core" || sourceId.startsWith("nexus:") || sourceId.startsWith("core:") ? "core" : "mine";
+        const originFilter = panel.querySelector("[data-library-origin-filter].active")?.dataset.libraryOriginFilter ?? "all";
+        if (originFilter !== "all" && origin !== originFilter) return false;
         if (activeFolder && preferences.assignments[key] !== activeFolder) return false;
         return true;
       });
@@ -208,8 +214,6 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
       folderSelect.value = preferences.assignments[`${collection}:${entry.id}`] ?? ""; folderLabel.append(folderSelect);
       const save = document.createElement("button"); save.type = "button"; save.dataset.librarySaveMetadata = ""; save.textContent = "Salvar metadados";
-      const info = document.createElement("small"); info.className = "nexus-library-definition-note";
-      info.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
       const visualPreview = document.createElement("div"); visualPreview.className = "nexus-library-type-preview";
       if (collection === "media") {
         const source = String(entry.path ?? entry.url ?? entry.src ?? "");
@@ -242,7 +246,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
       preview.textContent = JSON.stringify(safeSummary,null,2);
-      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,info,preview);
+      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,preview);
       detail.append(heading,form);
     };
     panel.addEventListener("click", async event => {
@@ -308,12 +312,16 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       panel.querySelectorAll("[data-library-collection-filter]").forEach(item => item.classList.toggle("active", item === button));
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     }));
+    panel.querySelectorAll("[data-library-origin-filter]").forEach(button => button.addEventListener("click", () => {
+      panel.querySelectorAll("[data-library-origin-filter]").forEach(item => item.classList.toggle("active", item === button));
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
+    }));
     panel.querySelector("[data-library-collection-folder]")?.addEventListener("change", () => {
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     });
     const activateSection=(key)=>{
       sheet._librarySection=key;
-      panel.querySelectorAll("[data-library-section]").forEach(button=>{const sameSection=button.dataset.librarySection===key;const sameScope=!button.dataset.libraryScope||button.dataset.libraryScope===sheet._libraryAssetScope;const active=sameSection&&sameScope;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+      panel.querySelectorAll("[data-library-section]").forEach(button=>{const sameSection=button.dataset.librarySection===key;const sameScope=button.dataset.libraryScope ? button.dataset.libraryScope===sheet._libraryAssetScope : !panel.querySelector('[data-library-section="' + key + '"][data-library-scope]');const active=sameSection&&sameScope;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{
         const isGeneric = key.startsWith("collection:");
         section.hidden = isGeneric
@@ -321,7 +329,13 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           : section.dataset.librarySectionPanel !== key;
       });
       if(key.startsWith("collection:")) renderGenericCollection(key.slice("collection:".length));
-      if(key==="assets")sheet._libraryApplyFilter?.();
+      if(key==="assets") {
+        sheet._libraryApplyFilter?.();
+        const empty = panel.querySelector("[data-library-source-empty]");
+        const scope = sheet._libraryAssetScope ?? "core";
+        const hasItems = [...panel.querySelectorAll("[data-library-asset]")].some(card => !card.hidden);
+        if (empty) { empty.hidden = hasItems || scope === "personal"; empty.textContent = scope === "modules" ? "Nenhum elemento de módulo foi disponibilizado." : scope === "extras" ? "Nenhum elemento extra foi disponibilizado." : "Não há elementos nesta origem ainda."; }
+      }
       if(key==="themes"){
         const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
         const cards=[...panel.querySelectorAll("[data-library-theme],[data-library-custom-theme]")];let visible=0;
@@ -338,18 +352,17 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>{
       if (button.dataset.libraryScope) {
         sheet._libraryAssetScope = button.dataset.libraryScope;
-        panel.querySelectorAll("[data-library-scope]").forEach(item => item.classList.toggle("active", item === button));
+        folderNav.hidden = sheet._libraryAssetScope !== "core";
+        panel.querySelectorAll("[data-library-scope]").forEach(item => {
+          const active = item.dataset.libraryScope === sheet._libraryAssetScope;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
       }
       activateSection(button.dataset.librarySection);
     }));
     panel.querySelector("[data-library-section-panel='collection']")?.setAttribute("data-library-section-panel","collection");
     activateSection(sheet._librarySection ?? "assets");
-    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
-      sheet._libraryAssetScope=button.dataset.libraryScope;
-      panel.querySelectorAll("[data-library-scope]").forEach(item=>item.classList.toggle("active",item===button));
-      folderNav.hidden=sheet._libraryAssetScope!=="core";
-      sheet._libraryApplyFilter?.();
-    }));
     folderNav.addEventListener("click",event=>{
       const button=event.target.closest("[data-library-folder]");if(!button)return;
       sheet._libraryFolder=button.dataset.libraryFolder;
