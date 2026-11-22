@@ -698,8 +698,8 @@ assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXU
 assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
 assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
 assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve manter o Indicador – Barra");
-assert.match(libraryCatalog, /currentPath: "resources\.pv\.value"/);
-assert.match(libraryCatalog, /maxPath: "resources\.pv\.max"/);
+assert.match(libraryCatalog, /currentPath: ""/, "A barra neutra não deve vincular automaticamente o recurso PV");
+assert.match(libraryCatalog, /maxPath: ""/, "A barra neutra não deve vincular automaticamente o máximo de PV");
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
 assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
