@@ -7460,3 +7460,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-type-preview code { max-width:100%; padding:8px; overflow-wrap:anywhere; color:#cbd8e8; background:#111a25; border-radius:5px; font-size:10px; }
 .nexus-library-style-swatch { display:grid; justify-items:center; gap:3px; min-width:48px; color:#aebdce; font-size:8px; }
 .nexus-library-style-swatch i { width:32px; height:32px; border:1px solid #61748a; border-radius:6px; }
+
+.nexus-library-layout-overrides { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:10px 12px; }
+.nexus-library-layout-overrides label { display:grid; gap:4px; color:#aebdce; font-size:10px; }
+.nexus-library-layout-overrides label:first-child { grid-column:1/-1; }
+.nexus-library-layout-overrides input { width:100%; min-width:0; min-height:29px; padding:5px 7px; border:1px solid #3b4b5e; border-radius:5px; color:#e2eaf3; background:#111a25; font-size:11px; }
+.nexus-library-layout-overrides input[type="color"] { padding:2px; }
