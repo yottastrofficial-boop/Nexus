@@ -1,7 +1,13 @@
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
+import { createMediaFormatRegistry } from "./core/media-format-registry.js";
 
 Hooks.once("init", () => {
+  // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
+  game.nexus ??= {};
+  game.nexus.media ??= {};
+  game.nexus.media.formats = createMediaFormatRegistry();
+
   game.settings.register("nexus","interactionLibrary",{
     name:"Biblioteca de fluxos",
     scope:"client",
