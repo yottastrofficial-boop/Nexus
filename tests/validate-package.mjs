@@ -674,7 +674,7 @@ const loadGroup = findPropertyPickerNode(canonicalIdentityAndLoad, "encumbrance"
 assert.deepEqual([...loadGroup.children.keys()].sort(), ["base", "bonus", "capacity", "current", "overloaded"], "Carga deve exibir propriedades diretamente em um único grupo");
 assert.ok([...loadGroup.children.values()].every(node => node.entry && node.children.size === 0), "Carga não deve criar subgrupos de propriedade única");
 assert.equal(findPropertyPickerNode(propertyTree, "progression").children.get("level").entry.path, "identity.level", "Nível deve ficar em Progressão sem mudar o caminho salvo");
-assert.equal(manifest.compatibility.verified, "14", "Versão verificada do Foundry incorreta");
+assert.equal(manifest.compatibility.verified, "14.360", "A versão verificada deve corresponder ao build 360 do Foundry V14");
 assert.match(manifest.manifest, /raw\.githubusercontent\.com\/yottastrofficial-boop\/Nexus\/main\/manifest\.json$/,
   "O manifesto embutido deve apontar para o canal estável de atualizações");
 assert.equal(stableManifest.id, manifest.id, "O manifesto estável deve identificar o mesmo sistema");
