@@ -138,6 +138,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         folderSelect.value = preferences.folders.some(item => item.id === selected) ? selected : "";
       }
       const activeFolder = folderSelect?.value ?? folderId;
+      renderCustomFolderTree(collection);
       const visible = entries.filter(entry => {
         const key = `${collection}:${entry.id}`;
         const haystack = [entry.name,entry.label,entry.title,entry.description,entry.type,entry.sourceId, ...(Array.isArray(entry.tags) ? entry.tags : [])]
