@@ -290,7 +290,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors" };
           const legacyFlag = legacyFlagByCollection[collection];
           if (legacyFlag) await game.user.setFlag("nexus", legacyFlag, store.collections[collection]);
-          if (game.user.getFlag?.("nexus", "libraryStore")) await writeNexusLibraryStore(game.user, store);
+          await writeNexusLibraryStore(game.user, store);
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
           renderGenericCollection(collection, true);
