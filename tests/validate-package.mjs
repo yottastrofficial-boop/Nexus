@@ -1370,7 +1370,7 @@ assert.match(template,/data-library-section="collection:styles"/,"A navegação 
 assert.match(template,/data-library-section="collection:rules"/,"A navegação deve expor regras");
 assert.match(template,/data-library-section="collection:behaviors"/,"A navegação deve expor comportamentos");
 assert.match(template,/data-library-section-panel="collection"/,"Coleções complementares devem compartilhar um único painel");
-assert.match(libraryView,/readNexusLibraryStore\(game\.user, legacyFlags\)/,"Coleções devem ser lidas pelo contrato unificado com fallback legado");
+assert.match(libraryView,/readNexusLibraryStore\(game\.user, getLegacyLibraryFlags\(\)\)/,"Coleções devem ser lidas pelo contrato unificado com fallback legado");
 assert.match(libraryView,/data-library-entry/,"Itens das coleções devem possuir seleção contextual");
 assert.match(libraryView,/genericCollectionLabels/,"Coleções complementares devem usar rótulos centralizados");
 assert.match(sheetListeners,/data-library-entry/,"A pesquisa global deve incluir itens das coleções complementares");
