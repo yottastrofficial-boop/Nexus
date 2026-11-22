@@ -31,8 +31,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       card.dataset.libraryCategory=asset.category;card.dataset.librarySource=asset.source??"core";card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
       const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
       if(asset.type==="sheet-resource"){
-        const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
-        preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1??code,current:32,max:40,color,showValues:true}));
+        const code=String(asset.template?.sheetCode??"").toUpperCase(),color=asset.template?.sheetColor??"#78b7e8";
+        preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1||"Recurso",current:32,max:40,color,showValues:false}));
         fitSheetResourcePreview(preview,{w:78,h:78},78);
       }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
       else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
@@ -125,7 +125,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const preferences = getLibraryPreferences();
       renderCustomFolderTree(collection);
       const query = searchInput?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
-      const filter = panel.querySelector("[data-library-collection-filter].active")?.dataset.libraryCollectionFilter ?? "all";
+      const filter = panel.querySelector("[data-library-collection-filter]")?.value ?? "all";
       const folderId = panel.querySelector("[data-library-collection-folder]")?.value ?? "";
       const folderSelect = panel.querySelector("[data-library-collection-folder]");
       if (folderSelect) {
@@ -150,7 +150,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const origin = entry.origin === "module" || entry.moduleId || sourceId.startsWith("module:") || sourceId.startsWith("module.") ? "module"
           : entry.origin === "extra" || entry.isExtra || sourceId.startsWith("extra:") || sourceId.startsWith("extra.") ? "extra"
           : entry.origin === "core" || sourceId.startsWith("nexus:") || sourceId.startsWith("core:") ? "core" : "mine";
-        const originFilter = panel.querySelector("[data-library-origin-filter].active")?.dataset.libraryOriginFilter ?? "all";
+        const originFilter = panel.querySelector("[data-library-origin-filter]")?.value ?? "all";
         if (originFilter !== "all" && origin !== originFilter) return false;
         if (activeFolder && preferences.assignments[key] !== activeFolder) return false;
         return true;
@@ -401,10 +401,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
     });
     const detailCollection = () => panel.querySelector("[data-library-generic-details]")?.dataset.selectedCollection ?? panel.querySelector("[data-library-section].active")?.dataset.librarySection?.replace("collection:","") ?? "";
-    panel.querySelectorAll("[data-library-collection-filter]").forEach(button => button.addEventListener("click", () => {
-      panel.querySelectorAll("[data-library-collection-filter]").forEach(item => item.classList.toggle("active", item === button));
+    panel.querySelector("[data-library-collection-filter]")?.addEventListener("change", () => {
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
-    }));
+    });
     panel.querySelectorAll("[data-library-collection-view-mode]").forEach(button => button.addEventListener("click", () => {
       sheet._libraryCollectionViewMode = button.dataset.libraryCollectionViewMode === "list" ? "list" : "grid";
       const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
@@ -413,10 +412,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       sheet._libraryCardSize = ["small","medium","large"].includes(event.target.value) ? event.target.value : "medium";
       const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
     });
-    panel.querySelectorAll("[data-library-origin-filter]").forEach(button => button.addEventListener("click", () => {
-      panel.querySelectorAll("[data-library-origin-filter]").forEach(item => item.classList.toggle("active", item === button));
+    panel.querySelector("[data-library-origin-filter]")?.addEventListener("change", () => {
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
-    }));
+    });
     panel.querySelector("[data-library-collection-folder]")?.addEventListener("change", () => {
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     });
