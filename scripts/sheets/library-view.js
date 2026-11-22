@@ -146,6 +146,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         if (query && !haystack.includes(query)) return false;
         if (filter === "favorites" && !preferences.favorites.includes(key)) return false;
         if (filter === "recent" && !preferences.recent.includes(key)) return false;
+        const sourceId = String(entry.sourceId ?? "");
+        const origin = entry.origin === "module" || entry.moduleId || sourceId.startsWith("module:") || sourceId.startsWith("module.") ? "module"
+          : entry.origin === "extra" || entry.isExtra || sourceId.startsWith("extra:") || sourceId.startsWith("extra.") ? "extra"
+          : entry.origin === "core" || sourceId.startsWith("nexus:") || sourceId.startsWith("core:") ? "core" : "mine";
+        const originFilter = panel.querySelector("[data-library-origin-filter].active")?.dataset.libraryOriginFilter ?? "all";
+        if (originFilter !== "all" && origin !== originFilter) return false;
         if (activeFolder && preferences.assignments[key] !== activeFolder) return false;
         return true;
       });
@@ -306,6 +312,10 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       panel.querySelectorAll("[data-library-collection-filter]").forEach(item => item.classList.toggle("active", item === button));
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     }));
+    panel.querySelectorAll("[data-library-origin-filter]").forEach(button => button.addEventListener("click", () => {
+      panel.querySelectorAll("[data-library-origin-filter]").forEach(item => item.classList.toggle("active", item === button));
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
+    }));
     panel.querySelector("[data-library-collection-folder]")?.addEventListener("change", () => {
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     });
@@ -319,7 +329,13 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           : section.dataset.librarySectionPanel !== key;
       });
       if(key.startsWith("collection:")) renderGenericCollection(key.slice("collection:".length));
-      if(key==="assets")sheet._libraryApplyFilter?.();
+      if(key==="assets") {
+        sheet._libraryApplyFilter?.();
+        const empty = panel.querySelector("[data-library-source-empty]");
+        const scope = sheet._libraryAssetScope ?? "core";
+        const hasItems = [...panel.querySelectorAll("[data-library-asset]")].some(card => !card.hidden);
+        if (empty) { empty.hidden = hasItems || scope === "personal"; empty.textContent = scope === "modules" ? "Nenhum elemento de módulo foi disponibilizado." : scope === "extras" ? "Nenhum elemento extra foi disponibilizado." : "Não há elementos nesta origem ainda."; }
+      }
       if(key==="themes"){
         const query=panel.querySelector("[data-library-search]")?.value.trim().toLocaleLowerCase("pt-BR")??"";
         const cards=[...panel.querySelectorAll("[data-library-theme],[data-library-custom-theme]")];let visible=0;
@@ -347,12 +363,6 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     }));
     panel.querySelector("[data-library-section-panel='collection']")?.setAttribute("data-library-section-panel","collection");
     activateSection(sheet._librarySection ?? "assets");
-    panel.querySelectorAll("[data-library-scope]").forEach(button=>button.addEventListener("click",()=>{
-      sheet._libraryAssetScope=button.dataset.libraryScope;
-      panel.querySelectorAll("[data-library-scope]").forEach(item=>item.classList.toggle("active",item===button));
-      folderNav.hidden=sheet._libraryAssetScope!=="core";
-      sheet._libraryApplyFilter?.();
-    }));
     folderNav.addEventListener("click",event=>{
       const button=event.target.closest("[data-library-folder]");if(!button)return;
       sheet._libraryFolder=button.dataset.libraryFolder;
