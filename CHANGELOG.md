@@ -1,6 +1,7 @@
 ## Em desenvolvimento — revisão da Biblioteca e do Inspector
 
 - Reorganiza o Inspector em seções compactas com navegação por ícones para aparência, dados, interações e opções avançadas.
+- Adiciona exclusão de pastas pessoais pelo menu contextual; os itens permanecem na Biblioteca e apenas perdem a associação com a pasta.
 - Atualiza o Inspector após salvar metadados para evitar exibir dados antigos.
 - Substitui filtros textuais repetidos por seletores compactos e mantém os controles de grade/lista por ícones.
 - Consolida regras visuais da grade, cartões e rolagem com uma camada de estilos compartilhada.
