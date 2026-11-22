@@ -1481,9 +1481,12 @@ assert.match(sheetCode, /evaluateNexusExpression\(formulaSource/, "Interpolaçã
 
 
 const proficiencyAsset = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === "core-skill-proficiency");
-assert.ok(proficiencyAsset, "A Biblioteca deve disponibilizar o marcador de proficiência");
-assert.equal(proficiencyAsset.template.actionPath, "skills.athletics.proficientLevel", "O marcador da Biblioteca deve apontar para o valor numérico canônico");
-assert.equal(proficiencyAsset.type, "sheet-proficiency", "O marcador deve usar o componente dedicado");
+assert.equal(proficiencyAsset, undefined, "O marcador de proficiência não deve ser oferecido como asset independente na Biblioteca");
+const neutralResourceBar = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key === "core-health-bar");
+assert.equal(neutralResourceBar.template.currentPath, "", "A barra genérica não deve vir vinculada a PV ou outro recurso");
+assert.equal(neutralResourceBar.template.maxPath, "", "O valor máximo da barra genérica deve ser configurado na instância");
+assert.equal(neutralResourceBar.template.sheetCode, "", "A barra genérica não deve carregar o código PV por padrão");
+assert.equal(neutralResourceBar.template.sheetContent1, "Recurso", "A barra genérica deve usar um rótulo neutro");
 const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, combat: { mb: 2 }, skills: { athletics: { proficientLevel: 2 } } } };
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
@@ -2434,7 +2437,19 @@ assert.match(libraryView,/nexus-library-logic-preview/,"O Inspector deve apresen
 assert.match(css,/data-view-mode="list"/,"A visualização em lista deve possuir layout próprio");
 assert.match(css,/data-card-size="large"/,"A grade deve permitir miniaturas maiores");
 
-assert.match(libraryView,/folderLabel,visualPreview,save,preview/,"O Inspector deve exibir a prévia visual antes das ações de metadados");
+assert.match(libraryView,/data-library-detail-tab/,"O Inspector deve oferecer navegação compacta por ícones");
+assert.match(libraryView,/data-library-detail-panel/,"O Inspector deve separar conteúdo por seção");
+assert.match(libraryView,/refreshedCard[\s\S]*showGenericDetails/,"O Inspector deve atualizar os dados após salvar metadados");
+assert.match(libraryView,/makePanel\("appearance"/,"O Inspector deve oferecer seção de aparência");
+assert.match(libraryView,/makePanel\("data"/,"O Inspector deve oferecer seção de dados");
+assert.match(libraryView,/makePanel\("behavior"/,"O Inspector deve oferecer seção de interações");
+assert.match(libraryView,/makePanel\("advanced"/,"O Inspector deve oferecer seção avançada");
 assert.match(libraryView,/"libraryProperties"[\s\S]*"libraryFunctions"/,"A leitura de compatibilidade deve incluir as flags legadas de Propriedades e Funções");
 assert.match(libraryView,/registry\?\.register/,"Alterações de metadados lógicos devem atualizar o registry em memória");
 assert.match(template,/data-library-card-size/,"A seleção de tamanho dos cartões deve estar disponível na interface");
+assert.match(template,/data-library-origin-filter/,"A origem deve ser selecionada por controle compacto");
+assert.match(template,/data-library-collection-filter/,"Favoritos e recentes devem ser selecionados por controle compacto");
+assert.doesNotMatch(template,/data-library-origin-filter="core"/,"A interface não deve manter botões textuais repetidos para a origem");
+assert.match(css,/scrollbar-gutter:stable/,"A Biblioteca deve reservar espaço para a barra de rolagem");
+assert.match(css,/nexus-library-detail-tabs/,"O Inspector deve possuir navegação lateral compacta");
+assert.match(css,/nexus-library-generic-items\[data-view-mode="list"\]/,"A lista deve possuir apresentação própria");
