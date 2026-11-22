@@ -336,7 +336,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>{
       if (button.dataset.libraryScope) {
         sheet._libraryAssetScope = button.dataset.libraryScope;
-        panel.querySelectorAll("[data-library-scope]").forEach(item => item.classList.toggle("active", item === button));
+        folderNav.hidden = sheet._libraryAssetScope !== "core";
+        panel.querySelectorAll("[data-library-scope]").forEach(item => {
+          const active = item.dataset.libraryScope === sheet._libraryAssetScope;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
       }
       activateSection(button.dataset.librarySection);
     }));
