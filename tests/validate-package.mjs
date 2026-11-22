@@ -2298,7 +2298,7 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(preferences.assignments["assets:meter-1"], undefined);
   assert.equal(preferences.folders.length, 0);
   const malformed = normalizeLibraryPreferences({ folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
-  assert.deepEqual(malformed.favorites, ["x"]);
+  assert.deepEqual(malformed.favorites, []);
   assert.deepEqual(malformed.recent, ["assets:a"]);
 }
 
