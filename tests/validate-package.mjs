@@ -1,4 +1,4 @@
-import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
+import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores, readNexusLibraryCollection, writeNexusLibraryCollection } from "../scripts/core/library-store.js";
 import { createEmptyLibraryPreferences, normalizeLibraryPreferences, createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder } from "../scripts/core/library-preferences.js";
 import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides, applyLibraryLayoutOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
@@ -2281,6 +2281,26 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
 }
 
+
+/* Library repository writes cards and blocks to one canonical store while keeping legacy readers working. */
+{
+  const flags = { nexus: { libraryComponents: [{ id:"legacy-card", type:"custom-card", settings:{ text:"old" } }] } };
+  const user = {
+    getFlag(scope,key) { return flags[scope]?.[key]; },
+    async setFlag(scope,key,value) { flags[scope] ??= {}; flags[scope][key] = structuredClone(value); return value; }
+  };
+  const initial = readNexusLibraryCollection(user,"components");
+  assert.equal(initial.migrated,true);
+  assert.equal(initial.entries[0].id,"legacy-card");
+  const cards = [...initial.entries,{ id:"new-card", type:"custom-card", settings:{ text:"saved card", w:240, h:120 } }];
+  await writeNexusLibraryCollection(user,"components",cards);
+  assert.equal(flags.nexus.libraryStore.collections.components.length,2);
+  assert.equal(flags.nexus.libraryComponents.length,2);
+  const blocks = [{ id:"block-1", name:"Bloco", components:[{type:"custom-card",text:"A"}], groups:[{id:"root"}] }];
+  await writeNexusLibraryCollection(user,"groups",blocks);
+  assert.deepEqual(readNexusLibraryCollection(user,"groups").entries,blocks);
+  assert.deepEqual(flags.nexus.libraryGroups,blocks);
+}
 
 /* Library organization: custom folders, favorites, recent history and safe reassignment. */
 {
