@@ -2347,6 +2347,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   preferences = removeLibraryFolder(preferences, "folder-assets");
   assert.equal(preferences.assignments["assets:meter-1"], undefined);
   assert.equal(preferences.folders.length, 0);
+  assert.equal(preferences.assignments["assets:meter-1"], undefined,
+    "Excluir uma pasta deve limpar a associação sem excluir o item da coleção");
   const malformed = normalizeLibraryPreferences({ schemaVersion: 1, folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
   assert.deepEqual(malformed.favorites, ["x"]);
   assert.deepEqual(malformed.recent, ["assets:a"]);
@@ -2455,3 +2457,6 @@ assert.match(css,/\.application\.nexus-window \{ min-width: 800px !important; \}
 assert.doesNotMatch(css,/\.application\.nexus-window \{ min-width: 800px !important; min-height: 800px !important; \}/,"A janela não deve impor altura mínima fixa ao estado minimizado");
 assert.match(css,/nexus-library-detail-tabs/,"O Inspector deve possuir navegação lateral compacta");
 assert.match(css,/nexus-library-generic-items\[data-view-mode="list"\]/,"A lista deve possuir apresentação própria");
+assert.match(libraryView,/addEventListener\("contextmenu"/,"Pastas pessoais devem oferecer menu contextual");
+assert.match(libraryView,/data-library-folder-delete/,"O menu contextual deve oferecer exclusão de pasta");
+assert.match(libraryView,/removeLibraryFolder\(getLibraryPreferences\(\), folderId\)/,"Excluir uma pasta deve preservar os itens e limpar somente suas atribuições");
