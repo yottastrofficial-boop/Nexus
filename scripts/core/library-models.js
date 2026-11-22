@@ -79,3 +79,25 @@ export function collectLibraryInstanceOverrides(definition, instance) {
   }
   return overrides;
 }
+
+
+/** Applies user-selected layout overrides to a fresh copy, never to the saved source. */
+export function applyLibraryLayoutOverrides(layout, overrides = {}) {
+  if (!layout || typeof layout !== "object" || Array.isArray(layout)) throw new Error("O layout salvo é inválido.");
+  const result = cloneSerializable(layout);
+  const name = String(overrides.name ?? "").trim();
+  if (name) result.name = name.slice(0, 32);
+  for (const key of ["width", "height"]) {
+    if (overrides[key] === undefined || overrides[key] === "") continue;
+    const value = Number(overrides[key]);
+    if (!Number.isFinite(value)) throw new Error(`A dimensão ${key} é inválida.`);
+    result[key] = Math.round(Math.min(5000, Math.max(320, value)));
+  }
+  for (const key of ["canvasColor", "cardColor", "accentColor", "highlightColor", "buttonColor"]) {
+    if (overrides[key] === undefined || overrides[key] === "") continue;
+    const color = String(overrides[key]).trim();
+    if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) throw new Error(`A cor ${key} é inválida.`);
+    result[key] = color;
+  }
+  return result;
+}
