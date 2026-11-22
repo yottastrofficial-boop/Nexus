@@ -502,8 +502,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           const layout = entry.layout ?? {};
           const summary = document.createElement("p"); summary.className = "nexus-library-summary-meta";
           summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
-          const note = document.createElement("p"); note.className = "nexus-library-definition-note";
-          note.textContent = "Ajuste esta cópia antes de adicioná-la. O modelo salvo permanece inalterado.";
           const editor = document.createElement("div"); editor.className = "nexus-library-layout-overrides";
           const fields = [["name","Nome", "text", entry.name ?? layout.name ?? ""],["width","Largura", "number", layout.width ?? 1200],["height","Altura", "number", layout.height ?? 700]];
           for (const [key,label,type,value] of fields) {
@@ -759,7 +757,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const summary = document.createElement("p");
         const nestedCount = Array.isArray(saved.groups) ? Math.max(0, saved.groups.length - 1) : 0;
         summary.textContent = `${saved.components?.length ?? 0} componentes · ${nestedCount} subgrupos`;
-        const note = document.createElement("small");note.className="nexus-library-definition-note";note.textContent="Ajustes abaixo valem somente para a cópia inserida. O grupo salvo não será alterado.";
         const fields = document.createElement("div");fields.className="nexus-library-definition-fields";
         const root = (saved.groups??[]).find(item=>!item.parentGroupId)??{};
         const controls = [
