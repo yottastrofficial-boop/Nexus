@@ -7699,3 +7699,12 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-panel-window:has(.nexus-library-panel) .nexus-library-header-actions { gap: 3px !important; }
   .nexus-panel-window:has(.nexus-library-panel) .nexus-library-count { display: none !important; }
 }
+
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-save-configured {
+  width:100%; min-height:36px; margin-top:4px; padding:7px 10px;
+  border:1px solid var(--nexus-panel-accent,#78b7e8); border-radius:6px;
+  color:#fff; background:var(--nexus-panel-card,#315b7d); font-size:10px; font-weight:700;
+}
+.nexus-panel-window:has(.nexus-library-panel) .nexus-library-save-configured:hover {
+  filter:brightness(1.12);
+}
