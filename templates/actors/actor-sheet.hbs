@@ -336,7 +336,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
               <div class="nexus-library-header-actions">
                 <span class="nexus-library-count" data-library-count>0 itens</span>
                 <button type="button" class="nexus-library-action-label" data-library-save-component title="Salvar o elemento selecionado no Canvas"><i class="fa-solid fa-bookmark" aria-hidden="true"></i><span>Salvar elemento</span></button>
-                <button type="button" class="nexus-library-action-label" data-library-save-layout title="Salvar a ficha atual como modelo"><i class="fa-solid fa-table-columns" aria-hidden="true"></i><span>Salvar ficha</span></button>
+                <button type="button" class="nexus-library-action-label" data-library-save-layout title="Salvar a ficha atual como modelo"><i class="fa-solid fa-table-columns" aria-hidden="true"></i><span>Salvar modelo de ficha</span></button>
                 <button type="button" data-library-copy-all aria-label="Copiar backup da biblioteca" title="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
                 <button type="button" data-library-export-all aria-label="Exportar biblioteca" title="Exportar biblioteca"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
                 <button type="button" data-library-import-all-code aria-label="Importar biblioteca por código" title="Importar por código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
@@ -350,21 +350,21 @@ remove legacy typography selects                  <label class="nexus-inspector-
             <div class="nexus-library-body">
               <nav class="nexus-library-section-tabs" aria-label="Navegação da biblioteca">
                 <div class="nexus-library-tree-heading">BIBLIOTECA</div>
-                <button type="button" class="active" data-library-scope="core" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i><span>Elementos NEXUS</span></button>
-                <button type="button" data-library-scope="personal" data-library-section="assets"><i class="fa-solid fa-user" aria-hidden="true"></i><span>Meus elementos e composições</span></button>
-                <button type="button" data-library-scope="modules" data-library-section="assets"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i><span>De módulos</span></button>
-                <button type="button" data-library-scope="extras" data-library-section="assets"><i class="fa-solid fa-shapes" aria-hidden="true"></i><span>Extras</span></button>
+                <button type="button" class="active" data-library-scope="core" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i><span>Padrão</span></button>
+                <button type="button" data-library-scope="personal" data-library-section="assets"><i class="fa-solid fa-user" aria-hidden="true"></i><span>Pessoais</span></button>
+                <button type="button" data-library-scope="modules" data-library-section="assets"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i><span>Módulos</span></button>
+                <button type="button" data-library-scope="extras" data-library-section="assets"><i class="fa-solid fa-shapes" aria-hidden="true"></i><span>Complementos</span></button>
                 <div class="nexus-library-tree-heading">CATEGORIAS</div>
-                <button type="button" data-library-section="flows"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i><span>Automações</span></button>
-                <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Aparências</span></button>
+                <button type="button" data-library-section="flows"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i><span>Fluxos</span></button>
+                <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Temas</span></button>
                 <button type="button" data-library-section="layouts"><i class="fa-solid fa-table-columns" aria-hidden="true"></i><span>Modelos de ficha</span></button>
                 <div class="nexus-library-tree-heading">OUTROS CONTEÚDOS</div>
-                <button type="button" data-library-section="collection:templates"><i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Modelos e predefinições</span></button>
-                <button type="button" data-library-section="collection:assets"><i class="fa-solid fa-cube" aria-hidden="true"></i><span>Elementos salvos</span></button>
+                <button type="button" data-library-section="collection:templates"><i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Predefinições</span></button>
+                <button type="button" data-library-section="collection:assets"><i class="fa-solid fa-cube" aria-hidden="true"></i><span>Componentes salvos</span></button>
                 <button type="button" data-library-section="collection:media"><i class="fa-solid fa-photo-film" aria-hidden="true"></i><span>Mídia</span></button>
-                <button type="button" data-library-section="collection:styles"><i class="fa-solid fa-swatchbook" aria-hidden="true"></i><span>Estilos</span></button>
+                <button type="button" data-library-section="collection:styles"><i class="fa-solid fa-swatchbook" aria-hidden="true"></i><span>Estilos visuais</span></button>
                 <button type="button" data-library-section="collection:rules"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i><span>Regras</span></button>
-                <button type="button" data-library-section="collection:behaviors"><i class="fa-solid fa-gears" aria-hidden="true"></i><span>Interações</span></button>
+                <button type="button" data-library-section="collection:behaviors"><i class="fa-solid fa-gears" aria-hidden="true"></i><span>Comportamentos</span></button>
                 <div class="nexus-library-tree-heading" data-library-custom-folder-heading hidden>MINHAS PASTAS</div>
                 <div class="nexus-library-custom-folder-tree" data-library-custom-folders></div>
               </nav>
@@ -376,30 +376,30 @@ remove legacy typography selects                  <label class="nexus-inspector-
                       <div class="nexus-library-assets" data-library-assets></div>
                       <p class="nexus-library-empty" data-library-source-empty hidden>Não há elementos nesta origem ainda.</p>
                       <section class="nexus-library-personal" data-library-personal hidden>
-                        <div class="nexus-library-personal-group"><div class="nexus-library-section-heading"><strong>Elementos salvos</strong><span>Configurações reutilizáveis criadas por você</span></div><div class="nexus-library-personal-grid" data-library-saved-components></div></div>
+                        <div class="nexus-library-personal-group"><div class="nexus-library-section-heading"><strong>Componentes salvos</strong><span>Configurações reutilizáveis criadas por você</span></div><div class="nexus-library-personal-grid" data-library-saved-components></div></div>
                         <div class="nexus-library-personal-group"><div class="nexus-library-section-heading nexus-library-group-heading"><strong>Composições</strong><span>Conjuntos de elementos e subgrupos reutilizáveis</span><button type="button" data-library-save-selected-group>Salvar composição selecionada</button><button type="button" data-library-import-group>Importar pacote</button><button type="button" data-library-import-group-file>Importar JSON</button></div><div class="nexus-library-saved-groups" data-library-saved-groups></div></div>
                       </section>
                     </main>
-                    <aside class="nexus-library-details" data-library-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-cube" aria-hidden="true"></i></span><strong>Inspector</strong><p>Selecione um elemento para visualizar, configurar, salvar ou inserir na ficha.</p></div></aside>
+                    <aside class="nexus-library-details" data-library-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-cube" aria-hidden="true"></i></span><strong>Detalhes e configuração</strong><p>Selecione um elemento para visualizar, configurar, salvar ou inserir na ficha.</p></div></aside>
                   </div>
                 </section>
                 <section class="nexus-library-section-panel" data-library-section-panel="flows" hidden>
                   <div class="nexus-library-workspace">
-                    <main class="nexus-library-main"><div class="nexus-library-section-heading"><strong>Automações salvas</strong><span>Gatilhos, condições e ações reutilizáveis</span></div><div class="nexus-library-flow-grid" data-library-flows></div></main>
-                    <aside class="nexus-library-details nexus-library-flow-details" data-library-flow-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span><strong>Detalhes da automação</strong><p>Selecione uma automação para consultar sua configuração e aplicá-la a um elemento.</p></div></aside>
+                    <main class="nexus-library-main"><div class="nexus-library-section-heading"><strong>Fluxos salvas</strong><span>Gatilhos, condições e ações reutilizáveis</span></div><div class="nexus-library-flow-grid" data-library-flows></div></main>
+                    <aside class="nexus-library-details nexus-library-flow-details" data-library-flow-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span><strong>Detalhes do fluxo</strong><p>Selecione um fluxo para consultar sua configuração e aplicá-lo a um componente.</p></div></aside>
                   </div>
                 </section>
                 <section class="nexus-library-section-panel" data-library-section-panel="themes" hidden>
                   <div class="nexus-library-workspace">
-                    <main class="nexus-library-main"><div class="nexus-library-section-heading"><strong>Aparências disponíveis</strong><span>Paletas e identidade visual</span></div><div class="nexus-library-assets nexus-library-theme-grid" data-library-themes></div></main>
-                    <aside class="nexus-library-details nexus-library-theme-details" data-library-theme-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-palette" aria-hidden="true"></i></span><strong>Detalhes da aparência</strong><p>Selecione um tema para pré-visualizar, personalizar, salvar como novo ou aplicar.</p></div></aside>
+                    <main class="nexus-library-main"><div class="nexus-library-section-heading"><strong>Temas disponíveis</strong><span>Paletas e identidade visual</span></div><div class="nexus-library-assets nexus-library-theme-grid" data-library-themes></div></main>
+                    <aside class="nexus-library-details nexus-library-theme-details" data-library-theme-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-palette" aria-hidden="true"></i></span><strong>Detalhes do tema</strong><p>Selecione um tema para visualizar, personalizar, salvar como novo ou aplicar.</p></div></aside>
                   </div>
                 </section>
                 <section class="nexus-library-section-panel" data-library-section-panel="layouts" hidden>
                   <div class="nexus-library-workspace">
                     <main class="nexus-library-main">
                       <div class="nexus-library-section-heading"><strong>Modelos de ficha</strong><span>Modelos de ficha com componentes, grupos e configurações</span></div>
-                      <div class="nexus-library-layout-toolbar"><button type="button" data-library-import-layout><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar layout</button><span>Use o botão Salvar ficha para guardar a configuração atual.</span></div>
+                      <div class="nexus-library-layout-toolbar"><button type="button" data-library-import-layout><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar modelo</button><span>Use o botão Salvar modelo de ficha para guardar a configuração atual.</span></div>
                       <div class="nexus-library-layouts" data-library-saved-layouts></div>
                     </main>
                     <aside class="nexus-library-details nexus-library-layout-details" data-library-layout-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-table-columns" aria-hidden="true"></i></span><strong>Detalhes do modelo</strong><p>Selecione um modelo para visualizar a composição e personalizar a cópia antes de inserir.</p></div></aside>
@@ -410,14 +410,14 @@ remove legacy typography selects                  <label class="nexus-inspector-
                     <main class="nexus-library-main">
                       <div class="nexus-library-section-heading"><strong data-library-collection-heading>Modelos de ficha</strong><span data-library-collection-count>Conteúdo salvo na Biblioteca</span></div>
                       <div class="nexus-library-collection-toolbar">
-                        <div class="nexus-library-origin-filters" role="group" aria-label="Filtrar origem"><button type="button" class="active" data-library-origin-filter="all">Todas as origens</button><button type="button" data-library-origin-filter="core">NEXUS</button><button type="button" data-library-origin-filter="module">Módulos</button><button type="button" data-library-origin-filter="extra">Extras</button><button type="button" data-library-origin-filter="mine">Criados por mim</button></div>
+                        <div class="nexus-library-origin-filters" role="group" aria-label="Filtrar origem"><button type="button" class="active" data-library-origin-filter="all">Todas</button><button type="button" data-library-origin-filter="core">NEXUS</button><button type="button" data-library-origin-filter="module">Módulos</button><button type="button" data-library-origin-filter="extra">Complementos</button><button type="button" data-library-origin-filter="mine">Pessoais</button></div>
                         <div class="nexus-library-collection-filters" role="group" aria-label="Filtrar itens"><button type="button" class="active" data-library-collection-filter="all">Todos</button><button type="button" data-library-collection-filter="favorites">Favoritos</button><button type="button" data-library-collection-filter="recent">Recentes</button></div>
                         <select data-library-collection-folder aria-label="Filtrar por pasta"><option value="">Todas as pastas</option></select>
                         <label class="nexus-library-folder-create"><input type="text" maxlength="80" placeholder="Nome da pasta" data-library-folder-name><button type="button" data-library-create-folder>Criar pasta</button></label>
                       </div>
                       <div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items></div>
                     </main>
-                    <aside class="nexus-library-details" data-library-generic-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-box-open" aria-hidden="true"></i></span><strong>Inspector de conteúdo</strong><p>Selecione um item para visualizar e editar seus metadados.</p></div></aside>
+                    <aside class="nexus-library-details" data-library-generic-details><div class="nexus-library-detail-placeholder"><span><i class="fa-solid fa-box-open" aria-hidden="true"></i></span><strong>Detalhes e configuração de conteúdo</strong><p>Selecione um item para visualizar e editar seus metadados.</p></div></aside>
                   </div>
                 </section>
               </div>
