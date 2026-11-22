@@ -1,7 +1,8 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
-import { readNexusLibraryStore } from "../core/library-store.js";
+import { readNexusLibraryStore, writeNexusLibraryStore } from "../core/library-store.js";
+import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
 
@@ -92,74 +93,165 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
       styles: "fa-solid fa-swatchbook", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears"
     };
-    const renderGenericCollection = collection => {
+    const getLegacyLibraryFlags = () => Object.fromEntries([
+      "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
+      "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
+    ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
+    const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
+    const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    const renderGenericCollection = (collection, keepSelection = false) => {
       const container = panel.querySelector("[data-library-generic-items]");
       const detail = panel.querySelector("[data-library-generic-details]");
       if (!container || !detail || !genericCollectionLabels[collection]) return;
-      const legacyFlags = Object.fromEntries([
-        "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
-        "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
-      ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
       let entries = [];
-      try {
-        const { store } = readNexusLibraryStore(game.user, legacyFlags);
-        entries = store.collections[collection] ?? [];
-      } catch (error) {
-        console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error);
-      }
+      try { entries = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store.collections[collection] ?? []; }
+      catch (error) { console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error); }
+      const preferences = getLibraryPreferences();
       const query = searchInput?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
-      container.replaceChildren();
+      const filter = panel.querySelector("[data-library-collection-filter].active")?.dataset.libraryCollectionFilter ?? "all";
+      const folderId = panel.querySelector("[data-library-collection-folder]")?.value ?? "";
+      const folderSelect = panel.querySelector("[data-library-collection-folder]");
+      if (folderSelect) {
+        const selected = folderSelect.value;
+        folderSelect.replaceChildren();
+        const all = document.createElement("option"); all.value = ""; all.textContent = "Todas as pastas"; folderSelect.append(all);
+        for (const folder of preferences.folders.filter(item => !item.collection || item.collection === collection)) {
+          const option = document.createElement("option"); option.value = folder.id; option.textContent = folder.name; folderSelect.append(option);
+        }
+        folderSelect.value = preferences.folders.some(item => item.id === selected) ? selected : "";
+      }
+      const activeFolder = folderSelect?.value ?? folderId;
       const visible = entries.filter(entry => {
-        const haystack = [entry.name,entry.label,entry.title,entry.description,entry.type,entry.sourceId]
+        const key = `${collection}:${entry.id}`;
+        const haystack = [entry.name,entry.label,entry.title,entry.description,entry.type,entry.sourceId, ...(Array.isArray(entry.tags) ? entry.tags : [])]
           .filter(value => value !== undefined && value !== null).join(" ").toLocaleLowerCase("pt-BR");
-        return !query || haystack.includes(query);
+        if (query && !haystack.includes(query)) return false;
+        if (filter === "favorites" && !preferences.favorites.includes(key)) return false;
+        if (filter === "recent" && !preferences.recent.includes(key)) return false;
+        if (activeFolder && preferences.assignments[key] !== activeFolder) return false;
+        return true;
       });
+      container.replaceChildren();
       for (const entry of visible) {
-        const card = document.createElement("button");
-        card.type = "button"; card.className = "nexus-library-generic-item";
-        card.dataset.libraryEntry = entry.id; card.dataset.libraryCollection = collection;
+        const key = `${collection}:${entry.id}`;
+        const card = document.createElement("article"); card.className = "nexus-library-generic-card";
+        const select = document.createElement("button"); select.type = "button"; select.className = "nexus-library-generic-item";
+        select.dataset.libraryEntry = entry.id; select.dataset.libraryCollection = collection;
         const icon = document.createElement("i"); icon.className = genericCollectionIcons[collection]; icon.setAttribute("aria-hidden","true");
         const title = document.createElement("strong"); title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome");
         const meta = document.createElement("small"); meta.textContent = String(entry.type ?? entry.sourceId ?? "Item salvo");
-        card.append(icon,title,meta); container.append(card);
+        select.append(icon,title,meta);
+        const favorite = document.createElement("button"); favorite.type = "button"; favorite.className = "nexus-library-favorite";
+        favorite.dataset.libraryFavorite = entry.id; favorite.dataset.libraryCollection = collection;
+        favorite.setAttribute("aria-pressed", String(preferences.favorites.includes(key)));
+        favorite.setAttribute("aria-label", preferences.favorites.includes(key) ? "Remover dos favoritos" : "Adicionar aos favoritos");
+        favorite.textContent = preferences.favorites.includes(key) ? "★" : "☆";
+        card.append(select,favorite); container.append(card);
       }
       if (!visible.length) {
         const empty = document.createElement("p"); empty.className = "nexus-library-empty";
-        empty.textContent = entries.length ? "Nenhum item corresponde à pesquisa." : "Esta coleção ainda não possui itens salvos.";
+        empty.textContent = entries.length ? "Nenhum item corresponde aos filtros selecionados." : "Esta coleção ainda não possui itens salvos.";
         container.append(empty);
       }
       panel.querySelector("[data-library-collection-heading]").textContent = genericCollectionLabels[collection];
       panel.querySelector("[data-library-collection-count]").textContent = `${visible.length} de ${entries.length} itens`;
-      detail.dataset.selectedCollection = collection;
-      detail.dataset.selectedEntry = "";
-      detail.innerHTML = '<div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do item</strong><p>Selecione um item para consultar os dados armazenados. O editor específico desta coleção ainda não está disponível.</p></div>';
+      if (!keepSelection || !detail.dataset.selectedEntry) {
+        detail.dataset.selectedCollection = collection; detail.dataset.selectedEntry = "";
+        detail.innerHTML = '<div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do item</strong><p>Selecione um item para consultar e editar seus metadados.</p></div>';
+      }
     };
-    panel.addEventListener("click", event => {
-      const card = event.target.closest("[data-library-entry]");
-      if (!card || !panel.contains(card)) return;
-      const collection = card.dataset.libraryCollection;
-      const legacyFlags = Object.fromEntries([
-        "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
-        "libraryMedia","libraryThemes","libraryStyles","libraryRules","libraryBehaviors","interactionLibrary"
-      ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
-      try {
-        const { store } = readNexusLibraryStore(game.user, legacyFlags);
-        const entry = store.collections[collection]?.find(item => item.id === card.dataset.libraryEntry);
-        if (!entry) return;
-        panel.querySelectorAll("[data-library-entry]").forEach(item => item.classList.toggle("is-selected", item === card));
+    const showGenericDetails = async (collection, entryId, card) => {
+      const { store } = readNexusLibraryStore(game.user, getLegacyLibraryFlags());
+      const entry = store.collections[collection]?.find(item => item.id === entryId);
+      if (!entry) return;
+      const preferences = recordLibraryRecent(getLibraryPreferences(), collection, entry.id);
+      await persistLibraryPreferences(preferences);
+      panel.querySelectorAll("[data-library-entry]").forEach(item => item.classList.toggle("is-selected", item === card));
+      const detail = panel.querySelector("[data-library-generic-details]");
+      detail.dataset.selectedCollection = collection; detail.dataset.selectedEntry = entry.id; detail.replaceChildren();
+      const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
+      const title = document.createElement("strong"); title.className = "nexus-library-detail-title";
+      title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome"); heading.append(title);
+      const form = document.createElement("div"); form.className = "nexus-library-metadata-editor";
+      const nameLabel = document.createElement("label"); nameLabel.textContent = "Nome";
+      const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.maxLength = 120; nameInput.dataset.libraryMetadata = "name"; nameInput.value = String(entry.name ?? entry.label ?? entry.title ?? "");
+      nameLabel.append(nameInput);
+      const descriptionLabel = document.createElement("label"); descriptionLabel.textContent = "Descrição";
+      const descriptionInput = document.createElement("textarea"); descriptionInput.rows = 3; descriptionInput.maxLength = 1000; descriptionInput.dataset.libraryMetadata = "description"; descriptionInput.value = String(entry.description ?? "");
+      descriptionLabel.append(descriptionInput);
+      const tagsLabel = document.createElement("label"); tagsLabel.textContent = "Etiquetas (separadas por vírgula)";
+      const tagsInput = document.createElement("input"); tagsInput.type = "text"; tagsInput.maxLength = 240; tagsInput.dataset.libraryMetadata = "tags"; tagsInput.value = Array.isArray(entry.tags) ? entry.tags.join(", ") : "";
+      tagsLabel.append(tagsInput);
+      const folderLabel = document.createElement("label"); folderLabel.textContent = "Pasta";
+      const folderSelect = document.createElement("select"); folderSelect.dataset.libraryMetadata = "folder";
+      const noFolder = document.createElement("option"); noFolder.value = ""; noFolder.textContent = "Sem pasta"; folderSelect.append(noFolder);
+      for (const folder of preferences.folders.filter(item => !item.collection || item.collection === collection)) {
+        const option = document.createElement("option"); option.value = folder.id; option.textContent = folder.name; folderSelect.append(option);
+      }
+      folderSelect.value = preferences.assignments[`${collection}:${entry.id}`] ?? ""; folderLabel.append(folderSelect);
+      const save = document.createElement("button"); save.type = "button"; save.dataset.librarySaveMetadata = ""; save.textContent = "Salvar metadados";
+      const info = document.createElement("small"); info.className = "nexus-library-definition-note";
+      info.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
+      const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
+      const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
+      preview.textContent = JSON.stringify(safeSummary,null,2);
+      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,info,preview);
+      detail.append(heading,form);
+    };
+    panel.addEventListener("click", async event => {
+      const favorite = event.target.closest("[data-library-favorite]");
+      if (favorite && panel.contains(favorite)) {
+        event.preventDefault();
+        await persistLibraryPreferences(toggleLibraryFavorite(getLibraryPreferences(), favorite.dataset.libraryCollection, favorite.dataset.libraryFavorite));
+        renderGenericCollection(favorite.dataset.libraryCollection, true);
+        return;
+      }
+      const createFolderButton = event.target.closest("[data-library-create-folder]");
+      if (createFolderButton && panel.contains(createFolderButton)) {
+        const collection = detailCollection();
+        const input = panel.querySelector("[data-library-folder-name]");
+        try {
+          const result = createLibraryFolder(getLibraryPreferences(), { id: foundry.utils.randomID(10), name: input?.value, collection });
+          await persistLibraryPreferences(result.preferences);
+          if (input) input.value = "";
+          renderGenericCollection(collection, true);
+        } catch (error) { ui.notifications.warn(error.message); }
+        return;
+      }
+      const saveMetadata = event.target.closest("[data-library-save-metadata]");
+      if (saveMetadata && panel.contains(saveMetadata)) {
         const detail = panel.querySelector("[data-library-generic-details]");
-        detail.dataset.selectedCollection = collection; detail.dataset.selectedEntry = entry.id; detail.replaceChildren();
-        const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
-        const title = document.createElement("strong"); title.className = "nexus-library-detail-title";
-        title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome"); heading.append(title);
-        const description = document.createElement("p"); description.className = "nexus-library-definition-note";
-        description.textContent = String(entry.description ?? "Conteúdo salvo na Biblioteca NEXUS.");
-        const metadata = document.createElement("small"); metadata.className = "nexus-library-definition-note";
-        metadata.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
-        const status = document.createElement("p"); status.className = "nexus-library-definition-note";
-        status.textContent = "Prévia e edição específicas ainda não estão disponíveis para esta coleção. Os dados originais não foram modificados.";
-        detail.append(heading,description,metadata,status);
-      } catch (error) { console.warn("NEXUS | Falha ao abrir detalhes da coleção", error); }
+        const collection = detail.dataset.selectedCollection, entryId = detail.dataset.selectedEntry;
+        try {
+          const { store } = readNexusLibraryStore(game.user, getLegacyLibraryFlags());
+          const entry = store.collections[collection]?.find(item => item.id === entryId);
+          if (!entry) return;
+          const value = key => detail.querySelector(`[data-library-metadata="${key}"]`)?.value ?? "";
+          const newName = value("name").trim();
+          if (!newName) { ui.notifications.warn("O nome não pode ficar vazio."); return; }
+          if ("name" in entry || !("label" in entry)) entry.name = newName; else entry.label = newName;
+          if ("description" in entry || value("description")) entry.description = value("description").trim();
+          entry.tags = value("tags").split(",").map(tag => tag.trim()).filter(Boolean).slice(0,20);
+          await writeNexusLibraryStore(game.user, store);
+          const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
+          await persistLibraryPreferences(preferences);
+          renderGenericCollection(collection, true);
+          ui.notifications.info("Metadados salvos.");
+        } catch (error) { ui.notifications.error(`Não foi possível salvar: ${error.message}`); }
+        return;
+      }
+      const card = event.target.closest("[data-library-entry]");
+      if (card && panel.contains(card)) {
+        await showGenericDetails(card.dataset.libraryCollection, card.dataset.libraryEntry, card);
+      }
+    });
+    const detailCollection = () => panel.querySelector("[data-library-generic-details]")?.dataset.selectedCollection ?? panel.querySelector("[data-library-section].active")?.dataset.librarySection?.replace("collection:","") ?? "";
+    panel.querySelectorAll("[data-library-collection-filter]").forEach(button => button.addEventListener("click", () => {
+      panel.querySelectorAll("[data-library-collection-filter]").forEach(item => item.classList.toggle("active", item === button));
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
+    }));
+    panel.querySelector("[data-library-collection-folder]")?.addEventListener("change", () => {
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     });
     const activateSection=(key)=>{
       sheet._librarySection=key;
