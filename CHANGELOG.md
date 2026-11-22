@@ -9,6 +9,7 @@
 - Mantém os payloads como dados inertes; a prévia não executa HTML, CSS, JavaScript ou expressões.
 
 ### Correções e validação
+- Inclui uma verificação adicional dos controles de visualização e da prévia anexada ao Inspector.
 - Corrige a ausência da prévia contextual no Inspector genérico.
 - Adiciona testes de regressão para navegação Lógica, preview seguro, compatibilidade legada e modos de visualização.
 - A validação visual/funcional no Foundry VTT 14 build 360 continua necessária antes de considerar a interface confirmada.
