@@ -28,7 +28,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
       card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
-      card.dataset.libraryCategory=asset.category;card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
+      card.dataset.libraryCategory=asset.category;card.dataset.librarySource=asset.source??"core";card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
       const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
       if(asset.type==="sheet-resource"){
         const code=String(asset.template?.sheetCode??"PV").toUpperCase(),color=asset.template?.sheetColor??({PV:"#d94b4b",PM:"#3979d8",PE:"#39a86b"})[code]??"#d94b4b";
@@ -208,8 +208,6 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
       folderSelect.value = preferences.assignments[`${collection}:${entry.id}`] ?? ""; folderLabel.append(folderSelect);
       const save = document.createElement("button"); save.type = "button"; save.dataset.librarySaveMetadata = ""; save.textContent = "Salvar metadados";
-      const info = document.createElement("small"); info.className = "nexus-library-definition-note";
-      info.textContent = `ID: ${entry.id} · Tipo: ${entry.type ?? "não especificado"}`;
       const visualPreview = document.createElement("div"); visualPreview.className = "nexus-library-type-preview";
       if (collection === "media") {
         const source = String(entry.path ?? entry.url ?? entry.src ?? "");
@@ -242,7 +240,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
       preview.textContent = JSON.stringify(safeSummary,null,2);
-      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,info,preview);
+      form.append(nameLabel,descriptionLabel,tagsLabel,folderLabel,save,preview);
       detail.append(heading,form);
     };
     panel.addEventListener("click", async event => {
@@ -313,7 +311,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     });
     const activateSection=(key)=>{
       sheet._librarySection=key;
-      panel.querySelectorAll("[data-library-section]").forEach(button=>{const sameSection=button.dataset.librarySection===key;const sameScope=!button.dataset.libraryScope||button.dataset.libraryScope===sheet._libraryAssetScope;const active=sameSection&&sameScope;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+      panel.querySelectorAll("[data-library-section]").forEach(button=>{const sameSection=button.dataset.librarySection===key;const sameScope=button.dataset.libraryScope ? button.dataset.libraryScope===sheet._libraryAssetScope : !panel.querySelector('[data-library-section="' + key + '"][data-library-scope]');const active=sameSection&&sameScope;button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
       panel.querySelectorAll("[data-library-section-panel]").forEach(section=>{
         const isGeneric = key.startsWith("collection:");
         section.hidden = isGeneric
