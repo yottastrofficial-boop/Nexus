@@ -55,3 +55,18 @@ Este documento registra prioridades e decisões de arquitetura; não declara rec
 - Coleções genéricas passam a oferecer grade/lista e três tamanhos de miniatura.
 - A edição de metadados tenta sincronizar o registry em memória, sem alterar o payload do ativo.
 - Próximo passo: editores especializados e criação/edição validada de payloads por subtipo, seguida de testes reais no Foundry.
+
+
+## Em desenvolvimento — estabilização da Biblioteca
+
+- [x] Inspector com navegação compacta por ícones e seções separadas.
+- [x] Atualização do Inspector após salvar metadados.
+- [x] Filtros de origem e coleção em seletores compactos.
+- [x] Controles de grade/lista por ícones e organização em duas linhas de ferramentas.
+- [x] Barra de recurso genérica sem vínculo padrão com PV.
+- [x] Remoção do marcador de proficiência da Biblioteca, preservando os dados e cálculos de perícia.
+- [ ] Testar a rolagem, as dimensões dos cartões e o Inspector no Foundry V14 build 360.
+- [ ] Investigar minimização/restauração da ficha com o DOM real da janela.
+- [ ] Criar prévias fiéis dos componentes salvos a partir dos modelos de instância, sem executar conteúdo importado.
+- [ ] Implementar editores especializados de propriedades e ativos lógicos com validação.
+
