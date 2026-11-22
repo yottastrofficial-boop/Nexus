@@ -87,11 +87,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     renderSavedFlows();
     const genericCollectionLabels = {
       templates: "Predefinições", assets: "Componentes salvos", media: "Mídia",
-      styles: "Estilos visuais", rules: "Regras", behaviors: "Comportamentos"
+      styles: "Estilos visuais", properties: "Propriedades", rules: "Regras", behaviors: "Comportamentos", functions: "Funções"
     };
     const genericCollectionIcons = {
       templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
-      styles: "fa-solid fa-swatchbook", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears"
+      styles: "fa-solid fa-swatchbook", properties: "fa-solid fa-list-check", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears", functions: "fa-solid fa-function"
     };
     const getLegacyLibraryFlags = () => Object.fromEntries([
       "libraryComponents","libraryGroups","libraryLayouts","libraryTemplates","libraryAssets",
@@ -156,6 +156,17 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         return true;
       });
       container.replaceChildren();
+      sheet._libraryCollectionViewMode ??= "grid";
+      sheet._libraryCardSize ??= "medium";
+      container.dataset.viewMode = sheet._libraryCollectionViewMode;
+      container.dataset.cardSize = sheet._libraryCardSize;
+      panel.querySelectorAll("[data-library-collection-view-mode]").forEach(button => {
+        const active = button.dataset.libraryCollectionViewMode === sheet._libraryCollectionViewMode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      const cardSizeSelect = panel.querySelector("[data-library-card-size]");
+      if (cardSizeSelect) cardSizeSelect.value = sheet._libraryCardSize;
       for (const entry of visible) {
         const key = `${collection}:${entry.id}`;
         const card = document.createElement("article"); card.className = "nexus-library-generic-card";
@@ -237,11 +248,43 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           const label = document.createElement("small"); label.textContent = key;
           swatch.append(color,label); visualPreview.append(swatch);
         }
-      } else if (collection === "rules" && typeof entry.expression === "string") {
-        const expression = document.createElement("code"); expression.textContent = entry.expression; visualPreview.append(expression);
+      } else if (collection === "rules" && (typeof entry.expression === "string" || typeof entry.payload?.expression === "string")) {
+        const expression = document.createElement("code"); expression.textContent = entry.expression ?? entry.payload.expression; visualPreview.append(expression);
       } else if (collection === "behaviors") {
-        const flow = entry.flow ?? {};
+        const flow = entry.flow ?? entry.payload?.flow ?? entry.payload ?? {};
         const summary = document.createElement("p"); summary.textContent = `${flow.triggers?.length ?? 0} gatilhos · ${flow.conditions?.length ?? 0} condições · ${flow.actions?.length ?? 0} ações`; visualPreview.append(summary);
+      } else if (collection === "properties") {
+        const payload = entry.payload ?? entry;
+        const summary = document.createElement("p");
+        summary.textContent = [payload.path ?? payload.key, payload.valueType ?? payload.type, payload.defaultValue !== undefined ? `Padrão: ${String(payload.defaultValue)}` : ""].filter(Boolean).join(" · ") || "Definição de propriedade";
+        visualPreview.append(summary);
+      } else if (collection === "functions") {
+        const payload = entry.payload ?? entry;
+        const summary = document.createElement("p");
+        summary.textContent = [payload.operation ?? payload.signature ?? payload.name, payload.returnType ? `Retorna: ${payload.returnType}` : ""].filter(Boolean).join(" · ") || "Função registrada";
+        visualPreview.append(summary);
+      }
+      if (["properties","rules","behaviors","functions"].includes(collection)) {
+        const logic = document.createElement("section"); logic.className = "nexus-library-logic-preview";
+        const logicHeading = document.createElement("strong"); logicHeading.textContent = "Definição lógica";
+        const logicMeta = document.createElement("small");
+        logicMeta.textContent = [entry.type, `Esquema ${entry.schemaVersion ?? 1}`, entry.enabled === false ? "Desativado" : "Ativo"].filter(Boolean).join(" · ");
+        const payload = entry.payload ?? entry.flow ?? Object.fromEntries(Object.entries(entry).filter(([key]) => !["id","name","label","title","description","tags","dependencies","permissions"].includes(key)));
+        const payloadView = document.createElement("pre"); payloadView.textContent = JSON.stringify(payload, null, 2).slice(0, 8000);
+        logic.append(logicHeading, logicMeta, payloadView);
+        const dependencyList = Array.isArray(entry.dependencies) ? entry.dependencies : [];
+        if (dependencyList.length) {
+          const dependencies = document.createElement("p"); dependencies.className = "nexus-library-logic-dependencies";
+          dependencies.textContent = "Dependências: " + dependencyList.map(item => typeof item === "string" ? item : item.id ?? item.ref ?? "Referência").join(", ");
+          logic.append(dependencies);
+        }
+        const permissionList = Array.isArray(entry.permissions) ? entry.permissions : [];
+        if (permissionList.length) {
+          const permissions = document.createElement("p"); permissions.className = "nexus-library-logic-dependencies";
+          permissions.textContent = "Permissões: " + permissionList.join(", ");
+          logic.append(permissions);
+        }
+        visualPreview.append(logic);
       }
       const preview = document.createElement("pre"); preview.className = "nexus-library-safe-preview";
       const safeSummary = Object.fromEntries(Object.entries(entry).filter(([key,value]) => !["html","css","js","script","content","data","layout","flow","settings","palette","tokens","expression"].includes(key) && ["string","number","boolean"].includes(typeof value)).slice(0,12));
@@ -316,6 +359,14 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       panel.querySelectorAll("[data-library-collection-filter]").forEach(item => item.classList.toggle("active", item === button));
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     }));
+    panel.querySelectorAll("[data-library-collection-view-mode]").forEach(button => button.addEventListener("click", () => {
+      sheet._libraryCollectionViewMode = button.dataset.libraryCollectionViewMode === "list" ? "list" : "grid";
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
+    }));
+    panel.querySelector("[data-library-card-size]")?.addEventListener("change", event => {
+      sheet._libraryCardSize = ["small","medium","large"].includes(event.target.value) ? event.target.value : "medium";
+      const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
+    });
     panel.querySelectorAll("[data-library-origin-filter]").forEach(button => button.addEventListener("click", () => {
       panel.querySelectorAll("[data-library-origin-filter]").forEach(item => item.classList.toggle("active", item === button));
       const collection = detailCollection(); if (collection) renderGenericCollection(collection);
