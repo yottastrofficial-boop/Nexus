@@ -65,6 +65,8 @@ Este documento registra prioridades e decisões de arquitetura; não declara rec
 - [x] Controles de grade/lista por ícones e organização em duas linhas de ferramentas.
 - [x] Barra de recurso genérica sem vínculo padrão com PV.
 - [x] Remoção do marcador de proficiência da Biblioteca, preservando os dados e cálculos de perícia.
+- [x] Excluir pastas pessoais por menu contextual, removendo apenas a pasta e suas atribuições; os itens permanecem na coleção.
+- [ ] Validar criação, exclusão e persistência de pastas no Foundry V14 build 360.
 - [ ] Testar a rolagem, as dimensões dos cartões e o Inspector no Foundry V14 build 360.
 - [ ] Investigar minimização/restauração da ficha com o DOM real da janela.
 - [ ] Criar prévias fiéis dos componentes salvos a partir dos modelos de instância, sem executar conteúdo importado.
