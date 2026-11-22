@@ -1,71 +1,30 @@
-# Roadmap
+# Roadmap NEXUS
 
-Este documento registra direções e prioridades do NEXUS. Não é uma promessa de entrega nem uma declaração de que os recursos listados já existem.
+Este documento registra prioridades e decisões de arquitetura; não declara recursos planejados como concluídos.
 
-## Estado atual — 1.0.0.79 publicada; 1.0.0.80 em desenvolvimento
+## Estado de referência
+- Código-base consultado: main no commit 1fe51ecbe5d89d6f67d584c707150bf7df153165.
+- Versão distribuída indicada por system.json e manifest.json: 1.0.0.84.
+- Foundry declarado: V14.
+- A Biblioteca já possui armazenamento unificado, preferências, modelos de definição/instância, compartilhamento e interface Explorer em evolução.
+- Propriedades, fórmulas e interações já possuem implementações e documentação próprias; a próxima etapa consolida contratos e navegação, não presume ausência dessas funções.
+- A ficha principal, templates e CSS ainda concentram responsabilidades e exigem extração gradual.
 
-A versão 1.0.0.71 consolida a ficha Canvas modular, componentes configuráveis, editor de propriedades, interações, Biblioteca, organização hierárquica, backup completo e uma rodada de estabilização dos listeners, persistência de propriedades, aliases e controladores de perícias/recursos.
+## Prioridades aprovadas
+1. Auditar árvore, imports, estado persistido, dependências e testes antes de substituições.
+2. Consolidar **Lógica** para Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões, mantendo modelos e executores especializados.
+3. Formalizar contratos de ativos, referências, dependências, permissões e versões.
+4. Refatorar dados/propriedades/regras antes de reconstruir componentes e fichas.
+5. Reconstruir a Biblioteca como Explorador com Inspector contextual e editores por tipo.
+6. Implementar infraestrutura de mídia própria, começando por identificação e registro de adaptadores.
+7. Avaliar FFmpeg.wasm customizado com libdav1d (AV1), libopus (Opus) e libjxl (JXL); manter decoder JXL especializado como alternativa.
+8. Implementar storage adapters para arquivos que o upload Foundry não aceite, sem falsificar extensões.
+9. Consolidar CSS/templates e remover legado após migrações verificadas.
+10. Validar em instalação real Foundry V14 antes de publicar versão estável.
 
-A validação automatizada de pacote, sintaxe, regressões e empacotamento passou no GitHub Actions, e a release `v1.0.0.71` foi publicada com o pacote `nexus.zip`. A validação visual e funcional em uma instalação real do Foundry VTT 14 permanece necessária; portanto, esta versão não está declarada estável.
-
-## Prioridades imediatas
-
-1. Executar testes funcionais e visuais no Foundry VTT 14, incluindo múltiplas janelas e usuários.
-2. Validar concorrência e recuperação de falhas na persistência de aliases, dados personalizados e layouts.
-3. Consolidar a composição visual das perícias e a cascata CSS sem perder personalizações de tema.
-4. Reforçar testes comportamentais dos fluxos, reduzindo gradualmente dependência de verificações por texto/regex.
-5. Continuar extrações por domínio apenas quando reduzirem acoplamento sem fragmentar excessivamente os módulos.
-6. Publicar a release somente após a validação funcional e a revisão de compatibilidade.
-
-## Arquitetura de módulos e propriedades
-
-- Expandir o registro central de propriedades para módulos e metadados completos.
-- Preservar identificadores estáveis quando nomes e apresentações mudarem.
-- Definir regras de dependência, substituição e migração antes de permitir redefinições profundas.
-- Evoluir a invalidação reativa para um grafo global de dependências com cálculo incremental e detecção explícita de ciclos.
-- Consolidar o diálogo universal de rolagem sem duplicar regras de cálculo.
-
-## Editor de fichas e componentes
-
-- Evoluir os modelos de ficha reutilizáveis.
-- Aprimorar a organização livre e hierárquica dos componentes.
-- Manter uma estrutura interna compartilhada entre os modos de edição.
-- Permitir importar, exportar e reutilizar componentes personalizados com validação e compatibilidade.
-
-## Design, mídia e desempenho
-
-- Consolidar a separação entre funcionalidade, formato e estilo.
-- Evoluir temas e herança visual sem sobrescritas desnecessárias.
-- Ampliar o gerenciamento de imagens, GIFs, vídeos e outros recursos.
-- Medir gargalos antes de introduzir cache, carregamento sob demanda ou otimizações de renderização.
-
-## Compatibilidade e qualidade
-
-- Priorizar APIs públicas compatíveis com Foundry VTT 14.
-- Testar fluxos completos dentro do Foundry, incluindo múltiplas fichas, janelas, Actors e usuários.
-- Preservar dados existentes e documentar migrações.
-- Manter a main e as releases utilizáveis; mudanças estruturais devem ser desenvolvidas em branches e integradas após CI e validação funcional.
-
-## Critérios para considerar um recurso concluído
-
-Um recurso só deve ser marcado como implementado quando seu comportamento estiver presente no código, seus dados e estados estiverem definidos, os fluxos relevantes tiverem testes, limitações conhecidas estiverem documentadas e a documentação refletir o comportamento real.
-
-## Biblioteca funcional — implementação incremental
-
-### Fundação iniciada na 1.0.0.80
-- Contrato unificado para componentes, grupos, layouts, modelos, assets, mídia, temas, estilos, regras, comportamentos e fluxos.
-- Normalização de dados JSON com limites de profundidade, tamanho e quantidade.
-- Migração explícita em memória das flags legadas para o novo formato.
-- Merge com políticas de conflito skip, duplicate e replace; a interface deve exigir escolha explícita antes de substituir definições.
-- Backup completo NEXUS-LIBRARY/2, com leitura retrocompatível de NEXUS-LIBRARY/1.
-
-### Próximas etapas obrigatórias
-1. Adaptador de persistência canônica com migração segura e verificação de integridade antes de gravar.
-2. Interface unificada para pesquisar, filtrar, categorizar, favoritar, renomear, duplicar, excluir e visualizar entradas.
-3. Salvar/importar/exportar individualmente cada tipo de entrada, mantendo relações internas e IDs remapeados na instanciação.
-4. Versões de definições e atualização opcional das instâncias, sem propagar mudanças silenciosamente.
-5. Separar referências de mídia e metadados dos arquivos binários, respeitando permissões e limitações do Foundry.
-6. Definir schemas próprios para regras, estilos e comportamentos antes de habilitar edição/execução avançada.
-7. Testar migração, importação parcial, conflito, backup antigo, backup novo e recuperação após falha no Foundry V14.
-
-A etapa 1.0.0.80 não declara a Biblioteca completa; ela inicia a fundação de dados e o formato de intercâmbio.
+## Não objetivos
+- Não prometer suporte literal a qualquer formato existente.
+- Não armazenar originais grandes em flags/JSON de Actor ou Item.
+- Não converter originais silenciosamente.
+- Não remover legado antes de validar consumidores.
+- Não atualizar o manifesto para versão sem pacote de release confirmado.
