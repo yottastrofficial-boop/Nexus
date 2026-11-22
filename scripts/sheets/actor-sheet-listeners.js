@@ -664,7 +664,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const heading=document.createElement("div");heading.className="nexus-library-detail-heading";
         const title=document.createElement("strong");title.className="nexus-library-detail-title";title.textContent=saved.label||"Componente salvo";heading.append(title);
         const summary=document.createElement("p");summary.textContent=COMPONENTS[saved.type]?.label||saved.type;
-        const notice=document.createElement("small");notice.className="nexus-library-definition-note";notice.textContent="Você está editando uma cópia de configuração. O modelo salvo permanece intacto.";
+        
         const preview=document.createElement("div");preview.className="nexus-library-definition-preview";
         const previewTitle=document.createElement("strong");previewTitle.textContent=String(saved.settings?.customLabel||saved.settings?.sheetContent1||saved.settings?.text||saved.label||"Prévia");preview.append(previewTitle);
         const previewMeta=document.createElement("small");previewMeta.textContent="Pré-visualização da configuração que será inserida";preview.append(previewMeta);
