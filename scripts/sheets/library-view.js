@@ -2,7 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 import { readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
-import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, normalizeLibraryPreferences } from "../core/library-preferences.js";
+import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
 
@@ -110,11 +110,46 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const button = document.createElement("button"); button.type = "button";
         button.className = "nexus-library-custom-folder";
         button.dataset.libraryCustomFolder = folder.id;
+        button.dataset.libraryFolderCollection = collection;
         button.textContent = folder.name;
         button.classList.toggle("active", panel.querySelector("[data-library-collection-folder]")?.value === folder.id);
         container.append(button);
       }
     };
+    let folderContextMenu = null;
+    const closeFolderContextMenu = () => {
+      folderContextMenu?.remove();
+      folderContextMenu = null;
+    };
+    panel.addEventListener("contextmenu", event => {
+      const folderButton = event.target.closest("[data-library-custom-folder]");
+      if (!folderButton || !panel.contains(folderButton)) return;
+      event.preventDefault();
+      closeFolderContextMenu();
+      const bounds = panel.getBoundingClientRect();
+      const menu = document.createElement("div");
+      menu.className = "nexus-library-folder-context-menu";
+      menu.setAttribute("role", "menu");
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.dataset.libraryFolderDelete = folderButton.dataset.libraryCustomFolder;
+      removeButton.dataset.libraryFolderCollection = folderButton.dataset.libraryFolderCollection ?? "";
+      removeButton.setAttribute("role", "menuitem");
+      removeButton.textContent = "Excluir pasta";
+      menu.append(removeButton);
+      const maxLeft = Math.max(8, bounds.width - 164);
+      const maxTop = Math.max(8, bounds.height - 48);
+      menu.style.left = Math.max(8, Math.min(event.clientX - bounds.left, maxLeft)) + "px";
+      menu.style.top = Math.max(8, Math.min(event.clientY - bounds.top, maxTop)) + "px";
+      panel.append(menu);
+      folderContextMenu = menu;
+      removeButton.focus({ preventScroll: true });
+    });
+    panel.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || !folderContextMenu) return;
+      event.preventDefault();
+      closeFolderContextMenu();
+    });
     const renderGenericCollection = (collection, keepSelection = false) => {
       const container = panel.querySelector("[data-library-generic-items]");
       const detail = panel.querySelector("[data-library-generic-details]");
@@ -332,6 +367,27 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       detail.append(heading, form);
     };
     panel.addEventListener("click", async event => {
+      const folderDeleteButton = event.target.closest("[data-library-folder-delete]");
+      if (folderDeleteButton && panel.contains(folderDeleteButton)) {
+        event.preventDefault();
+        const folderId = folderDeleteButton.dataset.libraryFolderDelete;
+        const collection = folderDeleteButton.dataset.libraryFolderCollection;
+        const folder = getLibraryPreferences().folders.find(item => item.id === folderId);
+        closeFolderContextMenu();
+        if (!folder || !collection) return;
+        const confirmed = await foundry.applications.api.DialogV2.confirm({
+          window: { title: "Excluir pasta" },
+          content: "<p>Excluir esta pasta? Os itens serão mantidos na Biblioteca e ficarão sem pasta.</p>",
+          rejectClose: false
+        });
+        if (!confirmed) return;
+        await persistLibraryPreferences(removeLibraryFolder(getLibraryPreferences(), folderId));
+        const folderSelect = panel.querySelector("[data-library-collection-folder]");
+        if (folderSelect?.value === folderId) folderSelect.value = "";
+        renderGenericCollection(collection, true);
+        return;
+      }
+      if (!event.target.closest(".nexus-library-folder-context-menu")) closeFolderContextMenu();
       const customFolder = event.target.closest("[data-library-custom-folder]");
       if (customFolder && panel.contains(customFolder)) {
         const select = panel.querySelector("[data-library-collection-folder]");
