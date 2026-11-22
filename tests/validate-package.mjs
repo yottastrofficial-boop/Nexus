@@ -1388,6 +1388,15 @@ assert.match(libraryView,/renderCustomFolderTree/,"A navegação deve refletir a
 assert.match(sheetListeners,/data-library-layout-override/,"O inspector de layouts deve expor overrides");
 assert.match(sheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
 assert.match(css,/nexus-library-layout-overrides/,"Os controles de override devem seguir o padrão visual do inspector");
+assert.match(template,/nexus-library-body/,"A Biblioteca deve ter uma área de navegação independente da área de conteúdo");
+assert.match(template,/nexus-library-views/,"Todas as categorias devem compartilhar o mesmo contêiner de visualização");
+assert.match(css,/nexus-library-workspace\s*\{[\s\S]*grid-template-columns: minmax\(0,1fr\) minmax\(225px,275px\)/,"Todas as categorias devem manter grade central e inspector em colunas independentes");
+assert.match(sheetListeners,/data-library-save-configured-asset/,"A configuração de um asset deve poder ser salva como modelo antes da inserção");
+assert.match(sheet,/async _saveLibraryDefinitionFromTemplate/,"A ficha deve salvar configurações de cards como definições reutilizáveis");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "components"/,"Cards devem ser persistidos no armazenamento unificado");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "groups"/,"Blocos e grupos devem ser persistidos no armazenamento unificado");
+assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configurações completas de ficha devem ser persistidas no armazenamento unificado");
+
 
 
 assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
