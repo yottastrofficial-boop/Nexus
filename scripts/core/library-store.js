@@ -18,7 +18,19 @@ const COLLECTION_LIMITS = Object.freeze({
 const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 const MAX_DEPTH = 16;
 const MAX_STRING = 100_000;
-const collectionWriteQueues = new WeakMap();
+const libraryWriteQueues = new WeakMap();
+
+function enqueueLibraryWrite(user, operation) {
+  if (!user || (typeof user !== "object" && typeof user !== "function")) {
+    throw new Error("Não foi possível identificar o usuário da Biblioteca.");
+  }
+  const previous = libraryWriteQueues.get(user) ?? Promise.resolve();
+  const pending = previous.catch(() => {}).then(operation);
+  libraryWriteQueues.set(user, pending);
+  return pending.finally(() => {
+    if (libraryWriteQueues.get(user) === pending) libraryWriteQueues.delete(user);
+  });
+}
 
 function cloneJson(value, depth = 0) {
   if (depth > MAX_DEPTH) throw new Error("A Biblioteca contém uma estrutura profunda demais.");
@@ -128,6 +140,9 @@ export function mergeNexusLibraryStores(currentRaw, incomingRaw, options = {}) {
   const mode = ["skip", "duplicate", "replace"].includes(options.conflictMode) ? options.conflictMode : "skip";
   const createId = typeof options.createId === "function" ? options.createId : ((collection, index) => makeId(collection.slice(0, -1) || "entry", index));
   const result = createEmptyNexusLibraryStore();
+  for (const [key, value] of Object.entries(current)) {
+    if (key !== "schemaVersion" && key !== "collections") result[key] = cloneJson(value);
+  }
   const report = { added: {}, skipped: {}, replaced: {}, conflicts: [] };
   for (const collection of NEXUS_LIBRARY_COLLECTIONS) {
     const target = current.collections[collection].map(cloneJson);
@@ -169,11 +184,29 @@ export function readNexusLibraryStore(user, legacyFlags = {}) {
 }
 
 /** Writes one canonical flag to avoid partial imports across many independent flags. */
-export async function writeNexusLibraryStore(user, raw) {
+export function writeNexusLibraryStore(user, raw) {
   if (typeof user?.setFlag !== "function") throw new Error("Não foi possível acessar o armazenamento pessoal da Biblioteca.");
   const store = normalizeNexusLibraryStore(raw);
-  await user.setFlag("nexus", "libraryStore", store);
-  return store;
+  return enqueueLibraryWrite(user, async () => {
+    await user.setFlag("nexus", "libraryStore", store);
+    return store;
+  });
+}
+
+/**
+ * Applies a read-modify-write operation against the latest stored snapshot.
+ * The updater runs inside the per-user queue to avoid stale full-store writes.
+ */
+export function updateNexusLibraryStore(user, updater) {
+  if (typeof user?.setFlag !== "function") throw new Error("Não foi possível acessar o armazenamento pessoal da Biblioteca.");
+  if (typeof updater !== "function") throw new TypeError("A atualização da Biblioteca precisa ser uma função.");
+  return enqueueLibraryWrite(user, async () => {
+    const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
+    const result = await updater(store);
+    const saved = normalizeNexusLibraryStore(result ?? store);
+    await user.setFlag("nexus", "libraryStore", saved);
+    return saved;
+  });
 }
 
 const LEGACY_LIBRARY_FLAG_BY_COLLECTION = Object.freeze({
@@ -204,26 +237,17 @@ export function readNexusLibraryCollection(user, collection) {
  * another collection when two UI operations finish at nearly the same time.
  */
 export function writeNexusLibraryCollection(user, collection, entries) {
-  if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error(`Coleção desconhecida: ${collection}`);
-  if (!Array.isArray(entries)) throw new Error(`A coleção "${collection}" precisa ser uma lista.`);
-  if (!user || (typeof user !== "object" && typeof user !== "function")) {
-    throw new Error("Não foi possível identificar o usuário da Biblioteca.");
-  }
+  if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error("Coleção desconhecida: " + collection);
+  if (!Array.isArray(entries)) throw new Error("A coleção \"" + collection + "\" precisa ser uma lista.");
+  if (typeof user?.setFlag !== "function") throw new Error("Não foi possível acessar o armazenamento pessoal da Biblioteca.");
 
-  const previous = collectionWriteQueues.get(user) ?? Promise.resolve();
-  const operation = previous.catch(() => {}).then(async () => {
+  return enqueueLibraryWrite(user, async () => {
     const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
     store.collections[collection] = entries;
-    const saved = await writeNexusLibraryStore(user, store);
+    const saved = normalizeNexusLibraryStore(store);
+    await user.setFlag("nexus", "libraryStore", saved);
     const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
-    if (legacyFlag && typeof user?.setFlag === "function") {
-      await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
-    }
+    if (legacyFlag) await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
     return saved.collections[collection];
-  });
-
-  collectionWriteQueues.set(user, operation);
-  return operation.finally(() => {
-    if (collectionWriteQueues.get(user) === operation) collectionWriteQueues.delete(user);
   });
 }

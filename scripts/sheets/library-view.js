@@ -1,7 +1,7 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
-import { readNexusLibraryStore, writeNexusLibraryStore } from "../core/library-store.js";
+import { readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
 import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
@@ -282,19 +282,23 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const detail = panel.querySelector("[data-library-generic-details]");
         const collection = detail.dataset.selectedCollection, entryId = detail.dataset.selectedEntry;
         try {
-          const { store } = readNexusLibraryStore(game.user, getLegacyLibraryFlags());
-          const entry = store.collections[collection]?.find(item => item.id === entryId);
-          if (!entry) return;
-          const value = key => detail.querySelector(`[data-library-metadata="${key}"]`)?.value ?? "";
+          const value = key => detail.querySelector('[data-library-metadata="' + key + '"]')?.value ?? "";
           const newName = value("name").trim();
           if (!newName) { ui.notifications.warn("O nome não pode ficar vazio."); return; }
-          if ("name" in entry || !("label" in entry)) entry.name = newName; else entry.label = newName;
-          if ("description" in entry || value("description")) entry.description = value("description").trim();
-          entry.tags = value("tags").split(",").map(tag => tag.trim()).filter(Boolean).slice(0,20);
+          const savedStore = await updateNexusLibraryStore(game.user, store => {
+            const entry = store.collections[collection]?.find(item => item.id === entryId);
+            if (!entry) throw new Error("O item selecionado não existe mais na Biblioteca.");
+            if ("name" in entry || !("label" in entry)) entry.name = newName; else entry.label = newName;
+            if ("description" in entry || value("description")) entry.description = value("description").trim();
+            entry.tags = value("tags").split(",").map(tag => tag.trim()).filter(Boolean).slice(0,20);
+            return store;
+          });
           const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors" };
           const legacyFlag = legacyFlagByCollection[collection];
-          if (legacyFlag) await game.user.setFlag("nexus", legacyFlag, store.collections[collection]);
-          await writeNexusLibraryStore(game.user, store);
+          if (legacyFlag) {
+            try { await game.user.setFlag("nexus", legacyFlag, savedStore.collections[collection]); }
+            catch (mirrorError) { console.warn("NEXUS | Falha ao espelhar a coleção legada da Biblioteca.", mirrorError); }
+          }
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
           renderGenericCollection(collection, true);

@@ -5,7 +5,7 @@ import {
   evaluateNexusFormula
 } from "../scripts/core/formula-engine.js";
 import { createLibraryDefinition, createLibraryComponentInstance } from "../scripts/core/library-models.js";
-import { normalizeNexusLibraryStore, writeNexusLibraryCollection } from "../scripts/core/library-store.js";
+import { mergeNexusLibraryStores, normalizeNexusLibraryStore, updateNexusLibraryStore, writeNexusLibraryCollection } from "../scripts/core/library-store.js";
 import { createPropertyRegistry } from "../scripts/core/property-registry.js";
 
 const resolver = path => path === "pv" ? "" : path === "level" ? 3 : undefined;
@@ -23,6 +23,8 @@ const normalized = normalizeNexusLibraryStore({
   collections: { components: [{ id: "component-1", label: "PV" }] }
 });
 assert.deepEqual(normalized.metadata, { origin: "future-compatible", revision: 2 });
+const merged = mergeNexusLibraryStores(normalized, { schemaVersion: 1, collections: { rules: [{ id: "imported-rule" }] } });
+assert.deepEqual(merged.store.metadata, normalized.metadata, "a mesclagem deve preservar os metadados atuais");
 
 const state = Object.create(null);
 const fakeUser = {
@@ -34,7 +36,10 @@ const fakeUser = {
 };
 await Promise.all([
   writeNexusLibraryCollection(fakeUser, "components", [{ id: "component-1", label: "PV" }]),
-  writeNexusLibraryCollection(fakeUser, "rules", [{ id: "rule-1", name: "Regra de teste" }])
+  updateNexusLibraryStore(fakeUser, store => {
+    store.collections.rules = [{ id: "rule-1", name: "Regra de teste" }];
+    return store;
+  })
 ]);
 assert.equal(state.libraryStore.collections.components[0].id, "component-1");
 assert.equal(state.libraryStore.collections.rules[0].id, "rule-1");

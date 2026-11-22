@@ -10,10 +10,10 @@ Os cinco PDFs-base do NEXUS v0.1 foram localizados na Biblioteca do projeto. Est
 ### Corrigido nesta rodada
 1. Identificação de AVIF: arquivos AVIF usam a estrutura ISO-BMFF/ftyp; a detecção anterior classificava qualquer ftyp como MP4. Agora as marcas avif/avis são verificadas antes do fallback MP4.
 2. Assinatura do contêiner JPEG XL: a assinatura de contêiner agora valida o comprimento declarado de 12 bytes, reduzindo falsos positivos. A assinatura codestream JXL continua reconhecida.
-3. Gravações concorrentes na Biblioteca: gravações simultâneas de coleções diferentes podiam partir do mesmo snapshot antigo e uma sobrescrever a outra. As operações de writeNexusLibraryCollection agora são serializadas por usuário.
+3. Gravações concorrentes na Biblioteca: gravações simultâneas de coleções diferentes podiam partir do mesmo snapshot antigo e uma sobrescrever a outra. As operações de coleção e de atualização read-modify-write agora usam uma fila por usuário; o editor de metadados foi migrado para essa API.
 4. Metadados da Biblioteca: a normalização declarava preservar metadados futuros, mas descartava campos desconhecidos no envelope canônico. Metadados adicionais agora sobrevivem ao ciclo de normalização.
 5. Publicação acidental: o evento manual workflow_dispatch permitia executar o job de publicação sem um commit explícito de release. Agora a execução manual valida e empacota, mas somente um push em main com [release] pode publicar.
-6. Cobertura de regressão: foram adicionados testes para fórmulas, strings entre aspas/chaves, valores vazios, números negativos, ausência de execução JavaScript arbitrária, metadados, concorrência de gravação, caminhos inseguros, isolamento entre definição e instância, AVIF, MP4 e JXL.
+6. Cobertura de regressão: foram adicionados testes para fórmulas, strings entre aspas/chaves, valores vazios, números negativos, ausência de execução JavaScript arbitrária, metadados preservados também na mesclagem, concorrência entre gravação de coleção e atualização read-modify-write, caminhos inseguros, isolamento entre definição e instância, AVIF, MP4 e JXL.
 
 ### Limitações confirmadas — não declarar concluídas
 - O registry de mídia não decodifica arquivos. Os adaptadores FFmpeg.wasm/libjxl, Workers, cache, conversão e storage adapters ainda precisam ser implementados e testados.
