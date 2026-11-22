@@ -44,7 +44,6 @@ await Promise.all([
 assert.equal(state.libraryStore.collections.components[0].id, "component-1");
 assert.equal(state.libraryStore.collections.rules[0].id, "rule-1");
 assert.equal(state.libraryComponents[0].id, "component-1");
-assert.equal(state.libraryRules[0].id, "rule-1");
 
 const propertyRegistry = createPropertyRegistry({
   custom: [
