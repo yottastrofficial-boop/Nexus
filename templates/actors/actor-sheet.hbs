@@ -339,16 +339,25 @@ remove legacy typography selects                  <label class="nexus-inspector-
               <label class="nexus-library-search-wrap"><span aria-hidden="true">⌕</span><input type="search" class="nexus-library-search" data-library-search></label>
               <select class="nexus-library-tag" data-library-tag aria-label="Filtrar por tag"><option value="all">Todas as tags</option><option value="barra">Barra de vida</option></select>
             </div>
-            <nav class="nexus-library-section-tabs" aria-label="Categorias da biblioteca">
-              <button type="button" class="active" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i> Assets</button>
+            <nav class="nexus-library-section-tabs" aria-label="Pastas da biblioteca">
+              <div class="nexus-library-tree-heading">BIBLIOTECA</div>
+              <button type="button" class="active" data-library-section="assets"><i class="fa-solid fa-cubes" aria-hidden="true"></i> Assets padrão</button>
+              <button type="button" data-library-scope="personal" data-library-section="assets"><i class="fa-solid fa-user" aria-hidden="true"></i> Meus componentes e grupos</button>
+              <div class="nexus-library-tree-heading">COLEÇÕES</div>
               <button type="button" data-library-section="flows"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i> Fluxos</button>
-              <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i> Temas</button><button type="button" data-library-section="layouts"><i class="fa-solid fa-table-columns" aria-hidden="true"></i> Layouts</button>
+              <button type="button" data-library-section="themes"><i class="fa-solid fa-palette" aria-hidden="true"></i> Temas</button>
+              <button type="button" data-library-section="layouts"><i class="fa-solid fa-table-columns" aria-hidden="true"></i> Layouts</button>
+              <div class="nexus-library-tree-heading">OUTROS CONTEÚDOS</div>
+              <button type="button" data-library-section="collection:templates"><i class="fa-solid fa-id-card" aria-hidden="true"></i> Modelos de ficha</button>
+              <button type="button" data-library-section="collection:assets"><i class="fa-solid fa-cube" aria-hidden="true"></i> Assets salvos</button>
+              <button type="button" data-library-section="collection:media"><i class="fa-solid fa-photo-film" aria-hidden="true"></i> Mídia</button>
+              <button type="button" data-library-section="collection:styles"><i class="fa-solid fa-swatchbook" aria-hidden="true"></i> Estilos visuais</button>
+              <button type="button" data-library-section="collection:rules"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Regras</button>
+              <button type="button" data-library-section="collection:behaviors"><i class="fa-solid fa-gears" aria-hidden="true"></i> Comportamentos</button>
+              <div class="nexus-library-tree-heading" data-library-custom-folder-heading hidden>MINHAS PASTAS</div>
+              <div class="nexus-library-custom-folder-tree" data-library-custom-folders></div>
             </nav>
             <section class="nexus-library-section-panel" data-library-section-panel="assets">
-              <nav class="nexus-library-scope-tabs" aria-label="Origem dos assets">
-                <button type="button" class="active" data-library-scope="core">Padrão NEXUS</button>
-                <button type="button" data-library-scope="personal">Meus itens</button>
-              </nav>
               <div class="nexus-library-workspace">
                 <div class="nexus-library-main">
                   <div class="nexus-library-section-heading"><strong data-library-list-heading>Assets disponíveis</strong><span data-library-list-count></span></div>
@@ -379,7 +388,23 @@ remove legacy typography selects                  <label class="nexus-inspector-
             <section class="nexus-library-section-panel" data-library-section-panel="layouts" hidden>
               <div class="nexus-library-section-heading"><strong>Layouts completos</strong><span>Modelos reutilizáveis entre fichas e jogadores</span></div>
               <div class="nexus-library-layout-toolbar"><button type="button" data-library-import-layout><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar layout por código</button><span>Salve o layout atual pelo ícone de exportação no cabeçalho da Biblioteca.</span></div>
-              <div class="nexus-library-layouts" data-library-saved-layouts></div>
+              <div class="nexus-library-layout-workspace"><div class="nexus-library-layouts" data-library-saved-layouts></div><aside class="nexus-library-details nexus-library-layout-details" data-library-layout-details><div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do layout</strong><p>Selecione um layout para consultar sua composição e ações disponíveis.</p></div></aside></div>
+            </section>
+            <section class="nexus-library-section-panel nexus-library-generic-panel" data-library-section-panel="collection" hidden>
+              <div class="nexus-library-section-heading"><strong data-library-collection-heading>Modelos de ficha</strong><span data-library-collection-count>Conteúdo salvo na Biblioteca</span></div>
+              <div class="nexus-library-collection-toolbar">
+                <div class="nexus-library-collection-filters" role="group" aria-label="Filtrar itens">
+                  <button type="button" class="active" data-library-collection-filter="all">Todos</button>
+                  <button type="button" data-library-collection-filter="favorites">Favoritos</button>
+                  <button type="button" data-library-collection-filter="recent">Recentes</button>
+                </div>
+                <select data-library-collection-folder aria-label="Filtrar por pasta"><option value="">Todas as pastas</option></select>
+                <label class="nexus-library-folder-create"><input type="text" maxlength="80" placeholder="Nova pasta" data-library-folder-name><button type="button" data-library-create-folder>Criar pasta</button></label>
+              </div>
+              <div class="nexus-library-workspace nexus-library-generic-workspace">
+                <div class="nexus-library-main"><div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items></div></div>
+                <aside class="nexus-library-details" data-library-generic-details><div class="nexus-library-detail-placeholder"><span>▤</span><strong>Detalhes do item</strong><p>Selecione um item para consultar os dados armazenados.</p></div></aside>
+              </div>
             </section>
           </section>
         </div>

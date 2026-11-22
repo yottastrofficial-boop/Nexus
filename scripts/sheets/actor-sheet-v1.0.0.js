@@ -1,5 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { createLibraryDefinition, createLibraryComponentInstance } from "../core/library-models.js";
+import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
@@ -2592,10 +2592,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
     await game.user.setFlag("nexus", "libraryLayouts", next); this._libraryRenderSavedLayouts?.(); return true;
   }
 
-  async _addSavedLayoutToActor(layoutId) {
+  async _addSavedLayoutToActor(layoutId, overrides = {}) {
     const entry = (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === layoutId);
     if (!entry?.layout) return false;
-    const layouts = await this._readLayouts(), base = clone(entry.layout);
+    const layouts = await this._readLayouts(), base = applyLibraryLayoutOverrides(entry.layout, overrides);
     const layoutIdNew = `layout-${foundry.utils.randomID(6)}`;
     const componentIds = new Map((base.components ?? []).map(component => [String(component.id), `cmp-${foundry.utils.randomID(8)}`]));
     const groupIds = new Map((base.groups ?? []).map(group => [String(group.id), `grp-${foundry.utils.randomID(8)}`]));

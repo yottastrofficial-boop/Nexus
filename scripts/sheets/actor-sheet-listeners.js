@@ -253,6 +253,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
+      const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
+      genericCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleGeneric++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
@@ -262,7 +264,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
       libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);});
       const count=libraryPanel?.querySelector("[data-library-count]");
-      if(count)count.textContent=activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
+      if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"item":"itens"}`:`${visible} ${visible===1?"asset":"assets"}`;
       const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Meus componentes e grupos":"Assets disponíveis";
     };
     const resourcePaths = (() => {
@@ -472,6 +474,40 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         const applyOriginal=document.createElement("button");applyOriginal.type="button";applyOriginal.dataset.libraryApplyThemeOriginal="";applyOriginal.textContent=custom?"Aplicar tema salvo":"Aplicar tema padrão";
         detail.append(heading,note,preview,swatches,fields,applyOriginal,apply);
       };
+      const layoutCard = target?.closest("[data-library-saved-layout]");
+      if (layoutCard && libraryPanel.contains(layoutCard) && !target?.closest(".nexus-library-layout-actions")) {
+        event.preventDefault();
+        libraryPanel.querySelectorAll("[data-library-saved-layout]").forEach(item => item.classList.toggle("is-selected", item === layoutCard));
+        const entry = (game.user?.getFlag?.("nexus", "libraryLayouts") ?? []).find(item => item.id === layoutCard.dataset.librarySavedLayout);
+        const detail = libraryPanel.querySelector("[data-library-layout-details]");
+        if (entry && detail) {
+          detail.dataset.selectedLayoutId = entry.id;
+          detail.replaceChildren();
+          const heading = document.createElement("div"); heading.className = "nexus-library-detail-heading";
+          const title = document.createElement("strong"); title.className = "nexus-library-detail-title"; title.textContent = entry.name || "Layout sem nome"; heading.append(title);
+          const layout = entry.layout ?? {};
+          const summary = document.createElement("p"); summary.className = "nexus-library-definition-note";
+          summary.textContent = `${layout.components?.length ?? 0} componentes · ${layout.groups?.length ?? 0} grupos · ${layout.width ?? "?"} × ${layout.height ?? "?"} px`;
+          const note = document.createElement("p"); note.className = "nexus-library-definition-note";
+          note.textContent = "Ajuste esta cópia antes de adicioná-la. O modelo salvo permanece inalterado.";
+          const editor = document.createElement("div"); editor.className = "nexus-library-layout-overrides";
+          const fields = [["name","Nome", "text", entry.name ?? layout.name ?? ""],["width","Largura", "number", layout.width ?? 1200],["height","Altura", "number", layout.height ?? 700]];
+          for (const [key,label,type,value] of fields) {
+            const field = document.createElement("label"); field.textContent = label;
+            const input = document.createElement("input"); input.type = type; input.dataset.libraryLayoutOverride = key; input.value = String(value); field.append(input); editor.append(field);
+          }
+          for (const [key,label] of [["canvasColor","Fundo"],["cardColor","Cartões"],["accentColor","Destaque"]]) {
+            const color = document.createElement("label"); color.textContent = label;
+            const input = document.createElement("input"); input.type = "color"; input.dataset.libraryLayoutOverride = key;
+            input.value = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(layout[key] ?? "")) ? layout[key] : "#263749";
+            color.append(input); editor.append(color);
+          }
+          const actions = document.createElement("div"); actions.className = "nexus-library-layout-actions";
+          const apply = document.createElement("button"); apply.type = "button"; apply.dataset.libraryAddLayout = entry.id; apply.textContent = "Adicionar cópia à ficha"; actions.append(apply);
+          detail.append(heading, summary, note, editor, actions);
+        }
+        return;
+      }
       const customThemeCard = target?.closest("[data-library-custom-theme]");
       if (customThemeCard && libraryPanel.contains(customThemeCard)) {
         event.preventDefault();
@@ -779,7 +815,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       const addLayoutButton = target?.closest("[data-library-add-layout]");
-      if (addLayoutButton && libraryPanel.contains(addLayoutButton)) { event.preventDefault(); await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout); return; }
+      if (addLayoutButton && libraryPanel.contains(addLayoutButton)) {
+        event.preventDefault();
+        const detail = libraryPanel.querySelector("[data-library-layout-details]");
+        const overrides = Object.fromEntries([...(detail?.querySelectorAll("[data-library-layout-override]") ?? [])].map(input => [input.dataset.libraryLayoutOverride, input.value]));
+        await sheet._addSavedLayoutToActor(addLayoutButton.dataset.libraryAddLayout, detail?.dataset.selectedLayoutId === addLayoutButton.dataset.libraryAddLayout ? overrides : {});
+        return;
+      }
       const copyLayoutButton = target?.closest("[data-library-copy-layout]");
       if (copyLayoutButton && libraryPanel.contains(copyLayoutButton)) { event.preventDefault(); await sheet._copyLibraryPackage("layout",copyLayoutButton.dataset.libraryCopyLayout); return; }
       const exportLayoutButton = target?.closest("[data-library-export-layout]");

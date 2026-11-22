@@ -1,5 +1,6 @@
 import { createEmptyNexusLibraryStore, normalizeNexusLibraryStore, migrateLegacyNexusLibrary, mergeNexusLibraryStores } from "../scripts/core/library-store.js";
-import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides } from "../scripts/core/library-models.js";
+import { createEmptyLibraryPreferences, normalizeLibraryPreferences, createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder } from "../scripts/core/library-preferences.js";
+import { createLibraryDefinition, createLibraryComponentInstance, collectLibraryInstanceOverrides, applyLibraryLayoutOverrides } from "../scripts/core/library-models.js";
 import assert from "node:assert/strict";
 import { readFile, access, readdir } from "node:fs/promises";
 import path from "node:path";
@@ -1363,6 +1364,34 @@ assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder s
 assert.match(sheetListeners,/data-library-delete-flow/,"A Biblioteca deve expor a ação de excluir fluxos");
 assert.match(sheetListeners,/data-library-delete-saved-group/,"A Biblioteca deve expor a ação de excluir grupos");
 assert.match(template,/data-library-flow-details/,"A Biblioteca deve ter um painel de detalhes dos fluxos");
+assert.match(template,/data-library-section="collection:templates"/,"A navegação deve expor modelos de ficha");
+assert.match(template,/data-library-section="collection:media"/,"A navegação deve expor mídia");
+assert.match(template,/data-library-section="collection:styles"/,"A navegação deve expor estilos visuais");
+assert.match(template,/data-library-section="collection:rules"/,"A navegação deve expor regras");
+assert.match(template,/data-library-section="collection:behaviors"/,"A navegação deve expor comportamentos");
+assert.match(template,/data-library-section-panel="collection"/,"Coleções complementares devem compartilhar um único painel");
+assert.match(libraryView,/readNexusLibraryStore\(game\.user, getLegacyLibraryFlags\(\)\)/,"Coleções devem ser lidas pelo contrato unificado com fallback legado");
+assert.match(libraryView,/data-library-entry/,"Itens das coleções devem possuir seleção contextual");
+assert.match(libraryView,/genericCollectionLabels/,"Coleções complementares devem usar rótulos centralizados");
+assert.match(sheetListeners,/data-library-entry/,"A pesquisa global deve incluir itens das coleções complementares");
+assert.match(css,/nexus-library-tree-heading/,"A navegação deve ter hierarquia visual de pastas");
+assert.match(libraryView,/createLibraryFolder/,"A Biblioteca deve criar pastas personalizadas");
+assert.match(libraryView,/toggleLibraryFavorite/,"A Biblioteca deve permitir favoritar itens");
+assert.match(libraryView,/recordLibraryRecent/,"A seleção deve alimentar a lista de recentes");
+assert.match(libraryView,/data-library-save-metadata/,"O inspector deve salvar metadados editáveis");
+assert.match(template,/data-library-collection-filter="favorites"/,"A Biblioteca deve oferecer filtro de favoritos");
+assert.match(template,/data-library-collection-filter="recent"/,"A Biblioteca deve oferecer filtro de recentes");
+assert.match(template,/data-library-create-folder/,"A interface deve expor a criação de pastas");
+assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
+assert.match(template,/data-library-custom-folders/,"Pastas personalizadas devem aparecer na navegação lateral");
+assert.match(libraryView,/renderCustomFolderTree/,"A navegação deve refletir as pastas salvas");
+assert.match(sheetListeners,/data-library-layout-override/,"O inspector de layouts deve expor overrides");
+assert.match(sheet,/applyLibraryLayoutOverrides/,"A ficha deve aplicar overrides somente à cópia do layout");
+assert.match(css,/nexus-library-layout-overrides/,"Os controles de override devem seguir o padrão visual do inspector");
+
+
+assert.match(css,/nexus-library-generic-item\.is-selected/,"Itens genéricos devem ter estado de seleção consistente");
+
 assert.match(actorPropertyPickerListeners,/propertyPickerId/,"A ficha deve reutilizar um único seletor de propriedades");
 assert.doesNotMatch(interactions,/property\.dataset\.interactionPropertyInput/,"Condições por expressão não devem depender de um seletor de caminho separado");
 assert.match(sheetCode,/expandNexusPropertyExpressions/,"Fórmulas devem resolver referências de propriedades");
@@ -2252,6 +2281,47 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>normalizeNexusLibraryStore({collections:{components:[{value:Infinity}]}}),/número inválido/);
 }
 
+
+/* Library organization: custom folders, favorites, recent history and safe reassignment. */
+{
+  let preferences = createEmptyLibraryPreferences();
+  const created = createLibraryFolder(preferences, { id: "folder-assets", name: "Meus medidores", collection: "assets" });
+  preferences = created.preferences;
+  assert.equal(created.folder.name, "Meus medidores");
+  assert.throws(() => createLibraryFolder(preferences, { id: "duplicate", name: "meus medidores", collection: "assets" }), /Já existe uma pasta/);
+  preferences = assignLibraryEntryFolder(preferences, "assets", "meter-1", "folder-assets");
+  assert.equal(preferences.assignments["assets:meter-1"], "folder-assets");
+  assert.throws(() => assignLibraryEntryFolder(preferences, "media", "portrait-1", "folder-assets"), /não pertence/);
+  preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
+  assert.ok(preferences.favorites.includes("assets:meter-1"));
+  preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
+  assert.equal(preferences.favorites.includes("assets:meter-1"), false);
+  preferences = recordLibraryRecent(preferences, "assets", "meter-1");
+  preferences = recordLibraryRecent(preferences, "media", "portrait-1");
+  preferences = recordLibraryRecent(preferences, "assets", "meter-1");
+  assert.deepEqual(preferences.recent.slice(0, 2), ["assets:meter-1", "media:portrait-1"]);
+  preferences = removeLibraryFolder(preferences, "folder-assets");
+  assert.equal(preferences.assignments["assets:meter-1"], undefined);
+  assert.equal(preferences.folders.length, 0);
+  const malformed = normalizeLibraryPreferences({ schemaVersion: 1, folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
+  assert.deepEqual(malformed.favorites, ["x"]);
+  assert.deepEqual(malformed.recent, ["assets:a"]);
+}
+
+/* Saved layouts remain immutable when inspector overrides are applied to a new Actor layout. */
+{
+  const source = { id:"saved", name:"Modelo", width:1200, height:700, canvasColor:"#111111", components:[{id:"original"}] };
+  const customized = applyLibraryLayoutOverrides(source, { name:"Minha ficha", width:1500, height:900, canvasColor:"#222222" });
+  assert.equal(customized.name,"Minha ficha");
+  assert.equal(customized.width,1500);
+  assert.equal(customized.height,900);
+  assert.equal(customized.canvasColor,"#222222");
+  assert.equal(source.name,"Modelo");
+  assert.equal(source.width,1200);
+  assert.equal(source.canvasColor,"#111111");
+  assert.throws(()=>applyLibraryLayoutOverrides(source,{canvasColor:"red"}),/cor canvasColor é inválida/);
+  assert.equal(applyLibraryLayoutOverrides(source,{width:9000}).width,5000);
+}
 
 /* Library definitions are immutable models; Actor instances own their overrides. */
 {

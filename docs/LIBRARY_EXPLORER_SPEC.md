@@ -46,3 +46,23 @@ Temas padrão são somente leitura. O inspector permite pré-visualizar uma pale
 ## Estado desta implementação
 
 Esta etapa adiciona o contrato de definição/instância para componentes, personalização pré-inserção de componentes e grupos salvos, inspector editável de temas e uma organização visual em explorador com navegação lateral e cartões unificados para itens pessoais. As coleções de layouts, regras, modelos, mídia, estilos e comportamentos ainda precisam ser conectadas progressivamente ao mesmo catálogo/inspector; sua existência no formato de backup não significa que todos os editores já estejam prontos.
+
+
+## Interface do Explorador — reconstrução visual
+
+A janela da Biblioteca utiliza uma composição única em três regiões:
+
+- **Navegação à esquerda:** árvore visual para Assets padrão, itens pessoais, Fluxos, Temas, Layouts, Modelos de ficha, Assets salvos, Mídia, Estilos visuais, Regras e Comportamentos.
+- **Área central:** cartões de itens com busca compartilhada; Assets, Fluxos, Temas e Layouts mantêm os renderizadores específicos existentes. As coleções complementares usam uma listagem genérica.
+- **Inspector à direita:** painel contextual para prévia, detalhes e configuração. Assets, Fluxos e Temas mantêm seus editores existentes; Layouts apresentam resumo; coleções complementares exibem metadados em modo somente leitura.
+
+A navegação é uma árvore visual de categorias, mas ainda não representa pastas personalizáveis. Coleções complementares são carregadas por `readNexusLibraryStore`, com fallback para flags legadas quando o armazenamento canônico ainda não existe. Conteúdo importado permanece inerte.
+
+A interface usa o mesmo padrão de grade e seleção para itens. Em larguras menores, o inspector passa para baixo da listagem para evitar colunas impraticáveis.
+
+### Limitações ainda abertas
+
+- Favoritos, recentes, pastas personalizadas e filtros por etiquetas ainda não estão implementados.
+- As coleções complementares têm inspector somente leitura; editores específicos e ações de aplicação ainda não existem.
+- Layouts têm resumo contextual, mas não editor de overrides.
+- A validação visual/funcional no Foundry VTT 14 continua obrigatória.

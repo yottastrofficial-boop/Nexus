@@ -1,3 +1,22 @@
+## 1.0.0.81
+
+### Biblioteca — janela unificada estilo Explorador
+
+- Consolida a Biblioteca em navegação lateral, área central de itens e inspector contextual.
+- Expõe categorias de modelos de ficha, assets salvos, mídia, estilos visuais, regras e comportamentos, lendo o armazenamento unificado com fallback para as flags legadas.
+- Adiciona pastas personalizadas por coleção, atribuição de itens a pastas e navegação pelas pastas na barra lateral.
+- Adiciona favoritos e itens recentes, com filtros dedicados.
+- Permite editar metadados seguros (nome, descrição, etiquetas e pasta) sem executar conteúdo importado.
+- Adiciona prévias seguras para mídia compatível, amostras de cores, expressões de regras e resumo de comportamentos.
+- Adiciona overrides de nome, dimensões e cores ao inserir um layout salvo; o modelo original permanece intacto.
+- Padroniza os painéis de detalhes e os controles da Biblioteca em diferentes larguras.
+
+### Validação e limites
+
+- Testes automatizados de organização da Biblioteca, preservação de modelos, overrides e regressões de pacote.
+- Conteúdos executáveis importados permanecem inertes.
+- A renderização visual e o fluxo de uso ainda precisam de confirmação em uma instância real do Foundry VTT 14 build 360.
+
 ## 1.0.0.80
 
 ### Comportamentos
@@ -18,6 +37,23 @@
 - Conteúdo avançado permanece dado inerte durante importação; nenhuma string de código é executada pelo parser.
 - Esta versão será empacotada e validada pelo workflow de release da `main` antes da publicação do manifesto.
 - Teste funcional no Foundry VTT 14 build 360 continua necessário; esta publicação disponibiliza a etapa atual para teste, não representa a conclusão da Biblioteca unificada.
+
+## Próxima versão — Biblioteca Explorer (em desenvolvimento)
+
+### Interface
+- Reorganiza a Biblioteca como uma janela única estilo Explorador de Arquivos, com navegação vertical à esquerda, área de itens ao centro e inspector contextual à direita.
+- Padroniza grade, seleção, superfícies, espaçamento e largura dos painéis de detalhes entre Assets, Fluxos, Temas e Layouts.
+- Adiciona navegação em árvore por Assets, itens pessoais, Fluxos, Temas, Layouts, Modelos de ficha, Assets salvos, Mídia, Estilos, Regras e Comportamentos.
+- Conecta as coleções complementares ao armazenamento unificado com fallback de leitura das flags legadas.
+- Apresenta itens dessas coleções em cartões e permite consultar metadados no inspector, sem executar conteúdo importado.
+- Inclui itens das coleções complementares na busca compartilhada.
+- Mantém a interface responsiva: em larguras menores, a navegação vira faixa horizontal e o inspector passa abaixo da listagem.
+
+### Escopo ainda pendente
+- Pastas hierárquicas personalizáveis, favoritos, recentes e filtros completos.
+- Editores e prévias específicos para modelos de ficha, assets salvos, mídia, estilos, regras e comportamentos; por enquanto, essas coleções têm visualização de metadados.
+- Editor de overrides para layouts e integração plena de todas as coleções com aplicação na ficha.
+- Validação visual e funcional no Foundry VTT 14 build 360.
 
 ## 1.0.0.79
 
