@@ -1,11 +1,3 @@
-## Em desenvolvimento — fundação da modernização
-
-- Adiciona registry de formatos e adaptadores de mídia, com identificação por assinatura, MIME e extensão.
-- Integra o registry ao ciclo de inicialização do NEXUS e expõe o serviço em game.nexus.media.formats.
-- Adiciona testes de regressão para JXL, Opus, contêineres e carregamento sob demanda de adaptadores.
-- Documenta a área unificada Lógica e a estratégia de compatibilidade de mídia via WASM e storage adapters.
-- A decodificação JXL/AV1/Opus por WASM, a interface da Biblioteca reformulada e as migrações permanecem em etapas futuras.
-
 ## 1.0.0.84
 
 ### Biblioteca — nomenclatura final e títulos dos cartões
@@ -604,3 +596,12 @@ A geometria de contato das bordas é compartilhada pelos modos Padrão, Configur
 - O arquivo de distribuição contém `system.json` na raiz e é anexado à Release correspondente à versão do manifesto.
 - A instalação manual deve utilizar o asset `nexus.zip` da Release, e não o ZIP automático do repositório-fonte.
 
+
+
+## Em desenvolvimento — fundação da modernização
+
+- Adiciona registry de formatos e adaptadores de mídia, com identificação por assinatura, MIME e extensão.
+- Integra o registry ao ciclo de inicialização do NEXUS e expõe o serviço em game.nexus.media.formats.
+- Adiciona testes de regressão para JXL, Opus, contêineres e carregamento sob demanda de adaptadores.
+- Documenta a área unificada Lógica e a estratégia de compatibilidade de mídia via WASM e storage adapters.
+- A decodificação JXL/AV1/Opus por WASM, a interface da Biblioteca reformulada e as migrações permanecem em etapas futuras.
