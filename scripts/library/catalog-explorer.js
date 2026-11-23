@@ -70,7 +70,10 @@ export function createLibraryCatalogExplorer({
   container,
   detail,
   getPreferences,
-  savePreferences
+  savePreferences,
+  canApplyResource = () => false,
+  onApplyResource = null,
+  applyLabel = "Aplicar ao contexto"
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -303,6 +306,21 @@ export function createLibraryCatalogExplorer({
         }
       });
       actions.append(button);
+    }
+
+    if (typeof onApplyResource === "function" && canApplyResource(resource, resolved)) {
+      const apply = makeElement("button", "nexus-library-apply-context", applyLabel);
+      apply.type = "button";
+      apply.addEventListener("click", async () => {
+        try {
+          const result = await onApplyResource(resource, resolved);
+          if (result === false) return;
+          globalThis.ui?.notifications?.info?.("Recurso aplicado ao contexto atual.");
+        } catch (error) {
+          detail.append(makeElement("p", "nexus-library-empty", "Não foi possível aplicar o recurso: " + error.message));
+        }
+      });
+      actions.append(apply);
     }
 
     const advanced = makeElement("details", "nexus-library-resource-raw");
