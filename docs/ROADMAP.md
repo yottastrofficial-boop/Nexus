@@ -8,6 +8,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
 - Versão publicada: `1.0.0.90` (release de teste; a validação funcional no Foundry continua pendente)
+- Versão candidata em preparação: `1.0.0.91` (Biblioteca universal integrada; CI e validação funcional no Foundry pendentes).
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
@@ -61,7 +62,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
-## Biblioteca universal — implementação em andamento
+## Biblioteca universal — integração concluída na candidata 1.0.0.91
 
 - **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
 - **PR #59 / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
