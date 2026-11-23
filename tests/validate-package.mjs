@@ -1486,7 +1486,7 @@ const neutralResourceBar = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key ==
 assert.equal(neutralResourceBar.template.currentPath, "", "A barra genérica não deve vir vinculada a PV ou outro recurso");
 assert.equal(neutralResourceBar.template.maxPath, "", "O valor máximo da barra genérica deve ser configurado na instância");
 assert.equal(neutralResourceBar.template.sheetCode, "", "A barra genérica não deve carregar o código PV por padrão");
-assert.equal(neutralResourceBar.template.sheetContent1, "Recurso", "A barra genérica deve usar um rótulo neutro");
+assert.equal(neutralResourceBar.template.sheetContent1, "", "A barra genérica não deve exibir rótulo");
 const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, combat: { mb: 2 }, skills: { athletics: { proficientLevel: 2 } } } };
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
