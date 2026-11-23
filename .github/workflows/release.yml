@@ -46,6 +46,7 @@ jobs:
         run: |
           node --experimental-default-type=module tests/media-format-registry.mjs
           node --experimental-default-type=module tests/logic-infrastructure.mjs
+          node --experimental-default-type=module tests/foundry-logic-integration.test.mjs
           node --experimental-default-type=module tests/logic-schemas.test.mjs
           node --experimental-default-type=module tests/logic-editors.test.mjs
           node --experimental-default-type=module tests/media-infrastructure.mjs
