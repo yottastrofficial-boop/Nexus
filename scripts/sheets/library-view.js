@@ -1,10 +1,9 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
 import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
-import { getLegacyNexusLibraryFlags, readNexusLibraryStore, writeNexusLibraryCollection } from "../core/library-store.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
-import { NEXUS_LIBRARY_COLLECTIONS, updateNexusLibraryStore } from "../core/library-store.js";
+import { getLegacyNexusLibraryFlags, readNexusLibraryStore, writeNexusLibraryCollection, NEXUS_LIBRARY_COLLECTIONS, updateNexusLibraryStore } from "../core/library-store.js";
 import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
