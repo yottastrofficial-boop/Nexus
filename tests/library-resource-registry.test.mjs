@@ -83,6 +83,24 @@ const component = await nexusProvider.resolve({
   id: "component-health"
 });
 assert.equal(component.payload.settings.currentPath, "resources.vitality.value");
+const componentReference = { providerId: "nexus-library", collection: "components", id: "component-health" };
+assert.deepEqual(nexusProvider.getActions(componentReference).map(action => action.id), ["edit-metadata", "duplicate", "delete"]);
+const metadataResult = await nexusProvider.executeAction("edit-metadata", componentReference, {
+  name: "Indicador de vitalidade",
+  description: "Metadados atualizados",
+  tags: ["ficha", "vitalidade"]
+});
+assert.equal(metadataResult.entry.name, "Indicador de vitalidade");
+const duplicateResult = await nexusProvider.executeAction("duplicate", componentReference);
+assert.equal(duplicateResult.duplicated, true);
+assert.notEqual(duplicateResult.entry.id, "component-health");
+assert.equal(duplicateResult.entry.name, "Indicador de vitalidade (cópia)");
+const deleteResult = await nexusProvider.executeAction("delete", {
+  providerId: "nexus-library",
+  collection: "components",
+  id: duplicateResult.entry.id
+});
+assert.equal(deleteResult.deleted, true);
 let worldFlows = [{ id: "world-flow-1", name: "Fluxo de sessão", flow: { name: "Fluxo de sessão", triggers: [], conditions: [], actions: [] } }];
 const flowProvider = createNexusLibraryProvider({ getUser: () => user, getWorldFlows: () => worldFlows, catalog: { assets: [], themes: [] } });
 const worldFlowPage = await flowProvider.list({ origin: "world", type: "flow" });
@@ -179,6 +197,8 @@ const resolved = await registry.resolve(
   foundryOnly.items[0]
 );
 assert.equal(resolved.name, "Documento resolvido");
+assert.deepEqual(registry.getActions(foundryOnly.items[0].reference).map(action => action.id), ["open"]);
+await assert.rejects(registry.executeAction("delete", foundryOnly.items[0].reference), /não oferece operações|não está disponível/);
 const referencedPage = await registry.list({
   references: [
     { providerId: "nexus-library", id: "components:component-health" },
