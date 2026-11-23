@@ -106,6 +106,7 @@ export function createLibraryCatalogExplorer({
 
   const renderDetails = async resource => {
     const version = ++requestVersion;
+    const key = resourceKey(resource);
     detail.dataset.selectedProvider = resource.providerId;
     detail.dataset.selectedResource = resource.id;
     detail.replaceChildren(makeElement("p", "nexus-library-detail-placeholder", "Carregando detalhes…"));
@@ -113,14 +114,14 @@ export function createLibraryCatalogExplorer({
     const preferences = getPreferences();
     await savePreferences({
       ...preferences,
-      recent: [resourceKey(resource), ...preferences.recent.filter(key => key !== resourceKey(resource))].slice(0, 30)
+      recent: [key, ...preferences.recent.filter(item => item !== key)].slice(0, 30)
     });
     let resolved;
     try {
       resolved = await registry.resolve(resource.reference, resource);
     } catch (error) {
       if (version !== requestVersion) return;
-      detail.replaceChildren(makeElement("p", "nexus-library-empty", `Não foi possível abrir este recurso: ${error.message}`));
+      detail.replaceChildren(makeElement("p", "nexus-library-empty", "Não foi possível abrir este recurso: " + error.message));
       return;
     }
     if (version !== requestVersion) return;
@@ -135,19 +136,114 @@ export function createLibraryCatalogExplorer({
       ["Provedor", resource.providerId],
       ["Tipo", resource.type],
       ["Origem", resource.origin],
-      ["Pasta", resource.folder],
+      ["Pasta de origem", resource.folder],
       ["Etiquetas", resource.tags.join(", ") || "—"]
     ]) {
       if (!value) continue;
       facts.append(makeElement("dt", "", label), makeElement("dd", "", value));
     }
 
+    const folderLabel = makeElement("label", "nexus-library-folder-assignment", "Pasta pessoal");
+    const folderSelect = makeElement("select");
+    const noFolder = makeElement("option", "", "Sem pasta");
+    noFolder.value = "";
+    folderSelect.append(noFolder);
+    for (const folder of preferences.folders.filter(item =>
+      !item.collection || item.collection === resource.providerId || item.collection === resource.reference?.collection
+    )) {
+      const option = makeElement("option", "", folder.name);
+      option.value = folder.id;
+      folderSelect.append(option);
+    }
+    folderSelect.value = preferences.assignments[key] ?? "";
+    folderSelect.addEventListener("change", async () => {
+      const current = getPreferences();
+      const assignments = { ...current.assignments };
+      if (folderSelect.value) assignments[key] = folderSelect.value;
+      else delete assignments[key];
+      try { await savePreferences({ ...current, assignments }); }
+      catch (error) { detail.append(makeElement("p", "nexus-library-empty", "Não foi possível salvar a pasta: " + error.message)); }
+    });
+    folderLabel.append(folderSelect);
+
     const actions = makeElement("div", "nexus-library-item-actions");
-    if (resource.kind === "document" && resolved?.sheet?.render) {
-      const open = makeElement("button", "", "Abrir documento");
-      open.type = "button";
-      open.addEventListener("click", () => resolved.sheet.render(true));
-      actions.append(open);
+    const availableActions = typeof registry.getActions === "function"
+      ? registry.getActions(resource.reference, resource)
+      : [];
+    for (const action of availableActions) {
+      const button = makeElement("button", "", action.label);
+      button.type = "button";
+      button.dataset.libraryAction = action.id;
+      button.addEventListener("click", async () => {
+        if (action.id === "edit-metadata") {
+          const editor = makeElement("div", "nexus-library-metadata-editor");
+          const nameLabel = makeElement("label", "", "Nome");
+          const nameInput = makeElement("input");
+          nameInput.type = "text";
+          nameInput.maxLength = 120;
+          nameInput.value = resource.name;
+          nameLabel.append(nameInput);
+          const descriptionLabel = makeElement("label", "", "Descrição");
+          const descriptionInput = makeElement("textarea");
+          descriptionInput.rows = 3;
+          descriptionInput.maxLength = 1000;
+          descriptionInput.value = resource.description;
+          descriptionLabel.append(descriptionInput);
+          const tagsLabel = makeElement("label", "", "Etiquetas (separadas por vírgula)");
+          const tagsInput = makeElement("input");
+          tagsInput.type = "text";
+          tagsInput.maxLength = 240;
+          tagsInput.value = resource.tags.join(", ");
+          tagsLabel.append(tagsInput);
+          const save = makeElement("button", "", "Salvar metadados");
+          save.type = "button";
+          save.addEventListener("click", async () => {
+            try {
+              await registry.executeAction(action.id, resource.reference, resource, {
+                name: nameInput.value,
+                description: descriptionInput.value,
+                tags: tagsInput.value.split(",").map(tag => tag.trim()).filter(Boolean)
+              });
+              await render();
+            } catch (error) {
+              editor.append(makeElement("p", "nexus-library-empty", "Não foi possível salvar: " + error.message));
+            }
+          });
+          editor.append(nameLabel, descriptionLabel, tagsLabel, save);
+          detail.replaceChildren(heading, meta, description, facts, folderLabel, editor, actions);
+          return;
+        }
+
+        if (action.requiresConfirmation) {
+          const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+          if (typeof confirm !== "function") return;
+          const accepted = await confirm({
+            window: { title: action.label },
+            content: "<p>Deseja realmente executar esta operação?</p>",
+            rejectClose: false
+          });
+          if (!accepted) return;
+        }
+
+        try {
+          await registry.executeAction(action.id, resource.reference, resource);
+          if (action.id === "delete") {
+            const current = getPreferences();
+            const assignments = { ...current.assignments };
+            delete assignments[key];
+            await savePreferences({
+              ...current,
+              assignments,
+              favorites: current.favorites.filter(item => item !== key),
+              recent: current.recent.filter(item => item !== key)
+            });
+          }
+          await render();
+        } catch (error) {
+          detail.append(makeElement("p", "nexus-library-empty", "Não foi possível executar a operação: " + error.message));
+        }
+      });
+      actions.append(button);
     }
 
     const advanced = makeElement("details", "nexus-library-resource-raw");
@@ -157,8 +253,8 @@ export function createLibraryCatalogExplorer({
       ? resolved.toObject()
       : resolved;
     try {
-      raw.textContent = JSON.stringify(safeResolved, (key, value) => {
-        if (["parent", "apps", "sheet", "collection", "pack", "folder"].includes(key)) return undefined;
+      raw.textContent = JSON.stringify(safeResolved, (property, value) => {
+        if (["parent", "apps", "sheet", "collection", "pack", "folder"].includes(property)) return undefined;
         if (typeof value === "function") return undefined;
         return value;
       }, 2).slice(0, 10000);
@@ -166,7 +262,7 @@ export function createLibraryCatalogExplorer({
       raw.textContent = "Não foi possível gerar uma prévia dos dados deste recurso.";
     }
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, facts, actions, advanced);
+    detail.replaceChildren(heading, meta, description, facts, folderLabel, actions, advanced);
   };
 
   const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, origin = currentOrigin, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
