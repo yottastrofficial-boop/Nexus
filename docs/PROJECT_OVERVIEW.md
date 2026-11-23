@@ -62,16 +62,18 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
-## Fundação da Biblioteca universal — branch em desenvolvimento
+## Fundação da Biblioteca universal — implementação em branches de trabalho
 
-A branch `feat/universal-library-resource-foundation-2026-11-23` inicia a integração universal sem alterar a versão publicada 1.0.0.90:
+A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal, sem alterar a versão publicada 1.0.0.90:
 
 - `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
 - `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
 - Os serviços são expostos em `game.nexus.documents` e `game.nexus.resources`; a inicialização não carrega listas, decoders ou mídia em massa.
+- `scripts/core/library-resource-registry.js` agrega coleções pessoais NEXUS, ativos lógicos e documentos nativos por provedores extensíveis; `game.nexus.library` expõe `list`, `resolve`, `registerProvider` e `getProviders`.
+- A listagem constrói metadados leves, pagina cada provedor separadamente e resolve o conteúdo completo sob demanda. Módulos podem contribuir com conteúdo sem adicionar janelas ou botões independentes.
 - Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
 
-Esta branch ainda não contém os menus funcionais nem a camada de tema global. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador. Testes automatizados e validação real no Foundry são necessários antes de promover a etapa.
+As branches ainda não contêm a integração visual completa do catálogo, os adaptadores de importação/destino, os menus funcionais nem a camada de tema global. O padrão de importação inspirado no Plutonium (origem, prévia, validação e destino) está especificado, mas não implementado. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador. Testes automatizados e validação real no Foundry são necessários antes de promover a etapa.
 
 ## Limitações conhecidas e trabalho pendente
 
