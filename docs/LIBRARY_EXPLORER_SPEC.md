@@ -79,7 +79,7 @@ Implementado nesta etapa:
 - espelhamento de CRUD para flags legadas.
 
 Limitações que permanecem:
-- editores especializados completos para cada tipo lógico ainda precisam ser desenvolvidos;
+- editores estruturados iniciais para Propriedades, Regras, Comportamentos, Fluxos e Funções estão no Inspector; um construtor visual avançado de Fluxos ainda precisa ser desenvolvido;
 - nem todo tipo possui ação de aplicação direta a partir da visão universal; os fluxos especializados continuam responsáveis por inserir/aplicar conteúdos;
 - a aparência, persistência e os fluxos devem ser testados no Foundry VTT 14 build 360 antes de declarar estabilidade funcional.
 
@@ -132,3 +132,8 @@ O contrato de provedores inclui consulta por IDs para que favoritos, recentes e 
 - validação funcional em cliente real do Foundry VTT 14 build 360.
 
 A branch de conclusão não deve ser considerada release até que a cadeia de PRs seja integrada na ordem correta e a validação real seja concluída.
+
+
+### Editores especializados iniciais
+
+O Inspector da aplicação independente carrega editores por subtipo lógico. Propriedades editam caminho, tipo e valor padrão; Regras editam expressão e tipo de resultado; Comportamentos editam eventos e referência de fluxo; Fluxos editam gatilhos, condições, ações e política de erro como dados JSON; Funções editam identificador, assinatura, argumentos e tipo de retorno. O salvamento valida o payload antes de persistir. Nenhum editor aceita ou executa código JavaScript importado.
