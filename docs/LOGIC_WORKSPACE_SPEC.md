@@ -1,7 +1,7 @@
 # NEXUS — Núcleo de Lógica e Configuração
 
 ## Estado
-Arquitetura aprovada. A infraestrutura de dados e execução foi implementada na 1.0.0.85; a interface unificada e os editores especializados continuam pendentes.
+Arquitetura aprovada. A infraestrutura de dados e execução foi implementada na 1.0.0.85. Nesta branch, os cinco tipos recebem schemas estruturais no Core, validação sem efeitos colaterais e editores especializados iniciais no Inspector da Biblioteca. Ações e funções executáveis continuam sendo registradas por código confiável do Core/módulos.
 
 ## Organização unificada
 Regras, comportamentos, fluxos e propriedades técnicas serão administrados em um único ambiente da Biblioteca chamado **Lógica**. A unificação é de navegação, descoberta, dependências e ferramentas comuns. Os conceitos continuam sendo tipos distintos, com schemas, editores e executores especializados.
@@ -90,3 +90,13 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - A interface ainda não apresenta Propriedades, Regras, Comportamentos, Fluxos e Funções em uma única área visual Lógica.
 - Os schemas específicos de cada subtipo precisam ser registrados pelo Core ou por módulos; o registry fornece o contrato e a validação plugável.
 - A execução de ações depende de executores registrados e de um verificador de permissões configurado pelo sistema/módulo.
+
+
+## Implementação dos editores — Biblioteca universal
+
+- `scripts/core/logic-schemas.js` registra validadores estruturais para Propriedades, Regras, Comportamentos, Fluxos e Funções.
+- O parser seguro do Core valida expressões; regras aceitam resultados booleanos, numéricos ou textuais conforme o tipo declarado.
+- `LogicRegistry.validateAsset()` permite validar rascunhos sem registrar ou persistir o ativo. O salvamento valida antes de gravar.
+- `scripts/library/logic-editors.js` fornece editores especializados iniciais para os cinco subtipos. Fluxos editam gatilhos, condições e ações como dados JSON declarativos; Funções editam assinatura/referência, nunca código executável.
+- O Inspector da janela independente integra esses editores e preserva o contrato de provedores.
+- Limitação restante: um construtor visual avançado de nós/ações e executores padrão do Core ainda exigem contratos específicos e testes ponta a ponta. Tipos de ação/função desconhecidos permanecem inertes até que um módulo confiável registre a implementação.
