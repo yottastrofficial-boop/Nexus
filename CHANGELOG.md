@@ -1,3 +1,10 @@
+## 1.0.0.89 — build de teste da ficha no Foundry VTT 14
+
+- Gera uma versão identificável para a rodada de testes manuais da ficha de personagem no Foundry VTT 14 build 360.
+- Não inclui correções funcionais na ficha nesta versão: o código de execução permanece igual ao estado publicado na 1.0.0.88.
+- A ficha ainda não é considerada concluída; problemas encontrados durante o teste devem ser registrados e corrigidos em alterações posteriores.
+- O manifesto estável permanece apontando para 1.0.0.88 até que o GitHub Actions valide e publique o pacote `nexus.zip` da 1.0.0.89.
+
 ## 1.0.0.88 — build para teste no Foundry VTT 14
 
 - Prepara a publicação da etapa atual da Biblioteca, incluindo o menu contextual para excluir pastas pessoais sem remover os itens armazenados.

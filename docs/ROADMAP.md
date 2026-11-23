@@ -7,9 +7,9 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
 - Commit: `335db5149ede0d595bb69a3f3102d1f4495c6ff7`
-- Versão declarada e publicada: `1.0.0.88`
+- Versão candidata para teste: `1.0.0.89` (a última publicada permanece `1.0.0.88`)
 - Alvo: Foundry VTT 14, build 360.
-- Estado: build distribuído para validação; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
+- Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
 ## Estado atual por domínio
 
