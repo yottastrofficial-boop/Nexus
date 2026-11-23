@@ -451,3 +451,97 @@ test("executor nexus.actor.adjust altera propriedade numérica genérica e respe
   assert.match(invalidTarget.errors[0].message, /não contém um número válido/);
   integration.uninstall();
 });
+
+test("schemas visuais de executores são declarativos, isolados e validados em execução", async () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  const runtime = createLogicRuntime({ registry });
+  const calls = [];
+  runtime.registerAction({
+    type: "test.configured",
+    effects: ["pure"],
+    configSchema: { fields: [
+      { key: "target", label: "Alvo", type: "text", required: true },
+      { key: "amount", label: "Quantidade", type: "number", required: true, min: 0, max: 10 },
+      { key: "mode", label: "Modo", type: "select", required: true, options: [
+        { value: "add", label: "Adicionar" }, { value: "subtract", label: "Subtrair" }
+      ] },
+      { key: "enabled", label: "Ativo", type: "checkbox" },
+      { key: "note", label: "Observação", type: "textarea" },
+      { key: "metadata", label: "Metadados", type: "json" }
+    ] },
+    execute: ({ config }) => { calls.push(config); return true; }
+  });
+
+  const exposed = runtime.getActionDefinition("test.configured");
+  assert.equal(exposed.configSchema.fields[0].label, "Alvo");
+  exposed.configSchema.fields[0].label = "Alterado externamente";
+  assert.equal(runtime.getActionDefinition("test.configured").configSchema.fields[0].label, "Alvo");
+
+  const invalid = await runtime.simulateFlow({
+    actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 20, mode: "multiply" } }]
+  });
+  assert.equal(invalid.status, "invalid");
+  assert.equal(invalid.executed, false);
+  assert.equal(invalid.actions[0].status, "invalid-config");
+  assert.equal(calls.length, 0);
+
+  const missing = await runtime.runFlow({
+    actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 3, mode: "add" } }]
+  });
+  assert.equal(missing.status, "success");
+  assert.equal(calls.length, 1);
+
+  const graphInvalid = await runtime.simulateFlow({
+    graph: {
+      entryNodeId: "start",
+      nodes: [
+        { id: "start", type: "start" },
+        { id: "action", type: "action", action: { id: "configured", type: "test.configured", config: { target: "PV", amount: -1, mode: "add" } } },
+        { id: "end", type: "end" }
+      ],
+      edges: [
+        { from: "start", to: "action", when: "next" },
+        { from: "action", to: "end", when: "next" }
+      ]
+    }
+  });
+  assert.equal(graphInvalid.status, "invalid");
+  assert.equal(graphInvalid.actions[0].status, "invalid-config");
+  assert.equal(calls.length, 1);
+
+  assert.throws(() => runtime.registerAction({
+    type: "test.bad-schema",
+    execute() {},
+    configSchema: { fields: [
+      { key: "__proto__", label: "Inseguro", type: "text" }
+    ] }
+  }), /Chave visual inválida/);
+  assert.throws(() => runtime.registerAction({
+    type: "test.duplicate-fields",
+    execute() {},
+    configSchema: { fields: [
+      { key: "value", label: "Um", type: "text" },
+      { key: "value", label: "Dois", type: "text" }
+    ] }
+  }), /duplicada/);
+});
+
+test("executores Core publicam schemas visuais sem mudar os contratos de execução", () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  const runtime = createLogicRuntime({ registry });
+  const hooks = createHooks();
+  const user = { id: "schema-gm", isGM: true };
+  const integration = installFoundryLogicIntegration({
+    hooks, runtime,
+    gameRef: { user, users: { get: id => id === user.id ? user : null } },
+    constRef: { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } },
+    logger: { warn() {}, error() {} }
+  });
+  const update = runtime.getActionDefinition("nexus.actor.update");
+  const adjust = runtime.getActionDefinition("nexus.actor.adjust");
+  assert.deepEqual(update.configSchema.fields.map(field => field.key), ["path", "value"]);
+  assert.deepEqual(adjust.configSchema.fields.map(field => field.key), ["path", "delta", "min", "max"]);
+  assert.ok(runtime.actionTypes.includes("nexus.actor.update"));
+  assert.ok(runtime.actionTypes.includes("nexus.actor.adjust"));
+  integration.uninstall();
+});
