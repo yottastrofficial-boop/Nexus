@@ -1,5 +1,5 @@
 import { createLibraryCatalogExplorer } from "./catalog-explorer.js";
-import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder } from "../core/library-preferences.js";
+import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
@@ -55,6 +55,7 @@ export function createLibraryApplicationClass({
         query: "",
         smartView: "all",
         folder: "",
+        collectionId: "",
         tag: "all",
         origin: "all",
         kind: "all",
@@ -133,6 +134,21 @@ export function createLibraryApplicationClass({
         }
       };
       refreshFolders();
+      const refreshCollections = () => {
+        const nav = root.querySelector("[data-library-app-collections]");
+        if (!nav) return;
+        nav.replaceChildren();
+        for (const collection of normalizeLibraryPreferences(this._getPreferences()).collections) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "nexus-library-custom-folder";
+          button.dataset.libraryCollection = collection.id;
+          button.textContent = collection.name;
+          button.classList.toggle("active", this._state.collectionId === collection.id);
+          nav.append(button);
+        }
+      };
+      refreshCollections();
 
       const render = () => this._explorer?.render({ ...this._state });
       const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
@@ -287,6 +303,7 @@ export function createLibraryApplicationClass({
       root.querySelectorAll("[data-library-smart-view]").forEach(button => button.addEventListener("click", () => {
         this._state.smartView = button.dataset.librarySmartView || "all";
         this._state.folder = "";
+        this._state.collectionId = "";
         root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item === button));
         refreshFolders();
         void render();
@@ -297,6 +314,7 @@ export function createLibraryApplicationClass({
         const folderButton = target?.closest("[data-library-folder]");
         if (!clear && !folderButton) return;
         this._state.smartView = "all";
+        this._state.collectionId = "";
         this._state.folder = clear ? "" : folderButton.dataset.libraryFolder;
         root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item.dataset.librarySmartView === "all"));
         refreshFolders();
@@ -348,6 +366,89 @@ export function createLibraryApplicationClass({
         } catch (error) {
           notify("warn", error.message);
         }
+      });
+      root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const button = target?.closest("[data-library-collection]");
+        if (!button) return;
+        this._state.smartView = "collection";
+        this._state.folder = "";
+        this._state.collectionId = button.dataset.libraryCollection;
+        root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.remove("active"));
+        refreshFolders();
+        refreshCollections();
+        await render();
+      });
+      root.querySelector("[data-library-create-collection]")?.addEventListener("click", async () => {
+        const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input;
+        if (typeof prompt !== "function") return;
+        const result = await prompt({
+          window: { title: "Nova coleção universal" },
+          content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+          ok: { label: "Criar coleção" },
+          rejectClose: false
+        });
+        const name = String(result?.name ?? "").trim();
+        if (!name) return;
+        try {
+          const current = normalizeLibraryPreferences(this._getPreferences());
+          const created = createLibraryCollection(current, {
+            id: globalThis.foundry?.utils?.randomID?.(10),
+            name
+          });
+          await this._savePreferences(created.preferences);
+          this._state.smartView = "collection";
+          this._state.collectionId = created.collection.id;
+          this._state.folder = "";
+          refreshCollections();
+          refreshFolders();
+          await render();
+        } catch (error) { notify("warn", error.message); }
+      });
+      root.querySelector("[data-library-app-collections]")?.addEventListener("contextmenu", async event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const button = target?.closest("[data-library-collection]");
+        if (!button) return;
+        event.preventDefault();
+        const collectionId = button.dataset.libraryCollection;
+        const current = normalizeLibraryPreferences(this._getPreferences());
+        const collection = current.collections.find(item => item.id === collectionId);
+        if (!collection) return;
+        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
+        if (typeof input !== "function") return;
+        try {
+          const result = await input({
+            window: { title: "Gerenciar coleção" },
+            content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+            ok: { label: "Renomear" },
+            buttons: [{
+              action: "delete-collection",
+              label: "Excluir coleção",
+              class: "nexus-library-delete-folder",
+              callback: () => ({ action: "delete-collection" })
+            }],
+            rejectClose: false
+          });
+          if (result?.action === "delete-collection") {
+            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+            const accepted = typeof confirm === "function" && await confirm({
+              window: { title: "Excluir coleção" },
+              content: "<p>Os recursos não serão apagados; apenas a coleção será removida.</p>",
+              yes: { label: "Excluir" },
+              no: { label: "Cancelar" },
+              rejectClose: false
+            });
+            if (!accepted) return;
+            await this._savePreferences(removeLibraryCollection(this._getPreferences(), collectionId));
+            if (this._state.collectionId === collectionId) this._state.collectionId = "";
+          } else {
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            await this._savePreferences(renameLibraryCollection(this._getPreferences(), collectionId, name));
+          }
+          refreshCollections();
+          await render();
+        } catch (error) { notify("warn", error.message); }
       });
       root.querySelector("[data-library-create-folder]")?.addEventListener("click", async () => {
         const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input;
