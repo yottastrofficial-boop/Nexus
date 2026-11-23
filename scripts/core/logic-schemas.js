@@ -22,6 +22,22 @@ const checkExpression = (expression, label, errors, expectedType = null) => {
     errors.push(label + ": expressão inválida ou incompatível com o tipo de resultado esperado.");
   }
 };
+const validateActorAdjustConfig = (config, label, errors) => {
+  const path = String(config.path ?? "");
+  if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) {
+    errors.push(label + ".path precisa apontar para uma propriedade permitida em system.*.");
+  }
+  if (typeof config.delta !== "number" || !Number.isFinite(config.delta)) errors.push(label + ".delta precisa ser um número finito.");
+  for (const key of ["min", "max"]) {
+    if (config[key] !== undefined && (typeof config[key] !== "number" || !Number.isFinite(config[key]))) {
+      errors.push(label + "." + key + " precisa ser um número finito.");
+    }
+  }
+  if (typeof config.min === "number" && typeof config.max === "number" && config.min > config.max) {
+    errors.push(label + ": o limite mínimo não pode superar o máximo.");
+  }
+};
+
 const checkNoExecutablePayload = (value, path, errors, depth = 0) => {
   if (depth > 20 || !value || typeof value !== "object") return;
   for (const [key, child] of Object.entries(value)) {
@@ -86,6 +102,9 @@ function validateFlowGraph(graph, errors) {
           const path = String(node.action.config.path ?? "");
           if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) errors.push("flow.graph.nodes[" + index + "].action.config.path precisa apontar para system.*.");
           if (!hasOwn(node.action.config, "value")) errors.push("flow.graph.nodes[" + index + "].action.config.value é obrigatório.");
+        }
+        if (String(node.action.type ?? "").toLowerCase() === "nexus.actor.adjust" && isRecord(node.action.config)) {
+          validateActorAdjustConfig(node.action.config, "flow.graph.nodes[" + index + "].action.config", errors);
         }
       }
     }
@@ -152,6 +171,9 @@ function validateFlow(payload) {
         errors.push("flow.actions[" + index + "].config.path precisa apontar para uma propriedade permitida em system.*.");
       }
       if (!hasOwn(action.config, "value")) errors.push("flow.actions[" + index + "].config.value é obrigatório.");
+    }
+    if (String(action.type ?? "").toLowerCase() === "nexus.actor.adjust" && isRecord(action.config)) {
+      validateActorAdjustConfig(action.config, "flow.actions[" + index + "].config", errors);
     }
   }
   if (payload.graph !== undefined) validateFlowGraph(payload.graph, errors);
