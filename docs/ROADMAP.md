@@ -101,7 +101,7 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 
 - O editor de Fluxos agora apresenta um canvas de nós arrastáveis com conectores SVG, organização automática por camadas e conexões editáveis.
 - Coordenadas de layout são metadados limitados do editor; não participam da avaliação nem alteram os dados do Actor.
-- O próximo refinamento visual deverá focar em ligação direta por portas, acessibilidade de teclado, zoom/visão geral e testes em Foundry VTT 14 build 360.
+- O próximo refinamento visual deverá focar em ligação direta por portas, zoom/visão geral e testes em Foundry VTT 14 build 360. A movimentação dos nós já possui alternativas por teclado e controles direcionais.
 - Permanecem pendentes os adaptadores externos concretos, ampliação dos executores confiáveis do Core e validação funcional no cliente Foundry.
 
 - Refinamento do Flow Builder: inclusão de criação de nós pela barra superior, conexão guiada por seleção de origem/destino, prevenção de conexões incompatíveis/ciclos e campos dedicados para o executor Core de atualização de Actor.
@@ -109,3 +109,6 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - Executor Core genérico `nexus.actor.adjust` adicionado para incrementar/decrementar propriedades numéricas `system.*`, com limites opcionais e permissão OWNER, sem assumir que todo módulo usa PV/PM/PE.
 
 - Flow Builder: Inspector dedicado ao nó selecionado e schemas visuais declarativos opcionais para executores, com validação pelo runtime e fallback JSON para módulos legados.
+
+- Fluxos sequenciais e grafos agora compartilham os campos visuais dos schemas dos executores; o runtime expõe pré-validação para os editores e mensagens acessíveis por campo.
+- Contrato público de `configSchema` documentado para módulos, incluindo tipos, limites, valores padrão, compatibilidade e preservação de dados sem schema.
