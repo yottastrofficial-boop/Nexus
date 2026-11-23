@@ -46,7 +46,9 @@ function normalizePackage(raw, limits) {
   });
   const metadata = cloneTransferData(raw.metadata ?? {}, 0, limits.maxDepth);
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) throw new Error("Metadados do pacote precisam ser um objeto.");
-  const transfer = { format: String(raw.format ?? "unknown").slice(0, 80), version: Math.max(1, Number(raw.version) || 1), metadata, items };
+  const parsedVersion = Number(raw.version);
+  const version = Number.isFinite(parsedVersion) && parsedVersion >= 1 ? parsedVersion : 1;
+  const transfer = { format: String(raw.format ?? "unknown").slice(0, 80), version, metadata, items };
   const size = new TextEncoder().encode(JSON.stringify(transfer)).length;
   if (size > limits.maxBytes) throw new Error("Pacote de transferência excede o limite de tamanho.");
   return deepFreeze(transfer);
@@ -66,15 +68,6 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
   const destinations = new Map();
   const plans = new Map();
   const makePlanId = createPlanId ?? (() => globalThis.crypto?.randomUUID?.() ?? "transfer-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10));
-
-  const register = (registry, adapter, kind) => {
-    const id = String(adapter?.id ?? "").trim();
-    if (!ID_PATTERN.test(id) || !String(adapter?.label ?? "").trim()) throw new TypeError("Adaptador " + kind + " precisa de ID e rótulo válidos.");
-    if (registry.has(id)) throw new Error("Adaptador " + kind + " já registrado: " + id);
-    registry.set(id, Object.freeze({ ...adapter, id, label: String(adapter.label).trim().slice(0, 100) }));
-    return () => registry.get(id) === adapterRecord ? registry.delete(id) : false;
-    function adapterRecord() {}
-  };
 
   const registerSource = adapter => {
     const id = String(adapter?.id ?? "").trim();
