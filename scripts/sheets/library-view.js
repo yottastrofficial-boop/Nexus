@@ -471,7 +471,38 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const openGlobalLibrary = event.target.closest("[data-library-open-global]");
       if (openGlobalLibrary && panel.contains(openGlobalLibrary)) {
         event.preventDefault();
-        try { sheet._getLibraryBackupService?.(); await game.nexus?.library?.open?.(); }
+        try {
+          sheet._getLibraryBackupService?.();
+          const canApplyResource = resource => {
+            const reference = resource?.reference ?? {};
+            return reference.providerId === "nexus-library" && (
+              ["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) ||
+              reference.builtin === "asset"
+            );
+          };
+          const applyResource = async (resource, resolved) => {
+            const reference = resource?.reference ?? {};
+            if (reference.providerId !== "nexus-library") return false;
+            if (reference.collection === "components") return sheet._addSavedLibraryComponent?.(reference.id) ?? false;
+            if (reference.collection === "groups") return sheet._addSavedGroupToCanvas?.(reference.id) ?? false;
+            if (reference.collection === "layouts") return sheet._addSavedLayoutToActor?.(reference.id) ?? false;
+            if (reference.collection === "themes") return sheet._applyLibraryCustomTheme?.(reference.id) ?? false;
+            if (reference.collection === "assets" || reference.builtin === "asset") {
+              const componentType = String(resolved?.type ?? resolved?.componentType ?? "");
+              if (!componentType || typeof sheet._addComponent !== "function") return false;
+              return sheet._addComponent(componentType, {
+                format: resolved?.format,
+                template: resolved?.template ?? resolved?.settings ?? {}
+              });
+            }
+            return false;
+          };
+          await game.nexus?.library?.open?.({
+            canApplyResource,
+            applyResource,
+            applyLabel: "Inserir na ficha"
+          });
+        }
         catch (error) { ui.notifications?.error?.("Não foi possível abrir a Biblioteca: " + error.message); }
         return;
       }
