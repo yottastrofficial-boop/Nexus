@@ -47,7 +47,7 @@ export function createLibraryApplicationClass({
     };
 
     constructor(options = {}) {
-      super(options);
+      super({ id: "nexus-library", ...options });
       this._registry = registry;
       this._getPreferences = getPreferences;
       this._savePreferences = savePreferences;
