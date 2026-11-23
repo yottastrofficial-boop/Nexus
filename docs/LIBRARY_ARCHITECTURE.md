@@ -12,7 +12,7 @@ A separação é por responsabilidade e ciclo de vida, não por quantidade de ar
 |---|---|---|
 | `scripts/core/library-resource-registry.js` | Contratos de provedores, busca, filtros, paginação, resolução e ações contextuais | DOM, ficha, apresentação ou execução de conteúdo arbitrário |
 | `scripts/core/library-store.js` | Persistência e validação das definições pessoais NEXUS | Documentos Foundry ou preferências visuais |
-| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes e atribuições universais | Alterar definições ou documentos de origem |
+| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |
 | `scripts/library/catalog-explorer.js` | Cartões, seleção, Inspector, ações contextuais e organização por referência | Conhecer Actor, Canvas, templates de ficha ou regras de aplicação |
 | `scripts/library/library-application.js` | Ciclo de vida da janela ApplicationV2, navegação e controles da Biblioteca independente | Implementar provedores, persistência ou schemas de conteúdo |
 | `scripts/library/library-backup-service.js` | Composição, validação, prévia, mesclagem e exportação de backups completos | Interface de ficha ou execução de dados importados |
@@ -60,6 +60,7 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 - Pastas, favoritos e recentes armazenam referências estáveis, não cópias de documentos.
 - Chaves antigas como `components:<id>` continuam resolvíveis; documentos Foundry usam `foundry-documents:<uuid>`.
 - Pastas globais podem organizar recursos de provedores diferentes; pastas vinculadas a uma coleção respeitam seu escopo.
+- Coleções universais são agrupamentos curados independentes de pastas; podem conter referências de qualquer provedor e tipo, sem duplicar os recursos.
 - Documentos Foundry não são duplicados. O UUID é resolvido pelo bridge e as permissões nativas continuam válidas.
 - A importação de backup preserva escopos: fluxos pessoais permanecem pessoais e fluxos do mundo permanecem no setting do mundo.
 
@@ -92,7 +93,7 @@ Conteúdo importado permanece dado inerte. HTML, CSS, JavaScript, macros ou comp
 
 ## Estado e limitações
 
-A integração atual possui catálogo universal, ações contextuais para recursos pessoais NEXUS, abertura de documentos Foundry, pastas/favoritos/recentes por referência, filtros por categoria/tipo/origem/etiqueta, janela independente e backup completo com prévia.
+A integração atual possui catálogo universal, ações contextuais para recursos pessoais NEXUS, abertura de documentos Foundry, pastas/favoritos/recentes e coleções mistas por referência, filtros por categoria/tipo/origem/etiqueta, janela independente e backup completo com prévia.
 
 Ainda não estão concluídos:
 - editores especializados completos para todos os tipos de Lógica;
