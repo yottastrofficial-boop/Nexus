@@ -1,4 +1,4 @@
-import { createNexusLibraryBackup } from "../core/library-sharing.js";
+import { createNexusLibraryBackup, parseNexusLibraryBackup } from "../core/library-sharing.js";
 import {
   NEXUS_LIBRARY_COLLECTIONS,
   createEmptyNexusLibraryStore,
@@ -7,11 +7,10 @@ import {
   readNexusLibraryStore,
   writeNexusLibraryStore
 } from "../core/library-store.js";
-import { parseNexusLibraryBackup } from "../core/library-sharing.js";
 
 /**
- * Library-owned backup composition. The sheet may provide a download/copy UI,
- * but it never assembles or interprets the Library's data model.
+ * Library-owned backup composition and transfer pipeline.
+ * Parsing/validation and conflict preview are separate from committing changes.
  */
 export function createLibraryBackupService({
   getUser,
@@ -29,17 +28,14 @@ export function createLibraryBackupService({
     const store = createEmptyNexusLibraryStore();
     const builtinAssetKeys = new Set((Array.isArray(catalog.assets) ? catalog.assets : []).map(asset => String(asset.key)));
     const builtinThemeIds = new Set(Object.keys(themePalettes ?? {}));
-    const makeEntryId = (collection, index) => String(createId?.(collection, index) ?? `${collection}-import-${index + 1}`);
+    const makeEntryId = (collection, index) => String(createId(collection, index));
 
     for (const collection of ["components", "groups", "layouts", "templates", "media", "styles", "properties", "rules", "behaviors", "functions"]) {
       const entries = Array.isArray(data[collection]) ? data[collection] : [];
       store.collections[collection] = entries.map((entry, index) => {
         const copy = structuredClone(entry);
-        if (["components", "groups", "layouts"].includes(collection)) {
-          copy.id = makeEntryId(collection, index);
-        } else {
-          copy.id = String(copy.id ?? makeEntryId(collection, index));
-        }
+        if (["components", "groups", "layouts"].includes(collection)) copy.id = makeEntryId(collection, index);
+        else copy.id = String(copy.id ?? makeEntryId(collection, index));
         return copy;
       });
     }
@@ -93,7 +89,7 @@ export function createLibraryBackupService({
       const flag = legacyFlags[collection];
       if (!flag) continue;
       try { await user.setFlag("nexus", flag, store.collections[collection]); }
-      catch (error) { warnings.push(`Não foi possível atualizar a compatibilidade antiga de ${collection}: ${error?.message ?? error}`); }
+      catch (error) { warnings.push("Não foi possível atualizar a compatibilidade antiga de " + collection + ": " + (error?.message ?? error)); }
     }
     return warnings;
   };
@@ -135,50 +131,63 @@ export function createLibraryBackupService({
     }, getComponentTypes());
   };
 
-  const importCode = async (source, { createId = (collection, index) => `${collection}-${index + 1}-${Date.now().toString(36)}` } = {}) => {
+  const prepareImport = (source, {
+    createId = (collection, index) => collection + "-import-" + index + "-" + globalThis.foundry?.utils?.randomID?.(8)
+  } = {}) => {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
-    const componentTypes = getComponentTypes();
-    const parsed = parseNexusLibraryBackup(source, componentTypes);
-    const catalog = getCatalog() ?? {};
-    const themePalettes = getThemePalettes() ?? {};
-    const incoming = createIncomingStore(parsed.collections, catalog, themePalettes, createId);
+    const parsed = parseNexusLibraryBackup(source, getComponentTypes());
+    const incoming = createIncomingStore(parsed.collections, getCatalog() ?? {}, getThemePalettes() ?? {}, createId);
     const current = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
     const merged = mergeNexusLibraryStores(current, incoming, { conflictMode: "skip", createId });
-    const saved = await writeNexusLibraryStore(user, merged.store);
-    const warnings = await mirrorLegacyCollections(user, saved);
 
     const importedWorldFlows = (Array.isArray(parsed.collections.flows) ? parsed.collections.flows : [])
       .filter(entry => entry?.origin === "world" && entry.flow);
-    if (importedWorldFlows.length) {
-      if (typeof setWorldFlows !== "function") {
-        warnings.push("Os fluxos de origem mundial foram validados, mas não foram importados porque a configuração do mundo não está disponível.");
-      } else {
-        try {
-          const existing = getWorldFlows() ?? [];
-          const next = Array.isArray(existing) ? [...existing] : [];
-          let addedWorldFlows = 0;
-          for (const entry of importedWorldFlows) {
-            const signature = JSON.stringify(entry.flow);
-            if (next.some(savedEntry => JSON.stringify(savedEntry?.flow) === signature)) continue;
-            next.push({
-              id: String(createId("world-flows", next.length)),
-              name: String(entry.name ?? entry.flow.name ?? "Fluxo importado").slice(0, 60),
-              flow: structuredClone(entry.flow)
-            });
-            addedWorldFlows++;
-          }
-          if (addedWorldFlows) await setWorldFlows(next);
-          merged.report.added.worldFlows = addedWorldFlows;
-          merged.report.skipped.worldFlows = importedWorldFlows.length - addedWorldFlows;
-        } catch (error) {
-          warnings.push(`Não foi possível importar os fluxos do mundo: ${error?.message ?? error}`);
-        }
-      }
+    let currentWorldFlows = [];
+    try { currentWorldFlows = getWorldFlows() ?? []; } catch { currentWorldFlows = []; }
+    const nextWorldFlows = Array.isArray(currentWorldFlows) ? [...currentWorldFlows] : [];
+    let addedWorldFlows = 0;
+    for (const entry of importedWorldFlows) {
+      const signature = JSON.stringify(entry.flow);
+      if (nextWorldFlows.some(savedEntry => JSON.stringify(savedEntry?.flow) === signature)) continue;
+      nextWorldFlows.push({
+        id: String(createId("world-flows", nextWorldFlows.length)),
+        name: String(entry.name ?? entry.flow.name ?? "Fluxo importado").slice(0, 60),
+        flow: structuredClone(entry.flow)
+      });
+      addedWorldFlows++;
+    }
+    merged.report.added.worldFlows = typeof setWorldFlows === "function" ? addedWorldFlows : 0;
+    merged.report.skipped.worldFlows = importedWorldFlows.length - merged.report.added.worldFlows;
+
+    const warnings = [];
+    if (importedWorldFlows.length && typeof setWorldFlows !== "function") {
+      warnings.push("Os fluxos de origem mundial foram validados, mas não podem ser importados neste contexto.");
     }
 
-    return { name: parsed.name, report: merged.report, warnings, store: saved };
+    return Object.freeze({
+      name: parsed.name,
+      report: merged.report,
+      warnings: Object.freeze(warnings),
+      store: merged.store,
+      nextWorldFlows,
+      shouldWriteWorldFlows: typeof setWorldFlows === "function" && addedWorldFlows > 0
+    });
   };
 
-  return Object.freeze({ exportCode, importCode });
+  const commitImport = async plan => {
+    const user = getUser();
+    if (!user || !plan?.store || !plan?.report) throw new Error("Prévia de importação inválida ou expirada.");
+    const saved = await writeNexusLibraryStore(user, plan.store);
+    const warnings = [...(plan.warnings ?? []), ...await mirrorLegacyCollections(user, saved)];
+    if (plan.shouldWriteWorldFlows) {
+      try { await setWorldFlows(plan.nextWorldFlows); }
+      catch (error) { warnings.push("Não foi possível importar os fluxos do mundo: " + (error?.message ?? error)); }
+    }
+    return { name: plan.name, report: plan.report, warnings, store: saved };
+  };
+
+  const importCode = async (source, options) => commitImport(prepareImport(source, options));
+
+  return Object.freeze({ exportCode, prepareImport, commitImport, importCode });
 }
