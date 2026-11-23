@@ -20,7 +20,7 @@ export function createResourceLifecycleManager({
   maxConcurrentLoads = DEFAULT_LIMITS.maxConcurrentLoads,
   now = Date.now
 } = {}) {
-  const residentLimit = Math.max(1024, safeBytes(maxResidentBytes));
+  const residentLimit = Math.max(1, safeBytes(maxResidentBytes));
   const idleLimit = Math.min(residentLimit, safeBytes(maxIdleBytes));
   const concurrentLimit = Math.max(1, Math.floor(Number(maxConcurrentLoads) || DEFAULT_LIMITS.maxConcurrentLoads));
   const entries = new Map();
@@ -249,11 +249,12 @@ export function createResourceLifecycleManager({
   const dispose = async () => {
     disposed = true;
     const pending = [];
+    let unloaded = 0;
     for (const entry of entries.values()) {
       if (entry.references || entry.pins || entry.state === "loading") { pending.push(entry.id); continue; }
-      if (entry.state === "ready") await unloadEntry(entry);
+      if (entry.state === "ready" && await unloadEntry(entry)) unloaded++;
     }
-    return Object.freeze({ unloaded: entries.size - pending.length, pending });
+    return Object.freeze({ unloaded, pending });
   };
 
   return Object.freeze({ register, acquire, preload, trim, unregister, get, stats, dispose });
