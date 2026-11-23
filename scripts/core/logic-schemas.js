@@ -9,13 +9,15 @@ const FORBIDDEN_CODE_KEYS = new Set(["javascript", "script", "sourceCode", "eval
 const isRecord = value => Boolean(value && typeof value === "object" && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype);
 const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 const result = errors => ({ valid: errors.length === 0, errors });
-const checkExpression = (expression, label, errors) => {
+const checkExpression = (expression, label, errors, expectedType = null) => {
   if (typeof expression !== "string" || !expression.trim() || expression.length > 500) {
     errors.push(label + ": expressão ausente ou acima de 500 caracteres.");
     return;
   }
   const value = evaluateNexusExpression(expression, () => 0, { maxLength: 500, maxTokens: 128, maxDepth: 16 });
-  if (typeof value !== "boolean") errors.push(label + ": use uma expressão lógica válida que resulte em verdadeiro/falso.");
+  if (value === null || (expectedType && typeof value !== expectedType)) {
+    errors.push(label + ": expressão inválida ou incompatível com o tipo de resultado esperado.");
+  }
 };
 const checkNoExecutablePayload = (value, path, errors, depth = 0) => {
   if (depth > 20 || !value || typeof value !== "object") return;
@@ -46,8 +48,8 @@ function validateProperty(payload) {
 function validateRule(payload) {
   const errors = [];
   const expression = payload.expression ?? payload.formula;
-  if (expression !== undefined) checkExpression(expression, "rule.expression", errors);
   if (payload.resultType !== undefined && !["boolean", "number", "string"].includes(String(payload.resultType))) errors.push("rule.resultType: tipo de resultado inválido.");
+  if (expression !== undefined) checkExpression(expression, "rule.expression", errors, payload.resultType ?? null);
   checkNoExecutablePayload(payload, "rule", errors);
   return result(errors);
 }
@@ -63,7 +65,7 @@ function validateFlow(payload) {
   if (payload.conditions !== undefined && !Array.isArray(payload.conditions)) errors.push("flow.conditions precisa ser uma lista.");
   for (const [index, condition] of (Array.isArray(payload.conditions) ? payload.conditions : []).entries()) {
     if (!isRecord(condition)) { errors.push("flow.conditions[" + index + "] precisa ser um objeto."); continue; }
-    if (condition.expression !== undefined) checkExpression(condition.expression, "flow.conditions[" + index + "].expression", errors);
+    if (condition.expression !== undefined) checkExpression(condition.expression, "flow.conditions[" + index + "].expression", errors, "boolean");
   }
   if (payload.conditionJoin !== undefined && !["all", "any"].includes(payload.conditionJoin)) errors.push("flow.conditionJoin deve ser all ou any.");
   if (payload.actions !== undefined && !Array.isArray(payload.actions)) errors.push("flow.actions precisa ser uma lista.");
