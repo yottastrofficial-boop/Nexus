@@ -213,10 +213,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const select = document.createElement("button"); select.type = "button"; select.className = "nexus-library-generic-item";
         select.dataset.libraryEntry = entry.id; select.dataset.libraryCollection = entryCollection;
         select.dataset.libraryTags = (Array.isArray(entry.tags) ? entry.tags : []).map(tag => String(tag).toLocaleLowerCase("pt-BR")).join(" ");
-        const icon = document.createElement("i"); icon.className = genericCollectionIcons[entryCollection] ?? genericCollectionIcons.assets; icon.setAttribute("aria-hidden","true");
+        const preview = document.createElement("span"); preview.className = "nexus-library-generic-preview";
+        const icon = document.createElement("i"); icon.className = genericCollectionIcons[entryCollection] ?? genericCollectionIcons.assets; icon.setAttribute("aria-hidden","true"); preview.append(icon);
         const title = document.createElement("strong"); title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome");
-        const meta = document.createElement("small"); meta.textContent = String(entry.type ?? entry.sourceId ?? "Item salvo");
-        select.append(icon,title,meta);
+        const meta = document.createElement("small"); meta.textContent = genericCollectionLabels[entryCollection] ?? String(entry.type ?? "Item salvo");
+        select.append(preview,title,meta);
         const favorite = document.createElement("button"); favorite.type = "button"; favorite.className = "nexus-library-favorite";
         favorite.dataset.libraryFavorite = entry.id; favorite.dataset.libraryCollection = entryCollection;
         favorite.setAttribute("aria-pressed", String(preferences.favorites.includes(key)));
