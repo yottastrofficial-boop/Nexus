@@ -103,7 +103,9 @@ Hooks.once("init", () => {
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.loadLibrary = () => loadLogicLibrary(game.user, game.nexus.logic.registry);
   game.nexus.logic.save = async asset => {
-    const saved = await saveLogicAsset(game.user, asset);
+    const checked = game.nexus.logic.registry.validateAsset(asset);
+    if (!checked.valid) throw new Error(checked.errors.join(" "));
+    const saved = await saveLogicAsset(game.user, checked.asset);
     game.nexus.logic.registry.register(saved, { replace: true });
     return saved;
   };
