@@ -26,6 +26,13 @@ test("consulta compêndios apenas quando solicitada e resolve UUID sob demanda",
   assert.equal(indexed, 1);
   assert.equal((await bridge.resolve(result.items[0])).name, "Macro teste");
   assert.equal(resolved, "Compendium.world.macros.m1");
+  const hiddenPack = { documentName: "Macro", collection: "world.hidden", visible: false, getIndex: async () => { throw new Error("Must not index hidden packs."); } };
+  const visibilityBridge = createFoundryDocumentBridge({
+    gameRef: { packs: new Map([["world.macros", pack], ["world.hidden", hiddenPack]]) }
+  });
+  const visibleOnly = await visibilityBridge.list({ type: "macros", compendiumIds: ["world.macros", "world.hidden"] });
+  assert.equal(visibleOnly.total, 1);
+  assert.ok(visibleOnly.errors.some(error => error.pack === "world.hidden"));
 });
 
 test("rejeita tipos não integrados e UUIDs inexistentes", async () => {
