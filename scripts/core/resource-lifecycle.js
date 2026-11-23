@@ -80,7 +80,7 @@ export function createResourceLifecycleManager({
     }
   };
 
-  const reserveCapacity = bytes => {
+  const trimIdle = async () => {\n    const protectedBytes = [...entries.values()]\n      .filter(entry => entry.state === "ready" && (entry.references > 0 || entry.pins > 0))\n      .reduce((sum, entry) => sum + entry.residentBytes, 0);\n    await trimInternal(protectedBytes + idleLimit);\n  };\n\n  const reserveCapacity = bytes => {
     const requested = safeBytes(bytes);
     if (requested > residentLimit) return Promise.reject(new Error("O recurso excede o limite de memória RAM configurado."));
     const operation = capacityQueue.then(async () => {
@@ -140,7 +140,7 @@ export function createResourceLifecycleManager({
         if (kind === "pin") entry.pins = Math.max(0, entry.pins - 1);
         else entry.references = Math.max(0, entry.references - 1);
         entry.lastUsed = now();
-        await trimInternal(Math.max(0, residentLimit - Math.max(0, residentBytes - idleLimit)));
+        await trimIdle();
         return true;
       }
     });
@@ -148,7 +148,7 @@ export function createResourceLifecycleManager({
 
   const register = ({ id, load, unload, estimateBytes = 0, priority = 0 } = {}) => {
     const key = String(id ?? "");
-    if (!validId(key)) throw new TypeError("O recurso precisa de um ID estável válido.");
+    if (disposed) throw new Error("O gerenciador de recursos já foi encerrado.");\n    if (!validId(key)) throw new TypeError("O recurso precisa de um ID estável válido.");
     if (typeof load !== "function") throw new TypeError("O recurso precisa fornecer load().");
     if (unload !== undefined && typeof unload !== "function") throw new TypeError("unload() precisa ser uma função.");
     if (entries.has(key)) throw new Error("Recurso já registrado: " + key);
