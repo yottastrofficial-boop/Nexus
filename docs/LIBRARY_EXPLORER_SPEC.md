@@ -113,6 +113,7 @@ A branch `feature/library-universal-completion-2026-11-23` amplia a base sem alt
 
 - janela independente ApplicationV2, reutilizando o mesmo registro e o mesmo Explorer;
 - filtros por categoria, tipo específico, origem e etiqueta;
+- seleção explícita de compêndios visíveis, sem varrer todos os pacotes automaticamente;
 - favoritos, recentes, pastas e coleções universais resolvidos por referências estáveis, inclusive UUIDs Foundry e fluxos do mundo;
 - coleções pessoais capazes de agrupar tipos/provedores diferentes sem copiar os recursos;
 - ações contextuais declaradas pelos provedores: editar metadados, duplicar, excluir com verificação de dependências e abrir documentos Foundry;
