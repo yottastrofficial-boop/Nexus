@@ -61,9 +61,10 @@ export function createLibraryCatalogExplorer({
     select.setAttribute("aria-label", `${resource.name}, ${resource.type}`);
 
     const preview = makeElement("span", "nexus-library-generic-preview");
-    if (resource.thumbnail) {
+    const thumbnail = text(resource.thumbnail).trim();
+    if (thumbnail && !/^javascript:/i.test(thumbnail) && /^(https?:\/\/|\/|[a-z0-9_.-])/i.test(thumbnail)) {
       const image = document.createElement("img");
-      image.src = resource.thumbnail;
+      image.src = thumbnail;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
