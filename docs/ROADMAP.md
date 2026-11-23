@@ -64,10 +64,12 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 ## Biblioteca universal — implementação em andamento
 
 - **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
-- **PR seguinte / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
-- **Próxima etapa:** conectar o Explorer existente ao catálogo, apresentando tudo em uma área de busca comum. Não criar um botão ou janela por módulo/tipo; filtros e ações devem ser contextuais.
-- **Importação integrada inspirada no Plutonium:** implementar adaptadores de origem, prévia, validação e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo de terceiros sem direitos de uso nem executar payloads automaticamente.
-- **Menus e Inspector:** depois da integração de dados, consolidar navegação, filtros, contexto e ações específicas por tipo.
+- **PR #59 / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
+- **PR #60 / `feature/library-explorer-catalog-integration-2026-11-23`:** primeira integração do Explorer existente com o catálogo universal.
+- **Branch de conclusão / `feature/library-universal-completion-2026-11-23`:** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
+- **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
+- **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem; ainda faltam adaptadores para origens externas e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
+- **Lógica:** concluir editores especializados e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
 - **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
 - **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
