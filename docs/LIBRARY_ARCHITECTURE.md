@@ -11,6 +11,7 @@ A separação é por responsabilidade e ciclo de vida, não por quantidade de ar
 | Camada | Responsabilidade | Não deve assumir |
 |---|---|---|
 | `scripts/core/library-resource-registry.js` | Contratos de provedores, busca, filtros, paginação, resolução e ações contextuais | DOM, ficha, apresentação ou execução de conteúdo arbitrário |
+| `scripts/core/component-types.js` | Registro de tipos de componentes compartilhado por ficha, Biblioteca e validação de transferências | Dependências de interface ou DOM |
 | `scripts/core/library-store.js` | Persistência e validação das definições pessoais NEXUS | Documentos Foundry ou preferências visuais |
 | `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |
 | `scripts/library/catalog-explorer.js` | Cartões, seleção, Inspector, ações contextuais e organização por referência | Conhecer Actor, Canvas, templates de ficha ou regras de aplicação |
@@ -66,7 +67,7 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 
 ## Importação e exportação
 
-O backup completo da Biblioteca inclui componentes, grupos, layouts, assets, temas, templates, mídia, estilos, propriedades, regras, comportamentos, fluxos e funções. A exportação é feita pelo serviço da Biblioteca, não pela ficha.
+O backup completo da Biblioteca inclui componentes, grupos, layouts, assets, temas, templates, mídia, estilos, propriedades, regras, comportamentos, fluxos e funções. A exportação é feita pelo serviço da Biblioteca, inicializado no núcleo com o registro de tipos compartilhado, não pela ficha.
 
 A importação passa por:
 1. leitura e validação do formato;
