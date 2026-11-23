@@ -65,7 +65,13 @@ export function createLibraryApplicationClass({
         cardSize: "medium"
       };
       this._explorer = null;
+      this._context = {};
       this._searchTimer = 0;
+    }
+
+    setContext(context = {}) {
+      this._context = context && typeof context === "object" ? context : {};
+      return this;
     }
 
     async _prepareContext(options = {}) {
@@ -91,7 +97,10 @@ export function createLibraryApplicationClass({
         container,
         detail,
         getPreferences: () => normalizeLibraryPreferences(this._getPreferences()),
-        savePreferences: value => this._savePreferences(normalizeLibraryPreferences(value))
+        savePreferences: value => this._savePreferences(normalizeLibraryPreferences(value)),
+        canApplyResource: (resource, resolved) => this._context.canApplyResource?.(resource, resolved) === true,
+        onApplyResource: this._context.applyResource,
+        applyLabel: this._context.applyLabel ?? "Aplicar ao contexto"
       });
 
       const search = root.querySelector("[data-library-search]");
