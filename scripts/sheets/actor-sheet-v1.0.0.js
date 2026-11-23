@@ -2709,18 +2709,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importLibraryBackupCode(source) {
-    const result = await this._getLibraryBackupService().importCode(source, {
+    const service = this._getLibraryBackupService();
+    const preview = service.prepareImport(source, {
       createId: (collection, index) => `${collection}-${foundry.utils.randomID(8)}-${index}`
     });
-    this._libraryAssetScope = "personal";
-    this._libraryRenderPersonalItems?.();
-    this._libraryRenderSavedGroups?.();
-    this._libraryRenderSavedLayouts?.();
-    this._libraryRenderCustomThemes?.();
-    this._libraryRenderSavedFlows?.();
-    this._libraryApplyFilter?.();
-
-    const added = result.report.added ?? {};
+    const added = preview.report.added ?? {};
+    const skipped = preview.report.skipped ?? {};
     const summary = [
       [added.components, "componentes"],
       [added.groups, "grupos"],
@@ -2737,10 +2731,34 @@ export class NexusActorSheet extends NexusActorSheetBase {
       [added.functions, "funções"],
       [added.worldFlows, "fluxos do mundo"]
     ].filter(([count]) => Number(count) > 0).map(([count, label]) => `${count} ${label}`);
-    const message = summary.length
+    const skippedCount = Object.values(skipped).reduce((sum, count) => sum + Number(count || 0), 0);
+    const previewText = summary.length
+      ? `<p>Serão adicionados: ${summary.join(", ")}.</p>`
+      : "<p>Nenhum item novo será adicionado.</p>";
+    const conflictText = skippedCount
+      ? `<p>${skippedCount} item(ns) com conflito serão preservados sem sobrescrita.</p>`
+      : "<p>Nenhum conflito foi encontrado.</p>";
+    const accepted = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Prévia da importação da Biblioteca" },
+      content: previewText + conflictText + "<p>Os dados serão validados e mesclados sem executar conteúdo importado.</p>",
+      yes: { label: "Importar" },
+      no: { label: "Cancelar" },
+      rejectClose: false
+    });
+    if (!accepted) return { cancelled: true };
+
+    const result = await service.commitImport(preview);
+    this._libraryAssetScope = "personal";
+    this._libraryRenderPersonalItems?.();
+    this._libraryRenderSavedGroups?.();
+    this._libraryRenderSavedLayouts?.();
+    this._libraryRenderCustomThemes?.();
+    this._libraryRenderSavedFlows?.();
+    this._libraryApplyFilter?.();
+
+    ui.notifications?.info?.(summary.length
       ? `Biblioteca importada: ${summary.join(", ")}.`
-      : "Backup validado. Nenhum item novo foi necessário.";
-    ui.notifications?.info?.(message);
+      : "Backup validado. Nenhum item novo foi necessário.");
     for (const warning of result.warnings ?? []) ui.notifications?.warn?.(warning);
     return result;
   }
