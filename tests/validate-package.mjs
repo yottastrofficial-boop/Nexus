@@ -2452,9 +2452,17 @@ assert.doesNotMatch(template,/data-library-origin-filter/,"A interface não deve
 assert.doesNotMatch(template,/data-library-collection-filter/,"A interface não deve exibir o seletor genérico de tipo/itens");
 assert.match(template,/data-library-filter-toggle/,"O filtro de etiquetas deve ser aberto por um botão contextual");
 assert.match(template,/data-library-tag-option="barra"/,"O filtro deve apresentar etiquetas como opções visuais");
-assert.doesNotMatch(template,/Todas as origens|Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
+assert.doesNotMatch(template,/Todas as origens|<option[^>]*>Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
 assert.match(libraryView,/selectedTag/,"A seleção de etiqueta deve filtrar coleções salvas");
 assert.match(libraryView,/dataset\.libraryTags/,"Os recursos devem expor suas etiquetas como metadados filtráveis");
+assert.match(template,/data-library-smart-view="favorites"/,"A navegação deve expor uma coleção universal de favoritos");
+assert.match(template,/data-library-smart-view="recent"/,"A navegação deve expor uma coleção universal de recentes");
+assert.match(libraryView,/collection === "all"/,"A Biblioteca deve agregar todas as coleções salvas em uma visão universal");
+assert.match(libraryView,/NEXUS_LIBRARY_COLLECTIONS\.flatMap/,"A visão universal deve reunir as coleções do armazenamento canônico");
+assert.match(libraryView,/data-library-duplicate-entry/,"O Inspector deve oferecer duplicação de itens salvos");
+assert.match(libraryView,/data-library-delete-entry/,"O Inspector deve oferecer exclusão controlada de itens salvos");
+assert.match(css,/nexus-library-generic-preview/,"Os cartões genéricos devem usar a mesma área de prévia padronizada");
+assert.doesNotMatch(template,/data-library-collection-folder/,"A organização por pastas não deve depender de um seletor textual na área principal");
 assert.match(template,/role="meter" aria-valuemin="0" aria-valuemax="{{component.max}}"/,"A barra de recurso deve expor seus valores acessíveis sem renderizar texto");
 assert.match(css,/background:#8994a3!important/,"A barra de recurso deve usar preenchimento neutro");
 const resourceBarMarkup = template.slice(template.indexOf('{{else if (eq component.sheetVariant "resource")}}'), template.indexOf('{{else if (eq component.sheetVariant "derived")}}'));
