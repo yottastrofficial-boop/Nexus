@@ -83,6 +83,26 @@ Limitações que permanecem:
 - nem todo tipo possui ação de aplicação direta a partir da visão universal; os fluxos especializados continuam responsáveis por inserir/aplicar conteúdos;
 - a aparência, persistência e os fluxos devem ser testados no Foundry VTT 14 build 360 antes de declarar estabilidade funcional.
 
+## Catálogo universal e provedores
+
+O explorador deve apresentar uma única coleção de recursos, sem exigir uma área ou botão permanente por módulo/tipo. Os provedores entregam cartões ao mesmo catálogo; a classificação técnica é metadado e filtro contextual, não uma arquitetura de janelas separadas.
+
+O contrato `LibraryResourceRegistry` foi iniciado com dois provedores:
+- **Biblioteca NEXUS:** definições pessoais, catálogo padrão e coleções de Lógica.
+- **Foundry:** referências UUID de Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards.
+
+Cada resultado contém identidade estável, provedor de origem, tipo, nome, descrição, etiquetas, miniatura, pasta, referência e capacidades declaradas. A listagem retorna metadados; `resolve(reference)` só obtém o objeto completo quando o Inspector ou uma ação realmente precisa dele. A paginação mantém cursores independentes por provedor.
+
+Módulos podem registrar provedores adicionais em `game.nexus.library.registerProvider()`. Isso permite integrar conteúdo sem acrescentar um botão, aba ou janela por módulo. A Biblioteca controla descoberta e organização; o provedor continua responsável por resolver seu conteúdo e respeitar suas permissões.
+
+### Importação integrada — direção inspirada no Plutonium
+
+O fluxo desejado é: **origem → prévia/validação → destino compatível → confirmação**. Origens poderão incluir recursos NEXUS, documentos Foundry, compêndios explicitamente selecionados, arquivos do usuário e fontes externas compatíveis. Destinos poderão incluir documentos nativos, compêndios, fichas e coleções NEXUS.
+
+A descoberta universal está implementada na camada de serviço. Os adaptadores de importação, validação de formatos e destinos ainda são etapas futuras. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
+
+A interface final deve manter uma barra compacta de pesquisa e um único controle de filtros; ações aparecem contextualmente no Inspector/menu do recurso, não como uma fileira de botões permanentes para cada categoria.
+
 ## Área unificada Lógica
 
 Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões continuam sendo tipos distintos. A visão universal unifica descoberta e organização, não seus schemas, editores ou executores. Metadados comuns (origem, namespace, versão, permissões, etiquetas e dependências) podem ser apresentados de forma consistente sem colapsar os contratos especializados.
