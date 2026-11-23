@@ -1,70 +1,91 @@
-# Visão do projeto
+# Visão do projeto NEXUS
+
+## Estado de referência
+
+- Repositório: `yottastrofficial-boop/Nexus`
+- Branch de referência: `main`
+- Commit de referência: `335db5149ede0d595bb69a3f3102d1f4495c6ff7`
+- Versão declarada: `1.0.0.88`
+- Compatibilidade declarada: Foundry VTT 14, build 360
+- Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
+
+Este documento descreve a implementação observada no repositório e separa recursos presentes, infraestrutura parcial e objetivos futuros. Não substitui os livros oficiais do NEXUS RPG.
 
 ## O que é o NEXUS
 
-NEXUS é um projeto de RPG com uma implementação para Foundry Virtual Tabletop. A direção arquitetural de longo prazo é oferecer uma base modular na qual diferentes módulos possam definir suas próprias propriedades, regras e conteúdos, enquanto a ficha apresenta essas informações de forma configurável.
+NEXUS reúne duas frentes relacionadas, mas distintas:
 
-Este documento descreve a intenção arquitetural e a separa do que está comprovadamente presente no base 1.0.0.1, em atualização para 1.0.0.2.
+1. **Sistema de RPG de mesa:** regras, módulos e suplementos que definem como o jogo funciona.
+2. **Implementação para Foundry VTT:** software que armazena os dados, apresenta fichas, organiza componentes e oferece ferramentas de automação.
 
-## Três camadas conceituais
+Os documentos mecânicos oficiais do NEXUS RPG são a autoridade para regras de mesa. O código do Foundry não deve inventar nem alterar fórmulas, custos, progressão ou outros procedimentos mecânicos. Quando houver divergência entre código e livro, a divergência deve ser registrada e resolvida como decisão de projeto.
 
-### 1. Regras e módulos
+## Direção arquitetural
 
-Um módulo poderá definir propriedades, atributos, recursos, cálculos e comportamentos próprios. A arquitetura planejada não deve presumir que todos os jogos utilizam o mesmo conjunto universal de regras.
+A implementação deve manter separadas estas responsabilidades:
 
-Os documentos mecânicos oficiais do NEXUS RPG continuam sendo a referência para as regras de mesa. Este repositório trata da implementação Foundry e não substitui esses documentos.
+- **Dados:** valores e estruturas persistidas em Actors, Items e na Biblioteca.
+- **Regras:** interpretação mecânica definida pelos livros ou por módulos específicos.
+- **Propriedades:** caminhos, metadados, valores e expressões vinculadas aos dados.
+- **Componentes:** unidades reutilizáveis de apresentação e interação.
+- **Instâncias:** cópias inseridas em uma ficha, com identidade e configurações próprias.
+- **Canvas:** organização visual, posicionamento, seleção, camadas e grupos estruturais.
+- **Biblioteca:** catálogo e armazenamento de definições reutilizáveis.
+- **Lógica:** Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões, com contratos especializados.
+- **Mídia:** identificação, capacidade do ambiente, processamento e armazenamento, sem executar conteúdo importado.
 
-### 2. Ficha e componentes
+A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-A ficha deverá permitir organizar informações por meio de componentes. A intenção é que a apresentação não imponha uma disposição única e rígida para todas as experiências.
+## Implementação presente na linha 1.0.0.88
 
-A base 1.0.0.1 já contém uma ficha Canvas e uma biblioteca de elementos. Um editor visual completo, criação avançada de componentes e gerenciamento abrangente de modelos permanecem fora do escopo confirmado desta versão.
+A árvore atual contém, entre outros:
 
-### 3. Estilo e mídia
+- Inicialização e registro de fichas em `scripts/nexus-v1.0.0.js`.
+- Manifestos para Foundry VTT 14 e tipos de Actor/Item em `system.json`.
+- Ficha Canvas e controladores em `scripts/sheets/`.
+- Serviços compartilhados em `scripts/core/`, incluindo fórmulas, propriedades, migrações, grupos, Biblioteca, Lógica e Mídia.
+- Templates Handlebars em `templates/`, estilos em `styles/` e tradução pt-BR em `lang/`.
+- Testes automatizados de regressão e validação do pacote em `tests/`.
+- Documentação de contratos e decisões em `docs/`.
 
-A direção planejada separa a função de um componente, sua forma de representação e sua aparência. Também prevê uma biblioteca de mídia e mecanismos de otimização.
+### Recursos e infraestrutura observados
 
-A base 1.0.0.1 já inclui recursos de personalização visual e prévia de determinados tipos de mídia. Isso não significa que toda a infraestrutura futura de mídia, cache, carregamento sob demanda ou animações esteja concluída.
+- Ficha Canvas modular, com componentes configuráveis e dados vinculados ao Actor.
+- Tipos de Actor `player-character`, `npc` e `character`.
+- Token de protótipo vinculado ao Actor por padrão, preservando a possibilidade de desvincular depois.
+- Grupos hierárquicos e composição visual com modos de organização.
+- Biblioteca com coleções reutilizáveis, preferências, metadados, navegação e Inspector.
+- Separação entre definições reutilizáveis e instâncias inseridas nas fichas.
+- Motor de expressões seguro, sem execução arbitrária de JavaScript.
+- Infraestrutura tipada de Lógica, persistência e runtime declarativo.
+- Infraestrutura de Mídia com capacidades nativas, pipeline, contrato de Workers, upload pelo Foundry e cache local.
 
-## Implementação herdada da versão 1.0.0.1
+A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
-A implementação está concentrada em:
+## Limitações conhecidas e trabalho pendente
 
-- Inicialização do sistema e registro da ficha no Foundry.
-- Tipos de Actor e Item declarados em `system.json`.
-- Ficha Canvas e seus componentes.
-- Catálogo da Biblioteca.
-- Estilos e templates.
-- Tradução pt-BR.
+- A área Lógica ainda precisa de editores especializados completos para cada subtipo, com schemas, validação e integração de ponta a ponta.
+- O runtime não deve ser considerado um sistema de automação pronto enquanto os executores e permissões necessários não estiverem registrados e testados.
+- Não há binários WASM FFmpeg/libjxl incluídos na base atual; decodificação especializada de AV1/JXL não deve ser anunciada como concluída.
+- Nenhum backend externo de armazenamento compartilhado vem configurado por padrão.
+- A classe principal da ficha e alguns controladores ainda são grandes e concentram responsabilidades; a extração deve ser incremental e guiada por dependências e testes.
+- A validação automatizada e a geração do ZIP não substituem testes visuais e funcionais em uma instalação real do Foundry VTT 14 build 360.
 
-### Organização técnica
+## Integridade e compatibilidade de dados
 
-| Caminho | Responsabilidade |
-|---|---|
-| `system.json` | Metadados, compatibilidade, documentos e arquivos carregados pelo Foundry |
-| `scripts/nexus-v1.0.0.js` | Inicialização e registro da ficha |\n| `scripts/core/` | Serviços centrais extraídos incrementalmente; atualmente inclui migrações legadas |
-| `scripts/sheets/` | Lógica da ficha |
-| `templates/actors/` | Estrutura Handlebars |
-| `styles/` | Aparência e layout |
-| `assets/library/catalog.js` | Catálogo de elementos da Biblioteca |
-| `lang/` | Traduções |
-| `docs/` | Documentação do projeto |
-
-A primeira extração para `scripts/core/` é `migration-manager.js`, responsável por migrações persistentes de compatibilidade. A classe da ficha coordena sua execução fora de `_prepareContext()`.\n\nConsulte [Arquitetura técnica](ARCHITECTURE.md) para os limites de responsabilidade e a sequência de refatoração.\n\n## Princípios arquiteturais
-
-1. **Identificadores estáveis:** nomes exibidos podem mudar; referências internas devem permanecer estáveis sempre que possível.
-2. **Separação de responsabilidades:** regras, dados, interface e aparência não devem ficar desnecessariamente acoplados.
-3. **Extensibilidade:** estruturas futuras devem permitir módulos com propriedades e regras próprias.
-4. **Compatibilidade:** alterações em dados persistidos precisam considerar fichas e Actors já existentes.
-5. **Integração nativa:** priorizar APIs públicas e padrões oficiais do Foundry VTT.
-6. **Evolução incremental:** construir e validar a fundação antes de ampliar a superfície de funcionalidades.
+- Identificadores internos e caminhos persistidos devem ser preservados sempre que possível.
+- Mudanças de schema exigem versão explícita e migração idempotente.
+- Migrações devem preservar dados desconhecidos, aliases, componentes, grupos e configurações não envolvidos na alteração.
+- Uma versão antiga do sistema não pode rebaixar dados de Actor gravados por um schema mais novo.
+- Valores zero, negativos e strings vazias precisam manter semântica distinta de dados ausentes.
+- Fórmulas devem ser avaliadas pelo parser seguro e não por `eval` ou `Function`.
+- Compatibilidade com flags legadas deve ser removida somente após mapear e testar todos os leitores e escritores.
 
 ## Fontes de referência
 
-O desenvolvimento deve considerar três fontes complementares:
+- **Regras de mesa:** livros e suplementos oficiais do NEXUS RPG.
+- **Implementação:** branch `main` do repositório.
+- **Arquitetura e contratos:** documentos em `docs/`.
+- **Compatibilidade externa:** documentação oficial do Foundry VTT 14.
 
-- **Regras oficiais:** documentos mecânicos do NEXUS RPG, que definem o funcionamento do jogo de mesa.
-- **Planejamento arquitetural:** decisões e propostas registradas nos documentos de projeto.
-- **Código existente:** implementação efetivamente presente neste repositório.
-
-Em caso de divergência, não se deve presumir que uma proposta já foi implementada. A implementação deve ser conferida no código e as regras devem ser conferidas nos documentos mecânicos oficiais.
+Em caso de divergência, registrar separadamente o que dizem os livros, o que especificam os documentos técnicos e o que o código efetivamente executa. Não presumir que uma proposta está implementada nem que uma implementação representa uma regra oficial.
