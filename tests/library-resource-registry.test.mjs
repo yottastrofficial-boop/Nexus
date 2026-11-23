@@ -97,7 +97,7 @@ assert.equal(duplicateResult.duplicated, true);
 assert.notEqual(duplicateResult.entry.id, "component-health");
 assert.equal(duplicateResult.entry.name, "Indicador de vitalidade (cópia)");
 const duplicateProperty = await nexusProvider.executeAction("duplicate", { providerId: "nexus-library", collection: "properties", id: "property-strength" });
-assert.match(duplicateProperty.entry.id, /^nexus\\.personal\\.property\\.copy-/,
+assert.ok(duplicateProperty.entry.id.startsWith("nexus.personal.property.copy-"),
   "IDs duplicados de propriedades devem usar o tipo singular válido no LogicRegistry.");
 const deleteResult = await nexusProvider.executeAction("delete", {
   providerId: "nexus-library",
