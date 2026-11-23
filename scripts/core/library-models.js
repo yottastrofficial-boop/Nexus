@@ -191,7 +191,8 @@ export function planLibraryDefinitionUpdate(definition, layouts, { selectedInsta
         instanceId: String(instance.id),
         label: String(instance.label ?? instance.resourceLabel ?? definition.label ?? definition.type)
       });
-      if (selected && !selected.has(key)) continue;
+      // A plan without explicit selections is preview-only; never mutate by default.
+      if (!selected || !selected.has(key)) continue;
       layout.components[index] = updateLibraryComponentInstance(definition, instance);
       updatedCount++;
     }
