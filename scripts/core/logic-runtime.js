@@ -240,8 +240,13 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
           errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: "Ação não registrada no runtime: " + type });
           if (onError === "stop") break;
         } else {
-          const permissionDescriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
-          if (!(await permitted(permissionDescriptor, context, action))) {
+          const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+          if (configErrors.length) {
+            errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: configErrors.join(" ") });
+            if (onError === "stop") break;
+          } else {
+            const permissionDescriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
+            if (!(await permitted(permissionDescriptor, context, action))) {
             errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: "Permissão insuficiente para executar a ação." });
             if (onError === "stop") break;
           } else {
@@ -256,6 +261,7 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
               errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: String(error?.message ?? error) });
               if (onError === "stop") break;
             } finally { clearTimeout(timer); }
+            }
           }
         }
       }
@@ -291,10 +297,15 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         const executor = actions.get(type);
         if (!executor) preview.push({ nodeId: node.id, type, status: "unregistered", allowed: false, effects: [], permissions: [] });
         else {
-          const descriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
-          let allowed = false;
-          try { allowed = await permitted(descriptor, context, action); } catch { allowed = false; }
-          preview.push({ nodeId: node.id, type, status: allowed ? "ready" : "denied", allowed, effects: [...executor.effects], permissions: [...descriptor.permissions] });
+          const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+          if (configErrors.length) {
+            preview.push({ nodeId: node.id, type, status: "invalid-config", allowed: false, errors: configErrors, effects: [...executor.effects], permissions: [...executor.permissions] });
+          } else {
+            const descriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
+            let allowed = false;
+            try { allowed = await permitted(descriptor, context, action); } catch { allowed = false; }
+            preview.push({ nodeId: node.id, type, status: allowed ? "ready" : "denied", allowed, effects: [...executor.effects], permissions: [...descriptor.permissions] });
+          }
         }
       }
       const edge = (edges.get(current) ?? []).find(item => (item.when ?? "next") === branch);
@@ -302,7 +313,7 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
       current = edge.to;
     }
     if (steps >= 128) errors.push("Limite de 128 nós visitados excedido.");
-    return { status: errors.length ? "invalid" : preview.some(item => !item.allowed) ? "blocked" : "ready", executed: false, trace, actions: preview, errors };
+    return { status: errors.length || preview.some(item => item.status === "invalid-config") ? "invalid" : preview.some(item => !item.allowed) ? "blocked" : "ready", executed: false, trace, actions: preview, errors };
   };
 
   const runFlow = async (flowInput, context = {}) => {
@@ -331,6 +342,12 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
       if (!executor) {
         const error = { actionId: action.id ?? null, type, message: "Ação não registrada no runtime: " + type };
         errors.push(error);
+        if (onError === "stop") break;
+        continue;
+      }
+      const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+      if (configErrors.length) {
+        errors.push({ actionId: action.id ?? null, type, message: configErrors.join(" ") });
         if (onError === "stop") break;
         continue;
       }
@@ -393,6 +410,11 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         actionsPreview.push({ actionId: action.id ?? null, type, status: "unregistered", allowed: false, effects: [], permissions: [] });
         continue;
       }
+      const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+      if (configErrors.length) {
+        actionsPreview.push({ actionId: action.id ?? null, type, status: "invalid-config", allowed: false, errors: configErrors, effects: [...executor.effects], permissions: [...executor.permissions] });
+        continue;
+      }
       const permissionDescriptor = {
         permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])],
         effects: executor.effects
@@ -409,9 +431,10 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         permissions: [...permissionDescriptor.permissions]
       });
     }
+    const invalidConfig = actionsPreview.some(item => item.status === "invalid-config");
     const blocked = actionsPreview.some(item => !item.allowed);
     return {
-      status: blocked ? "blocked" : "ready",
+      status: invalidConfig ? "invalid" : blocked ? "blocked" : "ready",
       executed: false,
       conditionResults,
       actions: actionsPreview,
