@@ -32,7 +32,7 @@ test("valida expressões lógicas usando o parser seguro do Core", () => {
     id: "nexus.personal.rule.invalid",
     type: "rule",
     payload: { expression: "1 + )" }
-  }), /expressão lógica válida/);
+  }), /expressão inválida/);
   assert.doesNotThrow(() => registry.register({
     id: "nexus.personal.rule.numeric",
     type: "rule",
@@ -56,7 +56,7 @@ test("valida gatilhos, condições e ações de fluxos sem executar payloads", (
     id: "nexus.personal.flow.bad",
     type: "flow",
     payload: { triggers: [{ event: "not-an-event" }] }
-  }), /evento não é reconhecido/);
+  }), /event não é reconhecido/);
   assert.throws(() => registry.register({
     id: "nexus.personal.flow.script",
     type: "flow",
