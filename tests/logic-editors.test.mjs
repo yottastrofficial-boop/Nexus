@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildLogicEditorPayload } from "../scripts/library/logic-editors.js";
 import { layoutFlowGraph, getFlowGraphCanvasSize } from "../scripts/library/flow-graph-layout.js";
+import { createLogicRegistry } from "../scripts/core/logic-registry.js";
+import { createNexusLogicSchemas } from "../scripts/core/logic-schemas.js";
 
 test("editor de propriedades preserva valores zero, false e string vazia", () => {
   const payload = buildLogicEditorPayload("property", {}, {
@@ -108,6 +110,7 @@ test("layout de grafo rejeita estrutura ausente sem lançar erro obscuro", () =>
 });
 
 test("schema rejeita coordenadas visuais fora dos limites do canvas", () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
   const bad = registry.validateAsset({
     id: "nexus.personal.flow.bad-layout",
     type: "flow",
