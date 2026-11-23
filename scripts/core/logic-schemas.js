@@ -98,12 +98,14 @@ function validateFlowGraph(graph, errors) {
       else {
         if (typeof node.action.type !== "string" || !/^[a-z][a-z0-9._-]{0,63}$/i.test(node.action.type)) errors.push("flow.graph.nodes[" + index + "].action.type inválido.");
         if (node.action.config !== undefined && !isRecord(node.action.config)) errors.push("flow.graph.nodes[" + index + "].action.config precisa ser um objeto.");
-        if (String(node.action.type ?? "").toLowerCase() === "nexus.actor.update" && isRecord(node.action.config)) {
+        const actionType = String(node.action.type ?? "").toLowerCase();
+        if (["nexus.actor.update", "nexus.actor.adjust"].includes(actionType) && !isRecord(node.action.config)) {
+          errors.push("flow.graph.nodes[" + index + "].action.config precisa ser um objeto.");
+        } else if (actionType === "nexus.actor.update") {
           const path = String(node.action.config.path ?? "");
           if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) errors.push("flow.graph.nodes[" + index + "].action.config.path precisa apontar para system.*.");
           if (!hasOwn(node.action.config, "value")) errors.push("flow.graph.nodes[" + index + "].action.config.value é obrigatório.");
-        }
-        if (String(node.action.type ?? "").toLowerCase() === "nexus.actor.adjust" && isRecord(node.action.config)) {
+        } else if (actionType === "nexus.actor.adjust") {
           validateActorAdjustConfig(node.action.config, "flow.graph.nodes[" + index + "].action.config", errors);
         }
       }
@@ -165,14 +167,16 @@ function validateFlow(payload) {
     if (!isRecord(action)) { errors.push("flow.actions[" + index + "] precisa ser um objeto."); continue; }
     if (action.type !== undefined && !/^[a-z][a-z0-9._-]{0,63}$/i.test(String(action.type))) errors.push("flow.actions[" + index + "].type inválido.");
     if (action.config !== undefined && !isRecord(action.config)) errors.push("flow.actions[" + index + "].config precisa ser um objeto.");
-    if (String(action.type ?? "").toLowerCase() === "nexus.actor.update" && isRecord(action.config)) {
+    const actionType = String(action.type ?? "").toLowerCase();
+    if (["nexus.actor.update", "nexus.actor.adjust"].includes(actionType) && !isRecord(action.config)) {
+      errors.push("flow.actions[" + index + "].config precisa ser um objeto.");
+    } else if (actionType === "nexus.actor.update") {
       const path = String(action.config.path ?? "");
       if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) {
         errors.push("flow.actions[" + index + "].config.path precisa apontar para uma propriedade permitida em system.*.");
       }
       if (!hasOwn(action.config, "value")) errors.push("flow.actions[" + index + "].config.value é obrigatório.");
-    }
-    if (String(action.type ?? "").toLowerCase() === "nexus.actor.adjust" && isRecord(action.config)) {
+    } else if (actionType === "nexus.actor.adjust") {
       validateActorAdjustConfig(action.config, "flow.actions[" + index + "].config", errors);
     }
   }
