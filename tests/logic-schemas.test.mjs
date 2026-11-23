@@ -83,3 +83,21 @@ test("comportamentos e funções guardam referências, não código executável"
 });
 
 console.log("NEXUS logic schemas: tests passed.");
+
+test("valida configuração do executor seguro de atualização de Actor", () => {
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.safe-update",
+    type: "flow",
+    payload: { actions: [{ type: "nexus.actor.update", config: { path: "system.resources.pv.value", value: 2 } }] }
+  }).valid, true);
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.unsafe-update",
+    type: "flow",
+    payload: { actions: [{ type: "nexus.actor.update", config: { path: "ownership.default", value: 3 } }] }
+  }).valid, false);
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.missing-value",
+    type: "flow",
+    payload: { actions: [{ type: "nexus.actor.update", config: { path: "system.resources.pv.value" } }] }
+  }).valid, false);
+});
