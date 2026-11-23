@@ -23,6 +23,10 @@ Hooks.once("init", () => {
   game.nexus.library ??= {};
   game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
     getUser: () => game.user,
+    getWorldFlows: () => {
+      try { return game.settings.get("nexus", "interactionLibrary") ?? []; }
+      catch { return []; }
+    },
     documentBridge: game.nexus.documents,
     catalog: NEXUS_LIBRARY_CATALOG
   });
