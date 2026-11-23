@@ -1,5 +1,6 @@
 import { evaluateNexusExpression } from "./formula-engine.js";
 import { INTERACTION_EVENTS } from "./interactions.js";
+import { FOUNDRY_LOGIC_EVENTS } from "./foundry-logic-integration.js";
 
 const SAFE_PATH = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
 const SAFE_ID = /^[a-z0-9][a-z0-9._:-]{2,159}$/i;
@@ -85,7 +86,7 @@ function validateBehavior(payload) {
   const errors = [];
   const events = Array.isArray(payload.events) ? payload.events : (payload.event ? [payload.event] : []);
   if (payload.events !== undefined && !Array.isArray(payload.events)) errors.push("behavior.events precisa ser uma lista.");
-  for (const event of events) if (!INTERACTION_EVENTS.includes(String(event))) errors.push("behavior.events contém evento não reconhecido: " + event);
+  for (const event of events) if (!INTERACTION_EVENTS.includes(String(event)) && !FOUNDRY_LOGIC_EVENTS.includes(String(event))) errors.push("behavior.events contém evento não reconhecido: " + event);
   if (payload.flowId !== undefined && (typeof payload.flowId !== "string" || !SAFE_ID.test(payload.flowId))) errors.push("behavior.flowId inválido.");
   if (payload.flow !== undefined) {
     if (!isRecord(payload.flow)) errors.push("behavior.flow precisa ser um objeto.");
