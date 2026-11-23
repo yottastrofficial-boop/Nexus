@@ -1,6 +1,6 @@
 import { INTERACTION_EVENTS } from "../core/interactions.js";
 import { FOUNDRY_LOGIC_EVENTS } from "../core/foundry-logic-integration.js";
-import { layoutFlowGraph, getFlowGraphCanvasSize } from "./flow-graph-layout.js";
+import { layoutFlowGraph, getFlowGraphCanvasSize, connectFlowNodes } from "./flow-graph-layout.js";
 
 const clone = value => structuredClone(value ?? {});
 const newId = prefix => prefix + "-" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
@@ -123,6 +123,8 @@ function createFlowBuilder(form, payload, runtime) {
 function createFlowGraphBuilder(form, payload, runtime) {
   const root = make("section", "nexus-library-graph-builder");
   let graph = isRecord(payload.graph) ? layoutFlowGraph(clone(payload.graph)) : null;
+  let connectMode = false;
+  let connectingFrom = null;
   if (graph) { graph.nodes = Array.isArray(graph.nodes) ? graph.nodes : []; graph.edges = Array.isArray(graph.edges) ? graph.edges : []; }
   const nodeTypeOptions = [["condition", "Condição"], ["action", "Ação"], ["end", "Fim"]];
   const actionTypes = [...new Set(runtime?.actionTypes ?? [])];
@@ -138,14 +140,19 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const addType = makeSelect("condition", nodeTypeOptions);
   const addNode = make("button", "nexus-library-flow-add", "+ Adicionar nó");
   addNode.type = "button";
+  const connectType = makeSelect("next", [["next", "Próxima"], ["true", "Verdadeiro"], ["false", "Falso"]]);
+  const connectModeButton = make("button", "nexus-library-flow-add", "Conectar nós");
+  connectModeButton.type = "button";
   const arrange = make("button", "nexus-library-flow-add", "Organizar automaticamente");
   arrange.type = "button";
   const toggle = make("button", "nexus-library-flow-add", graph ? "Remover grafo" : "Criar grafo visual");
   toggle.type = "button";
-  toolbarActions.append(addType, addNode, arrange, toggle);
+  toolbarActions.append(addType, addNode, connectType, connectModeButton, arrange, toggle);
   toolbar.append(title, toolbarActions);
 
   const status = make("p", "nexus-library-flow-empty", "Grafo opcional. Fluxos existentes continuam usando gatilhos, condições e ações sequenciais.");
+  const connectHint = make("p", "nexus-library-graph-connect-hint", "");
+  connectHint.hidden = true;
   const canvasScroll = make("div", "nexus-library-graph-canvas-scroll");
   const canvas = make("div", "nexus-library-graph-canvas");
   const arrowId = newId("flow-arrow");
@@ -157,7 +164,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
   canvasScroll.append(canvas);
   const edgesWrap = make("div", "nexus-library-graph-edges");
   const content = make("div", "nexus-library-graph-content");
-  content.append(canvasScroll, edgesWrap);
+  content.append(connectHint, canvasScroll, edgesWrap);
 
   const makeText = (value, placeholder) => { const node = make("input", ""); node.type = "text"; node.value = String(value ?? ""); node.placeholder = placeholder ?? ""; return node; };
   const field = (label, control, wide = false) => { const wrap = make("label", "nexus-library-flow-field" + (wide ? " wide" : "")); wrap.append(make("span", "", label), control); return wrap; };
@@ -203,9 +210,12 @@ function createFlowGraphBuilder(form, payload, runtime) {
   };
   const render = () => {
     nodesWrap.replaceChildren(); edgesWrap.replaceChildren();
-    if (!graph) { content.hidden = true; status.hidden = false; arrange.disabled = true; addNode.disabled = true; addType.disabled = true; return; }
+    if (!graph) { content.hidden = true; status.hidden = false; arrange.disabled = true; addNode.disabled = true; addType.disabled = true; connectType.disabled = true; connectModeButton.disabled = true; return; }
     graph = layoutFlowGraph(graph);
-    content.hidden = false; status.hidden = true; arrange.disabled = false; addNode.disabled = false; addType.disabled = false;
+    content.hidden = false; status.hidden = true; arrange.disabled = false; addNode.disabled = false; addType.disabled = false; connectType.disabled = false; connectModeButton.disabled = false;
+    connectModeButton.textContent = connectMode ? "Cancelar conexão" : "Conectar nós";
+    connectHint.hidden = !connectMode;
+    connectHint.textContent = connectMode ? (connectingFrom ? "Origem selecionada. Agora selecione o nó de destino." : "Modo conexão: selecione o nó de origem e depois o destino.") : "";
     const size = getFlowGraphCanvasSize(graph);
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
@@ -240,6 +250,28 @@ function createFlowGraphBuilder(form, payload, runtime) {
       }
       const drag = make("span", "nexus-library-graph-drag-handle", "⠿ Arrastar");
       head.append(drag);
+      const port = make("button", "nexus-library-graph-port", connectingFrom === node.id ? "Origem" : "Selecionar");
+      port.type = "button"; port.disabled = !connectMode;
+      port.addEventListener("click", event => {
+        event.stopPropagation();
+        if (!connectMode) return;
+        if (!connectingFrom) {
+          connectingFrom = node.id;
+          render();
+          return;
+        }
+        try {
+          graph = connectFlowNodes(graph, connectingFrom, node.id, connectType.value);
+          connectingFrom = null;
+          render();
+          connectHint.textContent = "Conexão criada. Você pode selecionar outra origem ou cancelar.";
+        } catch (error) {
+          connectHint.hidden = false;
+          connectHint.textContent = String(error?.message ?? error);
+        }
+      });
+      head.append(port);
+      if (connectingFrom === node.id) card.classList.add("is-connect-source");
       head.addEventListener("pointerdown", event => {
         if (event.target.closest("button,select")) return;
         event.preventDefault();
@@ -344,6 +376,11 @@ function createFlowGraphBuilder(form, payload, runtime) {
     if (!graph) return;
     graph.nodes.push(freshNode(addType.value));
     graph = layoutFlowGraph(graph);
+    render();
+  });
+  connectModeButton.addEventListener("click", () => {
+    connectMode = !connectMode;
+    connectingFrom = null;
     render();
   });
   arrange.addEventListener("click", () => { if (graph) { graph = layoutFlowGraph(graph, { force: true }); render(); } });
