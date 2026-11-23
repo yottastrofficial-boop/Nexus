@@ -2,7 +2,7 @@
 
 ## Objetivo desta etapa
 
-A Biblioteca deve localizar e organizar recursos próprios do NEXUS e documentos nativos do Foundry sem duplicar os documentos originais. A interface/menus funcionais serão construídos em uma etapa posterior sobre estes contratos.
+A Biblioteca deve localizar e organizar recursos próprios do NEXUS e documentos nativos do Foundry sem duplicar os documentos originais. O catálogo e a primeira integração da visão universal com o Explorer existente estão em implementação; importadores, destinos e ações contextuais especializadas continuam sendo etapas posteriores.
 
 ## Documentos nativos do Foundry
 
