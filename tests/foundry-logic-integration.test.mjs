@@ -51,7 +51,7 @@ test("bridge despacha evento Foundry com documento, Actor e alterações", async
   const hooks = createHooks();
   const calls = [];
   const runtime = { dispatch: async (event, context) => { calls.push({ event, context }); return []; } };
-  const gameRef = { user: { id: "user-1" } };
+  const gameRef = { user: { id: "user-1", isGM: true } };
   const bridge = createFoundryLogicEventBridge({ hooks, runtime, gameRef, logger: { warn() {}, error() {} } });
   assert.equal(bridge.install(), true);
   assert.equal(bridge.install(), false);
@@ -84,7 +84,7 @@ test("bridge impede reentrada do mesmo evento/documento enquanto o despacho est�
   let release;
   const gate = new Promise(resolve => { release = resolve; });
   const runtime = { dispatch: async () => { calls++; await gate; } };
-  const bridge = createFoundryLogicEventBridge({ hooks, runtime, logger: { warn() {}, error() {} } });
+  const bridge = createFoundryLogicEventBridge({ hooks, runtime, gameRef: { user: { id: "gm-1", isGM: true } }, logger: { warn() {}, error() {} } });
   bridge.install();
   const actor = { documentName: "Actor", uuid: "Actor.recursive" };
   hooks.emit("updateActor", actor, {}, {}, "u1");
@@ -111,7 +111,7 @@ test("executor nexus.actor.update exige propriedade OWNER e altera apenas system
   });
   const runtime = createLogicRuntime({ registry });
   const hooks = createHooks();
-  const user = { id: "player-1", isGM: false };
+  const user = { id: "gm-1", isGM: true };
   const gameRef = { user };
   const constRef = { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } };
   const integration = installFoundryLogicIntegration({ hooks, runtime, gameRef, constRef, logger: { warn() {}, error() {} } });
@@ -158,9 +158,8 @@ test("executor nega escrita sem OWNER e rejeita caminhos fora de system", async 
     testUserPermission: (_user, level) => level === 2,
     async update(changes) { updates.push(changes); }
   };
-  hooks.emit("updateActor", actor, {}, {}, user.id);
-  await flush();
-  await flush();
+  const result = await runtime.dispatch("actor.updated", { actor, document: actor });
+  assert.equal(result[0].result.status, "failed");
   assert.equal(updates.length, 0);
   integration.uninstall();
 });
