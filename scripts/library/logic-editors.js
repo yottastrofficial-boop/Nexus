@@ -138,6 +138,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const status = make("p", "nexus-library-flow-empty", "Grafo opcional. Fluxos existentes continuam usando gatilhos, condições e ações sequenciais.");
   const canvasScroll = make("div", "nexus-library-graph-canvas-scroll");
   const canvas = make("div", "nexus-library-graph-canvas");
+  const arrowId = newId("flow-arrow");
   const wires = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   wires.classList.add("nexus-library-graph-wires");
   wires.setAttribute("aria-hidden", "true");
@@ -174,7 +175,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
     wires.setAttribute("width", String(size.width));
     wires.setAttribute("height", String(size.height));
     const defs = svgElement("defs");
-    const marker = svgElement("marker", { id: "nexus-flow-arrow", markerWidth: 8, markerHeight: 8, refX: 6, refY: 3, orient: "auto" });
+    const marker = svgElement("marker", { id: arrowId, markerWidth: 8, markerHeight: 8, refX: 6, refY: 3, orient: "auto" });
     marker.append(svgElement("path", { d: "M0 0 L6 3 L0 6", fill: "none", stroke: "currentColor", "stroke-width": 1.2 }));
     defs.append(marker); wires.append(defs);
     const byId = new Map(graph.nodes.map(node => [node.id, node]));
@@ -187,7 +188,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
       const path = svgElement("path", {
         d: "M " + x1 + " " + y1 + " C " + (x1 + bend) + " " + y1 + ", " + (x2 - bend) + " " + y2 + ", " + x2 + " " + y2,
         class: "nexus-library-graph-wire " + (edge.when === "true" ? "is-true" : edge.when === "false" ? "is-false" : "is-next"),
-        "marker-end": "url(#nexus-flow-arrow)"
+        "marker-end": "url(#" + arrowId + ")"
       });
       wires.append(path);
       if (edge.when && edge.when !== "next") {
@@ -245,7 +246,10 @@ function createFlowGraphBuilder(form, payload, runtime) {
           node.x = Math.max(0, Math.min(4800, baseX + moveEvent.clientX - originX));
           node.y = Math.max(0, Math.min(4800, baseY + moveEvent.clientY - originY));
           card.style.left = node.x + "px"; card.style.top = node.y + "px";
-          drawEdges(getFlowGraphCanvasSize(graph));
+          const size = getFlowGraphCanvasSize(graph);
+          canvas.style.width = size.width + "px";
+          canvas.style.height = size.height + "px";
+          drawEdges(size);
         };
         const finish = () => {
           head.removeEventListener("pointermove", move);
