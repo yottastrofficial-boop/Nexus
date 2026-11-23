@@ -21,4 +21,4 @@ O catálogo não implementa os componentes. A inserção depende do registro e d
 - **Pré-configurados:** elementos da ficha com configurações iniciais úteis;
 - **Temas:** paletas visuais aplicáveis à ficha.
 
-A Biblioteca oferece busca, filtro por categoria, prévia e configuração antes da inserção. Modelos pessoais ainda são armazenados por métodos internos, mas a interface de gerenciamento não está exposta nesta versão.
+A Biblioteca oferece busca global, filtro dinâmico por etiquetas, visões universais de itens salvos/favoritos/recentes, pastas pessoais livres ou vinculadas a uma coleção, cartões padronizados em grade/lista e Inspector contextual. O Inspector permite editar metadados, duplicar e excluir itens salvos com proteção de dependências. A visão universal agrega dados sem alterar seu tipo semântico; inserção/aplicação de alguns tipos permanece nas áreas especializadas. A validação visual e funcional no Foundry VTT 14 build 360 continua necessária.
