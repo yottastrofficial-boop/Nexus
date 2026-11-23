@@ -5,7 +5,8 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
-- Versão publicada: `1.0.0.90` (Biblioteca Explorer unificada; validação funcional pendente))
+- Versão publicada: `1.0.0.90` (Biblioteca Explorer unificada; validação funcional pendente)
+- Versão candidata: `1.0.0.91` (Biblioteca universal integrada; CI/publicação e validação funcional no Foundry pendentes)
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -36,7 +37,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na linha 1.0.0.90 (release publicada; validação funcional pendente)
+## Implementação presente na candidata 1.0.0.91 (publicação e validação funcional pendentes)
 
 A árvore atual contém, entre outros:
 
