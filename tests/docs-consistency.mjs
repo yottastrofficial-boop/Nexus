@@ -16,7 +16,7 @@ const [system, manifest, changelog, readme, roadmap, stability, overview] = awai
 
 assert.equal(system.version, manifest.version, "system.json e manifest.json devem declarar a mesma versão.");
 assert.match(manifest.download, new RegExp(`/releases/download/v${system.version}/nexus\\.zip$`), "O download do manifesto deve apontar para o ZIP da mesma versão.");
-assert.match(changelog, new RegExp(`^## ${system.version.replaceAll(".", "\\\\.")}(?:\\s|—)`, "m"), "O CHANGELOG deve começar com a versão publicada.");
+assert.match(changelog, new RegExp(`^## ${system.version.replaceAll(".", "\\.")}(?:\\s|—)`, "m"), "O CHANGELOG deve começar com a versão publicada.");
 assert.ok(readme.includes(system.version), "O README deve mencionar a versão atual.");
 assert.ok(readme.includes("Foundry VTT 14"), "O README deve declarar a linha de compatibilidade atual.");
 assert.ok(roadmap.includes(system.version), "O roadmap deve mencionar a versão atual.");
