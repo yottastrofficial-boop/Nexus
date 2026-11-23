@@ -116,6 +116,10 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
   const simulateFlow = async (flowInput, context = {}) => {
     const { asset, flow } = resolveFlowInput(flowInput);
     if (!flow || typeof flow !== "object") return { status: "invalid", executed: false, actions: [], errors: ["Fluxo lógico inválido."] };
+    if (asset && typeof registry.validateAsset === "function") {
+      const validation = registry.validateAsset(asset);
+      if (!validation.valid) return { status: "invalid", executed: false, actions: [], errors: [...validation.errors] };
+    }
     if (asset && !asset.enabled) return { status: "disabled", executed: false, actions: [], errors: [] };
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
     if (conditions.length > maxConditions) return { status: "invalid", executed: false, actions: [], errors: ["Fluxo excede o limite de condições."] };
