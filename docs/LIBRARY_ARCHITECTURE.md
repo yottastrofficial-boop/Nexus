@@ -13,7 +13,7 @@ A separação é por responsabilidade e ciclo de vida, não por quantidade de ar
 | `scripts/core/library-resource-registry.js` | Contratos de provedores, busca, filtros, paginação, resolução e ações contextuais | DOM, ficha, apresentação ou execução de conteúdo arbitrário |
 | `scripts/core/component-types.js` | Registro de tipos de componentes compartilhado por ficha, Biblioteca e validação de transferências | Dependências de interface ou DOM |
 | `scripts/core/library-store.js` | Persistência e validação das definições pessoais NEXUS | Documentos Foundry ou preferências visuais |
-| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |
+| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |\n| `scripts/core/logic-schemas.js` | Validadores inertes dos cinco tipos de Lógica, usando o parser seguro do Core | Executar código ou registrar executores arbitrários |\n| `scripts/library/logic-editors.js` | Campos especializados para editar payloads de Lógica no Inspector | Executar payloads ou controlar persistência diretamente |
 | `scripts/library/catalog-explorer.js` | Cartões, seleção, Inspector, ações contextuais e organização por referência | Conhecer Actor, Canvas, templates de ficha ou regras de aplicação |
 | `scripts/library/library-application.js` | Ciclo de vida da janela ApplicationV2, navegação e controles da Biblioteca independente | Implementar provedores, persistência ou schemas de conteúdo |
 | `scripts/library/library-backup-service.js` | Composição, validação, prévia, mesclagem e exportação de backups completos | Interface de ficha ou execução de dados importados |
@@ -103,7 +103,7 @@ Conteúdo importado permanece dado inerte. HTML, CSS, JavaScript, macros ou comp
 A integração atual possui catálogo universal, ações contextuais para recursos pessoais NEXUS, abertura de documentos Foundry, pastas/favoritos/recentes e coleções mistas por referência, filtros por categoria/tipo/origem/etiqueta, janela independente e backup completo com prévia.
 
 Ainda não estão concluídos:
-- editores especializados completos para todos os tipos de Lógica;
+- construtor visual avançado de Fluxos e simulação de ações; os editores estruturados iniciais para os cinco tipos já existem;
 - ações de aplicação para todos os destinos e tipos;
 - adaptadores de importação de fontes externas e destinos como compêndios/fichas;
 - edição de documentos Foundry por meio de metadados da Biblioteca (documentos continuam sob suas próprias fichas);
