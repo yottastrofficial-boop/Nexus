@@ -109,7 +109,7 @@ test("valida grafo visual, ramificações obrigatórias e ausência de ciclos", 
     nodes: [
       { id: "start-node", type: "start" },
       { id: "check-node", type: "condition", expression: "@system.resources.pv.value > 0" },
-      { id: "yes-action", type: "action", action: { id: "set-flag", type: "nexus.actor.update", config: { path: "system.flags.active", value: true } } },
+      { id: "yes-action", type: "action", action: { id: "set-flag", type: "nexus.actor.update", config: { path: "system.resources.pv.value", value: 3 } } },
       { id: "yes-end", type: "end" },
       { id: "no-end", type: "end" }
     ],
