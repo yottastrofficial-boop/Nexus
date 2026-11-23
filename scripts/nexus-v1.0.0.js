@@ -9,6 +9,8 @@ import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndex
 import { createResourceLifecycleManager } from "./core/resource-lifecycle.js";
 import { createFoundryDocumentBridge } from "./core/foundry-document-bridge.js";
 import { createDefaultLibraryResourceRegistry } from "./core/library-resource-registry.js";
+import { createLibraryApplicationClass } from "./library/library-application.js";
+import { normalizeLibraryPreferences } from "./core/library-preferences.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
@@ -37,6 +39,27 @@ Hooks.once("init", () => {
     game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
+  const LibraryApplication = createLibraryApplicationClass({
+    ApplicationV2: foundry.applications.api.ApplicationV2,
+    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+    registry: game.nexus.library.registry,
+    getPreferences: () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences")),
+    savePreferences: preferences => {
+      if (typeof game.user?.setFlag !== "function") throw new Error("Não foi possível salvar as preferências da Biblioteca.");
+      return game.user.setFlag("nexus", "libraryPreferences", preferences);
+    }
+  });
+  game.nexus.library.Application = LibraryApplication;
+  game.nexus.library.open = () => {
+    const current = game.nexus.library.application;
+    if (current?.rendered) {
+      current.bringToTop?.();
+      return Promise.resolve(current);
+    }
+    const application = new LibraryApplication();
+    game.nexus.library.application = application;
+    return application.render({ force: true });
+  };
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
