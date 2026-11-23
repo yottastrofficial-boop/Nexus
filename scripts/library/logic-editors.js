@@ -64,59 +64,298 @@ export function buildLogicEditorPayload(type, basePayload = {}, draft = {}) {
 const isRecord = value => Boolean(value && typeof value === "object" && !Array.isArray(value));
 const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
+function renderExecutorConfigFields(container, action, runtime, { drafts = new Map(), draftPrefix = "action" } = {}) {
+  action.config = isRecord(action.config) ? action.config : {};
+  const definition = runtime?.getActionDefinition?.(action.type) ??
+    runtime?.getActionDefinitions?.().find(item => item.type === action.type) ?? null;
+  const schemaFields = definition?.configSchema?.fields;
+  const draftKey = key => draftPrefix + "::" + key;
+  const validation = () => runtime?.validateActionConfig?.(action.type, action.config) ?? { hasSchema: false, valid: true, errors: [] };
+  const updateError = (errorNode, control, messages) => {
+    const message = messages.join(" ");
+    errorNode.textContent = message;
+    errorNode.hidden = !message;
+    if (message) control.setAttribute("aria-invalid", "true");
+    else control.removeAttribute("aria-invalid");
+  };
+  const makeError = id => {
+    const error = make("small", "nexus-library-flow-field-error");
+    error.id = id;
+    error.setAttribute("role", "status");
+    error.setAttribute("aria-live", "polite");
+    error.hidden = true;
+    return error;
+  };
+  if (!Array.isArray(schemaFields) || !schemaFields.length) {
+    const key = draftKey("__fallback");
+    const wrap = make("label", "nexus-library-flow-field wide");
+    const control = make("textarea", "");
+    control.rows = 4;
+    control.spellcheck = false;
+    control.value = drafts.has(key) ? drafts.get(key) : JSON.stringify(action.config, null, 2);
+    control.setAttribute("aria-label", "Configuração JSON do executor " + (action.type || "não selecionado"));
+    const error = makeError(newId("config-error"));
+    control.setAttribute("aria-describedby", error.id);
+    control.addEventListener("input", () => {
+      drafts.set(key, control.value);
+      try {
+        const parsed = JSON.parse(control.value || "{}");
+        if (!isRecord(parsed)) throw new Error("A configuração precisa ser um objeto JSON.");
+        action.config = parsed;
+        drafts.delete(key);
+        updateError(error, control, validation().errors);
+      } catch (cause) {
+        updateError(error, control, [String(cause?.message ?? "JSON inválido.")]);
+      }
+    });
+    wrap.append(make("span", "", "Configuração JSON"), control, error);
+    wrap.append(make("small", "nexus-library-graph-field-help", "Este executor não declara campos visuais. A configuração permanece como JSON inerte."));
+    container.append(wrap);
+    return {
+      flush() {
+        if (!drafts.has(key)) return;
+        let parsed;
+        try { parsed = JSON.parse(drafts.get(key) || "{}"); }
+        catch { throw new Error("Configuração JSON de " + action.type + " inválida."); }
+        if (!isRecord(parsed)) throw new Error("A configuração de " + action.type + " precisa ser um objeto JSON.");
+        action.config = parsed;
+        drafts.delete(key);
+      },
+      validate: validation
+    };
+  }
+  for (const schemaField of schemaFields) {
+    const key = schemaField.key;
+    const storageKey = draftKey(key);
+    if (!hasOwn(action.config, key) && hasOwn(schemaField, "defaultValue")) action.config[key] = structuredClone(schemaField.defaultValue);
+    const stored = action.config[key];
+    const error = makeError(newId("config-error"));
+    let control;
+    if (schemaField.type === "checkbox") {
+      control = make("input", "");
+      control.type = "checkbox";
+      control.checked = stored === true;
+    } else if (schemaField.type === "select") {
+      control = make("select", "");
+      const options = schemaField.options.map(option => [option.value, option.label]);
+      if (stored != null && !options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
+      options.forEach(([value, label]) => {
+        const option = make("option", "", label);
+        option.value = value;
+        option.selected = value === stored;
+        control.append(option);
+      });
+    } else if (schemaField.type === "textarea" || schemaField.type === "json") {
+      control = make("textarea", "");
+      control.rows = schemaField.rows ?? 3;
+      control.spellcheck = false;
+      control.value = String(drafts.has(storageKey) ? drafts.get(storageKey) :
+        schemaField.type === "json" && stored !== undefined ? JSON.stringify(stored, null, 2) : stored ?? "");
+    } else {
+      control = make("input", "");
+      control.type = schemaField.type === "number" ? "number" : "text";
+      control.value = stored == null ? "" : String(stored);
+      if (schemaField.type === "number" && schemaField.step !== undefined) control.step = String(schemaField.step);
+      if (schemaField.type === "number" && schemaField.min !== undefined) control.min = String(schemaField.min);
+      if (schemaField.type === "number" && schemaField.max !== undefined) control.max = String(schemaField.max);
+    }
+    control.id = newId("config-field");
+    if (schemaField.required) control.required = true;
+    if (schemaField.placeholder) control.placeholder = schemaField.placeholder;
+    control.setAttribute("aria-describedby", error.id);
+    const updateFromControl = () => {
+      try {
+        if (schemaField.type === "checkbox") action.config[key] = control.checked;
+        else if (schemaField.type === "number") {
+          if (!control.value.trim()) delete action.config[key];
+          else if (!Number.isFinite(Number(control.value))) throw new Error("Informe um número finito.");
+          else action.config[key] = Number(control.value);
+        } else if (schemaField.type === "json") {
+          drafts.set(storageKey, control.value);
+          action.config[key] = JSON.parse(control.value);
+          drafts.delete(storageKey);
+        } else action.config[key] = control.value;
+        const errors = validation().errors.filter(message => message.includes(schemaField.label));
+        updateError(error, control, errors);
+      } catch (cause) {
+        updateError(error, control, [schemaField.type === "json" ? "JSON inválido. Corrija a estrutura antes de salvar." : String(cause?.message ?? cause)]);
+      }
+    };
+    control.addEventListener("input", updateFromControl);
+    control.addEventListener("change", updateFromControl);
+    const wrap = make("label", "nexus-library-flow-field" + (["textarea", "json"].includes(schemaField.type) ? " wide" : ""));
+    wrap.append(make("span", "", schemaField.label), control);
+    if (schemaField.help) wrap.append(make("small", "nexus-library-graph-field-help", schemaField.help));
+    wrap.append(error);
+    container.append(wrap);
+  }
+  return {
+    validate: validation,
+    flush() {
+      for (const schemaField of schemaFields) {
+        const key = draftKey(schemaField.key);
+        if (!drafts.has(key) || schemaField.type !== "json") continue;
+        try { action.config[schemaField.key] = JSON.parse(drafts.get(key)); drafts.delete(key); }
+        catch { throw new Error(schemaField.label + " precisa conter JSON válido."); }
+      }
+      const result = validation();
+      if (!result.valid) throw new Error(result.errors.join(" "));
+    }
+  };
+}
+
 function createFlowBuilder(form, payload, runtime) {
   const root = make("div", "nexus-library-flow-builder");
-  const types = [...new Set(runtime?.actionTypes ?? [])];
-  const data = { triggers: Array.isArray(payload.triggers) ? clone(payload.triggers) : [], conditions: Array.isArray(payload.conditions) ? clone(payload.conditions) : [], actions: Array.isArray(payload.actions) ? clone(payload.actions) : [] };
+  const definitions = runtime?.getActionDefinitions?.() ?? [];
+  const types = [...new Set([...(runtime?.actionTypes ?? []), ...definitions.map(item => item.type)])];
+  const data = {
+    triggers: Array.isArray(payload.triggers) ? clone(payload.triggers) : [],
+    conditions: Array.isArray(payload.conditions) ? clone(payload.conditions) : [],
+    actions: Array.isArray(payload.actions) ? clone(payload.actions) : []
+  };
   const sections = {};
-  const field = (title, control, wide = false) => { const label = make("label", "nexus-library-flow-field" + (wide ? " wide" : "")); label.append(make("span", "", title), control); return label; };
-  const text = (value, placeholder) => { const node = make("input", ""); node.type = "text"; node.value = String(value ?? ""); node.placeholder = placeholder ?? ""; return node; };
-  const select = (value, options) => { const node = make("select", ""); options.forEach(pair => { const opt = make("option", "", pair[1]); opt.value = pair[0]; opt.selected = pair[0] === value; node.append(opt); }); return node; };
-  const remove = callback => { const button = make("button", "nexus-library-flow-remove", "Remover"); button.type = "button"; button.addEventListener("click", callback); return button; };
+  const actionDrafts = new Map();
+  const field = (title, control, wide = false) => {
+    const label = make("label", "nexus-library-flow-field" + (wide ? " wide" : ""));
+    label.append(make("span", "", title), control);
+    return label;
+  };
+  const text = (value, placeholder) => {
+    const node = make("input", "");
+    node.type = "text";
+    node.value = String(value ?? "");
+    node.placeholder = placeholder ?? "";
+    return node;
+  };
+  const select = (value, options) => {
+    const node = make("select", "");
+    options.forEach(pair => {
+      const opt = make("option", "", pair[1]);
+      opt.value = pair[0];
+      opt.selected = pair[0] === value;
+      node.append(opt);
+    });
+    return node;
+  };
+  const remove = callback => {
+    const button = make("button", "nexus-library-flow-remove", "Remover");
+    button.type = "button";
+    button.addEventListener("click", callback);
+    return button;
+  };
   const section = (key, title, description, rowFactory, fresh) => {
-    const group = make("section", "nexus-library-flow-group"); const head = make("div", "nexus-library-flow-group-head");
-    const intro = make("div", ""); intro.append(make("strong", "", title), make("small", "", description));
+    const group = make("section", "nexus-library-flow-group");
+    const head = make("div", "nexus-library-flow-group-head");
+    const intro = make("div", "");
+    intro.append(make("strong", "", title), make("small", "", description));
     const rows = make("div", "nexus-library-flow-rows");
-    const render = () => { rows.replaceChildren(); data[key].forEach((item, index) => rows.append(rowFactory(item, () => { data[key].splice(index, 1); render(); }))); if (!data[key].length) rows.append(make("p", "nexus-library-flow-empty", "Nenhum item configurado.")); };
-    const add = make("button", "nexus-library-flow-add", "+ Adicionar"); add.type = "button"; add.addEventListener("click", () => { data[key].push(fresh()); render(); });
-    head.append(intro, add); group.append(head, rows); root.append(group); sections[key] = rows; render();
+    const render = () => {
+      rows.replaceChildren();
+      data[key].forEach((item, index) => rows.append(rowFactory(item, () => {
+        data[key].splice(index, 1);
+        render();
+      })));
+      if (!data[key].length) rows.append(make("p", "nexus-library-flow-empty", "Nenhum item configurado."));
+    };
+    const add = make("button", "nexus-library-flow-add", "+ Adicionar");
+    add.type = "button";
+    add.addEventListener("click", () => { data[key].push(fresh()); render(); });
+    head.append(intro, add);
+    group.append(head, rows);
+    root.append(group);
+    sections[key] = { rows, render };
+    render();
   };
   section("triggers", "Gatilhos", "Eventos que iniciam o fluxo.", (item, onRemove) => {
-    const row = make("article", "nexus-library-flow-row"); row.dataset.id = item.id ?? newId("trigger");
-    const event = select(item.event ?? INTERACTION_EVENTS[0], INTERACTION_EVENTS.map(value => [value, value])); event.dataset.field = "event";
-    const modifiers = text(Array.isArray(item.modifiers) ? item.modifiers.join("+") : item.modifiers, "ctrl+shift"); modifiers.dataset.field = "modifiers";
-    const key = text(item.key, "Tecla opcional"); key.dataset.field = "key";
-    const duration = text(item.durationMs, "600"); duration.dataset.field = "durationMs";
-    row.append(field("Evento", event), field("Modificadores", modifiers), field("Tecla", key), field("Duração (ms)", duration), remove(onRemove)); return row;
+    const row = make("article", "nexus-library-flow-row");
+    row.dataset.id = item.id ?? newId("trigger");
+    const event = select(item.event ?? INTERACTION_EVENTS[0], INTERACTION_EVENTS.map(value => [value, value]));
+    event.dataset.field = "event";
+    const modifiers = text(Array.isArray(item.modifiers) ? item.modifiers.join("+") : item.modifiers, "ctrl+shift");
+    modifiers.dataset.field = "modifiers";
+    const key = text(item.key, "Tecla opcional");
+    key.dataset.field = "key";
+    const duration = text(item.durationMs, "600");
+    duration.dataset.field = "durationMs";
+    row.append(field("Evento", event), field("Modificadores", modifiers), field("Tecla", key), field("Duração (ms)", duration), remove(onRemove));
+    return row;
   }, () => ({ id: newId("trigger"), event: INTERACTION_EVENTS[0] }));
   section("conditions", "Condições", "Expressões avaliadas antes das ações pelo parser seguro.", (item, onRemove) => {
-    const row = make("article", "nexus-library-flow-row"); row.dataset.id = item.id ?? newId("condition");
-    const expression = make("textarea", ""); expression.rows = 2; expression.spellcheck = false; expression.value = item.expression ?? ""; expression.placeholder = "@system.resources.pv.value > 0"; expression.dataset.field = "expression";
-    row.append(field("Expressão", expression, true), remove(onRemove)); return row;
+    const row = make("article", "nexus-library-flow-row");
+    row.dataset.id = item.id ?? newId("condition");
+    const expression = make("textarea", "");
+    expression.rows = 2;
+    expression.spellcheck = false;
+    expression.value = item.expression ?? "";
+    expression.placeholder = "@system.resources.pv.value > 0";
+    expression.dataset.field = "expression";
+    row.append(field("Expressão", expression, true), remove(onRemove));
+    return row;
   }, () => ({ id: newId("condition"), expression: "" }));
-  section("actions", "Ações", "Executores devem ser registrados pelo Core ou por módulos confiáveis.", (item, onRemove) => {
-    const row = make("article", "nexus-library-flow-row"); row.dataset.id = item.id ?? newId("action");
-    const name = text(item.name, "Nome opcional"); name.dataset.field = "name";
-    const options = [...types]; if (item.type && !options.includes(item.type)) options.push(item.type);
-    const type = options.length ? select(item.type ?? "", options.map(value => [value, value])) : text(item.type, "namespace.acao"); type.dataset.field = "type";
-    const enabled = make("input", ""); enabled.type = "checkbox"; enabled.checked = item.enabled !== false; enabled.dataset.field = "enabled";
-    const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = JSON.stringify(item.config ?? {}, null, 2); config.dataset.field = "config";
-    const active = make("label", "nexus-library-flow-enabled"); active.append(enabled, make("span", "", "Ação ativa"));
-    row.append(field("Nome", name), field("Tipo do executor", type), field("Configuração (JSON)", config, true), active, remove(onRemove)); return row;
-  }, () => ({ id: newId("action"), type: types[0] ?? "", enabled: true, config: {} }));
-  form.append(root);
-  return { read() {
-    const result = {};
-    for (const key of Object.keys(data)) result[key] = [...sections[key].querySelectorAll(".nexus-library-flow-row")].map(row => {
-      const get = name => row.querySelector('[data-field="' + name + '"]'); const id = row.dataset.id;
-      if (key === "triggers") return { id, event: get("event").value, modifiers: get("modifiers").value.split("+").map(x => x.trim()).filter(Boolean), key: get("key").value, durationMs: get("durationMs").value ? Number(get("durationMs").value) : undefined };
-      if (key === "conditions") return { id, expression: get("expression").value };
-      let config; try { config = JSON.parse(get("config").value || "{}"); } catch { throw new Error("Configuração da ação deve ser JSON válido."); }
-      if (!isRecord(config)) throw new Error("Configuração da ação deve ser um objeto JSON.");
-      return { id, name: get("name").value, type: get("type").value, enabled: get("enabled").checked, config };
+
+  section("actions", "Ações", "Cada executor pode declarar seus próprios campos. Configurações sem schema permanecem em JSON.", (item, onRemove) => {
+    const row = make("article", "nexus-library-flow-row nexus-library-flow-action-row");
+    row.dataset.id = item.id ?? newId("action");
+    item.config = isRecord(item.config) ? item.config : {};
+    const name = text(item.name, "Nome opcional");
+    name.dataset.field = "name";
+    const options = [...types];
+    if (item.type && !options.includes(item.type)) options.push(item.type);
+    const type = options.length ? select(item.type ?? "", options.map(value => [value, value])) : text(item.type, "namespace.acao");
+    type.dataset.field = "type";
+    type.addEventListener("change", () => {
+      if (type.value === item.type) return;
+      item.type = type.value;
+      item.config = {};
+      for (const key of [...actionDrafts.keys()]) if (key.startsWith(item.id + "::")) actionDrafts.delete(key);
+      sections.actions.render();
     });
-    return result;
-  } };
+    const enabled = make("input", "");
+    enabled.type = "checkbox";
+    enabled.checked = item.enabled !== false;
+    enabled.dataset.field = "enabled";
+    const active = make("label", "nexus-library-flow-enabled");
+    active.append(enabled, make("span", "", "Ação ativa"));
+    const header = make("div", "nexus-library-flow-action-head");
+    header.append(field("Nome", name), field("Tipo do executor", type), active, remove(onRemove));
+    const config = make("div", "nexus-library-flow-config-fields");
+    renderExecutorConfigFields(config, item, runtime, { drafts: actionDrafts, draftPrefix: item.id });
+    row.append(header, config);
+    return row;
+  }, () => ({ id: newId("action"), type: types[0] ?? "", enabled: true, config: {} }));
+
+  form.append(root);
+  const flushActions = () => {
+    for (const item of data.actions) {
+      const fallbackKey = item.id + "::__fallback";
+      if (actionDrafts.has(fallbackKey)) {
+        let config;
+        try { config = JSON.parse(actionDrafts.get(fallbackKey) || "{}"); }
+        catch { throw new Error("Configuração JSON de " + (item.type || "ação") + " inválida."); }
+        if (!isRecord(config)) throw new Error("A configuração de " + (item.type || "ação") + " precisa ser um objeto JSON.");
+        item.config = config;
+        actionDrafts.delete(fallbackKey);
+      }
+      for (const [key, raw] of [...actionDrafts.entries()]) {
+        if (!key.startsWith(item.id + "::")) continue;
+        const fieldKey = key.slice(item.id.length + 2);
+        const schemaField = runtime?.getActionDefinition?.(item.type)?.configSchema?.fields?.find(field => field.key === fieldKey);
+        if (schemaField?.type === "json") {
+          try { item.config[fieldKey] = JSON.parse(raw); }
+          catch { throw new Error(schemaField.label + " precisa conter JSON válido."); }
+          actionDrafts.delete(key);
+        }
+      }
+      const result = runtime?.validateActionConfig?.(item.type, item.config) ?? { valid: true, errors: [] };
+      if (item.enabled !== false && !result.valid) throw new Error((item.name || item.type || "Ação") + ": " + result.errors.join(" "));
+    }
+  };
+  return {
+    read() {
+      flushActions();
+      return Object.fromEntries(["triggers", "conditions", "actions"].map(key => [key, clone(data[key])]));
+    }
+  };
 }
 
 
