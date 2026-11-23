@@ -8654,8 +8654,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-logic-field textarea{resize:vertical;font-family:var(--font-monospace,monospace);font-size:11px}
 .nexus-library-logic-checkbox{display:flex;align-items:center;gap:8px}
 .nexus-library-logic-checkbox input{width:auto;min-width:0}
-.nexus-library-logic-editor-actions{display:flex;justify-content:flex-end}
-.nexus-library-logic-editor-save{min-height:30px;padding:5px 12px}
+.nexus-library-logic-editor-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.nexus-library-logic-editor-save,.nexus-library-logic-editor-simulate{min-height:30px;padding:5px 12px}
 .nexus-library-logic-editor-status{min-height:1.2em}
 
 /* Construtor visual de Fluxos declarativos */
