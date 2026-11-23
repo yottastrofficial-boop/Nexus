@@ -103,7 +103,8 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
       if (await destination.supports(item, context)) supported.push(item);
       else unsupported.push({ id: item.id, type: item.type, name: item.name, reason: "Tipo não compatível com o destino." });
     }
-    const destinationPreview = await destination.preview(Object.freeze(supported), { context, metadata: transfer.metadata, format: transfer.format, version: transfer.version });
+    const rawDestinationPreview = await destination.preview(Object.freeze(supported), { context, metadata: transfer.metadata, format: transfer.format, version: transfer.version });
+    const destinationPreview = deepFreeze(cloneTransferData(rawDestinationPreview ?? {}, 0, safeLimits.maxDepth));
     const planId = String(makePlanId());
     if (!planId || plans.has(planId)) throw new Error("Não foi possível criar um identificador exclusivo para a prévia.");
     const preview = deepFreeze({
@@ -115,7 +116,7 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
       total: transfer.items.length,
       compatible: supported.length,
       unsupported,
-      destinationPreview: cloneTransferData(destinationPreview ?? {}, 0, safeLimits.maxDepth)
+      destinationPreview
     });
     plans.set(planId, { source, destination, transfer, supported, destinationPreview, context, state: "prepared" });
     return preview;
