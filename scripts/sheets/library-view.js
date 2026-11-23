@@ -4,7 +4,7 @@ import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDef
 import { getLegacyNexusLibraryFlags, readNexusLibraryStore, writeNexusLibraryCollection } from "../core/library-store.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
-import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
+import { NEXUS_LIBRARY_COLLECTIONS, updateNexusLibraryStore } from "../core/library-store.js";
 import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
@@ -538,8 +538,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
                 history: [
                   ...(definition.history ?? []).filter(entry => Number(entry.version) !== Number(definition.version)),
                   { version: definition.version, settings: definition.settings ?? {} }
-                ]
-                metadata: definition.metadata ?? {}
+                ],
               });
               const currentStore = readNexusLibraryStore(game.user, getLegacyNexusLibraryFlags(game.user)).store;
               const entries = currentStore.collections.components.map(entry =>
