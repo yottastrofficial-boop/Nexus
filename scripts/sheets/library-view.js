@@ -25,7 +25,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const text=document.createElement("span");text.textContent=label;button.append(glyph,text);
       button.classList.toggle("active",id===sheet._libraryFolder);folderNav.append(button);
     }
-    panel.querySelector(".nexus-library-scope-tabs")?.after(folderNav);
+    panel.querySelector('[data-library-section="assets"]')?.after(folderNav);
     for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
       card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
