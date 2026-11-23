@@ -421,6 +421,26 @@ test("executor nexus.actor.adjust altera propriedade numérica genérica e respe
   assert.equal(increased.status, "success");
   assert.deepEqual(updates[1], { "system.customModule.energy": 12 });
 
+  const graphAdjusted = await runtime.runFlow({
+    graph: {
+      entryNodeId: "start",
+      nodes: [
+        { id: "start", type: "start" },
+        { id: "adjust", type: "action", action: {
+          id: "adjust-energy", type: "nexus.actor.adjust",
+          config: { path: "system.customModule.energy", delta: -2, min: 0 }
+        } },
+        { id: "end", type: "end" }
+      ],
+      edges: [
+        { from: "start", to: "adjust", when: "next" },
+        { from: "adjust", to: "end", when: "next" }
+      ]
+    }
+  }, { actor, document: actor });
+  assert.equal(graphAdjusted.status, "success");
+  assert.deepEqual(updates[2], { "system.customModule.energy": 2 });
+
   const invalidTarget = await runtime.runFlow({
     actions: [{
       id: "invalid-target", type: "nexus.actor.adjust",
