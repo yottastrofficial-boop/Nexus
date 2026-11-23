@@ -5,7 +5,6 @@ const make = (tag, className, value = "") => {
   if (value !== "") element.textContent = String(value);
   return element;
 };
-const JSON_FIELDS = new Set(["triggers", "conditions", "actions", "arguments"]);
 
 export function buildLogicEditorPayload(type, basePayload = {}, draft = {}) {
   const payload = clone(basePayload);
@@ -56,6 +55,7 @@ export function buildLogicEditorPayload(type, basePayload = {}, draft = {}) {
   return payload;
 }
 const isRecord = value => Boolean(value && typeof value === "object" && !Array.isArray(value));
+const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
 export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
   if (!asset || !["property", "rule", "behavior", "flow", "function"].includes(asset.type)) return null;
@@ -77,6 +77,16 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
     input.value = value == null ? "" : String(value);
     fields[key] = input;
     label.append(input);
+    form.append(label);
+  };
+  const addCheckbox = (key, labelText, checked) => {
+    const label = make("label", "nexus-library-logic-field nexus-library-logic-checkbox");
+    const input = make("input", "");
+    input.type = "checkbox";
+    input.name = key;
+    input.checked = checked === true;
+    fields[key] = input;
+    label.append(input, make("span", "", labelText));
     form.append(label);
   };
   const addSelect = (key, labelText, value, options) => {
@@ -114,14 +124,8 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
       ["string", "Texto"], ["number", "Número"], ["boolean", "Verdadeiro/falso"],
       ["array", "Lista"], ["object", "Objeto"], ["formula", "Expressão"]
     ]);
-    addInput("hasDefault", "Valor padrão (JSON; deixe vazio para remover)", hasOwn(payload, "defaultValue") ? JSON.stringify(payload.defaultValue) : "");
-    fields.hasDefault = { checked: hasOwn(payload, "defaultValue") };
-    fields.defaultValue = fields.hasDefaultInput = fields.hasDefault;
-    const defaultField = form.lastElementChild;
-    if (defaultField) {
-      const input = defaultField.querySelector("input");
-      if (input) { fields.defaultValue = input; fields.hasDefault = { get checked() { return input.value.trim() !== ""; } }; }
-    }
+    addCheckbox("hasDefault", "Definir valor padrão", hasOwn(payload, "defaultValue"));
+    addInput("defaultValue", "Valor padrão (JSON)", hasOwn(payload, "defaultValue") ? JSON.stringify(payload.defaultValue) : "");
   } else if (asset.type === "rule") {
     note.textContent = "Expressões usam o parser seguro do NEXUS; não aceitam JavaScript.";
     addTextarea("expression", "Expressão", payload.expression ?? payload.formula ?? "", 4);
