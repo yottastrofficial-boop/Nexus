@@ -622,7 +622,17 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     label: "Documentos Foundry",
     kinds: Object.freeze(["document"]),
     list,
-    resolve: reference => documentBridge.resolve(reference)
+    resolve: reference => documentBridge.resolve(reference),
+    getActions: () => [{ id: "open", label: "Abrir documento" }],
+    executeAction: async (actionId, reference) => {
+      if (actionId !== "open") throw new Error("Operação de documento Foundry não reconhecida.");
+      const document = await documentBridge.resolve(reference);
+      if (typeof document?.sheet?.render !== "function") {
+        throw new Error("Este documento não possui uma ficha que possa ser aberta.");
+      }
+      document.sheet.render(true);
+      return { opened: true, uuid: reference.uuid };
+    }
   });
 }
 
