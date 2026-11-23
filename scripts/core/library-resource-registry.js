@@ -102,6 +102,7 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     kind,
     type,
     name,
+    version: Math.max(1, Number(raw.version) || 1),
     description: cleanText(raw.description, 1000),
     tags: Object.freeze(tags),
     thumbnail: cleanText(raw.thumbnail, 2048),
