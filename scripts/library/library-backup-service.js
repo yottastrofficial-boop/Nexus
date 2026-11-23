@@ -5,7 +5,7 @@ import {
   getLegacyNexusLibraryFlags,
   mergeNexusLibraryStores,
   readNexusLibraryStore,
-  writeNexusLibraryStore
+  updateNexusLibraryStore
 } from "../core/library-store.js";
 
 /**
@@ -139,7 +139,7 @@ export function createLibraryBackupService({
     const parsed = parseNexusLibraryBackup(source, getComponentTypes());
     const incoming = createIncomingStore(parsed.collections, getCatalog() ?? {}, getThemePalettes() ?? {}, createId);
     const current = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
-    const merged = mergeNexusLibraryStores(current, incoming, { conflictMode: "skip", createId });
+    const merged = mergeNexusLibraryStores(current, incoming, { conflictMode: "skip" });
 
     const importedWorldFlows = (Array.isArray(parsed.collections.flows) ? parsed.collections.flows : [])
       .filter(entry => entry?.origin === "world" && entry.flow);
@@ -169,22 +169,52 @@ export function createLibraryBackupService({
       name: parsed.name,
       report: merged.report,
       warnings: Object.freeze(warnings),
-      store: merged.store,
-      nextWorldFlows,
-      shouldWriteWorldFlows: typeof setWorldFlows === "function" && addedWorldFlows > 0
+      incoming,
+      importedWorldFlows: Object.freeze(importedWorldFlows),
+      createId
     });
   };
 
   const commitImport = async plan => {
     const user = getUser();
-    if (!user || !plan?.store || !plan?.report) throw new Error("Prévia de importação inválida ou expirada.");
-    const saved = await writeNexusLibraryStore(user, plan.store);
+    if (!user || !plan?.incoming || !plan?.report) throw new Error("Prévia de importação inválida ou expirada.");
+    let committedReport = null;
+    const saved = await updateNexusLibraryStore(user, current => {
+      const merged = mergeNexusLibraryStores(current, plan.incoming, { conflictMode: "skip" });
+      const previewSignature = JSON.stringify({ added: plan.report.added, skipped: plan.report.skipped, conflicts: plan.report.conflicts });
+      const currentSignature = JSON.stringify({ added: merged.report.added, skipped: merged.report.skipped, conflicts: merged.report.conflicts });
+      if (previewSignature !== currentSignature) {
+        throw new Error("A Biblioteca mudou desde a prévia. Gere uma nova prévia antes de importar.");
+      }
+      committedReport = merged.report;
+      return merged.store;
+    });
     const warnings = [...(plan.warnings ?? []), ...await mirrorLegacyCollections(user, saved)];
-    if (plan.shouldWriteWorldFlows) {
-      try { await setWorldFlows(plan.nextWorldFlows); }
-      catch (error) { warnings.push("Não foi possível importar os fluxos do mundo: " + (error?.message ?? error)); }
+
+    if (typeof setWorldFlows === "function" && plan.importedWorldFlows?.length) {
+      try {
+        const currentWorldFlows = getWorldFlows() ?? [];
+        const nextWorldFlows = Array.isArray(currentWorldFlows) ? [...currentWorldFlows] : [];
+        let addedWorldFlows = 0;
+        for (const entry of plan.importedWorldFlows) {
+          const signature = JSON.stringify(entry.flow);
+          if (nextWorldFlows.some(savedEntry => JSON.stringify(savedEntry?.flow) === signature)) continue;
+          nextWorldFlows.push({
+            id: String(plan.createId("world-flows", nextWorldFlows.length)),
+            name: String(entry.name ?? entry.flow.name ?? "Fluxo importado").slice(0, 60),
+            flow: structuredClone(entry.flow)
+          });
+          addedWorldFlows++;
+        }
+        if (addedWorldFlows) await setWorldFlows(nextWorldFlows);
+        committedReport.added.worldFlows = addedWorldFlows;
+        committedReport.skipped.worldFlows = plan.importedWorldFlows.length - addedWorldFlows;
+      } catch (error) {
+        warnings.push("Não foi possível importar os fluxos do mundo: " + (error?.message ?? error));
+      }
     }
-    return { name: plan.name, report: plan.report, warnings, store: saved };
+
+    return { name: plan.name, report: committedReport ?? plan.report, warnings, store: saved };
   };
 
   const importCode = async (source, options) => commitImport(prepareImport(source, options));
