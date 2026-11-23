@@ -103,3 +103,5 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - Coordenadas de layout são metadados limitados do editor; não participam da avaliação nem alteram os dados do Actor.
 - O próximo refinamento visual deverá focar em ligação direta por portas, acessibilidade de teclado, zoom/visão geral e testes em Foundry VTT 14 build 360.
 - Permanecem pendentes os adaptadores externos concretos, ampliação dos executores confiáveis do Core e validação funcional no cliente Foundry.
+
+- Refinamento do Flow Builder: inclusão de criação de nós pela barra superior, conexão guiada por seleção de origem/destino, prevenção de conexões incompatíveis/ciclos e campos dedicados para o executor Core de atualização de Actor.
