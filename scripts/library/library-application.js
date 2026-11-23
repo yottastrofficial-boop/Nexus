@@ -100,6 +100,8 @@ export function createLibraryApplicationClass({
         savePreferences: value => this._savePreferences(normalizeLibraryPreferences(value)),
         canApplyResource: (resource, resolved) => this._context.canApplyResource?.(resource, resolved) === true,
         onApplyResource: this._context.applyResource,
+        getUpdateInfo: this._context.getUpdateInfo,
+        onUpdateInstances: this._context.updateInstances,
         applyLabel: this._context.applyLabel ?? "Aplicar ao contexto"
       });
 
