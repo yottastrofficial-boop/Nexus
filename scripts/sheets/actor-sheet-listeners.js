@@ -461,6 +461,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const filterButton = libraryPanel?.querySelector("[data-library-filter-toggle]");
     const filterPopover = libraryPanel?.querySelector("[data-library-filter-popover]");
     const tagInput = libraryPanel?.querySelector("[data-library-tag]");
+    const initialTag = tagInput?.value || sheet._libraryTagFilter || "all";
+    if (tagInput) tagInput.value = initialTag;
+    libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryTagOption === initialTag));
+    const initialTagLabel = filterButton?.querySelector("span");
+    if (initialTagLabel) initialTagLabel.textContent = initialTag === "all" ? "Etiquetas" : initialTag;
+    const initialTagCount = libraryPanel?.querySelector("[data-library-filter-count]");
+    if (initialTagCount) { initialTagCount.hidden = initialTag === "all"; initialTagCount.textContent = initialTag === "all" ? "" : "1"; }
     filterButton?.addEventListener("click", () => {
       const opening = filterPopover?.hidden ?? true;
       if (filterPopover) filterPopover.hidden = !opening;
