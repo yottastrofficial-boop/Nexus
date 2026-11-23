@@ -63,6 +63,7 @@ export function createLibraryCatalogExplorer({
   let currentOrigin = "all";
   let currentKind = "all";
   let currentType = "all";
+  let currentCompendiumIds = [];
   let currentViewMode = "grid";
   let currentCardSize = "medium";
   let smartOffset = 0;
@@ -300,7 +301,7 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
@@ -309,6 +310,7 @@ export function createLibraryCatalogExplorer({
     currentOrigin = origin;
     currentKind = kind || "all";
     currentType = type || "all";
+    currentCompendiumIds = Array.isArray(compendiumIds) ? [...new Set(compendiumIds.map(String).filter(Boolean))].slice(0, 32) : [];
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
     const version = ++requestVersion;
@@ -341,6 +343,7 @@ export function createLibraryCatalogExplorer({
           type: currentType,
           limit: PAGE_SIZE,
           references,
+          compendiumIds: currentCompendiumIds,
           tags: currentTag === "all" ? [] : [currentTag],
           origin: currentOrigin
         });
@@ -364,6 +367,7 @@ export function createLibraryCatalogExplorer({
         type: currentType,
         limit: PAGE_SIZE,
         cursor,
+        compendiumIds: currentCompendiumIds,
         tags: currentTag === "all" ? [] : [currentTag],
         origin: currentOrigin
       });
