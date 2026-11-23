@@ -32,6 +32,9 @@ Hooks.once("init", () => {
   });
   game.nexus.library.list = options => game.nexus.library.registry.list(options);
   game.nexus.library.resolve = (reference, resource) => game.nexus.library.registry.resolve(reference, resource);
+  game.nexus.library.getActions = (reference, resource) => game.nexus.library.registry.getActions(reference, resource);
+  game.nexus.library.executeAction = (actionId, reference, resource, params) =>
+    game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
   game.nexus.media ??= {};
