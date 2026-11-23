@@ -469,7 +469,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryTagOption === initialTag));
     libraryPanel?.querySelectorAll("[data-library-origin-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryOriginOption === initialOrigin));
     const updateFilterSummary = () => {
-      const activeCount = Number(initialTag !== "all") + Number((originInput?.value ?? "all") !== "all");
+      const activeCount = Number((tagInput?.value ?? "all") !== "all") + Number((originInput?.value ?? "all") !== "all");
       const count = libraryPanel?.querySelector("[data-library-filter-count]");
       if (count) { count.hidden = activeCount === 0; count.textContent = activeCount ? String(activeCount) : ""; }
       const label = filterButton?.querySelector("span");
