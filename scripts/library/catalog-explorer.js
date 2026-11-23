@@ -78,6 +78,7 @@ export function createLibraryCatalogExplorer({
   onUpdateInstances = null,
   canUpdateDefinition = () => false,
   onUpdateDefinition = null,
+  renderSpecializedEditor = null,
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -398,6 +399,14 @@ export function createLibraryCatalogExplorer({
     });
     advanced.append(raw);
     detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    if (typeof renderSpecializedEditor === "function") {
+      try {
+        const specializedEditor = renderSpecializedEditor(resource, resolved);
+        if (specializedEditor && typeof specializedEditor.nodeType === "number") detail.append(specializedEditor);
+      } catch (error) {
+        detail.append(makeElement("p", "nexus-library-empty", "Editor especializado indisponível: " + String(error?.message ?? error)));
+      }
+    }
   };
 
   const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
