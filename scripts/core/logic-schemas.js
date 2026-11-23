@@ -3,6 +3,8 @@ import { INTERACTION_EVENTS } from "./interactions.js";
 import { FOUNDRY_LOGIC_EVENTS } from "./foundry-logic-integration.js";
 
 const SAFE_PATH = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
+const SAFE_ACTOR_UPDATE_PATH = /^system\.[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
+const FORBIDDEN_UPDATE_KEYS = new Set(["__proto__", "prototype", "constructor", "ownership", "permission", "flags", "items", "_id", "id"]);
 const SAFE_ID = /^[a-z0-9][a-z0-9._:-]{2,159}$/i;
 const VALUE_TYPES = new Set(["string", "number", "boolean", "array", "object", "formula"]);
 const FORBIDDEN_CODE_KEYS = new Set(["javascript", "script", "sourceCode", "eval", "functionBody"]);
@@ -74,6 +76,13 @@ function validateFlow(payload) {
     if (!isRecord(action)) { errors.push("flow.actions[" + index + "] precisa ser um objeto."); continue; }
     if (action.type !== undefined && !/^[a-z][a-z0-9._-]{0,63}$/i.test(String(action.type))) errors.push("flow.actions[" + index + "].type inválido.");
     if (action.config !== undefined && !isRecord(action.config)) errors.push("flow.actions[" + index + "].config precisa ser um objeto.");
+    if (String(action.type ?? "").toLowerCase() === "nexus.actor.update" && isRecord(action.config)) {
+      const path = String(action.config.path ?? "");
+      if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) {
+        errors.push("flow.actions[" + index + "].config.path precisa apontar para uma propriedade permitida em system.*.");
+      }
+      if (!hasOwn(action.config, "value")) errors.push("flow.actions[" + index + "].config.value é obrigatório.");
+    }
   }
   if (payload.execution !== undefined && (!isRecord(payload.execution) || (payload.execution.onError !== undefined && !["stop", "continue"].includes(payload.execution.onError)))) {
     errors.push("flow.execution.onError deve ser stop ou continue.");
