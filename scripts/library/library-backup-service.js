@@ -181,7 +181,11 @@ export function createLibraryBackupService({
     let committedReport = null;
     const saved = await updateNexusLibraryStore(user, current => {
       const merged = mergeNexusLibraryStores(current, plan.incoming, { conflictMode: "skip" });
-      const previewSignature = JSON.stringify({ added: plan.report.added, skipped: plan.report.skipped, conflicts: plan.report.conflicts });
+      const previewAdded = { ...plan.report.added };
+      const previewSkipped = { ...plan.report.skipped };
+      delete previewAdded.worldFlows;
+      delete previewSkipped.worldFlows;
+      const previewSignature = JSON.stringify({ added: previewAdded, skipped: previewSkipped, conflicts: plan.report.conflicts });
       const currentSignature = JSON.stringify({ added: merged.report.added, skipped: merged.report.skipped, conflicts: merged.report.conflicts });
       if (previewSignature !== currentSignature) {
         throw new Error("A Biblioteca mudou desde a prévia. Gere uma nova prévia antes de importar.");
@@ -190,6 +194,8 @@ export function createLibraryBackupService({
       return merged.store;
     });
     const warnings = [...(plan.warnings ?? []), ...await mirrorLegacyCollections(user, saved)];
+    committedReport.added.worldFlows = 0;
+    committedReport.skipped.worldFlows = plan.importedWorldFlows?.length ?? 0;
 
     if (typeof setWorldFlows === "function" && plan.importedWorldFlows?.length) {
       try {
