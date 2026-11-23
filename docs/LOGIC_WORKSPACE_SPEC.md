@@ -105,3 +105,21 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `scripts/library/logic-editors.js` fornece editores especializados para os cinco subtipos. Fluxos possuem construtor visual declarativo para gatilhos, condições e ações, preservando IDs e payloads JSON; a configuração específica de cada executor continua em JSON. Funções editam assinatura/referência, nunca código executável.
 - O Inspector da janela independente integra esses editores e preserva o contrato de provedores.
 - Limitação restante: um construtor visual avançado de nós/ações e executores padrão do Core ainda exigem contratos específicos e testes ponta a ponta. Tipos de ação/função desconhecidos permanecem inertes até que um módulo confiável registre a implementação.
+
+
+## Grafo visual de Fluxos — núcleo inicial
+
+O payload de Fluxo aceita, opcionalmente, `graph`, mantendo o formato sequencial legado (`triggers`, `conditions`, `actions`) válido para ativos existentes. Quando `graph` está presente, o runtime usa o grafo como caminho de execução; os campos sequenciais permanecem preservados para compatibilidade, mas não são executados em paralelo.
+
+Contrato inicial:
+
+- `entryNodeId` identifica o único nó `start`.
+- `nodes` aceita até 64 nós dos tipos `start`, `condition`, `action` e `end`.
+- `edges` aceita até 128 conexões com origem, destino e saída `next`, `true` ou `false`.
+- Nós `condition` exigem exatamente uma saída `true` e uma `false`; nós `start` e `action` exigem uma saída `next`; nós `end` não possuem saídas.
+- Todos os nós devem ser alcançáveis, referências precisam existir e ciclos são rejeitados.
+- Nós `action` guardam um executor registrado e configuração declarativa inerte; as permissões do executor e do ativo continuam obrigatórias.
+
+`runFlow()` percorre somente o caminho selecionado pelas condições, executando ações encontradas no caminho. `simulateFlow()` percorre o mesmo caminho, informa nós visitados, ações disponíveis e permissões, sem chamar executores. O percurso possui limite de 128 nós por execução.
+
+**Estado da interface:** este commit entrega schema, runtime e testes de ramificação. O editor visual de nós/conexões, movimentação no canvas e Inspector específico por nó ainda precisam ser conectados à UI; o protótipo HTML é referência de interação, não código integrado ao Foundry.
