@@ -1397,10 +1397,10 @@ assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "components"/,"Card
 assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "groups"/,"Blocos e grupos devem ser persistidos no armazenamento unificado");
 assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configurações completas de ficha devem ser persistidas no armazenamento unificado");
 assert.match(template,/data-library-scope="core"/,"A navegação deve oferecer a origem NEXUS");
-assert.match(template,/data-library-scope="modules"/,"A navegação deve oferecer a origem módulos");
-assert.match(template,/data-library-scope="extras"/,"A navegação deve oferecer a origem extras");
+assert.doesNotMatch(template,/data-library-scope="modules"/,"A navegação não deve expor filtros técnicos de origem");
+assert.doesNotMatch(template,/data-library-scope="extras"/,"A navegação não deve expor filtros técnicos de origem");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
-assert.match(libraryView,/data-library-origin-filter/,"O filtro de origem deve ser aplicado às coleções");
+assert.doesNotMatch(libraryView,/data-library-origin-filter/,"A navegação universal não deve depender de filtro técnico de origem");
 assert.match(libraryView,/sameScope=button\.dataset\.libraryScope/,"A navegação deve manter uma única origem ativa por vez");
 assert.match(css,/aspect-ratio:1 \/ 1 !important/,"Os cartões da Biblioteca devem ter prévias quadradas");
 assert.match(css,/overflow:auto !important; overscroll-behavior:contain/,"As grades devem rolar independentemente para evitar cortes");
