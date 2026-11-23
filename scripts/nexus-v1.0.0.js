@@ -4,6 +4,7 @@ import { createMediaFormatRegistry } from "./core/media-format-registry.js";
 import { createLogicRegistry } from "./core/logic-registry.js";
 import { createNexusLogicSchemas } from "./core/logic-schemas.js";
 import { createLogicRuntime } from "./core/logic-runtime.js";
+import { installFoundryLogicIntegration } from "./core/foundry-logic-integration.js";
 import { loadLogicLibrary, saveLogicAsset, deleteLogicAsset } from "./core/logic-library.js";
 import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter, installNexusMediaWorkerRuntime } from "./core/media-service.js";
 import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndexedDbMediaCache, createMediaCacheKey } from "./core/media-storage.js";
@@ -154,6 +155,18 @@ Hooks.once("ready", () => {
     console.info("NEXUS | Ativos lógicos carregados:", report?.loaded?.length ?? 0);
   } catch (error) {
     console.error("NEXUS | Falha ao carregar a Biblioteca de Lógica.", error);
+  }
+  try {
+    game.nexus.logic.foundryIntegration?.uninstall?.();
+    game.nexus.logic.foundryIntegration = installFoundryLogicIntegration({
+      hooks: Hooks,
+      runtime: game.nexus.logic.runtime,
+      gameRef: game,
+      constRef: CONST
+    });
+    console.info("NEXUS | Eventos do Foundry conectados à Lógica:", game.nexus.logic.foundryIntegration.bridge.hookCount);
+  } catch (error) {
+    console.error("NEXUS | Falha ao conectar eventos do Foundry à Lógica.", error);
   }
   console.log(`NEXUS | Sistema ${game.system.version} carregado. Ficha Canvas habilitada.`);
 });
