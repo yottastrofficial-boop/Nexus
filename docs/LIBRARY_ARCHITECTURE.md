@@ -13,10 +13,13 @@ A separação é por responsabilidade e ciclo de vida, não por quantidade de ar
 | `scripts/core/library-resource-registry.js` | Contratos de provedores, busca, filtros, paginação, resolução e ações contextuais | DOM, ficha, apresentação ou execução de conteúdo arbitrário |
 | `scripts/core/component-types.js` | Registro de tipos de componentes compartilhado por ficha, Biblioteca e validação de transferências | Dependências de interface ou DOM |
 | `scripts/core/library-store.js` | Persistência e validação das definições pessoais NEXUS | Documentos Foundry ou preferências visuais |
-| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |\n| `scripts/core/logic-schemas.js` | Validadores inertes dos cinco tipos de Lógica, usando o parser seguro do Core | Executar código ou registrar executores arbitrários |\n| `scripts/library/logic-editors.js` | Campos especializados para editar payloads de Lógica no Inspector | Executar payloads ou controlar persistência diretamente |
+| `scripts/core/library-preferences.js` | Pastas, favoritos, recentes, coleções universais e atribuições | Alterar definições ou documentos de origem |
+| `scripts/core/logic-schemas.js` | Validadores inertes dos cinco tipos de Lógica, usando o parser seguro do Core | Executar código ou registrar executores arbitrários |
+| `scripts/library/logic-editors.js` | Campos especializados para editar payloads de Lógica no Inspector | Executar payloads ou controlar persistência diretamente |
 | `scripts/library/catalog-explorer.js` | Cartões, seleção, Inspector, ações contextuais e organização por referência | Conhecer Actor, Canvas, templates de ficha ou regras de aplicação |
 | `scripts/library/library-application.js` | Ciclo de vida da janela ApplicationV2, navegação e controles da Biblioteca independente | Implementar provedores, persistência ou schemas de conteúdo |
-| `scripts/library/library-backup-service.js` | Composição, validação, prévia, mesclagem e exportação de backups completos | Interface de ficha ou execução de dados importados |\n| `scripts/core/library-transfer-registry.js` | Contratos de adaptadores de origem/destino, validação de payload inerte, prévia e confirmação explícita | Conhecer formatos externos não implementados ou persistir por conta própria |
+| `scripts/library/library-backup-service.js` | Composição, validação, prévia, mesclagem e exportação de backups completos | Interface de ficha ou execução de dados importados |
+| `scripts/core/library-transfer-registry.js` | Contratos de adaptadores de origem/destino, validação de payload inerte, prévia e confirmação explícita | Conhecer formatos externos não implementados ou persistir por conta própria |
 | `scripts/sheets/library-view.js` | Adaptador da Biblioteca no espaço de ferramentas da ficha; oferece destino para recursos aplicáveis | Ser a fonte de verdade do catálogo |
 | `scripts/sheets/actor-sheet-*.js` | Consumir/aplicar recursos ao Actor e ao Canvas; fornecer adaptadores específicos | Gerenciar documentos de outros domínios |
 | `scripts/nexus-v1.0.0.js` | Inicializar serviços leves e expor APIs públicas em `game.nexus` | Carregar listas, mídias ou payloads completos durante o init |
@@ -32,7 +35,10 @@ A Biblioteca é exposta em `game.nexus.library`:
 - `registerProvider(provider)`: registra fontes adicionais sem criar janela ou botão por módulo.
 - `getProviders()`: informa os provedores registrados.
 - `open()`: abre a janela independente ApplicationV2.
-- `backup.exportCode()`, `backup.prepareImport(source)` e `backup.commitImport(plan)`: exportação, prévia validada e confirmação do backup NEXUS.\n- `registerSourceAdapter(adapter)` e `registerDestinationAdapter(adapter)`: registro de adaptadores confiáveis de transferência.\n- `prepareTransfer(options)`, `commitTransfer(planId)` e `discardTransfer(planId)`: pipeline genérico origem → validação → prévia do destino → confirmação explícita.\n- `getTransferAdapters()`: lista adaptadores disponíveis nesta sessão.
+- `backup.exportCode()`, `backup.prepareImport(source)` e `backup.commitImport(plan)`: exportação, prévia validada e confirmação do backup NEXUS.
+- `registerSourceAdapter(adapter)` e `registerDestinationAdapter(adapter)`: registro de adaptadores confiáveis de transferência.
+- `prepareTransfer(options)`, `commitTransfer(planId)` e `discardTransfer(planId)`: pipeline genérico origem → validação → prévia do destino → confirmação explícita.
+- `getTransferAdapters()`: lista adaptadores disponíveis nesta sessão.
 
 Provedores devem fornecer identidade estável por recurso e suportar consultas por IDs quando o Explorer solicitar favoritos, recentes ou referências de pastas. Ações são declaradas pelo provedor; o registro não executa nomes de função ou scripts recebidos como dados.
 
