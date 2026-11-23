@@ -360,7 +360,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
       behaviorPanel.append(...Array.from(visualPreview.querySelectorAll(".nexus-library-logic-preview")));
       advancedPanel.append(preview);
-      form.append(tabs, appearancePanel, dataPanel, behaviorPanel, advancedPanel, save);
+      const itemActions = document.createElement("div"); itemActions.className = "nexus-library-item-actions";
+      const duplicate = document.createElement("button"); duplicate.type = "button"; duplicate.dataset.libraryDuplicateEntry = entry.id; duplicate.dataset.libraryDuplicateCollection = collection; duplicate.textContent = "Duplicar";
+      const remove = document.createElement("button"); remove.type = "button"; remove.dataset.libraryDeleteEntry = entry.id; remove.dataset.libraryDeleteCollection = collection; remove.textContent = "Excluir";
+      itemActions.append(duplicate, remove);
+      form.append(tabs, appearancePanel, dataPanel, behaviorPanel, advancedPanel, save, itemActions);
       tabs.addEventListener("click", event => {
         const button = event.target.closest("[data-library-detail-tab]");
         if (!button || !tabs.contains(button)) return;
@@ -418,6 +422,48 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           if (input) input.value = "";
           renderGenericCollection(collection, true);
         } catch (error) { ui.notifications.warn(error.message); }
+        return;
+      }
+      const duplicateEntry = event.target.closest("[data-library-duplicate-entry]");
+      if (duplicateEntry && panel.contains(duplicateEntry)) {
+        const collection = duplicateEntry.dataset.libraryDuplicateCollection;
+        const entryId = duplicateEntry.dataset.libraryDuplicateEntry;
+        try {
+          await updateNexusLibraryStore(game.user, store => {
+            const original = store.collections[collection]?.find(item => String(item.id) === entryId);
+            if (!original) throw new Error("O item original não existe mais.");
+            const copy = foundry.utils.deepClone(original);
+            const suffix = foundry.utils.randomID(8).toLowerCase();
+            copy.id = ["properties","rules","behaviors","functions"].includes(collection) ? String(original.id) + ".copy-" + suffix : suffix;
+            if (copy.sourceId) copy.sourceId = String(copy.sourceId) + "-copy-" + suffix;
+            if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
+            else copy.label = String(original.label) + " (cópia)";
+            store.collections[collection].push(copy);
+            return store;
+          });
+          renderGenericCollection(detailCollection());
+          ui.notifications.info("Cópia criada na Biblioteca.");
+        } catch (error) { ui.notifications.error("Não foi possível duplicar: " + error.message); }
+        return;
+      }
+      const deleteEntry = event.target.closest("[data-library-delete-entry]");
+      if (deleteEntry && panel.contains(deleteEntry)) {
+        const collection = deleteEntry.dataset.libraryDeleteCollection;
+        const entryId = deleteEntry.dataset.libraryDeleteEntry;
+        if (["properties","rules","behaviors","functions"].includes(collection)) {
+          const dependents = game.nexus?.logic?.registry?.getDependents?.(entryId) ?? [];
+          if (dependents.length) { ui.notifications.warn("Este item possui dependências e não pode ser excluído agora."); return; }
+        }
+        const confirmed = await foundry.applications.api.DialogV2.confirm({ window: { title: "Excluir item da Biblioteca" }, content: "<p>Excluir este item? A ação não altera componentes já inseridos nas fichas.</p>", rejectClose: false });
+        if (!confirmed) return;
+        try {
+          await updateNexusLibraryStore(game.user, store => { store.collections[collection] = store.collections[collection].filter(item => String(item.id) !== entryId); return store; });
+          if (["properties","rules","behaviors","functions"].includes(collection)) game.nexus?.logic?.registry?.remove?.(entryId);
+          const preferences = getLibraryPreferences(); const key = collection + ":" + entryId;
+          preferences.favorites = preferences.favorites.filter(item => item !== key); preferences.recent = preferences.recent.filter(item => item !== key); delete preferences.assignments[key];
+          await persistLibraryPreferences(preferences); renderGenericCollection(detailCollection());
+          ui.notifications.info("Item excluído da Biblioteca.");
+        } catch (error) { ui.notifications.error("Não foi possível excluir: " + error.message); }
         return;
       }
       const saveMetadata = event.target.closest("[data-library-save-metadata]");
