@@ -142,7 +142,7 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     } else if (schemaField.type === "select") {
       control = make("select", "");
       const options = schemaField.options.map(option => [option.value, option.label]);
-      if (stored == null) options.unshift(["", "Selecione…"]);
+      if (stored == null || stored === "") options.unshift(["", "Selecione…"]);
       else if (!options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
       options.forEach(([value, label]) => {
         const option = make("option", "", label);
@@ -225,7 +225,12 @@ function createFlowBuilder(form, payload, runtime) {
   const definitions = runtime?.getActionDefinitions?.() ?? [];
   const types = [...new Set([...(runtime?.actionTypes ?? []), ...definitions.map(item => item.type)])];
   const data = {
-    triggers: Array.isArray(payload.triggers) ? clone(payload.triggers) : [],
+    triggers: Array.isArray(payload.triggers) ? clone(payload.triggers).map(trigger => ({
+      ...trigger,
+      modifiers: Array.isArray(trigger.modifiers) ? trigger.modifiers : String(trigger.modifiers ?? "").split("+").map(value => value.trim()).filter(Boolean),
+      ...(trigger.durationMs !== undefined && trigger.durationMs !== "" && Number.isFinite(Number(trigger.durationMs))
+        ? { durationMs: Number(trigger.durationMs) } : {})
+    })) : [],
     conditions: Array.isArray(payload.conditions) ? clone(payload.conditions) : [],
     actions: Array.isArray(payload.actions) ? clone(payload.actions) : []
   };
