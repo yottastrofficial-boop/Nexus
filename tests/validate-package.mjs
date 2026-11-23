@@ -697,7 +697,7 @@ assert.match(entrypoint, /texture: \{ src: actor\.img \|\| DEFAULT_TOKEN_IMAGE \
 assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
 assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
 assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
-assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve manter o Indicador – Barra");
+assert.match(libraryCatalog, /label: "Barra de recurso"/, "A biblioteca deve manter a barra de recurso sem rótulo visual");
 assert.match(libraryCatalog, /currentPath: ""/, "A barra neutra não deve vincular automaticamente o recurso PV");
 assert.match(libraryCatalog, /maxPath: ""/, "A barra neutra não deve vincular automaticamente o máximo de PV");
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
@@ -705,7 +705,7 @@ assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categorie
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>0 itens</, "A contagem inicial da Biblioteca deve começar em estado neutro até a coleção ser renderizada");
-assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
+assert.match(template, /data-library-tag-option="barra"/, "O filtro da Biblioteca deve expor a etiqueta da barra como chip");
 
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
