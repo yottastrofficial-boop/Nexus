@@ -8479,6 +8479,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   overflow:hidden;
 }
 .nexus-library-application .nexus-library-section-tabs {
+  grid-column:1;
+  grid-row:1;
   display:flex;
   flex-direction:column;
   align-items:stretch;
@@ -8526,6 +8528,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   gap:3px;
 }
 .nexus-library-application .nexus-library-section-panel {
+  grid-column:2;
+  grid-row:1;
   min-width:0;
   min-height:0;
   padding:8px 2px;
