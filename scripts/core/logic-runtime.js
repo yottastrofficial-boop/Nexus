@@ -66,12 +66,139 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     const validation = registry.validateAsset(candidate);
     return validation.valid ? [] : [...validation.errors];
   };
+
+  const getFlowResolver = context => typeof resolveProperty === "function"
+    ? path => resolveProperty(path, context)
+    : path => readContextPath(context, path);
+  const graphPath = (graph, conditionValue) => {
+    const nodes = new Map(graph.nodes.map(node => [node.id, node]));
+    const edges = new Map();
+    for (const edge of graph.edges) {
+      if (!edges.has(edge.from)) edges.set(edge.from, []);
+      edges.get(edge.from).push(edge);
+    }
+    const trace = [], actionResults = [], errors = [];
+    let current = graph.entryNodeId, steps = 0;
+    while (current && steps++ < 128) {
+      const node = nodes.get(current);
+      if (!node) { errors.push({ nodeId: current, message: "Nó inexistente." }); break; }
+      trace.push({ nodeId: node.id, type: node.type });
+      if (node.type === "end") break;
+      let branch = "next";
+      if (node.type === "condition") {
+        let passed = false;
+        try { passed = evaluateNexusCondition(node.expression, conditionValue) === true; }
+        catch (error) { errors.push({ nodeId: node.id, message: String(error?.message ?? error) }); break; }
+        branch = passed ? "true" : "false";
+        trace[trace.length - 1].result = passed;
+      }
+      const edge = (edges.get(current) ?? []).find(item => (item.when ?? "next") === branch);
+      if (!edge) { errors.push({ nodeId: node.id, message: "Conexão de saída ausente: " + branch }); break; }
+      current = edge.to;
+    }
+    if (steps >= 128) errors.push({ message: "Limite de 128 nós visitados excedido." });
+    return { trace, actionResults, errors };
+  };
+  const runGraph = async (asset, flow, context) => {
+    const resolver = getFlowResolver(context);
+    const nodes = new Map(flow.graph.nodes.map(node => [node.id, node]));
+    const edges = new Map();
+    for (const edge of flow.graph.edges) {
+      if (!edges.has(edge.from)) edges.set(edge.from, []);
+      edges.get(edge.from).push(edge);
+    }
+    const trace = [], results = [], errors = [];
+    const onError = flow.execution?.onError === "continue" ? "continue" : "stop";
+    let current = flow.graph.entryNodeId, steps = 0;
+    while (current && steps++ < 128) {
+      const node = nodes.get(current);
+      if (!node) { errors.push({ nodeId: current, message: "Nó inexistente." }); break; }
+      trace.push({ nodeId: node.id, type: node.type });
+      if (node.type === "end") break;
+      let branch = "next";
+      if (node.type === "condition") {
+        const passed = evaluateNexusCondition(node.expression, resolver) === true;
+        branch = passed ? "true" : "false";
+        trace[trace.length - 1].result = passed;
+      } else if (node.type === "action" && node.action?.enabled !== false) {
+        const action = node.action, type = String(action.type ?? "").trim().toLowerCase();
+        const executor = actions.get(type);
+        if (!executor) {
+          errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: "Ação não registrada no runtime: " + type });
+          if (onError === "stop") break;
+        } else {
+          const permissionDescriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
+          if (!(await permitted(permissionDescriptor, context, action))) {
+            errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: "Permissão insuficiente para executar a ação." });
+            if (onError === "stop") break;
+          } else {
+            const controller = new AbortController();
+            let timer;
+            try {
+              const execution = Promise.resolve(executor.execute({ action, config: action.config ?? {}, context, signal: controller.signal, invokeFunction, registry }));
+              const timeout = new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("Tempo limite da ação excedido.")); }, timeoutMs); });
+              const value = await Promise.race([execution, timeout]);
+              results.push({ nodeId: node.id, actionId: action.id ?? node.id, type, status: "success", value });
+            } catch (error) {
+              errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: String(error?.message ?? error) });
+              if (onError === "stop") break;
+            } finally { clearTimeout(timer); }
+          }
+        }
+      }
+      const edge = (edges.get(current) ?? []).find(item => (item.when ?? "next") === branch);
+      if (!edge) { errors.push({ nodeId: node.id, message: "Conexão de saída ausente: " + branch }); break; }
+      current = edge.to;
+    }
+    if (steps >= 128) errors.push({ message: "Limite de 128 nós visitados excedido." });
+    return { status: errors.length ? (results.length ? "partial" : "failed") : "success", trace, results, errors };
+  };
+  const simulateGraph = async (asset, flow, context) => {
+    const resolver = getFlowResolver(context);
+    const nodes = new Map(flow.graph.nodes.map(node => [node.id, node]));
+    const edges = new Map();
+    for (const edge of flow.graph.edges) {
+      if (!edges.has(edge.from)) edges.set(edge.from, []);
+      edges.get(edge.from).push(edge);
+    }
+    const trace = [], preview = [], errors = [];
+    let current = flow.graph.entryNodeId, steps = 0;
+    while (current && steps++ < 128) {
+      const node = nodes.get(current);
+      if (!node) { errors.push("Nó inexistente: " + current); break; }
+      trace.push({ nodeId: node.id, type: node.type });
+      if (node.type === "end") break;
+      let branch = "next";
+      if (node.type === "condition") {
+        const passed = evaluateNexusCondition(node.expression, resolver) === true;
+        branch = passed ? "true" : "false";
+        trace[trace.length - 1].result = passed;
+      } else if (node.type === "action" && node.action?.enabled !== false) {
+        const action = node.action, type = String(action.type ?? "").trim().toLowerCase();
+        const executor = actions.get(type);
+        if (!executor) preview.push({ nodeId: node.id, type, status: "unregistered", allowed: false, effects: [], permissions: [] });
+        else {
+          const descriptor = { permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])], effects: executor.effects };
+          let allowed = false;
+          try { allowed = await permitted(descriptor, context, action); } catch { allowed = false; }
+          preview.push({ nodeId: node.id, type, status: allowed ? "ready" : "denied", allowed, effects: [...executor.effects], permissions: [...descriptor.permissions] });
+        }
+      }
+      const edge = (edges.get(current) ?? []).find(item => (item.when ?? "next") === branch);
+      if (!edge) { errors.push("Conexão de saída ausente: " + branch + " em " + node.id); break; }
+      current = edge.to;
+    }
+    if (steps >= 128) errors.push("Limite de 128 nós visitados excedido.");
+    return { status: errors.length ? "invalid" : preview.some(item => !item.allowed) ? "blocked" : "ready", executed: false, trace, actions: preview, errors };
+  };
+
   const runFlow = async (flowInput, context = {}) => {
     const { asset, flow } = resolveFlowInput(flowInput);
     if (!flow || typeof flow !== "object") throw new Error("Fluxo lógico inválido.");
     const validationErrors = validateFlowInput(asset, flow);
     if (validationErrors.length) throw new Error(validationErrors.join(" "));
     if (asset && !asset.enabled) return { status: "disabled", results: [], errors: [] };
+    if (flow.graph) return runGraph(asset, flow, context);
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
     if (conditions.length > maxConditions) throw new Error("Fluxo excede o limite de condições.");
     const resolver = typeof resolveProperty === "function"
@@ -133,6 +260,7 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     const validationErrors = validateFlowInput(asset, flow);
     if (validationErrors.length) return { status: "invalid", executed: false, actions: [], errors: validationErrors };
     if (asset && !asset.enabled) return { status: "disabled", executed: false, actions: [], errors: [] };
+    if (flow.graph) return simulateGraph(asset, flow, context);
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
     if (conditions.length > maxConditions) return { status: "invalid", executed: false, actions: [], errors: ["Fluxo excede o limite de condições."] };
     const resolver = typeof resolveProperty === "function"
