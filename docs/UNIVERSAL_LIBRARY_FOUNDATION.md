@@ -24,6 +24,8 @@ O `ResourceLifecycleManager` administra apenas objetos transitórios residentes 
 - Limites de bytes são estimativas fornecidas pelo adaptador, não medição exata da RAM do navegador.
 - Carregamentos concorrentes são deduplicados e limitados.
 - Recursos ociosos são descarregados para respeitar o orçamento de memória.
+- O pipeline de mídia usa o gerenciador para carregar e descarregar adaptadores/decoders; Workers podem informar uma estimativa própria de memória e são encerrados no unload.
+- `resolve()` do pipeline retorna uma lease quando o gerenciador está ativo; o consumidor deve chamar `release()` ao terminar.
 - O serviço não controla memória de documentos que pertencem ao Foundry, do navegador ou de outros módulos.
 
 ## Integração visual do Foundry
@@ -34,6 +36,6 @@ A padronização visual será incremental e baseada em tokens CSS e wrappers App
 
 - Nenhum documento Foundry é duplicado no armazenamento da Biblioteca.
 - Nenhum recurso pesado é pré-carregado na inicialização do sistema.
-- O índice de compêndios só é solicitado quando explicitamente incluído na consulta.
+- Índices de compêndios só são solicitados quando IDs específicos de pacotes são informados; não existe varredura automática de todos os compêndios.
 - A RAM real não pode ser lida com precisão confiável; o orçamento é contábil e conservador.
 - A UI da Biblioteca, menus contextuais, preparação de sessão e integração visual ampla permanecem etapas posteriores.
