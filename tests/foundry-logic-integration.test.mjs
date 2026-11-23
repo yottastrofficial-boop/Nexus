@@ -473,6 +473,22 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
     execute: ({ config }) => { calls.push(config); return true; }
   });
 
+  const publicValidation = runtime.validateActionConfig("test.configured", {
+    target: "PV", amount: 3, mode: "add", metadata: null
+  });
+  assert.deepEqual(publicValidation, { registered: true, hasSchema: true, valid: true, errors: [] });
+  assert.deepEqual(runtime.validateActionConfig("test.configured", {
+    target: "PV", amount: 30, mode: "add", metadata: null
+  }).errors, ["Quantidade está fora dos limites permitidos."]);
+  assert.deepEqual(runtime.validateActionConfig("test.legacy", {}).valid, true);
+  assert.equal(runtime.validateActionConfig("test.legacy", {}).hasSchema, false);
+
+  assert.throws(() => runtime.registerAction({
+    type: "test.bad-default",
+    execute() {},
+    configSchema: { fields: [{ key: "amount", label: "Quantidade", type: "number", defaultValue: "inválido" }] }
+  }), /Valor padrão inválido/);
+
   const exposed = runtime.getActionDefinition("test.configured");
   assert.equal(exposed.configSchema.fields[0].label, "Alvo");
   exposed.configSchema.fields[0].label = "Alterado externamente";
