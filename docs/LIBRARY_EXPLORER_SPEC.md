@@ -1,73 +1,88 @@
-# Biblioteca NEXUS — contrato de definições e instâncias
+# Biblioteca NEXUS — contrato de definições, coleções e instâncias
 
 ## Objetivo
 
-A Biblioteca funciona como um explorador de conteúdos reutilizáveis. A navegação por tipo/pasta é independente do tipo técnico do conteúdo; a área central apresenta cartões com miniatura, título e metadados; o inspector contextual à direita permite pré-visualizar e preparar uma configuração antes de aplicá-la.
+A Biblioteca é um explorador universal de conteúdos reutilizáveis. Coleções e pastas organizam itens sem modificar seu tipo semântico. A interface mantém três regiões: navegação, cartões e Inspector contextual.
 
-## Três áreas persistentes
+## Navegação e organização
 
-1. **Navegação:** categorias, pastas, favoritos, recentes, itens pessoais e conteúdos padrão do NEXUS.
-2. **Explorador:** cartões consistentes de componentes, grupos, layouts, modelos, temas, estilos, regras, comportamentos, fluxos e mídia.
-3. **Inspector:** detalhes, prévia, configurações específicas do tipo, relações/dependências e ações de aplicação/salvamento.
+- **Todos os itens:** agrega as coleções persistidas no armazenamento canônico.
+- **Favoritos:** visão transversal dos itens marcados pelo usuário.
+- **Recentes:** visão transversal dos últimos itens consultados.
+- **Coleções especializadas:** elementos disponíveis, meus componentes, temas, modelos, fluxos, predefinições, componentes salvos, mídia, estilos, propriedades, regras, comportamentos e funções.
+- **Pastas:** pastas pessoais podem ser globais (livres) ou vinculadas a uma coleção. A associação é metadado do usuário e não altera o tipo ou conteúdo do item.
+- **Etiquetas:** chips gerados a partir das etiquetas realmente presentes nos itens salvos; a pesquisa e o filtro atuam sobre a coleção visível.
+- **Visualização:** grade e lista compartilham os mesmos controles e padrões de cartão.
 
-As categorias e pastas organizam itens, mas não alteram seu tipo semântico. Um grupo pode estar na pasta Combate e continua sendo um grupo.
+As visões Todos os itens, Favoritos e Recentes agregam conteúdo salvo. Os elementos padrão do catálogo continuam disponíveis na área Elementos disponíveis; não são convertidos artificialmente em definições pessoais.
+
+## Cartões e Inspector
+
+Os cartões seguem uma estrutura comum de prévia, título, metadado e estado de favorito. A prévia usa dados inertes e não executa HTML, CSS, JavaScript ou expressões importadas.
+
+O Inspector genérico permite:
+- consultar prévias contextuais seguras;
+- editar nome, descrição e etiquetas;
+- atribuir ou remover pasta;
+- duplicar uma definição com identidade nova;
+- excluir uma definição, removendo também seus metadados de favorito/recente/pasta.
+
+Ativos lógicos com dependentes registrados não podem ser excluídos. A atualização do armazenamento canônico é espelhada nas flags legadas correspondentes para preservar compatibilidade com consumidores antigos.
+
+A visão universal é agregadora e serve para localizar, organizar e administrar definições. Ações especializadas de inserir componentes, aplicar temas, inserir layouts ou anexar fluxos continuam disponíveis nas respectivas áreas de trabalho quando exigem configuração específica. A visão universal não deve simular uma ação de aplicação que o tipo não suporte.
 
 ## Definição e instância
 
 - **Definição:** modelo reutilizável salvo na Biblioteca, identificado por ID estável e versão.
-- **Rascunho de instância:** cópia temporária das configurações no inspector, editável antes da inserção.
+- **Rascunho de instância:** cópia temporária das configurações no Inspector, editável antes da inserção.
 - **Instância:** cópia inserida no layout de um Actor, com ID próprio, referência à definição de origem e overrides próprios.
 
 A inserção não altera a definição. A edição de uma instância não altera outras instâncias nem o modelo. A edição de um modelo não propaga mudanças automaticamente para instâncias existentes.
 
 ### Componentes
 
-As funções createLibraryDefinition e createLibraryComponentInstance normalizam uma definição e criam uma cópia independente, com novo ID e campos libraryDefinitionId, libraryDefinitionVersion e libraryOverrides.
+As funções `createLibraryDefinition` e `createLibraryComponentInstance` normalizam uma definição e criam uma cópia independente, com novo ID e campos `libraryDefinitionId`, `libraryDefinitionVersion` e `libraryOverrides`.
 
-As personalizações feitas no inspector são passadas como overrides; os valores não alterados continuam herdados do modelo no momento da criação da instância. Restaurar o padrão significa descartar o rascunho de overrides antes de inserir.
+As personalizações feitas no Inspector são passadas como overrides; os valores não alterados continuam herdados do modelo no momento da criação da instância. Restaurar o padrão significa descartar o rascunho de overrides antes de inserir.
 
 ### Grupos
 
-Um grupo salvo é uma composição autocontida de componentes e subgrupos. O inspector permite preparar uma cópia com nome, tipo, organização, espaçamento, preenchimento e colunas próprios. Ao inserir, os IDs dos componentes e grupos são recriados e as referências internas remapeadas. Os overrides do inspector afetam apenas o grupo raiz da nova composição.
+Um grupo salvo é uma composição autocontida de componentes e subgrupos. Ao inserir, os IDs dos componentes e grupos são recriados e as referências internas remapeadas. Os overrides do Inspector afetam apenas o grupo raiz da nova composição.
 
-## Temas
+### Temas
 
-Temas padrão são somente leitura. O inspector permite pré-visualizar uma paleta, aplicar o tema original ou salvar uma cópia personalizada e aplicá-la. Nunca substituir um tema padrão silenciosamente.
+Temas padrão são somente leitura. Temas pessoais podem ser editados como definições independentes. Nunca substituir um tema padrão silenciosamente.
 
 ## Persistência e compatibilidade
 
-- As definições pessoais continuam no escopo do usuário.
+- Definições pessoais e preferências de organização permanecem no escopo do usuário.
 - Instâncias pertencem ao layout do Actor.
+- Pastas, favoritos e recentes são preferências; não são armazenados dentro da definição reutilizável.
 - Importar/duplicar deve criar identidades novas e relatar conflitos, sem sobrescrever silenciosamente.
-- Dados legados de componentes continuam legíveis; ao inserir, são normalizados para a forma atual.
+- Dados legados continuam legíveis; a primeira gravação canônica preserva as coleções migradas.
+- Operações de CRUD atualizam o armazenamento canônico e espelham as flags legadas correspondentes.
 - Conteúdo importado permanece dado inerte: não executar HTML, CSS ou JavaScript vindo de pacotes.
 - Atualizações de definições não modificam instâncias existentes automaticamente.
+- Exclusão de ativos lógicos deve respeitar dependências registradas.
 
-## Estado desta implementação
+## Estado da implementação — 1.0.0.90
 
-Esta etapa adiciona o contrato de definição/instância para componentes, personalização pré-inserção de componentes e grupos salvos, inspector editável de temas e uma organização visual em explorador com navegação lateral e cartões unificados para itens pessoais. As coleções de layouts, regras, modelos, mídia, estilos e comportamentos ainda precisam ser conectadas progressivamente ao mesmo catálogo/inspector; sua existência no formato de backup não significa que todos os editores já estejam prontos.
+Implementado nesta etapa:
+- visão universal de itens salvos, favoritos e recentes;
+- navegação sem agrupamentos técnicos separados por Lógica/Aparência/Outros;
+- pastas livres e pastas vinculadas a coleção;
+- chips de etiquetas derivados dos dados existentes;
+- barra de pesquisa compacta e alternância grade/lista;
+- cartões genéricos com prévia e dimensões padronizadas;
+- Inspector de metadados com atribuição de pasta;
+- duplicação e exclusão com identidades novas e proteção de dependências;
+- espelhamento de CRUD para flags legadas.
 
-
-## Interface do Explorador — reconstrução visual
-
-A janela da Biblioteca utiliza uma composição única em três regiões:
-
-- **Navegação à esquerda:** árvore visual para Assets padrão, itens pessoais, Fluxos, Temas, Layouts, Modelos de ficha, Assets salvos, Mídia, Estilos visuais, Regras e Comportamentos.
-- **Área central:** cartões de itens com busca compartilhada; Assets, Fluxos, Temas e Layouts mantêm os renderizadores específicos existentes. As coleções complementares usam uma listagem genérica.
-- **Inspector à direita:** painel contextual para prévia, detalhes e configuração. Assets, Fluxos e Temas mantêm seus editores existentes; Layouts apresentam resumo; coleções complementares exibem metadados em modo somente leitura.
-
-A navegação é uma árvore visual de categorias, mas ainda não representa pastas personalizáveis. Coleções complementares são carregadas por `readNexusLibraryStore`, com fallback para flags legadas quando o armazenamento canônico ainda não existe. Conteúdo importado permanece inerte.
-
-A interface usa o mesmo padrão de grade e seleção para itens. Em larguras menores, o inspector passa para baixo da listagem para evitar colunas impraticáveis.
-
-### Limitações ainda abertas
-
-- Favoritos, recentes, pastas personalizadas e filtros por etiquetas ainda não estão implementados.
-- As coleções complementares têm inspector somente leitura; editores específicos e ações de aplicação ainda não existem.
-- Layouts têm resumo contextual, mas não editor de overrides.
-- A validação visual/funcional no Foundry VTT 14 continua obrigatória.
-
+Limitações que permanecem:
+- editores especializados completos para cada tipo lógico ainda precisam ser desenvolvidos;
+- nem todo tipo possui ação de aplicação direta a partir da visão universal; os fluxos especializados continuam responsáveis por inserir/aplicar conteúdos;
+- a aparência, persistência e os fluxos devem ser testados no Foundry VTT 14 build 360 antes de declarar estabilidade funcional.
 
 ## Área unificada Lógica
 
-A navegação da Biblioteca agrupa Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões sob a categoria **Lógica**. Essa união não altera o tipo semântico dos ativos: cada subtipo mantém seu próprio schema, editor contextual e executor. Os metadados comuns (origem, namespace, versão, permissões e dependências) são compartilhados. A especificação completa está em docs/LOGIC_WORKSPACE_SPEC.md.
+Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões continuam sendo tipos distintos. A visão universal unifica descoberta e organização, não seus schemas, editores ou executores. Metadados comuns (origem, namespace, versão, permissões, etiquetas e dependências) podem ser apresentados de forma consistente sem colapsar os contratos especializados.
