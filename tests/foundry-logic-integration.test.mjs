@@ -55,7 +55,7 @@ test("bridge despacha evento Foundry com documento, Actor e alterações", async
   const bridge = createFoundryLogicEventBridge({ hooks, runtime, gameRef, logger: { warn() {}, error() {} } });
   assert.equal(bridge.install(), true);
   assert.equal(bridge.install(), false);
-  assert.equal(bridge.hookCount, 14);
+  assert.equal(bridge.hookCount, 15);
 
   const actor = {
     documentName: "Actor",
