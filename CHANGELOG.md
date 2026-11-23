@@ -1,3 +1,18 @@
+## 1.0.0.90 — Biblioteca Explorer unificada
+
+- Substitui a navegação fragmentada por uma experiência universal com Todos os itens, Favoritos, Recentes e acesso direto às coleções especializadas.
+- Agrega as coleções persistidas em uma visão transversal sem alterar os tipos semânticos dos itens.
+- Adiciona pastas pessoais livres ou vinculadas a uma coleção; pastas e atribuições permanecem nas preferências do usuário.
+- Gera chips de filtro a partir das etiquetas realmente salvas, sem manter opções técnicas hard-coded.
+- Padroniza cartões genéricos com prévia, título e metadados; aplica o mesmo modo de grade/lista às coleções visíveis.
+- Amplia o Inspector com prévias seguras e edição de nome, descrição, etiquetas e pasta.
+- Adiciona duplicação com nova identidade e exclusão controlada; ativos lógicos com dependentes registrados não podem ser excluídos.
+- Espelha operações de CRUD nas flags legadas correspondentes, preservando compatibilidade com consumidores existentes.
+- Mantém o armazenamento canônico, as estruturas legadas e a separação entre definições reutilizáveis e instâncias.
+- Ações específicas de aplicação/inserção continuam nos espaços especializados quando o tipo exige configuração própria.
+- Inclui testes de regressão e atualiza README, roadmap, visão do projeto e contrato da Biblioteca.
+- Candidata para Foundry VTT 14 build 360. CI e pacote não substituem o teste visual/funcional no Foundry real; esta versão não é checkpoint funcional confirmado.
+
 ## 1.0.0.89 — build de teste da ficha no Foundry VTT 14
 
 - Gera uma versão identificável para a rodada de testes manuais da ficha de personagem no Foundry VTT 14 build 360.
