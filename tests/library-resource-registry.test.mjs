@@ -5,7 +5,13 @@ import {
   createFoundryLibraryProvider,
   createDefaultLibraryResourceRegistry
 } from "../scripts/core/library-resource-registry.js";
-import { createEmptyNexusLibraryStore } from "../scripts/core/library-store.js";
+import { createEmptyNexusLibraryStore, updateNexusLibraryStore } from "../scripts/core/library-store.js";
+
+const hookListeners = new Map();
+globalThis.Hooks = {
+  on(name, callback) { const listeners = hookListeners.get(name) ?? []; listeners.push(callback); hookListeners.set(name, listeners); },
+  callAll(name, ...args) { for (const callback of hookListeners.get(name) ?? []) callback(...args); }
+};
 
 const store = createEmptyNexusLibraryStore();
 store.collections.components.push({
@@ -29,8 +35,13 @@ store.collections.behaviors.push({
 });
 
 const user = {
+  libraryStore: store,
   getFlag(scope, key) {
-    return scope === "nexus" && key === "libraryStore" ? store : undefined;
+    return scope === "nexus" && key === "libraryStore" ? this.libraryStore : undefined;
+  },
+  async setFlag(scope, key, value) {
+    if (scope === "nexus" && key === "libraryStore") this.libraryStore = value;
+    return value;
   }
 };
 
@@ -63,6 +74,14 @@ const component = await nexusProvider.resolve({
   id: "component-health"
 });
 assert.equal(component.payload.settings.currentPath, "resources.vitality.value");
+
+await updateNexusLibraryStore(user, current => {
+  current.collections.media.push({ id: "media-new", name: "Trilha ambiente", tags: ["audio"] });
+  return current;
+});
+const refreshedPage = await nexusProvider.list({ query: "Trilha ambiente" });
+assert.equal(refreshedPage.items.length, 1,
+  "A gravação canônica deve invalidar o índice leve da Biblioteca.");
 
 const bridgeCalls = [];
 const documentBridge = {
