@@ -1,4 +1,4 @@
-import { createLibraryCatalogExplorer } from "./catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
 import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
 
 /**
@@ -60,6 +60,7 @@ export function createLibraryApplicationClass({
         origin: "all",
         kind: "all",
         type: "all",
+        compendiumIds: [],
         viewMode: "grid",
         cardSize: "medium"
       };
@@ -98,6 +99,7 @@ export function createLibraryApplicationClass({
       const origin = root.querySelector("[data-library-origin]");
       const kind = root.querySelector("[data-library-kind]");
       const type = root.querySelector("[data-library-type]");
+      const compendiums = root.querySelector("[data-library-compendiums]");
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
       if (search) search.value = this._state.query;
@@ -105,6 +107,7 @@ export function createLibraryApplicationClass({
       if (origin) origin.value = this._state.origin;
       if (kind) kind.value = this._state.kind;
       if (type) type.value = this._state.type;
+      if (compendiums) populateLibraryCompendiumSelect(compendiums, this._state.compendiumIds);
       if (cardSize) cardSize.value = this._state.cardSize;
       viewControls.forEach(button => {
         const active = button.dataset.libraryCollectionViewMode === this._state.viewMode;
@@ -284,6 +287,10 @@ export function createLibraryApplicationClass({
       });
       type?.addEventListener("change", () => {
         this._state.type = type.value || "all";
+        void render();
+      });
+      compendiums?.addEventListener("change", () => {
+        this._state.compendiumIds = [...compendiums.selectedOptions].map(option => option.value).filter(Boolean).slice(0, 32);
         void render();
       });
       cardSize?.addEventListener("change", () => {
