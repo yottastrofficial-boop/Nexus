@@ -247,7 +247,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
       const scope=sheet._libraryAssetScope??"core";let visible=0;
       libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
-        const text=card.dataset.libraryAsset??"",tags=(card.dataset.libraryTags??"").split(/\\s+/).filter(Boolean),matchText=!query||text.includes(query),matchTag=tag==="all"||tags.includes(tag)||text.includes(tag);
+        const text=card.dataset.libraryAsset??"",tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean),matchText=!query||text.includes(query),matchTag=tag==="all"||tags.includes(tag)||text.includes(tag);
         const matchFolder=card.dataset.libraryCategory===(sheet._libraryFolder??"core");
         const matchSource=(card.dataset.librarySource??"core")===scope;
         card.hidden=scope==="personal"||!(matchText&&matchTag&&matchFolder&&matchSource);if(!card.hidden)visible++;
@@ -256,7 +256,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
       const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
-      genericCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleGeneric++;});
+      genericCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleGeneric++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
