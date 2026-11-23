@@ -124,6 +124,7 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
       validate: validation
     };
   }
+  const fieldEntries = [];
   for (const schemaField of schemaFields) {
     const key = schemaField.key;
     const storageKey = draftKey(key);
@@ -188,9 +189,16 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     if (schemaField.help) wrap.append(make("small", "nexus-library-graph-field-help", schemaField.help));
     wrap.append(error);
     container.append(wrap);
+    fieldEntries.push({ schemaField, control, error });
   }
+  const initialValidation = validation();
+  for (const entry of fieldEntries) updateError(entry.error, entry.control, initialValidation.errors.filter(message => message.includes(entry.schemaField.label)));
   return {
-    validate: validation,
+    validate: () => {
+      const result = validation();
+      for (const entry of fieldEntries) updateError(entry.error, entry.control, result.errors.filter(message => message.includes(entry.schemaField.label)));
+      return result;
+    },
     flush() {
       for (const schemaField of schemaFields) {
         const key = draftKey(schemaField.key);
@@ -541,69 +549,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
       active.append(enabled, make("span", "", "Ação ativa"));
       inspector.append(active);
 
-      const definition = definitionByType.get(node.action.type);
-      const schemaFields = definition?.configSchema?.fields;
-      if (Array.isArray(schemaFields) && schemaFields.length) {
-        for (const schemaField of schemaFields) {
-          const key = node.id + "::" + schemaField.key;
-          if (!Object.prototype.hasOwnProperty.call(node.action.config, schemaField.key) && Object.prototype.hasOwnProperty.call(schemaField, "defaultValue")) {
-            node.action.config[schemaField.key] = structuredClone(schemaField.defaultValue);
-          }
-          const stored = node.action.config[schemaField.key];
-          let control;
-          if (schemaField.type === "checkbox") {
-            control = make("input", "");
-            control.type = "checkbox";
-            control.checked = stored === true;
-            control.addEventListener("change", () => setNodeConfig(node, schemaField.key, control.checked));
-          } else if (schemaField.type === "select") {
-            const options = schemaField.options.map(option => [option.value, option.label]);
-            if (stored != null && !options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
-            control = makeSelect(stored ?? "", options);
-            control.addEventListener("change", () => setNodeConfig(node, schemaField.key, control.value));
-          } else if (schemaField.type === "textarea" || schemaField.type === "json") {
-            control = make("textarea", "");
-            control.rows = schemaField.rows ?? 3;
-            control.spellcheck = false;
-            const draft = configDrafts.has(key) ? configDrafts.get(key) : schemaField.type === "json" && stored !== undefined ? JSON.stringify(stored, null, 2) : stored ?? "";
-            control.value = String(draft);
-            if (schemaField.type === "json") {
-              control.addEventListener("input", () => configDrafts.set(key, control.value));
-              control.addEventListener("change", () => {
-                try {
-                  setNodeConfig(node, schemaField.key, JSON.parse(control.value));
-                  configDrafts.delete(key);
-                } catch { /* Draft remains visible; read() reports the validation error. */ }
-              });
-            } else control.addEventListener("input", () => setNodeConfig(node, schemaField.key, control.value));
-          } else {
-            control = makeText(stored ?? "", schemaField.placeholder, schemaField.type === "number" ? "number" : "text");
-            if (schemaField.type === "number") {
-              if (schemaField.step !== undefined) control.step = String(schemaField.step);
-              if (schemaField.min !== undefined) control.min = String(schemaField.min);
-              if (schemaField.max !== undefined) control.max = String(schemaField.max);
-              control.addEventListener("input", () => {
-                if (!control.value.trim()) setNodeConfig(node, schemaField.key, undefined);
-                else if (Number.isFinite(Number(control.value))) setNodeConfig(node, schemaField.key, Number(control.value));
-              });
-            } else control.addEventListener("input", () => setNodeConfig(node, schemaField.key, control.value));
-          }
-          if (schemaField.required) control.required = true;
-          if (schemaField.placeholder && !["textarea", "json"].includes(schemaField.type)) control.placeholder = schemaField.placeholder;
-          const wrap = field(schemaField.label, control, ["textarea", "json"].includes(schemaField.type));
-          if (schemaField.help) wrap.append(make("small", "nexus-library-graph-field-help", schemaField.help));
-          inspector.append(wrap);
-        }
-      } else {
-        const configKey = node.id + "::__fallback";
-        const config = make("textarea", "");
-        config.rows = 5;
-        config.spellcheck = false;
-        config.value = configDrafts.has(configKey) ? configDrafts.get(configKey) : node.action.__configDraft ?? JSON.stringify(node.action.config ?? {}, null, 2);
-        config.addEventListener("input", () => configDrafts.set(configKey, config.value));
-        inspector.append(field("Configuração JSON", config, true));
-        inspector.append(make("small", "nexus-library-graph-field-help", "Este executor ainda não fornece um schema visual. A configuração JSON permanece disponível."));
-      }
+      renderExecutorConfigFields(inspector, node.action, runtime, { drafts: configDrafts, draftPrefix: node.id });
     }
   };
 
