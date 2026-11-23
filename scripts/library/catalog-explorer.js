@@ -45,6 +45,7 @@ export function createLibraryCatalogExplorer({
   let currentQuery = "";
   let currentSmartView = "all";
   let currentFolder = "";
+  let currentTag = "all";
 
   const renderEmpty = message => {
     container.replaceChildren(makeElement("p", "nexus-library-empty", message));
@@ -152,10 +153,11 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
+    currentTag = tag;
     const version = ++requestVersion;
     if (!append) {
       cursor = {};
@@ -182,6 +184,7 @@ export function createLibraryCatalogExplorer({
       if (currentSmartView === "favorites" && !preferences.favorites.includes(key)) return false;
       if (currentSmartView === "recent" && !preferences.recent.includes(key)) return false;
       if (currentFolder && preferences.assignments[key] !== currentFolder) return false;
+      if (currentTag !== "all" && !resource.tags.some(value => String(value).toLocaleLowerCase("pt-BR") === String(currentTag).toLocaleLowerCase("pt-BR"))) return false;
       return true;
     });
 
