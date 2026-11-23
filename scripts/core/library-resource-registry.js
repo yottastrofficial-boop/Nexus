@@ -486,6 +486,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       const copy = structuredClone(original);
       copy.id = logicCollections.has(collection) ? `nexus.personal.${LOGIC_TYPE_BY_COLLECTION[collection]}.copy-${suffix}` : suffix;
       if (copy.sourceId) copy.sourceId = String(copy.sourceId) + "-copy-" + suffix;
+      if (collection === "assets" && copy.key) copy.key = String(copy.key) + "-copy-" + suffix;
       if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
       else copy.label = String(original.label) + " (cópia)";
       const saved = await updateNexusLibraryStore(user, store => { store.collections[collection].push(copy); return store; });
