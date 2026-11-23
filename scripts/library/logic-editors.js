@@ -128,11 +128,14 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const title = make("div", "");
   title.append(make("strong", "", "Grafo de execução"), make("small", "", "Arraste os nós para organizar. Selecione conexões abaixo para definir o caminho de cada saída."));
   const toolbarActions = make("div", "nexus-library-graph-toolbar-actions");
+  const addType = makeSelect("condition", nodeTypeOptions);
+  const addNode = make("button", "nexus-library-flow-add", "+ Adicionar nó");
+  addNode.type = "button";
   const arrange = make("button", "nexus-library-flow-add", "Organizar automaticamente");
   arrange.type = "button";
   const toggle = make("button", "nexus-library-flow-add", graph ? "Remover grafo" : "Criar grafo visual");
   toggle.type = "button";
-  toolbarActions.append(arrange, toggle);
+  toolbarActions.append(addType, addNode, arrange, toggle);
   toolbar.append(title, toolbarActions);
 
   const status = make("p", "nexus-library-flow-empty", "Grafo opcional. Fluxos existentes continuam usando gatilhos, condições e ações sequenciais.");
@@ -200,9 +203,9 @@ function createFlowGraphBuilder(form, payload, runtime) {
   };
   const render = () => {
     nodesWrap.replaceChildren(); edgesWrap.replaceChildren();
-    if (!graph) { content.hidden = true; status.hidden = false; arrange.disabled = true; return; }
+    if (!graph) { content.hidden = true; status.hidden = false; arrange.disabled = true; addNode.disabled = true; addType.disabled = true; return; }
     graph = layoutFlowGraph(graph);
-    content.hidden = false; status.hidden = true; arrange.disabled = false;
+    content.hidden = false; status.hidden = true; arrange.disabled = false; addNode.disabled = false; addType.disabled = false;
     const size = getFlowGraphCanvasSize(graph);
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
@@ -274,17 +277,31 @@ function createFlowGraphBuilder(form, payload, runtime) {
         const availableTypes = [...actionTypes];
         if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
         const actionType = availableTypes.length ? makeSelect(node.action?.type ?? "", availableTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
-        actionType.addEventListener("change", () => { node.action.type = actionType.value; });
-        const config = make("textarea", "");
-        config.rows = 3; config.spellcheck = false;
-        config.value = node.action?.__configDraft ?? JSON.stringify(node.action?.config ?? {}, null, 2);
-        config.addEventListener("input", () => { node.action.__configDraft = config.value; });
+        actionType.addEventListener("change", () => {
+          node.action.type = actionType.value;
+          render();
+        });
+        const configFields = [];
+        if (node.action?.type === "nexus.actor.update") {
+          const path = makeText(node.action.config?.path ?? "system.", "system.propriedade.valor");
+          const value = make("textarea", "");
+          value.rows = 2; value.spellcheck = false;
+          value.value = Object.prototype.hasOwnProperty.call(node.action.config ?? {}, "value")
+            ? JSON.stringify(node.action.config.value, null, 2) : "";
+          configFields.push(field("Caminho system.*", path), field("Valor (JSON)", value, true));
+        } else {
+          const config = make("textarea", "");
+          config.rows = 3; config.spellcheck = false;
+          config.value = node.action?.__configDraft ?? JSON.stringify(node.action?.config ?? {}, null, 2);
+          config.addEventListener("input", () => { node.action.__configDraft = config.value; });
+          configFields.push(field("Configuração JSON", config, true));
+        }
         const enabled = make("input", "");
         enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
         enabled.addEventListener("change", () => { node.action.enabled = enabled.checked; });
         const active = make("label", "nexus-library-flow-enabled");
         active.append(enabled, make("span", "", "Ação ativa"));
-        card.append(field("Executor", actionType), field("Configuração JSON", config, true), active);
+        card.append(field("Executor", actionType), ...configFields, active);
       }
       nodesWrap.append(card);
     });
@@ -321,6 +338,12 @@ function createFlowGraphBuilder(form, payload, runtime) {
     }
     render();
   });
+  addNode.addEventListener("click", () => {
+    if (!graph) return;
+    graph.nodes.push(freshNode(addType.value));
+    graph = layoutFlowGraph(graph);
+    render();
+  });
   arrange.addEventListener("click", () => { if (graph) { graph = layoutFlowGraph(graph, { force: true }); render(); } });
   root.append(toolbar, status, content);
   form.append(root);
@@ -347,6 +370,12 @@ function createFlowGraphBuilder(form, payload, runtime) {
           if (!isRecord(config)) throw new Error("Configuração do nó de ação deve ser um objeto JSON.");
           node.action.config = config;
           delete node.action.__configDraft;
+        }
+        if (caption === "Caminho system.*" && node.action) node.action.config.path = control.value.trim();
+        if (caption === "Valor (JSON)" && node.action) {
+          if (!control.value.trim()) throw new Error("Informe o valor JSON da ação de atualização.");
+          try { node.action.config.value = JSON.parse(control.value); }
+          catch { throw new Error("O valor da ação deve ser JSON válido."); }
         }
         if (caption === "Ação ativa" && node.action) node.action.enabled = control.checked;
       }
