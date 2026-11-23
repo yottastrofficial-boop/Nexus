@@ -63,7 +63,8 @@ assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
 
 const nextNexusPage = await nexusProvider.list({ limit: 2, cursor: nexusPage.nextCursor });
 assert.equal(nextNexusPage.items.length, 2);
-assert.equal(nextNexusPage.hasMore, false);
+assert.equal(nextNexusPage.hasMore, true);
+assert.equal(nextNexusPage.nextCursor, 4);
 const behaviorPage = await nexusProvider.list({ kind: "logic", type: "behavior" });
 assert.equal(behaviorPage.items.length, 1);
 assert.equal(behaviorPage.items[0].kind, "logic");
