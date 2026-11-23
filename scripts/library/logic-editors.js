@@ -276,7 +276,8 @@ function createFlowBuilder(form, payload, runtime) {
   };
   section("triggers", "Gatilhos", "Eventos que iniciam o fluxo.", (item, onRemove) => {
     const row = make("article", "nexus-library-flow-row");
-    row.dataset.id = item.id ?? newId("trigger");
+    item.id = item.id ?? newId("trigger");
+    row.dataset.id = item.id;
     const event = select(item.event ?? INTERACTION_EVENTS[0], INTERACTION_EVENTS.map(value => [value, value]));
     event.dataset.field = "event";
     const modifiers = text(Array.isArray(item.modifiers) ? item.modifiers.join("+") : item.modifiers, "ctrl+shift");
@@ -285,28 +286,36 @@ function createFlowBuilder(form, payload, runtime) {
     key.dataset.field = "key";
     const duration = text(item.durationMs, "600");
     duration.dataset.field = "durationMs";
+    event.addEventListener("change", () => { item.event = event.value; });
+    modifiers.addEventListener("input", () => { item.modifiers = modifiers.value.split("+").map(value => value.trim()).filter(Boolean); });
+    key.addEventListener("input", () => { if (key.value) item.key = key.value; else delete item.key; });
+    duration.addEventListener("input", () => { if (duration.value.trim() && Number.isFinite(Number(duration.value))) item.durationMs = Number(duration.value); else delete item.durationMs; });
     row.append(field("Evento", event), field("Modificadores", modifiers), field("Tecla", key), field("Duração (ms)", duration), remove(onRemove));
     return row;
   }, () => ({ id: newId("trigger"), event: INTERACTION_EVENTS[0] }));
   section("conditions", "Condições", "Expressões avaliadas antes das ações pelo parser seguro.", (item, onRemove) => {
     const row = make("article", "nexus-library-flow-row");
-    row.dataset.id = item.id ?? newId("condition");
+    item.id = item.id ?? newId("condition");
+    row.dataset.id = item.id;
     const expression = make("textarea", "");
     expression.rows = 2;
     expression.spellcheck = false;
     expression.value = item.expression ?? "";
     expression.placeholder = "@system.resources.pv.value > 0";
     expression.dataset.field = "expression";
+    expression.addEventListener("input", () => { item.expression = expression.value; });
     row.append(field("Expressão", expression, true), remove(onRemove));
     return row;
   }, () => ({ id: newId("condition"), expression: "" }));
 
   section("actions", "Ações", "Cada executor pode declarar seus próprios campos. Configurações sem schema permanecem em JSON.", (item, onRemove) => {
     const row = make("article", "nexus-library-flow-row nexus-library-flow-action-row");
-    row.dataset.id = item.id ?? newId("action");
+    item.id = item.id ?? newId("action");
+    row.dataset.id = item.id;
     item.config = isRecord(item.config) ? item.config : {};
     const name = text(item.name, "Nome opcional");
     name.dataset.field = "name";
+    name.addEventListener("input", () => { item.name = name.value; });
     const options = [...types];
     if (item.type && !options.includes(item.type)) options.push(item.type);
     const type = options.length ? select(item.type ?? "", options.map(value => [value, value])) : text(item.type, "namespace.acao");
@@ -322,6 +331,7 @@ function createFlowBuilder(form, payload, runtime) {
     enabled.type = "checkbox";
     enabled.checked = item.enabled !== false;
     enabled.dataset.field = "enabled";
+    enabled.addEventListener("change", () => { item.enabled = enabled.checked; });
     const active = make("label", "nexus-library-flow-enabled");
     active.append(enabled, make("span", "", "Ação ativa"));
     const header = make("div", "nexus-library-flow-action-head");
