@@ -191,6 +191,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const detail = panel.querySelector("[data-library-generic-details]");
       if (!container || !detail || !genericCollectionLabels[collection]) return;
       if (collection === "all" && universalCatalog) {
+        renderCustomFolderTree(collection);
         void universalCatalog.render({
           query: searchInput?.value ?? "",
           smartView: sheet._librarySmartView ?? "all",
