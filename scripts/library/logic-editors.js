@@ -421,6 +421,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
   arrange.type = "button";
   const toggle = make("button", "nexus-library-flow-add", graph ? "Remover grafo" : "Criar grafo visual");
   toggle.type = "button";
+  addType.setAttribute("aria-label", "Tipo do novo nó");
+  connectType.setAttribute("aria-label", "Tipo de conexão");
   toolbarActions.append(addType, addNode, connectType, connectModeButton, arrange, toggle);
   toolbar.append(title, toolbarActions);
 
@@ -616,6 +618,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
     drawEdges(size);
 
     graph.nodes.forEach(node => {
+      const typeLabel = node.type === "start" ? "Início" : node.type === "condition" ? "Condição" : node.type === "action" ? "Ação" : "Fim";
       const card = make("article", "nexus-library-graph-node nexus-library-graph-node-" + node.type + (node.id === selectedNodeId ? " is-selected" : ""));
       card.dataset.nodeId = node.id;
       card.tabIndex = 0;
@@ -624,7 +627,6 @@ function createFlowGraphBuilder(form, payload, runtime) {
       card.style.left = (Number(node.x) || 0) + "px";
       card.style.top = (Number(node.y) || 0) + "px";
       const head = make("div", "nexus-library-graph-node-head");
-      const typeLabel = node.type === "start" ? "Início" : node.type === "condition" ? "Condição" : node.type === "action" ? "Ação" : "Fim";
       const heading = make("strong", "nexus-library-graph-node-title", typeLabel + " · " + (node.name || "Sem nome"));
       heading.title = node.id;
       head.append(heading);
@@ -646,7 +648,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
         selectedNodeId = node.id;
         render();
       });
-      head.append(type);
+      head.append(field("Tipo", type));
       if (node.type !== "start") {
         const removeNode = make("button", "nexus-library-flow-remove", "Remover");
         removeNode.type = "button";
@@ -679,6 +681,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
       });
       const port = make("button", "nexus-library-graph-port", connectingFrom === node.id ? "Origem" : "Selecionar");
       port.type = "button";
+      port.setAttribute("aria-label", "Selecionar " + (node.name || typeLabel) + (connectingFrom ? " como destino" : " como origem"));
       port.disabled = !connectMode;
       port.addEventListener("click", event => {
         event.stopPropagation();
