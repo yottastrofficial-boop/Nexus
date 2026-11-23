@@ -467,7 +467,8 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
       ] },
       { key: "enabled", label: "Ativo", type: "checkbox" },
       { key: "note", label: "Observação", type: "textarea" },
-      { key: "metadata", label: "Metadados", type: "json" }
+      { key: "metadata", label: "Metadados", type: "json", required: true },
+      { key: "defaults", label: "Padrões", type: "json", defaultValue: { nested: { enabled: true } } }
     ] },
     execute: ({ config }) => { calls.push(config); return true; }
   });
@@ -475,7 +476,10 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   const exposed = runtime.getActionDefinition("test.configured");
   assert.equal(exposed.configSchema.fields[0].label, "Alvo");
   exposed.configSchema.fields[0].label = "Alterado externamente";
-  assert.equal(runtime.getActionDefinition("test.configured").configSchema.fields[0].label, "Alvo");
+  exposed.configSchema.fields[6].defaultValue.nested.enabled = false;
+  const isolated = runtime.getActionDefinition("test.configured").configSchema;
+  assert.equal(isolated.fields[0].label, "Alvo");
+  assert.equal(isolated.fields[6].defaultValue.nested.enabled, true);
 
   const invalid = await runtime.simulateFlow({
     actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 20, mode: "multiply" } }]
@@ -486,7 +490,7 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   assert.equal(calls.length, 0);
 
   const missing = await runtime.runFlow({
-    actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 3, mode: "add" } }]
+    actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 3, mode: "add", metadata: null } }]
   });
   assert.equal(missing.status, "success");
   assert.equal(calls.length, 1);
