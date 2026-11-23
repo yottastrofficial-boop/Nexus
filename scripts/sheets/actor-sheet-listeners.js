@@ -253,6 +253,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         card.hidden=scope==="personal"||!(matchText&&matchTag&&matchFolder&&matchSource);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
+      const viewMode=sheet._libraryCollectionViewMode==="list"?"list":"grid";
+      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows]").forEach(container=>{container.dataset.viewMode=viewMode;});
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
       const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
@@ -447,6 +449,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (libraryFilterFrame) return;
       libraryFilterFrame = requestAnimationFrame(() => { libraryFilterFrame = 0; filterLibrary(); });
     };
+    libraryPanel?.querySelectorAll("[data-library-collection-view-mode]")?.forEach(button => button.addEventListener("click", () => {
+      sheet._libraryCollectionViewMode = button.dataset.libraryCollectionViewMode === "list" ? "list" : "grid";
+      libraryPanel.querySelectorAll("[data-library-collection-view-mode]").forEach(item => { const active = item === button; item.classList.toggle("active", active); item.setAttribute("aria-pressed", String(active)); });
+      filterLibrary();
+    }));
     libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", event => {
        sheet._librarySearchQuery = event.currentTarget.value;
        scheduleLibraryFilter();
