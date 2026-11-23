@@ -85,7 +85,13 @@ function getDocumentKind(document) {
 
 export function createFoundryLogicPermissionResolver({ gameRef = globalThis.game, constRef = globalThis.CONST } = {}) {
   return async ({ permissions = [], effects = [], context = {} } = {}) => {
-    const user = gameRef?.user;
+    const currentUser = gameRef?.user;
+    if (!currentUser) return false;
+    // O GM ativo executa o Hook, mas a autorização de escrita deve refletir
+    // o usuário que originou a alteração, não os privilégios do GM executor.
+    const user = context.userId
+      ? gameRef?.users?.get?.(context.userId)
+      : currentUser;
     if (!user) return false;
     if (user.isGM === true) return true;
 
