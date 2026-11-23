@@ -327,3 +327,15 @@ test("simulação avalia condições e permissões sem executar nenhum executor"
   assert.equal(invalid.executed, false);
   assert.equal(executions, 0);
 });
+
+test("runtime valida fluxos transitórios antes de executar ou simular", async () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  const runtime = createLogicRuntime({ registry });
+  const invalidFlow = {
+    actions: [{ id: "unsafe", type: "nexus.actor.update", config: { path: "ownership.default", value: 3 } }]
+  };
+  await assert.rejects(() => runtime.runFlow(invalidFlow), /config.path/);
+  const preview = await runtime.simulateFlow(invalidFlow);
+  assert.equal(preview.status, "invalid");
+  assert.equal(preview.executed, false);
+});
