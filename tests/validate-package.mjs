@@ -2336,6 +2336,10 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   preferences = assignLibraryEntryFolder(preferences, "assets", "meter-1", "folder-assets");
   assert.equal(preferences.assignments["assets:meter-1"], "folder-assets");
   assert.throws(() => assignLibraryEntryFolder(preferences, "media", "portrait-1", "folder-assets"), /não pertence/);
+  const globalFolder = createLibraryFolder(preferences, { id: "folder-global", name: "Compartilhados" });
+  preferences = assignLibraryEntryFolder(globalFolder.preferences, "media", "portrait-1", "folder-global");
+  assert.equal(preferences.assignments["media:portrait-1"], "folder-global",
+    "Pastas livres devem aceitar itens de coleções diferentes");
   preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
   assert.ok(preferences.favorites.includes("assets:meter-1"));
   preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
