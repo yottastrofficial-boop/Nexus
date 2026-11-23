@@ -179,7 +179,8 @@ export function createLibraryResourceRegistry() {
           cursor: cursors[provider.id] ?? null,
           compendiumIds: Array.isArray(compendiumIds) ? compendiumIds.slice(0, 32).map(String) : [],
           ids: normalizedReferences.filter(reference => reference.providerId === provider.id).map(reference => String(reference.id)),
-          tags: normalizedTags
+          tags: normalizedTags,
+          origin
         });
         const rawItems = Array.isArray(page) ? page : page?.items;
         if (!Array.isArray(rawItems)) throw new Error("O provedor não retornou uma lista de recursos.");
