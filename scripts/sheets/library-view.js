@@ -104,6 +104,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    let universalCatalogSearchTimer = null;
     const universalCatalog = game.nexus?.library?.registry
       ? createLibraryCatalogExplorer({
           registry: game.nexus.library.registry,
@@ -114,8 +115,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         })
       : null;
     searchInput?.addEventListener("input", () => {
-      const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
-      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", kind: panel.querySelector("[data-library-kind]")?.value ?? "all", type: panel.querySelector("[data-library-type]")?.value ?? "all", viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
+      if (universalCatalogSearchTimer) clearTimeout(universalCatalogSearchTimer);
+      universalCatalogSearchTimer = setTimeout(() => {
+        universalCatalogSearchTimer = null;
+        const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+        if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", kind: panel.querySelector("[data-library-kind]")?.value ?? "all", type: panel.querySelector("[data-library-type]")?.value ?? "all", viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
+      }, 160);
     });
     panel.querySelector("[data-library-filter-popover]")?.addEventListener("click", () => {
       requestAnimationFrame(() => {
