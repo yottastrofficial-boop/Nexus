@@ -534,6 +534,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
                 label: definition.label,
                 version: Math.max(1, Number(definition.version) || 1) + 1,
                 settings: { ...component },
+                metadata: definition.metadata ?? {},
+                history: [
+                  ...(definition.history ?? []).filter(entry => Number(entry.version) !== Number(definition.version)),
+                  { version: definition.version, settings: definition.settings ?? {} }
+                ]
                 metadata: definition.metadata ?? {}
               });
               const currentStore = readNexusLibraryStore(game.user, getLegacyNexusLibraryFlags(game.user)).store;
