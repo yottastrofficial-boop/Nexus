@@ -72,7 +72,7 @@ function cloneReference(value, depth = 0) {
   return result;
 }
 
-function normalizeResource(raw, providerId) {
+function normalizeResource(raw, providerId, defaultOrigin = providerId) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new TypeError("O provedor retornou um recurso inválido.");
   }
@@ -99,7 +99,7 @@ function normalizeResource(raw, providerId) {
     tags: Object.freeze(tags),
     thumbnail: cleanText(raw.thumbnail, 2048),
     folder: cleanText(raw.folder, 160),
-    origin: cleanText(raw.origin, 48) || providerId,
+    origin: cleanText(raw.origin, 48) || defaultOrigin,
     reference: Object.freeze(cloneReference(raw.reference ?? {})),
     capabilities: Object.freeze(capabilities),
     isExternal: Boolean(raw.isExternal),
@@ -133,6 +133,7 @@ export function createLibraryResourceRegistry() {
     const record = Object.freeze({
       id,
       label: cleanText(provider.label, 80) || id,
+      origin: cleanText(provider.origin, 48) || id,
       kinds: Object.freeze(Array.isArray(provider.kinds)
         ? [...new Set(provider.kinds.map(value => cleanText(value, 48)).filter(Boolean))]
         : []),
@@ -152,7 +153,8 @@ export function createLibraryResourceRegistry() {
     cursor = {},
     compendiumIds = [],
     references = [],
-    tags = []
+    tags = [],
+    origin = "all"
   } = {}) => {
     const search = cleanText(query, 160).toLocaleLowerCase();
     const requestedKind = cleanText(kind, 48) || "all";
@@ -181,10 +183,11 @@ export function createLibraryResourceRegistry() {
         });
         const rawItems = Array.isArray(page) ? page : page?.items;
         if (!Array.isArray(rawItems)) throw new Error("O provedor não retornou uma lista de recursos.");
-        const items = rawItems.map(item => normalizeResource(item, provider.id)).filter(item =>
+        const items = rawItems.map(item => normalizeResource(item, provider.id, provider.origin)).filter(item =>
           (requestedKind === "all" || item.kind === requestedKind) &&
           (requestedType === "all" || item.type === requestedType) &&
           (!normalizedTags.length || normalizedTags.every(tag => item.tags.some(value => value.toLocaleLowerCase() === tag))) &&
+          (origin === "all" || item.origin === origin) &&
           matchesText(item, search)
         );
         return {
@@ -331,7 +334,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
   });
 
-  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [], tags = [] } = {}) => {
+  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [], tags = [], origin = "all" } = {}) => {
     const resources = await getMetadata();
     const search = cleanText(query, 160).toLocaleLowerCase();
     const requestedIds = new Set(Array.isArray(ids) ? ids.map(String).slice(0, 500) : []);
@@ -339,6 +342,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     const filtered = resources.filter(resource =>
       (!requestedIds.size || requestedIds.has(resource.id)) &&
       (!requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag))) &&
+      (origin === "all" || resource.origin === origin) &&
       (kind === "all" || resource.kind === kind) &&
       (type === "all" || resource.type === type) &&
       matchesText(resource, search)
@@ -406,7 +410,8 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     cursor = 0,
     compendiumIds = [],
     ids = [],
-    tags = []
+    tags = [],
+    origin = "all"
   } = {}) => {
     if (kind !== "all" && kind !== "document") {
       return { items: [], total: 0, hasMore: false, nextCursor: null };
@@ -429,7 +434,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
         }
       }));
       const items = records.filter(record => record && (requestedType === "all" || record.type === requestedType))
-        .map(toResource).filter(resource => !requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag)));
+        .map(toResource).filter(resource => (!requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag))) && (origin === "all" || resource.origin === origin));
       return { items, total: items.length, hasMore: false, nextCursor: null, errors: [] };
     }
 
@@ -440,10 +445,11 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
       offset,
       limit: safeLimit(limit),
       compendiumIds,
-      tags
+      tags,
+      origin
     });
     return {
-      items: page.items.map(toResource),
+      items: page.items.map(toResource).filter(resource => origin === "all" || resource.origin === origin),
       total: page.total,
       hasMore: page.hasMore,
       nextCursor: page.hasMore ? offset + page.items.length : null,
