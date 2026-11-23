@@ -6,8 +6,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `branch feature/library-unified-explorer-1.0.0.90 — em revisão`
-- Versão candidata para teste: `1.0.0.90` (a última publicada permanece `1.0.0.89`)
+- Commit: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
+- Versão publicada: `1.0.0.90` (release de teste; a validação funcional no Foundry continua pendente)
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
