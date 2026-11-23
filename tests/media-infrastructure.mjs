@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter } from "../scripts/core/media-service.js";
 import { createFoundryMediaStorageAdapter, createExternalMediaStorageAdapter, createMediaStorageRouter } from "../scripts/core/media-storage.js";
+import { createResourceLifecycleManager } from "../scripts/core/resource-lifecycle.js";
 
 const registry = {
   getFormat: id => id === "png" ? { id, kind: "image", label: "PNG", mimeTypes: ["image/png"], codecs: ["png"], containers: ["png"], foundryUpload: true } : null,
@@ -32,6 +33,30 @@ const fallbackPipeline = createMediaProcessingPipeline({
 });
 const fallbackResult = await fallbackPipeline.process(png, "decodeImage");
 assert.equal(fallbackResult.adapterId, "nexus.test.fallback");
+
+let managedLoads = 0, managedUnloads = 0;
+const resourceManager = createResourceLifecycleManager({ maxResidentBytes: 20, maxIdleBytes: 0 });
+const managedPipeline = createMediaProcessingPipeline({
+  capabilityService: capability,
+  resourceManager,
+  adapters: [{
+    id: "nexus.test.managed",
+    estimatedMemoryBytes: 12,
+    formats: ["png"],
+    operations: ["decodeImage"],
+    load: async () => {
+      managedLoads++;
+      return { decodeImage: async () => ({ managed: true }) };
+    },
+    unload: async () => { managedUnloads++; }
+  }]
+});
+assert.equal((await managedPipeline.process(png, "decodeImage")).result.managed, true);
+assert.equal(resourceManager.stats().residentBytes, 0);
+assert.equal(managedUnloads, 1);
+await managedPipeline.process(png, "decodeImage");
+assert.equal(managedLoads, 2);
+assert.equal(managedUnloads, 2);
 
 let uploads = 0;
 const foundry = createFoundryMediaStorageAdapter({ FilePicker: { upload: async () => { uploads++; return { path: "test.png" }; } }, extensions: ["png"] });
