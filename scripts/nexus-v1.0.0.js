@@ -8,6 +8,8 @@ import { createMediaCapabilityService, createMediaProcessingPipeline, createBrow
 import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndexedDbMediaCache, createMediaCacheKey } from "./core/media-storage.js";
 import { createResourceLifecycleManager } from "./core/resource-lifecycle.js";
 import { createFoundryDocumentBridge } from "./core/foundry-document-bridge.js";
+import { createDefaultLibraryResourceRegistry } from "./core/library-resource-registry.js";
+import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
@@ -16,6 +18,18 @@ Hooks.once("init", () => {
   game.nexus.resources ??= createResourceLifecycleManager();
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
   game.nexus.documents ??= createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid });
+  // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
+  // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
+  game.nexus.library ??= {};
+  game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
+    getUser: () => game.user,
+    documentBridge: game.nexus.documents,
+    catalog: NEXUS_LIBRARY_CATALOG
+  });
+  game.nexus.library.list = options => game.nexus.library.registry.list(options);
+  game.nexus.library.resolve = (reference, resource) => game.nexus.library.registry.resolve(reference, resource);
+  game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
+  game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
