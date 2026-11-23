@@ -56,7 +56,7 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 11, "A listagem inclui coleções pessoais, catálogo de componentes e temas padrão.");
+assert.equal(nexusPage.total, 12, "A listagem inclui coleções pessoais, catálogo de componentes e temas padrão.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
