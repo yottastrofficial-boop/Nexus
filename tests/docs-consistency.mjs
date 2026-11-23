@@ -27,20 +27,15 @@ const compareVersions = (left, right) => {
 assert.equal(system.id, manifest.id, "system.json e manifest.json devem identificar o mesmo sistema.");
 assert.ok(compareVersions(manifest.version, system.version) <= 0,
   "O manifesto estável não pode apontar para uma versão mais nova que o pacote candidato.");
-assert.equal(
-  manifest.download,
-  \`https://github.com/yottastrofficial-boop/Nexus/releases/download/v\${manifest.version}/nexus.zip\`,
-  "O manifesto estável deve apontar para o ZIP da própria versão publicada."
-);
-assert.ok(changelog.startsWith(\`## \${system.version} —\`), "O CHANGELOG deve começar com a versão candidata.");
+assert.equal(manifest.download, "https://github.com/yottastrofficial-boop/Nexus/releases/download/v" + manifest.version + "/nexus.zip",
+  "O manifesto estável deve apontar para o ZIP da própria versão publicada.");
+assert.ok(changelog.startsWith("## " + system.version + " —"), "O CHANGELOG deve começar com a versão candidata.");
 assert.ok(readme.includes(system.version), "O README deve mencionar a versão candidata.");
 assert.ok(readme.includes("Foundry VTT 14"), "O README deve declarar a linha de compatibilidade atual.");
 assert.ok(roadmap.includes(system.version), "O roadmap deve mencionar a versão candidata.");
 assert.ok(overview.includes(system.version), "A visão do projeto deve mencionar a versão candidata.");
 assert.ok(stability.includes(system.version), "A política de estabilidade deve distinguir a versão candidata.");
-assert.ok(
-  stability.toLowerCase().includes("último checkpoint funcional confirmado") && stability.includes("1.0.0.70"),
-  "A política deve manter explícito o último checkpoint funcional comprovado."
-);
+assert.ok(stability.toLowerCase().includes("último checkpoint funcional confirmado") && stability.includes("1.0.0.70"),
+  "A política deve manter explícito o último checkpoint funcional comprovado.");
 
-console.log(\`NEXUS | Consistência documental aprovada para a versão candidata \${system.version} (manifesto publicado: \${manifest.version}).\`);
+console.log("NEXUS | Consistência documental aprovada para a versão candidata " + system.version + " (manifesto publicado: " + manifest.version + ").");
