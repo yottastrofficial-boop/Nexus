@@ -83,6 +83,16 @@ const component = await nexusProvider.resolve({
   id: "component-health"
 });
 assert.equal(component.payload.settings.currentPath, "resources.vitality.value");
+let worldFlows = [{ id: "world-flow-1", name: "Fluxo de sessão", flow: { name: "Fluxo de sessão", triggers: [], conditions: [], actions: [] } }];
+const flowProvider = createNexusLibraryProvider({ getUser: () => user, getWorldFlows: () => worldFlows, catalog: { assets: [], themes: [] } });
+const worldFlowPage = await flowProvider.list({ origin: "world", type: "flow" });
+assert.equal(worldFlowPage.items.length, 1, "World-scoped interaction flows must be visible in the universal catalog.");
+assert.equal(worldFlowPage.items[0].reference.collection, "world-flows");
+assert.equal((await flowProvider.resolve(worldFlowPage.items[0].reference)).name, "Fluxo de sessão");
+worldFlows = [{ id: "world-flow-2", name: "Fluxo atualizado", flow: { name: "Fluxo atualizado", triggers: [], conditions: [], actions: [] } }];
+globalThis.Hooks.callAll("updateSetting", { namespace: "nexus", key: "interactionLibrary" });
+const refreshedWorldFlowPage = await flowProvider.list({ query: "Fluxo atualizado", origin: "world" });
+assert.equal(refreshedWorldFlowPage.items.length, 1, "World setting updates must invalidate the flow metadata index.");
 
 await updateNexusLibraryStore(user, current => {
   current.collections.media.push({ id: "media-new", name: "Trilha ambiente", tags: ["audio"] });
