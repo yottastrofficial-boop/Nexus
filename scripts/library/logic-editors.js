@@ -323,6 +323,15 @@ function createFlowGraphBuilder(form, payload, runtime) {
           value.value = Object.prototype.hasOwnProperty.call(node.action.config ?? {}, "value")
             ? JSON.stringify(node.action.config.value, null, 2) : "";
           configFields.push(field("Caminho system.*", path), field("Valor (JSON)", value, true));
+        } else if (node.action?.type === "nexus.actor.adjust") {
+          const path = makeText(node.action.config?.path ?? "system.", "system.propriedade.numerica");
+          const delta = makeText(node.action.config?.delta ?? "", "ex.: -2 ou 5");
+          delta.type = "number"; delta.step = "any";
+          const min = makeText(node.action.config?.min ?? "", "opcional");
+          min.type = "number"; min.step = "any";
+          const max = makeText(node.action.config?.max ?? "", "opcional");
+          max.type = "number"; max.step = "any";
+          configFields.push(field("Propriedade numérica (system.*)", path, true), field("Variação (+/-)", delta), field("Mínimo (opcional)", min), field("Máximo (opcional)", max));
         } else {
           const config = make("textarea", "");
           config.rows = 3; config.spellcheck = false;
@@ -418,6 +427,23 @@ function createFlowGraphBuilder(form, payload, runtime) {
           if (!control.value.trim()) throw new Error("Informe o valor JSON da ação de atualização.");
           try { node.action.config.value = JSON.parse(control.value); }
           catch { throw new Error("O valor da ação deve ser JSON válido."); }
+        }
+        if (caption === "Propriedade numérica (system.*)" && node.action) node.action.config.path = control.value.trim();
+        if (caption === "Variação (+/-)" && node.action) {
+          if (!control.value.trim() || !Number.isFinite(Number(control.value))) throw new Error("Informe uma variação numérica válida.");
+          node.action.config.delta = Number(control.value);
+        }
+        if (caption === "Mínimo (opcional)" && node.action) {
+          if (control.value.trim()) {
+            if (!Number.isFinite(Number(control.value))) throw new Error("O limite mínimo precisa ser numérico.");
+            node.action.config.min = Number(control.value);
+          } else delete node.action.config.min;
+        }
+        if (caption === "Máximo (opcional)" && node.action) {
+          if (control.value.trim()) {
+            if (!Number.isFinite(Number(control.value))) throw new Error("O limite máximo precisa ser numérico.");
+            node.action.config.max = Number(control.value);
+          } else delete node.action.config.max;
         }
         if (caption === "Ação ativa" && node.action) node.action.enabled = control.checked;
       }
