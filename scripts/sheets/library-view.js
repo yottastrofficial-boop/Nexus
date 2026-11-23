@@ -101,6 +101,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    const mirrorLegacyCollection = async (collection, store) => {
+      const flags = { components:"libraryComponents", groups:"libraryGroups", layouts:"libraryLayouts", templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", themes:"libraryThemes", styles:"libraryStyles", properties:"libraryProperties", rules:"libraryRules", behaviors:"libraryBehaviors", flows:"interactionLibrary", functions:"libraryFunctions" };
+      const flag = flags[collection];
+      if (flag) await game.user.setFlag("nexus", flag, store.collections[collection]);
+    };
     const refreshTagOptions = () => {
       const options = panel.querySelector(".nexus-library-filter-options");
       if (!options) return;
@@ -450,7 +455,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const collection = duplicateEntry.dataset.libraryDuplicateCollection;
         const entryId = duplicateEntry.dataset.libraryDuplicateEntry;
         try {
-          await updateNexusLibraryStore(game.user, store => {
+          const savedStore = await updateNexusLibraryStore(game.user, store => {
             const original = store.collections[collection]?.find(item => String(item.id) === entryId);
             if (!original) throw new Error("O item original não existe mais.");
             const copy = foundry.utils.deepClone(original);
@@ -462,6 +467,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             store.collections[collection].push(copy);
             return store;
           });
+          await mirrorLegacyCollection(collection, savedStore);
           renderGenericCollection(detailCollection());
           ui.notifications.info("Cópia criada na Biblioteca.");
         } catch (error) { ui.notifications.error("Não foi possível duplicar: " + error.message); }
@@ -478,7 +484,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const confirmed = await foundry.applications.api.DialogV2.confirm({ window: { title: "Excluir item da Biblioteca" }, content: "<p>Excluir este item? A ação não altera componentes já inseridos nas fichas.</p>", rejectClose: false });
         if (!confirmed) return;
         try {
-          await updateNexusLibraryStore(game.user, store => { store.collections[collection] = store.collections[collection].filter(item => String(item.id) !== entryId); return store; });
+          const savedStore = await updateNexusLibraryStore(game.user, store => { store.collections[collection] = store.collections[collection].filter(item => String(item.id) !== entryId); return store; });
+          await mirrorLegacyCollection(collection, savedStore);
           if (["properties","rules","behaviors","functions"].includes(collection)) game.nexus?.logic?.registry?.remove?.(entryId);
           const preferences = getLibraryPreferences(); const key = collection + ":" + entryId;
           preferences.favorites = preferences.favorites.filter(item => item !== key); preferences.recent = preferences.recent.filter(item => item !== key); delete preferences.assignments[key];
@@ -508,12 +515,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             try { if (updatedAsset) game.nexus?.logic?.registry?.register?.(updatedAsset, { replace: true }); }
             catch (registryError) { console.warn("NEXUS | Não foi possível atualizar o registro lógico após editar metadados.", registryError); }
           }
-          const legacyFlagByCollection = { templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", styles:"libraryStyles", rules:"libraryRules", behaviors:"libraryBehaviors", properties:"libraryProperties", functions:"libraryFunctions" };
-          const legacyFlag = legacyFlagByCollection[collection];
-          if (legacyFlag) {
-            try { await game.user.setFlag("nexus", legacyFlag, savedStore.collections[collection]); }
-            catch (mirrorError) { console.warn("NEXUS | Falha ao espelhar a coleção legada da Biblioteca.", mirrorError); }
-          }
+          try { await mirrorLegacyCollection(collection, savedStore); }
+          catch (mirrorError) { console.warn("NEXUS | Falha ao espelhar a coleção legada da Biblioteca.", mirrorError); }
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
           const activeSectionKey = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
