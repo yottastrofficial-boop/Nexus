@@ -477,9 +477,15 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       if (deleteEntry && panel.contains(deleteEntry)) {
         const collection = deleteEntry.dataset.libraryDeleteCollection;
         const entryId = deleteEntry.dataset.libraryDeleteEntry;
-        if (["properties","rules","behaviors","functions"].includes(collection)) {
-          const dependents = game.nexus?.logic?.registry?.getDependents?.(entryId) ?? [];
-          if (dependents.length) { ui.notifications.warn("Este item possui dependências e não pode ser excluído agora."); return; }
+        const { store: dependencyStore } = readNexusLibraryStore(game.user, getLegacyLibraryFlags());
+        const storedDependents = NEXUS_LIBRARY_COLLECTIONS.flatMap(name => dependencyStore.collections[name]
+          .filter(item => String(item.id) !== entryId && Array.isArray(item.dependencies))
+          .filter(item => item.dependencies.some(dependency => String(typeof dependency === "string" ? dependency : dependency?.id ?? "") === entryId)));
+        const logicDependents = ["properties","rules","behaviors","functions"].includes(collection)
+          ? (game.nexus?.logic?.registry?.getDependents?.(entryId) ?? []) : [];
+        if (storedDependents.length || logicDependents.length) {
+          ui.notifications.warn("Este item possui dependências e não pode ser excluído agora.");
+          return;
         }
         const confirmed = await foundry.applications.api.DialogV2.confirm({ window: { title: "Excluir item da Biblioteca" }, content: "<p>Excluir este item? A ação não altera componentes já inseridos nas fichas.</p>", rejectClose: false });
         if (!confirmed) return;
