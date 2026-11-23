@@ -65,6 +65,12 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 - Documentos Foundry não são duplicados. O UUID é resolvido pelo bridge e as permissões nativas continuam válidas.
 - A importação de backup preserva escopos: fluxos pessoais permanecem pessoais e fluxos do mundo permanecem no setting do mundo.
 
+## Definições e instâncias de componentes
+
+Definições reutilizáveis ficam na Biblioteca; instâncias ficam nos layouts dos Actors e mantêm `libraryDefinitionId` e `libraryDefinitionVersion`. O histórico de versões pertence à definição, evitando copiar um snapshot completo para cada instância. Overrides locais são calculados contra a versão de origem.
+
+Ao publicar uma nova versão a partir de uma instância vinculada, o NEXUS preserva a versão anterior no histórico, atualiza a instância usada como origem e deixa as demais independentes. O Inspector pode mostrar quantas instâncias do Actor atual têm atualização disponível. A atualização é explícita, preserva overrides e posição, e permite selecionar somente instâncias compatíveis. Instâncias antigas sem histórico suficiente são marcadas para revisão manual, não atualizadas automaticamente.
+
 ## Importação e exportação
 
 O backup completo da Biblioteca inclui componentes, grupos, layouts, assets, temas, templates, mídia, estilos, propriedades, regras, comportamentos, fluxos e funções. A exportação é feita pelo serviço da Biblioteca, inicializado no núcleo com o registro de tipos compartilhado, não pela ficha.
