@@ -49,6 +49,7 @@ jobs:
           node --experimental-default-type=module tests/media-infrastructure.mjs
           node --experimental-default-type=module tests/core-regressions.mjs
           node tests/validate-package.mjs
+          node --experimental-default-type=module tests/docs-consistency.mjs
           node --experimental-default-type=module tests/group-render-performance.mjs
 
       - name: Build Foundry package
