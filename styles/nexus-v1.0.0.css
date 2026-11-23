@@ -8269,3 +8269,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* A barra de recurso é neutra por definição; valores são representados apenas pelo preenchimento. */
 .nexus-sheet-resource-preview .nexus-sheet-resource-track { background:#293443!important; }
 .nexus-sheet-resource-preview .nexus-sheet-resource-track>i { background:#8994a3!important; }
+
+.nexus-library-context-actions { display:flex; flex-wrap:wrap; gap:7px; padding-top:10px; border-top:1px solid var(--nexus-panel-border,#354b61); }
+.nexus-library-context-actions button { flex:1 1 100%; min-height:31px; padding:6px 9px; border:1px solid var(--nexus-panel-border,#43546a); border-radius:6px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-card,#263a4e); font-size:10px; cursor:pointer; }
+.nexus-library-panel .nexus-library-preview-stage>.nexus-sheet-resource-preview { width:78px!important; height:10px!important; min-height:10px!important; max-height:10px!important; align-self:center!important; }
+.nexus-library-panel .nexus-library-preview-stage>.nexus-sheet-resource-preview .nexus-sheet-resource-track { min-height:6px!important; height:6px!important; }
