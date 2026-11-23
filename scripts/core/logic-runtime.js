@@ -92,13 +92,29 @@ function cloneActionConfigSchema(schema) {
   return schema ? { fields: schema.fields.map(field => ({ ...field, ...(Object.prototype.hasOwnProperty.call(field, "defaultValue") ? { defaultValue: structuredClone(field.defaultValue) } : {}), options: field.options?.map(option => ({ ...option })) })) } : null;
 }
 
+function resolveActionConfig(config, schema) {
+  if (!schema) return config ?? {};
+  if (!config || typeof config !== "object" || Array.isArray(config)) return config;
+  const resolved = cloneInertConfigValue(config);
+  for (const field of schema.fields) {
+    if ((!Object.prototype.hasOwnProperty.call(resolved, field.key) || resolved[field.key] === undefined) &&
+        Object.prototype.hasOwnProperty.call(field, "defaultValue")) {
+      resolved[field.key] = cloneInertConfigValue(field.defaultValue);
+    }
+  }
+  return resolved;
+}
+
 function validateActionConfig(config, schema) {
   if (!schema) return [];
   if (!config || typeof config !== "object" || Array.isArray(config)) return ["A configuração do executor precisa ser um objeto."];
+  let effective;
+  try { effective = resolveActionConfig(config, schema); }
+  catch { return ["A configuração do executor precisa conter apenas dados JSON inertes."]; }
   const errors = [];
   for (const field of schema.fields) {
-    const present = Object.prototype.hasOwnProperty.call(config, field.key);
-    const value = config[field.key];
+    const present = Object.prototype.hasOwnProperty.call(effective, field.key);
+    const value = effective[field.key];
     const empty = !present || value === undefined || (value === null && field.type !== "json") || (typeof value === "string" && value.trim() === "");
     if (field.required && empty) {
       errors.push("Campo obrigatório: " + field.label + ".");
@@ -265,7 +281,8 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
           errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: "Ação não registrada no runtime: " + type });
           if (onError === "stop") break;
         } else {
-          const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+          const resolvedConfig = resolveActionConfig(action.config ?? {}, executor.configSchema);
+          const configErrors = validateActionConfig(resolvedConfig, executor.configSchema);
           if (configErrors.length) {
             errors.push({ nodeId: node.id, actionId: action.id ?? node.id, type, message: configErrors.join(" ") });
             if (onError === "stop") break;
@@ -278,7 +295,7 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
             const controller = new AbortController();
             let timer;
             try {
-              const execution = Promise.resolve(executor.execute({ action, config: action.config ?? {}, context, signal: controller.signal, invokeFunction, registry }));
+              const execution = Promise.resolve(executor.execute({ action, config: resolvedConfig, context, signal: controller.signal, invokeFunction, registry }));
               const timeout = new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("Tempo limite da ação excedido.")); }, timeoutMs); });
               const value = await Promise.race([execution, timeout]);
               results.push({ nodeId: node.id, actionId: action.id ?? node.id, type, status: "success", value });
@@ -322,7 +339,8 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         const executor = actions.get(type);
         if (!executor) preview.push({ nodeId: node.id, type, status: "unregistered", allowed: false, effects: [], permissions: [] });
         else {
-          const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+          const resolvedConfig = resolveActionConfig(action.config ?? {}, executor.configSchema);
+      const configErrors = validateActionConfig(resolvedConfig, executor.configSchema);
           if (configErrors.length) {
             preview.push({ nodeId: node.id, type, status: "invalid-config", allowed: false, errors: configErrors, effects: [...executor.effects], permissions: [...executor.permissions] });
           } else {
@@ -389,7 +407,7 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
       let timer;
       try {
         const execution = Promise.resolve(executor.execute({
-          action, config: action.config ?? {}, context, signal: controller.signal,
+          action, config: resolvedConfig, context, signal: controller.signal,
           invokeFunction, registry
         }));
         const timeout = new Promise((_, reject) => {
