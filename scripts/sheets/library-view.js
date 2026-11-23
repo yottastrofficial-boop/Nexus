@@ -14,6 +14,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
     const tagFilter = panel.querySelector("[data-library-tag]");
     if (tagFilter) tagFilter.value = sheet._libraryTagFilter ?? "all";
+    const originFilter = panel.querySelector("[data-library-origin]");
+    if (originFilter) originFilter.value = sheet._libraryOriginFilter ?? "all";
     sheet._libraryAssetScope??="core";
     sheet._librarySmartView??="all";
     const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
@@ -113,14 +115,15 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       : null;
     searchInput?.addEventListener("input", () => {
       const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
-      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
+      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
     });
-    panel.querySelector(".nexus-library-filter-options")?.addEventListener("click", () => {
+    panel.querySelector("[data-library-filter-popover]")?.addEventListener("click", () => {
       requestAnimationFrame(() => {
         const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
         if (active === "collection:all") void universalCatalog?.render({
           query: searchInput?.value ?? "",
           tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+          origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
           viewMode: sheet._libraryCollectionViewMode ?? "grid",
           cardSize: sheet._libraryCardSize ?? "medium"
         });
