@@ -65,7 +65,7 @@ Temas padrão são somente leitura. Temas pessoais podem ser editados como defin
 - Atualizações de definições não modificam instâncias existentes automaticamente.
 - Exclusão de ativos lógicos deve respeitar dependências registradas.
 
-## Estado da implementação — 1.0.0.90
+## Base existente — 1.0.0.90
 
 Implementado nesta etapa:
 - visão universal conectada ao catálogo de provedores (recursos NEXUS e referências de documentos Foundry), além de itens salvos, favoritos e recentes;
@@ -99,10 +99,34 @@ Módulos podem registrar provedores adicionais em `game.nexus.library.registerPr
 
 O fluxo desejado é: **origem → prévia/validação → destino compatível → confirmação**. Origens poderão incluir recursos NEXUS, documentos Foundry, compêndios explicitamente selecionados, arquivos do usuário e fontes externas compatíveis. Destinos poderão incluir documentos nativos, compêndios, fichas e coleções NEXUS.
 
-A descoberta universal está implementada na camada de serviço e sua primeira visão foi conectada ao Explorer existente por `scripts/library/catalog-explorer.js`. A ficha atua como adaptador, não como proprietária do catálogo. Os adaptadores de importação, validação de formatos e destinos ainda são etapas futuras. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
+A descoberta universal está implementada na camada de serviço e sua primeira visão foi conectada ao Explorer existente por `scripts/library/catalog-explorer.js`. A ficha atua como adaptador, não como proprietária do catálogo. O backup integral da Biblioteca possui validação, prévia e mesclagem sem sobrescrita automática; isso não equivale a adaptadores de importação de fontes externas ou destinos especializados, que permanecem futuros. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
 
 A interface final deve manter uma barra compacta de pesquisa e um único controle de filtros; ações aparecem contextualmente no Inspector/menu do recurso, não como uma fileira de botões permanentes para cada categoria.
 
 ## Área unificada Lógica
 
 Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões continuam sendo tipos distintos. A visão universal unifica descoberta e organização, não seus schemas, editores ou executores. Metadados comuns (origem, namespace, versão, permissões, etiquetas e dependências) podem ser apresentados de forma consistente sem colapsar os contratos especializados.
+
+## Extensão universal — branch de conclusão em andamento
+
+A branch `feature/library-universal-completion-2026-11-23` amplia a base sem alterar a versão publicada:
+
+- janela independente ApplicationV2, reutilizando o mesmo registro e o mesmo Explorer;
+- filtros por categoria, tipo específico, origem e etiqueta;
+- favoritos, recentes e pastas resolvidos por referências estáveis, inclusive UUIDs Foundry e fluxos do mundo;
+- ações contextuais declaradas pelos provedores: editar metadados, duplicar, excluir com verificação de dependências e abrir documentos Foundry;
+- atribuição de pastas no Inspector e gerenciamento de pastas na aplicação independente;
+- backup integral de todas as coleções, incluindo propriedades e funções, com separação entre fluxos pessoais e fluxos do mundo;
+- prévia de importação, relatório de conflitos e confirmação explícita antes de gravar;
+- cache fraco de metadados Foundry invalidado por hooks e serialização técnica somente quando o Inspector é expandido.
+
+O contrato de provedores inclui consulta por IDs para que favoritos, recentes e pastas não dependam de estar na primeira página do catálogo. Ações de provedores são enumeradas e validadas pelo registro; dados importados não são executados.
+
+### Limites ainda não concluídos
+
+- adaptadores externos de descoberta/importação e destinos compatíveis no estilo origem → prévia → validação → destino;
+- editores próprios completos para todos os tipos de Lógica e ações de aplicação para cada domínio;
+- edição de documentos Foundry por metadados do catálogo, que continua pertencendo às fichas nativas;
+- validação funcional em cliente real do Foundry VTT 14 build 360.
+
+A branch de conclusão não deve ser considerada release até que a cadeia de PRs seja integrada na ordem correta e a validação real seja concluída.
