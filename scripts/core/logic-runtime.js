@@ -54,9 +54,23 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
       : (flowInput?.type === "flow" && flowInput?.payload && typeof flowInput.payload === "object" ? flowInput : null);
     return { asset, flow: asset ? asset.payload : (flowInput?.payload ?? flowInput) };
   };
+  const validateFlowInput = (asset, flow) => {
+    if (typeof registry.validateAsset !== "function") return [];
+    const candidate = asset ?? {
+      id: "nexus.runtime.flow.transient",
+      namespace: "nexus.runtime",
+      type: "flow",
+      origin: "core",
+      payload: flow
+    };
+    const validation = registry.validateAsset(candidate);
+    return validation.valid ? [] : [...validation.errors];
+  };
   const runFlow = async (flowInput, context = {}) => {
     const { asset, flow } = resolveFlowInput(flowInput);
     if (!flow || typeof flow !== "object") throw new Error("Fluxo lógico inválido.");
+    const validationErrors = validateFlowInput(asset, flow);
+    if (validationErrors.length) throw new Error(validationErrors.join(" "));
     if (asset && !asset.enabled) return { status: "disabled", results: [], errors: [] };
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
     if (conditions.length > maxConditions) throw new Error("Fluxo excede o limite de condições.");
@@ -116,10 +130,8 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
   const simulateFlow = async (flowInput, context = {}) => {
     const { asset, flow } = resolveFlowInput(flowInput);
     if (!flow || typeof flow !== "object") return { status: "invalid", executed: false, actions: [], errors: ["Fluxo lógico inválido."] };
-    if (asset && typeof registry.validateAsset === "function") {
-      const validation = registry.validateAsset(asset);
-      if (!validation.valid) return { status: "invalid", executed: false, actions: [], errors: [...validation.errors] };
-    }
+    const validationErrors = validateFlowInput(asset, flow);
+    if (validationErrors.length) return { status: "invalid", executed: false, actions: [], errors: validationErrors };
     if (asset && !asset.enabled) return { status: "disabled", executed: false, actions: [], errors: [] };
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
     if (conditions.length > maxConditions) return { status: "invalid", executed: false, actions: [], errors: ["Fluxo excede o limite de condições."] };
