@@ -1,5 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { createLibraryCatalogExplorer } from "../library/catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
@@ -16,6 +16,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     if (tagFilter) tagFilter.value = sheet._libraryTagFilter ?? "all";
     const originFilter = panel.querySelector("[data-library-origin]");
     if (originFilter) originFilter.value = sheet._libraryOriginFilter ?? "all";
+    const compendiumFilter = panel.querySelector("[data-library-compendiums]");
+    if (compendiumFilter) populateLibraryCompendiumSelect(compendiumFilter, sheet._libraryCompendiumIds ?? []);
+    const getCompendiumIds = () => [...(compendiumFilter?.selectedOptions ?? [])].map(option => option.value).filter(Boolean).slice(0, 32);
     sheet._libraryAssetScope??="core";
     sheet._librarySmartView??="all";
     const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
@@ -119,7 +122,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       universalCatalogSearchTimer = setTimeout(() => {
         universalCatalogSearchTimer = null;
         const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
-        if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", kind: panel.querySelector("[data-library-kind]")?.value ?? "all", type: panel.querySelector("[data-library-type]")?.value ?? "all", viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
+        if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", kind: panel.querySelector("[data-library-kind]")?.value ?? "all", type: panel.querySelector("[data-library-type]")?.value ?? "all", compendiumIds: getCompendiumIds(), viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
       }, 160);
     });
     panel.querySelector("[data-library-filter-popover]")?.addEventListener("click", () => {
@@ -131,12 +134,14 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
           kind: panel.querySelector("[data-library-kind]")?.value ?? "all",
           type: panel.querySelector("[data-library-type]")?.value ?? "all",
+          compendiumIds: getCompendiumIds(),
           viewMode: sheet._libraryCollectionViewMode ?? "grid",
           cardSize: sheet._libraryCardSize ?? "medium"
         });
       });
     });
     panel.querySelector("[data-library-filter-popover]")?.addEventListener("change", () => {
+      sheet._libraryCompendiumIds = getCompendiumIds();
       const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
       if (active === "collection:all") void universalCatalog?.render({
         query: searchInput?.value ?? "",
