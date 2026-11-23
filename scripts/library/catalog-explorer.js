@@ -77,7 +77,7 @@ export function createLibraryCatalogExplorer({
 
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
-    if (thumbnail && !/^javascript:/i.test(thumbnail) && /^(https?:\/\/|\/|[a-z0-9_.-])/i.test(thumbnail)) {
+    if (thumbnail && /^(https?:\\/\\/|\\/|(?:\\.\\.?\\/)?[a-z0-9_.-]+(?:\\/[a-z0-9_.-]+)*)/i.test(thumbnail)) {
       const image = document.createElement("img");
       image.src = thumbnail;
       image.alt = "";
