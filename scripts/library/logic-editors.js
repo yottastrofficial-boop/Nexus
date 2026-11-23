@@ -1,4 +1,5 @@
 import { INTERACTION_EVENTS } from "../core/interactions.js";
+import { FOUNDRY_LOGIC_EVENTS } from "../core/foundry-logic-integration.js";
 
 const clone = value => structuredClone(value ?? {});
 const newId = prefix => prefix + "-" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
@@ -193,7 +194,7 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
       ["boolean", "Verdadeiro/falso"], ["number", "Número"], ["string", "Texto"]
     ]);
   } else if (asset.type === "behavior") {
-    note.textContent = "O comportamento reage a eventos e referencia um fluxo registrado. Não contém scripts.";
+    note.textContent = "O comportamento reage a eventos de interface ou do ciclo de vida do Foundry e referencia um fluxo registrado. Eventos Foundry: " + FOUNDRY_LOGIC_EVENTS.join(", ") + ". Não contém scripts.";
     addInput("events", "Eventos (separados por vírgula)", Array.isArray(payload.events) ? payload.events.join(", ") : payload.event ?? "");
     addInput("flowId", "ID do fluxo", payload.flowId ?? "");
     const available = runtime?.actionTypes ?? [];
