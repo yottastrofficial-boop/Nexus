@@ -7,7 +7,7 @@
  */
 const INSTANCE_ONLY_KEYS = new Set([
   "id", "definition", "x", "y", "z", "stackOrder",
-  "libraryDefinitionId", "libraryDefinitionVersion", "libraryOverrides"
+  "libraryDefinitionId", "libraryDefinitionVersion", "libraryDefinitionBaseline", "libraryOverrides"
 ]);
 
 function cloneSerializable(value) {
@@ -65,6 +65,7 @@ export function createLibraryComponentInstance(definition, {
     y: Number.isFinite(y) ? y : 0,
     libraryDefinitionId: String(definition.id),
     libraryDefinitionVersion: Math.max(1, Number(definitionVersion ?? definition.version) || 1),
+    libraryDefinitionBaseline: cloneSerializable(definition.settings ?? {}),
     libraryOverrides: cleanOverrides
   };
 }
@@ -108,7 +109,7 @@ export function getLibraryDefinitionUpdateStatus(definition, instance) {
   if (String(instance.type) !== String(definition.type)) return "type-mismatch";
   const definitionVersion = Math.max(1, Number(definition.version) || 1);
   const instanceVersion = Math.max(1, Number(instance.libraryDefinitionVersion) || 1);
-  if (definitionVersion > instanceVersion) return "update-available";
+  if (definitionVersion > instanceVersion) return instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object" ? "update-available" : "baseline-missing";
   if (definitionVersion < instanceVersion) return "instance-newer";
   return "current";
 }
@@ -122,9 +123,10 @@ export function updateLibraryComponentInstance(definition, instance) {
   if (!["update-available", "current"].includes(status)) {
     throw new Error("Esta instância não pode receber a definição selecionada: " + status);
   }
-  const overrides = instance.libraryOverrides && typeof instance.libraryOverrides === "object"
-    ? cloneSerializable(instance.libraryOverrides)
-    : collectLibraryInstanceOverrides(definition, instance);
+  const baseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object"
+    ? instance.libraryDefinitionBaseline
+    : definition.settings ?? {};
+  const overrides = collectLibraryInstanceOverrides({ settings: baseline }, instance);
   const updated = createLibraryComponentInstance(definition, {
     id: instance.id,
     position: { x: instance.x, y: instance.y },
@@ -150,6 +152,7 @@ export function planLibraryDefinitionUpdate(definition, layouts, { selectedInsta
   const available = [];
   let updatedCount = 0;
   let skippedCount = 0;
+  const requiresReview = [];
 
   for (const [layoutId, layout] of Object.entries(result)) {
     if (!Array.isArray(layout?.components)) continue;
@@ -158,6 +161,9 @@ export function planLibraryDefinitionUpdate(definition, layouts, { selectedInsta
       if (String(instance?.libraryDefinitionId ?? "") !== String(definition.id)) continue;
       const status = getLibraryDefinitionUpdateStatus(definition, instance);
       if (status !== "update-available") {
+        if (status === "baseline-missing") {
+          requiresReview.push({ layoutId: String(layoutId), instanceId: String(instance.id), status });
+        }
         if (status !== "current") skippedCount++;
         continue;
       }
@@ -177,6 +183,7 @@ export function planLibraryDefinitionUpdate(definition, layouts, { selectedInsta
   return {
     layouts: result,
     available,
+    requiresReview,
     updatedCount,
     pendingCount: available.length - updatedCount,
     skippedCount
