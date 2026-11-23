@@ -6,6 +6,7 @@
  * The caller supplies the registry and user-preference callbacks.
  */
 const PAGE_SIZE = 30;
+const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions"]);
 
 export const getLibraryCatalogResourceKey = resource => {
   const reference = resource?.reference ?? {};
@@ -15,6 +16,16 @@ export const getLibraryCatalogResourceKey = resource => {
   return `${String(resource?.providerId ?? "")}:${String(resource?.id ?? "")}`;
 };
 const resourceKey = getLibraryCatalogResourceKey;
+export const getLibraryCatalogPreferenceReference = key => {
+  const value = String(key ?? "");
+  const separator = value.indexOf(":");
+  if (separator <= 0 || separator === value.length - 1) return null;
+  const prefix = value.slice(0, separator);
+  if (LEGACY_COLLECTIONS.has(prefix)) {
+    return { providerId: "nexus-library", id: value };
+  }
+  return { providerId: prefix, id: value.slice(separator + 1) };
+};
 const text = (value, fallback = "") => String(value ?? fallback);
 
 function makeElement(tag, className, content = "") {
@@ -46,6 +57,9 @@ export function createLibraryCatalogExplorer({
   let currentSmartView = "all";
   let currentFolder = "";
   let currentTag = "all";
+  let currentViewMode = "grid";
+  let currentCardSize = "medium";
+  let smartOffset = 0;
 
   const renderEmpty = message => {
     container.replaceChildren(makeElement("p", "nexus-library-empty", message));
@@ -154,38 +168,71 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
     currentTag = tag;
+    currentViewMode = viewMode === "list" ? "list" : "grid";
+    currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
     const version = ++requestVersion;
     if (!append) {
       cursor = {};
+      smartOffset = 0;
       currentResources = [];
       container.replaceChildren();
     }
-    container.dataset.viewMode = "grid";
-    container.dataset.cardSize = "medium";
-    const page = await registry.list({
-      query: currentQuery,
-      kind: "all",
-      type: "all",
-      limit: PAGE_SIZE,
-      cursor
-    });
+    container.dataset.viewMode = currentViewMode;
+    container.dataset.cardSize = currentCardSize;
+    const preferences = getPreferences();
+    const smartKeys = currentSmartView === "favorites"
+      ? preferences.favorites
+      : currentSmartView === "recent"
+        ? preferences.recent
+        : currentFolder
+          ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
+          : null;
+    let page;
+    if (smartKeys) {
+      const keyPage = smartKeys.slice(smartOffset, smartOffset + PAGE_SIZE);
+      const references = keyPage.map(getLibraryCatalogPreferenceReference).filter(Boolean);
+      page = await registry.list({
+        query: currentQuery,
+        kind: "all",
+        type: "all",
+        limit: PAGE_SIZE,
+        references
+      });
+      if (version !== requestVersion) return;
+      const byKey = new Map(page.items.map(resource => [resourceKey(resource), resource]));
+      page = {
+        ...page,
+        items: keyPage.map(key => byKey.get(key)).filter(Boolean),
+        total: smartKeys.length,
+        hasMore: smartOffset + keyPage.length < smartKeys.length,
+        cursor: { smartOffset: smartOffset + keyPage.length }
+      };
+      smartOffset += append ? keyPage.length : 0;
+    } else {
+      page = await registry.list({
+        query: currentQuery,
+        kind: "all",
+        type: "all",
+        limit: PAGE_SIZE,
+        cursor,
+        tags: currentTag === "all" ? [] : [currentTag]
+      });
+    }
     if (version !== requestVersion) return;
 
     cursor = page.cursor ?? {};
     hasMore = Boolean(page.hasMore);
     currentResources = append ? [...currentResources, ...page.items] : [...page.items];
-    const preferences = getPreferences();
     const visible = currentResources.filter(resource => {
       const key = resourceKey(resource);
       if (currentSmartView === "favorites" && !preferences.favorites.includes(key)) return false;
       if (currentSmartView === "recent" && !preferences.recent.includes(key)) return false;
-      if (currentFolder && preferences.assignments[key] !== currentFolder) return false;
-      if (currentTag !== "all" && !resource.tags.some(value => String(value).toLocaleLowerCase("pt-BR") === String(currentTag).toLocaleLowerCase("pt-BR"))) return false;
+      if (smartKeys && !smartKeys.includes(key)) return false;
       return true;
     });
 
@@ -208,7 +255,7 @@ export function createLibraryCatalogExplorer({
     const heading = container.closest("[data-library-section-panel]")?.querySelector("[data-library-collection-heading]");
     const count = container.closest("[data-library-section-panel]")?.querySelector("[data-library-collection-count]");
     if (heading) heading.textContent = "Todos os recursos";
-    if (count) count.textContent = `${visible.length} exibidos · ${page.total} encontrados`;
+    if (count) count.textContent = `${currentResources.length} exibidos · ${page.total} encontrados`;
     if (!append) {
       detail.dataset.selectedProvider = "";
       detail.dataset.selectedResource = "";
