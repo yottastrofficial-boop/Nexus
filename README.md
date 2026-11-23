@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Versão atual em validação funcional:** 1.0.0.90. Build de teste para a rodada manual da ficha de personagem no Foundry VTT 14 build 360. Não contém correções funcionais em relação à 1.0.0.88; a ficha continua em validação e não deve ser considerada concluída.
+**Versão publicada:** 1.0.0.90. Esta versão conclui a etapa principal da Biblioteca Explorer, com coleções universais, pastas, favoritos, recentes, filtros dinâmicos e operações de gerenciamento. A validação funcional completa no Foundry VTT 14 build 360 ainda está pendente; a ficha e os demais fluxos não devem ser considerados integralmente validados.
 
 ## Visão geral
 
@@ -49,7 +49,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Versão atual | 1.0.0.90 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.90 está sendo preparada para teste; a validação visual e funcional completa no cliente Foundry continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. O pacote 1.0.0.90 foi publicado após CI e empacotamento aprovados; a validação visual e funcional no cliente Foundry continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -128,7 +128,7 @@ O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Ac
 - **Criar o grupo pai:** com os grupos selecionados, use a ação **Agrupar seleção**. Os grupos selecionados passam a ser filhos do novo grupo; seus componentes não são desmontados.
 - **Criar grupos em vários níveis:** selecione componentes e/ou grupos completos e use **Agrupar seleção** para criar um grupo pai. Para mover um grupo já existente para dentro de outro, selecione-o e escolha o **Grupo superior** no Inspector.
 - **Nomear e organizar:** selecione o grupo e edite seu nome no Inspector. A árvore de camadas reflete a hierarquia e permite recolher os níveis.
-- **Salvar na Biblioteca:** selecione o grupo pela árvore de camadas, abra **Meus itens → Grupos** e use **Salvar seleção**. O botão do Inspector do grupo continua disponível.
+- **Salvar na Biblioteca:** selecione o grupo pela árvore de camadas, abra **Meus componentes** e use a área **Composições** para salvar a seleção. O botão do Inspector do grupo continua disponível.
 - **Compartilhar componentes:** selecione um componente salvo em Meus Componentes e use **Copiar pacote** ou **Exportar JSON**.
 - **Compartilhar grupos e layouts:** selecione a composição salva e use as ações de copiar ou exportar pacote.
 - **Importar:** use **Importar pacote** para colar um código ou **Importar pacote JSON** para selecionar um arquivo. O formato unificado reconhece componentes, grupos hierárquicos e layouts, mantendo compatibilidade com os formatos antigos.
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A última versão publicada é a **1.0.0.89**. A **1.0.0.90** é a candidata desta rodada, com a Biblioteca unificada; a publicação depende da validação automatizada do pacote. A **1.0.0.90** está sendo preparada como build de teste da ficha; a publicação só será considerada concluída após o GitHub Actions confirmar o pacote e a Release.
+A última versão publicada é a **1.0.0.90**. O pacote foi validado e anexado à Release; isso não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
