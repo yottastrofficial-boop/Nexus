@@ -376,6 +376,22 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
   if (!documentBridge || typeof documentBridge.list !== "function" || typeof documentBridge.resolve !== "function") {
     throw new TypeError("O FoundryDocumentBridge é obrigatório.");
   }
+  const toResource = record => ({
+    id: record.uuid,
+    kind: "document",
+    type: record.type,
+    name: record.name,
+    description: "",
+    tags: [record.type, record.isCompendium ? "compendium" : "world"],
+    thumbnail: record.img,
+    folder: record.folder,
+    origin: record.isCompendium ? "compendium" : "world",
+    reference: { providerId: "foundry-documents", uuid: record.uuid },
+    capabilities: ["resolve"],
+    isExternal: false,
+    isCompendium: record.isCompendium
+  });
+
   const list = async ({
     query = "",
     type = "all",
@@ -390,7 +406,25 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     }
     const validTypes = new Set(Object.keys(documentBridge.types ?? {}));
     const requestedType = type === "all" || !validTypes.has(type) ? "all" : type;
-    const requestedIds = new Set(Array.isArray(ids) ? ids.map(String).slice(0, 500) : []);
+    const requestedIds = [...new Set(Array.isArray(ids) ? ids.map(String).filter(Boolean).slice(0, 500) : [])];
+
+    if (requestedIds.length) {
+      if (typeof documentBridge.reference !== "function") {
+        throw new Error("O bridge de documentos não oferece referências estáveis para esta consulta.");
+      }
+      const records = await Promise.all(requestedIds.map(async uuid => {
+        try {
+          const document = await documentBridge.resolve({ uuid });
+          return documentBridge.reference(document);
+        } catch {
+          return null;
+        }
+      }));
+      const items = records.filter(record => record && (requestedType === "all" || record.type === requestedType))
+        .map(toResource);
+      return { items, total: items.length, hasMore: false, nextCursor: null, errors: [] };
+    }
+
     const offset = safeOffset(cursor);
     const page = await documentBridge.list({
       type: requestedType,
@@ -400,24 +434,10 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
       compendiumIds
     });
     return {
-      items: page.items.filter(record => !requestedIds.size || requestedIds.has(record.uuid)).map(record => ({
-        id: record.uuid,
-        kind: "document",
-        type: record.type,
-        name: record.name,
-        description: "",
-        tags: [record.type, record.isCompendium ? "compendium" : "world"],
-        thumbnail: record.img,
-        folder: record.folder,
-        origin: record.isCompendium ? "compendium" : "world",
-        reference: { providerId: "foundry-documents", uuid: record.uuid },
-        capabilities: ["resolve"],
-        isExternal: false,
-        isCompendium: record.isCompendium
-      })),
-      total: requestedIds.size ? page.items.filter(record => requestedIds.has(record.uuid)).length : page.total,
-      hasMore: requestedIds.size ? false : page.hasMore,
-      nextCursor: requestedIds.size ? null : page.hasMore ? offset + page.items.length : null,
+      items: page.items.map(toResource),
+      total: page.total,
+      hasMore: page.hasMore,
+      nextCursor: page.hasMore ? offset + page.items.length : null,
       errors: page.errors ?? []
     };
   };
