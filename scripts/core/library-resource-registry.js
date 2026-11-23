@@ -9,7 +9,6 @@ import { THEME_PALETTES } from "./theme.js";
 
 const PROVIDER_ID = /^[a-z][a-z0-9._-]{1,63}$/i;
 const MAX_PAGE_SIZE = 50;
-const LOGIC_COLLECTION_TYPES = Object.freeze({ properties: "property", rules: "rule", behaviors: "behavior", flows: "flow", functions: "function" });
 const COLLECTION_TYPES = Object.freeze({
   components: "component",
   groups: "composition",
@@ -237,8 +236,9 @@ export function createLibraryResourceRegistry() {
 /** Provider for personal NEXUS collections and the built-in component catalog. */
 export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
   if (typeof getUser !== "function") throw new TypeError("getUser() é obrigatório.");
-  const getCollections = async () => {
-    const user = getUser();
+  const metadataCache = new WeakMap();
+
+  const getCollections = async user => {
     if (!user) return {};
     const canonical = user.getFlag?.("nexus", "libraryStore");
     if (canonical?.collections && typeof canonical.collections === "object" &&
@@ -247,16 +247,15 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     return readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store.collections;
   };
 
-  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0 } = {}) => {
-    const collections = await getCollections();
+  const buildMetadata = async user => {
+    const collections = await getCollections(user);
     const resources = [];
     for (const [collection, entries] of Object.entries(collections)) {
       if (!Array.isArray(entries) || !COLLECTION_KINDS[collection]) continue;
       for (const entry of entries) {
-        const resourceKind = COLLECTION_KINDS[collection] ?? "resource";
-        resources.push({
+        resources.push(normalizeResource({
           id: collection + ":" + String(entry.id),
-          kind: resourceKind,
+          kind: COLLECTION_KINDS[collection],
           type: COLLECTION_TYPES[collection] === "component" ? String(entry.type ?? "component") : COLLECTION_TYPES[collection] ?? collection,
           name: entry.name ?? entry.label ?? entry.title ?? entry.id,
           description: entry.description ?? "",
@@ -266,11 +265,11 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
           origin: entry.origin ?? "personal",
           reference: { providerId: "nexus-library", collection, id: String(entry.id) },
           capabilities: ["resolve"]
-        });
+        }, "nexus-library"));
       }
     }
     for (const asset of Array.isArray(catalog.assets) ? catalog.assets : []) {
-      resources.push({
+      resources.push(normalizeResource({
         id: "builtin:" + String(asset.key),
         kind: "component",
         type: String(asset.type ?? "asset"),
@@ -281,14 +280,14 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         origin: "core",
         reference: { providerId: "nexus-library", builtin: "asset", key: String(asset.key) },
         capabilities: ["resolve"]
-      });
+      }, "nexus-library"));
     }
     const builtInThemes = [
       ...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })),
       ...(Array.isArray(catalog.themes) ? catalog.themes : [])
     ];
     for (const theme of builtInThemes) {
-      resources.push({
+      resources.push(normalizeResource({
         id: "builtin-theme:" + String(theme.id ?? theme.key),
         kind: "theme",
         type: "theme",
@@ -298,15 +297,36 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         origin: "core",
         reference: { providerId: "nexus-library", builtin: "theme", key: String(theme.id ?? theme.key) },
         capabilities: ["resolve"]
-      });
+      }, "nexus-library"));
     }
+    resources.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    return Object.freeze(resources);
+  };
+
+  const getMetadata = async () => {
+    const user = getUser();
+    if (!user || (typeof user !== "object" && typeof user !== "function")) return buildMetadata(user);
+    let metadata = metadataCache.get(user);
+    if (!metadata) {
+      metadata = await buildMetadata(user);
+      metadataCache.set(user, metadata);
+    }
+    return metadata;
+  };
+
+  // Canonical Library writes invalidate the metadata-only index; full payloads are never cached here.
+  globalThis.Hooks?.on?.("nexusLibraryUpdated", user => {
+    if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
+  });
+
+  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0 } = {}) => {
+    const resources = await getMetadata();
     const search = cleanText(query, 160).toLocaleLowerCase();
     const filtered = resources.filter(resource =>
       (kind === "all" || resource.kind === kind) &&
       (type === "all" || resource.type === type) &&
-      matchesText({ ...resource, tags: resource.tags ?? [] }, search)
-    ).map(resource => normalizeResource(resource, "nexus-library"));
-    filtered.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+      matchesText(resource, search)
+    );
     const offset = safeOffset(cursor);
     const pageSize = safeLimit(limit);
     const items = filtered.slice(offset, offset + pageSize);
@@ -325,7 +345,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     if (reference?.builtin === "theme") {
       return [...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })), ...(catalog.themes ?? [])].find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
     }
-    const collections = await getCollections();
+    const collections = await getCollections(getUser());
     const collection = String(reference?.collection ?? "");
     const id = String(reference?.id ?? "");
     if (!Array.isArray(collections[collection])) throw new Error("Coleção NEXUS desconhecida: " + collection);
