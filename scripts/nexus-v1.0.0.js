@@ -21,6 +21,7 @@ Hooks.once("init", () => {
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
   game.nexus.media.pipeline = createMediaProcessingPipeline({
     capabilityService: game.nexus.media.capabilities,
+    resourceManager: game.nexus.resources,
     adapters: [createBrowserMediaAdapter(game.nexus.media.capabilities)]
   });
   game.nexus.media.storage = createMediaStorageRouter([
