@@ -30,6 +30,11 @@ test("valida expressões lógicas usando o parser seguro do Core", () => {
     type: "rule",
     payload: { expression: "1 + )" }
   }), /expressão lógica válida/);
+  assert.doesNotThrow(() => registry.register({
+    id: "nexus.personal.rule.numeric",
+    type: "rule",
+    payload: { expression: "@system.attributes.corpo.value + 2", resultType: "number" }
+  }), "Regras também podem produzir cálculos numéricos, não apenas booleanos.");
 });
 
 test("valida gatilhos, condições e ações de fluxos sem executar payloads", () => {
