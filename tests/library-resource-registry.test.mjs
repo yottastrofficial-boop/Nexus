@@ -44,7 +44,7 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 4);
+assert.equal(nexusPage.total, 11, "A listagem inclui coleções pessoais, catálogo de componentes e temas padrão.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
@@ -53,7 +53,9 @@ assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
 const nextNexusPage = await nexusProvider.list({ limit: 2, cursor: nexusPage.nextCursor });
 assert.equal(nextNexusPage.items.length, 2);
 assert.equal(nextNexusPage.hasMore, false);
-assert.equal(nextNexusPage.items.find(item => item.type === "behaviors")?.kind, "logic");
+const behaviorPage = await nexusProvider.list({ kind: "logic", type: "behavior" });
+assert.equal(behaviorPage.items.length, 1);
+assert.equal(behaviorPage.items[0].kind, "logic");
 
 const component = await nexusProvider.resolve({
   providerId: "nexus-library",
