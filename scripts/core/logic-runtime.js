@@ -79,7 +79,13 @@ function normalizeActionConfigSchema(schema) {
     }
     return Object.freeze(normalized);
   });
-  return Object.freeze({ fields: Object.freeze(fields) });
+  const normalizedSchema = { fields: Object.freeze(fields) };
+  for (const field of fields) {
+    if (!Object.prototype.hasOwnProperty.call(field, "defaultValue")) continue;
+    const errors = validateActionConfig({ [field.key]: field.defaultValue }, { fields: [field] });
+    if (errors.length) throw new TypeError("Valor padrão inválido para " + field.label + ": " + errors.join(" "));
+  }
+  return Object.freeze(normalizedSchema);
 }
 
 function cloneActionConfigSchema(schema) {
@@ -157,6 +163,14 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     const key = String(type ?? "").trim().toLowerCase();
     const descriptor = actions.get(key);
     return descriptor ? { type: key, effects: [...descriptor.effects], permissions: [...descriptor.permissions], configSchema: cloneActionConfigSchema(descriptor.configSchema) } : null;
+  };
+  const validateRegisteredActionConfig = (type, config) => {
+    const key = String(type ?? "").trim().toLowerCase();
+    const descriptor = actions.get(key);
+    if (!descriptor) return { registered: false, hasSchema: false, valid: true, errors: [] };
+    const schema = descriptor.configSchema;
+    const errors = validateActionConfig(config ?? {}, schema);
+    return { registered: true, hasSchema: Boolean(schema), valid: errors.length === 0, errors };
   };
   const registerFunction = ({ id, execute, effects = ["read"], permissions = [] } = {}) => {
     const key = String(id ?? "").trim().toLowerCase();
@@ -485,5 +499,5 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     }
     return results;
   };
-  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, getActionDefinitions, getActionDefinition, runFlow, simulateFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get actionDefinitions() { return getActionDefinitions(); }, get functionIds() { return [...functions.keys()]; } });
+  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, getActionDefinitions, getActionDefinition, validateActionConfig: validateRegisteredActionConfig, runFlow, simulateFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get actionDefinitions() { return getActionDefinitions(); }, get functionIds() { return [...functions.keys()]; } });
 }
