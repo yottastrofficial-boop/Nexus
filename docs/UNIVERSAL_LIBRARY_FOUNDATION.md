@@ -60,4 +60,4 @@ A padronização visual será incremental e baseada em tokens CSS e wrappers App
 - Nenhum recurso pesado é pré-carregado na inicialização do sistema.
 - Índices de compêndios só são solicitados quando IDs específicos de pacotes são informados; não existe varredura automática de todos os compêndios.
 - A RAM real não pode ser lida com precisão confiável; o orçamento é contábil e conservador.
-- A UI da Biblioteca, menus contextuais, preparação de sessão e integração visual ampla permanecem etapas posteriores.
+- A visão universal inicial do Explorer já consome o catálogo por páginas e resolve detalhes somente após seleção. Menus contextuais completos, importação/destinos, preparação de sessão e integração visual ampla permanecem etapas posteriores.
