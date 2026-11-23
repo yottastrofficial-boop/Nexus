@@ -75,6 +75,23 @@ export function recordLibraryRecent(raw, collection, entryId) {
   return preferences;
 }
 
+export function renameLibraryFolder(raw, folderId, name) {
+  const preferences = normalizeLibraryPreferences(raw);
+  const folder = preferences.folders.find(item => item.id === folderId);
+  if (!folder) throw new Error("A pasta selecionada não existe.");
+  const cleanName = cleanText(name);
+  if (!cleanName) throw new Error("Informe um nome para a pasta.");
+  if (preferences.folders.some(item =>
+    item.id !== folderId &&
+    item.collection === folder.collection &&
+    item.name.toLocaleLowerCase("pt-BR") === cleanName.toLocaleLowerCase("pt-BR")
+  )) {
+    throw new Error("Já existe uma pasta com esse nome nesta coleção.");
+  }
+  folder.name = cleanName;
+  return preferences;
+}
+
 export function removeLibraryFolder(raw, folderId) {
   const preferences = normalizeLibraryPreferences(raw);
   preferences.folders = preferences.folders.filter(folder => folder.id !== folderId);
