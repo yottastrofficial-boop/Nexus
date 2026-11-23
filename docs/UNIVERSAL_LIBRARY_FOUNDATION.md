@@ -21,12 +21,15 @@ O `LibraryResourceRegistry` é a camada comum de descoberta para os provedores d
 Provedores iniciais:
 - `nexus-library`: coleções pessoais do NEXUS, incluindo componentes, composições, layouts, modelos, mídia, temas, estilos e os cinco tipos de Lógica.
 - `foundry-documents`: Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards, sempre por UUID e respeitando a disponibilidade/permissão nativa.
+- Fluxos salvos no escopo do mundo são indexados com origem `world`, sem serem convertidos silenciosamente em definições pessoais.
 
 A API é exposta em `game.nexus.library`:
 - `list(options)`: pesquisa e pagina metadados de vários provedores numa mesma consulta.
 - `resolve(reference)`: obtém o objeto completo do provedor de origem, sob demanda.
+- `getActions(reference, resource)` e `executeAction(actionId, reference, resource, params)`: oferecem ações contextuais declaradas pelo provedor e impedem operações não anunciadas.
 - `registerProvider(provider)`: permite que módulos contribuam com recursos no mesmo catálogo, sem criar uma janela ou botão próprio.
 - `getProviders()`: informa os provedores registrados.
+- `open()`: abre a janela independente ApplicationV2 da Biblioteca.
 
 O cursor é separado por provedor para que uma fonte grande não obrigue o catálogo a carregar todos os demais recursos. A listagem não clona payloads completos das coleções pessoais; constrói apenas cartões leves e mantém um índice de metadados por usuário. Gravações pelo armazenamento canônico emitem `nexusLibraryUpdated`, invalidando esse índice sem reter documentos ou payloads completos. Os cinco tipos de Lógica continuam distintos e as Macros continuam documentos nativos do Foundry.
 
@@ -60,4 +63,4 @@ A padronização visual será incremental e baseada em tokens CSS e wrappers App
 - Nenhum recurso pesado é pré-carregado na inicialização do sistema.
 - Índices de compêndios só são solicitados quando IDs específicos de pacotes são informados; não existe varredura automática de todos os compêndios.
 - A RAM real não pode ser lida com precisão confiável; o orçamento é contábil e conservador.
-- A visão universal inicial do Explorer já consome o catálogo por páginas e resolve detalhes somente após seleção. Menus contextuais completos, importação/destinos, preparação de sessão e integração visual ampla permanecem etapas posteriores.
+- A visão universal consome o catálogo por páginas e resolve detalhes somente após seleção. Ações contextuais estão disponíveis para recursos pessoais NEXUS e abertura de documentos Foundry; editores especializados, adaptadores externos de importação/destinos, preparação de sessão e integração visual ampla permanecem etapas posteriores.
