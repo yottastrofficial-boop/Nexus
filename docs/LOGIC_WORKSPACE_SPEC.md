@@ -85,7 +85,7 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - Funções e ações são registradas explicitamente por código confiável; o runtime não interpreta JavaScript importado.
 - `game.nexus.logic.registerAction()` e `registerFunction()` expõem o registro de executores confiáveis a módulos; `runFlow()` e `dispatch()` expõem execução e despacho, e `getExecutors()` lista os IDs disponíveis. Nenhum executor padrão é presumido até que o Core defina operações e permissões específicas.
 - `foundry-logic-integration.js` conecta Hooks de criação/atualização/remoção de Actors, Items, Tokens e Combats, além de início/rodada/turno de combate, aos eventos `actor.*`, `item.*`, `token.*` e `combat.*` dos Comportamentos.
-- O despacho de eventos de ciclo de vida ocorre somente no GM ativo para evitar execução duplicada entre clientes. O executor inicial `nexus.actor.update` grava exclusivamente em caminhos `system.*`, exige propriedade OWNER e aceita somente valores JSON inertes.
+- O despacho de eventos de ciclo de vida ocorre somente no GM ativo para evitar execução duplicada entre clientes. A verificação de permissões usa o usuário que originou o Hook, nunca os privilégios do GM executor. O executor inicial `nexus.actor.update` grava exclusivamente em caminhos `system.*`, exige propriedade OWNER do usuário originador e aceita somente valores JSON inertes.
 - O bridge limita reentrada por documento/evento, profundidade de encadeamento e captura falhas por Comportamento para que um fluxo defeituoso não interrompa os demais.
 - O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
 
