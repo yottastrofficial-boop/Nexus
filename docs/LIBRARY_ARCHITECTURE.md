@@ -80,7 +80,7 @@ Conteúdo importado permanece dado inerte. HTML, CSS, JavaScript, macros ou comp
 ## Regras de desempenho
 
 - Não carregar payloads completos durante a busca.
-- Não percorrer todos os compêndios automaticamente; IDs de compêndios precisam ser selecionados explicitamente.
+- Não percorrer todos os compêndios automaticamente; o usuário seleciona explicitamente os pacotes no filtro e o bridge ainda valida a visibilidade/permissão antes de indexar.
 - Usar paginação independente por provedor e limitar páginas.
 - Debounce de pesquisa para evitar varreduras a cada tecla.
 - Reutilizar metadados leves por documento Foundry via cache fraco, invalidado pelos hooks de criação/atualização/exclusão; não reter documentos completos.
