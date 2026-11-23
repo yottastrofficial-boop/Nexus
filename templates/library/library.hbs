@@ -1,0 +1,63 @@
+<section class="nexus-tool-panel nexus-library-panel nexus-library-standalone" data-tool-panel="library">
+  <div class="nexus-library-toolbar nexus-library-toolbar-unified">
+    <label class="nexus-library-search-wrap">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na Biblioteca..." autocomplete="off">
+    </label>
+    <div class="nexus-library-filter-wrap">
+      <label class="nexus-library-app-filter">
+        <span>Origem</span>
+        <select data-library-origin>
+          <option value="all">Todas</option>
+          <option value="core">Padrão</option>
+          <option value="personal">Pessoais</option>
+          <option value="module">Módulos</option>
+          <option value="addon">Complementos</option>
+          <option value="world">Mundo</option>
+          <option value="compendium">Compêndios</option>
+        </select>
+      </label>
+      <label class="nexus-library-app-filter">
+        <span>Etiqueta</span>
+        <input type="text" data-library-tag value="all" placeholder="Todas as etiquetas" maxlength="48">
+      </label>
+    </div>
+    <div class="nexus-library-view-controls" role="group" aria-label="Modo de visualização">
+      <button type="button" data-library-collection-view-mode="grid" class="active" aria-pressed="true" title="Grade" aria-label="Visualização em grade"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
+      <button type="button" data-library-collection-view-mode="list" aria-pressed="false" title="Lista" aria-label="Visualização em lista"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
+    </div>
+    <label class="nexus-library-app-size">
+      <span>Tamanho</span>
+      <select data-library-card-size>
+        <option value="small">Pequeno</option>
+        <option value="medium" selected>Médio</option>
+        <option value="large">Grande</option>
+      </select>
+    </label>
+  </div>
+  <div class="nexus-library-body nexus-library-app-body">
+    <nav class="nexus-library-section-tabs" aria-label="Navegação da Biblioteca">
+      <button type="button" class="active" data-library-smart-view="all"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Todos os itens</span></button>
+      <button type="button" data-library-smart-view="favorites"><i class="fa-solid fa-star" aria-hidden="true"></i><span>Favoritos</span></button>
+      <button type="button" data-library-smart-view="recent"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Recentes</span></button>
+      <div class="nexus-library-custom-folder-heading">Pastas</div>
+      <div class="nexus-library-custom-folders" data-library-app-folders></div>
+      <button type="button" data-library-create-folder class="nexus-library-create-folder"><i class="fa-solid fa-folder-plus" aria-hidden="true"></i><span>Nova pasta</span></button>
+    </nav>
+    <section class="nexus-library-section-panel" data-library-section-panel="collection">
+      <div class="nexus-library-collection-header">
+        <strong data-library-collection-heading>Todos os recursos</strong>
+        <span data-library-collection-count>0 encontrados</span>
+      </div>
+      <div class="nexus-library-explorer-layout">
+        <div class="nexus-library-generic-items" data-library-generic-items data-library-list-heading="Todos os recursos"></div>
+        <aside class="nexus-library-generic-details" data-library-generic-details>
+          <div class="nexus-library-detail-placeholder">
+            <strong>Inspector</strong>
+            <p>Selecione um recurso para consultar seus detalhes e ações disponíveis.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</section>
