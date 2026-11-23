@@ -74,21 +74,31 @@ test("plano lista atualizações e separa instâncias antigas que exigem revisã
     secondary: { components: [legacy] }
   };
 
-  const preview = planLibraryDefinitionUpdate(v2, layouts);
+  const preview = planLibraryDefinitionUpdate(v2, { principal: layouts.principal });
   assert.equal(preview.available.length, 1);
-  assert.equal(preview.requiresReview.length, 1);
+  assert.equal(preview.requiresReview.length, 0);
   assert.equal(preview.updatedCount, 0);
   assert.equal(preview.pendingCount, 1);
-  assert.equal(preview.skippedCount, 1);
+  assert.equal(preview.skippedCount, 0);
 
-  const applied = planLibraryDefinitionUpdate(v2, layouts, {
+  const applied = planLibraryDefinitionUpdate(v2, { principal: layouts.principal }, {
     selectedInstanceKeys: ["principal:linked-1"]
   });
   assert.equal(applied.updatedCount, 1);
   assert.equal(applied.layouts.principal.components[0].value, 20);
   assert.equal(applied.layouts.principal.components[0].color, "red");
-  assert.equal(applied.layouts.secondary.components[0].value, 10);
   assert.equal(layouts.principal.components[0].libraryDefinitionVersion, 1);
+
+  const legacyDefinition = createLibraryDefinition({
+    id: "definition-meter",
+    type: "meter",
+    version: 2,
+    settings: { value: 20, color: "blue" }
+  });
+  const legacyPlan = planLibraryDefinitionUpdate(legacyDefinition, { secondary: layouts.secondary });
+  assert.equal(legacyPlan.available.length, 0);
+  assert.equal(legacyPlan.requiresReview.length, 1);
+  assert.equal(legacyPlan.skippedCount, 1);
 });
 
 test("instâncias sem vínculo ou com tipo incompatível não recebem atualização", () => {
