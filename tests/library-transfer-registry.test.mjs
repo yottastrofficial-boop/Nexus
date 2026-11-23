@@ -57,7 +57,7 @@ test("rejeita payloads executáveis, protótipos e limites excedidos", async () 
 
   await assert.rejects(() => registry.prepare({
     sourceId: "unsafe-source", destinationId: "safe-destination",
-    input: { items: [{ type: "component", name: "A", data: { nested: { script: "alert(1)" } } }] }
+    input: { items: [{ type: "component", name: "A", data: { nested: { code: () => "alert(1)" } } }] }
   }), /somente dados JSON simples/);
   await assert.rejects(() => registry.prepare({
     sourceId: "unsafe-source", destinationId: "safe-destination",
