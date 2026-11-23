@@ -250,7 +250,7 @@ export function createLibraryResourceRegistry() {
 }
 
 /** Provider for personal NEXUS collections and the built-in component catalog. */
-export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
+export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], catalog = {} } = {}) {
   if (typeof getUser !== "function") throw new TypeError("getUser() é obrigatório.");
   const metadataCache = new WeakMap();
 
@@ -284,6 +284,23 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         }, "nexus-library"));
       }
     }
+    let worldFlows = [];
+    try { worldFlows = getWorldFlows() ?? []; } catch { worldFlows = []; }
+    for (const entry of Array.isArray(worldFlows) ? worldFlows : []) {
+      if (!entry || typeof entry !== "object" || !entry.id || !entry.flow) continue;
+      resources.push(normalizeResource({
+        id: "world-flows:" + String(entry.id),
+        kind: "logic",
+        type: "flow",
+        name: entry.name ?? entry.flow.name ?? "Fluxo salvo",
+        description: entry.flow.description ?? "",
+        tags: entry.flow.tags ?? [],
+        origin: "world",
+        reference: { providerId: "nexus-library", collection: "world-flows", id: String(entry.id) },
+        capabilities: ["resolve"]
+      }, "nexus-library"));
+    }
+
     for (const asset of Array.isArray(catalog.assets) ? catalog.assets : []) {
       resources.push(normalizeResource({
         id: "builtin:" + String(asset.key),
@@ -334,6 +351,12 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
   globalThis.Hooks?.on?.("nexusLibraryUpdated", user => {
     if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
   });
+  globalThis.Hooks?.on?.("updateSetting", setting => {
+    if (setting?.namespace === "nexus" && setting?.key === "interactionLibrary") {
+      const user = getUser();
+      if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
+    }
+  });
 
   const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [], tags = [], origin = "all" } = {}) => {
     const resources = await getMetadata();
@@ -360,6 +383,11 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
   };
 
   const resolve = async reference => {
+    if (reference?.collection === "world-flows") {
+      let entries = [];
+      try { entries = getWorldFlows() ?? []; } catch { entries = []; }
+      return (Array.isArray(entries) ? entries : []).find(entry => String(entry?.id ?? "") === String(reference.id ?? "")) ?? null;
+    }
     if (reference?.builtin === "asset") {
       return (catalog.assets ?? []).find(item => String(item.key) === String(reference.key)) ?? null;
     }
@@ -468,9 +496,9 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
 }
 
 /** Creates the default unified catalog with NEXUS and Foundry sources connected. */
-export function createDefaultLibraryResourceRegistry({ getUser, documentBridge, catalog } = {}) {
+export function createDefaultLibraryResourceRegistry({ getUser, getWorldFlows, documentBridge, catalog } = {}) {
   const registry = createLibraryResourceRegistry();
-  registry.register(createNexusLibraryProvider({ getUser, catalog }));
+  registry.register(createNexusLibraryProvider({ getUser, getWorldFlows, catalog }));
   if (documentBridge) registry.register(createFoundryLibraryProvider({ documentBridge }));
   return registry;
 }
