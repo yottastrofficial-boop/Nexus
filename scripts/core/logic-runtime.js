@@ -49,7 +49,9 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     return (await permissionResolver({ permissions: descriptor.permissions, effects: descriptor.effects, context, target })) === true;
   };
   const runFlow = async (flowInput, context = {}) => {
-    const asset = typeof flowInput === "string" ? registry.resolve(flowInput, "flow") : null;
+    const asset = typeof flowInput === "string"
+      ? registry.resolve(flowInput, "flow")
+      : (flowInput?.type === "flow" && flowInput?.payload && typeof flowInput.payload === "object" ? flowInput : null);
     const flow = asset ? asset.payload : (flowInput?.payload ?? flowInput);
     if (!flow || typeof flow !== "object") throw new Error("Fluxo lógico inválido.");
     if (asset && !asset.enabled) return { status: "disabled", results: [], errors: [] };
