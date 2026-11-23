@@ -2351,6 +2351,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   preferences = removeLibraryFolder(preferences, "folder-assets");
   assert.equal(preferences.assignments["assets:meter-1"], undefined,
     "Excluir uma pasta deve limpar a associação sem excluir o item da coleção");
+  preferences = removeLibraryFolder(preferences, "folder-global");
+  assert.equal(preferences.assignments["media:portrait-1"], undefined);
   assert.equal(preferences.folders.length, 0);
   const malformed = normalizeLibraryPreferences({ schemaVersion: 1, folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
   assert.deepEqual(malformed.favorites, ["x"]);
