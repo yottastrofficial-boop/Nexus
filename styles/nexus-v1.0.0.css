@@ -8735,3 +8735,18 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-field-help{grid-column:1/-1;color:var(--nexus-muted-color,#999);font-size:10px;line-height:1.35}
 .nexus-library-graph-inspector .nexus-library-flow-enabled{grid-column:1/-1}
 @media(max-width:640px){.nexus-library-graph-inspector{grid-template-columns:minmax(0,1fr)}.nexus-library-graph-inspector-head{grid-column:1}}
+
+/* Flow action schemas, inline validation and keyboard-accessible graph controls */
+.nexus-library-flow-action-row{display:grid;gap:10px}
+.nexus-library-flow-action-head{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:end}
+.nexus-library-flow-action-head>.nexus-library-flow-enabled{grid-column:1}
+.nexus-library-flow-config-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.2));border-radius:7px;background:var(--nexus-panel-background,rgba(128,128,128,.035))}
+.nexus-library-flow-config-fields .wide{grid-column:1/-1}
+.nexus-library-flow-field-error{display:block;color:var(--nexus-error-color,#c34b4b);font-size:11px;line-height:1.35}
+.nexus-library-flow-field-error[hidden]{display:none}
+.nexus-library-flow-field [aria-invalid="true"],.nexus-library-graph-inspector [aria-invalid="true"]{border-color:var(--nexus-error-color,#c34b4b)!important;outline-color:var(--nexus-error-color,#c34b4b)}
+.nexus-library-graph-move-controls{display:flex;gap:5px;align-items:center}
+.nexus-library-graph-move-controls button{min-width:34px;min-height:30px}
+.nexus-library-graph-node:focus-visible,.nexus-library-graph-node button:focus-visible,.nexus-library-graph-inspector :focus-visible,.nexus-library-flow-builder :focus-visible{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
+.nexus-library-graph-drag-handle{user-select:none}
+@media(max-width:640px){.nexus-library-flow-action-head,.nexus-library-flow-config-fields{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-config-fields .wide{grid-column:1}}
