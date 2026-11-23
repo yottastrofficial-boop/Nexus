@@ -74,7 +74,8 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
     maxItems: Math.max(1, Math.min(10000, Number(limits.maxItems) || DEFAULT_LIMITS.maxItems)),
     maxDepth: Math.max(1, Math.min(40, Number(limits.maxDepth) || DEFAULT_LIMITS.maxDepth)),
     maxBytes: Math.max(1024, Math.min(25 * 1024 * 1024, Number(limits.maxBytes) || DEFAULT_LIMITS.maxBytes)),
-    maxNodes: Math.max(1000, Math.min(500000, Number(limits.maxNodes) || 100000))
+    maxNodes: Math.max(1000, Math.min(500000, Number(limits.maxNodes) || 100000)),
+    maxPendingPlans: Math.max(1, Math.min(500, Number(limits.maxPendingPlans) || 100))
   };
   const sources = new Map();
   const destinations = new Map();
@@ -109,10 +110,11 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
     const destination = destinations.get(String(destinationId ?? ""));
     if (!source) throw new Error("Adaptador de origem indisponível: " + sourceId);
     if (!destination) throw new Error("Adaptador de destino indisponível: " + destinationId);
+    if (plans.size >= safeLimits.maxPendingPlans) throw new Error("Limite de prévias pendentes atingido; descarte prévias antigas antes de continuar.");
     const transfer = normalizePackage(await source.read(input, context), safeLimits);
     const supported = [], unsupported = [];
     for (const item of transfer.items) {
-      if (await destination.supports(item, context)) supported.push(item);
+      if ((await destination.supports(item, context)) === true) supported.push(item);
       else unsupported.push({ id: item.id, type: item.type, name: item.name, reason: "Tipo não compatível com o destino." });
     }
     const rawDestinationPreview = await destination.preview(Object.freeze(supported), { context, metadata: transfer.metadata, format: transfer.format, version: transfer.version });
