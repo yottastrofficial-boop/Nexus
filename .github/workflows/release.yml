@@ -54,6 +54,7 @@ jobs:
           node --experimental-default-type=module tests/resource-lifecycle.test.mjs
           node --experimental-default-type=module tests/foundry-document-bridge.test.mjs
           node --experimental-default-type=module tests/library-resource-registry.test.mjs
+          node --experimental-default-type=module tests/library-catalog-explorer.test.mjs
 
       - name: Build Foundry package
         run: |
