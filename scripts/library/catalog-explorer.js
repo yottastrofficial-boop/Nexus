@@ -251,18 +251,23 @@ export function createLibraryCatalogExplorer({
     const advanced = makeElement("details", "nexus-library-resource-raw");
     advanced.append(makeElement("summary", "", "Dados técnicos"));
     const raw = makeElement("pre");
-    const safeResolved = resolved && typeof resolved.toObject === "function"
-      ? resolved.toObject()
-      : resolved;
-    try {
-      raw.textContent = JSON.stringify(safeResolved, (property, value) => {
-        if (["parent", "apps", "sheet", "collection", "pack", "folder"].includes(property)) return undefined;
-        if (typeof value === "function") return undefined;
-        return value;
-      }, 2).slice(0, 10000);
-    } catch {
-      raw.textContent = "Não foi possível gerar uma prévia dos dados deste recurso.";
-    }
+    raw.textContent = "Abra para carregar os dados técnicos deste recurso.";
+    advanced.addEventListener("toggle", () => {
+      if (!advanced.open || raw.dataset.loaded === "true") return;
+      const safeResolved = resolved && typeof resolved.toObject === "function"
+        ? resolved.toObject()
+        : resolved;
+      try {
+        raw.textContent = JSON.stringify(safeResolved, (property, value) => {
+          if (["parent", "apps", "sheet", "collection", "pack", "folder"].includes(property)) return undefined;
+          if (typeof value === "function") return undefined;
+          return value;
+        }, 2).slice(0, 10000);
+      } catch {
+        raw.textContent = "Não foi possível gerar uma prévia dos dados deste recurso.";
+      }
+      raw.dataset.loaded = "true";
+    });
     advanced.append(raw);
     detail.replaceChildren(heading, meta, description, facts, folderLabel, actions, advanced);
   };
