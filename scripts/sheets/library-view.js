@@ -115,7 +115,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       options.replaceChildren();
       for (const value of ["all", ...tags]) {
         const button = document.createElement("button"); button.type = "button";
-        button.dataset.libraryTagOption = value; button.textContent = value === "all" ? "Todas" : value;
+        button.dataset.libraryTagOption = value; button.textContent = value === "all" ? "Sem filtro" : value;
         button.classList.toggle("active", value === selected); options.append(button);
       }
     };
