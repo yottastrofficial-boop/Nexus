@@ -8657,3 +8657,23 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-logic-editor-actions{display:flex;justify-content:flex-end}
 .nexus-library-logic-editor-save{min-height:30px;padding:5px 12px}
 .nexus-library-logic-editor-status{min-height:1.2em}
+
+/* Construtor visual de Fluxos declarativos */
+.nexus-library-flow-builder{display:grid;gap:12px;min-width:0}
+.nexus-library-flow-group{display:grid;gap:8px;min-width:0;padding:10px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.25));border-radius:7px}
+.nexus-library-flow-group-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.nexus-library-flow-group-head>div{display:grid;gap:3px}
+.nexus-library-flow-group-head strong{font-size:12px}
+.nexus-library-flow-group-head small,.nexus-library-flow-empty{color:var(--nexus-muted-color,#888);font-size:10px;line-height:1.4}
+.nexus-library-flow-add,.nexus-library-flow-remove{flex:0 0 auto;min-height:27px;padding:4px 9px;font-size:10px}
+.nexus-library-flow-rows{display:grid;gap:8px;min-width:0}
+.nexus-library-flow-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;padding:8px;border-radius:6px;background:var(--nexus-panel-background,rgba(128,128,128,.05))}
+.nexus-library-flow-field{display:grid;gap:4px;min-width:0;font-size:10px}
+.nexus-library-flow-field>span{font-weight:600}
+.nexus-library-flow-field input,.nexus-library-flow-field select,.nexus-library-flow-field textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.nexus-library-flow-field textarea{resize:vertical;font-family:var(--font-monospace,monospace);font-size:10px}
+.nexus-library-flow-row-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
+.nexus-library-flow-field.wide{grid-column:1/-1}
+.nexus-library-flow-enabled{display:flex;align-items:center;gap:6px;font-size:10px}
+.nexus-library-flow-enabled input{width:auto;min-width:0}
+@media(max-width:640px){.nexus-library-flow-row-fields{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-row{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-remove{justify-self:end}}
