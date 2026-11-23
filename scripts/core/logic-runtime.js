@@ -48,11 +48,14 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     }
     return (await permissionResolver({ permissions: descriptor.permissions, effects: descriptor.effects, context, target })) === true;
   };
-  const runFlow = async (flowInput, context = {}) => {
+  const resolveFlowInput = flowInput => {
     const asset = typeof flowInput === "string"
       ? registry.resolve(flowInput, "flow")
       : (flowInput?.type === "flow" && flowInput?.payload && typeof flowInput.payload === "object" ? flowInput : null);
-    const flow = asset ? asset.payload : (flowInput?.payload ?? flowInput);
+    return { asset, flow: asset ? asset.payload : (flowInput?.payload ?? flowInput) };
+  };
+  const runFlow = async (flowInput, context = {}) => {
+    const { asset, flow } = resolveFlowInput(flowInput);
     if (!flow || typeof flow !== "object") throw new Error("Fluxo lógico inválido.");
     if (asset && !asset.enabled) return { status: "disabled", results: [], errors: [] };
     const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
@@ -110,6 +113,54 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     }
     return { status: errors.length ? (results.length ? "partial" : "failed") : "success", conditionResults, results, errors };
   };
+  const simulateFlow = async (flowInput, context = {}) => {
+    const { asset, flow } = resolveFlowInput(flowInput);
+    if (!flow || typeof flow !== "object") return { status: "invalid", executed: false, actions: [], errors: ["Fluxo lógico inválido."] };
+    if (asset && !asset.enabled) return { status: "disabled", executed: false, actions: [], errors: [] };
+    const conditions = Array.isArray(flow.conditions) ? flow.conditions.filter(item => item && String(item.expression ?? "").trim()) : [];
+    if (conditions.length > maxConditions) return { status: "invalid", executed: false, actions: [], errors: ["Fluxo excede o limite de condições."] };
+    const resolver = typeof resolveProperty === "function"
+      ? path => resolveProperty(path, context)
+      : path => readContextPath(context, path);
+    const conditionResults = conditions.map(condition => evaluateNexusCondition(condition.expression, resolver) === true);
+    const join = flow.conditionJoin === "any" ? "any" : "all";
+    const conditionsPass = !conditions.length || (join === "all" ? conditionResults.every(Boolean) : conditionResults.some(Boolean));
+    if (!conditionsPass) return { status: "skipped", executed: false, reason: "conditions", conditionResults, actions: [], errors: [] };
+    const queue = (Array.isArray(flow.actions) ? flow.actions : []).filter(action => action && action.enabled !== false);
+    if (queue.length > maxActions) return { status: "invalid", executed: false, conditionResults, actions: [], errors: ["Fluxo excede o limite de ações."] };
+    const actionsPreview = [];
+    for (const action of queue) {
+      const type = String(action.type ?? "").trim().toLowerCase();
+      const executor = actions.get(type);
+      if (!executor) {
+        actionsPreview.push({ actionId: action.id ?? null, type, status: "unregistered", allowed: false, effects: [], permissions: [] });
+        continue;
+      }
+      const permissionDescriptor = {
+        permissions: [...new Set([...(asset?.permissions ?? []), ...executor.permissions])],
+        effects: executor.effects
+      };
+      let allowed = false;
+      try { allowed = await permitted(permissionDescriptor, context, action); }
+      catch { allowed = false; }
+      actionsPreview.push({
+        actionId: action.id ?? null,
+        type,
+        status: allowed ? "ready" : "denied",
+        allowed,
+        effects: [...executor.effects],
+        permissions: [...permissionDescriptor.permissions]
+      });
+    }
+    const blocked = actionsPreview.some(item => !item.allowed);
+    return {
+      status: blocked ? "blocked" : "ready",
+      executed: false,
+      conditionResults,
+      actions: actionsPreview,
+      errors: []
+    };
+  };
   const invokeFunction = async (id, args = [], context = {}) => {
     const fn = functions.get(String(id ?? "").toLowerCase());
     if (!fn) throw new Error("Função lógica não registrada: " + id);
@@ -143,5 +194,5 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     }
     return results;
   };
-  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, runFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get functionIds() { return [...functions.keys()]; } });
+  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, runFlow, simulateFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get functionIds() { return [...functions.keys()]; } });
 }
