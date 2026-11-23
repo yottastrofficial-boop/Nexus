@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -49,3 +49,67 @@ assert.deepEqual(
 assert.equal(getLibraryCatalogPreferenceReference("invalid"), null);
 
 console.log("Library catalog Explorer identity tests passed.");
+
+test("compendium selector exposes only packs allowed by Foundry permissions", () => {
+  const previousGame = globalThis.game;
+  const previousConst = globalThis.CONST;
+  const previousDocument = globalThis.document;
+  try {
+    const user = { isGM: false };
+    const allowed = {
+      collection: "world.public", documentName: "JournalEntry", visible: true,
+      metadata: { label: "Público" },
+      testUserPermission: (candidate, level) => candidate === user && level === 2
+    };
+    const denied = {
+      collection: "world.private", documentName: "JournalEntry", visible: true,
+      metadata: { label: "Privado" },
+      testUserPermission: () => false
+    };
+    const unchecked = {
+      collection: "world.unknown", documentName: "JournalEntry", visible: true,
+      metadata: { label: "Sem verificação" }
+    };
+    const hidden = {
+      collection: "world.hidden", documentName: "JournalEntry", visible: false,
+      metadata: { label: "Oculto" },
+      testUserPermission: () => true
+    };
+    globalThis.game = { user, packs: { contents: [allowed, denied, unchecked, hidden] } };
+    globalThis.CONST = { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2 } };
+    globalThis.document = { createElement: tag => ({ tagName: tag }) };
+    const select = {
+      children: [],
+      replaceChildren() { this.children = []; },
+      append(option) { this.children.push(option); }
+    };
+
+    const result = populateLibraryCompendiumSelect(select, ["world.public", "world.private"]);
+    assert.deepEqual(result, ["world.public"]);
+    assert.equal(select.children.length, 1);
+    assert.equal(select.children[0].value, "world.public");
+    assert.equal(select.children[0].selected, true);
+    assert.match(select.children[0].textContent, /Público/);
+  } finally {
+    if (previousGame === undefined) delete globalThis.game; else globalThis.game = previousGame;
+    if (previousConst === undefined) delete globalThis.CONST; else globalThis.CONST = previousConst;
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+  }
+});
+
+test("GM can select visible supported compendiums without a player permission check", () => {
+  const previousGame = globalThis.game;
+  const previousDocument = globalThis.document;
+  try {
+    globalThis.game = {
+      user: { isGM: true },
+      packs: { contents: [{ collection: "world.gm", documentName: "Macro", visible: true }] }
+    };
+    globalThis.document = { createElement: tag => ({ tagName: tag }) };
+    const select = { children: [], replaceChildren() { this.children = []; }, append(option) { this.children.push(option); } };
+    assert.deepEqual(populateLibraryCompendiumSelect(select), ["world.gm"]);
+  } finally {
+    if (previousGame === undefined) delete globalThis.game; else globalThis.game = previousGame;
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+  }
+});
