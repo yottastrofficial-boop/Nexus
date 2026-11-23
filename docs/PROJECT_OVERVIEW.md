@@ -4,8 +4,8 @@
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
-- Commit de referência: `335db5149ede0d595bb69a3f3102d1f4495c6ff7`
-- Versão candidata: `1.0.0.89` (base de código da `1.0.0.88`)
+- Commit de referência: `branch feature/library-unified-explorer-1.0.0.90 — commit em revisão`
+- Versão candidata: `1.0.0.90` (candidata com conclusão da Biblioteca`)
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -36,7 +36,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na linha 1.0.0.89 (sem mudanças funcionais em relação à 1.0.0.88)
+## Implementação presente na linha 1.0.0.90 (candidata para validação da Biblioteca)
 
 A árvore atual contém, entre outros:
 
@@ -54,7 +54,7 @@ A árvore atual contém, entre outros:
 - Tipos de Actor `player-character`, `npc` e `character`.
 - Token de protótipo vinculado ao Actor por padrão, preservando a possibilidade de desvincular depois.
 - Grupos hierárquicos e composição visual com modos de organização.
-- Biblioteca com coleções reutilizáveis, preferências, metadados, navegação e Inspector.
+- Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas.
 - Separação entre definições reutilizáveis e instâncias inseridas nas fichas.
 - Motor de expressões seguro, sem execução arbitrária de JavaScript.
 - Infraestrutura tipada de Lógica, persistência e runtime declarativo.
