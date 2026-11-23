@@ -1,21 +1,31 @@
 const ID_PATTERN = /^[a-z][a-z0-9._-]{1,63}$/i;
 const DEFAULT_LIMITS = Object.freeze({ maxItems: 2000, maxDepth: 20, maxBytes: 5 * 1024 * 1024 });
 
-function cloneTransferData(value, depth = 0, maxDepth = DEFAULT_LIMITS.maxDepth) {
+function cloneTransferData(value, depth = 0, maxDepth = DEFAULT_LIMITS.maxDepth, budget = { nodes: 0, bytes: 0, maxNodes: 100000, maxBytes: DEFAULT_LIMITS.maxBytes }) {
   if (depth > maxDepth) throw new Error("Pacote de transferência excede a profundidade permitida.");
-  if (value === null || typeof value === "string" || typeof value === "boolean") return value;
+  budget.nodes++;
+  if (budget.nodes > budget.maxNodes) throw new Error("Pacote de transferência contém dados demais.");
+  if (typeof value === "string") { budget.bytes += value.length; if (budget.bytes > budget.maxBytes) throw new Error("Pacote de transferência excede o limite de tamanho."); return value; }
+  if (value === null || typeof value === "boolean") return value;
   if (typeof value === "number") {
     if (!Number.isFinite(value)) throw new Error("Pacote de transferência contém número inválido.");
     return value;
   }
-  if (Array.isArray(value)) return value.map(item => cloneTransferData(item, depth + 1, maxDepth));
+  if (Array.isArray(value)) {
+    if (value.length > 10000) throw new Error("Pacote de transferência contém uma lista grande demais.");
+    return value.map(item => cloneTransferData(item, depth + 1, maxDepth, budget));
+  }
   if (!value || typeof value !== "object" || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
     throw new Error("Pacote de transferência aceita somente dados JSON simples.");
   }
+  const entries = Object.entries(value);
+  if (entries.length > 10000) throw new Error("Pacote de transferência contém um objeto grande demais.");
   const result = {};
-  for (const [key, child] of Object.entries(value)) {
+  for (const [key, child] of entries) {
+    budget.bytes += key.length;
+    if (budget.bytes > budget.maxBytes) throw new Error("Pacote de transferência excede o limite de tamanho.");
     if (["__proto__", "prototype", "constructor"].includes(key)) throw new Error("Pacote de transferência contém chave proibida.");
-    result[key] = cloneTransferData(child, depth + 1, maxDepth);
+    result[key] = cloneTransferData(child, depth + 1, maxDepth, budget);
   }
   return result;
 }
@@ -29,12 +39,13 @@ function deepFreeze(value) {
 function normalizePackage(raw, limits) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new TypeError("A origem não retornou um pacote de transferência.");
   if (!Array.isArray(raw.items) || raw.items.length > limits.maxItems) throw new Error("Pacote inválido ou acima do limite de itens.");
+  const budget = { nodes: 0, bytes: 0, maxNodes: limits.maxNodes, maxBytes: limits.maxBytes };
   const items = raw.items.map((item, index) => {
     if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error("Item de transferência inválido na posição " + index + ".");
     const type = String(item.type ?? "").trim();
     const name = String(item.name ?? "").trim();
     if (!/^[a-z][a-z0-9._-]{0,63}$/i.test(type) || !name || name.length > 160) throw new Error("Item de transferência sem tipo ou nome válido.");
-    const data = cloneTransferData(item.data ?? {}, 0, limits.maxDepth);
+    const data = cloneTransferData(item.data ?? {}, 0, limits.maxDepth, budget);
     if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Dados do item precisam ser um objeto.");
     return deepFreeze({
       id: String(item.id ?? "item-" + index).slice(0, 192),
@@ -44,7 +55,7 @@ function normalizePackage(raw, limits) {
       data
     });
   });
-  const metadata = cloneTransferData(raw.metadata ?? {}, 0, limits.maxDepth);
+  const metadata = cloneTransferData(raw.metadata ?? {}, 0, limits.maxDepth, budget);
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) throw new Error("Metadados do pacote precisam ser um objeto.");
   const parsedVersion = Number(raw.version);
   const version = Number.isFinite(parsedVersion) && parsedVersion >= 1 ? parsedVersion : 1;
@@ -62,7 +73,8 @@ export function createLibraryTransferRegistry({ limits = {}, createPlanId } = {}
   const safeLimits = {
     maxItems: Math.max(1, Math.min(10000, Number(limits.maxItems) || DEFAULT_LIMITS.maxItems)),
     maxDepth: Math.max(1, Math.min(40, Number(limits.maxDepth) || DEFAULT_LIMITS.maxDepth)),
-    maxBytes: Math.max(1024, Math.min(25 * 1024 * 1024, Number(limits.maxBytes) || DEFAULT_LIMITS.maxBytes))
+    maxBytes: Math.max(1024, Math.min(25 * 1024 * 1024, Number(limits.maxBytes) || DEFAULT_LIMITS.maxBytes)),
+    maxNodes: Math.max(1000, Math.min(500000, Number(limits.maxNodes) || 100000))
   };
   const sources = new Map();
   const destinations = new Map();
