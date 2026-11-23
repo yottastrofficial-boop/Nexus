@@ -113,7 +113,7 @@ test("executor nexus.actor.update exige propriedade OWNER e altera apenas system
   const runtime = createLogicRuntime({ registry });
   const hooks = createHooks();
   const user = { id: "gm-1", isGM: true };
-  const gameRef = { user };
+  const gameRef = { user, users: { get: id => id === user.id ? user : null } };
   const constRef = { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } };
   const integration = installFoundryLogicIntegration({ hooks, runtime, gameRef, constRef, logger: { warn() {}, error() {} } });
   const updates = [];
