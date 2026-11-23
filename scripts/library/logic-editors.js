@@ -124,6 +124,13 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const root = make("section", "nexus-library-graph-builder");
   let graph = isRecord(payload.graph) ? layoutFlowGraph(clone(payload.graph)) : null;
   if (graph) { graph.nodes = Array.isArray(graph.nodes) ? graph.nodes : []; graph.edges = Array.isArray(graph.edges) ? graph.edges : []; }
+  const nodeTypeOptions = [["condition", "Condição"], ["action", "Ação"], ["end", "Fim"]];
+  const actionTypes = [...new Set(runtime?.actionTypes ?? [])];
+  const makeSelect = (value, options) => {
+    const node = make("select", "");
+    options.forEach(([key, label]) => { const option = make("option", "", label); option.value = key; option.selected = key === value; node.append(option); });
+    return node;
+  };
   const toolbar = make("div", "nexus-library-graph-toolbar");
   const title = make("div", "");
   title.append(make("strong", "", "Grafo de execução"), make("small", "", "Arraste os nós para organizar. Selecione conexões abaixo para definir o caminho de cada saída."));
@@ -152,13 +159,6 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const content = make("div", "nexus-library-graph-content");
   content.append(canvasScroll, edgesWrap);
 
-  const nodeTypeOptions = [["condition", "Condição"], ["action", "Ação"], ["end", "Fim"]];
-  const actionTypes = [...new Set(runtime?.actionTypes ?? [])];
-  const makeSelect = (value, options) => {
-    const node = make("select", "");
-    options.forEach(([key, label]) => { const option = make("option", "", label); option.value = key; option.selected = key === value; node.append(option); });
-    return node;
-  };
   const makeText = (value, placeholder) => { const node = make("input", ""); node.type = "text"; node.value = String(value ?? ""); node.placeholder = placeholder ?? ""; return node; };
   const field = (label, control, wide = false) => { const wrap = make("label", "nexus-library-flow-field" + (wide ? " wide" : "")); wrap.append(make("span", "", label), control); return wrap; };
   const freshNode = type => {
