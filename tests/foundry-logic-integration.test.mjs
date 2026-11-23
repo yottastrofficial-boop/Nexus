@@ -317,5 +317,11 @@ test("simulação avalia condições e permissões sem executar nenhum executor"
   const skipped = await runtime.simulateFlow(asset, { system: { resources: { pv: { value: 0 } } } });
   assert.equal(skipped.status, "skipped");
   assert.equal(skipped.reason, "conditions");
+  const invalid = await runtime.simulateFlow({
+    ...asset,
+    payload: { actions: [{ id: "bad", type: "nexus.actor.update", config: { path: "name", value: "unsafe" } }] }
+  }, { system: { resources: { pv: { value: 1 } } } });
+  assert.equal(invalid.status, "invalid");
+  assert.equal(invalid.executed, false);
   assert.equal(executions, 0);
 });
