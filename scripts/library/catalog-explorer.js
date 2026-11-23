@@ -73,7 +73,9 @@ export function createLibraryCatalogExplorer({
   savePreferences,
   canApplyResource = () => false,
   onApplyResource = null,
-  applyLabel = "Aplicar ao contexto"
+  applyLabel = "Aplicar ao contexto",
+  getUpdateInfo = null,
+  onUpdateInstances = null
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -162,6 +164,12 @@ export function createLibraryCatalogExplorer({
       return;
     }
     if (version !== requestVersion) return;
+    let updateInfo = null;
+    if (typeof getUpdateInfo === "function") {
+      try { updateInfo = await getUpdateInfo(resource, resolved); }
+      catch (error) { updateInfo = { error: error.message }; }
+    }
+    if (version !== requestVersion) return;
 
     const heading = makeElement("div", "nexus-library-detail-heading");
     heading.append(makeElement("strong", "nexus-library-detail-title", resource.name));
@@ -227,6 +235,30 @@ export function createLibraryCatalogExplorer({
       }
     }
 
+    const updateSection = makeElement("div", "nexus-library-definition-update");
+    if (updateInfo?.available?.length) {
+      updateSection.append(makeElement("p", "", updateInfo.available.length + " instância(s) podem receber uma atualização da definição."));
+      if (updateInfo.requiresReview?.length) {
+        updateSection.append(makeElement("p", "", updateInfo.requiresReview.length + " instância(s) antigas precisam de revisão manual."));
+      }
+      if (typeof onUpdateInstances === "function") {
+        const updateButton = makeElement("button", "", "Revisar e atualizar instâncias");
+        updateButton.type = "button";
+        updateButton.addEventListener("click", async () => {
+          try {
+            const result = await onUpdateInstances(resource, resolved, updateInfo);
+            if (result !== false) await renderDetails(resource);
+          } catch (error) {
+            detail.append(makeElement("p", "nexus-library-empty", "Não foi possível atualizar as instâncias: " + error.message));
+          }
+        });
+        updateSection.append(updateButton);
+      }
+    } else if (updateInfo?.requiresReview?.length) {
+      updateSection.append(makeElement("p", "", updateInfo.requiresReview.length + " instância(s) antigas precisam de revisão manual antes de receber uma atualização."));
+    }
+    if (updateInfo?.error) updateSection.append(makeElement("p", "nexus-library-empty", "Não foi possível verificar atualizações: " + updateInfo.error));
+
     const actions = makeElement("div", "nexus-library-item-actions");
     const availableActions = typeof registry.getActions === "function"
       ? registry.getActions(resource.reference, resource)
@@ -271,7 +303,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, save);
-          detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, editor, actions);
+          detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
 
@@ -344,7 +376,7 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, actions, advanced);
+    detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
   };
 
   const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
