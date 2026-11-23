@@ -14,6 +14,28 @@ Favoritos, recentes, pastas e etiquetas podem referenciar documentos pela chave 
 
 Macros nativas permanecem documentos Foundry. Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões continuam como tipos próprios do NEXUS. A Biblioteca pode apresentá-los sob uma área de automações/lógica unificada, sem converter um tipo no outro ou executar payloads importados. Integração com menus e editores específicos será etapa posterior.
 
+## Catálogo universal de recursos
+
+O `LibraryResourceRegistry` é a camada comum de descoberta para os provedores da Biblioteca. Cada provedor informa metadados leves e resolve o conteúdo completo somente quando solicitado.
+
+Provedores iniciais:
+- `nexus-library`: coleções pessoais do NEXUS, incluindo componentes, composições, layouts, modelos, mídia, temas, estilos e os cinco tipos de Lógica.
+- `foundry-documents`: Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards, sempre por UUID e respeitando a disponibilidade/permissão nativa.
+
+A API é exposta em `game.nexus.library`:
+- `list(options)`: pesquisa e pagina metadados de vários provedores numa mesma consulta.
+- `resolve(reference)`: obtém o objeto completo do provedor de origem, sob demanda.
+- `registerProvider(provider)`: permite que módulos contribuam com recursos no mesmo catálogo, sem criar uma janela ou botão próprio.
+- `getProviders()`: informa os provedores registrados.
+
+O cursor é separado por provedor para que uma fonte grande não obrigue o catálogo a carregar todos os demais recursos. A listagem não clona payloads completos das coleções pessoais; constrói apenas cartões leves. Os cinco tipos de Lógica continuam distintos e as Macros continuam documentos nativos do Foundry.
+
+### Referência de experiência: Plutonium
+
+A inspiração é o fluxo integrado de descoberta e importação: encontrar conteúdo numa origem, visualizar seus dados, escolher um destino compatível e importar sem navegar por uma ferramenta independente para cada tipo. No NEXUS, isso deverá ser implementado por adaptadores de origem e ações/destinos tipados (por exemplo, documento Foundry, compêndio, ficha ou coleção NEXUS). O catálogo atual fornece a base de descoberta e resolução; importadores e destinos ainda não foram implementados.
+
+Não haverá uma fileira de botões permanentes para áudio, imagens, cenas, macros e outros tipos. Eles serão recursos no mesmo catálogo; ações específicas aparecerão contextualmente no Inspector ou menu do item.
+
 ## RAM e ciclo de vida
 
 O `ResourceLifecycleManager` administra apenas objetos transitórios residentes em memória: decoders, previews, buffers e adaptadores. Ele é independente do cache IndexedDB já existente em `media-storage.js`.
