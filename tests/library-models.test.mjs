@@ -42,7 +42,7 @@ test("atualização controlada preserva overrides reais e aplica novos padrões"
   assert.equal(updated.z, 7);
   assert.equal(updated.stackOrder, 4);
   assert.equal(updated.libraryDefinitionVersion, 2);
-  assert.deepEqual(updated.libraryDefinitionBaseline, updatedDefinition.settings);
+  assert.equal(updated.libraryDefinitionBaseline, undefined);
   assert.equal(instance.libraryDefinitionVersion, 1);
 });
 
