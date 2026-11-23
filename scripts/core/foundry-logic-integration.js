@@ -158,6 +158,8 @@ export function createFoundryLogicEventBridge({ hooks = globalThis.Hooks, runtim
     // Hooks de documentos chegam a todos os clientes. Apenas o GM executa
     // comportamentos de ciclo de vida para evitar efeitos colaterais duplicados.
     if (gameRef?.user?.isGM !== true) return;
+    const activeGM = gameRef?.users?.activeGM;
+    if (activeGM?.id && activeGM.id !== gameRef.user.id) return;
     if (!document || (typeof document !== "object" && typeof document !== "function")) return;
     let active = activeDocuments.get(document);
     if (!active) { active = new Set(); activeDocuments.set(document, active); }
