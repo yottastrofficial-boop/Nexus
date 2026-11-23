@@ -103,7 +103,7 @@ Cada campo declara `key` (identificador técnico único), `label` (rótulo obrig
 - `checkbox`: booleano.
 - `select`: string selecionada em `options`, cada opção com `value` e `label`.
 - `json`: valor JSON inerte; aceita objetos, listas, números, strings, booleanos e `null`, sem funções, protótipos especiais ou estruturas executáveis.
-- Qualquer campo pode declarar `defaultValue`, verificado contra o tipo e os limites do próprio campo ao registrar o executor.
+- Qualquer campo pode declarar `defaultValue`, verificado contra o tipo e os limites do próprio campo ao registrar o executor. Quando a chave estiver ausente, o runtime fornece uma cópia do valor padrão ao executor sem alterar o fluxo persistido; valores explicitamente presentes são preservados.
 
 O schema aceita no máximo 32 campos e até 64 opções por seletor. Chaves especiais de protótipo e campos duplicados são rejeitados. Metadados expostos por `getActionDefinition()` e `getActionDefinitions()` são cópias isoladas. `validateActionConfig(type, config)` pré-valida com as mesmas regras do runtime e retorna `{ registered, hasSchema, valid, errors }`.
 
