@@ -9,25 +9,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     const assets=panel.querySelector("[data-library-assets]");
     if(!assets||panel.dataset.libraryMounted==="true")return;
     panel.dataset.libraryMounted="true";assets.replaceChildren();
-    const refreshTagOptions = () => {
-      const options = panel.querySelector(".nexus-library-filter-options");
-      if (!options) return;
-      const store = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store;
-      const tags = [...new Set(NEXUS_LIBRARY_COLLECTIONS.flatMap(name => store.collections[name].flatMap(entry => Array.isArray(entry.tags) ? entry.tags : [])).map(tag => String(tag).trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b,"pt-BR"));
-      const selected = panel.querySelector("[data-library-tag]")?.value ?? "all";
-      options.replaceChildren();
-      for (const value of ["all", ...tags]) {
-        const button = document.createElement("button"); button.type = "button";
-        button.dataset.libraryTagOption = value; button.textContent = value === "all" ? "Todas" : value;
-        button.classList.toggle("active", value === selected); options.append(button);
-      }
-    };
-    refreshTagOptions();
     const searchInput = panel.querySelector("[data-library-search]");
     if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
     const tagFilter = panel.querySelector("[data-library-tag]");
     if (tagFilter) tagFilter.value = sheet._libraryTagFilter ?? "all";
     sheet._libraryAssetScope??="core";
+    sheet._librarySmartView??="all";
     const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
     const preferredFolder=sheet._libraryFolder??NEXUS_LIBRARY_CATALOG.assets.find(item=>item.type===sheet._librarySelectedType)?.category;
     sheet._libraryFolder=availableFolders.some(folder=>folder.id===preferredFolder)?preferredFolder:(availableFolders[0]?.id??"core");
@@ -114,6 +101,21 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    const refreshTagOptions = () => {
+      const options = panel.querySelector(".nexus-library-filter-options");
+      if (!options) return;
+      const store = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store;
+      const tags = [...new Set(NEXUS_LIBRARY_COLLECTIONS.flatMap(name => store.collections[name].flatMap(entry => Array.isArray(entry.tags) ? entry.tags : [])).map(tag => String(tag).trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b,"pt-BR"));
+      const selected = panel.querySelector("[data-library-tag]")?.value ?? "all";
+      options.replaceChildren();
+      for (const value of ["all", ...tags]) {
+        const button = document.createElement("button"); button.type = "button";
+        button.dataset.libraryTagOption = value; button.textContent = value === "all" ? "Todas" : value;
+        button.classList.toggle("active", value === selected); options.append(button);
+      }
+    };
+    refreshTagOptions();
+
     const renderCustomFolderTree = collection => {
       const container = panel.querySelector("[data-library-custom-folders]");
       const heading = panel.querySelector("[data-library-custom-folder-heading]");
@@ -189,7 +191,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         if (selectedTag !== "all" && !entryTags.includes(selectedTag)) return false;
         if (filter === "favorites" && !preferences.favorites.includes(key)) return false;
         if (filter === "recent" && !preferences.recent.includes(key)) return false;
-
+        if (activeFolder && preferences.assignments[key] !== activeFolder) return false;
         return true;
       });
       container.replaceChildren();
@@ -205,12 +207,13 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const cardSizeSelect = panel.querySelector("[data-library-card-size]");
       if (cardSizeSelect) cardSizeSelect.value = sheet._libraryCardSize;
       for (const entry of visible) {
-        const key = `${collection}:${entry.id}`;
+        const entryCollection = entry.__libraryCollection ?? collection;
+        const key = `${entryCollection}:${entry.id}`;
         const card = document.createElement("article"); card.className = "nexus-library-generic-card";
         const select = document.createElement("button"); select.type = "button"; select.className = "nexus-library-generic-item";
         select.dataset.libraryEntry = entry.id; select.dataset.libraryCollection = entryCollection;
         select.dataset.libraryTags = (Array.isArray(entry.tags) ? entry.tags : []).map(tag => String(tag).toLocaleLowerCase("pt-BR")).join(" ");
-        const icon = document.createElement("i"); icon.className = genericCollectionIcons[collection]; icon.setAttribute("aria-hidden","true");
+        const icon = document.createElement("i"); icon.className = genericCollectionIcons[entryCollection] ?? genericCollectionIcons.assets; icon.setAttribute("aria-hidden","true");
         const title = document.createElement("strong"); title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome");
         const meta = document.createElement("small"); meta.textContent = String(entry.type ?? entry.sourceId ?? "Item salvo");
         select.append(icon,title,meta);
@@ -507,6 +510,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
     };
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>{
+      if (button.dataset.librarySmartView) { sheet._librarySmartView = button.dataset.librarySmartView; sheet._librarySelectedFolder = ""; panel.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item === button)); }
       if (button.dataset.libraryScope) {
         sheet._libraryAssetScope = button.dataset.libraryScope;
         folderNav.hidden = sheet._libraryAssetScope !== "core";
