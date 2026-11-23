@@ -57,3 +57,49 @@ export function getFlowGraphCanvasSize(graph, { nodeWidth = 220, nodeHeight = 30
     height: Math.max(360, ...nodes.map(node => (Number(node.y) || 0) + nodeHeight + padding))
   };
 }
+
+/**
+ * Adds or rewires one explicit outgoing branch while preventing malformed edges
+ * and cycles before the user reaches schema validation.
+ */
+export function connectFlowNodes(graph, fromId, toId, when = "next") {
+  if (!graph || !Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) {
+    throw new TypeError("Grafo inválido para criar conexão.");
+  }
+  const next = structuredClone(graph);
+  const from = next.nodes.find(node => node.id === fromId);
+  const to = next.nodes.find(node => node.id === toId);
+  if (!from || !to) throw new Error("Selecione dois nós existentes.");
+  if (fromId === toId) throw new Error("Um nó não pode se conectar a si mesmo.");
+  if (to.type === "start") throw new Error("O nó inicial não pode receber conexões.");
+  if (from.type === "end") throw new Error("Um nó final não pode ter saídas.");
+  const branch = String(when ?? "next");
+  const allowed = from.type === "condition" ? ["true", "false"] : ["next"];
+  if (!allowed.includes(branch)) {
+    throw new Error(from.type === "condition"
+      ? "Condições precisam usar a saída Verdadeiro ou Falso."
+      : "Este tipo de nó só aceita a saída Próxima.");
+  }
+
+  const outgoing = new Map(next.nodes.map(node => [node.id, []]));
+  for (const edge of next.edges) {
+    if (outgoing.has(edge.from)) outgoing.get(edge.from).push(edge.to);
+  }
+  const pending = [toId], visited = new Set();
+  while (pending.length) {
+    const current = pending.pop();
+    if (current === fromId) throw new Error("Essa conexão criaria um ciclo no fluxo.");
+    if (visited.has(current)) continue;
+    visited.add(current);
+    pending.push(...(outgoing.get(current) ?? []));
+  }
+
+  const existing = next.edges.findIndex(edge => edge.from === fromId && (edge.when ?? "next") === branch);
+  const replacement = { from: fromId, to: toId, when: branch };
+  if (existing >= 0) next.edges[existing] = replacement;
+  else {
+    if (next.edges.length >= 128) throw new Error("O grafo atingiu o limite de 128 conexões.");
+    next.edges.push(replacement);
+  }
+  return next;
+}
