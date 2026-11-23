@@ -17,6 +17,34 @@ export const getLibraryCatalogResourceKey = resource => {
   }
   return `${String(resource?.providerId ?? "")}:${String(resource?.id ?? "")}`;
 };
+export function populateLibraryCompendiumSelect(select, selectedIds = []) {
+  if (!select) return [];
+  const packs = globalThis.game?.packs;
+  const entries = Array.isArray(packs?.contents)
+    ? packs.contents
+    : typeof packs?.values === "function" ? [...packs.values()] : [];
+  const supported = new Set(["Actor", "Item", "Scene", "JournalEntry", "Macro", "Playlist", "RollTable", "Cards"]);
+  const selected = new Set(Array.isArray(selectedIds) ? selectedIds.map(String) : []);
+  select.replaceChildren();
+  const available = entries.filter(pack =>
+    pack && pack.visible !== false && supported.has(pack.documentName) && typeof pack.collection === "string"
+  );
+  for (const pack of available) {
+    const option = document.createElement("option");
+    option.value = pack.collection;
+    option.textContent = String(pack.metadata?.label ?? pack.collection) + " · " + String(pack.documentName);
+    option.selected = selected.has(pack.collection);
+    select.append(option);
+  }
+  if (!available.length) {
+    const option = document.createElement("option");
+    option.disabled = true;
+    option.textContent = "Nenhum compêndio disponível";
+    select.append(option);
+  }
+  return available.map(pack => pack.collection);
+}
+
 const resourceKey = getLibraryCatalogResourceKey;
 export const getLibraryCatalogPreferenceReference = key => {
   const value = String(key ?? "");
