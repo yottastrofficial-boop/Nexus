@@ -211,6 +211,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           smartView: sheet._librarySmartView ?? "all",
           folder: sheet._librarySelectedFolder ?? "",
           tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+          origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
           viewMode: sheet._libraryCollectionViewMode ?? "grid",
           cardSize: sheet._libraryCardSize ?? "medium"
         });
