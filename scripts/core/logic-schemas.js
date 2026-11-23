@@ -57,6 +57,72 @@ function validateRule(payload) {
   return result(errors);
 }
 
+
+function validateFlowGraph(graph, errors) {
+  if (!isRecord(graph)) { errors.push("flow.graph precisa ser um objeto."); return; }
+  if (!Array.isArray(graph.nodes) || graph.nodes.length < 2 || graph.nodes.length > 64) {
+    errors.push("flow.graph.nodes precisa conter de 2 a 64 nós.");
+    return;
+  }
+  if (!Array.isArray(graph.edges) || graph.edges.length > 128) errors.push("flow.graph.edges precisa conter até 128 conexões.");
+  const nodes = new Map();
+  for (const [index, node] of graph.nodes.entries()) {
+    if (!isRecord(node)) { errors.push("flow.graph.nodes[" + index + "] precisa ser um objeto."); continue; }
+    const id = String(node.id ?? "");
+    if (!SAFE_ID.test(id) || nodes.has(id)) errors.push("flow.graph.nodes[" + index + "].id inválido ou duplicado.");
+    else nodes.set(id, node);
+    if (!["start", "condition", "action", "end"].includes(node.type)) errors.push("flow.graph.nodes[" + index + "].type não reconhecido.");
+    if (node.type === "condition") checkExpression(node.expression, "flow.graph.nodes[" + index + "].expression", errors, "boolean");
+    if (node.type === "action") {
+      if (!isRecord(node.action)) errors.push("flow.graph.nodes[" + index + "].action precisa ser um objeto.");
+      else {
+        if (typeof node.action.type !== "string" || !/^[a-z][a-z0-9._-]{0,63}$/i.test(node.action.type)) errors.push("flow.graph.nodes[" + index + "].action.type inválido.");
+        if (node.action.config !== undefined && !isRecord(node.action.config)) errors.push("flow.graph.nodes[" + index + "].action.config precisa ser um objeto.");
+        if (String(node.action.type ?? "").toLowerCase() === "nexus.actor.update" && isRecord(node.action.config)) {
+          const path = String(node.action.config.path ?? "");
+          if (!SAFE_ACTOR_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_UPDATE_KEYS.has(part))) errors.push("flow.graph.nodes[" + index + "].action.config.path precisa apontar para system.*.");
+          if (!hasOwn(node.action.config, "value")) errors.push("flow.graph.nodes[" + index + "].action.config.value é obrigatório.");
+        }
+      }
+    }
+  }
+  const starts = [...nodes.values()].filter(node => node.type === "start");
+  if (starts.length !== 1 || graph.entryNodeId !== starts[0]?.id) errors.push("flow.graph.entryNodeId precisa apontar para o único nó start.");
+  const outgoing = new Map([...nodes.keys()].map(id => [id, []]));
+  const incoming = new Map([...nodes.keys()].map(id => [id, 0]));
+  const edgeKeys = new Set();
+  for (const [index, edge] of (Array.isArray(graph.edges) ? graph.edges : []).entries()) {
+    if (!isRecord(edge)) { errors.push("flow.graph.edges[" + index + "] precisa ser um objeto."); continue; }
+    if (!nodes.has(edge.from) || !nodes.has(edge.to)) { errors.push("flow.graph.edges[" + index + "] referencia um nó inexistente."); continue; }
+    const when = String(edge.when ?? "next");
+    if (!["next", "true", "false"].includes(when)) errors.push("flow.graph.edges[" + index + "].when inválido.");
+    const key = edge.from + ">" + edge.to + ":" + when;
+    if (edgeKeys.has(key)) errors.push("flow.graph contém conexão duplicada.");
+    edgeKeys.add(key);
+    outgoing.get(edge.from).push({ ...edge, when });
+    incoming.set(edge.to, incoming.get(edge.to) + 1);
+  }
+  for (const [id, node] of nodes) {
+    const edges = outgoing.get(id) ?? [];
+    const branches = edges.map(edge => edge.when);
+    if (node.type === "end" && edges.length) errors.push("Nós end não podem ter saídas.");
+    if (node.type === "condition" && (edges.length !== 2 || branches.filter(value => value === "true").length !== 1 || branches.filter(value => value === "false").length !== 1)) errors.push("Cada nó condition precisa de uma saída true e uma false.");
+    if (["start", "action"].includes(node.type) && (edges.length !== 1 || branches[0] !== "next")) errors.push("Nós start/action precisam de exatamente uma saída next.");
+    if (node.type === "start" && incoming.get(id) !== 0) errors.push("O nó start não pode receber conexões.");
+    if (node.type !== "start" && incoming.get(id) === 0) errors.push("Todos os nós, exceto start, precisam receber uma conexão.");
+  }
+  const visiting = new Set(), visited = new Set();
+  const visit = id => {
+    if (visiting.has(id)) { errors.push("flow.graph não pode conter ciclos."); return; }
+    if (visited.has(id)) return;
+    visiting.add(id);
+    for (const edge of outgoing.get(id) ?? []) visit(edge.to);
+    visiting.delete(id); visited.add(id);
+  };
+  if (starts[0]) visit(starts[0].id);
+  if (visited.size !== nodes.size) errors.push("Todos os nós do grafo precisam ser alcançáveis a partir de start.");
+}
+
 function validateFlow(payload) {
   const errors = [];
   if (payload.triggers !== undefined && !Array.isArray(payload.triggers)) errors.push("flow.triggers precisa ser uma lista.");
@@ -84,6 +150,7 @@ function validateFlow(payload) {
       if (!hasOwn(action.config, "value")) errors.push("flow.actions[" + index + "].config.value é obrigatório.");
     }
   }
+  if (payload.graph !== undefined) validateFlowGraph(payload.graph, errors);
   if (payload.execution !== undefined && (!isRecord(payload.execution) || (payload.execution.onError !== undefined && !["stop", "continue"].includes(payload.execution.onError)))) {
     errors.push("flow.execution.onError deve ser stop ou continue.");
   }
