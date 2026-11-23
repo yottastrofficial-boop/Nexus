@@ -62,6 +62,17 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
+## Fundação da Biblioteca universal — branch em desenvolvimento
+
+A branch `feat/universal-library-resource-foundation-2026-11-23` inicia a integração universal sem alterar a versão publicada 1.0.0.90:
+
+- `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
+- `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
+- Os serviços são expostos em `game.nexus.documents` e `game.nexus.resources`; a inicialização não carrega listas, decoders ou mídia em massa.
+- Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
+
+Esta branch ainda não contém os menus funcionais nem a camada de tema global. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador. Testes automatizados e validação real no Foundry são necessários antes de promover a etapa.
+
 ## Limitações conhecidas e trabalho pendente
 
 - A área Lógica ainda precisa de editores especializados completos para cada subtipo, com schemas, validação e integração de ponta a ponta.
