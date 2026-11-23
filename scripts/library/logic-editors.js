@@ -1,5 +1,6 @@
 import { INTERACTION_EVENTS } from "../core/interactions.js";
 import { FOUNDRY_LOGIC_EVENTS } from "../core/foundry-logic-integration.js";
+import { layoutFlowGraph, getFlowGraphCanvasSize } from "./flow-graph-layout.js";
 
 const clone = value => structuredClone(value ?? {});
 const newId = prefix => prefix + "-" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
@@ -121,18 +122,32 @@ function createFlowBuilder(form, payload, runtime) {
 
 function createFlowGraphBuilder(form, payload, runtime) {
   const root = make("section", "nexus-library-graph-builder");
-  let graph = isRecord(payload.graph) ? clone(payload.graph) : null;
+  let graph = isRecord(payload.graph) ? layoutFlowGraph(clone(payload.graph)) : null;
   if (graph) { graph.nodes = Array.isArray(graph.nodes) ? graph.nodes : []; graph.edges = Array.isArray(graph.edges) ? graph.edges : []; }
   const toolbar = make("div", "nexus-library-graph-toolbar");
   const title = make("div", "");
-  title.append(make("strong", "", "Grafo de execução"), make("small", "", "Construa caminhos com nós e conexões explícitas. O grafo tem prioridade sobre a sequência legada."));
+  title.append(make("strong", "", "Grafo de execução"), make("small", "", "Arraste os nós para organizar. Selecione conexões abaixo para definir o caminho de cada saída."));
+  const toolbarActions = make("div", "nexus-library-graph-toolbar-actions");
+  const arrange = make("button", "nexus-library-flow-add", "Organizar automaticamente");
+  arrange.type = "button";
   const toggle = make("button", "nexus-library-flow-add", graph ? "Remover grafo" : "Criar grafo visual");
   toggle.type = "button";
-  toolbar.append(title, toggle);
-  const content = make("div", "nexus-library-graph-content");
-  const nodesWrap = make("div", "nexus-library-graph-nodes");
-  const edgesWrap = make("div", "nexus-library-graph-edges");
+  toolbarActions.append(arrange, toggle);
+  toolbar.append(title, toolbarActions);
+
   const status = make("p", "nexus-library-flow-empty", "Grafo opcional. Fluxos existentes continuam usando gatilhos, condições e ações sequenciais.");
+  const canvasScroll = make("div", "nexus-library-graph-canvas-scroll");
+  const canvas = make("div", "nexus-library-graph-canvas");
+  const wires = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  wires.classList.add("nexus-library-graph-wires");
+  wires.setAttribute("aria-hidden", "true");
+  const nodesWrap = make("div", "nexus-library-graph-canvas-nodes");
+  canvas.append(wires, nodesWrap);
+  canvasScroll.append(canvas);
+  const edgesWrap = make("div", "nexus-library-graph-edges");
+  const content = make("div", "nexus-library-graph-content");
+  content.append(canvasScroll, edgesWrap);
+
   const nodeTypeOptions = [["condition", "Condição"], ["action", "Ação"], ["end", "Fim"]];
   const actionTypes = [...new Set(runtime?.actionTypes ?? [])];
   const makeSelect = (value, options) => {
@@ -148,57 +163,132 @@ function createFlowGraphBuilder(form, payload, runtime) {
     if (type === "action") return { id, type, name: "Nova ação", action: { id: newId("action"), type: actionTypes[0] ?? "", enabled: true, config: {} } };
     return { id, type, name: "Fim" };
   };
+  const svgElement = (tag, attrs = {}) => {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, String(value));
+    return element;
+  };
+  const drawEdges = size => {
+    wires.replaceChildren();
+    wires.setAttribute("viewBox", "0 0 " + size.width + " " + size.height);
+    wires.setAttribute("width", String(size.width));
+    wires.setAttribute("height", String(size.height));
+    const defs = svgElement("defs");
+    const marker = svgElement("marker", { id: "nexus-flow-arrow", markerWidth: 8, markerHeight: 8, refX: 6, refY: 3, orient: "auto" });
+    marker.append(svgElement("path", { d: "M0 0 L6 3 L0 6", fill: "none", stroke: "currentColor", "stroke-width": 1.2 }));
+    defs.append(marker); wires.append(defs);
+    const byId = new Map(graph.nodes.map(node => [node.id, node]));
+    for (const edge of graph.edges) {
+      const from = byId.get(edge.from), to = byId.get(edge.to);
+      if (!from || !to) continue;
+      const x1 = (Number(from.x) || 0) + 220, y1 = (Number(from.y) || 0) + 66;
+      const x2 = Number(to.x) || 0, y2 = (Number(to.y) || 0) + 66;
+      const bend = Math.max(45, Math.abs(x2 - x1) * .45);
+      const path = svgElement("path", {
+        d: "M " + x1 + " " + y1 + " C " + (x1 + bend) + " " + y1 + ", " + (x2 - bend) + " " + y2 + ", " + x2 + " " + y2,
+        class: "nexus-library-graph-wire " + (edge.when === "true" ? "is-true" : edge.when === "false" ? "is-false" : "is-next"),
+        "marker-end": "url(#nexus-flow-arrow)"
+      });
+      wires.append(path);
+      if (edge.when && edge.when !== "next") {
+        const label = svgElement("text", { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 7, class: "nexus-library-graph-wire-label" });
+        label.textContent = edge.when === "true" ? "Verdadeiro" : "Falso";
+        wires.append(label);
+      }
+    }
+  };
   const render = () => {
     nodesWrap.replaceChildren(); edgesWrap.replaceChildren();
-    if (!graph) { content.hidden = true; status.hidden = false; return; }
-    content.hidden = false; status.hidden = true;
-    const nodeHead = make("div", "nexus-library-graph-section-head");
-    nodeHead.append(make("strong", "", "Nós (" + graph.nodes.length + ")"));
-    const addType = makeSelect("condition", nodeTypeOptions);
-    const addNode = make("button", "nexus-library-flow-add", "+ Adicionar nó"); addNode.type = "button";
-    addNode.addEventListener("click", () => { graph.nodes.push(freshNode(addType.value)); render(); });
-    nodeHead.append(addType, addNode); nodesWrap.append(nodeHead);
+    if (!graph) { content.hidden = true; status.hidden = false; arrange.disabled = true; return; }
+    graph = layoutFlowGraph(graph);
+    content.hidden = false; status.hidden = true; arrange.disabled = false;
+    const size = getFlowGraphCanvasSize(graph);
+    canvas.style.width = size.width + "px";
+    canvas.style.height = size.height + "px";
+    drawEdges(size);
     graph.nodes.forEach((node, index) => {
-      const card = make("article", "nexus-library-graph-node");
+      const card = make("article", "nexus-library-graph-node nexus-library-graph-node-" + node.type);
+      card.dataset.nodeId = node.id;
+      card.style.left = (Number(node.x) || 0) + "px";
+      card.style.top = (Number(node.y) || 0) + "px";
       const head = make("div", "nexus-library-graph-node-head");
-      const type = makeSelect(node.type, [["start","Início"],["condition","Condição"],["action","Ação"],["end","Fim"]]);
+      const typeLabel = node.type === "start" ? "Início" : node.type === "condition" ? "Condição" : node.type === "action" ? "Ação" : "Fim";
+      head.append(make("strong", "", typeLabel + " · " + (node.name || "Sem nome")));
+      const type = makeSelect(node.type, node.type === "start" ? [["start","Início"]] : nodeTypeOptions.map(([key,label]) => [key,label]));
+      type.disabled = node.type === "start";
       type.addEventListener("change", () => {
         node.type = type.value;
         if (node.type === "condition" && !node.expression) node.expression = "true";
         if (node.type === "action" && !node.action) node.action = { id: newId("action"), type: actionTypes[0] ?? "", enabled: true, config: {} };
+        if (node.type !== "action") delete node.action;
         render();
       });
-      head.append(make("strong", "", node.type === "start" ? "Nó inicial" : "Nó " + (index + 1)), type);
+      head.append(type);
       if (node.type !== "start") {
-        const removeNode = make("button", "nexus-library-flow-remove", "Remover"); removeNode.type = "button";
-        removeNode.addEventListener("click", () => { graph.nodes = graph.nodes.filter(item => item.id !== node.id); graph.edges = graph.edges.filter(edge => edge.from !== node.id && edge.to !== node.id); render(); });
+        const removeNode = make("button", "nexus-library-flow-remove", "Remover");
+        removeNode.type = "button";
+        removeNode.addEventListener("click", () => {
+          graph.nodes = graph.nodes.filter(item => item.id !== node.id);
+          graph.edges = graph.edges.filter(edge => edge.from !== node.id && edge.to !== node.id);
+          render();
+        });
         head.append(removeNode);
       }
-      const idControl = makeText(node.id, "node-id"); idControl.readOnly = true; card.dataset.nodeId = node.id;
-      card.append(head, field("ID estável", idControl, true));
-      const name = makeText(node.name ?? "", "Nome do nó"); name.addEventListener("input", () => { node.name = name.value; }); card.append(field("Rótulo", name));
+      const drag = make("span", "nexus-library-graph-drag-handle", "⠿ Arrastar");
+      head.append(drag);
+      head.addEventListener("pointerdown", event => {
+        if (event.target.closest("button,select")) return;
+        event.preventDefault();
+        head.setPointerCapture?.(event.pointerId);
+        const originX = event.clientX, originY = event.clientY, baseX = Number(node.x) || 0, baseY = Number(node.y) || 0;
+        const move = moveEvent => {
+          node.x = Math.max(0, Math.min(4800, baseX + moveEvent.clientX - originX));
+          node.y = Math.max(0, Math.min(4800, baseY + moveEvent.clientY - originY));
+          card.style.left = node.x + "px"; card.style.top = node.y + "px";
+          drawEdges(getFlowGraphCanvasSize(graph));
+        };
+        const finish = () => {
+          head.removeEventListener("pointermove", move);
+          head.removeEventListener("pointerup", finish);
+          head.removeEventListener("pointercancel", finish);
+        };
+        head.addEventListener("pointermove", move);
+        head.addEventListener("pointerup", finish, { once: true });
+        head.addEventListener("pointercancel", finish, { once: true });
+      });
+      const name = makeText(node.name ?? "", "Nome do nó");
+      name.addEventListener("input", () => { node.name = name.value; });
+      card.append(head, field("Rótulo", name));
       if (node.type === "condition") {
-        const expression = make("textarea", ""); expression.rows = 2; expression.spellcheck = false; expression.value = node.expression ?? ""; expression.placeholder = "@system.resources.pv.value > 0";
+        const expression = make("textarea", "");
+        expression.rows = 2; expression.spellcheck = false;
+        expression.value = node.expression ?? ""; expression.placeholder = "@system.resources.pv.value > 0";
         expression.addEventListener("input", () => { node.expression = expression.value; });
         card.append(field("Expressão", expression, true));
       }
       if (node.type === "action") {
-        const availableTypes = [...actionTypes]; if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
+        const availableTypes = [...actionTypes];
+        if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
         const actionType = availableTypes.length ? makeSelect(node.action?.type ?? "", availableTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
         actionType.addEventListener("change", () => { node.action.type = actionType.value; });
-        const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = node.action?.__configDraft ?? JSON.stringify(node.action?.config ?? {}, null, 2);
+        const config = make("textarea", "");
+        config.rows = 3; config.spellcheck = false;
+        config.value = node.action?.__configDraft ?? JSON.stringify(node.action?.config ?? {}, null, 2);
         config.addEventListener("input", () => { node.action.__configDraft = config.value; });
-        const enabled = make("input", ""); enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
+        const enabled = make("input", "");
+        enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
         enabled.addEventListener("change", () => { node.action.enabled = enabled.checked; });
-        const active = make("label", "nexus-library-flow-enabled"); active.append(enabled, make("span", "", "Ação ativa"));
+        const active = make("label", "nexus-library-flow-enabled");
+        active.append(enabled, make("span", "", "Ação ativa"));
         card.append(field("Executor", actionType), field("Configuração JSON", config, true), active);
       }
       nodesWrap.append(card);
     });
+    drawEdges(size);
     const edgeHead = make("div", "nexus-library-graph-section-head");
     edgeHead.append(make("strong", "", "Conexões (" + graph.edges.length + ")"));
-    const addEdge = make("button", "nexus-library-flow-add", "+ Conectar nós"); addEdge.type = "button";
-    addEdge.disabled = graph.nodes.length < 2;
+    const addEdge = make("button", "nexus-library-flow-add", "+ Conectar nós");
+    addEdge.type = "button"; addEdge.disabled = graph.nodes.length < 2;
     addEdge.addEventListener("click", () => { graph.edges.push({ from: "", to: "", when: "next" }); render(); });
     edgeHead.append(addEdge); edgesWrap.append(edgeHead);
     graph.edges.forEach((edge, index) => {
@@ -206,26 +296,28 @@ function createFlowGraphBuilder(form, payload, runtime) {
       const from = makeSelect(edge.from, [["", "Selecionar nó"], ...graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id])]);
       const when = makeSelect(edge.when ?? "next", [["next","Próxima"],["true","Verdadeiro"],["false","Falso"]]);
       const to = makeSelect(edge.to, [["", "Selecionar nó"], ...graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id])]);
-      from.addEventListener("change", () => { edge.from = from.value; });
-      when.addEventListener("change", () => { edge.when = when.value; });
-      to.addEventListener("change", () => { edge.to = to.value; });
-      const removeEdge = make("button", "nexus-library-flow-remove", "Remover"); removeEdge.type = "button"; removeEdge.addEventListener("click", () => { graph.edges.splice(index, 1); render(); });
-      row.append(field("De", from), field("Saída", when), field("Para", to), removeEdge); edgesWrap.append(row);
+      from.addEventListener("change", () => { edge.from = from.value; render(); });
+      when.addEventListener("change", () => { edge.when = when.value; render(); });
+      to.addEventListener("change", () => { edge.to = to.value; render(); });
+      const removeEdge = make("button", "nexus-library-flow-remove", "Remover");
+      removeEdge.type = "button"; removeEdge.addEventListener("click", () => { graph.edges.splice(index, 1); render(); });
+      row.append(field("De", from), field("Saída", when), field("Para", to), removeEdge);
+      edgesWrap.append(row);
     });
-    content.append(nodesWrap, edgesWrap);
   };
   toggle.addEventListener("click", () => {
     if (graph) {
       graph = null;
       toggle.textContent = "Criar grafo visual";
     } else {
-      const start = { id: "start-node", type: "start", name: "Início" };
-      const end = { id: "end-node", type: "end", name: "Fim" };
+      const start = { id: newId("node"), type: "start", name: "Início", x: 40, y: 40 };
+      const end = { id: newId("node"), type: "end", name: "Fim", x: 340, y: 40 };
       graph = { entryNodeId: start.id, nodes: [start, end], edges: [{ from: start.id, to: end.id, when: "next" }] };
       toggle.textContent = "Remover grafo";
     }
     render();
   });
+  arrange.addEventListener("click", () => { if (graph) { graph = layoutFlowGraph(graph, { force: true }); render(); } });
   root.append(toolbar, status, content);
   form.append(root);
   render();
@@ -236,8 +328,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
       const id = card.dataset.nodeId;
       const node = next.nodes.find(item => item.id === id);
       if (!node) continue;
-      const fields = card.querySelectorAll("label");
-      for (const label of fields) {
+      const labels = card.querySelectorAll("label");
+      for (const label of labels) {
         const caption = label.querySelector("span")?.textContent;
         const control = label.querySelector("input,textarea,select");
         if (!control) continue;
@@ -245,7 +337,9 @@ function createFlowGraphBuilder(form, payload, runtime) {
         if (caption === "Expressão") node.expression = control.value;
         if (caption === "Executor" && node.action) node.action.type = control.value;
         if (caption === "Configuração JSON" && node.action) {
-          let config; try { config = JSON.parse(control.value || "{}"); } catch { throw new Error("Configuração do nó de ação deve ser JSON válido."); }
+          let config;
+          try { config = JSON.parse(control.value || "{}"); }
+          catch { throw new Error("Configuração do nó de ação deve ser JSON válido."); }
           if (!isRecord(config)) throw new Error("Configuração do nó de ação deve ser um objeto JSON.");
           node.action.config = config;
           delete node.action.__configDraft;
