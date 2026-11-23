@@ -42,3 +42,18 @@ test("editor de função registra apenas referência e assinatura, nunca código
 });
 
 console.log("NEXUS logic editors: tests passed.");
+
+test("editor visual de fluxo salva gatilhos, condições e ações como dados estruturados", () => {
+  const payload = buildLogicEditorPayload("flow", { execution: { retries: 1 } }, {
+    triggers: [{ id: "trigger-keep", event: "click", modifiers: ["ctrl"] }],
+    conditions: [{ id: "condition-keep", expression: "@system.resources.pv.value > 0" }],
+    actions: [{ id: "action-keep", type: "nexus.update", enabled: true, config: { path: "system.resources.pv.value", value: 2 } }],
+    conditionJoin: "all",
+    onError: "stop"
+  });
+  assert.equal(payload.triggers[0].id, "trigger-keep");
+  assert.deepEqual(payload.triggers[0].modifiers, ["ctrl"]);
+  assert.equal(payload.conditions[0].expression, "@system.resources.pv.value > 0");
+  assert.equal(payload.actions[0].config.value, 2);
+  assert.equal(payload.execution.retries, 1);
+});
