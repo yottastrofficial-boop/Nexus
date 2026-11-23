@@ -17,6 +17,16 @@ export const getLibraryCatalogResourceKey = resource => {
   }
   return `${String(resource?.providerId ?? "")}:${String(resource?.id ?? "")}`;
 };
+const canAccessCompendium = pack => {
+  if (!pack || pack.visible === false) return false;
+  const user = globalThis.game?.user;
+  if (user?.isGM === true) return true;
+  const observerPermission = globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OBSERVER ?? 2;
+  if (!user || typeof pack.testUserPermission !== "function") return false;
+  try { return pack.testUserPermission(user, observerPermission) === true; }
+  catch { return false; }
+};
+
 export function populateLibraryCompendiumSelect(select, selectedIds = []) {
   if (!select) return [];
   const packs = globalThis.game?.packs;
@@ -27,7 +37,7 @@ export function populateLibraryCompendiumSelect(select, selectedIds = []) {
   const selected = new Set(Array.isArray(selectedIds) ? selectedIds.map(String) : []);
   select.replaceChildren();
   const available = entries.filter(pack =>
-    pack && pack.visible !== false && supported.has(pack.documentName) && typeof pack.collection === "string"
+    canAccessCompendium(pack) && supported.has(pack.documentName) && typeof pack.collection === "string"
   );
   for (const pack of available) {
     const option = document.createElement("option");
