@@ -37,15 +37,20 @@ export function createResourceLifecycleManager({
     return entry;
   };
 
-  const acquireLoadSlot = async () => {
-    if (activeLoads < concurrentLimit) {
+  const acquireLoadSlot = () => new Promise(resolve => {
+    const grant = () => {
       activeLoads++;
-      return () => { activeLoads--; loadWaiters.shift()?.(); };
-    }
-    await new Promise(resolve => loadWaiters.push(resolve));
-    activeLoads++;
-    return () => { activeLoads--; loadWaiters.shift()?.(); };
-  };
+      let released = false;
+      resolve(() => {
+        if (released) return;
+        released = true;
+        activeLoads--;
+        loadWaiters.shift()?.();
+      });
+    };
+    if (activeLoads < concurrentLimit) grant();
+    else loadWaiters.push(grant);
+  });
 
   const unloadEntry = async entry => {
     if (entry.state !== "ready" || entry.references > 0 || entry.pins > 0) return false;
