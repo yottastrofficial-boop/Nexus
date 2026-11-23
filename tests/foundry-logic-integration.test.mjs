@@ -298,6 +298,7 @@ test("simulação avalia condições e permissões sem executar nenhum executor"
       conditions: [{ expression: "@system.resources.pv.value > 0" }],
       actions: [
         { id: "preview", type: "test.preview", config: {} },
+        { id: "write", type: "test.write", config: {} },
         { id: "missing", type: "test.missing", config: {} }
       ]
     }
@@ -305,13 +306,14 @@ test("simulação avalia condições e permissões sem executar nenhum executor"
   const runtime = createLogicRuntime({ registry });
   let executions = 0;
   runtime.registerAction({ type: "test.preview", effects: ["pure"], execute: () => { executions++; } });
+  runtime.registerAction({ type: "test.write", effects: ["write"], execute: () => { executions++; } });
   runtime.setPermissionResolver(async ({ effects }) => effects.every(effect => effect === "pure"));
   const asset = registry.resolve("nexus.test.flow.simulation", "flow");
 
   const preview = await runtime.simulateFlow(asset, { system: { resources: { pv: { value: 3 } } } });
   assert.equal(preview.status, "blocked");
   assert.equal(preview.executed, false);
-  assert.deepEqual(preview.actions.map(item => item.status), ["ready", "unregistered"]);
+  assert.deepEqual(preview.actions.map(item => item.status), ["ready", "denied", "unregistered"]);
   assert.equal(executions, 0);
 
   const skipped = await runtime.simulateFlow(asset, { system: { resources: { pv: { value: 0 } } } });
