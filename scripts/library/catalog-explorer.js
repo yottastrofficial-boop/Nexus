@@ -6,7 +6,7 @@
  * The caller supplies the registry and user-preference callbacks.
  */
 const PAGE_SIZE = 30;
-const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions"]);
+const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions", "world-flows"]);
 
 export const getLibraryCatalogResourceKey = resource => {
   const reference = resource?.reference ?? {};
