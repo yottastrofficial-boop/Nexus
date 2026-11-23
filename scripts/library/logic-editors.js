@@ -131,6 +131,7 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     const key = schemaField.key;
     const storageKey = draftKey(key);
     if (!hasOwn(action.config, key) && hasOwn(schemaField, "defaultValue")) action.config[key] = structuredClone(schemaField.defaultValue);
+    if (schemaField.type === "checkbox" && !hasOwn(action.config, key)) action.config[key] = false;
     const stored = action.config[key];
     const error = makeError(newId("config-error"));
     let control;
@@ -141,7 +142,8 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     } else if (schemaField.type === "select") {
       control = make("select", "");
       const options = schemaField.options.map(option => [option.value, option.label]);
-      if (stored != null && !options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
+      if (stored == null) options.unshift(["", "Selecione…"]);
+      else if (!options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
       options.forEach(([value, label]) => {
         const option = make("option", "", label);
         option.value = value;
@@ -175,6 +177,8 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
           if (!control.value.trim()) delete action.config[key];
           else if (!Number.isFinite(Number(control.value))) throw new Error("Informe um número finito.");
           else action.config[key] = Number(control.value);
+        } else if (schemaField.type === "select" && !control.value) {
+          delete action.config[key];
         } else if (schemaField.type === "json") {
           drafts.set(storageKey, control.value);
           action.config[key] = JSON.parse(control.value);
