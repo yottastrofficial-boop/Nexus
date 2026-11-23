@@ -8274,3 +8274,106 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-context-actions button { flex:1 1 100%; min-height:31px; padding:6px 9px; border:1px solid var(--nexus-panel-border,#43546a); border-radius:6px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-card,#263a4e); font-size:10px; cursor:pointer; }
 .nexus-library-panel .nexus-library-preview-stage>.nexus-sheet-resource-preview { width:78px!important; height:10px!important; min-height:10px!important; max-height:10px!important; align-self:center!important; }
 .nexus-library-panel .nexus-library-preview-stage>.nexus-sheet-resource-preview .nexus-sheet-resource-track { min-height:6px!important; height:6px!important; }
+
+
+/* 1.0.0.90 — Explorador universal da Biblioteca. */
+.nexus-library-section-tabs {
+  display:flex!important; flex-direction:column!important; align-items:stretch!important;
+  gap:3px!important; padding:2px!important; border:0!important; background:transparent!important;
+}
+.nexus-library-section-tabs .nexus-library-tree-heading { display:none!important; }
+.nexus-library-section-tabs>[data-library-section] {
+  display:flex!important; align-items:center!important; justify-content:flex-start!important;
+  width:100%!important; min-height:34px!important; padding:7px 10px!important;
+  gap:9px!important; border:1px solid transparent!important; border-radius:6px!important;
+  color:var(--nexus-panel-muted,#aebdce)!important; background:transparent!important;
+  text-align:left!important; font-size:10px!important;
+}
+.nexus-library-section-tabs>[data-library-section].active {
+  border-color:var(--nexus-panel-border,#40536a)!important;
+  color:var(--nexus-panel-text,#f2f6fb)!important; background:var(--nexus-panel-card,#29394c)!important;
+}
+.nexus-library-section-tabs>[data-library-section] i { width:15px; text-align:center; }
+.nexus-library-custom-folder-tree { padding:5px 0 8px 8px!important; border-top:1px solid var(--nexus-panel-border,#354b61); margin-top:7px; }
+.nexus-library-folder-hint { color:var(--nexus-panel-muted,#9fb0c2); font-size:9px; margin-right:auto; }
+.nexus-library-collection-toolbar { justify-content:flex-start!important; padding:4px 0 8px!important; }
+.nexus-library-toolbar-actions { justify-content:flex-start!important; }
+.nexus-library-folder-create { display:flex!important; align-items:center!important; gap:5px!important; max-width:220px; }
+.nexus-library-folder-create input { min-width:0; width:170px; height:30px; }
+.nexus-library-folder-create button { width:31px; height:30px; flex:none; }
+.nexus-library-assets,
+.nexus-library-generic-items,
+.nexus-library-flow-grid,
+.nexus-library-layouts {
+  display:grid!important; grid-template-columns:repeat(auto-fill,minmax(126px,1fr))!important;
+  align-content:start!important; align-items:stretch!important; gap:10px!important;
+}
+.nexus-library-generic-card {
+  position:relative!important; display:block!important; min-width:0!important;
+  min-height:154px!important; border:1px solid var(--nexus-panel-border,#3b5067)!important;
+  border-radius:8px!important; background:var(--nexus-panel-card,#263647)!important;
+  overflow:hidden!important;
+}
+.nexus-library-generic-item {
+  display:grid!important; grid-template-rows:88px auto auto!important;
+  align-content:start!important; justify-items:stretch!important; gap:5px!important;
+  width:100%!important; min-width:0!important; min-height:152px!important;
+  padding:7px!important; border:0!important; color:var(--nexus-panel-text,#e7edf5)!important;
+  background:transparent!important; text-align:left!important;
+}
+.nexus-library-generic-preview {
+  display:grid!important; place-items:center!important; width:100%!important; height:88px!important;
+  border:1px solid var(--nexus-panel-border,#40536a)!important; border-radius:6px!important;
+  color:var(--nexus-panel-accent,#91b9d9)!important; background:var(--nexus-panel-input,#172332)!important;
+  font-size:25px!important;
+}
+.nexus-library-generic-item>strong {
+  display:block!important; overflow:hidden!important; color:var(--nexus-panel-text,#eef3f8)!important;
+  font-size:10px!important; line-height:1.25!important; white-space:normal!important;
+  display:-webkit-box!important; -webkit-line-clamp:2!important; -webkit-box-orient:vertical!important;
+}
+.nexus-library-generic-item>small { color:var(--nexus-panel-muted,#9fb0c2)!important; font-size:8px!important; }
+.nexus-library-generic-card .nexus-library-favorite {
+  position:absolute!important; top:9px!important; right:9px!important; z-index:2!important;
+  width:25px!important; height:25px!important; border:1px solid var(--nexus-panel-border,#52647b)!important;
+  border-radius:50%!important; color:#e7c878!important; background:#142131dd!important;
+}
+.nexus-library-generic-card:has(.nexus-library-generic-item.is-selected),
+.nexus-library-generic-card:has(.nexus-library-generic-item:focus-visible) {
+  border-color:var(--nexus-panel-accent,#85bde8)!important; box-shadow:0 0 0 1px var(--nexus-panel-accent,#85bde8)!important;
+}
+.nexus-library-item-actions { display:flex; gap:7px; padding-top:9px; border-top:1px solid var(--nexus-panel-border,#354b61); }
+.nexus-library-item-actions button { flex:1; min-height:30px; border:1px solid var(--nexus-panel-border,#43546a); border-radius:6px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-card,#263a4e); font-size:10px; }
+.nexus-library-type-preview { display:flex; flex-wrap:wrap; align-items:center; gap:7px; min-height:74px; padding:10px; border:1px solid var(--nexus-panel-border,#354b61); border-radius:7px; background:var(--nexus-panel-input,#172332); }
+.nexus-library-type-preview>p { margin:0; color:var(--nexus-panel-muted,#b2c0cf); font-size:10px; }
+.nexus-library-type-preview .nexus-library-style-swatch { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.nexus-library-type-preview .nexus-library-style-swatch>i { width:25px; height:25px; border-radius:5px; border:1px solid #ffffff33; }
+.nexus-library-type-preview .nexus-library-style-swatch>small { font-size:8px; }
+.nexus-library-panel [data-view-mode="list"] { display:flex!important; flex-direction:column!important; gap:6px!important; }
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-generic-card,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-flow-card,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-layout-card,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-asset {
+  display:flex!important; flex-direction:row!important; align-items:center!important;
+  width:100%!important; min-height:54px!important; height:auto!important;
+}
+.nexus-library-panel [data-view-mode="list"] .nexus-library-generic-item {
+  display:grid!important; grid-template-columns:42px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important; align-items:center!important; min-height:50px!important;
+  text-align:left!important;
+}
+.nexus-library-panel [data-view-mode="list"] .nexus-library-generic-preview {
+  grid-row:1 / 3!important; width:38px!important; height:38px!important; font-size:16px!important;
+}
+.nexus-library-panel [data-view-mode="list"] .nexus-library-generic-item>strong { -webkit-line-clamp:1!important; }
+.nexus-library-panel [data-view-mode="list"] .nexus-library-favorite { position:static!important; margin:0 8px!important; flex:none!important; }
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-asset>.nexus-library-preview-stage,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-asset>.nexus-library-generic-preview {
+  flex:0 0 40px!important; width:40px!important; height:40px!important; min-height:40px!important; max-height:40px!important;
+}
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-layout-card,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-flow-card { justify-content:space-between!important; padding:8px 12px!important; }
+.nexus-library-panel [data-view-mode="list"] .nexus-library-layout-actions { margin-left:auto!important; }
+@media(max-width:760px) {
+  .nexus-library-assets,.nexus-library-generic-items,.nexus-library-flow-grid,.nexus-library-layouts { grid-template-columns:repeat(auto-fill,minmax(112px,1fr))!important; }
+}
