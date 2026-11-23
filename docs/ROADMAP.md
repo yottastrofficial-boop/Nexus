@@ -32,7 +32,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - A infraestrutura possui registry tipado, dependências, detecção de ciclos, persistência e runtime declarativo.
 - Os cinco tipos permanecem distintos: Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões.
-- A navegação/Inspector inicial existe, mas editores especializados, schemas completos, executores registrados e integração ponta a ponta continuam pendentes.
+- Schemas estruturais e editores especializados iniciais dos cinco tipos estão integrados ao Inspector; o construtor visual avançado de Fluxos, executores padrão e integração ponta a ponta ainda estão pendentes.
 - Payloads lógicos importados devem permanecer inertes até serem validados por um editor e contrato específico.
 
 ### Mídia
