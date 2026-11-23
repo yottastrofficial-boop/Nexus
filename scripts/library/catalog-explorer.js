@@ -196,14 +196,18 @@ export function createLibraryCatalogExplorer({
     if (smartKeys) {
       const keyPage = smartKeys.slice(smartOffset, smartOffset + PAGE_SIZE);
       const references = keyPage.map(getLibraryCatalogPreferenceReference).filter(Boolean);
-      page = await registry.list({
-        query: currentQuery,
-        kind: "all",
-        type: "all",
-        limit: PAGE_SIZE,
-        references
-      });
-      if (version !== requestVersion) return;
+      if (references.length) {
+        page = await registry.list({
+          query: currentQuery,
+          kind: "all",
+          type: "all",
+          limit: PAGE_SIZE,
+          references
+        });
+        if (version !== requestVersion) return;
+      } else {
+        page = { items: [], total: 0, hasMore: false, cursor: {}, errors: [] };
+      }
       const byKey = new Map(page.items.map(resource => [resourceKey(resource), resource]));
       page = {
         ...page,
@@ -212,7 +216,7 @@ export function createLibraryCatalogExplorer({
         hasMore: smartOffset + keyPage.length < smartKeys.length,
         cursor: { smartOffset: smartOffset + keyPage.length }
       };
-      smartOffset += append ? keyPage.length : 0;
+      smartOffset += keyPage.length;
     } else {
       page = await registry.list({
         query: currentQuery,
