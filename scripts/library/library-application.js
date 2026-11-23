@@ -1,5 +1,5 @@
 import { createLibraryCatalogExplorer } from "./catalog-explorer.js";
-import { createLibraryFolder, normalizeLibraryPreferences } from "../core/library-preferences.js";
+import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder } from "../core/library-preferences.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
@@ -301,6 +301,53 @@ export function createLibraryApplicationClass({
         root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item.dataset.librarySmartView === "all"));
         refreshFolders();
         await render();
+      });
+      root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", async event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const button = target?.closest("[data-library-folder]");
+        if (!button) return;
+        event.preventDefault();
+        const folderId = button.dataset.libraryFolder;
+        const current = normalizeLibraryPreferences(this._getPreferences());
+        const folder = current.folders.find(item => item.id === folderId);
+        if (!folder) return;
+        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
+        if (typeof input !== "function") return;
+        try {
+          const result = await input({
+            window: { title: "Gerenciar pasta" },
+            content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+            ok: { label: "Renomear" },
+            buttons: [{
+              action: "delete-folder",
+              label: "Excluir pasta",
+              class: "nexus-library-delete-folder",
+              callback: () => ({ action: "delete-folder" })
+            }],
+            rejectClose: false
+          });
+          if (result?.action === "delete-folder") {
+            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+            const accepted = typeof confirm === "function" && await confirm({
+              window: { title: "Excluir pasta" },
+              content: "<p>Os recursos serão mantidos, mas ficarão sem pasta.</p>",
+              yes: { label: "Excluir" },
+              no: { label: "Cancelar" },
+              rejectClose: false
+            });
+            if (!accepted) return;
+            await this._savePreferences(removeLibraryFolder(this._getPreferences(), folderId));
+            if (this._state.folder === folderId) this._state.folder = "";
+          } else {
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            await this._savePreferences(renameLibraryFolder(this._getPreferences(), folderId, name));
+          }
+          refreshFolders();
+          await render();
+        } catch (error) {
+          notify("warn", error.message);
+        }
       });
       root.querySelector("[data-library-create-folder]")?.addEventListener("click", async () => {
         const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input;
