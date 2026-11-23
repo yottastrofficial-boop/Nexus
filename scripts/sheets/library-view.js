@@ -1,6 +1,7 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
-import { planLibraryDefinitionUpdate } from "../core/library-models.js";
+import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
+import { getLegacyNexusLibraryFlags, readNexusLibraryStore, writeNexusLibraryCollection } from "../core/library-store.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
@@ -507,6 +508,53 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
               if (sheet.rendered !== true || resource?.reference?.collection !== "components") return null;
               const layouts = await sheet._readLayouts();
               return planLibraryDefinitionUpdate(definition, layouts);
+            },
+            canUpdateDefinition: (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const selectedIds = [...(sheet._selectedIds ?? [])];
+              if (selectedIds.length !== 1) return false;
+              const component = sheet._currentLayout?.components?.find(item => item.id === selectedIds[0]);
+              return component?.libraryDefinitionId === resource.reference.id && component.type === definition?.type;
+            },
+            updateDefinition: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const selectedIds = [...(sheet._selectedIds ?? [])];
+              if (selectedIds.length !== 1) return false;
+              const layouts = await sheet._readLayouts();
+              const active = sheet._activeLayoutId();
+              const layout = layouts[active];
+              const componentIndex = layout?.components?.findIndex(item => item.id === selectedIds[0]) ?? -1;
+              if (componentIndex < 0) return false;
+              const component = layout.components[componentIndex];
+              if (component.libraryDefinitionId !== resource.reference.id || component.type !== definition.type) return false;
+
+              const updatedDefinition = createLibraryDefinition({
+                id: definition.id,
+                type: definition.type,
+                label: definition.label,
+                version: Math.max(1, Number(definition.version) || 1) + 1,
+                settings: { ...component },
+                metadata: definition.metadata ?? {}
+              });
+              const currentStore = readNexusLibraryStore(game.user, getLegacyNexusLibraryFlags(game.user)).store;
+              const entries = currentStore.collections.components.map(entry =>
+                entry.id === definition.id ? updatedDefinition : entry
+              );
+              if (!entries.some(entry => entry.id === definition.id)) throw new Error("A definição original não foi encontrada na Biblioteca.");
+              await writeNexusLibraryCollection(game.user, "components", entries);
+
+              const updatedInstance = createLibraryComponentInstance(updatedDefinition, {
+                id: component.id,
+                position: { x: component.x, y: component.y }
+              });
+              for (const key of ["z", "stackOrder"]) if (component[key] !== undefined) updatedInstance[key] = component[key];
+              sheet._captureHistory?.();
+              layout.components[componentIndex] = updatedInstance;
+              await sheet._writeLayouts(layouts, active);
+              sheet._currentLayout = layout;
+              await sheet.render({ force: true });
+              ui.notifications?.info?.("Definição atualizada para a versão " + updatedDefinition.version + ". As outras instâncias continuam independentes e podem receber a atualização separadamente.");
+              return true;
             },
             updateInstances: async (resource, definition) => {
               if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
