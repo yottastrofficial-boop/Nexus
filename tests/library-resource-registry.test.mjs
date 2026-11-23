@@ -71,7 +71,8 @@ const documentBridge = {
     bridgeCalls.push(options);
     const records = [
       { uuid: "Actor.abc", type: "actors", name: "Aventureiro", img: "actor.webp", folder: "Personagens", isCompendium: false },
-      { uuid: "Macro.def", type: "macros", name: "Preparar sessão", img: "", folder: "Ferramentas", isCompendium: false }
+      { uuid: "Macro.def", type: "macros", name: "Preparar sessão", img: "", folder: "Ferramentas", isCompendium: false },
+      { uuid: "Scene.xyz", type: "scenes", name: "Sala de jogo", img: "scene.webp", folder: "Cenas", isCompendium: false }
     ];
     const filtered = records.filter(record =>
       (options.type === "all" || options.type === record.type) &&
