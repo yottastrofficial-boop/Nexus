@@ -560,10 +560,20 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
           system: actor?.system?.toObject?.() ?? actor?.system ?? null
         };
         const result = await runtime.simulateFlow({ ...asset, payload: nextPayload }, context);
-        const summary = (result.actions ?? []).map(item => item.type + ": " + item.status).join(" · ");
-        status.textContent = "Simulação: " + result.status + ". " +
-          (summary || (result.reason === "conditions" ? "As condições não foram satisfeitas." : "Nenhuma ação ativa para avaliar.")) +
-          " Nenhuma ação foi executada.";
+        const path = (result.trace ?? []).map(step => {
+          const node = nextPayload.graph?.nodes?.find(item => item.id === step.nodeId);
+          const label = node?.name || step.nodeId;
+          return label + (step.result === true ? " (Verdadeiro)" : step.result === false ? " (Falso)" : "");
+        }).join(" → ");
+        const summary = (result.actions ?? []).map(item => {
+          const node = nextPayload.graph?.nodes?.find(candidate => candidate.id === item.nodeId);
+          return (node?.name || item.type) + ": " + item.status;
+        }).join(" · ");
+        const details = [
+          path ? "Caminho: " + path : "",
+          summary ? "Ações: " + summary : (result.reason === "conditions" ? "As condições não foram satisfeitas." : "Nenhuma ação ativa para avaliar.")
+        ].filter(Boolean).join(" | ");
+        status.textContent = "Simulação: " + result.status + ". " + details + " Nenhuma ação foi executada.";
       } catch (error) {
         status.textContent = "Falha na simulação: " + String(error?.message ?? error);
       } finally {
