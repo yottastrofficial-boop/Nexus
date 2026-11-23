@@ -11,6 +11,10 @@ import { createFoundryDocumentBridge } from "./core/foundry-document-bridge.js";
 import { createDefaultLibraryResourceRegistry } from "./core/library-resource-registry.js";
 import { createLibraryApplicationClass } from "./library/library-application.js";
 import { normalizeLibraryPreferences } from "./core/library-preferences.js";
+import { createLibraryBackupService } from "./library/library-backup-service.js";
+import { NEXUS_COMPONENTS } from "./core/component-types.js";
+import { THEME_PALETTES } from "./core/theme.js";
+import { getInteractionLibrary } from "./core/interactions.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
@@ -39,6 +43,14 @@ Hooks.once("init", () => {
     game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
+  game.nexus.library.backup ??= createLibraryBackupService({
+    getUser: () => game.user,
+    getCatalog: () => NEXUS_LIBRARY_CATALOG,
+    getThemePalettes: () => THEME_PALETTES,
+    getWorldFlows: () => getInteractionLibrary(),
+    setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
+    getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
+  });
   const LibraryApplication = createLibraryApplicationClass({
     ApplicationV2: foundry.applications.api.ApplicationV2,
     HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
