@@ -32,7 +32,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       card.dataset.libraryCategory=asset.category;card.dataset.librarySource=asset.source??"core";card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
       const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
       if(asset.type==="sheet-resource"){
-        const code=String(asset.template?.sheetCode??"").toUpperCase(),color=asset.template?.sheetColor??"#78b7e8";
+        
         preview.append(createSheetResourcePreview({label:"",icon:"",current:32,max:40,color:"#8994a3",trackColor:"#293443",showValues:false}));
         fitSheetResourcePreview(preview,{w:78,h:78},78);
       }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
