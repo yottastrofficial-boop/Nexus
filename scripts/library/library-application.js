@@ -440,7 +440,7 @@ export function createLibraryApplicationClass({
             });
             if (!accepted) return;
             await this._savePreferences(removeLibraryCollection(this._getPreferences(), collectionId));
-            if (this._state.collectionId === collectionId) this._state.collectionId = "";
+            if (this._state.collectionId === collectionId) { this._state.collectionId = ""; this._state.smartView = "all"; }
           } else {
             const name = String(result?.name ?? "").trim();
             if (!name) return;
