@@ -28,7 +28,7 @@ A API é exposta em `game.nexus.library`:
 - `registerProvider(provider)`: permite que módulos contribuam com recursos no mesmo catálogo, sem criar uma janela ou botão próprio.
 - `getProviders()`: informa os provedores registrados.
 
-O cursor é separado por provedor para que uma fonte grande não obrigue o catálogo a carregar todos os demais recursos. A listagem não clona payloads completos das coleções pessoais; constrói apenas cartões leves. Os cinco tipos de Lógica continuam distintos e as Macros continuam documentos nativos do Foundry.
+O cursor é separado por provedor para que uma fonte grande não obrigue o catálogo a carregar todos os demais recursos. A listagem não clona payloads completos das coleções pessoais; constrói apenas cartões leves e mantém um índice de metadados por usuário. Gravações pelo armazenamento canônico emitem `nexusLibraryUpdated`, invalidando esse índice sem reter documentos ou payloads completos. Os cinco tipos de Lógica continuam distintos e as Macros continuam documentos nativos do Foundry.
 
 ### Referência de experiência: Plutonium
 
