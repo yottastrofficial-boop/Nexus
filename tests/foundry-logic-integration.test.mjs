@@ -339,3 +339,47 @@ test("runtime valida fluxos transitórios antes de executar ou simular", async (
   assert.equal(preview.status, "invalid");
   assert.equal(preview.executed, false);
 });
+
+
+test("runtime percorre ramificações do grafo e simula sem executar ações", async () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  const graph = {
+    entryNodeId: "start-node",
+    nodes: [
+      { id: "start-node", type: "start" },
+      { id: "check-node", type: "condition", expression: "@system.resources.pv.value > 0" },
+      { id: "yes-action", type: "action", action: { id: "mark", type: "test.graph.mark", config: { value: "yes" } } },
+      { id: "yes-end", type: "end" },
+      { id: "no-end", type: "end" }
+    ],
+    edges: [
+      { from: "start-node", to: "check-node", when: "next" },
+      { from: "check-node", to: "yes-action", when: "true" },
+      { from: "check-node", to: "no-end", when: "false" },
+      { from: "yes-action", to: "yes-end", when: "next" }
+    ]
+  };
+  const asset = registry.register({ id: "nexus.test.flow.graph-runtime", type: "flow", payload: { graph } });
+  const runtime = createLogicRuntime({ registry });
+  const calls = [];
+  runtime.registerAction({ type: "test.graph.mark", effects: ["pure"], execute: ({ config }) => { calls.push(config.value); return config.value; } });
+
+  const yesPreview = await runtime.simulateFlow(asset, { system: { resources: { pv: { value: 4 } } } });
+  assert.equal(yesPreview.status, "ready");
+  assert.equal(yesPreview.executed, false);
+  assert.deepEqual(yesPreview.trace.map(item => item.nodeId), ["start-node", "check-node", "yes-action", "yes-end"]);
+  assert.equal(yesPreview.actions.length, 1);
+  assert.equal(calls.length, 0);
+
+  const noPreview = await runtime.simulateFlow(asset, { system: { resources: { pv: { value: 0 } } } });
+  assert.equal(noPreview.status, "ready");
+  assert.deepEqual(noPreview.trace.map(item => item.nodeId), ["start-node", "check-node", "no-end"]);
+  assert.equal(noPreview.actions.length, 0);
+
+  const executed = await runtime.runFlow(asset, { system: { resources: { pv: { value: 4 } } } });
+  assert.equal(executed.status, "success");
+  assert.deepEqual(calls, ["yes"]);
+  const skippedBranch = await runtime.runFlow(asset, { system: { resources: { pv: { value: 0 } } } });
+  assert.equal(skippedBranch.status, "success");
+  assert.deepEqual(calls, ["yes"]);
+});
