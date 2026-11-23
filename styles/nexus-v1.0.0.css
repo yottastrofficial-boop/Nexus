@@ -8719,3 +8719,19 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-port:disabled{opacity:.4;cursor:not-allowed}
 .nexus-library-graph-node.is-connect-source{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
 .nexus-library-graph-toolbar-actions select{max-width:125px}
+
+/* Flow Builder dedicated node Inspector */
+.nexus-library-graph-node.is-selected{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
+.nexus-library-graph-node-summary{grid-column:1/-1;display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--nexus-muted-color,#aab5c4);font-size:10px}
+.nexus-library-graph-inspector{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid var(--nexus-accent-color,rgba(128,120,220,.45));border-radius:8px;background:var(--nexus-panel-background,rgba(128,128,128,.045));min-width:0}
+.nexus-library-graph-inspector[hidden]{display:none}
+.nexus-library-graph-inspector-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-bottom:7px;border-bottom:1px solid var(--nexus-border-color,rgba(128,128,128,.2))}
+.nexus-library-graph-inspector-head strong{font-size:12px}
+.nexus-library-graph-inspector-id{font-size:10px;color:var(--nexus-muted-color,#999);overflow-wrap:anywhere}
+.nexus-library-graph-inspector>.wide,.nexus-library-graph-inspector>.nexus-library-flow-field:has(textarea){grid-column:1/-1}
+.nexus-library-graph-inspector .nexus-library-flow-field{display:grid;gap:4px;min-width:0;font-size:11px}
+.nexus-library-graph-inspector input,.nexus-library-graph-inspector textarea,.nexus-library-graph-inspector select{width:100%;min-width:0}
+.nexus-library-graph-inspector textarea{resize:vertical}
+.nexus-library-graph-field-help{grid-column:1/-1;color:var(--nexus-muted-color,#999);font-size:10px;line-height:1.35}
+.nexus-library-graph-inspector .nexus-library-flow-enabled{grid-column:1/-1}
+@media(max-width:640px){.nexus-library-graph-inspector{grid-template-columns:minmax(0,1fr)}.nexus-library-graph-inspector-head{grid-column:1}}
