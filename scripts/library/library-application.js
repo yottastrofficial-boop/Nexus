@@ -22,21 +22,25 @@ export function createLibraryApplicationClass({
   }
 
   const BaseApplication = HandlebarsApplicationMixin(ApplicationV2);
+  const applicationOptions = {
+    id: "nexus-library",
+    classes: ["nexus", "nexus-library-application"],
+    position: { width: 1180, height: 760 },
+    window: {
+      title: "Biblioteca NEXUS",
+      icon: "fa-solid fa-book-open",
+      frame: true,
+      positioned: true,
+      resizable: true,
+      minimizable: true
+    }
+  };
+  const defaultOptions = globalThis.foundry?.utils?.mergeObject
+    ? globalThis.foundry.utils.mergeObject(ApplicationV2.DEFAULT_OPTIONS ?? {}, applicationOptions, { inplace: false })
+    : { ...(ApplicationV2.DEFAULT_OPTIONS ?? {}), ...applicationOptions };
 
   return class NexusLibraryApplication extends BaseApplication {
-    static DEFAULT_OPTIONS = {
-      id: "nexus-library",
-      classes: ["nexus", "nexus-library-application"],
-      position: { width: 1180, height: 760 },
-      window: {
-        title: "Biblioteca NEXUS",
-        icon: "fa-solid fa-book-open",
-        frame: true,
-        positioned: true,
-        resizable: true,
-        minimizable: true
-      }
-    };
+    static DEFAULT_OPTIONS = defaultOptions;
 
     static PARTS = {
       main: { template: "systems/nexus/templates/library/library.hbs" }
