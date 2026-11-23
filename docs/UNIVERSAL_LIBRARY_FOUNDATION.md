@@ -63,9 +63,9 @@ A padronização visual será incremental e baseada em tokens CSS e wrappers App
 - Nenhum recurso pesado é pré-carregado na inicialização do sistema.
 - Índices de compêndios só são solicitados quando IDs específicos de pacotes são informados; não existe varredura automática de todos os compêndios.
 - A RAM real não pode ser lida com precisão confiável; o orçamento é contábil e conservador.
-- A visão universal consome o catálogo por páginas e resolve detalhes somente após seleção. Ações contextuais estão disponíveis para recursos pessoais NEXUS e abertura de documentos Foundry; editores especializados, adaptadores externos de importação/destinos, preparação de sessão e integração visual ampla permanecem etapas posteriores.
+- A visão universal consome o catálogo por páginas e resolve detalhes somente após seleção. Ações contextuais estão disponíveis para recursos pessoais NEXUS e abertura de documentos Foundry. O registro genérico de adaptadores de transferência já define origem → validação → prévia do destino → confirmação, mas adaptadores concretos externos e destinos Foundry ainda são etapas posteriores. Preparação de sessão e integração visual ampla também permanecem pendentes.
 
 
 ## Editores de Lógica integrados
 
-Os cinco tipos de Lógica agora possuem validadores estruturais no Core e editores iniciais no Inspector da janela independente. A validação usa o parser seguro do NEXUS e ocorre antes da persistência. A implementação de ações/funções executáveis continua sendo responsabilidade do Core ou de módulos confiáveis; os editores guardam referências e configurações inertes.
+Os cinco tipos de Lógica agora possuem validadores estruturais no Core e editores especializados no Inspector da janela independente. Fluxos contam com construtor visual declarativo para gatilhos, condições e ações, mantendo configuração específica de executor como JSON. A validação usa o parser seguro do NEXUS e ocorre antes da persistência. A implementação de ações/funções executáveis continua sendo responsabilidade do Core ou de módulos confiáveis; os editores guardam referências e configurações inertes.
