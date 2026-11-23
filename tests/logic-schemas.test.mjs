@@ -4,6 +4,9 @@ import { createLogicRegistry } from "../scripts/core/logic-registry.js";
 import { createNexusLogicSchemas } from "../scripts/core/logic-schemas.js";
 
 const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+const invalidPreview = registry.validateAsset({ id: "nexus.personal.rule.preview", type: "rule", payload: { expression: "1 + )" } });
+assert.equal(invalidPreview.valid, false);
+assert.equal(registry.size, 0, "A validação de prévia não pode registrar nem persistir ativos.");
 
 test("valida propriedades sem rejeitar zero, false ou string vazia", () => {
   const property = registry.register({
