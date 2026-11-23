@@ -165,7 +165,8 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
       if (schemaField.type === "number" && schemaField.max !== undefined) control.max = String(schemaField.max);
     }
     control.id = newId("config-field");
-    if (schemaField.required) control.required = true;
+    if (schemaField.required && schemaField.type !== "checkbox") control.required = true;
+    if (schemaField.required) control.setAttribute("aria-required", "true");
     if (schemaField.placeholder) control.placeholder = schemaField.placeholder;
     const help = schemaField.help ? make("small", "nexus-library-graph-field-help", schemaField.help) : null;
     if (help) help.id = newId("config-help");
