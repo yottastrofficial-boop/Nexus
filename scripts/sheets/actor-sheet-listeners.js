@@ -462,14 +462,20 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const filterPopover = libraryPanel?.querySelector("[data-library-filter-popover]");
     const tagInput = libraryPanel?.querySelector("[data-library-tag]");
     const originInput = libraryPanel?.querySelector("[data-library-origin]");
+    const kindInput = libraryPanel?.querySelector("[data-library-kind]");
+    const typeInput = libraryPanel?.querySelector("[data-library-type]");
     const initialTag = tagInput?.value || sheet._libraryTagFilter || "all";
     const initialOrigin = originInput?.value || sheet._libraryOriginFilter || "all";
+    const initialKind = kindInput?.value || sheet._libraryKindFilter || "all";
+    const initialType = typeInput?.value || sheet._libraryTypeFilter || "all";
     if (tagInput) tagInput.value = initialTag;
     if (originInput) originInput.value = initialOrigin;
+    if (kindInput) kindInput.value = initialKind;
+    if (typeInput) typeInput.value = initialType;
     libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryTagOption === initialTag));
     libraryPanel?.querySelectorAll("[data-library-origin-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryOriginOption === initialOrigin));
     const updateFilterSummary = () => {
-      const activeCount = Number((tagInput?.value ?? "all") !== "all") + Number((originInput?.value ?? "all") !== "all");
+      const activeCount = Number((tagInput?.value ?? "all") !== "all") + Number((originInput?.value ?? "all") !== "all") + Number((kindInput?.value ?? "all") !== "all") + Number((typeInput?.value ?? "all") !== "all");
       const count = libraryPanel?.querySelector("[data-library-filter-count]");
       if (count) { count.hidden = activeCount === 0; count.textContent = activeCount ? String(activeCount) : ""; }
       const label = filterButton?.querySelector("span");
@@ -491,6 +497,16 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       updateFilterSummary();
       if (filterPopover) filterPopover.hidden = true;
       filterButton?.setAttribute("aria-expanded", "false");
+      scheduleLibraryFilter();
+    });
+    kindInput?.addEventListener("change", () => {
+      sheet._libraryKindFilter = kindInput.value || "all";
+      updateFilterSummary();
+      scheduleLibraryFilter();
+    });
+    typeInput?.addEventListener("change", () => {
+      sheet._libraryTypeFilter = typeInput.value || "all";
+      updateFilterSummary();
       scheduleLibraryFilter();
     });
     libraryPanel?.querySelector(".nexus-library-origin-options")?.addEventListener("click", event => {
