@@ -57,6 +57,7 @@ jobs:
           node --experimental-default-type=module tests/library-backup-service.test.mjs
           node --experimental-default-type=module tests/library-catalog-explorer.test.mjs
           node --experimental-default-type=module tests/library-application.test.mjs
+          node --experimental-default-type=module tests/library-preferences.test.mjs
 
       - name: Build Foundry package
         run: |
