@@ -51,7 +51,7 @@ export function createFoundryDocumentBridge({
     query = "",
     offset = 0,
     limit = 50,
-    includeCompendiums = false
+    compendiumIds = []
   } = {}) => {
     const requestedTypes = type === "all" ? Object.keys(DOCUMENT_TYPES) : [String(type)];
     const unknown = requestedTypes.filter(key => !DOCUMENT_TYPES[key]);
@@ -61,6 +61,7 @@ export function createFoundryDocumentBridge({
     const pageSize = safeLimit(limit);
     const items = [];
     let total = 0;
+    const errors = [];
     const append = record => {
       if (!matches(record, search)) return;
       if (total >= start && items.length < pageSize) items.push(record);
@@ -75,29 +76,41 @@ export function createFoundryDocumentBridge({
       }
     }
 
-    if (includeCompendiums && gameRef.packs?.values) {
+    const requestedPacks = new Set((Array.isArray(compendiumIds) ? compendiumIds : []).map(value => String(value)));
+    if (requestedPacks.size && gameRef.packs?.values) {
+      const foundPacks = new Set();
       for (const pack of gameRef.packs.values()) {
+        const packId = String(pack.collection ?? "");
+        if (!requestedPacks.has(packId)) continue;
+        foundPacks.add(packId);
         const typeKey = requestedTypes.find(key => DOCUMENT_TYPES[key].documentName === pack.documentName);
         if (!typeKey || typeof pack.getIndex !== "function") continue;
-        const index = await pack.getIndex();
-        for (const entry of index ?? []) {
-          const uuid = String(entry.uuid ?? `Compendium.${pack.collection}.${entry._id}`);
-          append(Object.freeze({
-            id: String(entry._id ?? ""), uuid, type: typeKey,
-            documentName: DOCUMENT_TYPES[typeKey].documentName,
-            collection: DOCUMENT_TYPES[typeKey].collection,
-            name: String(entry.name ?? "Sem nome"),
-            img: String(entry.img ?? ""), folder: String(entry.folder?.name ?? ""),
-            pack: String(pack.collection ?? ""), sort: Number(entry.sort) || 0,
-            isCompendium: true
-          }));
+        try {
+          const index = await pack.getIndex();
+          for (const entry of index ?? []) {
+            const uuid = String(entry.uuid ?? `Compendium.${pack.collection}.${entry._id}`);
+            append(Object.freeze({
+              id: String(entry._id ?? ""), uuid, type: typeKey,
+              documentName: DOCUMENT_TYPES[typeKey].documentName,
+              collection: DOCUMENT_TYPES[typeKey].collection,
+              name: String(entry.name ?? "Sem nome"),
+              img: String(entry.img ?? ""), folder: String(entry.folder?.name ?? ""),
+              pack: packId, sort: Number(entry.sort) || 0,
+              isCompendium: true
+            }));
+          }
+        } catch (error) {
+          errors.push({ pack: packId, message: String(error?.message ?? error) });
         }
+      }
+      for (const packId of requestedPacks) {
+        if (!foundPacks.has(packId)) errors.push({ pack: packId, message: "Compêndio indisponível nesta sessão." });
       }
     }
 
     return Object.freeze({
       items: Object.freeze(items), total, offset: start, limit: pageSize,
-      hasMore: start + items.length < total
+      hasMore: start + items.length < total, errors: Object.freeze(errors)
     });
   };
 
