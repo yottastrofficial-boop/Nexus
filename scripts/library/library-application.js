@@ -1,4 +1,5 @@
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
+import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
 
 /**
@@ -104,7 +105,17 @@ export function createLibraryApplicationClass({
         onUpdateInstances: this._context.updateInstances,
         canUpdateDefinition: this._context.canUpdateDefinition,
         onUpdateDefinition: this._context.updateDefinition,
-        applyLabel: this._context.applyLabel ?? "Aplicar ao contexto"
+        applyLabel: this._context.applyLabel ?? "Aplicar ao contexto",
+        renderSpecializedEditor: (resource, resolved) => {
+          if (resource?.providerId !== "nexus-library" || resource?.kind !== "logic") return null;
+          const logic = globalThis.game?.nexus?.logic;
+          if (typeof logic?.save !== "function") return null;
+          return createLogicAssetEditor({
+            asset: resolved,
+            runtime: logic.runtime,
+            onSave: asset => logic.save(asset)
+          });
+        }
       });
 
       const search = root.querySelector("[data-library-search]");
