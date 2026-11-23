@@ -72,6 +72,10 @@ const taggedNexusPage = await nexusProvider.list({ tags: ["recurso"] });
 assert.ok(taggedNexusPage.items.length >= 1);
 assert.ok(taggedNexusPage.items.every(item => item.tags.some(tag => tag.toLocaleLowerCase() === "recurso")),
   "Tag filtering must happen at the provider before pagination.");
+const personalNexusPage = await nexusProvider.list({ origin: "personal" });
+assert.ok(personalNexusPage.items.length > 0);
+assert.ok(personalNexusPage.items.every(item => item.origin === "personal"),
+  "Origin filtering must distinguish personal definitions from built-in resources.");
 
 const component = await nexusProvider.resolve({
   providerId: "nexus-library",
@@ -157,6 +161,9 @@ assert.ok(foundryOnly.items.every(item => item.type === "actors"));
 const worldTagged = await registry.list({ tags: ["world"], source: "foundry-documents" });
 assert.ok(worldTagged.items.length > 0);
 assert.ok(worldTagged.items.every(item => item.tags.includes("world")));
+const foundryWorldOnly = await registry.list({ origin: "world", source: "foundry-documents" });
+assert.ok(foundryWorldOnly.items.length > 0);
+assert.ok(foundryWorldOnly.items.every(item => item.origin === "world"));
 const resolved = await registry.resolve(
   foundryOnly.items[0].reference,
   foundryOnly.items[0]
