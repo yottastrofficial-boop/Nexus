@@ -28,11 +28,12 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     for(const [index,asset] of NEXUS_LIBRARY_CATALOG.assets.entries()){
       const card=document.createElement("button");card.type="button";card.className="nexus-library-asset";
       card.dataset.libraryAsset=`${asset.label} ${asset.keywords??""}`.toLocaleLowerCase("pt-BR");
+      card.dataset.libraryTags=(Array.isArray(asset.tags)?asset.tags:[]).map(tag=>String(tag).toLocaleLowerCase("pt-BR")).join(" ");
       card.dataset.libraryCategory=asset.category;card.dataset.librarySource=asset.source??"core";card.dataset.assetType=asset.type;card.dataset.assetKey=asset.key??`${asset.category}-${index}`;
       const preview=document.createElement("span");preview.className=`nexus-library-preview-stage preview-${asset.preview??asset.type}`;
       if(asset.type==="sheet-resource"){
         const code=String(asset.template?.sheetCode??"").toUpperCase(),color=asset.template?.sheetColor??"#78b7e8";
-        preview.append(createSheetResourcePreview({label:asset.template?.sheetContent1||"Recurso",current:32,max:40,color,showValues:false}));
+        preview.append(createSheetResourcePreview({label:"",icon:"",current:32,max:40,color:"#8994a3",trackColor:"#293443",showValues:false}));
         fitSheetResourcePreview(preview,{w:78,h:78},78);
       }else if(asset.type==="token"){const token=document.createElement("span");token.className="nexus-library-token-preview";token.textContent="N";preview.append(token);}
       else if(asset.type==="asset-notes"){const note=document.createElement("span");note.className="nexus-library-note-preview";note.innerHTML="<i></i><i></i><i></i>";preview.append(note);}
@@ -161,6 +162,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       renderCustomFolderTree(collection);
       const query = searchInput?.value.trim().toLocaleLowerCase("pt-BR") ?? "";
       const filter = panel.querySelector("[data-library-collection-filter]")?.value ?? "all";
+      const selectedTag = panel.querySelector("[data-library-tag]")?.value ?? "all";
       const folderId = panel.querySelector("[data-library-collection-folder]")?.value ?? "";
       const folderSelect = panel.querySelector("[data-library-collection-folder]");
       if (folderSelect) {
@@ -179,6 +181,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const haystack = [entry.name,entry.label,entry.title,entry.description,entry.type,entry.sourceId, ...(Array.isArray(entry.tags) ? entry.tags : [])]
           .filter(value => value !== undefined && value !== null).join(" ").toLocaleLowerCase("pt-BR");
         if (query && !haystack.includes(query)) return false;
+        const entryTags = (Array.isArray(entry.tags) ? entry.tags : []).map(tag => String(tag).toLocaleLowerCase("pt-BR"));
+        if (selectedTag !== "all" && !entryTags.includes(selectedTag)) return false;
         if (filter === "favorites" && !preferences.favorites.includes(key)) return false;
         if (filter === "recent" && !preferences.recent.includes(key)) return false;
         const sourceId = String(entry.sourceId ?? "");
@@ -207,6 +211,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         const card = document.createElement("article"); card.className = "nexus-library-generic-card";
         const select = document.createElement("button"); select.type = "button"; select.className = "nexus-library-generic-item";
         select.dataset.libraryEntry = entry.id; select.dataset.libraryCollection = collection;
+        select.dataset.libraryTags = (Array.isArray(entry.tags) ? entry.tags : []).map(tag => String(tag).toLocaleLowerCase("pt-BR")).join(" ");
         const icon = document.createElement("i"); icon.className = genericCollectionIcons[collection]; icon.setAttribute("aria-hidden","true");
         const title = document.createElement("strong"); title.textContent = String(entry.name ?? entry.label ?? entry.title ?? "Item sem nome");
         const meta = document.createElement("small"); meta.textContent = String(entry.type ?? entry.sourceId ?? "Item salvo");
