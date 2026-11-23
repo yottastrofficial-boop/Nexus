@@ -131,6 +131,18 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         });
       });
     });
+    panel.querySelector("[data-library-filter-popover]")?.addEventListener("change", () => {
+      const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+      if (active === "collection:all") void universalCatalog?.render({
+        query: searchInput?.value ?? "",
+        tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+        origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
+        kind: panel.querySelector("[data-library-kind]")?.value ?? "all",
+        type: panel.querySelector("[data-library-type]")?.value ?? "all",
+        viewMode: sheet._libraryCollectionViewMode ?? "grid",
+        cardSize: sheet._libraryCardSize ?? "medium"
+      });
+    });
     const mirrorLegacyCollection = async (collection, store) => {
       const flags = { components:"libraryComponents", groups:"libraryGroups", layouts:"libraryLayouts", templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", themes:"libraryThemes", styles:"libraryStyles", properties:"libraryProperties", rules:"libraryRules", behaviors:"libraryBehaviors", flows:"interactionLibrary", functions:"libraryFunctions" };
       const flag = flags[collection];
