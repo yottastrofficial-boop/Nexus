@@ -6,7 +6,7 @@ A Biblioteca deve localizar e organizar recursos próprios do NEXUS e documentos
 
 ## Documentos nativos do Foundry
 
-O bridge integra Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards por UUID. A Biblioteca consulta metadados leves e pagina resultados; conteúdo completo só é resolvido quando uma ação específica precisa dele. Compêndios são consultados sob demanda por índice. O bridge não altera permissões, não copia documentos e não substitui as abas nativas do Foundry.
+O bridge integra Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards por UUID. A Biblioteca consulta metadados leves e pagina resultados; conteúdo completo só é resolvido quando uma ação específica precisa dele. Compêndios são consultados sob demanda e apenas quando a consulta informa explicitamente os IDs dos pacotes; não há varredura automática de todos os compêndios. O bridge não altera permissões, não copia documentos e não substitui as abas nativas do Foundry.
 
 Favoritos, recentes, pastas e etiquetas podem referenciar documentos pela chave `documents:<uuid>` nas preferências do usuário. A referência não concede acesso: o Foundry continua responsável por permissões e disponibilidade do documento.
 
