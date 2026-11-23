@@ -8677,3 +8677,15 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-flow-enabled{display:flex;align-items:center;gap:6px;font-size:10px}
 .nexus-library-flow-enabled input{width:auto;min-width:0}
 @media(max-width:640px){.nexus-library-flow-row-fields{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-row{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-remove{justify-self:end}}
+
+/* Flow graph editor */
+.nexus-library-graph-builder{display:grid;gap:10px;padding:12px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.25));border-radius:8px;min-width:0}
+.nexus-library-graph-toolbar,.nexus-library-graph-section-head,.nexus-library-graph-node-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.nexus-library-graph-toolbar>div{display:grid;gap:3px}.nexus-library-graph-toolbar strong,.nexus-library-graph-section-head strong{font-size:12px}.nexus-library-graph-toolbar small{font-size:10px;color:var(--nexus-muted-color,#888)}
+.nexus-library-graph-content{display:grid;gap:12px;min-width:0}.nexus-library-graph-nodes,.nexus-library-graph-edges{display:grid;gap:8px;min-width:0}
+.nexus-library-graph-node{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.2));border-radius:7px;background:var(--nexus-panel-background,rgba(128,128,128,.04));min-width:0}
+.nexus-library-graph-node-head{grid-column:1/-1}.nexus-library-graph-node-head strong{font-size:11px}
+.nexus-library-graph-node .wide{grid-column:1/-1}
+.nexus-library-graph-edge{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:8px;padding:8px;border-radius:6px;background:var(--nexus-panel-background,rgba(128,128,128,.05));min-width:0}
+.nexus-library-graph-edge label{min-width:0}
+@media(max-width:640px){.nexus-library-graph-node,.nexus-library-graph-edge{grid-template-columns:minmax(0,1fr)}.nexus-library-graph-node-head{grid-column:1}}
