@@ -98,7 +98,7 @@ export function createFoundryDocumentBridge({
       const foundPacks = new Set();
       for (const pack of gameRef.packs.values()) {
         const packId = String(pack.collection ?? "");
-        if (!requestedPacks.has(packId)) continue;
+        if (!requestedPacks.has(packId) || pack.visible === false) continue;
         foundPacks.add(packId);
         const typeKey = requestedTypes.find(key => DOCUMENT_TYPES[key].documentName === pack.documentName);
         if (!typeKey || typeof pack.getIndex !== "function") continue;
