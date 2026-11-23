@@ -224,6 +224,38 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
   save.type = "submit";
   const status = make("p", "nexus-library-logic-editor-status");
   actions.append(save);
+  if (asset.type === "flow" && typeof runtime?.simulateFlow === "function") {
+    const simulate = make("button", "nexus-library-logic-editor-simulate", "Simular sem salvar");
+    simulate.type = "button";
+    simulate.addEventListener("click", async () => {
+      simulate.disabled = true;
+      status.textContent = "Simulando sem executar ações…";
+      try {
+        const draft = {};
+        for (const [key, input] of Object.entries(fields)) {
+          draft[key] = input.type === "checkbox" ? input.checked : input.value;
+        }
+        Object.assign(draft, flowBuilder.read());
+        const nextPayload = buildLogicEditorPayload("flow", payload, draft);
+        const actor = globalThis.game?.user?.character ?? null;
+        const context = {
+          actor,
+          document: actor,
+          system: actor?.system?.toObject?.() ?? actor?.system ?? null
+        };
+        const result = await runtime.simulateFlow({ ...asset, payload: nextPayload }, context);
+        const summary = (result.actions ?? []).map(item => item.type + ": " + item.status).join(" · ");
+        status.textContent = "Simulação: " + result.status + ". " +
+          (summary || (result.reason === "conditions" ? "As condições não foram satisfeitas." : "Nenhuma ação ativa para avaliar.")) +
+          " Nenhuma ação foi executada.";
+      } catch (error) {
+        status.textContent = "Falha na simulação: " + String(error?.message ?? error);
+      } finally {
+        simulate.disabled = false;
+      }
+    });
+    actions.append(simulate);
+  }
   form.append(actions, status);
   form.addEventListener("submit", async event => {
     event.preventDefault();
