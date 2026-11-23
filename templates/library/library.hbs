@@ -34,6 +34,13 @@
         <option value="large">Grande</option>
       </select>
     </label>
+    <div class="nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca">
+      <button type="button" data-library-backup-copy title="Copiar backup" aria-label="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
+      <button type="button" data-library-backup-export title="Exportar backup" aria-label="Exportar backup"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
+      <button type="button" data-library-backup-import-code title="Importar código" aria-label="Importar código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
+      <button type="button" data-library-backup-import-file title="Importar arquivo" aria-label="Importar arquivo"><i class="fa-solid fa-file-import" aria-hidden="true"></i></button>
+      <input type="file" accept=".json,application/json" data-library-backup-file hidden>
+    </div>
   </div>
   <div class="nexus-library-body nexus-library-app-body">
     <nav class="nexus-library-section-tabs" aria-label="Navegação da Biblioteca">
