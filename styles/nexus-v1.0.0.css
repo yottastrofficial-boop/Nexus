@@ -8419,3 +8419,155 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-resource-facts dd { min-width:0; margin:0; overflow-wrap:anywhere; }
 .nexus-library-resource-raw { margin-top:12px; }
 .nexus-library-resource-raw pre { max-height:260px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
+
+/* Standalone universal Library window */
+.nexus-library-application .window-content,
+.nexus-library-application .application-content {
+  min-width:0;
+  min-height:0;
+  padding:12px;
+  overflow:hidden;
+}
+.nexus-library-application .nexus-library-panel {
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  gap:10px;
+}
+.nexus-library-application .nexus-library-toolbar {
+  flex:0 0 auto;
+  flex-wrap:wrap;
+}
+.nexus-library-application .nexus-library-filter-wrap {
+  display:flex;
+  flex:0 1 auto;
+  align-items:center;
+  gap:8px;
+}
+.nexus-library-application .nexus-library-app-filter,
+.nexus-library-application .nexus-library-app-size {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:105px;
+  margin:0;
+  color:var(--nexus-panel-muted,#a5b6c9);
+  font-size:9px;
+}
+.nexus-library-application .nexus-library-app-filter select,
+.nexus-library-application .nexus-library-app-filter input,
+.nexus-library-application .nexus-library-app-size select {
+  min-width:0;
+  max-width:150px;
+  padding:6px 8px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-input,#151d27);
+  font-size:10px;
+}
+.nexus-library-application .nexus-library-body {
+  display:grid;
+  grid-template-columns:190px minmax(0,1fr);
+  flex:1 1 auto;
+  gap:12px;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.nexus-library-application .nexus-library-section-tabs {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:4px;
+  min-width:0;
+  min-height:0;
+  max-height:100%;
+  padding:8px;
+  overflow:auto;
+  border:1px solid var(--nexus-panel-border,#344153);
+  border-radius:7px;
+  background:var(--nexus-panel-input,#151d27);
+}
+.nexus-library-application .nexus-library-section-tabs > button {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:flex-start;
+  gap:9px;
+  width:100%;
+  min-height:33px;
+  padding:7px 9px;
+  border:1px solid transparent;
+  border-radius:5px;
+  color:var(--nexus-panel-text,#cbd6e3);
+  background:transparent;
+  text-align:left;
+  font-size:10px;
+}
+.nexus-library-application .nexus-library-section-tabs > button.active {
+  border-color:var(--nexus-panel-border,#40566d);
+  background:var(--nexus-panel-surface,#263749);
+}
+.nexus-library-application .nexus-library-custom-folder-heading {
+  margin:12px 7px 5px;
+  color:var(--nexus-panel-muted,#91a3b8);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.nexus-library-application .nexus-library-custom-folders {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.nexus-library-application .nexus-library-section-panel {
+  min-width:0;
+  min-height:0;
+  padding:8px 2px;
+  overflow:hidden;
+}
+.nexus-library-application .nexus-library-workspace {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(250px,320px);
+  height:100%;
+  min-height:0;
+  align-items:stretch;
+}
+.nexus-library-application .nexus-library-main {
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+}
+.nexus-library-application .nexus-library-details {
+  position:static;
+  max-height:100%;
+  min-height:0;
+  overflow:auto;
+}
+.nexus-library-application .nexus-library-generic-items {
+  max-height:calc(100% - 34px);
+  overflow:auto;
+}
+@media(max-width:760px) {
+  .nexus-library-application .nexus-library-body {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .nexus-library-application .nexus-library-section-tabs {
+    flex-direction:row;
+    flex-wrap:nowrap;
+    max-height:110px;
+    overflow-x:auto;
+  }
+  .nexus-library-application .nexus-library-workspace {
+    grid-template-columns:minmax(0,1fr);
+    overflow:auto;
+  }
+  .nexus-library-application .nexus-library-details {
+    max-height:320px;
+  }
+}
