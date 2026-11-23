@@ -6,10 +6,16 @@ import { createLogicRuntime } from "./core/logic-runtime.js";
 import { loadLogicLibrary, saveLogicAsset, deleteLogicAsset } from "./core/logic-library.js";
 import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter, installNexusMediaWorkerRuntime } from "./core/media-service.js";
 import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndexedDbMediaCache, createMediaCacheKey } from "./core/media-storage.js";
+import { createResourceLifecycleManager } from "./core/resource-lifecycle.js";
+import { createFoundryDocumentBridge } from "./core/foundry-document-bridge.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
+  // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
+  game.nexus.resources ??= createResourceLifecycleManager();
+  // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
+  game.nexus.documents ??= createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid });
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
