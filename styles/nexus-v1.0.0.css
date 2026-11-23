@@ -8642,3 +8642,18 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   color:var(--nexus-panel-text,#e7edf5);
   background:var(--nexus-panel-input,#151d27);
 }
+
+/* Biblioteca — editores especializados da área Lógica */
+.nexus-library-logic-editor{display:grid;gap:10px;margin-top:16px;padding:12px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.3));border-radius:8px;background:var(--nexus-panel-background,rgba(128,128,128,.04))}
+.nexus-library-logic-editor h4{margin:0;font-size:13px}
+.nexus-library-logic-editor-note,.nexus-library-logic-editor-status{margin:0;color:var(--nexus-muted-color,#888);font-size:11px;line-height:1.45}
+.nexus-library-logic-editor-form{display:grid;grid-template-columns:1fr;gap:9px}
+.nexus-library-logic-field{display:grid;gap:4px;min-width:0;font-size:11px}
+.nexus-library-logic-field>span{font-weight:600}
+.nexus-library-logic-field input,.nexus-library-logic-field select,.nexus-library-logic-field textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.nexus-library-logic-field textarea{resize:vertical;font-family:var(--font-monospace,monospace);font-size:11px}
+.nexus-library-logic-checkbox{display:flex;align-items:center;gap:8px}
+.nexus-library-logic-checkbox input{width:auto;min-width:0}
+.nexus-library-logic-editor-actions{display:flex;justify-content:flex-end}
+.nexus-library-logic-editor-save{min-height:30px;padding:5px 12px}
+.nexus-library-logic-editor-status{min-height:1.2em}
