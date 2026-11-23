@@ -120,7 +120,8 @@ test("valida grafo visual, ramificações obrigatórias e ausência de ciclos", 
       { from: "yes-action", to: "yes-end", when: "next" }
     ]
   };
-  assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-valid", type: "flow", payload: { graph } }).valid, true);
+  const validGraph = registry.validateAsset({ id: "nexus.personal.flow.graph-valid", type: "flow", payload: { graph } });
+  assert.equal(validGraph.valid, true, JSON.stringify(validGraph.errors));
   const missingBranch = structuredClone(graph);
   missingBranch.edges = missingBranch.edges.filter(edge => edge.when !== "false");
   assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-branch", type: "flow", payload: { graph: missingBranch } }).valid, false);
