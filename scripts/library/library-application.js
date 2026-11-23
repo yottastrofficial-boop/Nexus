@@ -102,6 +102,8 @@ export function createLibraryApplicationClass({
         onApplyResource: this._context.applyResource,
         getUpdateInfo: this._context.getUpdateInfo,
         onUpdateInstances: this._context.updateInstances,
+        canUpdateDefinition: this._context.canUpdateDefinition,
+        onUpdateDefinition: this._context.updateDefinition,
         applyLabel: this._context.applyLabel ?? "Aplicar ao contexto"
       });
 
