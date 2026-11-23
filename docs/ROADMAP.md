@@ -6,8 +6,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `335db5149ede0d595bb69a3f3102d1f4495c6ff7`
-- Versão candidata para teste: `1.0.0.89` (a última publicada permanece `1.0.0.88`)
+- Commit: `branch feature/library-unified-explorer-1.0.0.90 — em revisão`
+- Versão candidata para teste: `1.0.0.90` (a última publicada permanece `1.0.0.89`)
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
@@ -23,10 +23,10 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 ### Biblioteca
 
 - Existe armazenamento unificado com coleções, preferências, backups e compatibilidade de leitura legada.
-- A interface Explorer possui navegação, cartões, filtros, visualização em grade/lista e Inspector contextual.
+- A interface Explorer possui navegação universal, visão de todos os itens salvos, favoritos, recentes, pastas livres, filtros de etiquetas dinâmicos, cartões padronizados, grade/lista e Inspector contextual.\n- O Inspector permite editar metadados, organizar por pastas, duplicar e excluir itens salvos; exclusão de ativos lógicos com dependentes é bloqueada.\n- A visão universal é agregadora; ações específicas de inserção/aplicação continuam disponíveis nas áreas especializadas correspondentes.
 - Definições reutilizáveis e instâncias inseridas na ficha devem continuar isoladas.
-- A integração completa de todas as coleções e seus editores especializados ainda precisa ser verificada no Foundry real.
-- Pastas, favoritos, recentes, metadados e operações de importação/exclusão exigem testes de persistência em cenário real.
+- Editores especializados completos para todos os tipos e aplicação direta de qualquer tipo a partir da visão universal ainda não estão concluídos; a validação visual/funcional no Foundry real permanece pendente.
+- Pastas, favoritos, recentes, metadados e operações de duplicação/exclusão/importação exigem testes de persistência em cenário real.
 
 ### Lógica
 
