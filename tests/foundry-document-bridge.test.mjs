@@ -21,7 +21,7 @@ test("consulta compêndios apenas quando solicitada e resolve UUID sob demanda",
   const empty = await bridge.list({ type: "macros" });
   assert.equal(empty.total, 0);
   assert.equal(indexed, 0);
-  const result = await bridge.list({ type: "macros", includeCompendiums: true });
+  const result = await bridge.list({ type: "macros", compendiumIds: ["world.macros"] });
   assert.equal(result.total, 1);
   assert.equal(indexed, 1);
   assert.equal((await bridge.resolve(result.items[0])).name, "Macro teste");
