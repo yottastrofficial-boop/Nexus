@@ -8575,3 +8575,46 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
     max-height:320px;
   }
 }
+
+.nexus-library-resource-collections {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:10px 0;
+  padding-top:8px;
+  border-top:1px solid var(--nexus-panel-border,#344153);
+}
+.nexus-library-resource-collections > strong {
+  color:var(--nexus-panel-muted,#a5b6c9);
+  font-size:10px;
+}
+.nexus-library-collection-membership {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  color:var(--nexus-panel-text,#dce5ef);
+  font-size:10px;
+}
+.nexus-library-collection-membership input {
+  flex:0 0 auto;
+  margin:0;
+}
+.nexus-library-application .nexus-library-custom-folder.active {
+  border-color:var(--nexus-panel-border,#40566d);
+  background:var(--nexus-panel-surface,#263749);
+}
+.nexus-library-application .nexus-library-create-folder {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  min-height:30px;
+  padding:6px 9px;
+  border:1px dashed var(--nexus-panel-border,#40566d);
+  border-radius:5px;
+  color:var(--nexus-panel-muted,#a5b6c9);
+  background:transparent;
+  text-align:left;
+  font-size:10px;
+}
