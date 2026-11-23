@@ -68,6 +68,10 @@ assert.equal(nextNexusPage.nextCursor, 4);
 const behaviorPage = await nexusProvider.list({ kind: "logic", type: "behavior" });
 assert.equal(behaviorPage.items.length, 1);
 assert.equal(behaviorPage.items[0].kind, "logic");
+const taggedNexusPage = await nexusProvider.list({ tags: ["recurso"] });
+assert.ok(taggedNexusPage.items.length >= 1);
+assert.ok(taggedNexusPage.items.every(item => item.tags.some(tag => tag.toLocaleLowerCase() === "recurso")),
+  "Tag filtering must happen at the provider before pagination.");
 
 const component = await nexusProvider.resolve({
   providerId: "nexus-library",
@@ -150,6 +154,9 @@ assert.ok(unifiedPage.cursor["foundry-documents"] !== undefined);
 
 const foundryOnly = await registry.list({ source: "foundry-documents", type: "actors" });
 assert.ok(foundryOnly.items.every(item => item.type === "actors"));
+const worldTagged = await registry.list({ tags: ["world"], source: "foundry-documents" });
+assert.ok(worldTagged.items.length > 0);
+assert.ok(worldTagged.items.every(item => item.tags.includes("world")));
 const resolved = await registry.resolve(
   foundryOnly.items[0].reference,
   foundryOnly.items[0]
