@@ -384,7 +384,6 @@ function createFlowGraphBuilder(form, payload, runtime) {
     ? runtime.getActionDefinitions()
     : Array.isArray(runtime?.actionDefinitions) ? runtime.actionDefinitions : [];
   const actionTypes = [...new Set([...(runtime?.actionTypes ?? []), ...definitions.map(item => item.type)])];
-  const definitionByType = new Map(definitions.map(item => [item.type, item]));
   const makeSelect = (value, options) => {
     const node = make("select", "");
     options.forEach(([key, label]) => {
@@ -418,6 +417,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const status = make("p", "nexus-library-flow-empty", "Grafo opcional. Fluxos existentes continuam usando gatilhos, condições e ações sequenciais.");
   const connectHint = make("p", "nexus-library-graph-connect-hint", "");
   connectHint.hidden = true;
+  connectHint.setAttribute("role", "status");
+  connectHint.setAttribute("aria-live", "polite");
   const canvasScroll = make("div", "nexus-library-graph-canvas-scroll");
   const canvas = make("div", "nexus-library-graph-canvas");
   const arrowId = newId("flow-arrow");
@@ -430,6 +431,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
 
   const inspector = make("aside", "nexus-library-graph-inspector");
   inspector.setAttribute("aria-label", "Inspector do nó selecionado");
+  inspector.setAttribute("role", "region");
   const edgesWrap = make("div", "nexus-library-graph-edges");
   const content = make("div", "nexus-library-graph-content");
   content.append(connectHint, canvasScroll, inspector, edgesWrap);
@@ -507,6 +509,24 @@ function createFlowGraphBuilder(form, payload, runtime) {
       make("span", "nexus-library-graph-inspector-id", node.id)
     );
     inspector.append(head);
+    const moveGroup = make("div", "nexus-library-graph-move-controls");
+    moveGroup.setAttribute("role", "group");
+    moveGroup.setAttribute("aria-label", "Mover nó sem arrastar");
+    for (const [label, dx, dy, symbol] of [
+      ["Mover para cima", 0, -20, "↑"], ["Mover para a esquerda", -20, 0, "←"],
+      ["Mover para baixo", 0, 20, "↓"], ["Mover para a direita", 20, 0, "→"]
+    ]) {
+      const moveButton = make("button", "nexus-library-flow-add", symbol);
+      moveButton.type = "button";
+      moveButton.setAttribute("aria-label", label);
+      moveButton.addEventListener("click", () => {
+        node.x = Math.max(0, Math.min(4800, (Number(node.x) || 0) + dx));
+        node.y = Math.max(0, Math.min(4800, (Number(node.y) || 0) + dy));
+        render();
+      });
+      moveGroup.append(moveButton);
+    }
+    inspector.append(moveGroup);
     const name = makeText(node.name ?? "", "Nome do nó");
     name.addEventListener("input", () => {
       node.name = name.value;
@@ -588,6 +608,9 @@ function createFlowGraphBuilder(form, payload, runtime) {
     graph.nodes.forEach(node => {
       const card = make("article", "nexus-library-graph-node nexus-library-graph-node-" + node.type + (node.id === selectedNodeId ? " is-selected" : ""));
       card.dataset.nodeId = node.id;
+      card.tabIndex = 0;
+      card.setAttribute("role", "group");
+      card.setAttribute("aria-label", typeLabel + " " + (node.name || node.id) + ". Use as setas do teclado para mover o nó.");
       card.style.left = (Number(node.x) || 0) + "px";
       card.style.top = (Number(node.y) || 0) + "px";
       const head = make("div", "nexus-library-graph-node-head");
@@ -627,7 +650,23 @@ function createFlowGraphBuilder(form, payload, runtime) {
         head.append(removeNode);
       }
       const drag = make("span", "nexus-library-graph-drag-handle", "⠿ Arrastar");
+      drag.setAttribute("aria-hidden", "true");
       head.append(drag);
+      card.addEventListener("keydown", event => {
+        if (event.target !== card || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+        event.preventDefault();
+        const step = event.shiftKey ? 80 : 20;
+        if (event.key === "ArrowLeft") node.x = Math.max(0, (Number(node.x) || 0) - step);
+        if (event.key === "ArrowRight") node.x = Math.min(4800, (Number(node.x) || 0) + step);
+        if (event.key === "ArrowUp") node.y = Math.max(0, (Number(node.y) || 0) - step);
+        if (event.key === "ArrowDown") node.y = Math.min(4800, (Number(node.y) || 0) + step);
+        card.style.left = node.x + "px";
+        card.style.top = node.y + "px";
+        const nextSize = getFlowGraphCanvasSize(graph);
+        canvas.style.width = nextSize.width + "px";
+        canvas.style.height = nextSize.height + "px";
+        drawEdges(nextSize);
+      });
       const port = make("button", "nexus-library-graph-port", connectingFrom === node.id ? "Origem" : "Selecionar");
       port.type = "button";
       port.disabled = !connectMode;
@@ -760,13 +799,17 @@ function createFlowGraphBuilder(form, payload, runtime) {
         delete node.action.__configDraft;
         configDrafts.delete(fallbackKey);
       }
-      const definition = definitionByType.get(node.action.type);
+      const definition = runtime?.getActionDefinition?.(node.action.type);
       for (const schemaField of definition?.configSchema?.fields ?? []) {
         const key = node.id + "::" + schemaField.key;
         if (!configDrafts.has(key)) continue;
         try { setNodeConfig(node, schemaField.key, JSON.parse(configDrafts.get(key))); }
         catch { throw new Error("O campo " + schemaField.label + " precisa conter JSON válido."); }
         configDrafts.delete(key);
+      }
+      const validation = runtime?.validateActionConfig?.(node.action.type, node.action.config ?? {}) ?? { valid: true, errors: [] };
+      if (node.action.enabled !== false && !validation.valid) {
+        throw new Error((node.name || node.action.type || "Ação") + ": " + validation.errors.join(" "));
       }
     }
   };
