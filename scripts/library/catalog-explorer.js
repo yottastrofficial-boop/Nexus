@@ -57,6 +57,7 @@ export function createLibraryCatalogExplorer({
   let currentSmartView = "all";
   let currentFolder = "";
   let currentTag = "all";
+  let currentOrigin = "all";
   let currentViewMode = "grid";
   let currentCardSize = "medium";
   let smartOffset = 0;
@@ -168,11 +169,12 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, origin = currentOrigin, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
     currentTag = tag;
+    currentOrigin = origin;
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
     const version = ++requestVersion;
@@ -202,7 +204,9 @@ export function createLibraryCatalogExplorer({
           kind: "all",
           type: "all",
           limit: PAGE_SIZE,
-          references
+          references,
+          tags: currentTag === "all" ? [] : [currentTag],
+          origin: currentOrigin
         });
         if (version !== requestVersion) return;
       } else {
@@ -224,7 +228,8 @@ export function createLibraryCatalogExplorer({
         type: "all",
         limit: PAGE_SIZE,
         cursor,
-        tags: currentTag === "all" ? [] : [currentTag]
+        tags: currentTag === "all" ? [] : [currentTag],
+        origin: currentOrigin
       });
     }
     if (version !== requestVersion) return;
