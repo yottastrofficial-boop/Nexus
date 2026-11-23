@@ -61,6 +61,18 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
+## Biblioteca universal — implementação iniciada
+
+Branch: `feat/universal-library-resource-foundation-2026-11-23`.
+
+1. **Fundação concluída nesta branch:** gerenciador de ciclo de vida em RAM e ponte de referências UUID para documentos nativos do Foundry.
+2. **Próxima etapa:** conectar referências de documentos e ativos lógicos ao modelo universal da Biblioteca, mantendo os schemas e ações especializadas.
+3. **Depois:** menus, navegação, filtros, Inspector e ações funcionais para cada tipo de recurso.
+4. **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
+5. **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; não pré-carregar conteúdo no init.
+
+A etapa não está pronta para release: requer execução dos testes, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+
 ## Critérios para concluir uma etapa
 
 - Escopo pequeno e explícito.
