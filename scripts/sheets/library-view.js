@@ -149,6 +149,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
         kind: panel.querySelector("[data-library-kind]")?.value ?? "all",
         type: panel.querySelector("[data-library-type]")?.value ?? "all",
+        compendiumIds: getCompendiumIds(),
         viewMode: sheet._libraryCollectionViewMode ?? "grid",
         cardSize: sheet._libraryCardSize ?? "medium"
       });
