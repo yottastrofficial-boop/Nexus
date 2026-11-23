@@ -274,6 +274,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
         card.append(field("Expressão", expression, true));
       }
       if (node.type === "action") {
+        node.action = isRecord(node.action) ? node.action : { id: newId("action"), type: "", enabled: true, config: {} };
+        node.action.config = isRecord(node.action.config) ? node.action.config : {};
         const availableTypes = [...actionTypes];
         if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
         const actionType = availableTypes.length ? makeSelect(node.action?.type ?? "", availableTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
