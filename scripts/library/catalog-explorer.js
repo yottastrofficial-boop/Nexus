@@ -75,7 +75,7 @@ export function createLibraryCatalogExplorer({
   onApplyResource = null,
   applyLabel = "Aplicar ao contexto",
   getUpdateInfo = null,
-  onUpdateInstances = null
+  onUpdateInstances = null,
   canUpdateDefinition = () => false,
   onUpdateDefinition = null,
 } = {}) {
