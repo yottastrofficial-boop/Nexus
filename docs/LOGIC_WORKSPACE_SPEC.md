@@ -83,6 +83,7 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `scripts/core/logic-library.js` carrega coleções legadas sem persistir migrações automaticamente, grava ativos nas coleções canônicas e preserva compatibilidade com as flags antigas.
 - `scripts/core/logic-runtime.js` executa fluxos declarativos em sequência, avalia condições pelo parser seguro existente, aplica permissões por callback, limita ações/condições/tempo e retorna diagnóstico por ação.
 - Funções e ações são registradas explicitamente por código confiável; o runtime não interpreta JavaScript importado.
+- `game.nexus.logic.registerAction()` e `registerFunction()` expõem o registro de executores confiáveis a módulos; `runFlow()` e `dispatch()` expõem execução e despacho, e `getExecutors()` lista os IDs disponíveis. Nenhum executor padrão é presumido até que o Core defina operações e permissões específicas.
 - O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
 
 ### Limitações restantes
