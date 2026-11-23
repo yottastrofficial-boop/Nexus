@@ -131,7 +131,7 @@ function readActorSystemPath(system, path) {
   const segments = String(path ?? "").split(".").slice(1);
   let value = system;
   for (const segment of segments) {
-    if (!value || typeof value !== "object" || !Object.prototype.hasOwnProperty.call(value, segment)) return undefined;
+    if (!value || typeof value !== "object") return undefined;
     value = value[segment];
   }
   return value;
