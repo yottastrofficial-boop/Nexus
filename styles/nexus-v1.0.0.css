@@ -8377,3 +8377,14 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media(max-width:760px) {
   .nexus-library-assets,.nexus-library-generic-items,.nexus-library-flow-grid,.nexus-library-layouts { grid-template-columns:repeat(auto-fill,minmax(112px,1fr))!important; }
 }
+
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-personal-card,
+.nexus-library-panel [data-view-mode="list"]>.nexus-library-saved-group {
+  display:flex!important; flex-direction:row!important; align-items:center!important;
+  justify-content:flex-start!important; gap:10px!important; width:100%!important;
+  min-height:54px!important; padding:6px 10px!important; text-align:left!important;
+}
+.nexus-library-panel [data-view-mode="list"] .nexus-library-personal-preview,
+.nexus-library-panel [data-view-mode="list"] .nexus-library-saved-group-preview {
+  flex:0 0 40px!important; width:40px!important; height:40px!important; min-height:40px!important;
+}
