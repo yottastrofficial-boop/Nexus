@@ -264,7 +264,8 @@ export function createLibraryCatalogExplorer({
               ...current,
               assignments,
               favorites: current.favorites.filter(item => item !== key),
-              recent: current.recent.filter(item => item !== key)
+              recent: current.recent.filter(item => item !== key),
+              collections: current.collections.map(collection => ({ ...collection, resources: collection.resources.filter(item => item !== key) }))
             });
           }
           await render();
