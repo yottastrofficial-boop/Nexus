@@ -49,11 +49,13 @@ export function createFoundryDocumentBridge({
     return record;
   };
 
-  const matches = (record, query, tags = []) => {
+  const matches = (record, query, tags = [], origin = "all") => {
     const textMatch = !query ||
       record.name.toLocaleLowerCase().includes(query) ||
       record.folder.toLocaleLowerCase().includes(query);
     if (!textMatch) return false;
+    const recordOrigin = record.isCompendium ? "compendium" : "world";
+    if (origin !== "all" && recordOrigin !== origin) return false;
     const recordTags = [record.type, record.isCompendium ? "compendium" : "world"].map(value => String(value).toLocaleLowerCase());
     return !tags.length || tags.every(tag => recordTags.includes(String(tag).toLocaleLowerCase()));
   };
@@ -64,7 +66,8 @@ export function createFoundryDocumentBridge({
     offset = 0,
     limit = 50,
     compendiumIds = [],
-    tags = []
+    tags = [],
+    origin = "all"
   } = {}) => {
     const requestedTypes = type === "all" ? Object.keys(DOCUMENT_TYPES) : [String(type)];
     const unknown = requestedTypes.filter(key => !DOCUMENT_TYPES[key]);
@@ -77,7 +80,7 @@ export function createFoundryDocumentBridge({
     let total = 0;
     const errors = [];
     const append = record => {
-      if (!matches(record, search, requestedTags)) return;
+      if (!matches(record, search, requestedTags, origin)) return;
       if (total >= start && items.length < pageSize) items.push(record);
       total++;
     };
