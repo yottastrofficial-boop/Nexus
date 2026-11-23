@@ -113,7 +113,16 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       : null;
     searchInput?.addEventListener("input", () => {
       const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
-      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value });
+      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all" });
+    });
+    panel.querySelector(".nexus-library-filter-options")?.addEventListener("click", () => {
+      requestAnimationFrame(() => {
+        const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+        if (active === "collection:all") void universalCatalog?.render({
+          query: searchInput?.value ?? "",
+          tag: panel.querySelector("[data-library-tag]")?.value ?? "all"
+        });
+      });
     });
     const mirrorLegacyCollection = async (collection, store) => {
       const flags = { components:"libraryComponents", groups:"libraryGroups", layouts:"libraryLayouts", templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", themes:"libraryThemes", styles:"libraryStyles", properties:"libraryProperties", rules:"libraryRules", behaviors:"libraryBehaviors", flows:"interactionLibrary", functions:"libraryFunctions" };
@@ -195,7 +204,8 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         void universalCatalog.render({
           query: searchInput?.value ?? "",
           smartView: sheet._librarySmartView ?? "all",
-          folder: sheet._librarySelectedFolder ?? ""
+          folder: sheet._librarySelectedFolder ?? "",
+          tag: panel.querySelector("[data-library-tag]")?.value ?? "all"
         });
         return;
       }
