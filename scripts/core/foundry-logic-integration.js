@@ -144,6 +144,10 @@ export function registerFoundryLogicExecutors({ runtime } = {}) {
     type: "nexus.actor.update",
     effects: ["write"],
     permissions: ["actor:update"],
+    configSchema: { fields: [
+      { key: "path", label: "Caminho da propriedade", type: "text", required: true, placeholder: "system.resources.pv.value" },
+      { key: "value", label: "Novo valor (JSON)", type: "json", required: true, help: "Aceita texto, número, booleano, lista, objeto ou null." }
+    ] },
     execute: async ({ config, context, signal }) => {
       if (signal?.aborted) throw new Error("Ação cancelada.");
       const actor = context.actor?.documentName === "Actor" ? context.actor : getActor(context.document);
@@ -163,6 +167,12 @@ export function registerFoundryLogicExecutors({ runtime } = {}) {
     type: "nexus.actor.adjust",
     effects: ["write"],
     permissions: ["actor:update"],
+    configSchema: { fields: [
+      { key: "path", label: "Propriedade numérica", type: "text", required: true, placeholder: "system.resources.pv.value" },
+      { key: "delta", label: "Variação (+/-)", type: "number", required: true, step: "any", help: "Use um valor positivo para adicionar ou negativo para subtrair." },
+      { key: "min", label: "Limite mínimo", type: "number", step: "any", help: "Opcional; impede que o resultado fique abaixo deste valor." },
+      { key: "max", label: "Limite máximo", type: "number", step: "any", help: "Opcional; impede que o resultado ultrapasse este valor." }
+    ] },
     execute: async ({ config, context, signal }) => {
       if (signal?.aborted) throw new Error("Ação cancelada.");
       const actor = context.actor?.documentName === "Actor" ? context.actor : getActor(context.document);
