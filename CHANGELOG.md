@@ -5,7 +5,7 @@
 - Adiciona backup completo, prévia e mesclagem de importação sem sobrescrita automática, além de contrato extensível para adaptadores de transferência.
 - Expande a área Lógica com integração de eventos do Foundry, executores Core seguros, simulação de Fluxos e editores sequenciais/grafo com schemas visuais e acessibilidade por teclado.
 - Mantém dados importados inertes e verifica permissões do usuário originador para ações sobre Actors.
-- CI automatizado deve validar sintaxe, regressões, schemas, manifestos, templates, estilos e pacote antes da publicação.
+- A publicação pelo GitHub Actions ocorre somente após aprovação do CI, incluindo sintaxe, regressões, schemas, manifestos, templates, estilos e empacotamento do ZIP.
 - Testes funcionais no Foundry VTT 14 build 360 ainda pendentes; esta versão não deve ser considerada validada no cliente até essa etapa.
 
 ## 1.0.0.90 — Biblioteca Explorer unificada
