@@ -32,7 +32,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - A infraestrutura possui registry tipado, dependências, detecção de ciclos, persistência e runtime declarativo.
 - Os cinco tipos permanecem distintos: Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões.
-- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos já possuem um construtor visual inicial de gatilhos, condições e ações. Eventos de ciclo de vida do Foundry estão conectados ao runtime, com execução no GM ativo e executor inicial `nexus.actor.update` protegido por OWNER. Nós/ramificações, simulação, mais executores e testes ponta a ponta no cliente Foundry ainda estão pendentes.
+- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos possuem construtor visual inicial e simulação sem execução de ações. Eventos de ciclo de vida do Foundry estão conectados ao runtime, com execução no GM ativo e executor inicial `nexus.actor.update` protegido pelas permissões do usuário originador. Nós/ramificações, mais executores e testes ponta a ponta no cliente Foundry ainda estão pendentes.
 - Payloads lógicos importados devem permanecer inertes até serem validados por um editor e contrato específico.
 
 ### Mídia
