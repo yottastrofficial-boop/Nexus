@@ -32,7 +32,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - A infraestrutura possui registry tipado, dependências, detecção de ciclos, persistência e runtime declarativo.
 - Os cinco tipos permanecem distintos: Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões.
-- Schemas estruturais e editores especializados iniciais dos cinco tipos estão integrados ao Inspector; o construtor visual avançado de Fluxos, executores padrão e integração ponta a ponta ainda estão pendentes.
+- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos já possuem um construtor visual inicial de gatilhos, condições e ações. Nós/ramificações, simulação, executores padrão e integração ponta a ponta ainda estão pendentes.
 - Payloads lógicos importados devem permanecer inertes até serem validados por um editor e contrato específico.
 
 ### Mídia
@@ -68,8 +68,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - **PR #60 / `feature/library-explorer-catalog-integration-2026-11-23`:** primeira integração do Explorer existente com o catálogo universal.
 - **Branch de conclusão / `feature/library-universal-completion-2026-11-23`:** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas/coleções mistas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
 - **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
-- **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem; ainda faltam adaptadores para origens externas e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
-- **Lógica:** concluir editores especializados e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
+- **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem e o Core agora define o registro de adaptadores de origem/destino com limites, validação de dados inertes, prévia e confirmação. Ainda faltam adaptadores concretos para formatos externos e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
+- **Lógica:** evoluir o construtor visual de Fluxos (nós, ramificações e simulação), registrar executores confiáveis e integrar eventos e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
 - **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
 - **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
