@@ -125,7 +125,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
   const toolbar = make("div", "nexus-library-graph-toolbar");
   const title = make("div", "");
   title.append(make("strong", "", "Grafo de execução"), make("small", "", "Construa caminhos com nós e conexões explícitas. O grafo tem prioridade sobre a sequência legada."));
-  const toggle = make("button", "nexus-library-flow-add", graph ? "Recriar grafo" : "Criar grafo visual");
+  const toggle = make("button", "nexus-library-flow-add", graph ? "Remover grafo" : "Criar grafo visual");
   toggle.type = "button";
   toolbar.append(title, toggle);
   const content = make("div", "nexus-library-graph-content");
@@ -173,7 +173,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
         removeNode.addEventListener("click", () => { graph.nodes = graph.nodes.filter(item => item.id !== node.id); graph.edges = graph.edges.filter(edge => edge.from !== node.id && edge.to !== node.id); render(); });
         head.append(removeNode);
       }
-      card.append(head, field("ID estável", makeText(node.id, "node-id"), true));
+      const idControl = makeText(node.id, "node-id"); idControl.readOnly = true; card.dataset.nodeId = node.id;
+      card.append(head, field("ID estável", idControl, true));
       const name = makeText(node.name ?? "", "Nome do nó"); name.addEventListener("input", () => { node.name = name.value; }); card.append(field("Rótulo", name));
       if (node.type === "condition") {
         const expression = make("textarea", ""); expression.rows = 2; expression.spellcheck = false; expression.value = node.expression ?? ""; expression.placeholder = "@system.resources.pv.value > 0";
@@ -184,7 +185,6 @@ function createFlowGraphBuilder(form, payload, runtime) {
         const actionType = actionTypes.length ? makeSelect(node.action?.type ?? "", actionTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
         actionType.addEventListener("change", () => { node.action.type = actionType.value; });
         const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = JSON.stringify(node.action?.config ?? {}, null, 2);
-        config.addEventListener("input", () => { node.action.__configDraft = config.value; });
         const enabled = make("input", ""); enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
         enabled.addEventListener("change", () => { node.action.enabled = enabled.checked; });
         const active = make("label", "nexus-library-flow-enabled"); active.append(enabled, make("span", "", "Ação ativa"));
@@ -230,10 +230,9 @@ function createFlowGraphBuilder(form, payload, runtime) {
     if (!graph) return { graph: null };
     const next = clone(graph);
     for (const card of nodesWrap.querySelectorAll(".nexus-library-graph-node")) {
-      const id = card.querySelector('input[placeholder="node-id"]')?.value;
-      const node = next.nodes.find(item => item.id === card.querySelector('input[placeholder="node-id"]')?.defaultValue || item.id === id);
+      const id = card.dataset.nodeId;
+      const node = next.nodes.find(item => item.id === id);
       if (!node) continue;
-      node.id = id;
       const fields = card.querySelectorAll("label");
       for (const label of fields) {
         const caption = label.querySelector("span")?.textContent;
