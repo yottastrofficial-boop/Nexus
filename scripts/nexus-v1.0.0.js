@@ -62,15 +62,17 @@ Hooks.once("init", () => {
     }
   });
   game.nexus.library.Application = LibraryApplication;
-  game.nexus.library.open = () => {
+  game.nexus.library.open = (context = {}) => {
     const current = game.nexus.library.application;
     if (current?.rendered) {
+      current.setContext(context);
+      const rendered = current.render({ force: true });
       current.bringToTop?.();
-      return Promise.resolve(current);
+      return Promise.resolve(rendered).then(() => current);
     }
-    const application = new LibraryApplication();
+    const application = new LibraryApplication().setContext(context);
     game.nexus.library.application = application;
-    return application.render({ force: true });
+    return Promise.resolve(application.render({ force: true })).then(() => application);
   };
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
