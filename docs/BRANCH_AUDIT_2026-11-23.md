@@ -103,3 +103,13 @@ A busca de PRs listou propostas abertas antigas relacionadas à correção do In
 - Revisar PRs antigos ainda abertos e fechar somente os que estiverem integralmente superseded pela main.
 - Revisar commits exclusivos de `refactor/audit-1.0.0.70` e das branches recentes de estabilidade, priorizando correções ainda ausentes.
 - Fazer a limpeza de código em PRs separados, com testes de regressão e sem alterar formatos persistidos sem migração.
+
+## Complemento do inventário
+
+| Branch | À frente | Atrás | Arquivos no diff | Encaminhamento |
+|---|---:|---:|---:|---|
+| `fix/release-manifest-and-sheet-performance` | 17 | 100 | 9 | Revisar workflow de release e otimizações separadamente |
+| `fix/stability-media-conditions-empty-values-2026-11-21` | 44 | 89 | 10 | A main já contém versões posteriores de arquivos centrais; portar somente diferenças não cobertas |
+| `performance/phase-2-canvas-runtime` | — | — | — | Comparação não concluída por erro de conexão; estado desconhecido |
+
+O inventário acima cobre as 49 branches retornadas na busca além da própria `main`. Os números representam o resultado da comparação no momento da auditoria; podem mudar se branches forem atualizadas.
