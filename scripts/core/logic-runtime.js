@@ -388,7 +388,8 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         if (onError === "stop") break;
         continue;
       }
-      const configErrors = validateActionConfig(action.config ?? {}, executor.configSchema);
+      const resolvedConfig = resolveActionConfig(action.config ?? {}, executor.configSchema);
+      const configErrors = validateActionConfig(resolvedConfig, executor.configSchema);
       if (configErrors.length) {
         errors.push({ actionId: action.id ?? null, type, message: configErrors.join(" ") });
         if (onError === "stop") break;
