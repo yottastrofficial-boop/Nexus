@@ -68,7 +68,7 @@ function normalizeActionConfigSchema(schema) {
 }
 
 function cloneActionConfigSchema(schema) {
-  return schema ? { fields: schema.fields.map(field => ({ ...field, defaultValue: Object.prototype.hasOwnProperty.call(field, "defaultValue") ? structuredClone(field.defaultValue) : undefined, options: field.options?.map(option => ({ ...option })) })) } : null;
+  return schema ? { fields: schema.fields.map(field => ({ ...field, ...(Object.prototype.hasOwnProperty.call(field, "defaultValue") ? { defaultValue: structuredClone(field.defaultValue) } : {}), options: field.options?.map(option => ({ ...option })) })) } : null;
 }
 
 function validateActionConfig(config, schema) {
