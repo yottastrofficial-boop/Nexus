@@ -343,7 +343,7 @@ function createFlowBuilder(form, payload, runtime) {
   }, () => ({ id: newId("action"), type: types[0] ?? "", enabled: true, config: {} }));
 
   form.append(root);
-  const flushActions = () => {
+  const flushActions = ({ validate = true } = {}) => {
     for (const item of data.actions) {
       const fallbackKey = item.id + "::__fallback";
       if (actionDrafts.has(fallbackKey)) {
@@ -364,13 +364,15 @@ function createFlowBuilder(form, payload, runtime) {
           actionDrafts.delete(key);
         }
       }
-      const result = runtime?.validateActionConfig?.(item.type, item.config) ?? { valid: true, errors: [] };
-      if (item.enabled !== false && !result.valid) throw new Error((item.name || item.type || "Ação") + ": " + result.errors.join(" "));
+      if (validate) {
+        const result = runtime?.validateActionConfig?.(item.type, item.config) ?? { valid: true, errors: [] };
+        if (item.enabled !== false && !result.valid) throw new Error((item.name || item.type || "Ação") + ": " + result.errors.join(" "));
+      }
     }
   };
   return {
-    read() {
-      flushActions();
+    read({ validate = true } = {}) {
+      flushActions({ validate });
       return Object.fromEntries(["triggers", "conditions", "actions"].map(key => [key, clone(data[key])]));
     }
   };
@@ -944,6 +946,9 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
   const save = make("button", "nexus-library-logic-editor-save", "Salvar definição");
   save.type = "submit";
   const status = make("p", "nexus-library-logic-editor-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  status.setAttribute("aria-atomic", "true");
   actions.append(save);
   if (asset.type === "flow" && typeof runtime?.simulateFlow === "function") {
     const simulate = make("button", "nexus-library-logic-editor-simulate", "Simular sem salvar");
@@ -956,7 +961,8 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
         for (const [key, input] of Object.entries(fields)) {
           draft[key] = input.type === "checkbox" ? input.checked : input.value;
         }
-        Object.assign(draft, flowBuilder.read(), flowGraphBuilder?.read?.() ?? {});
+        const graphDraft = flowGraphBuilder?.read?.() ?? {};
+        Object.assign(draft, flowBuilder.read({ validate: !graphDraft.graph }), graphDraft);
         const nextPayload = buildLogicEditorPayload("flow", payload, draft);
         const actor = globalThis.game?.user?.character ?? null;
         const context = {
@@ -999,7 +1005,10 @@ export function createLogicAssetEditor({ asset, runtime = null, onSave } = {}) {
         else if (key === "defaultValue") draft.defaultValue = input.value;
         else draft[key] = input.value;
       }
-      if (flowBuilder) Object.assign(draft, flowBuilder.read(), flowGraphBuilder?.read?.() ?? {});
+      if (flowBuilder) {
+        const graphDraft = flowGraphBuilder?.read?.() ?? {};
+        Object.assign(draft, flowBuilder.read({ validate: !graphDraft.graph }), graphDraft);
+      }
       const nextPayload = buildLogicEditorPayload(asset.type, payload, draft);
       await onSave({ ...asset, payload: nextPayload });
       status.textContent = "Definição salva e validada.";
