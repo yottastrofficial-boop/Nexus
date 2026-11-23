@@ -468,7 +468,8 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
       { key: "enabled", label: "Ativo", type: "checkbox" },
       { key: "note", label: "Observação", type: "textarea" },
       { key: "metadata", label: "Metadados", type: "json", required: true },
-      { key: "defaults", label: "Padrões", type: "json", defaultValue: { nested: { enabled: true } } }
+      { key: "defaults", label: "Padrões", type: "json", defaultValue: { nested: { enabled: true } } },
+      { key: "requiredFlag", label: "Confirmação", type: "checkbox", required: true, defaultValue: false }
     ] },
     execute: ({ config }) => { calls.push(config); return true; }
   });
@@ -496,6 +497,7 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   const isolated = runtime.getActionDefinition("test.configured").configSchema;
   assert.equal(isolated.fields[0].label, "Alvo");
   assert.equal(isolated.fields[6].defaultValue.nested.enabled, true);
+  assert.equal(isolated.fields[7].defaultValue, false);
 
   const invalid = await runtime.simulateFlow({
     actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 20, mode: "multiply" } }]
@@ -510,6 +512,8 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   });
   assert.equal(missing.status, "success");
   assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0].defaults, { nested: { enabled: true } });
+  assert.equal(calls[0].requiredFlag, false);
 
   const graphInvalid = await runtime.simulateFlow({
     graph: {
