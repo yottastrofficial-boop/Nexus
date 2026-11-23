@@ -122,4 +122,4 @@ Contrato inicial:
 
 `runFlow()` percorre somente o caminho selecionado pelas condições, executando ações encontradas no caminho. `simulateFlow()` percorre o mesmo caminho, informa nós visitados, ações disponíveis e permissões, sem chamar executores. O percurso possui limite de 128 nós por execução.
 
-**Estado da interface:** este commit entrega schema, runtime e testes de ramificação. O editor visual de nós/conexões, movimentação no canvas e Inspector específico por nó ainda precisam ser conectados à UI; o protótipo HTML é referência de interação, não código integrado ao Foundry.
+**Estado da interface:** o Inspector de Fluxos agora oferece criação/edição de nós e conexões, com campos específicos para condições e ações, preservação de IDs e validação antes de salvar. A interface atual é uma lista visual estruturada, ainda sem arrastar/soltar, posicionamento livre no canvas ou linhas gráficas entre cartões. O protótipo HTML é referência para a evolução dessas interações.
