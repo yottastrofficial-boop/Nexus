@@ -1,8 +1,12 @@
-# NEXUS — Arquitetura técnica e plano de estabilização 1.0.0.2
+# NEXUS — Arquitetura técnica e plano de estabilização
 
 ## Estado deste documento
 
-Este documento registra os limites de responsabilidade desejados para a refatoração incremental. Ele não declara que os módulos descritos já existem nem autoriza uma reescrita integral.
+Referência atual: branch `main`, commit `335db5149ede0d595bb69a3f3102d1f4495c6ff7`, versão `1.0.0.88`, Foundry VTT 14 build 360.
+
+Este documento reúne contratos arquiteturais e registros históricos de extrações incrementais. Seções que mencionam versões 1.0.0.1, 1.0.0.2 ou 1.0.0.70 descrevem o contexto da época; não devem ser interpretadas como a árvore atual nem como a sequência de trabalho vigente. Para o estado presente, consulte `PROJECT_OVERVIEW.md` e `ROADMAP.md`.
+
+A arquitetura deve ser evoluída por mudanças pequenas, preservando contratos e dados persistidos. A existência de um serviço no repositório não significa que a interface ou todos os adaptadores estejam concluídos.
 
 ## Princípios que não podem regredir
 
@@ -32,10 +36,10 @@ Este documento registra os limites de responsabilidade desejados para a refatora
 
 ## Sequência segura de refatoração
 
-### Etapa 0 — Linha de base
-- Preservar a implementação estável 1.0.0.1.
-- Validar manifesto, imports relativos, sintaxe, templates e pacote.
-- Registrar limitações e cenários ainda não testados.
+### Etapa 0 — Linha de base atual
+- Usar a main 1.0.0.88 como referência de código, sem confundi-la com o último checkpoint funcional confirmado no Foundry.
+- Validar manifesto, imports relativos, sintaxe, templates, testes de regressão e pacote antes de cada alteração.
+- Registrar limitações e cenários ainda não testados; consultar RELEASE_STABILITY_POLICY.md.
 
 ### Etapa 1 — Persistência e migrações
 - Mapear todos os leitores e escritores de layouts, aliases e flags.
@@ -80,7 +84,7 @@ Este documento registra os limites de responsabilidade desejados para a refatora
 
 ## Critério de conclusão
 
-A versão 1.0.0.2 só deve ser publicada quando os fluxos essenciais tiverem sido validados. Se um teste depender do Foundry real e ainda não tiver sido executado, a limitação deve permanecer explícita e a release não deve ser descrita como integralmente validada.
+Uma etapa só está concluída quando os testes automatizados adequados passam e, para mudanças que afetem interface, ciclo de vida, permissões, persistência ou APIs do Foundry, os fluxos correspondentes também foram testados no Foundry VTT 14 build 360. Se um teste real ainda não foi executado, a limitação deve permanecer explícita e a release não deve ser descrita como integralmente validada.
 
 ## Revisão incremental da base 1.0.0.70
 

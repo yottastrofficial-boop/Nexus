@@ -1,42 +1,53 @@
 # Política de versões e checkpoints estáveis
 
 ## Objetivo
-Manter a branch `main` enxuta e utilizável, sem perder o histórico técnico das versões anteriores nem confundir validação automatizada com estabilidade funcional.
+
+Manter a branch `main` utilizável e auditável, sem confundir publicação de pacote, CI verde e estabilidade funcional. O histórico Git e as releases preservam versões anteriores; a limpeza deve atuar na árvore e nas branches ativas, não apagar o histórico.
 
 ## Ciclo recomendado
-1. Desenvolver correções e melhorias em incrementos pequenos, cada um com testes de regressão.
-2. A cada 3 a 5 atualizações relevantes, ou antes de iniciar uma melhoria estrutural, realizar uma revisão de estabilidade.
-3. Escolher como checkpoint a versão mais recente que cumpra todos os critérios abaixo. Se nenhuma cumprir, não declarar uma versão estável.
-4. Registrar o checkpoint neste documento e utilizá-lo como base de referência para a próxima etapa.
-5. Remover da árvore ativa protótipos e artefatos experimentais que já não sejam necessários, após registrar objetivo, resultado e limitações em `docs/archive/`.
 
-## Critérios mínimos para declarar uma versão estável
-- Todos os workflows de validação e empacotamento estão verdes.
-- Não há defeitos conhecidos que impeçam fluxos essenciais da ficha.
-- Os fluxos afetados pela atualização foram testados dentro do Foundry VTT 14, não apenas por testes estáticos.
+1. Desenvolver correções em incrementos pequenos e isolados.
+2. Adicionar testes de regressão antes ou junto da alteração.
+3. A cada 3 a 5 atualizações relevantes, ou antes de uma mudança estrutural, revisar estabilidade.
+4. Escolher como checkpoint somente uma versão que cumpra todos os critérios abaixo.
+5. Registrar o checkpoint e as limitações antes de iniciar a etapa seguinte.
+6. Remover protótipos da árvore ativa apenas depois de identificar consumidores e registrar sua função/resultado em `docs/archive/`.
+
+## Critérios mínimos para declarar uma versão funcionalmente estável
+
+- Workflows de validação e empacotamento aprovados.
+- Nenhum defeito conhecido bloqueia fluxos essenciais.
+- Os fluxos afetados foram testados dentro do Foundry VTT 14, não apenas por testes estáticos.
 - Persistência, migração e compatibilidade de dados existentes foram verificadas quando aplicáveis.
-- O changelog registra mudanças, limitações e testes pendentes.
-- A versão é adequada como base para uma melhoria futura, sem depender de correções urgentes já conhecidas.
+- Changelog registra mudanças, limitações e testes pendentes.
+- A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
+
+## Estado de referência — 2026-11-23
+
+- **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
+- **Versão publicada na main:** `1.0.0.88`, commit `335db5149ede0d595bb69a3f3102d1f4495c6ff7`.
+- **Interpretação correta:** 1.0.0.88 é a versão distribuída mais recente, mas não deve ser chamada de checkpoint funcional confirmado. O changelog e o roadmap mantêm pendente a validação visual e funcional no Foundry VTT 14 build 360.
+- A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
+
+A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.
+
+## Regras obrigatórias de versionamento e migração
+
+- Toda mudança no formato persistido incrementa `NEXUS_PROPERTY_SCHEMA_VERSION` quando aplicável.
+- Toda nova versão de schema recebe migração explícita, idempotente e coberta por testes com Actors antigos.
+- Migrações preservam propriedades desconhecidas, layouts, componentes, grupos, aliases e dados personalizados que não estejam diretamente envolvidos na mudança.
+- Um sistema antigo nunca deve rebaixar um Actor com versão de schema superior.
+- Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
+- O manifesto de instalação só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível.
+- Uma release só é declarada funcionalmente estável após validação no Foundry real.
 
 ## O que é preservado
-- Releases e tags antigas não são apagadas automaticamente: elas permitem recuperar pacotes distribuídos e comparar regressões.
-- O changelog e o histórico Git são o registro permanente das versões, inclusive as instáveis.
-- A limpeza remove arquivos obsoletos da árvore atual, não reescreve o histórico do repositório.
 
-## Checkpoint atual
-**A versão 1.0.0.70 permanece como último checkpoint funcional confirmado no Foundry VTT.** A versão 1.0.0.71 foi publicada, mas sua validação automatizada não substitui a validação funcional/visual no Foundry. O pacote distribuído deve ser gerado a partir do commit validado da `main`; atualizar o código sem incrementar a versão não garante que o Foundry solicite outro pacote.
+- Releases e tags antigas não são apagadas automaticamente.
+- O histórico Git é o registro permanente das alterações, inclusive protótipos e etapas instáveis.
+- Branches antigas podem ser arquivadas ou excluídas somente após comparação com a main e confirmação de que commits exclusivos foram preservados ou deliberadamente descartados.
+- A limpeza remove duplicações e código obsoleto da árvore ativa, não reescreve o histórico do projeto.
 
-A versão 1.0.0.72 prepara uma atualização de compatibilidade: consolida a correção do contrato de dependências dos listeners, registra a versão do esquema de propriedades por Actor e protege dados de Actors gravados por uma versão mais nova do sistema. Ela ainda precisa passar por testes reais de abertura, navegação, edição e persistência no Foundry VTT 14 antes de ser declarada estável.
+## Próximo checkpoint
 
-### Regra obrigatória para futuras atualizações
-- Toda mudança no formato persistido incrementa `NEXUS_PROPERTY_SCHEMA_VERSION` quando aplicável.
-- Toda versão nova do esquema recebe uma migração explícita, idempotente e coberta por testes com Actors antigos.
-- Migrações preservam propriedades desconhecidas, layouts, componentes, grupos, aliases e dados personalizados que não estejam diretamente envolvidos na mudança.
-- Um sistema antigo nunca deve rebaixar um Actor com versão de esquema superior.
-- Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
-- Uma release só é declarada estável após validação funcional no Foundry, não apenas CI verde.
-
-
-## Atualização de infraestrutura 1.0.0.85
-
-A 1.0.0.85 entrega uma etapa de infraestrutura para Lógica e Mídia e pode ser instalada para validação. Os workflows automatizados devem passar antes da publicação do pacote. Esta versão ainda não deve ser descrita como funcionalmente confirmada no Foundry VTT 14 build 360 até que abertura de mundo, carregamento da ficha, persistência, biblioteca e armazenamento sejam testados no cliente real. A existência de uma release/manifesto atualizado não substitui esse teste.
+A próxima versão candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
