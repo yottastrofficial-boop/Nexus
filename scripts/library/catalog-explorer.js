@@ -447,7 +447,7 @@ export function createLibraryCatalogExplorer({
           tags: currentTag === "all" ? [] : [currentTag],
           origin: currentOrigin
         });
-        if (version !== detailRequestVersion) return;
+        if (version !== renderRequestVersion) return;
       } else {
         page = { items: [], total: 0, hasMore: false, cursor: {}, errors: [] };
       }
@@ -472,7 +472,7 @@ export function createLibraryCatalogExplorer({
         origin: currentOrigin
       });
     }
-    if (version !== detailRequestVersion) return;
+    if (version !== renderRequestVersion) return;
 
     cursor = page.cursor ?? {};
     hasMore = Boolean(page.hasMore);
