@@ -15,6 +15,7 @@ import {
 
 const PROVIDER_ID = /^[a-z][a-z0-9._-]{1,63}$/i;
 const MAX_PAGE_SIZE = 50;
+const LOGIC_TYPE_BY_COLLECTION = Object.freeze({ properties: "property", rules: "rule", behaviors: "behavior", flows: "flow", functions: "function" });
 const COLLECTION_TYPES = Object.freeze({
   components: "component",
   groups: "composition",
@@ -482,7 +483,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     if (actionId === "duplicate") {
       const suffix = globalThis.foundry?.utils?.randomID?.(8)?.toLowerCase() ?? Math.random().toString(36).slice(2, 10);
       const copy = structuredClone(original);
-      copy.id = logicCollections.has(collection) ? `nexus.personal.${collection.slice(0, -1)}.copy-${suffix}` : suffix;
+      copy.id = logicCollections.has(collection) ? `nexus.personal.${LOGIC_TYPE_BY_COLLECTION[collection]}.copy-${suffix}` : suffix;
       if (copy.sourceId) copy.sourceId = String(copy.sourceId) + "-copy-" + suffix;
       if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
       else copy.label = String(original.label) + " (cópia)";
