@@ -254,7 +254,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
       const viewMode=sheet._libraryCollectionViewMode==="list"?"list":"grid";
-      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows]").forEach(container=>{container.dataset.viewMode=viewMode;});
+      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows],[data-library-saved-layouts],[data-library-themes],[data-library-saved-components],[data-library-saved-groups]").forEach(container=>{container.dataset.viewMode=viewMode;});
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!String(card.dataset.libraryAsset??"").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleThemes++;});
       const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
