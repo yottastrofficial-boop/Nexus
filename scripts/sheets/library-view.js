@@ -1,5 +1,6 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
+import { planLibraryDefinitionUpdate } from "../core/library-models.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
@@ -501,7 +502,48 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           await game.nexus?.library?.open?.({
             canApplyResource,
             applyResource,
-            applyLabel: "Inserir na ficha"
+            applyLabel: "Inserir na ficha",
+            getUpdateInfo: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return null;
+              const layouts = await sheet._readLayouts();
+              return planLibraryDefinitionUpdate(definition, layouts);
+            },
+            updateInstances: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const layouts = await sheet._readLayouts();
+              const preview = planLibraryDefinitionUpdate(definition, layouts);
+              if (!preview.available.length) {
+                if (preview.requiresReview.length) ui.notifications?.warn?.("Há instâncias antigas sem snapshot de origem; elas precisam de revisão manual.");
+                return false;
+              }
+              const confirm = foundry.applications.api.DialogV2.confirm;
+              const accepted = await confirm({
+                window: { title: "Atualizar instâncias deste Actor" },
+                content: "<p>" + preview.available.length + " instância(s) vinculadas a esta definição podem receber os novos padrões.</p>" +
+                  (preview.requiresReview.length ? "<p>" + preview.requiresReview.length + " instância(s) antigas serão preservadas para revisão manual.</p>" : "") +
+                  "<p>Os valores sobrescritos manualmente e a posição das instâncias serão preservados.</p>",
+                yes: { label: "Atualizar instâncias" },
+                no: { label: "Cancelar" },
+                rejectClose: false
+              });
+              if (!accepted) return false;
+              const plan = planLibraryDefinitionUpdate(definition, layouts, {
+                selectedInstanceKeys: preview.available.map(item => item.key)
+              });
+              if (!plan.updatedCount) return false;
+              sheet._captureHistory?.();
+              for (const [layoutId, updatedLayout] of Object.entries(plan.layouts)) {
+                if (layouts[layoutId] && Array.isArray(updatedLayout?.components)) {
+                  layouts[layoutId].components = updatedLayout.components;
+                }
+              }
+              await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+              sheet._currentLayout = layouts[sheet._activeLayoutId()];
+              await sheet.render({ force: true });
+              ui.notifications?.info?.(plan.updatedCount + " instância(s) atualizada(s) neste Actor.");
+              if (plan.requiresReview.length) ui.notifications?.warn?.(plan.requiresReview.length + " instância(s) antiga(s) precisam de revisão manual.");
+              return true;
+            }
           });
         }
         catch (error) { ui.notifications?.error?.("Não foi possível abrir a Biblioteca: " + error.message); }
