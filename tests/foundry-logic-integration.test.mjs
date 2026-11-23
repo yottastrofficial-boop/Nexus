@@ -103,7 +103,7 @@ test("executor nexus.actor.update exige propriedade OWNER e altera apenas system
   registry.register({
     id: "nexus.test.flow.update-pv",
     type: "flow",
-    payload: { actions: [{ id: "set-pv", type: "nexus.actor.update", config: { path: "system.resources.pv.value", value: 1 } }] }
+    payload: { conditions: [{ expression: "@system.resources.pv.value > 0" }], actions: [{ id: "set-pv", type: "nexus.actor.update", config: { path: "system.resources.pv.value", value: 1 } }] }
   });
   registry.register({
     id: "nexus.test.behavior.actor-update",
@@ -120,6 +120,7 @@ test("executor nexus.actor.update exige propriedade OWNER e altera apenas system
   const actor = {
     documentName: "Actor",
     uuid: "Actor.pc-1",
+    system: { resources: { pv: { value: 2 } } },
     testUserPermission: (_user, level) => level <= 3,
     async update(changes) { updates.push(changes); }
   };
