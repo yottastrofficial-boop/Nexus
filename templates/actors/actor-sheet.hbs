@@ -331,21 +331,32 @@ remove legacy typography selects                  <label class="nexus-inspector-
             <div class="nexus-layer-list">{{#each nexus.layers as |layer|}}<div class="nexus-layer-folder {{#if layer.hidden}}is-hidden{{/if}} {{#if layer.locked}}is-locked{{/if}}" data-layer-depth="{{layer.depth}}" style="--nexus-layer-depth:{{layer.depth}}"><div class="nexus-layer-entry {{#if (eq layer.kind "group")}}is-group{{/if}}"><button type="button" class="nexus-layer-row {{#if (eq layer.kind "group")}}nexus-layer-group-row{{else}}nexus-layer-child-row{{/if}}" {{#if (eq layer.kind "group")}}data-layer-group="{{layer.id}}"{{else}}data-layer-select="{{layer.id}}"{{/if}}>{{#if (eq layer.kind "group")}}<span class="nexus-layer-disclosure" data-layer-disclosure="{{layer.id}}">{{#if layer.collapsed}}▸{{else}}▾{{/if}}</span>{{else}}<span class="nexus-layer-disclosure-placeholder"></span>{{/if}}<span class="nexus-layer-thumbnail">{{#if layer.image}}<img src="{{layer.image}}" alt="">{{else if layer.icon}}<i class="{{layer.icon}}" aria-hidden="true"></i>{{else if (eq layer.kind "group")}}▱{{else}}▧{{/if}}</span><span class="nexus-layer-name">{{layer.label}}</span><small>{{layer.z}}</small></button><button type="button" class="nexus-layer-state" data-layer-visibility="{{layer.kind}}:{{layer.id}}">{{#if layer.hidden}}◌{{else}}◉{{/if}}</button><button type="button" class="nexus-layer-state" data-layer-lock="{{layer.kind}}:{{layer.id}}">{{#if layer.locked}}🔒{{else}}♧{{/if}}</button></div></div>{{/each}}</div>
           </section>
           <section class="nexus-tool-panel nexus-library-panel" data-tool-panel="library" hidden>
-            <header class="nexus-library-header">
-              <div class="nexus-library-heading"><span class="nexus-library-eyebrow">NEXUS / BIBLIOTECA</span><h3>Biblioteca de elementos</h3></div>
+            <div class="nexus-library-toolbar nexus-library-toolbar-unified">
+              <label class="nexus-library-search-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na biblioteca..." autocomplete="off"></label>
+              <div class="nexus-library-filter-wrap">
+                <input type="hidden" data-library-tag value="all">
+                <button type="button" class="nexus-library-filter-button" data-library-filter-toggle aria-expanded="false"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Etiquetas</span><b data-library-filter-count hidden>0</b></button>
+                <div class="nexus-library-filter-popover" data-library-filter-popover hidden>
+                  <strong>Filtrar por etiqueta</strong>
+                  <div class="nexus-library-filter-options">
+                    <button type="button" class="active" data-library-tag-option="all">Todas</button>
+                    <button type="button" data-library-tag-option="recurso">Recurso</button>
+                    <button type="button" data-library-tag-option="barra">Barra</button>
+                    <button type="button" data-library-tag-option="indicador">Indicador</button>
+                  </div>
+                </div>
+              </div>
+              <div class="nexus-library-view-controls" role="group" aria-label="Modo de visualização">
+                <button type="button" data-library-collection-view-mode="grid" class="active" aria-pressed="true" title="Grade" aria-label="Visualização em grade"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
+                <button type="button" data-library-collection-view-mode="list" aria-pressed="false" title="Lista" aria-label="Visualização em lista"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
+              </div>
+              <span class="nexus-library-count" data-library-count>0 itens</span>
               <div class="nexus-library-header-actions">
-                <span class="nexus-library-count" data-library-count>0 itens</span>
-                <button type="button" class="nexus-library-action-label" data-library-save-component title="Salvar o elemento selecionado no Canvas"><i class="fa-solid fa-bookmark" aria-hidden="true"></i><span>Salvar elemento</span></button>
-                <button type="button" class="nexus-library-action-label" data-library-save-layout title="Salvar a ficha atual como modelo"><i class="fa-solid fa-table-columns" aria-hidden="true"></i><span>Salvar modelo de ficha</span></button>
                 <button type="button" data-library-copy-all aria-label="Copiar backup da biblioteca" title="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
                 <button type="button" data-library-export-all aria-label="Exportar biblioteca" title="Exportar biblioteca"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
                 <button type="button" data-library-import-all-code aria-label="Importar biblioteca por código" title="Importar por código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
                 <button type="button" data-library-import-all-file aria-label="Importar biblioteca por arquivo" title="Importar por arquivo"><i class="fa-solid fa-file-import" aria-hidden="true"></i></button>
               </div>
-            </header>
-            <div class="nexus-library-toolbar">
-              <label class="nexus-library-search-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar elementos, pastas e etiquetas..." autocomplete="off"></label>
-              <select class="nexus-library-tag" data-library-tag aria-label="Filtrar por etiqueta"><option value="all">Todas as etiquetas</option><option value="barra">Barra de vida</option></select>
             </div>
             <div class="nexus-library-body">
               <nav class="nexus-library-section-tabs" aria-label="Navegação da biblioteca">
@@ -484,7 +495,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
                     {{else if (eq component.sheetVariant "lineage")}}<small>LINHAGEM</small>{{#if (eq nexus.mode "config")}}<input type="text" class="nexus-config-inline-field" data-system-path="{{component.path}}" value="{{component.value}}" aria-label="Linhagem">{{else}}<strong>{{#if component.path}}{{component.value}}{{else}}{{component.text}}{{/if}}</strong>{{/if}}
                     {{else if (eq component.sheetVariant "physiognomy")}}<small>FISIONOMIA</small>{{#if (eq nexus.mode "config")}}<input type="text" class="nexus-config-inline-field" data-config-component-text value="{{component.text}}" aria-label="Fisionomia" data-component-id="{{component.id}}">{{else}}<strong>{{#if component.path}}{{component.value}}{{else}}{{component.text}}{{/if}}</strong>{{/if}}
                     {{else if (eq component.sheetVariant "legacy")}}<small>LEGADO</small>{{#if (eq nexus.mode "config")}}<input type="text" class="nexus-config-inline-field" data-system-path="{{component.path}}" value="{{component.value}}" aria-label="Legado">{{else}}<strong>{{#if component.path}}{{component.value}}{{else}}{{component.text}}{{/if}}</strong>{{/if}}
-                    {{else if (eq component.sheetVariant "resource")}}<div class="nexus-sheet-resource nexus-sheet-resource-preview {{#if (eq component.sheetOrientation "vertical")}}is-vertical{{/if}}" style="--nexus-resource-color:{{component.sheetColor}};--nexus-resource-track-color:{{component.sheetTrackColor}}">{{#if component.sheetContent1}}<span class="nexus-sheet-resource-label">{{#if component.sheetContent1IsImage}}<img src="{{component.sheetContent1}}" alt="">{{else}}{{component.sheetContent1}}{{/if}}</span>{{/if}}{{#if component.sheetContent2}}<span class="nexus-sheet-resource-icon">{{#if component.sheetContent2IsImage}}<img src="{{component.sheetContent2}}" alt="">{{else}}{{component.sheetContent2}}{{/if}}</span>{{/if}}<div class="nexus-sheet-resource-track"><i style="{{#if (eq component.sheetOrientation "vertical")}}--nexus-resource-percent:{{component.percent}}%;height:{{component.percent}}%;width:100%{{else}}width:{{component.percent}}%;height:100%{{/if}}"></i></div>{{#if (eq nexus.mode "config")}}<strong class="nexus-sheet-resource-values"><input type="number" min="0" data-system-path="{{component.currentPath}}" value="{{component.value}}" aria-label="Valor atual"><span>/</span><input type="number" min="0" data-system-path="{{component.maxPath}}" value="{{component.max}}" aria-label="Valor máximo"></strong>{{else}}<strong class="nexus-sheet-resource-values">{{component.value}} <span>/ {{component.max}}</span></strong>{{/if}}</div>
+                    {{else if (eq component.sheetVariant "resource")}}<div class="nexus-sheet-resource nexus-sheet-resource-preview" role="meter" aria-valuemin="0" aria-valuemax="{{component.max}}" aria-valuenow="{{component.value}}" style="--nexus-resource-color:{{component.sheetColor}};--nexus-resource-track-color:{{component.sheetTrackColor}}"><div class="nexus-sheet-resource-track"><i style="width:{{component.percent}}%;height:100%"></i></div></div>
                     {{else if (eq component.sheetVariant "derived")}}{{#if (eq nexus.mode "config")}}<input type="text" class="nexus-config-inline-field" data-config-component-code data-component-id="{{component.id}}" value="{{component.sheetCode}}" aria-label="Rótulo do indicador">{{else}}<small>{{component.sheetCode}}</small>{{/if}}<strong>{{#if component.path}}{{component.value}}{{else}}—{{/if}}</strong>
                     {{else if (eq component.sheetVariant "attribute")}}{{#if (eq nexus.mode "config")}}<input type="number" class="nexus-config-inline-field" data-system-path="{{component.path}}" value="{{component.value}}" aria-label="Valor do atributo">{{else}}<strong>{{#if component.path}}{{component.value}}{{else}}0{{/if}}</strong>{{/if}}
                     {{else if (eq component.sheetVariant "skill")}}<span class="nexus-sheet-skill-code">{{component.sheetCode}}</span><strong>{{component.text}}</strong><b>{{#if component.path}}{{component.value}}{{else}}+0{{/if}}</b>
