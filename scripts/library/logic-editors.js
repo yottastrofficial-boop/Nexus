@@ -182,7 +182,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
         card.append(field("Expressão", expression, true));
       }
       if (node.type === "action") {
-        const actionType = actionTypes.length ? makeSelect(node.action?.type ?? "", actionTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
+        const availableTypes = [...actionTypes]; if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
+        const actionType = availableTypes.length ? makeSelect(node.action?.type ?? "", availableTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
         actionType.addEventListener("change", () => { node.action.type = actionType.value; });
         const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = JSON.stringify(node.action?.config ?? {}, null, 2);
         const enabled = make("input", ""); enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
@@ -196,13 +197,13 @@ function createFlowGraphBuilder(form, payload, runtime) {
     edgeHead.append(make("strong", "", "Conexões (" + graph.edges.length + ")"));
     const addEdge = make("button", "nexus-library-flow-add", "+ Conectar nós"); addEdge.type = "button";
     addEdge.disabled = graph.nodes.length < 2;
-    addEdge.addEventListener("click", () => { const from = graph.nodes.find(node => node.type !== "end") ?? graph.nodes[0]; const to = graph.nodes.find(node => node.id !== from?.id) ?? graph.nodes[0]; if (from && to) graph.edges.push({ from: from.id, to: to.id, when: from.type === "condition" ? "true" : "next" }); render(); });
+    addEdge.addEventListener("click", () => { graph.edges.push({ from: "", to: "", when: "next" }); render(); });
     edgeHead.append(addEdge); edgesWrap.append(edgeHead);
     graph.edges.forEach((edge, index) => {
       const row = make("article", "nexus-library-graph-edge");
-      const from = makeSelect(edge.from, graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id]));
+      const from = makeSelect(edge.from, [["", "Selecionar nó"], ...graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id])]);
       const when = makeSelect(edge.when ?? "next", [["next","Próxima"],["true","Verdadeiro"],["false","Falso"]]);
-      const to = makeSelect(edge.to, graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id]));
+      const to = makeSelect(edge.to, [["", "Selecionar nó"], ...graph.nodes.map(node => [node.id, (node.name || node.type) + " · " + node.id])]);
       from.addEventListener("change", () => { edge.from = from.value; });
       when.addEventListener("change", () => { edge.when = when.value; });
       to.addEventListener("change", () => { edge.to = to.value; });
