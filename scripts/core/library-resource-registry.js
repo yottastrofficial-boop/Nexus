@@ -1,4 +1,10 @@
 import { THEME_PALETTES } from "./theme.js";
+import {
+  NEXUS_LIBRARY_COLLECTIONS,
+  getLegacyNexusLibraryFlags,
+  readNexusLibraryStore,
+  updateNexusLibraryStore
+} from "./library-store.js";
 /**
  * NEXUS Universal Library Resource Registry.
  *
@@ -138,7 +144,9 @@ export function createLibraryResourceRegistry() {
         ? [...new Set(provider.kinds.map(value => cleanText(value, 48)).filter(Boolean))]
         : []),
       list: provider.list,
-      resolve: provider.resolve ?? null
+      resolve: provider.resolve ?? null,
+      getActions: typeof provider.getActions === "function" ? provider.getActions : null,
+      executeAction: typeof provider.executeAction === "function" ? provider.executeAction : null
     });
     providers.set(id, record);
     return () => providers.get(id) === record ? providers.delete(id) : false;
@@ -242,11 +250,37 @@ export function createLibraryResourceRegistry() {
     return provider.resolve(cloneReference(reference), resource);
   };
 
+  const getActions = (reference, resource = null) => {
+    const providerId = cleanText(reference?.providerId ?? resource?.providerId, 64);
+    const provider = providers.get(providerId);
+    if (typeof provider?.getActions !== "function") return Object.freeze([]);
+    const actions = provider.getActions(cloneReference(reference), resource);
+    if (!Array.isArray(actions)) return Object.freeze([]);
+    return Object.freeze(actions.map(action => Object.freeze({
+      id: cleanText(action?.id, 48),
+      label: cleanText(action?.label, 80),
+      description: cleanText(action?.description, 200),
+      requiresConfirmation: action?.requiresConfirmation === true,
+      destructive: action?.destructive === true
+    })).filter(action => /^[a-z][a-z0-9-]{1,47}$/i.test(action.id) && action.label));
+  };
+
+  const executeAction = async (actionId, reference, resource = null, params = {}) => {
+    const providerId = cleanText(reference?.providerId ?? resource?.providerId, 64);
+    const provider = providers.get(providerId);
+    if (typeof provider?.executeAction !== "function") throw new Error("Este provedor não oferece operações para o recurso.");
+    const action = cleanText(actionId, 48);
+    if (!getActions(reference, resource).some(item => item.id === action)) {
+      throw new Error("A operação não está disponível para este recurso.");
+    }
+    return provider.executeAction(action, cloneReference(reference), resource, params);
+  };
+
   const getProviders = () => Object.freeze([...providers.values()].map(provider => Object.freeze({
     id: provider.id, label: provider.label, kinds: provider.kinds
   })));
 
-  return Object.freeze({ register, list, resolve, getProviders });
+  return Object.freeze({ register, list, resolve, getActions, executeAction, getProviders });
 }
 
 /** Provider for personal NEXUS collections and the built-in component catalog. */
@@ -382,6 +416,101 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     };
   };
 
+  const getActions = reference => {
+    const collection = String(reference?.collection ?? "");
+    const id = String(reference?.id ?? "");
+    if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection) || collection === "world-flows" || !id) return [];
+    return [
+      { id: "edit-metadata", label: "Editar metadados" },
+      { id: "duplicate", label: "Duplicar" },
+      { id: "delete", label: "Excluir", requiresConfirmation: true, destructive: true }
+    ];
+  };
+
+  const executeAction = async (actionId, reference, params = {}) => {
+    const user = getUser();
+    if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
+    const collection = String(reference?.collection ?? "");
+    const id = String(reference?.id ?? "");
+    if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection) || collection === "world-flows" || !id) {
+      throw new Error("Este recurso não pertence a uma coleção pessoal editável.");
+    }
+    const current = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
+    const original = current.collections[collection].find(entry => String(entry.id) === id);
+    if (!original) throw new Error("O recurso não existe mais na Biblioteca.");
+    const logicCollections = new Set(["properties", "rules", "behaviors", "flows", "functions"]);
+    const legacyFlags = {
+      components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",
+      templates: "libraryTemplates", assets: "libraryAssets", media: "libraryMedia",
+      themes: "libraryThemes", styles: "libraryStyles", properties: "libraryProperties",
+      rules: "libraryRules", behaviors: "libraryBehaviors", flows: "interactionLibrary",
+      functions: "libraryFunctions"
+    };
+    const mirrorLegacy = async saved => {
+      const flag = legacyFlags[collection];
+      if (flag) await user.setFlag("nexus", flag, saved.collections[collection]);
+    };
+    const updateLogicRegistry = asset => {
+      if (logicCollections.has(collection) && asset) {
+        try { globalThis.game?.nexus?.logic?.registry?.register?.(asset, { replace: true }); }
+        catch (error) { globalThis.console?.warn?.("NEXUS | Não foi possível atualizar o registro lógico.", error); }
+      }
+    };
+
+    if (actionId === "edit-metadata") {
+      const name = String(params.name ?? "").trim().slice(0, 120);
+      if (!name) throw new Error("O nome não pode ficar vazio.");
+      const description = String(params.description ?? "").trim().slice(0, 1000);
+      const tags = [...new Set((Array.isArray(params.tags) ? params.tags : String(params.tags ?? "").split(","))
+        .map(tag => String(tag).trim().slice(0, 48)).filter(Boolean))].slice(0, 20);
+      const saved = await updateNexusLibraryStore(user, store => {
+        const entry = store.collections[collection].find(item => String(item.id) === id);
+        if (!entry) throw new Error("O recurso não existe mais na Biblioteca.");
+        if ("name" in entry || !("label" in entry)) entry.name = name;
+        else entry.label = name;
+        if ("description" in entry || description) entry.description = description;
+        entry.tags = tags;
+        return store;
+      });
+      await mirrorLegacy(saved);
+      updateLogicRegistry(saved.collections[collection].find(entry => String(entry.id) === id));
+      return { updated: true, entry: saved.collections[collection].find(entry => String(entry.id) === id) };
+    }
+
+    if (actionId === "duplicate") {
+      const suffix = globalThis.foundry?.utils?.randomID?.(8)?.toLowerCase() ?? Math.random().toString(36).slice(2, 10);
+      const copy = structuredClone(original);
+      copy.id = logicCollections.has(collection) ? `nexus.personal.${collection.slice(0, -1)}.copy-${suffix}` : suffix;
+      if (copy.sourceId) copy.sourceId = String(copy.sourceId) + "-copy-" + suffix;
+      if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
+      else copy.label = String(original.label) + " (cópia)";
+      const saved = await updateNexusLibraryStore(user, store => { store.collections[collection].push(copy); return store; });
+      await mirrorLegacy(saved);
+      updateLogicRegistry(copy);
+      return { duplicated: true, entry: copy };
+    }
+
+    if (actionId === "delete") {
+      const dependents = NEXUS_LIBRARY_COLLECTIONS.flatMap(name => current.collections[name]
+        .filter(entry => String(entry.id) !== id && Array.isArray(entry.dependencies))
+        .filter(entry => entry.dependencies.some(dependency => String(typeof dependency === "string" ? dependency : dependency?.id ?? "") === id)));
+      const logicDependents = logicCollections.has(collection)
+        ? (globalThis.game?.nexus?.logic?.registry?.getDependents?.(id) ?? []) : [];
+      if (dependents.length || logicDependents.length) {
+        throw new Error("Este recurso possui dependências e não pode ser excluído agora.");
+      }
+      const saved = await updateNexusLibraryStore(user, store => {
+        store.collections[collection] = store.collections[collection].filter(entry => String(entry.id) !== id);
+        return store;
+      });
+      await mirrorLegacy(saved);
+      if (logicCollections.has(collection)) globalThis.game?.nexus?.logic?.registry?.remove?.(id);
+      return { deleted: true, id };
+    }
+
+    throw new Error("Operação da Biblioteca não reconhecida.");
+  };
+
   const resolve = async reference => {
     if (reference?.collection === "world-flows") {
       let entries = [];
@@ -406,7 +535,9 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     label: "Biblioteca NEXUS",
     kinds: Object.freeze(["component", "composition", "layout", "template", "asset", "media", "theme", "style", "logic"]),
     list,
-    resolve
+    resolve,
+    getActions,
+    executeAction
   });
 }
 
