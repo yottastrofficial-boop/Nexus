@@ -129,7 +129,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         button.dataset.libraryCustomFolder = folder.id;
         button.dataset.libraryFolderCollection = collection;
         button.textContent = folder.name;
-        button.classList.toggle("active", panel.querySelector("[data-library-collection-folder]")?.value === folder.id);
+        button.classList.toggle("active", (sheet._librarySelectedFolder ?? "") === folder.id);
         container.append(button);
       }
     };
@@ -392,8 +392,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         });
         if (!confirmed) return;
         await persistLibraryPreferences(removeLibraryFolder(getLibraryPreferences(), folderId));
-        const folderSelect = panel.querySelector("[data-library-collection-folder]");
-        if (folderSelect?.value === folderId) folderSelect.value = "";
+        if (sheet._librarySelectedFolder === folderId) sheet._librarySelectedFolder = "";
         renderGenericCollection(collection, true);
         return;
       }
@@ -495,7 +494,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           }
           const preferences = assignLibraryEntryFolder(getLibraryPreferences(), collection, entryId, value("folder"));
           await persistLibraryPreferences(preferences);
-          renderGenericCollection(collection, true);
+          const activeSectionKey = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+          const activeCollection = activeSectionKey.startsWith("collection:") ? activeSectionKey.slice("collection:".length) : collection;
+          renderGenericCollection(activeCollection, true);
           const refreshedCard = panel.querySelector('[data-library-entry="' + entryId + '"][data-library-collection="' + collection + '"]');
           if (refreshedCard) await showGenericDetails(collection, entryId, refreshedCard);
           ui.notifications.info("Metadados salvos.");
@@ -508,9 +509,6 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       }
     });
     const detailCollection = () => panel.querySelector("[data-library-section].active")?.dataset.librarySection?.replace("collection:","") ?? panel.querySelector("[data-library-generic-details]")?.dataset.selectedCollection ?? "";
-    panel.querySelector("[data-library-collection-filter]")?.addEventListener("change", () => {
-      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
-    });
     panel.querySelectorAll("[data-library-collection-view-mode]").forEach(button => button.addEventListener("click", () => {
       sheet._libraryCollectionViewMode = button.dataset.libraryCollectionViewMode === "list" ? "list" : "grid";
       const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
@@ -518,12 +516,6 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     panel.querySelector("[data-library-card-size]")?.addEventListener("change", event => {
       sheet._libraryCardSize = ["small","medium","large"].includes(event.target.value) ? event.target.value : "medium";
       const collection = detailCollection(); if (collection) renderGenericCollection(collection, true);
-    });
-    panel.querySelector("[data-library-origin-filter]")?.addEventListener("change", () => {
-      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
-    });
-    panel.querySelector("[data-library-collection-folder]")?.addEventListener("change", () => {
-      const collection = detailCollection(); if (collection) renderGenericCollection(collection);
     });
     const activateSection=(key)=>{
       sheet._librarySection=key;
@@ -557,6 +549,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     };
     panel.querySelectorAll("[data-library-section]").forEach(button=>button.addEventListener("click",()=>{
       if (button.dataset.librarySmartView) { sheet._librarySmartView = button.dataset.librarySmartView; sheet._librarySelectedFolder = ""; panel.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item === button)); }
+      else { sheet._librarySmartView = "all"; panel.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item.dataset.librarySmartView === "all")); }
       if (button.dataset.libraryScope) {
         sheet._libraryAssetScope = button.dataset.libraryScope;
         folderNav.hidden = sheet._libraryAssetScope !== "core";
