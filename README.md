@@ -26,19 +26,20 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Base funcional herdada da versão 1.0.0.1
+## Implementação atual — 1.0.0.88
 
-Com base no código e na documentação presentes neste repositório, a versão inclui:
+A linha atual da `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Explorer, armazenamento unificado e infraestrutura inicial de Lógica e Mídia. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-- Ficha Canvas modular para os tipos de Actor registrados pelo sistema.
-- Biblioteca de elementos organizada por categorias, com busca, prévia e configuração antes da inserção.
-- Componentes para informações de personagem, recursos, atributos, perícias, ações, imagens, textos e estruturas visuais.
-- Configuração visual da ficha, incluindo seletor de cores com HSV e opacidade.
-- Editor de propriedades que percorre estruturas de dados de `Actor.system`.
-- Prévia de mídia no editor de dados quando o valor vinculado corresponde a uma imagem, áudio ou vídeo reconhecível.
-- Configurações iniciais de dados para novos Actors e tokens de protótipo vinculados ao Actor.
+Recursos presentes no código incluem:
 
-A lista descreve o escopo observado no pacote; não significa que todas as possibilidades de personalização ou todos os fluxos estejam livres de limitações.
+- Registro de Actors `player-character`, `npc` e `character` e seus templates/fichas.
+- Componentes configuráveis, propriedades vinculadas, expressões seguras e persistência de layouts.
+- Grupos estruturais e operações de composição no Canvas.
+- Biblioteca com coleções, preferências, filtros, Inspector e separação entre definições e instâncias.
+- Infraestrutura tipada para Propriedades, Regras, Comportamentos, Fluxos e Funções.
+- Infraestrutura de mídia com capabilities, pipeline, Workers, upload Foundry e cache local.
+
+A existência de infraestrutura não significa que todos os editores, executores, decodificadores ou integrações estejam concluídos. Consulte as limitações registradas antes de tratar uma área como pronta para uso.
 
 ## Compatibilidade
 
@@ -48,7 +49,7 @@ A lista descreve o escopo observado no pacote; não significa que todas as possi
 | Versão atual | 1.0.0.88 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14. A versão 1.0.0.88 está em preparação para validação automatizada e depende da validação visual e funcional no Foundry. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.88 está publicada; a validação visual e funcional completa no cliente Foundry continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -108,7 +109,9 @@ Use o endereço do `manifest.json` acima como manifesto de instalação e atuali
 ## Documentação
 
 - [Visão do projeto e arquitetura](docs/PROJECT_OVERVIEW.md)
-- [Arquitetura técnica e refatoração 1.0.0.4](docs/ARCHITECTURE.md)
+- [Arquitetura técnica e plano de refatoração](docs/ARCHITECTURE.md)
+- [Política de versões e estabilidade](docs/RELEASE_STABILITY_POLICY.md)
+- [Auditoria de branches](docs/BRANCH_AUDIT_2026-11-23.md)
 - [Contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md)
 - [Roadmap e funcionalidades planejadas](docs/ROADMAP.md)
 - [Como contribuir](CONTRIBUTING.md)
@@ -134,11 +137,11 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão 1.0.0.80 amplia a composição de grupos com tipos semânticos, cabeçalhos e layouts automáticos, mantendo o modo Livre como padrão para estruturas antigas.
+A versão publicada mais recente é a **1.0.0.88**. O pacote foi confirmado e publicado, mas isso não substitui os testes visuais e funcionais no Foundry VTT 14 build 360.
 
-**Validação funcional pendente:** instalação limpa, criação e edição de Actors, persistência de dados, interação entre janelas, biblioteca, mídia e comportamento em diferentes resoluções e cenários de uso.
+O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
-Consulte o [CHANGELOG](CHANGELOG.md) para os detalhes registrados desta versão.
+Antes de uma release ser considerada estável, validar instalação limpa e atualização, criação/abertura/edição de Actors, persistência, múltiplas janelas, tokens, Biblioteca, grupos, Lógica, Mídia e migrações aplicáveis. Registrar ambiente, resultados e erros encontrados.
 
 ## Princípios do projeto
 
