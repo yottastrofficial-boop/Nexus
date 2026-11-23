@@ -705,7 +705,7 @@ assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categorie
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>0 itens</, "A contagem inicial da Biblioteca deve começar em estado neutro até a coleção ser renderizada");
-assert.match(template, /data-library-tag-option="barra"/, "O filtro da Biblioteca deve expor a etiqueta da barra como chip");
+assert.match(libraryView, /button\.dataset\.libraryTagOption = value/, "O filtro da Biblioteca deve criar chips a partir das etiquetas existentes");
 
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
