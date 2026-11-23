@@ -324,7 +324,7 @@ export function createLibraryCatalogExplorer({
       ? preferences.favorites
       : currentSmartView === "recent"
         ? preferences.recent
-        : currentCollectionId
+        : currentSmartView === "collection"
           ? preferences.collections.find(collection => collection.id === currentCollectionId)?.resources ?? []
           : currentFolder
             ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
