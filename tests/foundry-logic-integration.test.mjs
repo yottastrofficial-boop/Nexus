@@ -240,3 +240,25 @@ test("runFlow preserva enabled e permissões quando recebe um ativo do Registry"
   assert.equal(dispatched[0].result.status, "failed");
   assert.equal(calls, 0);
 });
+
+test("permissões usam o usuário que originou o Hook, não os privilégios do GM executor", async () => {
+  const gm = { id: "gm-1", isGM: true };
+  const player = { id: "player-1", isGM: false };
+  const gameRef = { user: gm, users: { get: id => id === player.id ? player : (id === gm.id ? gm : null) } };
+  const resolver = createFoundryLogicPermissionResolver({
+    gameRef,
+    constRef: { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } }
+  });
+  const actor = {
+    documentName: "Actor",
+    testUserPermission: (user, level) => user.id === "player-1" && level === 2
+  };
+  assert.equal(await resolver({
+    permissions: ["actor:update"], effects: ["write"],
+    context: { actor, userId: "player-1" }
+  }), false);
+  assert.equal(await resolver({
+    permissions: ["actor:update"], effects: ["write"],
+    context: { actor, userId: "gm-1" }
+  }), true);
+});
