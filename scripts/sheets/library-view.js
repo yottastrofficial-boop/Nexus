@@ -475,12 +475,13 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           sheet._getLibraryBackupService?.();
           const canApplyResource = resource => {
             const reference = resource?.reference ?? {};
-            return reference.providerId === "nexus-library" && (
+            return sheet.rendered === true && reference.providerId === "nexus-library" && (
               ["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) ||
               reference.builtin === "asset"
             );
           };
           const applyResource = async (resource, resolved) => {
+            if (sheet.rendered !== true) { ui.notifications?.warn?.("Abra a ficha de destino para inserir este recurso."); return false; }
             const reference = resource?.reference ?? {};
             if (reference.providerId !== "nexus-library") return false;
             if (reference.collection === "components") return sheet._addSavedLibraryComponent?.(reference.id) ?? false;
