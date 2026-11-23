@@ -120,8 +120,8 @@ export function createLibraryApplicationClass({
         clear.type = "button";
         clear.dataset.libraryFolderClear = "";
         clear.className = "nexus-library-custom-folder";
-        clear.textContent = "Todos os itens";
-        clear.classList.toggle("active", !this._state.folder);
+        clear.textContent = "Todas as pastas";
+        clear.classList.toggle("active", !this._state.folder && !this._state.collectionId && this._state.smartView === "all");
         nav.append(clear);
         for (const folder of normalizeLibraryPreferences(this._getPreferences()).folders) {
           const button = document.createElement("button");
@@ -306,6 +306,7 @@ export function createLibraryApplicationClass({
         this._state.collectionId = "";
         root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item === button));
         refreshFolders();
+        refreshCollections();
         void render();
       }));
       root.querySelector("[data-library-app-folders]")?.addEventListener("click", async event => {
@@ -318,6 +319,7 @@ export function createLibraryApplicationClass({
         this._state.folder = clear ? "" : folderButton.dataset.libraryFolder;
         root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item.dataset.librarySmartView === "all"));
         refreshFolders();
+        refreshCollections();
         await render();
       });
       root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", async event => {
@@ -441,6 +443,7 @@ export function createLibraryApplicationClass({
             if (!accepted) return;
             await this._savePreferences(removeLibraryCollection(this._getPreferences(), collectionId));
             if (this._state.collectionId === collectionId) { this._state.collectionId = ""; this._state.smartView = "all"; }
+            root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.toggle("active", item.dataset.librarySmartView === this._state.smartView));
           } else {
             const name = String(result?.name ?? "").trim();
             if (!name) return;
@@ -469,6 +472,7 @@ export function createLibraryApplicationClass({
           });
           await this._savePreferences(created.preferences);
           this._state.folder = created.folder.id;
+          this._state.collectionId = "";
           this._state.smartView = "all";
           refreshFolders();
           await render();
