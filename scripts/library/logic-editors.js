@@ -421,7 +421,10 @@ function createFlowGraphBuilder(form, payload, runtime) {
         node.type = type.value;
         if (node.type === "condition" && !node.expression) node.expression = "true";
         if (node.type === "action" && !node.action) node.action = { id: newId("action"), type: actionTypes[0] ?? "", enabled: true, config: {} };
-        if (node.type !== "action") delete node.action;
+        if (node.type !== "action") {
+          delete node.action;
+          for (const key of [...configDrafts.keys()]) if (key.startsWith(node.id + "::")) configDrafts.delete(key);
+        }
         selectedNodeId = node.id;
         render();
       });
@@ -432,6 +435,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
         removeNode.addEventListener("click", () => {
           graph.nodes = graph.nodes.filter(item => item.id !== node.id);
           graph.edges = graph.edges.filter(edge => edge.from !== node.id && edge.to !== node.id);
+          for (const key of [...configDrafts.keys()]) if (key.startsWith(node.id + "::")) configDrafts.delete(key);
           if (selectedNodeId === node.id) selectedNodeId = graph.nodes[0]?.id ?? null;
           render();
         });
