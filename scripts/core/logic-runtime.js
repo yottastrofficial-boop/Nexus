@@ -78,7 +78,7 @@ function validateActionConfig(config, schema) {
   for (const field of schema.fields) {
     const present = Object.prototype.hasOwnProperty.call(config, field.key);
     const value = config[field.key];
-    const empty = !present || value === null || value === undefined || (typeof value === "string" && value.trim() === "");
+    const empty = !present || value === undefined || (value === null && field.type !== "json") || (typeof value === "string" && value.trim() === "");
     if (field.required && empty) {
       errors.push("Campo obrigatório: " + field.label + ".");
       continue;
