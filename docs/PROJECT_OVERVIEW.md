@@ -5,7 +5,7 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `335db5149ede0d595bb69a3f3102d1f4495c6ff7`
-- Versão declarada: `1.0.0.88`
+- Versão candidata: `1.0.0.89` (base de código da `1.0.0.88`)
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -36,7 +36,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na linha 1.0.0.88
+## Implementação presente na linha 1.0.0.89 (sem mudanças funcionais em relação à 1.0.0.88)
 
 A árvore atual contém, entre outros:
 
