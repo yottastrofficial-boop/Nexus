@@ -90,7 +90,27 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - O bridge limita reentrada por documento/evento, profundidade de encadeamento e captura falhas por Comportamento para que um fluxo defeituoso não interrompa os demais.
 - O executor `nexus.actor.adjust` altera uma propriedade numérica genérica em `system.*`, com delta e limites opcionais, exige OWNER e valida o valor atual em runtime. Ele não presume nomes universais como PV/PM/PE, preservando a extensibilidade de propriedades dos módulos.
 - `registerAction()` aceita o metadado opcional `configSchema` com campos declarativos dos tipos `text`, `number`, `checkbox`, `textarea`, `json` e `select`. O runtime valida a definição ao registrar o executor, publica cópias isoladas por `getActionDefinitions()`/`getActionDefinition()` e valida configurações declaradas antes de executar ou simular. Schemas ausentes preservam o contrato legado e a edição JSON.
-- O Inspector do grafo edita o nó selecionado fora do canvas. Campos são construídos exclusivamente a partir do schema declarativo; nenhum HTML ou JavaScript fornecido pelo módulo é executado. Executores sem schema continuam com editor JSON inerte.
+
+### Contrato público de configuração de executores
+
+Módulos podem registrar metadados visuais sem fornecer HTML, CSS ou JavaScript para a interface. O Core cria os controles a partir de uma lista permitida de tipos e valida os valores no runtime.
+
+Formato: `registerAction({ type, execute, effects, permissions, configSchema: { fields: [...] } })`.
+
+Cada campo declara `key` (identificador técnico único), `label` (rótulo obrigatório) e `type`. Tipos aceitos:
+- `text` e `textarea`: texto; aceitam `placeholder`, `help` e `required`. `textarea` também aceita `rows` (limitado pelo Core).
+- `number`: número finito; aceita `min`, `max`, `step`, `placeholder`, `help` e `required`.
+- `checkbox`: booleano.
+- `select`: string selecionada em `options`, cada opção com `value` e `label`.
+- `json`: valor JSON inerte; aceita objetos, listas, números, strings, booleanos e `null`, sem funções, protótipos especiais ou estruturas executáveis.
+- Qualquer campo pode declarar `defaultValue`, verificado contra o tipo e os limites do próprio campo ao registrar o executor.
+
+O schema aceita no máximo 32 campos e até 64 opções por seletor. Chaves especiais de protótipo e campos duplicados são rejeitados. Metadados expostos por `getActionDefinition()` e `getActionDefinitions()` são cópias isoladas. `validateActionConfig(type, config)` pré-valida com as mesmas regras do runtime e retorna `{ registered, hasSchema, valid, errors }`.
+
+O editor aplica o schema tanto às ações sequenciais quanto às ações de nós do grafo. Campos obrigatórios e inválidos recebem mensagens junto ao controle, estado `aria-invalid` e anúncio acessível. O salvamento bloqueia ações ativas com configuração inválida; ações desativadas podem permanecer incompletas para edição posterior. Tipos desconhecidos ou antigos sem schema continuam editáveis em JSON e não têm sua configuração reescrita automaticamente.
+
+**Compatibilidade:** adicionar um schema a um executor existente não altera o formato do ativo. Módulos devem manter as chaves já usadas em fluxos publicados; mudanças ou remoções de chaves exigem migração explícita. Campos adicionais na configuração são preservados para permitir evolução compatível.
+- O Inspector do grafo edita o nó selecionado fora do canvas. Campos são construídos exclusivamente a partir do schema declarativo; nenhum HTML ou JavaScript fornecido pelo módulo é executado. O editor sequencial usa os mesmos campos e validação. Erros são associados aos controles, anunciados por região viva e identificados por `aria-invalid`. Os nós podem ser reposicionados por teclado ou por controles direcionais, além de arrastar.
 
 - O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
 
@@ -106,7 +126,7 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `scripts/core/logic-schemas.js` registra validadores estruturais para Propriedades, Regras, Comportamentos, Fluxos e Funções.
 - O parser seguro do Core valida expressões; regras aceitam resultados booleanos, numéricos ou textuais conforme o tipo declarado.
 - `LogicRegistry.validateAsset()` permite validar rascunhos sem registrar ou persistir o ativo. O salvamento valida antes de gravar.
-- `scripts/library/logic-editors.js` fornece editores especializados para os cinco subtipos. Fluxos possuem construtor visual declarativo para gatilhos, condições e ações, preservando IDs e payloads JSON; a configuração específica de cada executor continua em JSON. Funções editam assinatura/referência, nunca código executável.
+- `scripts/library/logic-editors.js` fornece editores especializados para os cinco subtipos. Fluxos sequenciais e grafos usam o mesmo contrato de configuração visual declarativa de executores; quando o executor não publica schema, a configuração JSON inerte continua disponível. Funções editam assinatura/referência, nunca código executável.
 - O Inspector da janela independente integra esses editores e preserva o contrato de provedores.
 - Limitação restante: um construtor visual avançado de nós/ações e executores padrão do Core ainda exigem contratos específicos e testes ponta a ponta. Tipos de ação/função desconhecidos permanecem inertes até que um módulo confiável registre a implementação.
 
@@ -126,4 +146,4 @@ Contrato inicial:
 
 `runFlow()` percorre somente o caminho selecionado pelas condições, executando ações encontradas no caminho. `simulateFlow()` percorre o mesmo caminho, informa nós visitados, ações disponíveis e permissões, sem chamar executores. O percurso possui limite de 128 nós por execução. O editor apresenta o caminho percorrido e o diagnóstico de cada ação na prévia, mantendo explícito que nenhuma ação foi executada.
 
-**Estado da interface:** o Inspector de Fluxos oferece canvas com nós arrastáveis, conectores SVG, organização automática, criação de nós e conexão guiada. A edição das propriedades ocorre em Inspector dedicado ao nó selecionado. Executores que publicam `configSchema` recebem campos visuais declarativos; os demais preservam o editor JSON inerte. O runtime valida schemas declarados na execução e simulação. As coordenadas são metadados visuais e não alteram o runtime. O editor previne conexões incompatíveis e ciclos durante a interação e valida o grafo antes de salvar ou simular. Ainda precisa de validação real em Foundry VTT 14 build 360, testes de interação no cliente, acessibilidade e zoom/visão geral.
+**Estado da interface:** o Inspector de Fluxos oferece canvas com nós arrastáveis, conectores SVG, organização automática, criação de nós e conexão guiada. A edição das propriedades ocorre em Inspector dedicado ao nó selecionado. Executores que publicam `configSchema` recebem os mesmos campos visuais declarativos nos fluxos sequenciais e nos grafos; os demais preservam o editor JSON inerte. O runtime valida schemas declarados na execução, simulação e pré-validação do editor. Erros são apresentados junto aos campos e anunciados de forma acessível. Os nós podem ser movidos por teclado e por controles direcionais. As coordenadas são metadados visuais e não alteram o runtime. O editor previne conexões incompatíveis e ciclos durante a interação e valida o grafo antes de salvar ou simular. Ainda precisa de validação real em Foundry VTT 14 build 360, testes de interação no cliente e refinamentos de zoom/visão geral.
