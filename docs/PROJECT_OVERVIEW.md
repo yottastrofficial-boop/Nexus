@@ -73,7 +73,7 @@ A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a
 - A listagem constrói metadados leves, pagina cada provedor separadamente e resolve o conteúdo completo sob demanda. Módulos podem contribuir com conteúdo sem adicionar janelas ou botões independentes.
 - Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
 
-As branches ainda não contêm a integração visual completa do catálogo, os adaptadores de importação/destino, os menus funcionais nem a camada de tema global. O padrão de importação inspirado no Plutonium (origem, prévia, validação e destino) está especificado, mas não implementado. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador. Testes automatizados e validação real no Foundry são necessários antes de promover a etapa.
+A integração inicial do catálogo ao Explorer está na branch `feature/library-explorer-catalog-integration-2026-11-23`, com o módulo independente `scripts/library/catalog-explorer.js` e a especificação `docs/LIBRARY_ARCHITECTURE.md`. Ainda faltam adaptadores de importação/destino, menus contextuais completos e a camada de tema global. O padrão de importação inspirado no Plutonium (origem, prévia, validação e destino) está especificado, mas não implementado. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador. Testes automatizados e validação real no Foundry são necessários antes de promover a etapa.
 
 ## Limitações conhecidas e trabalho pendente
 
