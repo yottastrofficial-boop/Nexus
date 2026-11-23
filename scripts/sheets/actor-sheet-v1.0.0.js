@@ -2644,7 +2644,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _getLibraryBackupService() {
-    return createLibraryBackupService({
+    const library = game.nexus?.library;
+    if (library?.backup) return library.backup;
+    const service = createLibraryBackupService({
       getUser: () => game.user,
       getCatalog: () => NEXUS_LIBRARY_CATALOG,
       getThemePalettes: () => THEME_PALETTES,
@@ -2662,6 +2664,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       },
       getComponentTypes: () => Object.keys(COMPONENTS)
     });
+    if (library) library.backup = service;
+    return service;
   }
 
   _buildLibraryBackupCode() {
