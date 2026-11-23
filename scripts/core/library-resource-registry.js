@@ -150,14 +150,21 @@ export function createLibraryResourceRegistry() {
     source = "all",
     limit = 30,
     cursor = {},
-    compendiumIds = []
+    compendiumIds = [],
+    references = []
   } = {}) => {
     const search = cleanText(query, 160).toLocaleLowerCase();
     const requestedKind = cleanText(kind, 48) || "all";
     const requestedType = cleanText(type, 64) || "all";
     const pageSize = safeLimit(limit);
     const cursors = isPlainObject(cursor) ? cursor : {};
-    const selected = [...providers.values()].filter(provider => source === "all" || provider.id === source);
+    const normalizedReferences = Array.isArray(references)
+      ? references.filter(reference => reference && typeof reference === "object" && String(reference.providerId ?? "") && String(reference.id ?? "")).slice(0, 500)
+      : [];
+    const selected = [...providers.values()].filter(provider =>
+      (source === "all" || provider.id === source) &&
+      (!normalizedReferences.length || normalizedReferences.some(reference => reference.providerId === provider.id))
+    );
     const results = await Promise.all(selected.map(async provider => {
       try {
         const page = await provider.list({
@@ -166,7 +173,8 @@ export function createLibraryResourceRegistry() {
           type: requestedType,
           limit: pageSize,
           cursor: cursors[provider.id] ?? null,
-          compendiumIds: Array.isArray(compendiumIds) ? compendiumIds.slice(0, 32).map(String) : []
+          compendiumIds: Array.isArray(compendiumIds) ? compendiumIds.slice(0, 32).map(String) : [],
+          ids: normalizedReferences.filter(reference => reference.providerId === provider.id).map(reference => String(reference.id))
         });
         const rawItems = Array.isArray(page) ? page : page?.items;
         if (!Array.isArray(rawItems)) throw new Error("O provedor não retornou uma lista de recursos.");
@@ -319,10 +327,12 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
   });
 
-  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0 } = {}) => {
+  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [] } = {}) => {
     const resources = await getMetadata();
     const search = cleanText(query, 160).toLocaleLowerCase();
+    const requestedIds = new Set(Array.isArray(ids) ? ids.map(String).slice(0, 500) : []);
     const filtered = resources.filter(resource =>
+      (!requestedIds.size || requestedIds.has(resource.id)) &&
       (kind === "all" || resource.kind === kind) &&
       (type === "all" || resource.type === type) &&
       matchesText(resource, search)
@@ -372,13 +382,15 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     kind = "all",
     limit = 30,
     cursor = 0,
-    compendiumIds = []
+    compendiumIds = [],
+    ids = []
   } = {}) => {
     if (kind !== "all" && kind !== "document") {
       return { items: [], total: 0, hasMore: false, nextCursor: null };
     }
     const validTypes = new Set(Object.keys(documentBridge.types ?? {}));
     const requestedType = type === "all" || !validTypes.has(type) ? "all" : type;
+    const requestedIds = new Set(Array.isArray(ids) ? ids.map(String).slice(0, 500) : []);
     const offset = safeOffset(cursor);
     const page = await documentBridge.list({
       type: requestedType,
@@ -388,7 +400,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
       compendiumIds
     });
     return {
-      items: page.items.map(record => ({
+      items: page.items.filter(record => !requestedIds.size || requestedIds.has(record.uuid)).map(record => ({
         id: record.uuid,
         kind: "document",
         type: record.type,
@@ -403,9 +415,9 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
         isExternal: false,
         isCompendium: record.isCompendium
       })),
-      total: page.total,
-      hasMore: page.hasMore,
-      nextCursor: page.hasMore ? offset + page.items.length : null,
+      total: requestedIds.size ? page.items.filter(record => requestedIds.has(record.uuid)).length : page.total,
+      hasMore: requestedIds.size ? false : page.hasMore,
+      nextCursor: requestedIds.size ? null : page.hasMore ? offset + page.items.length : null,
       errors: page.errors ?? []
     };
   };
