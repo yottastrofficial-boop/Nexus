@@ -108,6 +108,15 @@ const documentBridge = {
   },
   async resolve(reference) {
     return { uuid: reference.uuid, documentName: "Actor", name: "Documento resolvido" };
+  },
+  reference(document) {
+    const record = [
+      { uuid: "Actor.abc", type: "actors", name: "Aventureiro", img: "actor.webp", folder: "Personagens", isCompendium: false },
+      { uuid: "Macro.def", type: "macros", name: "Preparar sessão", img: "", folder: "Ferramentas", isCompendium: false },
+      { uuid: "Scene.xyz", type: "scenes", name: "Sala de jogo", img: "scene.webp", folder: "Cenas", isCompendium: false }
+    ].find(item => item.uuid === document.uuid);
+    if (!record) throw new Error("Documento não encontrado.");
+    return record;
   }
 };
 
@@ -120,6 +129,10 @@ assert.equal(bridgeCalls[0].compendiumIds.length, 0,
   "Compêndios não devem ser varridos automaticamente.");
 const foundryResolved = await foundryProvider.resolve(foundryPage.items[0].reference);
 assert.equal(foundryResolved.name, "Documento resolvido");
+const favoritePage = await foundryProvider.list({ kind: "document", ids: ["Scene.xyz"] });
+assert.equal(favoritePage.items.length, 1, "Referências favoritas devem ser resolvidas mesmo fora da primeira página.");
+assert.equal(favoritePage.items[0].reference.uuid, "Scene.xyz");
+assert.equal(favoritePage.hasMore, false);
 
 const registry = createLibraryResourceRegistry();
 registry.register(nexusProvider);
@@ -142,6 +155,15 @@ const resolved = await registry.resolve(
   foundryOnly.items[0]
 );
 assert.equal(resolved.name, "Documento resolvido");
+const referencedPage = await registry.list({
+  references: [
+    { providerId: "nexus-library", id: "components:component-health" },
+    { providerId: "foundry-documents", id: "Scene.xyz" }
+  ],
+  limit: 10
+});
+assert.equal(referencedPage.items.length, 2, "A consulta por referências deve buscar itens de qualquer posição do catálogo.");
+assert.deepEqual(referencedPage.items.map(item => item.providerId).sort(), ["foundry-documents", "nexus-library"]);
 
 const brokenRegistry = createLibraryResourceRegistry();
 brokenRegistry.register({
