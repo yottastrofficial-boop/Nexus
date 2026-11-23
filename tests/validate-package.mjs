@@ -705,7 +705,7 @@ assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categorie
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>0 itens</, "A contagem inicial da Biblioteca deve começar em estado neutro até a coleção ser renderizada");
-assert.match(template, /data-library-tag-option="barra"/, "O filtro da Biblioteca deve expor a etiqueta da barra como chip");
+assert.match(libraryView, /button\.dataset\.libraryTagOption = value/, "O filtro da Biblioteca deve criar chips a partir das etiquetas existentes");
 
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
@@ -1397,10 +1397,10 @@ assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "components"/,"Card
 assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "groups"/,"Blocos e grupos devem ser persistidos no armazenamento unificado");
 assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configurações completas de ficha devem ser persistidas no armazenamento unificado");
 assert.match(template,/data-library-scope="core"/,"A navegação deve oferecer a origem NEXUS");
-assert.match(template,/data-library-scope="modules"/,"A navegação deve oferecer a origem módulos");
-assert.match(template,/data-library-scope="extras"/,"A navegação deve oferecer a origem extras");
+assert.doesNotMatch(template,/data-library-scope="modules"/,"A navegação não deve expor filtros técnicos de origem");
+assert.doesNotMatch(template,/data-library-scope="extras"/,"A navegação não deve expor filtros técnicos de origem");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
-assert.match(libraryView,/data-library-origin-filter/,"O filtro de origem deve ser aplicado às coleções");
+assert.doesNotMatch(libraryView,/data-library-origin-filter/,"A navegação universal não deve depender de filtro técnico de origem");
 assert.match(libraryView,/sameScope=button\.dataset\.libraryScope/,"A navegação deve manter uma única origem ativa por vez");
 assert.match(css,/aspect-ratio:1 \/ 1 !important/,"Os cartões da Biblioteca devem ter prévias quadradas");
 assert.match(css,/overflow:auto !important; overscroll-behavior:contain/,"As grades devem rolar independentemente para evitar cortes");
@@ -2336,6 +2336,10 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   preferences = assignLibraryEntryFolder(preferences, "assets", "meter-1", "folder-assets");
   assert.equal(preferences.assignments["assets:meter-1"], "folder-assets");
   assert.throws(() => assignLibraryEntryFolder(preferences, "media", "portrait-1", "folder-assets"), /não pertence/);
+  const globalFolder = createLibraryFolder(preferences, { id: "folder-global", name: "Compartilhados" });
+  preferences = assignLibraryEntryFolder(globalFolder.preferences, "media", "portrait-1", "folder-global");
+  assert.equal(preferences.assignments["media:portrait-1"], "folder-global",
+    "Pastas livres devem aceitar itens de coleções diferentes");
   preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
   assert.ok(preferences.favorites.includes("assets:meter-1"));
   preferences = toggleLibraryFavorite(preferences, "assets", "meter-1");
@@ -2347,6 +2351,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   preferences = removeLibraryFolder(preferences, "folder-assets");
   assert.equal(preferences.assignments["assets:meter-1"], undefined,
     "Excluir uma pasta deve limpar a associação sem excluir o item da coleção");
+  preferences = removeLibraryFolder(preferences, "folder-global");
+  assert.equal(preferences.assignments["media:portrait-1"], undefined);
   assert.equal(preferences.folders.length, 0);
   const malformed = normalizeLibraryPreferences({ schemaVersion: 1, folders: [{ id: "__proto__", name: "Bad" }], favorites: ["x", "x", 2], recent: ["assets:a"] });
   assert.deepEqual(malformed.favorites, ["x"]);
@@ -2418,8 +2424,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }
 
-assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Padrão<\/span>/,"A origem padrão deve manter o nome Padrão");
-assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Pessoais<\/span>/,"A origem pessoal deve ser nomeada Pessoais");
+assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Elementos disponíveis<\/span>/,"O catálogo padrão deve estar acessível como Elementos disponíveis");
+assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Meus componentes<\/span>/,"A coleção pessoal deve continuar acessível sem filtro de origem genérico");
 assert.doesNotMatch(template,/data-library-origin-filter/,"A origem não deve ser filtrada por select genérico");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
 assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
@@ -2451,10 +2457,18 @@ assert.doesNotMatch(template,/data-library-card-size/,"O tamanho dos cartões n�
 assert.doesNotMatch(template,/data-library-origin-filter/,"A interface não deve exibir o seletor genérico de origem");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A interface não deve exibir o seletor genérico de tipo/itens");
 assert.match(template,/data-library-filter-toggle/,"O filtro de etiquetas deve ser aberto por um botão contextual");
-assert.match(template,/data-library-tag-option="barra"/,"O filtro deve apresentar etiquetas como opções visuais");
-assert.doesNotMatch(template,/Todas as origens|Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
+assert.match(template,/data-library-tag-option="all"/,"O filtro deve oferecer uma opção neutra quando nenhuma etiqueta estiver selecionada");
+assert.doesNotMatch(template,/Todas as origens|<option[^>]*>Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
 assert.match(libraryView,/selectedTag/,"A seleção de etiqueta deve filtrar coleções salvas");
 assert.match(libraryView,/dataset\.libraryTags/,"Os recursos devem expor suas etiquetas como metadados filtráveis");
+assert.match(template,/data-library-smart-view="favorites"/,"A navegação deve expor uma coleção universal de favoritos");
+assert.match(template,/data-library-smart-view="recent"/,"A navegação deve expor uma coleção universal de recentes");
+assert.match(libraryView,/collection === "all"/,"A Biblioteca deve agregar todas as coleções salvas em uma visão universal");
+assert.match(libraryView,/NEXUS_LIBRARY_COLLECTIONS\.flatMap/,"A visão universal deve reunir as coleções do armazenamento canônico");
+assert.match(libraryView,/data-library-duplicate-entry/,"O Inspector deve oferecer duplicação de itens salvos");
+assert.match(libraryView,/data-library-delete-entry/,"O Inspector deve oferecer exclusão controlada de itens salvos");
+assert.match(css,/nexus-library-generic-preview/,"Os cartões genéricos devem usar a mesma área de prévia padronizada");
+assert.doesNotMatch(template,/data-library-collection-folder/,"A organização por pastas não deve depender de um seletor textual na área principal");
 assert.match(template,/role="meter" aria-valuemin="0" aria-valuemax="{{component.max}}"/,"A barra de recurso deve expor seus valores acessíveis sem renderizar texto");
 assert.match(css,/background:#8994a3!important/,"A barra de recurso deve usar preenchimento neutro");
 const resourceBarMarkup = template.slice(template.indexOf('{{else if (eq component.sheetVariant "resource")}}'), template.indexOf('{{else if (eq component.sheetVariant "derived")}}'));

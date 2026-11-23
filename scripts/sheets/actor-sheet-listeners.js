@@ -254,11 +254,11 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
       const viewMode=sheet._libraryCollectionViewMode==="list"?"list":"grid";
-      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows]").forEach(container=>{container.dataset.viewMode=viewMode;});
+      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows],[data-library-saved-layouts],[data-library-themes],[data-library-saved-components],[data-library-saved-groups]").forEach(container=>{container.dataset.viewMode=viewMode;});
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
       themeCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!String(card.dataset.libraryAsset??"").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleThemes++;});
       const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
-      genericCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleGeneric++;});
+      genericCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean),hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));const tile=card.closest(".nexus-library-generic-card")??card;tile.hidden=hidden;card.hidden=hidden;if(!hidden)visibleGeneric++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
       layoutCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleLayouts++;});
@@ -473,11 +473,13 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (filterPopover) filterPopover.hidden = !opening;
       filterButton.setAttribute("aria-expanded", String(opening));
     });
-    libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.addEventListener("click", () => {
+    libraryPanel?.querySelector(".nexus-library-filter-options")?.addEventListener("click", event => {
+      const option = event.target.closest("[data-library-tag-option]");
+      if (!option || !event.currentTarget.contains(option)) return;
       const selected = option.dataset.libraryTagOption || "all";
       if (tagInput) tagInput.value = selected;
       sheet._libraryTagFilter = selected;
-      libraryPanel.querySelectorAll("[data-library-tag-option]").forEach(item => item.classList.toggle("active", item === option));
+      event.currentTarget.querySelectorAll("[data-library-tag-option]").forEach(item => item.classList.toggle("active", item === option));
       const count = libraryPanel.querySelector("[data-library-filter-count]");
       if (count) { count.hidden = selected === "all"; count.textContent = selected === "all" ? "" : "1"; }
       const label = filterButton?.querySelector("span");
@@ -485,7 +487,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (filterPopover) filterPopover.hidden = true;
       filterButton?.setAttribute("aria-expanded", "false");
       scheduleLibraryFilter();
-    }));
+    });;
 
     // Os controles da Biblioteca ficam dentro de uma janela ApplicationV2 separada.
     // A delegação nativa no próprio painel acompanha o nó quando ele é movido para
