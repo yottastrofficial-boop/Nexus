@@ -114,12 +114,15 @@ Hooks.once("init", () => {
   game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
+  game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
+  game.nexus.logic.getActionDefinition = type => game.nexus.logic.runtime.getActionDefinition(type);
   game.nexus.logic.registerFunction = descriptor => game.nexus.logic.runtime.registerFunction(descriptor);
   game.nexus.logic.runFlow = (flow, context) => game.nexus.logic.runtime.runFlow(flow, context);
   game.nexus.logic.simulateFlow = (flow, context) => game.nexus.logic.runtime.simulateFlow(flow, context);
   game.nexus.logic.dispatch = (eventName, context) => game.nexus.logic.runtime.dispatch(eventName, context);
   game.nexus.logic.getExecutors = () => ({
     actions: game.nexus.logic.runtime.actionTypes,
+    actionDefinitions: game.nexus.logic.runtime.getActionDefinitions(),
     functions: game.nexus.logic.runtime.functionIds
   });
   game.nexus.logic.loadLibrary = () => loadLogicLibrary(game.user, game.nexus.logic.registry);
