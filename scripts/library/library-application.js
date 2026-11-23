@@ -125,6 +125,117 @@ export function createLibraryApplicationClass({
       refreshFolders();
 
       const render = () => this._explorer?.render({ ...this._state });
+      const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
+      const backupService = () => globalThis.game?.nexus?.library?.backup;
+      const makeImportPreview = async source => {
+        const backup = backupService();
+        if (!backup?.prepareImport || !backup?.commitImport) {
+          throw new Error("O serviço de backup ainda não foi inicializado. Abra a Biblioteca pelo painel de uma ficha.");
+        }
+        const preview = backup.prepareImport(source, {
+          createId: (collection, index) => collection + "-" + globalThis.foundry?.utils?.randomID?.(8) + "-" + index
+        });
+        const labels = {
+          components: "componentes", groups: "grupos", layouts: "layouts", assets: "assets",
+          themes: "temas", templates: "modelos", media: "mídias", styles: "estilos",
+          properties: "propriedades", rules: "regras", behaviors: "comportamentos",
+          flows: "fluxos pessoais", functions: "funções", worldFlows: "fluxos do mundo"
+        };
+        const additions = Object.entries(preview.report.added ?? {})
+          .filter(([, count]) => Number(count) > 0)
+          .map(([key, count]) => Number(count) + " " + (labels[key] ?? key));
+        const skipped = Object.values(preview.report.skipped ?? {}).reduce((sum, count) => sum + Number(count || 0), 0);
+        const content = (additions.length
+          ? "<p>Serão adicionados: " + additions.join(", ") + ".</p>"
+          : "<p>Nenhum item novo será adicionado.</p>") +
+          (skipped ? "<p>" + skipped + " item(ns) em conflito serão preservados sem sobrescrita.</p>" : "<p>Nenhum conflito foi encontrado.</p>") +
+          "<p>O conteúdo será validado e não será executado durante a importação.</p>";
+        const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+        if (typeof confirm !== "function") throw new Error("O diálogo de confirmação do Foundry não está disponível.");
+        const accepted = await confirm({
+          window: { title: "Prévia da importação da Biblioteca" },
+          content,
+          yes: { label: "Importar" },
+          no: { label: "Cancelar" },
+          rejectClose: false
+        });
+        if (!accepted) return { cancelled: true };
+        const result = await backup.commitImport(preview);
+        for (const warning of result.warnings ?? []) notify("warn", warning);
+        notify("info", additions.length ? "Biblioteca importada: " + additions.join(", ") + "." : "Backup validado; nenhum item novo foi necessário.");
+        refreshFolders();
+        await render();
+        return result;
+      };
+
+      root.querySelector("[data-library-backup-copy]")?.addEventListener("click", async () => {
+        try {
+          const code = backupService()?.exportCode?.();
+          if (!code) throw new Error("O serviço de backup não está disponível.");
+          let copied = false;
+          try {
+            if (globalThis.navigator?.clipboard?.writeText) {
+              await globalThis.navigator.clipboard.writeText(code);
+              copied = true;
+            }
+          } catch {}
+          if (!copied) {
+            const field = document.createElement("textarea");
+            field.value = code;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.append(field);
+            field.select();
+            copied = document.execCommand?.("copy") === true;
+            field.remove();
+          }
+          if (!copied) throw new Error("Não foi possível copiar o backup.");
+          notify("info", "Backup da Biblioteca copiado.");
+        } catch (error) { notify("error", error.message); }
+      });
+
+      root.querySelector("[data-library-backup-export]")?.addEventListener("click", () => {
+        try {
+          const code = backupService()?.exportCode?.();
+          if (!code) throw new Error("O serviço de backup não está disponível.");
+          const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "nexus-library-" + new Date().toISOString().slice(0, 10) + ".json";
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          notify("info", "Backup da Biblioteca exportado.");
+        } catch (error) { notify("error", error.message); }
+      });
+
+      root.querySelector("[data-library-backup-import-code]")?.addEventListener("click", async () => {
+        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
+        if (typeof input !== "function") return;
+        try {
+          const result = await input({
+            window: { title: "Importar backup da Biblioteca" },
+            content: '<label>Código JSON<textarea name="code" rows="10" spellcheck="false"></textarea></label>',
+            ok: { label: "Validar backup" },
+            rejectClose: false
+          });
+          const source = String(result?.code ?? "").trim();
+          if (source) await makeImportPreview(source);
+        } catch (error) { notify("error", "Não foi possível importar o backup: " + error.message); }
+      });
+
+      const backupFile = root.querySelector("[data-library-backup-file]");
+      root.querySelector("[data-library-backup-import-file]")?.addEventListener("click", () => backupFile?.click());
+      backupFile?.addEventListener("change", async () => {
+        const file = backupFile.files?.[0];
+        if (!file) return;
+        try {
+          if (file.size > 5 * 1024 * 1024) throw new Error("O arquivo excede o limite de 5 MB.");
+          await makeImportPreview(await file.text());
+        } catch (error) { notify("error", "Não foi possível importar o arquivo: " + error.message); }
+        finally { backupFile.value = ""; }
+      });
       search?.addEventListener("input", () => {
         this._state.query = search.value;
         if (this._searchFrame) cancelAnimationFrame(this._searchFrame);
