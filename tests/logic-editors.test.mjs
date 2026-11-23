@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildLogicEditorPayload } from "../scripts/library/logic-editors.js";
-import { layoutFlowGraph, getFlowGraphCanvasSize } from "../scripts/library/flow-graph-layout.js";
+import { layoutFlowGraph, getFlowGraphCanvasSize, connectFlowNodes } from "../scripts/library/flow-graph-layout.js";
 import { createLogicRegistry } from "../scripts/core/logic-registry.js";
 import { createNexusLogicSchemas } from "../scripts/core/logic-schemas.js";
 
@@ -125,4 +125,44 @@ test("schema rejeita coordenadas visuais fora dos limites do canvas", () => {
   });
   assert.equal(bad.valid, false);
   assert.ok(bad.errors.some(error => error.includes("coordenadas visuais inválidas")));
+});
+
+test("conexão guiada cria e substitui saídas válidas sem duplicar ramificações", () => {
+  const graph = {
+    entryNodeId: "start",
+    nodes: [
+      { id: "start", type: "start" },
+      { id: "check", type: "condition" },
+      { id: "yes", type: "action" },
+      { id: "no", type: "end" },
+      { id: "other", type: "end" }
+    ],
+    edges: [{ from: "start", to: "check", when: "next" }]
+  };
+  const first = connectFlowNodes(graph, "check", "yes", "true");
+  const branched = connectFlowNodes(first, "check", "no", "false");
+  const rewired = connectFlowNodes(branched, "check", "other", "true");
+  assert.equal(graph.edges.length, 1, "A função deve preservar o grafo original.");
+  assert.equal(rewired.edges.filter(edge => edge.from === "check" && edge.when === "true").length, 1);
+  assert.equal(rewired.edges.find(edge => edge.from === "check" && edge.when === "true").to, "other");
+  assert.equal(rewired.edges.find(edge => edge.from === "check" && edge.when === "false").to, "no");
+});
+
+test("conexão guiada bloqueia saídas incompatíveis, destino inicial e ciclos", () => {
+  const graph = {
+    entryNodeId: "start",
+    nodes: [
+      { id: "start", type: "start" },
+      { id: "condition", type: "condition" },
+      { id: "action", type: "action" },
+      { id: "end", type: "end" }
+    ],
+    edges: [{ from: "start", to: "condition", when: "next" }]
+  };
+  assert.throws(() => connectFlowNodes(graph, "start", "action", "true"), /só aceita/);
+  assert.throws(() => connectFlowNodes(graph, "condition", "start", "true"), /não pode receber/);
+  assert.throws(() => connectFlowNodes(graph, "condition", "condition", "true"), /si mesmo/);
+  const withTrue = connectFlowNodes(graph, "condition", "action", "true");
+  const withNext = { ...withTrue, edges: [...withTrue.edges, { from: "action", to: "end", when: "next" }] };
+  assert.throws(() => connectFlowNodes(withNext, "action", "condition", "next"), /ciclo/);
 });
