@@ -53,21 +53,30 @@ export function createResourceLifecycleManager({
   });
 
   const unloadEntry = async entry => {
-    if (entry.state !== "ready" || entry.references > 0 || entry.pins > 0) return false;
-    entry.state = "unloading";
-    try {
-      await entry.unload?.(entry.value, { id: entry.id });
-      residentBytes = Math.max(0, residentBytes - entry.residentBytes);
-      entry.value = undefined;
-      entry.residentBytes = 0;
-      entry.state = "registered";
-      entry.lastError = "";
-      return true;
-    } catch (error) {
-      entry.state = "ready";
-      entry.lastError = String(error?.message ?? error);
+    if (entry.state === "unloading" && entry.unloadPromise) {
+      await entry.unloadPromise;
       return false;
     }
+    if (entry.state !== "ready" || entry.references > 0 || entry.pins > 0) return false;
+    entry.state = "unloading";
+    entry.unloadPromise = (async () => {
+      try {
+        await entry.unload?.(entry.value, { id: entry.id });
+        residentBytes = Math.max(0, residentBytes - entry.residentBytes);
+        entry.value = undefined;
+        entry.residentBytes = 0;
+        entry.state = "registered";
+        entry.lastError = "";
+        return true;
+      } catch (error) {
+        entry.state = "ready";
+        entry.lastError = String(error?.message ?? error);
+        return false;
+      } finally {
+        entry.unloadPromise = null;
+      }
+    })();
+    return entry.unloadPromise;
   };
 
   const trimInternal = async targetBytes => {
@@ -107,6 +116,7 @@ export function createResourceLifecycleManager({
   };
 
   const loadEntry = async entry => {
+    if (entry.state === "unloading" && entry.unloadPromise) await entry.unloadPromise;
     if (entry.state === "ready") return entry.value;
     if (entry.loadPromise) return entry.loadPromise;
     if (disposed) throw new Error("O gerenciador de recursos já foi encerrado.");
@@ -169,7 +179,7 @@ export function createResourceLifecycleManager({
       id: key, load, unload, estimatedBytes: safeBytes(estimateBytes),
       priority: Number.isFinite(Number(priority)) ? Number(priority) : 0,
       state: "registered", value: undefined, references: 0, pins: 0,
-      residentBytes: 0, lastUsed: now(), lastError: "", loadPromise: null
+      residentBytes: 0, lastUsed: now(), lastError: "", loadPromise: null, unloadPromise: null
     });
     return key;
   };
@@ -212,6 +222,7 @@ export function createResourceLifecycleManager({
 
   const unregister = async id => {
     const entry = requireEntry(id);
+    if (entry.state === "unloading" && entry.unloadPromise) await entry.unloadPromise;
     if (entry.references || entry.pins || entry.state === "loading") {
       throw new Error("Não é possível remover um recurso que está em uso ou sendo carregado.");
     }
