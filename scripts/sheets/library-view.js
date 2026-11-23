@@ -88,11 +88,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     sheet._libraryRenderSavedFlows=renderSavedFlows;
     renderSavedFlows();
     const genericCollectionLabels = {
-      templates: "Predefinições", assets: "Componentes salvos", media: "Mídia",
+      templates: "Predefinições", assets: "Componentes salvos", components: "Componentes", groups: "Composições", layouts: "Modelos de ficha", themes: "Temas", media: "Mídia", flows: "Fluxos",
       styles: "Estilos visuais", properties: "Propriedades", rules: "Regras", behaviors: "Comportamentos", functions: "Funções", all: "Todos os itens"
     };
     const genericCollectionIcons = {
-      templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", media: "fa-solid fa-photo-film",
+      templates: "fa-solid fa-id-card", assets: "fa-solid fa-cube", components: "fa-solid fa-cube", groups: "fa-solid fa-layer-group", layouts: "fa-solid fa-table-columns", themes: "fa-solid fa-palette", media: "fa-solid fa-photo-film", flows: "fa-solid fa-diagram-project",
       styles: "fa-solid fa-swatchbook", properties: "fa-solid fa-list-check", rules: "fa-solid fa-scale-balanced", behaviors: "fa-solid fa-gears", functions: "fa-solid fa-code", all: "fa-solid fa-layer-group"
     };
     const getLegacyLibraryFlags = () => Object.fromEntries([
@@ -280,6 +280,25 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         } else {
           const note = document.createElement("p"); note.textContent = source ? `Prévia indisponível para este formato (${kind || "tipo não identificado"}).` : "Este item ainda não possui um caminho de mídia."; visualPreview.append(note);
         }
+      } else if (collection === "layouts") {
+        const layout = entry.layout ?? {};
+        const summary = document.createElement("p"); summary.textContent = (layout.components?.length ?? 0) + " componentes · " + (layout.groups?.length ?? 0) + " grupos · " + (layout.width ?? "?") + " × " + (layout.height ?? "?") + " px"; visualPreview.append(summary);
+      } else if (collection === "groups") {
+        const summary = document.createElement("p"); summary.textContent = (entry.components?.length ?? entry.members?.length ?? 0) + " componentes · " + (entry.groups?.length ?? 0) + " subgrupos"; visualPreview.append(summary);
+      } else if (collection === "components") {
+        const summary = document.createElement("p"); summary.textContent = String(entry.type ?? "Componente") + " · Configuração reutilizável"; visualPreview.append(summary);
+      } else if (collection === "themes") {
+        const palette = entry.palette ?? {};
+        for (const [key,value] of Object.entries(palette).slice(0,12)) {
+          if (typeof value !== "string" || !/^#(?:[0-9a-f]{3,8})$/i.test(value)) continue;
+          const swatch = document.createElement("span"); swatch.className = "nexus-library-style-swatch";
+          const color = document.createElement("i"); color.style.backgroundColor = value;
+          const label = document.createElement("small"); label.textContent = key;
+          swatch.append(color,label); visualPreview.append(swatch);
+        }
+      } else if (collection === "flows") {
+        const flow = entry.flow ?? entry;
+        const summary = document.createElement("p"); summary.textContent = (flow.triggers?.length ?? 0) + " gatilhos · " + (flow.conditions?.length ?? 0) + " condições · " + (flow.actions?.length ?? 0) + " ações"; visualPreview.append(summary);
       } else if (collection === "styles") {
         const tokens = entry.tokens ?? entry.palette ?? {};
         for (const [key,value] of Object.entries(tokens).slice(0,16)) {
@@ -408,7 +427,9 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       if (favorite && panel.contains(favorite)) {
         event.preventDefault();
         await persistLibraryPreferences(toggleLibraryFavorite(getLibraryPreferences(), favorite.dataset.libraryCollection, favorite.dataset.libraryFavorite));
-        renderGenericCollection(favorite.dataset.libraryCollection, true);
+        const activeSection = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+        const activeCollection = activeSection.startsWith("collection:") ? activeSection.slice("collection:".length) : favorite.dataset.libraryCollection;
+        renderGenericCollection(activeCollection, true);
         return;
       }
       const createFolderButton = event.target.closest("[data-library-create-folder]");
@@ -497,6 +518,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           const activeSectionKey = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
           const activeCollection = activeSectionKey.startsWith("collection:") ? activeSectionKey.slice("collection:".length) : collection;
           renderGenericCollection(activeCollection, true);
+          refreshTagOptions();
           const refreshedCard = panel.querySelector('[data-library-entry="' + entryId + '"][data-library-collection="' + collection + '"]');
           if (refreshedCard) await showGenericDetails(collection, entryId, refreshedCard);
           ui.notifications.info("Metadados salvos.");
