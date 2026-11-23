@@ -383,3 +383,51 @@ test("runtime percorre ramificações do grafo e simula sem executar ações", a
   assert.equal(skippedBranch.status, "success");
   assert.deepEqual(calls, ["yes"]);
 });
+
+test("executor nexus.actor.adjust altera propriedade numérica genérica e respeita limites", async () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  const runtime = createLogicRuntime({ registry });
+  const hooks = createHooks();
+  const user = { id: "gm-adjust", isGM: true };
+  const integration = installFoundryLogicIntegration({
+    hooks, runtime,
+    gameRef: { user, users: { get: id => id === user.id ? user : null } },
+    constRef: { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } },
+    logger: { warn() {}, error() {} }
+  });
+  const updates = [];
+  const actor = {
+    documentName: "Actor",
+    uuid: "Actor.adjust-test",
+    system: { customModule: { energy: 4 } },
+    async update(changes) { updates.push(changes); },
+    testUserPermission: (_user, level) => level <= 3
+  };
+  const decreased = await runtime.runFlow({
+    actions: [{
+      id: "decrease-energy", type: "nexus.actor.adjust",
+      config: { path: "system.customModule.energy", delta: -10, min: 0, max: 12 }
+    }]
+  }, { actor, document: actor });
+  assert.equal(decreased.status, "success");
+  assert.deepEqual(updates[0], { "system.customModule.energy": 0 });
+
+  const increased = await runtime.runFlow({
+    actions: [{
+      id: "increase-energy", type: "nexus.actor.adjust",
+      config: { path: "system.customModule.energy", delta: 20, min: 0, max: 12 }
+    }]
+  }, { actor, document: actor });
+  assert.equal(increased.status, "success");
+  assert.deepEqual(updates[1], { "system.customModule.energy": 12 });
+
+  const invalidTarget = await runtime.runFlow({
+    actions: [{
+      id: "invalid-target", type: "nexus.actor.adjust",
+      config: { path: "system.customModule.label", delta: 1 }
+    }]
+  }, { actor, document: actor });
+  assert.equal(invalidTarget.status, "failed");
+  assert.match(invalidTarget.errors[0].message, /não contém um número válido/);
+  integration.uninstall();
+});
