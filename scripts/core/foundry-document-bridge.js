@@ -25,9 +25,12 @@ export function createFoundryDocumentBridge({
 } = {}) {
   if (!gameRef) throw new Error("O Foundry ainda não disponibilizou game para o bridge de documentos.");
 
+  const metadataCache = new WeakMap();
   const describe = (document, type) => {
+    const cached = metadataCache.get(document);
+    if (cached?.has(type)) return cached.get(type);
     const definition = DOCUMENT_TYPES[type];
-    return Object.freeze({
+    const record = Object.freeze({
       id: String(document.id ?? document._id ?? ""),
       uuid: String(document.uuid ?? ""),
       type,
@@ -40,6 +43,10 @@ export function createFoundryDocumentBridge({
       sort: Number(document.sort) || 0,
       isCompendium: Boolean(document.pack)
     });
+    const byType = cached ?? new Map();
+    byType.set(type, record);
+    if (!cached) metadataCache.set(document, byType);
+    return record;
   };
 
   const matches = (record, query, tags = []) => {
@@ -128,6 +135,19 @@ export function createFoundryDocumentBridge({
     if (!document) throw new Error("O documento referenciado não está mais disponível: " + uuid);
     return document;
   };
+
+  // Reuse lightweight metadata objects while avoiding retention of full documents.
+  // Foundry update hooks invalidate only the affected document entry.
+  for (const definition of Object.values(DOCUMENT_TYPES)) {
+    const suffix = definition.documentName;
+    for (const operation of ["create", "update", "delete"]) {
+      globalThis.Hooks?.on?.(`${operation}${suffix}`, document => {
+        if (document && (typeof document === "object" || typeof document === "function")) {
+          metadataCache.delete(document);
+        }
+      });
+    }
+  }
 
   const reference = document => {
     if (!document?.uuid) throw new Error("O documento não possui UUID do Foundry.");
