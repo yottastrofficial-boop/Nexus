@@ -157,12 +157,13 @@ export function createLibraryResourceRegistry() {
           total: Math.max(items.length, Number(page?.total) || 0),
           hasMore: Boolean(page?.hasMore),
           nextCursor: page?.nextCursor ?? null,
-          error: ""
+          error: "",
+          warnings: Array.isArray(page?.errors) ? page.errors : []
         };
       } catch (error) {
         return {
           providerId: provider.id, items: [], total: 0, hasMore: false,
-          nextCursor: null, error: String(error?.message ?? error)
+          nextCursor: null, error: String(error?.message ?? error), warnings: []
         };
       }
     }));
@@ -185,8 +186,12 @@ export function createLibraryResourceRegistry() {
         total: result.total,
         hasMore: result.hasMore
       }))),
-      errors: Object.freeze(results.filter(result => result.error).map(result =>
-        Object.freeze({ providerId: result.providerId, message: result.error })))
+      errors: Object.freeze([
+        ...results.filter(result => result.error).map(result =>
+          Object.freeze({ providerId: result.providerId, message: result.error })),
+        ...results.flatMap(result => result.warnings.map(warning =>
+          Object.freeze({ providerId: result.providerId, ...cloneReference(warning) })))
+      ])
     });
   };
 
@@ -207,16 +212,21 @@ export function createLibraryResourceRegistry() {
 /** Provider for personal NEXUS collections and the built-in component catalog. */
 export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
   if (typeof getUser !== "function") throw new TypeError("getUser() é obrigatório.");
-  const getStore = async () => {
-    const { getLegacyNexusLibraryFlags, readNexusLibraryStore } = await import("./library-store.js");
+  const getCollections = async () => {
     const user = getUser();
-    return readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
+    if (!user) return {};
+    const canonical = user.getFlag?.("nexus", "libraryStore");
+    if (canonical?.collections && typeof canonical.collections === "object" &&
+        Number(canonical.schemaVersion ?? 1) <= 2) return canonical.collections;
+    const { getLegacyNexusLibraryFlags, readNexusLibraryStore } = await import("./library-store.js");
+    return readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store.collections;
   };
 
   const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0 } = {}) => {
-    const store = await getStore();
+    const collections = await getCollections();
     const resources = [];
-    for (const [collection, entries] of Object.entries(store.collections)) {
+    for (const [collection, entries] of Object.entries(collections)) {
+      if (!Array.isArray(entries) || !COLLECTION_KINDS[collection]) continue;
       for (const entry of entries) {
         const resourceKind = COLLECTION_KINDS[collection] ?? "resource";
         resources.push({
@@ -286,11 +296,11 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     if (reference?.builtin === "theme") {
       return (catalog.themes ?? []).find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
     }
-    const store = await getStore();
+    const collections = await getCollections();
     const collection = String(reference?.collection ?? "");
     const id = String(reference?.id ?? "");
-    if (!store.collections[collection]) throw new Error("Coleção NEXUS desconhecida: " + collection);
-    return store.collections[collection].find(entry => String(entry.id) === id) ?? null;
+    if (!Array.isArray(collections[collection])) throw new Error("Coleção NEXUS desconhecida: " + collection);
+    return collections[collection].find(entry => String(entry.id) === id) ?? null;
   };
 
   return Object.freeze({
