@@ -88,6 +88,7 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `foundry-logic-integration.js` conecta Hooks de criação/atualização/remoção de Actors, Items, Tokens e Combats, além de início/rodada/turno de combate, aos eventos `actor.*`, `item.*`, `token.*` e `combat.*` dos Comportamentos.
 - O despacho de eventos de ciclo de vida ocorre somente no GM ativo para evitar execução duplicada entre clientes. A verificação de permissões usa o usuário que originou o Hook, nunca os privilégios do GM executor. O executor inicial `nexus.actor.update` grava exclusivamente em caminhos `system.*`, exige propriedade OWNER do usuário originador e aceita somente valores JSON inertes.
 - O bridge limita reentrada por documento/evento, profundidade de encadeamento e captura falhas por Comportamento para que um fluxo defeituoso não interrompa os demais.
+- O executor `nexus.actor.adjust` altera uma propriedade numérica genérica em `system.*`, com delta e limites opcionais, exige OWNER e valida o valor atual em runtime. Ele não presume nomes universais como PV/PM/PE, preservando a extensibilidade de propriedades dos módulos.
 - O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
 
 ### Limitações restantes
