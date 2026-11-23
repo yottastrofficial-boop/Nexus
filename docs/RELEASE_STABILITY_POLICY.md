@@ -25,8 +25,8 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-23
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Versão publicada na main:** `1.0.0.88`, commit `335db5149ede0d595bb69a3f3102d1f4495c6ff7`.
-- **Interpretação correta:** 1.0.0.88 é a versão distribuída mais recente, mas não deve ser chamada de checkpoint funcional confirmado. O changelog e o roadmap mantêm pendente a validação visual e funcional no Foundry VTT 14 build 360.
+- **Última versão publicada antes desta rodada:** `1.0.0.88`. **Candidata de teste:** `1.0.0.89`, ainda sem confirmação funcional.
+- **Interpretação correta:** 1.0.0.89 é apenas uma nova identificação de build para teste manual da ficha; não contém correções funcionais em relação à 1.0.0.88 e não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
 A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.
@@ -50,4 +50,4 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 
 ## Próximo checkpoint
 
-A próxima versão candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
+A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
