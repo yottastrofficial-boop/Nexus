@@ -101,3 +101,84 @@ export function applyLibraryLayoutOverrides(layout, overrides = {}) {
   }
   return result;
 }
+
+export function getLibraryDefinitionUpdateStatus(definition, instance) {
+  if (!definition?.id || !instance?.libraryDefinitionId) return "unlinked";
+  if (String(instance.libraryDefinitionId) !== String(definition.id)) return "unlinked";
+  if (String(instance.type) !== String(definition.type)) return "type-mismatch";
+  const definitionVersion = Math.max(1, Number(definition.version) || 1);
+  const instanceVersion = Math.max(1, Number(instance.libraryDefinitionVersion) || 1);
+  if (definitionVersion > instanceVersion) return "update-available";
+  if (definitionVersion < instanceVersion) return "instance-newer";
+  return "current";
+}
+
+/**
+ * Creates an updated instance while preserving Actor-local overrides and
+ * position. The original layout and definition are never mutated.
+ */
+export function updateLibraryComponentInstance(definition, instance) {
+  const status = getLibraryDefinitionUpdateStatus(definition, instance);
+  if (!["update-available", "current"].includes(status)) {
+    throw new Error("Esta instância não pode receber a definição selecionada: " + status);
+  }
+  const overrides = instance.libraryOverrides && typeof instance.libraryOverrides === "object"
+    ? cloneSerializable(instance.libraryOverrides)
+    : collectLibraryInstanceOverrides(definition, instance);
+  const updated = createLibraryComponentInstance(definition, {
+    id: instance.id,
+    position: { x: instance.x, y: instance.y },
+    overrides,
+    definitionVersion: definition.version
+  });
+  for (const key of ["z", "stackOrder"]) {
+    if (instance[key] !== undefined) updated[key] = cloneSerializable(instance[key]);
+  }
+  return updated;
+}
+
+/**
+ * Builds a reviewable update plan for one Actor's saved layouts.
+ * selectedInstanceKeys uses the stable form "<layoutId>:<instanceId>".
+ */
+export function planLibraryDefinitionUpdate(definition, layouts, { selectedInstanceKeys = null } = {}) {
+  if (!definition?.id || !layouts || typeof layouts !== "object" || Array.isArray(layouts)) {
+    throw new Error("Definição ou layouts inválidos.");
+  }
+  const result = cloneSerializable(layouts);
+  const selected = Array.isArray(selectedInstanceKeys) ? new Set(selectedInstanceKeys.map(String)) : null;
+  const available = [];
+  let updatedCount = 0;
+  let skippedCount = 0;
+
+  for (const [layoutId, layout] of Object.entries(result)) {
+    if (!Array.isArray(layout?.components)) continue;
+    for (let index = 0; index < layout.components.length; index++) {
+      const instance = layout.components[index];
+      if (String(instance?.libraryDefinitionId ?? "") !== String(definition.id)) continue;
+      const status = getLibraryDefinitionUpdateStatus(definition, instance);
+      if (status !== "update-available") {
+        if (status !== "current") skippedCount++;
+        continue;
+      }
+      const key = String(layoutId) + ":" + String(instance.id);
+      available.push({
+        key,
+        layoutId: String(layoutId),
+        instanceId: String(instance.id),
+        label: String(instance.label ?? instance.resourceLabel ?? definition.label ?? definition.type)
+      });
+      if (selected && !selected.has(key)) continue;
+      layout.components[index] = updateLibraryComponentInstance(definition, instance);
+      updatedCount++;
+    }
+  }
+
+  return {
+    layouts: result,
+    available,
+    updatedCount,
+    pendingCount: available.length - updatedCount,
+    skippedCount
+  };
+}
