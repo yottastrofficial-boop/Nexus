@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.88 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.89 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.88-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.89-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Versão atual em validação funcional:** 1.0.0.88. Inclui a etapa de gerenciamento contextual de pastas pessoais na Biblioteca; os itens permanecem armazenados ao excluir uma pasta. A validação visual e funcional ainda depende de teste no Foundry VTT 14 build 360. A validação automatizada é executada no GitHub Actions; a conferência visual final ainda depende de teste no Foundry VTT 14 build 360.
+**Versão atual em validação funcional:** 1.0.0.89. Build de teste para a rodada manual da ficha de personagem no Foundry VTT 14 build 360. Não contém correções funcionais em relação à 1.0.0.88; a ficha continua em validação e não deve ser considerada concluída.
 
 ## Visão geral
 
@@ -26,7 +26,7 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual — 1.0.0.88
+## Implementação atual — 1.0.0.89
 
 A linha atual da `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Explorer, armazenamento unificado e infraestrutura inicial de Lógica e Mídia. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
@@ -46,10 +46,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.88 |
+| Versão atual | 1.0.0.89 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.88 está publicada; a validação visual e funcional completa no cliente Foundry continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.89 está sendo preparada para teste; a validação visual e funcional completa no cliente Foundry continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão publicada mais recente é a **1.0.0.88**. O pacote foi confirmado e publicado, mas isso não substitui os testes visuais e funcionais no Foundry VTT 14 build 360.
+A versão publicada mais recente é a **1.0.0.89**. O pacote foi confirmado e publicado, mas isso não substitui os testes visuais e funcionais no Foundry VTT 14 build 360.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
