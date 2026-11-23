@@ -2,6 +2,7 @@ import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 import { createMediaFormatRegistry } from "./core/media-format-registry.js";
 import { createLogicRegistry } from "./core/logic-registry.js";
+import { createNexusLogicSchemas } from "./core/logic-schemas.js";
 import { createLogicRuntime } from "./core/logic-runtime.js";
 import { loadLogicLibrary, saveLogicAsset, deleteLogicAsset } from "./core/logic-library.js";
 import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter, installNexusMediaWorkerRuntime } from "./core/media-service.js";
@@ -97,7 +98,7 @@ Hooks.once("init", () => {
   }
 
   game.nexus.logic = {};
-  game.nexus.logic.registry = createLogicRegistry();
+  game.nexus.logic.registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
   game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.loadLibrary = () => loadLogicLibrary(game.user, game.nexus.logic.registry);
