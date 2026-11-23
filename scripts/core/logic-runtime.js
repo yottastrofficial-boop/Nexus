@@ -133,7 +133,11 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
         results.push({ behaviorId: behavior.id, status: "missing-flow" });
         continue;
       }
-      results.push({ behaviorId: behavior.id, result: await runFlow(flow, context) });
+      try {
+        results.push({ behaviorId: behavior.id, result: await runFlow(flow, context) });
+      } catch (error) {
+        results.push({ behaviorId: behavior.id, status: "failed", error: String(error?.message ?? error) });
+      }
     }
     return results;
   };
