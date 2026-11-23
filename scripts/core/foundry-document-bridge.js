@@ -26,6 +26,30 @@ export function createFoundryDocumentBridge({
   if (!gameRef) throw new Error("O Foundry ainda não disponibilizou game para o bridge de documentos.");
 
   const metadataCache = new WeakMap();
+  const observerPermission = globalThis.CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OBSERVER ?? 2;
+  const canViewDocument = document => {
+    const user = gameRef.user;
+    if (user?.isGM === true) return true;
+    if (!user || typeof document?.testUserPermission !== "function") return false;
+    try { return document.testUserPermission(user, observerPermission) === true; }
+    catch { return false; }
+  };
+  const canViewPack = pack => {
+    if (!pack || pack.visible === false) return false;
+    const user = gameRef.user;
+    if (user?.isGM === true) return true;
+    if (!user || typeof pack.testUserPermission !== "function") return false;
+    try { return pack.testUserPermission(user, observerPermission) === true; }
+    catch { return false; }
+  };
+  const assertCanResolve = document => {
+    if (document?.pack) {
+      const pack = gameRef.packs?.get?.(String(document.pack));
+      if (!canViewPack(pack)) throw new Error("Sem permissão para acessar este compêndio.");
+      return;
+    }
+    if (!canViewDocument(document)) throw new Error("Sem permissão para acessar este documento.");
+  };
   const describe = (document, type) => {
     const cached = metadataCache.get(document);
     if (cached?.has(type)) return cached.get(type);
@@ -89,7 +113,7 @@ export function createFoundryDocumentBridge({
       const definition = DOCUMENT_TYPES[key];
       const collection = gameRef[definition.collection];
       if (collection?.values) {
-        for (const document of collection.values()) append(describe(document, key));
+        for (const document of collection.values()) if (canViewDocument(document)) append(describe(document, key));
       }
     }
 
@@ -98,7 +122,11 @@ export function createFoundryDocumentBridge({
       const foundPacks = new Set();
       for (const pack of gameRef.packs.values()) {
         const packId = String(pack.collection ?? "");
-        if (!requestedPacks.has(packId) || pack.visible === false) continue;
+        if (!requestedPacks.has(packId)) continue;
+        if (!canViewPack(pack)) {
+          errors.push({ pack: packId, message: "Compêndio indisponível ou sem permissão." });
+          continue;
+        }
         foundPacks.add(packId);
         const typeKey = requestedTypes.find(key => DOCUMENT_TYPES[key].documentName === pack.documentName);
         if (!typeKey || typeof pack.getIndex !== "function") continue;
@@ -136,6 +164,7 @@ export function createFoundryDocumentBridge({
     if (!uuid || typeof fromUuidRef !== "function") throw new Error("Referência UUID inválida ou resolvedor Foundry indisponível.");
     const document = await fromUuidRef(String(uuid));
     if (!document) throw new Error("O documento referenciado não está mais disponível: " + uuid);
+    assertCanResolve(document);
     return document;
   };
 
@@ -154,6 +183,7 @@ export function createFoundryDocumentBridge({
 
   const reference = document => {
     if (!document?.uuid) throw new Error("O documento não possui UUID do Foundry.");
+    assertCanResolve(document);
     const type = Object.keys(DOCUMENT_TYPES).find(key => DOCUMENT_TYPES[key].documentName === document.documentName);
     if (!type) throw new Error("Tipo de documento não integrado à Biblioteca.");
     return describe(document, type);
