@@ -129,3 +129,30 @@ test("valida grafo visual, ramificações obrigatórias e ausência de ciclos", 
   cycle.edges.push({ from: "yes-end", to: "check-node", when: "next" });
   assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-cycle", type: "flow", payload: { graph: cycle } }).valid, false);
 });
+
+test("valida configuração de ajuste numérico de propriedade em Fluxos", () => {
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.adjust-valid",
+    type: "flow",
+    payload: { actions: [{
+      type: "nexus.actor.adjust",
+      config: { path: "system.resources.energy.value", delta: -2, min: 0, max: 10 }
+    }] }
+  }).valid, true);
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.adjust-bounds",
+    type: "flow",
+    payload: { actions: [{
+      type: "nexus.actor.adjust",
+      config: { path: "system.resources.energy.value", delta: 2, min: 10, max: 0 }
+    }] }
+  }).valid, false);
+  assert.equal(registry.validateAsset({
+    id: "nexus.personal.flow.adjust-string",
+    type: "flow",
+    payload: { actions: [{
+      type: "nexus.actor.adjust",
+      config: { path: "system.resources.energy.value", delta: "2" }
+    }] }
+  }).valid, false);
+});
