@@ -1,4 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { createLibraryCatalogExplorer } from "../library/catalog-explorer.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
 import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
@@ -101,6 +102,19 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    const universalCatalog = game.nexus?.library?.registry
+      ? createLibraryCatalogExplorer({
+          registry: game.nexus.library.registry,
+          container: panel.querySelector("[data-library-generic-items]"),
+          detail: panel.querySelector("[data-library-generic-details]"),
+          getPreferences: getLibraryPreferences,
+          savePreferences: persistLibraryPreferences
+        })
+      : null;
+    searchInput?.addEventListener("input", () => {
+      const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+      if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value });
+    });
     const mirrorLegacyCollection = async (collection, store) => {
       const flags = { components:"libraryComponents", groups:"libraryGroups", layouts:"libraryLayouts", templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", themes:"libraryThemes", styles:"libraryStyles", properties:"libraryProperties", rules:"libraryRules", behaviors:"libraryBehaviors", flows:"interactionLibrary", functions:"libraryFunctions" };
       const flag = flags[collection];
@@ -176,6 +190,14 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const container = panel.querySelector("[data-library-generic-items]");
       const detail = panel.querySelector("[data-library-generic-details]");
       if (!container || !detail || !genericCollectionLabels[collection]) return;
+      if (collection === "all" && universalCatalog) {
+        void universalCatalog.render({
+          query: searchInput?.value ?? "",
+          smartView: sheet._librarySmartView ?? "all",
+          folder: sheet._librarySelectedFolder ?? ""
+        });
+        return;
+      }
       let entries = [];
       try { const saved = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store.collections; entries = collection === "all" ? NEXUS_LIBRARY_COLLECTIONS.flatMap(name => saved[name].map(entry => ({ ...entry, __libraryCollection: name }))) : (saved[collection] ?? []).map(entry => ({ ...entry, __libraryCollection: collection })); }
       catch (error) { console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error); }
