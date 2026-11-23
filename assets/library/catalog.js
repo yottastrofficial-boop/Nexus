@@ -12,16 +12,17 @@ export const NEXUS_LIBRARY_CATALOG = {
       preview: "bar",
       template: {
         sheetCode: "",
-        sheetContent1: "Recurso",
+        sheetContent1: "",
         sheetContent2: "",
-        sheetColor: "#78b7e8",
-        sheetTrackColor: "#182432",
+        sheetColor: "#8994a3",
+        sheetTrackColor: "#293443",
         sheetOrientation: "horizontal",
         currentPath: "",
         maxPath: "",
         w: 220,
         h: 58
       },
+      tags: ["recurso", "barra", "indicador"],
       keywords: "recurso indicador barra progresso valor atual máximo"
     }
   ],
