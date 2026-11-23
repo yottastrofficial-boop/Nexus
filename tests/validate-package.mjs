@@ -2418,8 +2418,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }
 
-assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Padrão<\/span>/,"A origem padrão deve manter o nome Padrão");
-assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Pessoais<\/span>/,"A origem pessoal deve ser nomeada Pessoais");
+assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Elementos disponíveis<\/span>/,"O catálogo padrão deve estar acessível como Elementos disponíveis");
+assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Meus componentes<\/span>/,"A coleção pessoal deve continuar acessível sem filtro de origem genérico");
 assert.doesNotMatch(template,/data-library-origin-filter/,"A origem não deve ser filtrada por select genérico");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
 assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
