@@ -95,3 +95,11 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - Não armazenar originais grandes em flags/JSON de Actor ou Item.
 - Não converter originais silenciosamente.
 - Não introduzir fórmulas mecânicas implícitas ou universais para todos os módulos.
+
+
+## Biblioteca universal e editor de Fluxos — atualização de 2026-11-23
+
+- O editor de Fluxos agora apresenta um canvas de nós arrastáveis com conectores SVG, organização automática por camadas e conexões editáveis.
+- Coordenadas de layout são metadados limitados do editor; não participam da avaliação nem alteram os dados do Actor.
+- O próximo refinamento visual deverá focar em ligação direta por portas, acessibilidade de teclado, zoom/visão geral e testes em Foundry VTT 14 build 360.
+- Permanecem pendentes os adaptadores externos concretos, ampliação dos executores confiáveis do Core e validação funcional no cliente Foundry.
