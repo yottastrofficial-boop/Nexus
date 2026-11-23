@@ -28,6 +28,7 @@ test("atualização controlada preserva overrides reais e aplica novos padrões"
     type: "text",
     version: 2,
     settings: { text: "Texto novo", width: 160, height: 48, color: "blue" }
+    history: [{ version: 1, settings: original.settings }]
   });
 
   assert.equal(getLibraryDefinitionUpdateStatus(updatedDefinition, instance), "update-available");
@@ -66,6 +67,7 @@ test("plano lista atualizações e separa instâncias antigas que exigem revisã
     type: "meter",
     version: 2,
     settings: { value: 20, color: "blue" }
+    history: [{ version: 1, settings: v1.settings }]
   });
   const layouts = {
     principal: { components: [linked] },
