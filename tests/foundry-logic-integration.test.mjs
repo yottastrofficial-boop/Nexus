@@ -70,6 +70,7 @@ test("bridge despacha evento Foundry com documento, Actor e alterações", async
   assert.equal(calls[0].event, "actor.updated");
   assert.equal(calls[0].context.actor, actor);
   assert.equal(calls[0].context.document, actor);
+  assert.equal(calls[0].context.system, actor.system);
   assert.deepEqual(calls[0].context.changes, { "system.resources.pv.value": 2 });
   assert.equal(calls[0].context.userId, "user-2");
   assert.equal(calls[0].context.currentUserId, "user-1");
@@ -202,4 +203,40 @@ test("bridge não executa efeitos nos jogadores nem em GMs que não são o GM at
   await flush();
   assert.equal(calls, 0);
   secondaryGM.uninstall();
+});
+
+test("runFlow preserva enabled e permissões quando recebe um ativo do Registry", async () => {
+  const registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  registry.register({
+    id: "nexus.test.flow.disabled",
+    type: "flow",
+    enabled: false,
+    payload: { actions: [{ id: "disabled", type: "test.noop", config: {} }] }
+  });
+  registry.register({
+    id: "nexus.test.flow.permission",
+    type: "flow",
+    permissions: ["actor:update"],
+    payload: { actions: [{ id: "protected", type: "test.noop", config: {} }] }
+  });
+  registry.register({
+    id: "nexus.test.behavior.permission",
+    type: "behavior",
+    payload: { event: "test.event", flowId: "nexus.test.flow.permission" }
+  });
+  const runtime = createLogicRuntime({ registry });
+  let calls = 0;
+  runtime.registerAction({ type: "test.noop", effects: ["pure"], execute: () => { calls++; return true; } });
+  runtime.setPermissionResolver(async ({ permissions, effects }) => {
+    if (permissions.includes("actor:update")) return false;
+    return effects.every(effect => ["pure", "read"].includes(effect));
+  });
+
+  const disabled = await runtime.runFlow(registry.resolve("nexus.test.flow.disabled", "flow"));
+  assert.equal(disabled.status, "disabled");
+  const protectedResult = await runtime.runFlow(registry.resolve("nexus.test.flow.permission", "flow"), {});
+  assert.equal(protectedResult.status, "failed");
+  const dispatched = await runtime.dispatch("test.event", {});
+  assert.equal(dispatched[0].result.status, "failed");
+  assert.equal(calls, 0);
 });
