@@ -116,6 +116,7 @@ Hooks.once("init", () => {
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
   game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
   game.nexus.logic.getActionDefinition = type => game.nexus.logic.runtime.getActionDefinition(type);
+  game.nexus.logic.validateActionConfig = (type, config) => game.nexus.logic.runtime.validateActionConfig(type, config);
   game.nexus.logic.registerFunction = descriptor => game.nexus.logic.runtime.registerFunction(descriptor);
   game.nexus.logic.runFlow = (flow, context) => game.nexus.logic.runtime.runFlow(flow, context);
   game.nexus.logic.simulateFlow = (flow, context) => game.nexus.logic.runtime.simulateFlow(flow, context);
