@@ -25,8 +25,8 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-23
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última versão publicada antes desta rodada:** `1.0.0.88`. **Candidata de teste:** `1.0.0.89`, ainda sem confirmação funcional.
-- **Interpretação correta:** 1.0.0.89 é apenas uma nova identificação de build para teste manual da ficha; não contém correções funcionais em relação à 1.0.0.88 e não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
+- **Última versão publicada antes desta rodada:** `1.0.0.89`. **Candidata de teste:** `1.0.0.90`, ainda sem confirmação funcional.
+- **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
 A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.
