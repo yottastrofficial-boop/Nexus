@@ -335,11 +335,22 @@ remove legacy typography selects                  <label class="nexus-inspector-
               <label class="nexus-library-search-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na biblioteca..." autocomplete="off"></label>
               <div class="nexus-library-filter-wrap">
                 <input type="hidden" data-library-tag value="all">
-                <button type="button" class="nexus-library-filter-button" data-library-filter-toggle aria-expanded="false"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Etiquetas</span><b data-library-filter-count hidden>0</b></button>
+                <input type="hidden" data-library-origin value="all">
+                <button type="button" class="nexus-library-filter-button" data-library-filter-toggle aria-expanded="false"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filtros</span><b data-library-filter-count hidden>0</b></button>
                 <div class="nexus-library-filter-popover" data-library-filter-popover hidden>
-                  <strong>Filtrar por etiqueta</strong>
+                  <strong>Origem</strong>
+                  <div class="nexus-library-origin-options">
+                    <button type="button" class="active" data-library-origin-option="all">Todas</button>
+                    <button type="button" data-library-origin-option="core">Padrão</button>
+                    <button type="button" data-library-origin-option="personal">Pessoais</button>
+                    <button type="button" data-library-origin-option="module">Módulos</button>
+                    <button type="button" data-library-origin-option="addon">Complementos</button>
+                    <button type="button" data-library-origin-option="world">Mundo</button>
+                    <button type="button" data-library-origin-option="compendium">Compêndios</button>
+                  </div>
+                  <strong>Etiquetas</strong>
                   <div class="nexus-library-filter-options">
-                    <button type="button" class="active" data-library-tag-option="all">Sem filtro</button>
+                    <button type="button" class="active" data-library-tag-option="all">Todas</button>
                   </div>
                 </div>
               </div>
