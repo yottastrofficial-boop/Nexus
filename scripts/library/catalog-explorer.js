@@ -88,7 +88,8 @@ export function createLibraryCatalogExplorer({
 
   let cursor = {};
   let hasMore = false;
-  let requestVersion = 0;
+  let renderRequestVersion = 0;
+  let detailRequestVersion = 0;
   let currentResources = [];
   let currentQuery = "";
   let currentSmartView = "all";
@@ -146,7 +147,7 @@ export function createLibraryCatalogExplorer({
   };
 
   const renderDetails = async resource => {
-    const version = ++requestVersion;
+    const version = ++detailRequestVersion;
     const key = resourceKey(resource);
     detail.dataset.selectedProvider = resource.providerId;
     detail.dataset.selectedResource = resource.id;
@@ -161,17 +162,17 @@ export function createLibraryCatalogExplorer({
     try {
       resolved = await registry.resolve(resource.reference, resource);
     } catch (error) {
-      if (version !== requestVersion) return;
+      if (version !== detailRequestVersion) return;
       detail.replaceChildren(makeElement("p", "nexus-library-empty", "Não foi possível abrir este recurso: " + error.message));
       return;
     }
-    if (version !== requestVersion) return;
+    if (version !== detailRequestVersion) return;
     let updateInfo = null;
     if (typeof getUpdateInfo === "function") {
       try { updateInfo = await getUpdateInfo(resource, resolved); }
       catch (error) { updateInfo = { error: error.message }; }
     }
-    if (version !== requestVersion) return;
+    if (version !== detailRequestVersion) return;
 
     const heading = makeElement("div", "nexus-library-detail-heading");
     heading.append(makeElement("strong", "nexus-library-detail-title", resource.name));
@@ -406,8 +407,9 @@ export function createLibraryCatalogExplorer({
     currentCompendiumIds = Array.isArray(compendiumIds) ? [...new Set(compendiumIds.map(String).filter(Boolean))].slice(0, 32) : [];
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
-    const version = ++requestVersion;
+    const version = ++renderRequestVersion;
     if (!append) {
+      detailRequestVersion++;
       cursor = {};
       smartOffset = 0;
       currentResources = [];
@@ -440,7 +442,7 @@ export function createLibraryCatalogExplorer({
           tags: currentTag === "all" ? [] : [currentTag],
           origin: currentOrigin
         });
-        if (version !== requestVersion) return;
+        if (version !== detailRequestVersion) return;
       } else {
         page = { items: [], total: 0, hasMore: false, cursor: {}, errors: [] };
       }
@@ -465,7 +467,7 @@ export function createLibraryCatalogExplorer({
         origin: currentOrigin
       });
     }
-    if (version !== requestVersion) return;
+    if (version !== detailRequestVersion) return;
 
     cursor = page.cursor ?? {};
     hasMore = Boolean(page.hasMore);
