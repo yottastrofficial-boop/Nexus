@@ -7,7 +7,7 @@
  */
 const INSTANCE_ONLY_KEYS = new Set([
   "id", "definition", "x", "y", "z", "stackOrder",
-  "libraryDefinitionId", "libraryDefinitionVersion", "libraryOverrides"
+  "libraryDefinitionId", "libraryDefinitionVersion", "libraryDefinitionBaseline", "libraryOverrides"
 ]);
 
 function cloneSerializable(value) {
@@ -21,7 +21,7 @@ function cloneSerializable(value) {
   return result;
 }
 
-export function createLibraryDefinition({ id, type, label, settings = {}, version = 1, metadata = {} } = {}) {
+export function createLibraryDefinition({ id, type, label, settings = {}, version = 1, metadata = {}, history = [] } = {}) {
   const definitionId = String(id ?? "").trim();
   const componentType = String(type ?? "").trim();
   if (!definitionId || !componentType) throw new Error("A definição precisa de identificador e tipo.");
@@ -35,7 +35,11 @@ export function createLibraryDefinition({ id, type, label, settings = {}, versio
     type: componentType,
     label: String(label ?? "Componente").trim().slice(0, 80) || "Componente",
     settings: cleanSettings,
-    metadata: cloneSerializable(metadata)
+    metadata: cloneSerializable(metadata),
+    history: (Array.isArray(history) ? history : []).map(entry => ({
+      version: Math.max(1, Number(entry?.version) || 1),
+      settings: cloneSerializable(entry?.settings ?? {})
+    })).filter(entry => entry.version < Math.max(1, Number(version) || 1))
   };
 }
 
@@ -100,4 +104,106 @@ export function applyLibraryLayoutOverrides(layout, overrides = {}) {
     result[key] = color;
   }
   return result;
+}
+
+export function getLibraryDefinitionUpdateStatus(definition, instance) {
+  if (!definition?.id || !instance?.libraryDefinitionId) return "unlinked";
+  if (String(instance.libraryDefinitionId) !== String(definition.id)) return "unlinked";
+  if (String(instance.type) !== String(definition.type)) return "type-mismatch";
+  const definitionVersion = Math.max(1, Number(definition.version) || 1);
+  const instanceVersion = Math.max(1, Number(instance.libraryDefinitionVersion) || 1);
+  if (definitionVersion > instanceVersion) {
+    const hasInstanceBaseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object";
+    const hasLibraryOverrides = instance.libraryOverrides && typeof instance.libraryOverrides === "object" && !Array.isArray(instance.libraryOverrides);
+    const hasDefinitionHistory = Array.isArray(definition.history) && definition.history.some(entry =>
+      Math.max(1, Number(entry?.version) || 1) === instanceVersion && entry?.settings && typeof entry.settings === "object"
+    );
+    // Legacy instances without an override snapshot cannot be updated safely:
+    // their manual changes cannot be distinguished from the old definition.
+    return hasInstanceBaseline || (hasLibraryOverrides && hasDefinitionHistory)
+      ? "update-available"
+      : "baseline-missing";
+  }
+  if (definitionVersion < instanceVersion) return "instance-newer";
+  return "current";
+}
+
+/**
+ * Creates an updated instance while preserving Actor-local overrides and
+ * position. The original layout and definition are never mutated.
+ */
+export function updateLibraryComponentInstance(definition, instance) {
+  const status = getLibraryDefinitionUpdateStatus(definition, instance);
+  if (!["update-available", "current"].includes(status)) {
+    throw new Error("Esta instância não pode receber a definição selecionada: " + status);
+  }
+  const historical = Array.isArray(definition.history)
+    ? definition.history.find(entry => Math.max(1, Number(entry?.version) || 1) === Math.max(1, Number(instance.libraryDefinitionVersion) || 1))
+    : null;
+  const baseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object"
+    ? instance.libraryDefinitionBaseline
+    : historical?.settings ?? definition.settings ?? {};
+  const overrides = collectLibraryInstanceOverrides({ settings: baseline }, instance);
+  const updated = createLibraryComponentInstance(definition, {
+    id: instance.id,
+    position: { x: instance.x, y: instance.y },
+    overrides,
+    definitionVersion: definition.version
+  });
+  for (const key of ["z", "stackOrder"]) {
+    if (instance[key] !== undefined) updated[key] = cloneSerializable(instance[key]);
+  }
+  return updated;
+}
+
+/**
+ * Builds a reviewable update plan for one Actor's saved layouts.
+ * selectedInstanceKeys uses the stable form "<layoutId>:<instanceId>".
+ */
+export function planLibraryDefinitionUpdate(definition, layouts, { selectedInstanceKeys = null } = {}) {
+  if (!definition?.id || !layouts || typeof layouts !== "object" || Array.isArray(layouts)) {
+    throw new Error("Definição ou layouts inválidos.");
+  }
+  const result = cloneSerializable(layouts);
+  const selected = Array.isArray(selectedInstanceKeys) ? new Set(selectedInstanceKeys.map(String)) : null;
+  const available = [];
+  let updatedCount = 0;
+  let skippedCount = 0;
+  const requiresReview = [];
+
+  for (const [layoutId, layout] of Object.entries(result)) {
+    if (!Array.isArray(layout?.components)) continue;
+    for (let index = 0; index < layout.components.length; index++) {
+      const instance = layout.components[index];
+      if (String(instance?.libraryDefinitionId ?? "") !== String(definition.id)) continue;
+      const status = getLibraryDefinitionUpdateStatus(definition, instance);
+      if (status !== "update-available") {
+        if (status === "baseline-missing") {
+          requiresReview.push({ layoutId: String(layoutId), instanceId: String(instance.id), status });
+        }
+        if (status !== "current") skippedCount++;
+        continue;
+      }
+      const key = String(layoutId) + ":" + String(instance.id);
+      available.push({
+        key,
+        layoutId: String(layoutId),
+        instanceId: String(instance.id),
+        label: String(instance.label ?? instance.resourceLabel ?? definition.label ?? definition.type)
+      });
+      // A plan without explicit selections is preview-only; never mutate by default.
+      if (!selected || !selected.has(key)) continue;
+      layout.components[index] = updateLibraryComponentInstance(definition, instance);
+      updatedCount++;
+    }
+  }
+
+  return {
+    layouts: result,
+    available,
+    requiresReview,
+    updatedCount,
+    pendingCount: available.length - updatedCount,
+    skippedCount
+  };
 }

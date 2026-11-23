@@ -65,10 +65,10 @@ Temas padrão são somente leitura. Temas pessoais podem ser editados como defin
 - Atualizações de definições não modificam instâncias existentes automaticamente.
 - Exclusão de ativos lógicos deve respeitar dependências registradas.
 
-## Estado da implementação — 1.0.0.90
+## Base existente — 1.0.0.90
 
 Implementado nesta etapa:
-- visão universal de itens salvos, favoritos e recentes;
+- visão universal conectada ao catálogo de provedores (recursos NEXUS e referências de documentos Foundry), além de itens salvos, favoritos e recentes;
 - navegação sem agrupamentos técnicos separados por Lógica/Aparência/Outros;
 - pastas livres e pastas vinculadas a coleção;
 - chips de etiquetas derivados dos dados existentes;
@@ -79,10 +79,61 @@ Implementado nesta etapa:
 - espelhamento de CRUD para flags legadas.
 
 Limitações que permanecem:
-- editores especializados completos para cada tipo lógico ainda precisam ser desenvolvidos;
+- editores estruturados iniciais para Propriedades, Regras, Comportamentos, Fluxos e Funções estão no Inspector; um construtor visual avançado de Fluxos ainda precisa ser desenvolvido;
 - nem todo tipo possui ação de aplicação direta a partir da visão universal; os fluxos especializados continuam responsáveis por inserir/aplicar conteúdos;
 - a aparência, persistência e os fluxos devem ser testados no Foundry VTT 14 build 360 antes de declarar estabilidade funcional.
+
+## Catálogo universal e provedores
+
+O explorador deve apresentar uma única coleção de recursos, sem exigir uma área ou botão permanente por módulo/tipo. Os provedores entregam cartões ao mesmo catálogo; a classificação técnica é metadado e filtro contextual, não uma arquitetura de janelas separadas.
+
+O contrato `LibraryResourceRegistry` foi iniciado com dois provedores:
+- **Biblioteca NEXUS:** definições pessoais, catálogo padrão e coleções de Lógica.
+- **Foundry:** referências UUID de Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards.
+
+Cada resultado contém identidade estável, provedor de origem, tipo, nome, descrição, etiquetas, miniatura, pasta, referência e capacidades declaradas. A listagem retorna metadados; `resolve(reference)` só obtém o objeto completo quando o Inspector ou uma ação realmente precisa dele. A paginação mantém cursores independentes por provedor.
+
+Módulos podem registrar provedores adicionais em `game.nexus.library.registerProvider()`. Isso permite integrar conteúdo sem acrescentar um botão, aba ou janela por módulo. A Biblioteca controla descoberta e organização; o provedor continua responsável por resolver seu conteúdo e respeitar suas permissões.
+
+### Importação integrada — direção inspirada no Plutonium
+
+O fluxo desejado é: **origem → prévia/validação → destino compatível → confirmação**. Origens poderão incluir recursos NEXUS, documentos Foundry, compêndios explicitamente selecionados, arquivos do usuário e fontes externas compatíveis. Destinos poderão incluir documentos nativos, compêndios, fichas e coleções NEXUS.
+
+A descoberta universal está implementada na camada de serviço e sua primeira visão foi conectada ao Explorer existente por `scripts/library/catalog-explorer.js`. A ficha atua como adaptador, não como proprietária do catálogo. O backup integral da Biblioteca possui validação, prévia e mesclagem sem sobrescrita automática; isso não equivale a adaptadores de importação de fontes externas ou destinos especializados, que permanecem futuros. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
+
+A interface final deve manter uma barra compacta de pesquisa e um único controle de filtros; ações aparecem contextualmente no Inspector/menu do recurso, não como uma fileira de botões permanentes para cada categoria.
 
 ## Área unificada Lógica
 
 Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões continuam sendo tipos distintos. A visão universal unifica descoberta e organização, não seus schemas, editores ou executores. Metadados comuns (origem, namespace, versão, permissões, etiquetas e dependências) podem ser apresentados de forma consistente sem colapsar os contratos especializados.
+
+## Extensão universal — branch de conclusão em andamento
+
+A branch `feature/library-universal-completion-2026-11-23` amplia a base sem alterar a versão publicada:
+
+- janela independente ApplicationV2, reutilizando o mesmo registro e o mesmo Explorer;
+- filtros por categoria, tipo específico, origem e etiqueta;
+- seleção explícita de compêndios visíveis, sem varrer todos os pacotes automaticamente;
+- favoritos, recentes, pastas e coleções universais resolvidos por referências estáveis, inclusive UUIDs Foundry e fluxos do mundo;
+- coleções pessoais capazes de agrupar tipos/provedores diferentes sem copiar os recursos;
+- ações contextuais declaradas pelos provedores: editar metadados, duplicar, excluir com verificação de dependências e abrir documentos Foundry;
+- atribuição de pastas no Inspector e gerenciamento de pastas na aplicação independente;
+- backup integral de todas as coleções, incluindo propriedades e funções, com separação entre fluxos pessoais e fluxos do mundo;
+- prévia de importação, relatório de conflitos e confirmação explícita antes de gravar;
+- cache fraco de metadados Foundry invalidado por hooks e serialização técnica somente quando o Inspector é expandido.
+
+O contrato de provedores inclui consulta por IDs para que favoritos, recentes e pastas não dependam de estar na primeira página do catálogo. Ações de provedores são enumeradas e validadas pelo registro; dados importados não são executados.
+
+### Limites ainda não concluídos
+
+- adaptadores externos de descoberta/importação e destinos compatíveis no estilo origem → prévia → validação → destino;
+- editores próprios completos para todos os tipos de Lógica e ações de aplicação para cada domínio;
+- edição de documentos Foundry por metadados do catálogo, que continua pertencendo às fichas nativas;
+- validação funcional em cliente real do Foundry VTT 14 build 360.
+
+A branch de conclusão não deve ser considerada release até que a cadeia de PRs seja integrada na ordem correta e a validação real seja concluída.
+
+
+### Editores especializados iniciais
+
+O Inspector da aplicação independente carrega editores por subtipo lógico. Propriedades editam caminho, tipo e valor padrão; Regras editam expressão e tipo de resultado; Comportamentos editam eventos e referência de fluxo; Fluxos editam gatilhos, condições, ações e política de erro como dados JSON; Funções editam identificador, assinatura, argumentos e tipo de retorno. O salvamento valida o payload antes de persistir. Nenhum editor aceita ou executa código JavaScript importado.

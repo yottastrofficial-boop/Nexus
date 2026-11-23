@@ -461,13 +461,27 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const filterButton = libraryPanel?.querySelector("[data-library-filter-toggle]");
     const filterPopover = libraryPanel?.querySelector("[data-library-filter-popover]");
     const tagInput = libraryPanel?.querySelector("[data-library-tag]");
+    const originInput = libraryPanel?.querySelector("[data-library-origin]");
+    const kindInput = libraryPanel?.querySelector("[data-library-kind]");
+    const typeInput = libraryPanel?.querySelector("[data-library-type]");
     const initialTag = tagInput?.value || sheet._libraryTagFilter || "all";
+    const initialOrigin = originInput?.value || sheet._libraryOriginFilter || "all";
+    const initialKind = kindInput?.value || sheet._libraryKindFilter || "all";
+    const initialType = typeInput?.value || sheet._libraryTypeFilter || "all";
     if (tagInput) tagInput.value = initialTag;
+    if (originInput) originInput.value = initialOrigin;
+    if (kindInput) kindInput.value = initialKind;
+    if (typeInput) typeInput.value = initialType;
     libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryTagOption === initialTag));
-    const initialTagLabel = filterButton?.querySelector("span");
-    if (initialTagLabel) initialTagLabel.textContent = initialTag === "all" ? "Etiquetas" : initialTag;
-    const initialTagCount = libraryPanel?.querySelector("[data-library-filter-count]");
-    if (initialTagCount) { initialTagCount.hidden = initialTag === "all"; initialTagCount.textContent = initialTag === "all" ? "" : "1"; }
+    libraryPanel?.querySelectorAll("[data-library-origin-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryOriginOption === initialOrigin));
+    const updateFilterSummary = () => {
+      const activeCount = Number((tagInput?.value ?? "all") !== "all") + Number((originInput?.value ?? "all") !== "all") + Number((kindInput?.value ?? "all") !== "all") + Number((typeInput?.value ?? "all") !== "all");
+      const count = libraryPanel?.querySelector("[data-library-filter-count]");
+      if (count) { count.hidden = activeCount === 0; count.textContent = activeCount ? String(activeCount) : ""; }
+      const label = filterButton?.querySelector("span");
+      if (label) label.textContent = activeCount ? "Filtros ativos" : "Filtros";
+    };
+    updateFilterSummary();
     filterButton?.addEventListener("click", () => {
       const opening = filterPopover?.hidden ?? true;
       if (filterPopover) filterPopover.hidden = !opening;
@@ -480,14 +494,33 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (tagInput) tagInput.value = selected;
       sheet._libraryTagFilter = selected;
       event.currentTarget.querySelectorAll("[data-library-tag-option]").forEach(item => item.classList.toggle("active", item === option));
-      const count = libraryPanel.querySelector("[data-library-filter-count]");
-      if (count) { count.hidden = selected === "all"; count.textContent = selected === "all" ? "" : "1"; }
-      const label = filterButton?.querySelector("span");
-      if (label) label.textContent = selected === "all" ? "Etiquetas" : selected;
+      updateFilterSummary();
       if (filterPopover) filterPopover.hidden = true;
       filterButton?.setAttribute("aria-expanded", "false");
       scheduleLibraryFilter();
-    });;
+    });
+    kindInput?.addEventListener("change", () => {
+      sheet._libraryKindFilter = kindInput.value || "all";
+      updateFilterSummary();
+      scheduleLibraryFilter();
+    });
+    typeInput?.addEventListener("change", () => {
+      sheet._libraryTypeFilter = typeInput.value || "all";
+      updateFilterSummary();
+      scheduleLibraryFilter();
+    });
+    libraryPanel?.querySelector(".nexus-library-origin-options")?.addEventListener("click", event => {
+      const option = event.target.closest("[data-library-origin-option]");
+      if (!option || !event.currentTarget.contains(option)) return;
+      const selected = option.dataset.libraryOriginOption || "all";
+      if (originInput) originInput.value = selected;
+      sheet._libraryOriginFilter = selected;
+      event.currentTarget.querySelectorAll("[data-library-origin-option]").forEach(item => item.classList.toggle("active", item === option));
+      updateFilterSummary();
+      if (filterPopover) filterPopover.hidden = true;
+      filterButton?.setAttribute("aria-expanded", "false");
+      scheduleLibraryFilter();
+    });
 
     // Os controles da Biblioteca ficam dentro de uma janela ApplicationV2 separada.
     // A delegação nativa no próprio painel acompanha o nó quando ele é movido para

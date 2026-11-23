@@ -189,6 +189,7 @@ export function writeNexusLibraryStore(user, raw) {
   const store = normalizeNexusLibraryStore(raw);
   return enqueueLibraryWrite(user, async () => {
     await user.setFlag("nexus", "libraryStore", store);
+    globalThis.Hooks?.callAll?.("nexusLibraryUpdated", user);
     return store;
   });
 }
@@ -205,6 +206,7 @@ export function updateNexusLibraryStore(user, updater) {
     const result = await updater(store);
     const saved = normalizeNexusLibraryStore(result ?? store);
     await user.setFlag("nexus", "libraryStore", saved);
+    globalThis.Hooks?.callAll?.("nexusLibraryUpdated", user);
     return saved;
   });
 }
@@ -249,6 +251,7 @@ export function writeNexusLibraryCollection(user, collection, entries) {
     await user.setFlag("nexus", "libraryStore", saved);
     const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
     if (legacyFlag) await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
+    globalThis.Hooks?.callAll?.("nexusLibraryUpdated", user);
     return saved.collections[collection];
   });
 }

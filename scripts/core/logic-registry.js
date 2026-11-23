@@ -93,13 +93,22 @@ export function createLogicRegistry({ schemas = {} } = {}) {
     if (result && typeof result === "object" && result.valid === false) return { valid: false, errors: [...(result.errors ?? [])] };
     return { valid: true, errors: [] };
   };
+  const validateAsset = (raw, defaults = {}) => {
+    try {
+      const asset = normalizeLogicAsset(raw, defaults);
+      const validation = validate(asset);
+      return { ...validation, asset };
+    } catch (error) {
+      return { valid: false, errors: [String(error?.message ?? error)], asset: null };
+    }
+  };
   const register = (raw, { replace = false, origin, namespace } = {}) => {
-    const asset = normalizeLogicAsset(raw, { origin, namespace });
+    const checked = validateAsset(raw, { origin, namespace });
+    if (!checked.valid || !checked.asset) throw new Error(checked.errors.join(" "));
+    const asset = checked.asset;
     const existing = assets.get(asset.id);
     if (existing && !replace) throw new Error("Ativo lógico já registrado: " + asset.id);
     if (existing && existing.namespace !== asset.namespace) throw new Error("Um namespace não pode substituir ativo de outro namespace.");
-    const result = validate(asset);
-    if (!result.valid) throw new Error(result.errors.join(" "));
     assets.set(asset.id, asset);
     return asset;
   };
@@ -210,5 +219,5 @@ export function createLogicRegistry({ schemas = {} } = {}) {
     for (const key of removed) assets.delete(key);
     return { removed: true, ids: [...removed], dependents };
   };
-  return Object.freeze({ registerSchema, register, registerMany, get, resolve, list, getDependents, validateDependencies, remove, get size() { return assets.size; } });
+  return Object.freeze({ registerSchema, validateAsset, register, registerMany, get, resolve, list, getDependents, validateDependencies, remove, get size() { return assets.size; } });
 }

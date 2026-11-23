@@ -55,14 +55,30 @@ export function createMediaCapabilityService({ registry, environment = globalThi
   return Object.freeze({ inspect, canPlay, inspectPlayback, decodeImage });
 }
 
-export function createMediaProcessingPipeline({ capabilityService, adapters = [], limits = {} } = {}) {
+export function createMediaProcessingPipeline({ capabilityService, adapters = [], limits = {}, resourceManager = null } = {}) {
   if (!capabilityService) throw new TypeError("Pipeline de mídia exige serviço de capacidades.");
   const loaded = new Map();
   const maxBytes = Math.max(1024, Number(limits.maxInputBytes) || DEFAULT_MEDIA_LIMITS.maxFileBytes);
+  if (resourceManager && (typeof resourceManager.register !== "function" || typeof resourceManager.acquire !== "function")) {
+    throw new TypeError("O gerenciador de recursos fornecido é inválido.");
+  }
   const registerAdapter = adapter => {
     if (!adapter || !/^[a-z0-9][a-z0-9._-]*$/i.test(String(adapter.id ?? "")) || typeof adapter.load !== "function") throw new TypeError("Adaptador de mídia inválido.");
     if (loaded.has(adapter.id)) throw new Error("Adaptador de mídia já registrado: " + adapter.id);
-    loaded.set(adapter.id, { descriptor: Object.freeze({ ...adapter }), promise: null, instance: null });
+    const resourceId = "media.adapter." + adapter.id;
+    if (resourceManager) {
+      resourceManager.register({
+        id: resourceId,
+        estimateBytes: adapter.estimatedMemoryBytes ?? 0,
+        priority: adapter.priority ?? 0,
+        load: () => adapter.load(),
+        unload: async instance => {
+          if (typeof adapter.unload === "function") await adapter.unload(instance);
+          else await instance?.dispose?.();
+        }
+      });
+    }
+    loaded.set(adapter.id, { descriptor: Object.freeze({ ...adapter }), resourceId, promise: null, instance: null });
   };
   for (const adapter of adapters) registerAdapter(adapter);
   const candidatesFor = ({ descriptor, operation }) => [...loaded.values()].filter(item =>
@@ -71,10 +87,26 @@ export function createMediaProcessingPipeline({ capabilityService, adapters = []
     (typeof item.descriptor.supports !== "function" || item.descriptor.supports({ descriptor, operation }) === true)
   ).sort((a, b) => Number(b.descriptor.priority ?? 0) - Number(a.descriptor.priority ?? 0));
   const loadCandidate = async (candidate, operation) => {
+    if (resourceManager) {
+      let lease;
+      try {
+        lease = await resourceManager.acquire(candidate.resourceId, { priority: candidate.descriptor.priority ?? 0 });
+        if (typeof lease.value?.[operation] !== "function") {
+          await lease.release();
+          return null;
+        }
+        return { adapter: lease.value, release: lease.release };
+      } catch (error) {
+        candidate.lastError = String(error?.message ?? error);
+        return null;
+      }
+    }
     if (!candidate.promise) candidate.promise = Promise.resolve().then(() => candidate.descriptor.load());
     try {
       candidate.instance ??= await candidate.promise;
-      return typeof candidate.instance?.[operation] === "function" ? candidate.instance : null;
+      return typeof candidate.instance?.[operation] === "function"
+        ? { adapter: candidate.instance, release: async () => {} }
+        : null;
     } catch (error) {
       candidate.promise = null;
       candidate.instance = null;
@@ -84,8 +116,12 @@ export function createMediaProcessingPipeline({ capabilityService, adapters = []
   };
   const resolve = async ({ descriptor, operation }) => {
     for (const candidate of candidatesFor({ descriptor, operation })) {
-      const adapter = await loadCandidate(candidate, operation);
-      if (adapter) return { adapter, id: candidate.descriptor.id };
+      const loadedCandidate = await loadCandidate(candidate, operation);
+      if (loadedCandidate) return {
+        adapter: loadedCandidate.adapter,
+        id: candidate.descriptor.id,
+        release: loadedCandidate.release
+      };
     }
     return null;
   };
@@ -94,14 +130,16 @@ export function createMediaProcessingPipeline({ capabilityService, adapters = []
     const inspected = await capabilityService.inspect(file);
     const errors = [];
     for (const candidate of candidatesFor({ descriptor: inspected.descriptor, operation })) {
-      const adapter = await loadCandidate(candidate, operation);
-      if (!adapter) { errors.push(candidate.lastError ?? "Falha ao carregar adaptador."); continue; }
+      const loadedCandidate = await loadCandidate(candidate, operation);
+      if (!loadedCandidate) { errors.push(candidate.lastError ?? "Falha ao carregar adaptador."); continue; }
       try {
-        const result = await adapter[operation]({ file, descriptor: inspected.descriptor, options });
+        const result = await loadedCandidate.adapter[operation]({ file, descriptor: inspected.descriptor, options });
         return { adapterId: candidate.descriptor.id, descriptor: inspected.descriptor, result };
       } catch (error) {
         candidate.lastError = String(error?.message ?? error);
         errors.push(candidate.descriptor.id + ": " + candidate.lastError);
+      } finally {
+        await loadedCandidate.release();
       }
     }
     throw new Error("Nenhum adaptador conseguiu executar " + operation + " para " + (inspected.descriptor.label ?? inspected.descriptor.formatId ?? "formato desconhecido") + (errors.length ? " — " + errors.join("; ") : "."));
@@ -113,6 +151,7 @@ export function createBrowserMediaAdapter(capabilityService, environment = globa
   return Object.freeze({
     id: "nexus.browser.native",
     priority: 10,
+    estimatedMemoryBytes: 1024 * 1024,
     operations: ["decodeImage", "inspectPlayback"],
     formats: ["jpeg-xl", "avif", "webp", "png", "jpeg", "gif"],
     supports: ({ descriptor, operation }) => operation === "decodeImage"
@@ -131,7 +170,7 @@ export function createBrowserMediaAdapter(capabilityService, environment = globa
  * replies with { id, ok, result } or { id, ok:false, error }.
  * Worker URLs must be local to the Foundry origin; remote CDN execution is rejected.
  */
-export function createWorkerMediaAdapter({ id, workerUrl, formats = [], operations = [], priority = 50, timeoutMs = 30000, WorkerClass = globalThis.Worker, baseUrl = globalThis.location?.href } = {}) {
+export function createWorkerMediaAdapter({ id, workerUrl, formats = [], operations = [], priority = 50, estimatedMemoryBytes = 8 * 1024 * 1024, timeoutMs = 30000, WorkerClass = globalThis.Worker, baseUrl = globalThis.location?.href } = {}) {
   if (!/^[a-z0-9][a-z0-9._-]{2,95}$/i.test(String(id ?? ""))) throw new TypeError("ID do adaptador Worker inválido.");
   if (typeof WorkerClass !== "function") throw new Error("Web Workers não estão disponíveis neste ambiente.");
   if (!baseUrl) throw new Error("A origem local do Foundry não pôde ser determinada.");
@@ -140,7 +179,7 @@ export function createWorkerMediaAdapter({ id, workerUrl, formats = [], operatio
   const allowedOperations = [...new Set(operations.map(value => String(value)))];
   if (!allowedOperations.length || allowedOperations.some(value => !/^[a-z][a-zA-Z0-9]{1,40}$/.test(value))) throw new TypeError("Operações do Worker inválidas.");
   return Object.freeze({
-    id, formats: [...formats], operations: allowedOperations, priority,
+    id, formats: [...formats], operations: allowedOperations, priority, estimatedMemoryBytes,
     supports: ({ descriptor, operation }) => allowedOperations.includes(operation) && (!formats.length || formats.includes(descriptor.formatId)),
     load: async () => {
       const worker = new WorkerClass(resolved.href, { type: "module", name: "NEXUS media " + id });

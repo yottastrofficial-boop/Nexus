@@ -32,7 +32,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - A infraestrutura possui registry tipado, dependências, detecção de ciclos, persistência e runtime declarativo.
 - Os cinco tipos permanecem distintos: Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões.
-- A navegação/Inspector inicial existe, mas editores especializados, schemas completos, executores registrados e integração ponta a ponta continuam pendentes.
+- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos possuem construtor visual inicial e simulação sem execução de ações. Eventos de ciclo de vida do Foundry estão conectados ao runtime, com execução no GM ativo e executor inicial `nexus.actor.update` protegido pelas permissões do usuário originador. O núcleo inicial de grafo opcional para Fluxos (nós start/condition/action/end, conexões next/true/false, validação de ciclos/alcançabilidade, execução e simulação do caminho) está implementado e coberto por testes. O editor estruturado de nós/conexões e campos específicos já está integrado ao Inspector; arrastar/soltar e canvas com conectores gráficos, mais executores e testes ponta a ponta no cliente Foundry ainda estão pendentes.
 - Payloads lógicos importados devem permanecer inertes até serem validados por um editor e contrato específico.
 
 ### Mídia
@@ -61,6 +61,20 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
+## Biblioteca universal — implementação em andamento
+
+- **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
+- **PR #59 / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
+- **PR #60 / `feature/library-explorer-catalog-integration-2026-11-23`:** primeira integração do Explorer existente com o catálogo universal.
+- **Branch de conclusão / `feature/library-universal-completion-2026-11-23`:** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas/coleções mistas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
+- **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
+- **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem e o Core agora define o registro de adaptadores de origem/destino com limites, validação de dados inertes, prévia e confirmação. Ainda faltam adaptadores concretos para formatos externos e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
+- **Lógica:** evoluir o construtor visual de Fluxos (nós, ramificações e simulação), registrar executores confiáveis e integrar eventos e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
+- **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
+- **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
+
+A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+
 ## Critérios para concluir uma etapa
 
 - Escopo pequeno e explícito.
@@ -81,3 +95,20 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Não armazenar originais grandes em flags/JSON de Actor ou Item.
 - Não converter originais silenciosamente.
 - Não introduzir fórmulas mecânicas implícitas ou universais para todos os módulos.
+
+
+## Biblioteca universal e editor de Fluxos — atualização de 2026-11-23
+
+- O editor de Fluxos agora apresenta um canvas de nós arrastáveis com conectores SVG, organização automática por camadas e conexões editáveis.
+- Coordenadas de layout são metadados limitados do editor; não participam da avaliação nem alteram os dados do Actor.
+- O próximo refinamento visual deverá focar em ligação direta por portas, zoom/visão geral e testes em Foundry VTT 14 build 360. A movimentação dos nós já possui alternativas por teclado e controles direcionais.
+- Permanecem pendentes os adaptadores externos concretos, ampliação dos executores confiáveis do Core e validação funcional no cliente Foundry.
+
+- Refinamento do Flow Builder: inclusão de criação de nós pela barra superior, conexão guiada por seleção de origem/destino, prevenção de conexões incompatíveis/ciclos e campos dedicados para o executor Core de atualização de Actor.
+
+- Executor Core genérico `nexus.actor.adjust` adicionado para incrementar/decrementar propriedades numéricas `system.*`, com limites opcionais e permissão OWNER, sem assumir que todo módulo usa PV/PM/PE.
+
+- Flow Builder: Inspector dedicado ao nó selecionado e schemas visuais declarativos opcionais para executores, com validação pelo runtime e fallback JSON para módulos legados.
+
+- Fluxos sequenciais e grafos agora compartilham os campos visuais dos schemas dos executores; o runtime expõe pré-validação para os editores e mensagens acessíveis por campo.
+- Contrato público de `configSchema` documentado para módulos, incluindo tipos, limites, valores padrão, compatibilidade e preservação de dados sem schema.

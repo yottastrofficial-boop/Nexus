@@ -1,4 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { NEXUS_COMPONENTS as COMPONENTS } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
@@ -22,7 +23,7 @@ import { NEXUS_RULEBOOK_PROPERTY_DEFINITIONS, NEXUS_RULEBOOK_PROPERTY_PATHS, get
 import { normalizeNexusPropertyPath, normalizeNexusFormulaIdentifier } from "../core/property-paths.js";
 import { evaluateNexusFormula, evaluateNexusExpression } from "../core/formula-engine.js";
 import { executeTriggeredActions, getTriggeredActions, getComponentInteractions, hasKeyboardInteraction, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, evaluateComponentRepresentation, renderPropertyPresentationEditor, renderInteractionMediaPreview, normalizeInteractionPropertyPath } from "../core/interactions.js";
-import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage, createNexusLibraryBackup, parseNexusLibraryBackup } from "../core/library-sharing.js";
+import { createNexusGroupShareCode, parseNexusGroupShareCode, createNexusLayoutShareCode, parseNexusLayoutShareCode, createNexusSharePackage, parseNexusSharePackage } from "../core/library-sharing.js";
 
 const resolveFormulaIdentifier = normalizeNexusFormulaIdentifier;
 
@@ -34,57 +35,7 @@ const ActorSheetV2 = foundry.applications.sheets.ActorSheetV2;
 const HandlebarsApplicationMixin = foundry.applications.api.HandlebarsApplicationMixin;
 const NexusActorSheetBase = HandlebarsApplicationMixin(ActorSheetV2);
 
-const COMPONENTS = {
-  token: { label: "Token", namespace: "core.identity.token", w: 100, h: 100, path: "identity.token.img", kind: "token" },
-  pv: { label: "PV · Clássico", namespace: "core.resources.health", w: 190, h: 112, path: "resources.pv", kind: "resource" },
-  "resource-meter": { label: "Medidor", namespace: "nexus.asset.meter", w: 100, h: 100, path: "", kind: "resource-meter" },
-  "text-field": { label: "Campo de texto", namespace: "nexus.asset.text-field", w: 100, h: 100, path: "", kind: "text-field" },
-  "table": { label: "Tabela", namespace: "nexus.asset.table", w: 100, h: 100, path: "", kind: "table" },
-  "asset-text": { label: "Texto", namespace: "nexus.asset.text", w: 180, h: 64, path: "", kind: "asset-text" },
-  "asset-value": { label: "Valor", namespace: "nexus.asset.value", w: 120, h: 76, path: "", kind: "asset-value" },
-  "asset-field": { label: "Campo", namespace: "nexus.asset.field", w: 180, h: 76, path: "", kind: "asset-field" },
-  "asset-meter": { label: "Indicador", namespace: "nexus.asset.meter.generic", w: 220, h: 82, path: "", kind: "asset-meter" },
-  "asset-table": { label: "Tabela", namespace: "nexus.asset.table.generic", w: 260, h: 180, path: "", kind: "asset-table" },
-  "asset-notes": { label: "Anotações", namespace: "nexus.asset.notes", w: 240, h: 160, path: "", kind: "asset-notes" },
-  "asset-image": { label: "Imagem", namespace: "nexus.asset.image", w: 120, h: 120, path: "", kind: "asset-image" },
-  "asset-link": { label: "Link", namespace: "nexus.asset.link", w: 180, h: 48, path: "", kind: "asset-link" },
-  "sheet-name": { label: "Nome do personagem", namespace: "nexus.sheet.identity.name", w: 300, h: 66, path: "name", kind: "sheet-element", variant: "name" },
-  "sheet-level": { label: "Nível", namespace: "nexus.sheet.progression.level", w: 100, h: 66, path: "identity.level", kind: "sheet-element", variant: "level" },
-  "sheet-lineage": { label: "Linhagem", namespace: "nexus.sheet.identity.lineage", w: 180, h: 66, path: "identity.lineage", kind: "sheet-element", variant: "lineage" },
-  "sheet-physiognomy": { label: "Fisionomia", namespace: "nexus.sheet.identity.physiognomy", w: 180, h: 66, path: "", kind: "sheet-element", variant: "physiognomy" },
-  "sheet-legacy": { label: "Legado", namespace: "nexus.sheet.identity.legacy", w: 180, h: 66, path: "identity.legacy", kind: "sheet-element", variant: "legacy" },
-  "sheet-resource": { label: "Indicador – Barra", namespace: "nexus.sheet.resource.bar", w: 220, h: 58, path: "", kind: "sheet-element", variant: "resource" },
-  "sheet-derived": { label: "Indicador compacto", namespace: "nexus.sheet.derived", w: 110, h: 54, path: "", kind: "sheet-element", variant: "derived" },
-  "sheet-attribute": { label: "Card de atributo", namespace: "nexus.sheet.attribute", w: 96, h: 88, path: "", kind: "sheet-element", variant: "attribute" },
-  "sheet-skill": { label: "Linha de perícia", namespace: "nexus.sheet.skill.row", w: 250, h: 42, path: "", kind: "sheet-element", variant: "skill" },
-  "sheet-skill-group": { label: "Grupo de perícias", namespace: "nexus.sheet.skill.group", w: 260, h: 180, path: "", kind: "sheet-element", variant: "skill-group" },
-  "sheet-proficiency": { label: "Marcador de proficiência", namespace: "nexus.sheet.skill.proficiency", w: 44, h: 44, path: "", kind: "sheet-element", variant: "proficiency" },
-  "sheet-action-attack": { label: "Espaço de ataque", namespace: "nexus.sheet.action.attack", w: 220, h: 112, path: "", kind: "sheet-element", variant: "action-attack" },
-  "sheet-action-general": { label: "Espaço de ação", namespace: "nexus.sheet.action.general", w: 220, h: 112, path: "", kind: "sheet-element", variant: "action-general" },
-  "sheet-action-reaction": { label: "Espaço de reação", namespace: "nexus.sheet.action.reaction", w: 220, h: 112, path: "", kind: "sheet-element", variant: "action-reaction" },
-  "sheet-section": { label: "Cabeçalho de seção", namespace: "nexus.sheet.section.heading", w: 280, h: 38, path: "", kind: "sheet-element", variant: "section" },
-  "pv-bar": { label: "PV · Barra", namespace: "core.resources.health", w: 250, h: 82, path: "resources.pv", kind: "resource-bar" },
-  "pv-ring": { label: "PV · Circular", namespace: "core.resources.health", w: 130, h: 130, path: "resources.pv", kind: "resource-ring" },
-  pm: { label: "PM · Clássico", namespace: "core.resources.mana", w: 150, h: 100, path: "resources.pm", kind: "resource" },
-  "pm-bar": { label: "PM · Barra", namespace: "core.resources.mana", w: 250, h: 82, path: "resources.pm", kind: "resource-bar" },
-  pe: { label: "PE · Clássico", namespace: "core.resources.energy", w: 150, h: 100, path: "resources.pe", kind: "resource" },
-  "pe-bar": { label: "PE · Barra", namespace: "core.resources.energy", w: 250, h: 82, path: "resources.pe", kind: "resource-bar" },
-  defense: { label: "Defesa", namespace: "core.combat.defense", w: 150, h: 90, path: "combat.defense.value", kind: "number" },
-  movement: { label: "Movimento", namespace: "core.combat.movement", w: 150, h: 90, path: "combat.movement.value", kind: "number" },
-  desl: { label: "DESL", namespace: "core.combat.desl", w: 120, h: 85, path: "combat.movement.value", kind: "number" },
-  ddr: { label: "DdR", namespace: "core.combat.ddr", w: 120, h: 85, path: "recovery.count.value", kind: "number" },
-  mb: { label: "MB", namespace: "core.combat.mb", w: 120, h: 85, path: "progression.mb.value", kind: "number" },
-  // Deprecated scalar nucleus components remain registered only for old saved layouts.
-  body: { label: "Corpo (legado)", namespace: "core.attributes.body", w: 130, h: 90, path: "attributes.body", kind: "number", deprecated: true },
-  mind: { label: "Mente (legado)", namespace: "core.attributes.mind", w: 130, h: 90, path: "attributes.mind", kind: "number", deprecated: true },
-  soul: { label: "Alma (legado)", namespace: "core.attributes.soul", w: 130, h: 90, path: "attributes.soul", kind: "number", deprecated: true },
-  name: { label: "Nome", namespace: "core.identity.name", w: 210, h: 75, path: "name", kind: "name" },
-  level: { label: "Nível", namespace: "core.progression.level", w: 110, h: 75, path: "identity.level", kind: "number" },
-  lineage: { label: "Linhagem", namespace: "core.identity.lineage", w: 170, h: 75, path: "identity.lineage", kind: "text" },
-  legacy: { label: "Legado", namespace: "core.identity.legacy", w: 170, h: 75, path: "identity.legacy", kind: "text" },
-  notes: { label: "Anotações", namespace: "core.notes", w: 260, h: 150, path: "notes", kind: "text" },
-  "custom-card": { label: "Card personalizado", namespace: "nexus.custom.card", w: 220, h: 120, kind: "custom" }
-};
+
 
 const resolveNexusBinding = (actor, expression, depth = 0) => {
   const raw = String(expression ?? "").trim();
@@ -2642,28 +2593,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     ui.notifications?.info?.(`Layout "${name}" adicionado à ficha como uma nova aba.`); return true;
   }
 
+  _getLibraryBackupService() {
+    const service = game.nexus?.library?.backup;
+    if (!service) throw new Error("O serviço independente de backup da Biblioteca não foi inicializado.");
+    return service;
+  }
+
   _buildLibraryBackupCode() {
-    const snapshot = {
-      name: "Biblioteca NEXUS",
-      components: clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []),
-      groups: clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []),
-      layouts: clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []),
-      assets: [
-        ...clone(NEXUS_LIBRARY_CATALOG.assets ?? []),
-        ...clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? [])
-      ],
-      themes: {
-        ...clone(THEME_PALETTES),
-        ...Object.fromEntries((game.user?.getFlag?.("nexus", "libraryThemes") ?? []).map(theme => [theme.sourceId ?? theme.id, theme.palette]))
-      },
-      flows: clone(getInteractionLibrary(this.actor)),
-      templates: clone(game.user?.getFlag?.("nexus", "libraryTemplates") ?? []),
-      media: clone(game.user?.getFlag?.("nexus", "libraryMedia") ?? []),
-      styles: clone(game.user?.getFlag?.("nexus", "libraryStyles") ?? []),
-      rules: clone(game.user?.getFlag?.("nexus", "libraryRules") ?? []),
-      behaviors: clone(game.user?.getFlag?.("nexus", "libraryBehaviors") ?? [])
-    };
-    return createNexusLibraryBackup(snapshot, Object.keys(COMPONENTS));
+    return this._getLibraryBackupService().exportCode();
   }
 
   async _copyLibraryBackupCode() {
@@ -2707,88 +2644,45 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   async _importLibraryBackupCode(source) {
-    const imported = parseNexusLibraryBackup(source, Object.keys(COMPONENTS));
-    const data = imported.collections;
-    const components = clone(game.user?.getFlag?.("nexus", "libraryComponents") ?? []);
-    const groups = clone(game.user?.getFlag?.("nexus", "libraryGroups") ?? []);
-    const layouts = clone(game.user?.getFlag?.("nexus", "libraryLayouts") ?? []);
-    const assets = clone(game.user?.getFlag?.("nexus", "libraryAssets") ?? []);
-    const themes = clone(game.user?.getFlag?.("nexus", "libraryThemes") ?? []);
-    const templates = clone(game.user?.getFlag?.("nexus", "libraryTemplates") ?? []);
-    const media = clone(game.user?.getFlag?.("nexus", "libraryMedia") ?? []);
-    const styles = clone(game.user?.getFlag?.("nexus", "libraryStyles") ?? []);
-    const rules = clone(game.user?.getFlag?.("nexus", "libraryRules") ?? []);
-    const behaviors = clone(game.user?.getFlag?.("nexus", "libraryBehaviors") ?? []);
-    const builtinAssetKeys = new Set((NEXUS_LIBRARY_CATALOG.assets ?? []).map(asset => String(asset.key)));
-    const builtinThemeIds = new Set(Object.keys(THEME_PALETTES));
+    const service = this._getLibraryBackupService();
+    const preview = service.prepareImport(source, {
+      createId: (collection, index) => `${collection}-${foundry.utils.randomID(8)}-${index}`
+    });
+    const added = preview.report.added ?? {};
+    const skipped = preview.report.skipped ?? {};
+    const summary = [
+      [added.components, "componentes"],
+      [added.groups, "grupos"],
+      [added.layouts, "layouts"],
+      [added.assets, "assets"],
+      [added.themes, "temas"],
+      [added.templates, "modelos"],
+      [added.media, "mídias"],
+      [added.styles, "estilos"],
+      [added.properties, "propriedades"],
+      [added.rules, "regras"],
+      [added.behaviors, "comportamentos"],
+      [added.flows, "fluxos pessoais"],
+      [added.functions, "funções"],
+      [added.worldFlows, "fluxos do mundo"]
+    ].filter(([count]) => Number(count) > 0).map(([count, label]) => `${count} ${label}`);
+    const skippedCount = Object.values(skipped).reduce((sum, count) => sum + Number(count || 0), 0);
+    const previewText = summary.length
+      ? `<p>Serão adicionados: ${summary.join(", ")}.</p>`
+      : "<p>Nenhum item novo será adicionado.</p>";
+    const conflictText = skippedCount
+      ? `<p>${skippedCount} item(ns) com conflito serão preservados sem sobrescrita.</p>`
+      : "<p>Nenhum conflito foi encontrado.</p>";
+    const accepted = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Prévia da importação da Biblioteca" },
+      content: previewText + conflictText + "<p>Os dados serão validados e mesclados sem executar conteúdo importado.</p>",
+      yes: { label: "Importar" },
+      no: { label: "Cancelar" },
+      rejectClose: false
+    });
+    if (!accepted) return { cancelled: true };
 
-    let addedComponents = 0, addedGroups = 0, addedLayouts = 0, addedAssets = 0, addedThemes = 0, addedFlows = 0;
-    for (const item of data.components) {
-      if (item.sourceId && components.some(saved => saved.sourceId === item.sourceId)) continue;
-      components.push({ ...clone(item), id: foundry.utils.randomID(10), version: 1 });
-      addedComponents++;
-    }
-    for (const item of data.groups) {
-      if (item.sourceId && groups.some(saved => saved.sourceId === item.sourceId)) continue;
-      groups.push({ ...clone(item), id: `libgrp-${foundry.utils.randomID(8)}` });
-      addedGroups++;
-    }
-    for (const item of data.layouts) {
-      if (item.sourceId && layouts.some(saved => saved.sourceId === item.sourceId)) continue;
-      layouts.push({ ...clone(item), id: `liblayout-${foundry.utils.randomID(8)}` });
-      addedLayouts++;
-    }
-    for (const asset of data.assets) {
-      if (builtinAssetKeys.has(String(asset.key)) || assets.some(saved => saved.key === asset.key)) continue;
-      assets.push({ ...clone(asset), id: foundry.utils.randomID(10) });
-      addedAssets++;
-      if (COMPONENTS[asset.type] && !components.some(saved => saved.sourceId === asset.key)) {
-        components.push({ id: foundry.utils.randomID(10), sourceId: asset.key, version: 1, label: asset.label, type: asset.type, settings: clone(asset.template ?? {}) });
-        addedComponents++;
-      }
-    }
-    for (const [themeId, palette] of Object.entries(data.themes)) {
-      if (builtinThemeIds.has(themeId) || themes.some(saved => saved.sourceId === themeId)) continue;
-      themes.push({ id: `libtheme-${foundry.utils.randomID(8)}`, sourceId: themeId, name: themeId, palette: clone(palette) });
-      addedThemes++;
-    }
-
-    await writeNexusLibraryCollection(game.user, "components", components.slice(-200));
-    await writeNexusLibraryCollection(game.user, "groups", groups.slice(-100));
-    await writeNexusLibraryCollection(game.user, "layouts", layouts.slice(-100));
-    await writeNexusLibraryCollection(game.user, "assets", assets.slice(-200));
-    await writeNexusLibraryCollection(game.user, "themes", themes.slice(-100));
-    const mergeGeneric = (target, incoming, prefix) => {
-      let added = 0;
-      for (const item of incoming ?? []) {
-        if (!item || typeof item !== "object") continue;
-        const sourceId = String(item.sourceId ?? item.id ?? "");
-        if (sourceId && target.some(saved => String(saved.sourceId ?? saved.id ?? "") === sourceId)) continue;
-        target.push({ ...clone(item), id: `${prefix}-${foundry.utils.randomID(8)}` });
-        added++;
-      }
-      return added;
-    };
-    const addedTemplates = mergeGeneric(templates, data.templates, "libtemplate");
-    const addedMedia = mergeGeneric(media, data.media, "libmedia");
-    const addedStyles = mergeGeneric(styles, data.styles, "libstyle");
-    const addedRules = mergeGeneric(rules, data.rules, "librule");
-    const addedBehaviors = mergeGeneric(behaviors, data.behaviors, "libbehavior");
-    await writeNexusLibraryCollection(game.user, "templates", templates.slice(-100));
-    await writeNexusLibraryCollection(game.user, "media", media.slice(-200));
-    await writeNexusLibraryCollection(game.user, "styles", styles.slice(-200));
-    await writeNexusLibraryCollection(game.user, "rules", rules.slice(-200));
-    await writeNexusLibraryCollection(game.user, "behaviors", behaviors.slice(-200));
-
-    let savedFlows = getInteractionLibrary(this.actor);
-    for (const entry of data.flows) {
-      if (!entry?.flow) continue;
-      const signature = JSON.stringify(entry.flow);
-      if (savedFlows.some(saved => JSON.stringify(saved.flow) === signature)) continue;
-      savedFlows = await saveInteractionToLibrary(this.actor, entry.flow);
-      addedFlows++;
-    }
-
+    const result = await service.commitImport(preview);
     this._libraryAssetScope = "personal";
     this._libraryRenderPersonalItems?.();
     this._libraryRenderSavedGroups?.();
@@ -2796,8 +2690,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     this._libraryRenderCustomThemes?.();
     this._libraryRenderSavedFlows?.();
     this._libraryApplyFilter?.();
-    ui.notifications?.info?.(`Biblioteca importada: ${addedComponents} componentes, ${addedGroups} grupos, ${addedLayouts} layouts, ${addedAssets} assets, ${addedThemes} temas, ${addedTemplates} modelos, ${addedMedia} mídias, ${addedStyles} estilos, ${addedRules} regras, ${addedBehaviors} comportamentos e ${addedFlows} fluxos novos.`);
-    return imported;
+
+    ui.notifications?.info?.(summary.length
+      ? `Biblioteca importada: ${summary.join(", ")}.`
+      : "Backup validado. Nenhum item novo foi necessário.");
+    for (const warning of result.warnings ?? []) ui.notifications?.warn?.(warning);
+    return result;
   }
 
   async _applyLibraryCustomTheme(themeId) {

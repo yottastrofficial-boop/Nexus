@@ -335,11 +335,32 @@ remove legacy typography selects                  <label class="nexus-inspector-
               <label class="nexus-library-search-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na biblioteca..." autocomplete="off"></label>
               <div class="nexus-library-filter-wrap">
                 <input type="hidden" data-library-tag value="all">
-                <button type="button" class="nexus-library-filter-button" data-library-filter-toggle aria-expanded="false"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Etiquetas</span><b data-library-filter-count hidden>0</b></button>
+                <input type="hidden" data-library-origin value="all">
+                <input type="hidden" data-library-kind value="all">
+                <input type="hidden" data-library-type value="all">
+                <button type="button" class="nexus-library-filter-button" data-library-filter-toggle aria-expanded="false"><i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filtros</span><b data-library-filter-count hidden>0</b></button>
                 <div class="nexus-library-filter-popover" data-library-filter-popover hidden>
-                  <strong>Filtrar por etiqueta</strong>
+                  <strong>Categoria</strong>
+                  <label class="nexus-library-filter-select"><span>Área</span><select data-library-kind>
+                    <option value="all">Todas</option><option value="component">Componentes</option><option value="composition">Composições</option><option value="layout">Layouts</option><option value="template">Modelos</option><option value="asset">Recursos</option><option value="media">Mídia</option><option value="theme">Temas</option><option value="style">Estilos</option><option value="logic">Lógica</option><option value="document">Documentos Foundry</option>
+                  </select></label>
+                  <label class="nexus-library-filter-select"><span>Tipo específico</span><select data-library-type>
+                    <option value="all">Todos</option><option value="property">Propriedades</option><option value="rule">Regras</option><option value="behavior">Comportamentos</option><option value="flow">Fluxos</option><option value="function">Funções</option><option value="actors">Actors</option><option value="items">Items</option><option value="scenes">Scenes</option><option value="journals">Journals</option><option value="macros">Macros</option><option value="playlists">Playlists</option><option value="rolltables">RollTables</option><option value="cards">Cards</option>
+                  </select></label>
+                  <label class="nexus-library-filter-select"><span>Compêndios (seleção explícita)</span><select data-library-compendiums multiple size="4"></select></label>
+                  <strong>Origem</strong>
+                  <div class="nexus-library-origin-options">
+                    <button type="button" class="active" data-library-origin-option="all">Todas</button>
+                    <button type="button" data-library-origin-option="core">Padrão</button>
+                    <button type="button" data-library-origin-option="personal">Pessoais</button>
+                    <button type="button" data-library-origin-option="module">Módulos</button>
+                    <button type="button" data-library-origin-option="addon">Complementos</button>
+                    <button type="button" data-library-origin-option="world">Mundo</button>
+                    <button type="button" data-library-origin-option="compendium">Compêndios</button>
+                  </div>
+                  <strong>Etiquetas</strong>
                   <div class="nexus-library-filter-options">
-                    <button type="button" class="active" data-library-tag-option="all">Sem filtro</button>
+                    <button type="button" class="active" data-library-tag-option="all">Todas</button>
                   </div>
                 </div>
               </div>
@@ -349,6 +370,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
               </div>
               <span class="nexus-library-count" data-library-count>0 itens</span>
               <div class="nexus-library-header-actions">
+                <button type="button" data-library-open-global aria-label="Abrir Biblioteca em janela própria" title="Abrir Biblioteca completa"><i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i></button>
                 <button type="button" data-library-copy-all aria-label="Copiar backup da biblioteca" title="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
                 <button type="button" data-library-export-all aria-label="Exportar biblioteca" title="Exportar biblioteca"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
                 <button type="button" data-library-import-all-code aria-label="Importar biblioteca por código" title="Importar por código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>

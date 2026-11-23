@@ -62,6 +62,19 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
+## Fundação e integração da Biblioteca universal — implementação em branches de trabalho
+
+A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal; e a branch `feature/library-explorer-catalog-integration-2026-11-23` conecta a visão universal do Explorer ao catálogo, sem alterar a versão publicada 1.0.0.90:
+
+- `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
+- `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
+- Os serviços são expostos em `game.nexus.documents` e `game.nexus.resources`; a inicialização não carrega listas, decoders ou mídia em massa.
+- `scripts/core/library-resource-registry.js` agrega coleções pessoais NEXUS, ativos lógicos e documentos nativos por provedores extensíveis; `game.nexus.library` expõe `list`, `resolve`, `getActions`, `executeAction`, `registerProvider`, `getProviders` e `open`.
+- A listagem constrói metadados leves, pagina cada provedor separadamente e resolve o conteúdo completo sob demanda. Módulos podem contribuir com conteúdo sem adicionar janelas ou botões independentes.
+- Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
+
+A branch `feature/library-universal-completion-2026-11-23` adiciona `scripts/library/library-application.js` para a janela independente, `scripts/library/catalog-explorer.js` para a visão universal e `scripts/library/library-backup-service.js` para backup completo com prévia e importação confirmada. A Biblioteca agora oferece ações contextuais por provedor, filtros por origem/categoria/tipo/etiqueta, seleção explícita de compêndios visíveis, favoritos/recentes/pastas/coleções mistas por referência e metadados Foundry com cache invalidado por hooks. Ainda faltam adaptadores de importação de fontes externas e destinos especializados, editores completos de todos os tipos de Lógica e validação real no Foundry VTT 14 build 360. O fluxo inspirado no Plutonium está parcialmente atendido pelo backup; não se deve confundir backup com importação de fontes externas. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador.
+
 ## Limitações conhecidas e trabalho pendente
 
 - A área Lógica ainda precisa de editores especializados completos para cada subtipo, com schemas, validação e integração de ponta a ponta.

@@ -2,19 +2,97 @@ import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 import { createMediaFormatRegistry } from "./core/media-format-registry.js";
 import { createLogicRegistry } from "./core/logic-registry.js";
+import { createNexusLogicSchemas } from "./core/logic-schemas.js";
 import { createLogicRuntime } from "./core/logic-runtime.js";
+import { installFoundryLogicIntegration } from "./core/foundry-logic-integration.js";
 import { loadLogicLibrary, saveLogicAsset, deleteLogicAsset } from "./core/logic-library.js";
 import { createMediaCapabilityService, createMediaProcessingPipeline, createBrowserMediaAdapter, createWorkerMediaAdapter, installNexusMediaWorkerRuntime } from "./core/media-service.js";
 import { createFoundryMediaStorageAdapter, createMediaStorageRouter, createIndexedDbMediaCache, createMediaCacheKey } from "./core/media-storage.js";
+import { createResourceLifecycleManager } from "./core/resource-lifecycle.js";
+import { createFoundryDocumentBridge } from "./core/foundry-document-bridge.js";
+import { createDefaultLibraryResourceRegistry } from "./core/library-resource-registry.js";
+import { createLibraryApplicationClass } from "./library/library-application.js";
+import { normalizeLibraryPreferences } from "./core/library-preferences.js";
+import { createLibraryBackupService } from "./library/library-backup-service.js";
+import { createLibraryTransferRegistry } from "./core/library-transfer-registry.js";
+import { NEXUS_COMPONENTS } from "./core/component-types.js";
+import { THEME_PALETTES } from "./core/theme.js";
+import { getInteractionLibrary } from "./core/interactions.js";
+import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
+  // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
+  game.nexus.resources ??= createResourceLifecycleManager();
+  // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
+  game.nexus.documents ??= createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid });
+  // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
+  // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
+  game.nexus.library ??= {};
+  game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
+    getUser: () => game.user,
+    getWorldFlows: () => {
+      try { return game.settings.get("nexus", "interactionLibrary") ?? []; }
+      catch { return []; }
+    },
+    documentBridge: game.nexus.documents,
+    catalog: NEXUS_LIBRARY_CATALOG
+  });
+  game.nexus.library.list = options => game.nexus.library.registry.list(options);
+  game.nexus.library.resolve = (reference, resource) => game.nexus.library.registry.resolve(reference, resource);
+  game.nexus.library.getActions = (reference, resource) => game.nexus.library.registry.getActions(reference, resource);
+  game.nexus.library.executeAction = (actionId, reference, resource, params) =>
+    game.nexus.library.registry.executeAction(actionId, reference, resource, params);
+  game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
+  game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
+  game.nexus.library.transfers ??= createLibraryTransferRegistry();
+  game.nexus.library.registerSourceAdapter = adapter => game.nexus.library.transfers.registerSource(adapter);
+  game.nexus.library.registerDestinationAdapter = adapter => game.nexus.library.transfers.registerDestination(adapter);
+  game.nexus.library.prepareTransfer = options => game.nexus.library.transfers.prepare(options);
+  game.nexus.library.commitTransfer = (planId, context) => game.nexus.library.transfers.commit(planId, context);
+  game.nexus.library.discardTransfer = planId => game.nexus.library.transfers.discard(planId);
+  game.nexus.library.getTransferAdapters = () => ({
+    sources: game.nexus.library.transfers.listSources(),
+    destinations: game.nexus.library.transfers.listDestinations()
+  });
+  game.nexus.library.backup ??= createLibraryBackupService({
+    getUser: () => game.user,
+    getCatalog: () => NEXUS_LIBRARY_CATALOG,
+    getThemePalettes: () => THEME_PALETTES,
+    getWorldFlows: () => getInteractionLibrary(),
+    setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
+    getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
+  });
+  const LibraryApplication = createLibraryApplicationClass({
+    ApplicationV2: foundry.applications.api.ApplicationV2,
+    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+    registry: game.nexus.library.registry,
+    getPreferences: () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences")),
+    savePreferences: preferences => {
+      if (typeof game.user?.setFlag !== "function") throw new Error("Não foi possível salvar as preferências da Biblioteca.");
+      return game.user.setFlag("nexus", "libraryPreferences", preferences);
+    }
+  });
+  game.nexus.library.Application = LibraryApplication;
+  game.nexus.library.open = (context = {}) => {
+    const current = game.nexus.library.application;
+    if (current?.rendered) {
+      current.setContext(context);
+      const rendered = current.render({ force: true });
+      current.bringToTop?.();
+      return Promise.resolve(rendered).then(() => current);
+    }
+    const application = new LibraryApplication().setContext(context);
+    game.nexus.library.application = application;
+    return Promise.resolve(application.render({ force: true })).then(() => application);
+  };
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
   game.nexus.media.pipeline = createMediaProcessingPipeline({
     capabilityService: game.nexus.media.capabilities,
+    resourceManager: game.nexus.resources,
     adapters: [createBrowserMediaAdapter(game.nexus.media.capabilities)]
   });
   game.nexus.media.storage = createMediaStorageRouter([
@@ -32,12 +110,27 @@ Hooks.once("init", () => {
   }
 
   game.nexus.logic = {};
-  game.nexus.logic.registry = createLogicRegistry();
+  game.nexus.logic.registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
   game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
+  game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
+  game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
+  game.nexus.logic.getActionDefinition = type => game.nexus.logic.runtime.getActionDefinition(type);
+  game.nexus.logic.validateActionConfig = (type, config) => game.nexus.logic.runtime.validateActionConfig(type, config);
+  game.nexus.logic.registerFunction = descriptor => game.nexus.logic.runtime.registerFunction(descriptor);
+  game.nexus.logic.runFlow = (flow, context) => game.nexus.logic.runtime.runFlow(flow, context);
+  game.nexus.logic.simulateFlow = (flow, context) => game.nexus.logic.runtime.simulateFlow(flow, context);
+  game.nexus.logic.dispatch = (eventName, context) => game.nexus.logic.runtime.dispatch(eventName, context);
+  game.nexus.logic.getExecutors = () => ({
+    actions: game.nexus.logic.runtime.actionTypes,
+    actionDefinitions: game.nexus.logic.runtime.getActionDefinitions(),
+    functions: game.nexus.logic.runtime.functionIds
+  });
   game.nexus.logic.loadLibrary = () => loadLogicLibrary(game.user, game.nexus.logic.registry);
   game.nexus.logic.save = async asset => {
-    const saved = await saveLogicAsset(game.user, asset);
+    const checked = game.nexus.logic.registry.validateAsset(asset);
+    if (!checked.valid) throw new Error(checked.errors.join(" "));
+    const saved = await saveLogicAsset(game.user, checked.asset);
     game.nexus.logic.registry.register(saved, { replace: true });
     return saved;
   };
@@ -67,6 +160,18 @@ Hooks.once("ready", () => {
     console.info("NEXUS | Ativos lógicos carregados:", report?.loaded?.length ?? 0);
   } catch (error) {
     console.error("NEXUS | Falha ao carregar a Biblioteca de Lógica.", error);
+  }
+  try {
+    game.nexus.logic.foundryIntegration?.uninstall?.();
+    game.nexus.logic.foundryIntegration = installFoundryLogicIntegration({
+      hooks: Hooks,
+      runtime: game.nexus.logic.runtime,
+      gameRef: game,
+      constRef: CONST
+    });
+    console.info("NEXUS | Eventos do Foundry conectados à Lógica:", game.nexus.logic.foundryIntegration.bridge.hookCount);
+  } catch (error) {
+    console.error("NEXUS | Falha ao conectar eventos do Foundry à Lógica.", error);
   }
   console.log(`NEXUS | Sistema ${game.system.version} carregado. Ficha Canvas habilitada.`);
 });

@@ -1,7 +1,9 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
+import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
-import { NEXUS_LIBRARY_COLLECTIONS, readNexusLibraryStore, updateNexusLibraryStore } from "../core/library-store.js";
+import { getLegacyNexusLibraryFlags, readNexusLibraryStore, writeNexusLibraryCollection, NEXUS_LIBRARY_COLLECTIONS, updateNexusLibraryStore } from "../core/library-store.js";
 import { createLibraryFolder, assignLibraryEntryFolder, toggleLibraryFavorite, recordLibraryRecent, removeLibraryFolder, normalizeLibraryPreferences } from "../core/library-preferences.js";
 
 export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fitSheetResourcePreview } = {}) {
@@ -13,6 +15,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     if (searchInput) searchInput.value = sheet._librarySearchQuery ?? "";
     const tagFilter = panel.querySelector("[data-library-tag]");
     if (tagFilter) tagFilter.value = sheet._libraryTagFilter ?? "all";
+    const originFilter = panel.querySelector("[data-library-origin]");
+    if (originFilter) originFilter.value = sheet._libraryOriginFilter ?? "all";
+    const compendiumFilter = panel.querySelector("[data-library-compendiums]");
+    if (compendiumFilter) populateLibraryCompendiumSelect(compendiumFilter, sheet._libraryCompendiumIds ?? []);
+    const getCompendiumIds = () => [...(compendiumFilter?.selectedOptions ?? [])].map(option => option.value).filter(Boolean).slice(0, 32);
     sheet._libraryAssetScope??="core";
     sheet._librarySmartView??="all";
     const availableFolders=NEXUS_LIBRARY_CATALOG.categories??[];
@@ -101,6 +108,53 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     ].map(key => [key, game.user?.getFlag?.("nexus", key)]));
     const getLibraryPreferences = () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences") ?? {});
     const persistLibraryPreferences = async preferences => game.user.setFlag("nexus", "libraryPreferences", preferences);
+    let universalCatalogSearchTimer = null;
+    const universalCatalog = game.nexus?.library?.registry
+      ? createLibraryCatalogExplorer({
+          registry: game.nexus.library.registry,
+          container: panel.querySelector("[data-library-generic-items]"),
+          detail: panel.querySelector("[data-library-generic-details]"),
+          getPreferences: getLibraryPreferences,
+          savePreferences: persistLibraryPreferences
+        })
+      : null;
+    searchInput?.addEventListener("input", () => {
+      if (universalCatalogSearchTimer) clearTimeout(universalCatalogSearchTimer);
+      universalCatalogSearchTimer = setTimeout(() => {
+        universalCatalogSearchTimer = null;
+        const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+        if (active === "collection:all") void universalCatalog?.render({ query: searchInput.value, tag: panel.querySelector("[data-library-tag]")?.value ?? "all", origin: panel.querySelector("[data-library-origin]")?.value ?? "all", kind: panel.querySelector("[data-library-kind]")?.value ?? "all", type: panel.querySelector("[data-library-type]")?.value ?? "all", compendiumIds: getCompendiumIds(), viewMode: sheet._libraryCollectionViewMode ?? "grid", cardSize: sheet._libraryCardSize ?? "medium" });
+      }, 160);
+    });
+    panel.querySelector("[data-library-filter-popover]")?.addEventListener("click", () => {
+      requestAnimationFrame(() => {
+        const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+        if (active === "collection:all") void universalCatalog?.render({
+          query: searchInput?.value ?? "",
+          tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+          origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
+          kind: panel.querySelector("[data-library-kind]")?.value ?? "all",
+          type: panel.querySelector("[data-library-type]")?.value ?? "all",
+          compendiumIds: getCompendiumIds(),
+          viewMode: sheet._libraryCollectionViewMode ?? "grid",
+          cardSize: sheet._libraryCardSize ?? "medium"
+        });
+      });
+    });
+    panel.querySelector("[data-library-filter-popover]")?.addEventListener("change", () => {
+      sheet._libraryCompendiumIds = getCompendiumIds();
+      const active = panel.querySelector("[data-library-section].active")?.dataset.librarySection ?? "";
+      if (active === "collection:all") void universalCatalog?.render({
+        query: searchInput?.value ?? "",
+        tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+        origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
+        kind: panel.querySelector("[data-library-kind]")?.value ?? "all",
+        type: panel.querySelector("[data-library-type]")?.value ?? "all",
+        compendiumIds: getCompendiumIds(),
+        viewMode: sheet._libraryCollectionViewMode ?? "grid",
+        cardSize: sheet._libraryCardSize ?? "medium"
+      });
+    });
     const mirrorLegacyCollection = async (collection, store) => {
       const flags = { components:"libraryComponents", groups:"libraryGroups", layouts:"libraryLayouts", templates:"libraryTemplates", assets:"libraryAssets", media:"libraryMedia", themes:"libraryThemes", styles:"libraryStyles", properties:"libraryProperties", rules:"libraryRules", behaviors:"libraryBehaviors", flows:"interactionLibrary", functions:"libraryFunctions" };
       const flag = flags[collection];
@@ -176,6 +230,19 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       const container = panel.querySelector("[data-library-generic-items]");
       const detail = panel.querySelector("[data-library-generic-details]");
       if (!container || !detail || !genericCollectionLabels[collection]) return;
+      if (collection === "all" && universalCatalog) {
+        renderCustomFolderTree(collection);
+        void universalCatalog.render({
+          query: searchInput?.value ?? "",
+          smartView: sheet._librarySmartView ?? "all",
+          folder: sheet._librarySelectedFolder ?? "",
+          tag: panel.querySelector("[data-library-tag]")?.value ?? "all",
+          origin: panel.querySelector("[data-library-origin]")?.value ?? "all",
+          viewMode: sheet._libraryCollectionViewMode ?? "grid",
+          cardSize: sheet._libraryCardSize ?? "medium"
+        });
+        return;
+      }
       let entries = [];
       try { const saved = readNexusLibraryStore(game.user, getLegacyLibraryFlags()).store.collections; entries = collection === "all" ? NEXUS_LIBRARY_COLLECTIONS.flatMap(name => saved[name].map(entry => ({ ...entry, __libraryCollection: name }))) : (saved[collection] ?? []).map(entry => ({ ...entry, __libraryCollection: collection })); }
       catch (error) { console.warn("NEXUS | Não foi possível ler a coleção da Biblioteca", collection, error); }
@@ -402,6 +469,137 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       detail.append(heading, form);
     };
     panel.addEventListener("click", async event => {
+      const openGlobalLibrary = event.target.closest("[data-library-open-global]");
+      if (openGlobalLibrary && panel.contains(openGlobalLibrary)) {
+        event.preventDefault();
+        try {
+          sheet._getLibraryBackupService?.();
+          const canApplyResource = resource => {
+            const reference = resource?.reference ?? {};
+            return sheet.rendered === true && reference.providerId === "nexus-library" && (
+              ["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) ||
+              reference.builtin === "asset"
+            );
+          };
+          const applyResource = async (resource, resolved) => {
+            if (sheet.rendered !== true) { ui.notifications?.warn?.("Abra a ficha de destino para inserir este recurso."); return false; }
+            const reference = resource?.reference ?? {};
+            if (reference.providerId !== "nexus-library") return false;
+            if (reference.collection === "components") return sheet._addSavedLibraryComponent?.(reference.id) ?? false;
+            if (reference.collection === "groups") return sheet._addSavedGroupToCanvas?.(reference.id) ?? false;
+            if (reference.collection === "layouts") return sheet._addSavedLayoutToActor?.(reference.id) ?? false;
+            if (reference.collection === "themes") return sheet._applyLibraryCustomTheme?.(reference.id) ?? false;
+            if (reference.collection === "assets" || reference.builtin === "asset") {
+              const componentType = String(resolved?.type ?? resolved?.componentType ?? "");
+              if (!componentType || typeof sheet._addComponent !== "function") return false;
+              return sheet._addComponent(componentType, {
+                format: resolved?.format,
+                template: resolved?.template ?? resolved?.settings ?? {}
+              });
+            }
+            return false;
+          };
+          await game.nexus?.library?.open?.({
+            canApplyResource,
+            applyResource,
+            applyLabel: "Inserir na ficha",
+            getUpdateInfo: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return null;
+              const layouts = await sheet._readLayouts();
+              return planLibraryDefinitionUpdate(definition, layouts);
+            },
+            canUpdateDefinition: (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const selectedIds = [...(sheet._selectedIds ?? [])];
+              if (selectedIds.length !== 1) return false;
+              const component = sheet._currentLayout?.components?.find(item => item.id === selectedIds[0]);
+              return component?.libraryDefinitionId === resource.reference.id && component.type === definition?.type;
+            },
+            updateDefinition: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const selectedIds = [...(sheet._selectedIds ?? [])];
+              if (selectedIds.length !== 1) return false;
+              const layouts = await sheet._readLayouts();
+              const active = sheet._activeLayoutId();
+              const layout = layouts[active];
+              const componentIndex = layout?.components?.findIndex(item => item.id === selectedIds[0]) ?? -1;
+              if (componentIndex < 0) return false;
+              const component = layout.components[componentIndex];
+              if (component.libraryDefinitionId !== resource.reference.id || component.type !== definition.type) return false;
+
+              const updatedDefinition = createLibraryDefinition({
+                id: definition.id,
+                type: definition.type,
+                label: definition.label,
+                version: Math.max(1, Number(definition.version) || 1) + 1,
+                settings: { ...component },
+                metadata: definition.metadata ?? {},
+                history: [
+                  ...(definition.history ?? []).filter(entry => Number(entry.version) !== Number(definition.version)),
+                  { version: definition.version, settings: definition.settings ?? {} }
+                ],
+              });
+              const currentStore = readNexusLibraryStore(game.user, getLegacyNexusLibraryFlags(game.user)).store;
+              const entries = currentStore.collections.components.map(entry =>
+                entry.id === definition.id ? updatedDefinition : entry
+              );
+              if (!entries.some(entry => entry.id === definition.id)) throw new Error("A definição original não foi encontrada na Biblioteca.");
+              await writeNexusLibraryCollection(game.user, "components", entries);
+
+              const updatedInstance = createLibraryComponentInstance(updatedDefinition, {
+                id: component.id,
+                position: { x: component.x, y: component.y }
+              });
+              for (const key of ["z", "stackOrder"]) if (component[key] !== undefined) updatedInstance[key] = component[key];
+              sheet._captureHistory?.();
+              layout.components[componentIndex] = updatedInstance;
+              await sheet._writeLayouts(layouts, active);
+              sheet._currentLayout = layout;
+              await sheet.render({ force: true });
+              ui.notifications?.info?.("Definição atualizada para a versão " + updatedDefinition.version + ". As outras instâncias continuam independentes e podem receber a atualização separadamente.");
+              return true;
+            },
+            updateInstances: async (resource, definition) => {
+              if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+              const layouts = await sheet._readLayouts();
+              const preview = planLibraryDefinitionUpdate(definition, layouts);
+              if (!preview.available.length) {
+                if (preview.requiresReview.length) ui.notifications?.warn?.("Há instâncias antigas sem snapshot de origem; elas precisam de revisão manual.");
+                return false;
+              }
+              const confirm = foundry.applications.api.DialogV2.confirm;
+              const accepted = await confirm({
+                window: { title: "Atualizar instâncias deste Actor" },
+                content: "<p>" + preview.available.length + " instância(s) vinculadas a esta definição podem receber os novos padrões.</p>" +
+                  (preview.requiresReview.length ? "<p>" + preview.requiresReview.length + " instância(s) antigas serão preservadas para revisão manual.</p>" : "") +
+                  "<p>Os valores sobrescritos manualmente e a posição das instâncias serão preservados.</p>",
+                yes: { label: "Atualizar instâncias" },
+                no: { label: "Cancelar" },
+                rejectClose: false
+              });
+              if (!accepted) return false;
+              const plan = planLibraryDefinitionUpdate(definition, layouts, {
+                selectedInstanceKeys: preview.available.map(item => item.key)
+              });
+              if (!plan.updatedCount) return false;
+              sheet._captureHistory?.();
+              for (const [layoutId, updatedLayout] of Object.entries(plan.layouts)) {
+                if (layouts[layoutId] && Array.isArray(updatedLayout?.components)) {
+                  layouts[layoutId].components = updatedLayout.components;
+                }
+              }
+              await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+              sheet._currentLayout = layouts[sheet._activeLayoutId()];
+              await sheet.render({ force: true });
+              ui.notifications?.info?.(plan.updatedCount + " instância(s) atualizada(s) neste Actor.");
+              if (plan.requiresReview.length) ui.notifications?.warn?.(plan.requiresReview.length + " instância(s) antiga(s) precisam de revisão manual.");
+              return true;
+            }
+          });
+        }
+        catch (error) { ui.notifications?.error?.("Não foi possível abrir a Biblioteca: " + error.message); }
+        return;
+      }
       const folderDeleteButton = event.target.closest("[data-library-folder-delete]");
       if (folderDeleteButton && panel.contains(folderDeleteButton)) {
         event.preventDefault();
