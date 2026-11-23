@@ -113,7 +113,8 @@ A branch `feature/library-universal-completion-2026-11-23` amplia a base sem alt
 
 - janela independente ApplicationV2, reutilizando o mesmo registro e o mesmo Explorer;
 - filtros por categoria, tipo específico, origem e etiqueta;
-- favoritos, recentes e pastas resolvidos por referências estáveis, inclusive UUIDs Foundry e fluxos do mundo;
+- favoritos, recentes, pastas e coleções universais resolvidos por referências estáveis, inclusive UUIDs Foundry e fluxos do mundo;
+- coleções pessoais capazes de agrupar tipos/provedores diferentes sem copiar os recursos;
 - ações contextuais declaradas pelos provedores: editar metadados, duplicar, excluir com verificação de dependências e abrir documentos Foundry;
 - atribuição de pastas no Inspector e gerenciamento de pastas na aplicação independente;
 - backup integral de todas as coleções, incluindo propriedades e funções, com separação entre fluxos pessoais e fluxos do mundo;
