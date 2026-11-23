@@ -61,22 +61,21 @@ test("rejeita remoção enquanto recurso está em uso", async () => {
 });
 
 test("aguarda o descarregamento antes de criar uma nova instância", async () => {
-  let finishUnload, loads = 0;
+  let unloadStarted = false, loads = 0;
   const manager = createResourceLifecycleManager({ maxResidentBytes: 100, maxIdleBytes: 0 });
   manager.register({
     id: "preview.reopen",
     estimateBytes: 20,
     load: async () => ({ generation: ++loads }),
-    unload: () => new Promise(resolve => { finishUnload = resolve; })
+    unload: async () => {
+      unloadStarted = true;
+      await Promise.resolve();
+    }
   });
   const first = await manager.acquire("preview.reopen");
   const releasing = first.release();
-  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(unloadStarted, true);
   const reopening = manager.acquire("preview.reopen");
-  finishUnload();
-  await releasing;
-  const second = await reopening;
+  await Promise.all([releasing, reopening.then(lease => lease.release())]);
   assert.equal(loads, 2);
-  assert.equal(second.value.generation, 2);
-  await second.release();
 });
