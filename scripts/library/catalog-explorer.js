@@ -76,6 +76,8 @@ export function createLibraryCatalogExplorer({
   applyLabel = "Aplicar ao contexto",
   getUpdateInfo = null,
   onUpdateInstances = null
+  canUpdateDefinition = () => false,
+  onUpdateDefinition = null,
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -258,6 +260,19 @@ export function createLibraryCatalogExplorer({
       updateSection.append(makeElement("p", "", updateInfo.requiresReview.length + " instância(s) antigas precisam de revisão manual antes de receber uma atualização."));
     }
     if (updateInfo?.error) updateSection.append(makeElement("p", "nexus-library-empty", "Não foi possível verificar atualizações: " + updateInfo.error));
+    if (typeof onUpdateDefinition === "function" && canUpdateDefinition(resource, resolved)) {
+      const updateDefinitionButton = makeElement("button", "", "Atualizar definição a partir da seleção");
+      updateDefinitionButton.type = "button";
+      updateDefinitionButton.addEventListener("click", async () => {
+        try {
+          const result = await onUpdateDefinition(resource, resolved);
+          if (result !== false) await renderDetails(resource);
+        } catch (error) {
+          detail.append(makeElement("p", "nexus-library-empty", "Não foi possível atualizar a definição: " + error.message));
+        }
+      });
+      updateSection.append(updateDefinitionButton);
+    }
 
     const actions = makeElement("div", "nexus-library-item-actions");
     const availableActions = typeof registry.getActions === "function"
