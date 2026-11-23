@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildLogicEditorPayload } from "../scripts/library/logic-editors.js";
+import { layoutFlowGraph, getFlowGraphCanvasSize } from "../scripts/library/flow-graph-layout.js";
 
 test("editor de propriedades preserva valores zero, false e string vazia", () => {
   const payload = buildLogicEditorPayload("property", {}, {
@@ -73,4 +74,52 @@ test("editor preserva grafo de Fluxo e permite removê-lo explicitamente", () =>
     triggers: "[]", conditions: "[]", actions: "[]", conditionJoin: "all", onError: "stop", graph: null
   });
   assert.equal(Object.hasOwn(withoutGraph, "graph"), false);
+});
+
+test("layout do grafo posiciona nós por camada e preserva posições manuais", () => {
+  const graph = {
+    entryNodeId: "start",
+    nodes: [
+      { id: "start", type: "start" },
+      { id: "check", type: "condition" },
+      { id: "yes", type: "action", x: 777, y: 333 },
+      { id: "no", type: "end" }
+    ],
+    edges: [
+      { from: "start", to: "check", when: "next" },
+      { from: "check", to: "yes", when: "true" },
+      { from: "check", to: "no", when: "false" }
+    ]
+  };
+  const laidOut = layoutFlowGraph(graph);
+  assert.deepEqual(graph.nodes[0], { id: "start", type: "start" }, "O layout não deve alterar o objeto de entrada.");
+  assert.ok(laidOut.nodes[0].x < laidOut.nodes[1].x);
+  assert.equal(laidOut.nodes[2].x, 777, "Posições manuais devem ser preservadas.");
+  assert.equal(laidOut.nodes[2].y, 333);
+  const arranged = layoutFlowGraph(laidOut, { force: true });
+  assert.notEqual(arranged.nodes[2].x, 777, "Organizar automaticamente deve recalcular posições.");
+  const size = getFlowGraphCanvasSize(arranged);
+  assert.ok(size.width >= 720);
+  assert.ok(size.height >= 360);
+});
+
+test("layout de grafo rejeita estrutura ausente sem lançar erro obscuro", () => {
+  assert.throws(() => layoutFlowGraph(null), /Grafo inválido/);
+});
+
+test("schema rejeita coordenadas visuais fora dos limites do canvas", () => {
+  const bad = registry.validateAsset({
+    id: "nexus.personal.flow.bad-layout",
+    type: "flow",
+    payload: { graph: {
+      entryNodeId: "start-node",
+      nodes: [
+        { id: "start-node", type: "start", x: 9000, y: 0 },
+        { id: "end-node", type: "end", x: 300, y: 0 }
+      ],
+      edges: [{ from: "start-node", to: "end-node", when: "next" }]
+    } }
+  });
+  assert.equal(bad.valid, false);
+  assert.ok(bad.errors.some(error => error.includes("coordenadas visuais inválidas")));
 });
