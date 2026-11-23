@@ -127,6 +127,16 @@ export function createFoundryLogicPermissionResolver({ gameRef = globalThis.game
   };
 }
 
+function readActorSystemPath(system, path) {
+  const segments = String(path ?? "").split(".").slice(1);
+  let value = system;
+  for (const segment of segments) {
+    if (!value || typeof value !== "object" || !Object.prototype.hasOwnProperty.call(value, segment)) return undefined;
+    value = value[segment];
+  }
+  return value;
+}
+
 export function registerFoundryLogicExecutors({ runtime } = {}) {
   if (!runtime || typeof runtime.registerAction !== "function") throw new TypeError("Runtime lógico indisponível.");
   const registered = [];
@@ -147,6 +157,39 @@ export function registerFoundryLogicExecutors({ runtime } = {}) {
       if (signal?.aborted) throw new Error("Ação cancelada.");
       await actor.update({ [path]: value });
       return { actorUuid: actor.uuid ?? null, path, value };
+    }
+  }));
+  registered.push(runtime.registerAction({
+    type: "nexus.actor.adjust",
+    effects: ["write"],
+    permissions: ["actor:update"],
+    execute: async ({ config, context, signal }) => {
+      if (signal?.aborted) throw new Error("Ação cancelada.");
+      const actor = context.actor?.documentName === "Actor" ? context.actor : getActor(context.document);
+      if (!actor || typeof actor.update !== "function") throw new Error("A ação exige um Actor válido no contexto.");
+      const path = String(config.path ?? "").trim();
+      if (!SAFE_UPDATE_PATH.test(path) || path.split(".").some(part => FORBIDDEN_KEYS.has(part))) {
+        throw new Error("Caminho de ajuste não permitido. Use somente propriedades em system.*.");
+      }
+      if (typeof config.delta !== "number" || !Number.isFinite(config.delta)) throw new Error("O ajuste exige um delta numérico finito.");
+      for (const key of ["min", "max"]) {
+        if (config[key] !== undefined && (typeof config[key] !== "number" || !Number.isFinite(config[key]))) {
+          throw new Error("Os limites min/max precisam ser números finitos.");
+        }
+      }
+      if (config.min !== undefined && config.max !== undefined && config.min > config.max) {
+        throw new Error("O limite mínimo não pode superar o máximo.");
+      }
+      const current = readActorSystemPath(actor.system, path);
+      if (typeof current !== "number" || !Number.isFinite(current)) {
+        throw new Error("A propriedade indicada não contém um número válido.");
+      }
+      let value = current + config.delta;
+      if (config.min !== undefined) value = Math.max(config.min, value);
+      if (config.max !== undefined) value = Math.min(config.max, value);
+      if (signal?.aborted) throw new Error("Ação cancelada.");
+      await actor.update({ [path]: value });
+      return { actorUuid: actor.uuid ?? null, path, previous: current, delta: config.delta, value };
     }
   }));
   return registered;
