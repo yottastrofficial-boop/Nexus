@@ -1,5 +1,4 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { createLibraryBackupService } from "../library/library-backup-service.js";
 import { NEXUS_COMPONENTS as COMPONENTS } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
@@ -2595,27 +2594,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _getLibraryBackupService() {
-    const library = game.nexus?.library;
-    if (library?.backup) return library.backup;
-    const service = createLibraryBackupService({
-      getUser: () => game.user,
-      getCatalog: () => NEXUS_LIBRARY_CATALOG,
-      getThemePalettes: () => THEME_PALETTES,
-      getWorldFlows: () => getInteractionLibrary(this.actor),
-      setWorldFlows: async entries => {
-        if (typeof game.settings?.set === "function") {
-          await game.settings.set("nexus", "interactionLibrary", entries);
-          return;
-        }
-        if (typeof this.actor?.setFlag === "function") {
-          await this.actor.setFlag("nexus", "interactionLibrary", entries);
-          return;
-        }
-        throw new Error("Não há permissão para salvar os fluxos do mundo.");
-      },
-      getComponentTypes: () => Object.keys(COMPONENTS)
-    });
-    if (library) library.backup = service;
+    const service = game.nexus?.library?.backup;
+    if (!service) throw new Error("O serviço independente de backup da Biblioteca não foi inicializado.");
     return service;
   }
 
