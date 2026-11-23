@@ -5,6 +5,8 @@
  * about Actor sheets, Canvas components, or the persistence implementation.
  * The caller supplies the registry and user-preference callbacks.
  */
+import { toggleLibraryCollectionResource } from "../core/library-preferences.js";
+
 const PAGE_SIZE = 30;
 const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions", "world-flows"]);
 
@@ -169,6 +171,30 @@ export function createLibraryCatalogExplorer({
     });
     folderLabel.append(folderSelect);
 
+    const collectionSection = makeElement("div", "nexus-library-resource-collections");
+    collectionSection.append(makeElement("strong", "", "Coleções"));
+    if (!preferences.collections.length) {
+      collectionSection.append(makeElement("p", "", "Nenhuma coleção criada."));
+    } else {
+      for (const collection of preferences.collections) {
+        const label = makeElement("label", "nexus-library-collection-membership");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = collection.resources.includes(key);
+        checkbox.addEventListener("change", async () => {
+          try {
+            const updated = toggleLibraryCollectionResource(getPreferences(), collection.id, key);
+            await savePreferences(updated);
+            if (currentCollectionId === collection.id && !checkbox.checked) await render();
+          } catch (error) {
+            detail.append(makeElement("p", "nexus-library-empty", "Não foi possível atualizar a coleção: " + error.message));
+          }
+        });
+        label.append(checkbox, makeElement("span", "", collection.name));
+        collectionSection.append(label);
+      }
+    }
+
     const actions = makeElement("div", "nexus-library-item-actions");
     const availableActions = typeof registry.getActions === "function"
       ? registry.getActions(resource.reference, resource)
@@ -213,7 +239,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, save);
-          detail.replaceChildren(heading, meta, description, facts, folderLabel, editor, actions);
+          detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, editor, actions);
           return;
         }
 
@@ -270,7 +296,7 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, facts, folderLabel, actions, advanced);
+    detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, actions, advanced);
   };
 
   const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
