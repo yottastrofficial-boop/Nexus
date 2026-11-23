@@ -13,6 +13,7 @@ import { createDefaultLibraryResourceRegistry } from "./core/library-resource-re
 import { createLibraryApplicationClass } from "./library/library-application.js";
 import { normalizeLibraryPreferences } from "./core/library-preferences.js";
 import { createLibraryBackupService } from "./library/library-backup-service.js";
+import { createLibraryTransferRegistry } from "./core/library-transfer-registry.js";
 import { NEXUS_COMPONENTS } from "./core/component-types.js";
 import { THEME_PALETTES } from "./core/theme.js";
 import { getInteractionLibrary } from "./core/interactions.js";
@@ -44,6 +45,16 @@ Hooks.once("init", () => {
     game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
+  game.nexus.library.transfers ??= createLibraryTransferRegistry();
+  game.nexus.library.registerSourceAdapter = adapter => game.nexus.library.transfers.registerSource(adapter);
+  game.nexus.library.registerDestinationAdapter = adapter => game.nexus.library.transfers.registerDestination(adapter);
+  game.nexus.library.prepareTransfer = options => game.nexus.library.transfers.prepare(options);
+  game.nexus.library.commitTransfer = (planId, context) => game.nexus.library.transfers.commit(planId, context);
+  game.nexus.library.discardTransfer = planId => game.nexus.library.transfers.discard(planId);
+  game.nexus.library.getTransferAdapters = () => ({
+    sources: game.nexus.library.transfers.listSources(),
+    destinations: game.nexus.library.transfers.listDestinations()
+  });
   game.nexus.library.backup ??= createLibraryBackupService({
     getUser: () => game.user,
     getCatalog: () => NEXUS_LIBRARY_CATALOG,
