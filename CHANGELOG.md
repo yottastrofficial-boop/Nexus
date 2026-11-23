@@ -11,7 +11,7 @@
 - Mantém o armazenamento canônico, as estruturas legadas e a separação entre definições reutilizáveis e instâncias.
 - Ações específicas de aplicação/inserção continuam nos espaços especializados quando o tipo exige configuração própria.
 - Inclui testes de regressão e atualiza README, roadmap, visão do projeto e contrato da Biblioteca.
-- Candidata para Foundry VTT 14 build 360. CI e pacote não substituem o teste visual/funcional no Foundry real; esta versão não é checkpoint funcional confirmado.
+- Publicada como release de teste para Foundry VTT 14 build 360 após CI e pacote aprovados. O teste visual/funcional no Foundry real continua pendente; esta versão não é checkpoint funcional confirmado.
 
 ## 1.0.0.89 — build de teste da ficha no Foundry VTT 14
 
