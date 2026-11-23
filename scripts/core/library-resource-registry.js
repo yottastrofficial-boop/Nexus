@@ -151,13 +151,15 @@ export function createLibraryResourceRegistry() {
     limit = 30,
     cursor = {},
     compendiumIds = [],
-    references = []
+    references = [],
+    tags = []
   } = {}) => {
     const search = cleanText(query, 160).toLocaleLowerCase();
     const requestedKind = cleanText(kind, 48) || "all";
     const requestedType = cleanText(type, 64) || "all";
     const pageSize = safeLimit(limit);
     const cursors = isPlainObject(cursor) ? cursor : {};
+    const normalizedTags = Array.isArray(tags) ? [...new Set(tags.map(value => cleanText(value, 48).toLocaleLowerCase()).filter(Boolean))].slice(0, 32) : [];
     const normalizedReferences = Array.isArray(references)
       ? references.filter(reference => reference && typeof reference === "object" && String(reference.providerId ?? "") && String(reference.id ?? "")).slice(0, 500)
       : [];
@@ -174,13 +176,15 @@ export function createLibraryResourceRegistry() {
           limit: pageSize,
           cursor: cursors[provider.id] ?? null,
           compendiumIds: Array.isArray(compendiumIds) ? compendiumIds.slice(0, 32).map(String) : [],
-          ids: normalizedReferences.filter(reference => reference.providerId === provider.id).map(reference => String(reference.id))
+          ids: normalizedReferences.filter(reference => reference.providerId === provider.id).map(reference => String(reference.id)),
+          tags: normalizedTags
         });
         const rawItems = Array.isArray(page) ? page : page?.items;
         if (!Array.isArray(rawItems)) throw new Error("O provedor não retornou uma lista de recursos.");
         const items = rawItems.map(item => normalizeResource(item, provider.id)).filter(item =>
           (requestedKind === "all" || item.kind === requestedKind) &&
           (requestedType === "all" || item.type === requestedType) &&
+          (!normalizedTags.length || normalizedTags.every(tag => item.tags.some(value => value.toLocaleLowerCase() === tag))) &&
           matchesText(item, search)
         );
         return {
@@ -327,12 +331,14 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
     if (user && (typeof user === "object" || typeof user === "function")) metadataCache.delete(user);
   });
 
-  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [] } = {}) => {
+  const list = async ({ query = "", kind = "all", type = "all", limit = 30, cursor = 0, ids = [], tags = [] } = {}) => {
     const resources = await getMetadata();
     const search = cleanText(query, 160).toLocaleLowerCase();
     const requestedIds = new Set(Array.isArray(ids) ? ids.map(String).slice(0, 500) : []);
+    const requestedTags = Array.isArray(tags) ? tags.map(value => String(value).toLocaleLowerCase()) : [];
     const filtered = resources.filter(resource =>
       (!requestedIds.size || requestedIds.has(resource.id)) &&
+      (!requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag))) &&
       (kind === "all" || resource.kind === kind) &&
       (type === "all" || resource.type === type) &&
       matchesText(resource, search)
@@ -399,7 +405,8 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     limit = 30,
     cursor = 0,
     compendiumIds = [],
-    ids = []
+    ids = [],
+    tags = []
   } = {}) => {
     if (kind !== "all" && kind !== "document") {
       return { items: [], total: 0, hasMore: false, nextCursor: null };
@@ -409,6 +416,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     const requestedIds = [...new Set(Array.isArray(ids) ? ids.map(String).filter(Boolean).slice(0, 500) : [])];
 
     if (requestedIds.length) {
+      const requestedTags = Array.isArray(tags) ? tags.map(value => String(value).toLocaleLowerCase()) : [];
       if (typeof documentBridge.reference !== "function") {
         throw new Error("O bridge de documentos não oferece referências estáveis para esta consulta.");
       }
@@ -421,7 +429,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
         }
       }));
       const items = records.filter(record => record && (requestedType === "all" || record.type === requestedType))
-        .map(toResource);
+        .map(toResource).filter(resource => !requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag)));
       return { items, total: items.length, hasMore: false, nextCursor: null, errors: [] };
     }
 
@@ -431,7 +439,8 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
       query,
       offset,
       limit: safeLimit(limit),
-      compendiumIds
+      compendiumIds,
+      tags
     });
     return {
       items: page.items.map(toResource),
