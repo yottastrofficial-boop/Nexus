@@ -114,10 +114,15 @@ export function getLibraryDefinitionUpdateStatus(definition, instance) {
   const instanceVersion = Math.max(1, Number(instance.libraryDefinitionVersion) || 1);
   if (definitionVersion > instanceVersion) {
     const hasInstanceBaseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object";
+    const hasLibraryOverrides = instance.libraryOverrides && typeof instance.libraryOverrides === "object" && !Array.isArray(instance.libraryOverrides);
     const hasDefinitionHistory = Array.isArray(definition.history) && definition.history.some(entry =>
       Math.max(1, Number(entry?.version) || 1) === instanceVersion && entry?.settings && typeof entry.settings === "object"
     );
-    return hasInstanceBaseline || hasDefinitionHistory ? "update-available" : "baseline-missing";
+    // Legacy instances without an override snapshot cannot be updated safely:
+    // their manual changes cannot be distinguished from the old definition.
+    return hasInstanceBaseline || (hasLibraryOverrides && hasDefinitionHistory)
+      ? "update-available"
+      : "baseline-missing";
   }
   if (definitionVersion < instanceVersion) return "instance-newer";
   return "current";
