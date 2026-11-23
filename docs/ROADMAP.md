@@ -61,17 +61,17 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
-## Biblioteca universal — implementação iniciada
+## Biblioteca universal — implementação em andamento
 
-Branch: `feat/universal-library-resource-foundation-2026-11-23`.
+- **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
+- **PR seguinte / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
+- **Próxima etapa:** conectar o Explorer existente ao catálogo, apresentando tudo em uma área de busca comum. Não criar um botão ou janela por módulo/tipo; filtros e ações devem ser contextuais.
+- **Importação integrada inspirada no Plutonium:** implementar adaptadores de origem, prévia, validação e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo de terceiros sem direitos de uso nem executar payloads automaticamente.
+- **Menus e Inspector:** depois da integração de dados, consolidar navegação, filtros, contexto e ações específicas por tipo.
+- **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
+- **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
-1. **Fundação concluída nesta branch:** gerenciador de ciclo de vida em RAM e ponte de referências UUID para documentos nativos do Foundry.
-2. **Próxima etapa:** conectar referências de documentos e ativos lógicos ao modelo universal da Biblioteca, mantendo os schemas e ações especializadas.
-3. **Depois:** menus, navegação, filtros, Inspector e ações funcionais para cada tipo de recurso.
-4. **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
-5. **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; não pré-carregar conteúdo no init.
-
-A etapa não está pronta para release: requer execução dos testes, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
 
 ## Critérios para concluir uma etapa
 
