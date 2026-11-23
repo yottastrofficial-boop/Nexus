@@ -95,7 +95,9 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     control.value = drafts.has(key) ? drafts.get(key) : JSON.stringify(action.config, null, 2);
     control.setAttribute("aria-label", "Configuração JSON do executor " + (action.type || "não selecionado"));
     const error = makeError(newId("config-error"));
-    control.setAttribute("aria-describedby", error.id);
+    const help = make("small", "nexus-library-graph-field-help", "Este executor não declara campos visuais. A configuração permanece como JSON inerte.");
+    help.id = newId("config-help");
+    control.setAttribute("aria-describedby", help.id + " " + error.id);
     control.addEventListener("input", () => {
       drafts.set(key, control.value);
       try {
@@ -109,7 +111,7 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
       }
     });
     wrap.append(make("span", "", "Configuração JSON"), control, error);
-    wrap.append(make("small", "nexus-library-graph-field-help", "Este executor não declara campos visuais. A configuração permanece como JSON inerte."));
+    wrap.append(help);
     container.append(wrap);
     return {
       flush() {
@@ -163,7 +165,9 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     control.id = newId("config-field");
     if (schemaField.required) control.required = true;
     if (schemaField.placeholder) control.placeholder = schemaField.placeholder;
-    control.setAttribute("aria-describedby", error.id);
+    const help = schemaField.help ? make("small", "nexus-library-graph-field-help", schemaField.help) : null;
+    if (help) help.id = newId("config-help");
+    control.setAttribute("aria-describedby", [help?.id, error.id].filter(Boolean).join(" "));
     const updateFromControl = () => {
       try {
         if (schemaField.type === "checkbox") action.config[key] = control.checked;
@@ -186,7 +190,7 @@ function renderExecutorConfigFields(container, action, runtime, { drafts = new M
     control.addEventListener("change", updateFromControl);
     const wrap = make("label", "nexus-library-flow-field" + (["textarea", "json"].includes(schemaField.type) ? " wide" : ""));
     wrap.append(make("span", "", schemaField.label), control);
-    if (schemaField.help) wrap.append(make("small", "nexus-library-graph-field-help", schemaField.help));
+    if (help) wrap.append(help);
     wrap.append(error);
     container.append(wrap);
     fieldEntries.push({ schemaField, control, error });
