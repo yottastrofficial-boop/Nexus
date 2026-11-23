@@ -51,6 +51,8 @@ jobs:
           node tests/validate-package.mjs
           node --experimental-default-type=module tests/docs-consistency.mjs
           node --experimental-default-type=module tests/group-render-performance.mjs
+          node --experimental-default-type=module tests/resource-lifecycle.test.mjs
+          node --experimental-default-type=module tests/foundry-document-bridge.test.mjs
 
       - name: Build Foundry package
         run: |
