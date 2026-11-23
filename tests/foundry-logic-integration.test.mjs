@@ -176,3 +176,30 @@ test("resolver de permissões falha fechado para permissões desconhecidas", asy
 });
 
 console.log("NEXUS Foundry logic integration: tests passed.");
+
+test("bridge não executa efeitos nos jogadores nem em GMs que não são o GM ativo", async () => {
+  const hooks = createHooks();
+  let calls = 0;
+  const runtime = { dispatch: async () => { calls++; } };
+  const playerBridge = createFoundryLogicEventBridge({
+    hooks, runtime, gameRef: { user: { id: "player", isGM: false } },
+    logger: { warn() {}, error() {} }
+  });
+  playerBridge.install();
+  const actor = { documentName: "Actor", uuid: "Actor.authority" };
+  hooks.emit("updateActor", actor, {}, {}, "player");
+  await flush();
+  assert.equal(calls, 0);
+  playerBridge.uninstall();
+
+  const secondaryGM = createFoundryLogicEventBridge({
+    hooks, runtime,
+    gameRef: { user: { id: "gm-secondary", isGM: true }, users: { activeGM: { id: "gm-primary" } } },
+    logger: { warn() {}, error() {} }
+  });
+  secondaryGM.install();
+  hooks.emit("updateActor", actor, {}, {}, "gm-secondary");
+  await flush();
+  assert.equal(calls, 0);
+  secondaryGM.uninstall();
+});
