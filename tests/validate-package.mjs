@@ -697,7 +697,7 @@ assert.match(entrypoint, /texture: \{ src: actor\.img \|\| DEFAULT_TOKEN_IMAGE \
 assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
 assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
 assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
-assert.match(libraryCatalog, /label: "Indicador – Barra"/, "A biblioteca deve manter o Indicador – Barra");
+assert.match(libraryCatalog, /label: "Barra de recurso"/, "A biblioteca deve manter a barra de recurso sem rótulo visual");
 assert.match(libraryCatalog, /currentPath: ""/, "A barra neutra não deve vincular automaticamente o recurso PV");
 assert.match(libraryCatalog, /maxPath: ""/, "A barra neutra não deve vincular automaticamente o máximo de PV");
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
@@ -705,7 +705,7 @@ assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categorie
 assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 assert.match(template, /data-library-count>0 itens</, "A contagem inicial da Biblioteca deve começar em estado neutro até a coleção ser renderizada");
-assert.match(template, /<option value="barra">Barra de vida<\/option>/, "O filtro da Biblioteca deve refletir o único tipo disponível");
+assert.match(template, /data-library-tag-option="barra"/, "O filtro da Biblioteca deve expor a etiqueta da barra como chip");
 
 
 for (const file of [...(manifest.esmodules ?? []), ...(manifest.styles ?? []), ...(manifest.languages ?? []).map(item => item.path)]) {
@@ -1379,8 +1379,8 @@ assert.match(libraryView,/createLibraryFolder/,"A Biblioteca deve criar pastas p
 assert.match(libraryView,/toggleLibraryFavorite/,"A Biblioteca deve permitir favoritar itens");
 assert.match(libraryView,/recordLibraryRecent/,"A seleção deve alimentar a lista de recentes");
 assert.match(libraryView,/data-library-save-metadata/,"O inspector deve salvar metadados editáveis");
-assert.match(template,/data-library-collection-filter[^>]*>[\s\S]*?<option value="favorites">Favoritos<\/option>/,"A Biblioteca deve oferecer filtro de favoritos");
-assert.match(template,/data-library-collection-filter[^>]*>[\s\S]*?<option value="recent">Recentes<\/option>/,"A Biblioteca deve oferecer filtro de recentes");
+assert.doesNotMatch(template,/data-library-collection-filter/,"Favoritos e recentes não devem usar select genérico nesta barra");
+assert.doesNotMatch(template,/data-library-collection-filter/,"Favoritos e recentes não devem usar select genérico nesta barra");
 assert.match(template,/data-library-create-folder/,"A interface deve expor a criação de pastas");
 assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
 assert.match(template,/data-library-custom-folders/,"Pastas personalizadas devem aparecer na navegação lateral");
@@ -1399,7 +1399,7 @@ assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configu
 assert.match(template,/data-library-scope="core"/,"A navegação deve oferecer a origem NEXUS");
 assert.match(template,/data-library-scope="modules"/,"A navegação deve oferecer a origem módulos");
 assert.match(template,/data-library-scope="extras"/,"A navegação deve oferecer a origem extras");
-assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="mine">Pessoais<\/option>/,"Coleções devem permitir filtrar conteúdos criados pelo usuário");
+assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
 assert.match(libraryView,/data-library-origin-filter/,"O filtro de origem deve ser aplicado às coleções");
 assert.match(libraryView,/sameScope=button\.dataset\.libraryScope/,"A navegação deve manter uma única origem ativa por vez");
 assert.match(css,/aspect-ratio:1 \/ 1 !important/,"Os cartões da Biblioteca devem ter prévias quadradas");
@@ -1486,7 +1486,7 @@ const neutralResourceBar = NEXUS_LIBRARY_CATALOG.assets.find(item => item.key ==
 assert.equal(neutralResourceBar.template.currentPath, "", "A barra genérica não deve vir vinculada a PV ou outro recurso");
 assert.equal(neutralResourceBar.template.maxPath, "", "O valor máximo da barra genérica deve ser configurado na instância");
 assert.equal(neutralResourceBar.template.sheetCode, "", "A barra genérica não deve carregar o código PV por padrão");
-assert.equal(neutralResourceBar.template.sheetContent1, "Recurso", "A barra genérica deve usar um rótulo neutro");
+assert.equal(neutralResourceBar.template.sheetContent1, "", "A barra genérica não deve exibir rótulo");
 const formulaTestActor = { system: { identity: { level: 4 }, attributes: { for: 3 }, combat: { mb: 2 }, skills: { athletics: { proficientLevel: 2 } } } };
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "{{attributes.for.value}} + ({{combat.mb * skills.athletics.proficientLevel}})"), 7, "A fórmula com interpolação em cada parcela deve calcular corretamente");
 assert.equal(evaluateNexusSkillFormula(formulaTestActor, "athletics", "@FOR + (@MB*{{skills.athletics.proficientLevel}})"), 7, "Atalhos @FOR e @MB devem funcionar em fórmulas de perícia");
@@ -2420,8 +2420,8 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
 
 assert.match(template,/data-library-scope="core"[^>]*>[\s\S]*?<span>Padrão<\/span>/,"A origem padrão deve manter o nome Padrão");
 assert.match(template,/data-library-scope="personal"[^>]*>[\s\S]*?<span>Pessoais<\/span>/,"A origem pessoal deve ser nomeada Pessoais");
-assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="core">Padrão<\/option>/,"O filtro padrão deve usar o mesmo nome da navegação");
-assert.match(template,/data-library-origin-filter[^>]*>[\s\S]*?<option value="mine">Pessoais<\/option>/,"O filtro pessoal deve usar o mesmo nome da navegação");
+assert.doesNotMatch(template,/data-library-origin-filter/,"A origem não deve ser filtrada por select genérico");
+assert.doesNotMatch(template,/data-library-collection-filter/,"A coleção não deve usar o filtro genérico de tipo/itens");
 assert.match(libraryView,/label\.textContent=asset\.label;meta\.append\(label\);card\.append\(preview,meta\)/,"Cada cartão de componente deve exibir seu título abaixo da prévia");
 assert.match(css,/nexus-library-asset-meta strong[\s\S]*white-space:normal!important/,"Os títulos dos cartões devem permanecer visíveis em até duas linhas");
 
@@ -2447,9 +2447,26 @@ assert.match(libraryView,/makePanel\("behavior"/,"O Inspector deve oferecer seç
 assert.match(libraryView,/makePanel\("advanced"/,"O Inspector deve oferecer seção avançada");
 assert.match(libraryView,/"libraryProperties"[\s\S]*"libraryFunctions"/,"A leitura de compatibilidade deve incluir as flags legadas de Propriedades e Funções");
 assert.match(libraryView,/registry\?\.register/,"Alterações de metadados lógicos devem atualizar o registry em memória");
-assert.match(template,/data-library-card-size/,"A seleção de tamanho dos cartões deve estar disponível na interface");
-assert.match(template,/data-library-origin-filter/,"A origem deve ser selecionada por controle compacto");
-assert.match(template,/data-library-collection-filter/,"Favoritos e recentes devem ser selecionados por controle compacto");
+assert.doesNotMatch(template,/data-library-card-size/,"O tamanho dos cartões não deve ocupar a barra principal nesta etapa");
+assert.doesNotMatch(template,/data-library-origin-filter/,"A interface não deve exibir o seletor genérico de origem");
+assert.doesNotMatch(template,/data-library-collection-filter/,"A interface não deve exibir o seletor genérico de tipo/itens");
+assert.match(template,/data-library-filter-toggle/,"O filtro de etiquetas deve ser aberto por um botão contextual");
+assert.match(template,/data-library-tag-option="barra"/,"O filtro deve apresentar etiquetas como opções visuais");
+assert.doesNotMatch(template,/Todas as origens|Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
+assert.match(libraryView,/selectedTag/,"A seleção de etiqueta deve filtrar coleções salvas");
+assert.match(libraryView,/dataset\.libraryTags/,"Os recursos devem expor suas etiquetas como metadados filtráveis");
+assert.match(template,/role="meter" aria-valuemin="0" aria-valuemax="{{component.max}}"/,"A barra de recurso deve expor seus valores acessíveis sem renderizar texto");
+assert.match(css,/background:#8994a3!important/,"A barra de recurso deve usar preenchimento neutro");
+const resourceBarMarkup = template.slice(template.indexOf('{{else if (eq component.sheetVariant "resource")}}'), template.indexOf('{{else if (eq component.sheetVariant "derived")}}'));
+assert.doesNotMatch(resourceBarMarkup,/nexus-sheet-resource-label|nexus-sheet-resource-icon|nexus-sheet-resource-values/,"A barra de recurso não deve renderizar rótulo, ícone ou valores");
+const resourceBarDefinition = NEXUS_LIBRARY_CATALOG.assets.find(asset => asset.type === "sheet-resource");
+assert.ok(resourceBarDefinition, "A Biblioteca deve manter a definição do componente de barra");
+assert.deepEqual(resourceBarDefinition.tags, ["recurso", "barra", "indicador"]);
+assert.equal(resourceBarDefinition.template.sheetContent1, "");
+assert.equal(resourceBarDefinition.template.sheetContent2, "");
+assert.equal(resourceBarDefinition.template.sheetColor, "#8994a3");
+assert.equal(resourceBarDefinition.template.sheetTrackColor, "#293443");
+assert.equal(resourceBarDefinition.template.sheetOrientation, "horizontal");
 assert.doesNotMatch(template,/data-library-origin-filter="core"/,"A interface não deve manter botões textuais repetidos para a origem");
 assert.match(css,/scrollbar-gutter:stable/,"A Biblioteca deve reservar espaço para a barra de rolagem");
 assert.match(css,/\.application\.nexus-window \{ min-width: 800px !important; \}/,"A janela deve manter apenas a largura mínima, sem impor altura mínima que bloqueie a minimização");

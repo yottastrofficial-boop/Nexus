@@ -247,24 +247,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const tag=libraryPanel?.querySelector("[data-library-tag]")?.value??"all";
       const scope=sheet._libraryAssetScope??"core";let visible=0;
       libraryPanel?.querySelectorAll("[data-library-asset]").forEach(card=>{
-        const text=card.dataset.libraryAsset??"",matchText=!query||text.includes(query),matchTag=tag==="all"||text.includes(tag);
+        const text=card.dataset.libraryAsset??"",tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean),matchText=!query||text.includes(query),matchTag=tag==="all"||tags.includes(tag)||text.includes(tag);
         const matchFolder=card.dataset.libraryCategory===(sheet._libraryFolder??"core");
         const matchSource=(card.dataset.librarySource??"core")===scope;
         card.hidden=scope==="personal"||!(matchText&&matchTag&&matchFolder&&matchSource);if(!card.hidden)visible++;
       });
       const activeSection=libraryPanel?.querySelector("[data-library-section].active")?.dataset.librarySection??"assets";
+      const viewMode=sheet._libraryCollectionViewMode==="list"?"list":"grid";
+      libraryPanel?.querySelectorAll("[data-library-assets],[data-library-generic-items],[data-library-flows]").forEach(container=>{container.dataset.viewMode=viewMode;});
       const themeCards=[...(libraryPanel?.querySelectorAll("[data-library-theme],[data-library-custom-theme]")??[])];let visibleThemes=0;
-      themeCards.forEach(card=>{card.hidden=!!query&&!String(card.dataset.libraryAsset??"").includes(query);if(!card.hidden)visibleThemes++;});
+      themeCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!String(card.dataset.libraryAsset??"").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleThemes++;});
       const genericCards=[...(libraryPanel?.querySelectorAll("[data-library-entry]")??[])];let visibleGeneric=0;
-      genericCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleGeneric++;});
+      genericCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleGeneric++;});
       const flowCards=[...(libraryPanel?.querySelectorAll("[data-library-flow-id]")??[])];let visibleFlows=0;
       const layoutCards=[...(libraryPanel?.querySelectorAll("[data-library-saved-layout]")??[])];let visibleLayouts=0;
-      layoutCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleLayouts++;});
-      flowCards.forEach(card=>{card.hidden=!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query);if(!card.hidden)visibleFlows++;});
+      layoutCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleLayouts++;});
+      flowCards.forEach(card=>{const tags=(card.dataset.libraryTags??"").split(/\s+/).filter(Boolean);card.hidden=(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!tags.includes(tag));if(!card.hidden)visibleFlows++;});
       const personal=libraryPanel?.querySelector("[data-library-personal]");if(personal)personal.hidden=scope!=="personal";
       const assets=libraryPanel?.querySelector("[data-library-assets]");if(assets)assets.hidden=scope!=="core";
       const personalCount=(game.user?.getFlag?.("nexus","libraryComponents")??[]).length+(game.user?.getFlag?.("nexus","libraryGroups")??[]).length;
-      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=scope!=="personal"||(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query));});
+      libraryPanel?.querySelectorAll("[data-library-saved-component],[data-library-saved-group]").forEach(card=>{card.hidden=scope!=="personal"||(!!query&&!card.textContent.toLocaleLowerCase("pt-BR").includes(query))||(tag!=="all"&&!(card.dataset.libraryTags??"").split(/\s+/).includes(tag));});
       const count=libraryPanel?.querySelector("[data-library-count]");
       if(count)count.textContent=activeSection.startsWith("collection:")?`${visibleGeneric} itens`:activeSection==="themes"?`${visibleThemes} ${visibleThemes===1?"tema":"temas"}`:activeSection==="flows"?`${visibleFlows} ${visibleFlows===1?"fluxo":"fluxos"}`:activeSection==="layouts"?`${visibleLayouts} ${visibleLayouts===1?"layout":"layouts"}`:scope==="personal"?`${personalCount} ${personalCount===1?"elemento":"elementos"}`:`${visible} ${visible===1?"elemento":"elementos"}`;
       const heading=libraryPanel?.querySelector("[data-library-list-heading]");if(heading)heading.textContent=scope==="personal"?"Pessoais":"Padrão";
@@ -447,14 +449,43 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (libraryFilterFrame) return;
       libraryFilterFrame = requestAnimationFrame(() => { libraryFilterFrame = 0; filterLibrary(); });
     };
+    libraryPanel?.querySelectorAll("[data-library-collection-view-mode]")?.forEach(button => button.addEventListener("click", () => {
+      sheet._libraryCollectionViewMode = button.dataset.libraryCollectionViewMode === "list" ? "list" : "grid";
+      libraryPanel.querySelectorAll("[data-library-collection-view-mode]").forEach(item => { const active = item === button; item.classList.toggle("active", active); item.setAttribute("aria-pressed", String(active)); });
+      filterLibrary();
+    }));
     libraryPanel?.querySelector("[data-library-search]")?.addEventListener("input", event => {
        sheet._librarySearchQuery = event.currentTarget.value;
        scheduleLibraryFilter();
      });
-    libraryPanel?.querySelector("[data-library-tag]")?.addEventListener("change", event => {
-       sheet._libraryTagFilter = event.currentTarget.value;
-       scheduleLibraryFilter();
-     });
+    const filterButton = libraryPanel?.querySelector("[data-library-filter-toggle]");
+    const filterPopover = libraryPanel?.querySelector("[data-library-filter-popover]");
+    const tagInput = libraryPanel?.querySelector("[data-library-tag]");
+    const initialTag = tagInput?.value || sheet._libraryTagFilter || "all";
+    if (tagInput) tagInput.value = initialTag;
+    libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.classList.toggle("active", option.dataset.libraryTagOption === initialTag));
+    const initialTagLabel = filterButton?.querySelector("span");
+    if (initialTagLabel) initialTagLabel.textContent = initialTag === "all" ? "Etiquetas" : initialTag;
+    const initialTagCount = libraryPanel?.querySelector("[data-library-filter-count]");
+    if (initialTagCount) { initialTagCount.hidden = initialTag === "all"; initialTagCount.textContent = initialTag === "all" ? "" : "1"; }
+    filterButton?.addEventListener("click", () => {
+      const opening = filterPopover?.hidden ?? true;
+      if (filterPopover) filterPopover.hidden = !opening;
+      filterButton.setAttribute("aria-expanded", String(opening));
+    });
+    libraryPanel?.querySelectorAll("[data-library-tag-option]")?.forEach(option => option.addEventListener("click", () => {
+      const selected = option.dataset.libraryTagOption || "all";
+      if (tagInput) tagInput.value = selected;
+      sheet._libraryTagFilter = selected;
+      libraryPanel.querySelectorAll("[data-library-tag-option]").forEach(item => item.classList.toggle("active", item === option));
+      const count = libraryPanel.querySelector("[data-library-filter-count]");
+      if (count) { count.hidden = selected === "all"; count.textContent = selected === "all" ? "" : "1"; }
+      const label = filterButton?.querySelector("span");
+      if (label) label.textContent = selected === "all" ? "Etiquetas" : selected;
+      if (filterPopover) filterPopover.hidden = true;
+      filterButton?.setAttribute("aria-expanded", "false");
+      scheduleLibraryFilter();
+    }));
 
     // Os controles da Biblioteca ficam dentro de uma janela ApplicationV2 separada.
     // A delegação nativa no próprio painel acompanha o nó quando ele é movido para

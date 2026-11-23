@@ -7,22 +7,23 @@ export const NEXUS_LIBRARY_CATALOG = {
     {
       key: "core-health-bar",
       type: "sheet-resource",
-      label: "Indicador – Barra",
+      label: "Barra de recurso",
       category: "core",
       preview: "bar",
       template: {
         sheetCode: "",
-        sheetContent1: "Recurso",
+        sheetContent1: "",
         sheetContent2: "",
-        sheetColor: "#78b7e8",
-        sheetTrackColor: "#182432",
+        sheetColor: "#8994a3",
+        sheetTrackColor: "#293443",
         sheetOrientation: "horizontal",
         currentPath: "",
         maxPath: "",
         w: 220,
         h: 58
       },
-      keywords: "recurso indicador barra progresso valor atual máximo"
+      tags: ["recurso", "barra", "indicador"],
+      keywords: "recurso barra indicador progresso valor atual máximo"
     }
   ],
   themes: []
