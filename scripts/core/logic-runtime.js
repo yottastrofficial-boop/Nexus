@@ -5,6 +5,23 @@ const FORBIDDEN = new Set(["__proto__", "prototype", "constructor"]);
 const DEFAULT_LIMITS = Object.freeze({ maxActions: 32, maxConditions: 32, timeoutMs: 10000 });
 const ACTION_CONFIG_FIELD_TYPES = new Set(["text", "number", "checkbox", "textarea", "json", "select"]);
 const SAFE_CONFIG_KEY = /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/;
+const FORBIDDEN_CONFIG_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+function cloneInertConfigValue(value, depth = 0) {
+  if (depth > 12) throw new TypeError("Valor de configuração excede a profundidade permitida.");
+  if (value === null || typeof value === "string" || typeof value === "boolean") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (Array.isArray(value)) return value.map(item => cloneInertConfigValue(item, depth + 1));
+  if (!value || typeof value !== "object" || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) {
+    throw new TypeError("Valor de configuração precisa ser JSON inerte.");
+  }
+  const result = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (FORBIDDEN_CONFIG_KEYS.has(key)) throw new TypeError("Chave de configuração não permitida.");
+    result[key] = cloneInertConfigValue(item, depth + 1);
+  }
+  return result;
+}
 
 function normalizeActionConfigSchema(schema) {
   if (schema == null) return null;
@@ -17,7 +34,7 @@ function normalizeActionConfigSchema(schema) {
     const key = String(field.key ?? "").trim();
     const type = String(field.type ?? "text").toLowerCase();
     const label = String(field.label ?? "").trim();
-    if (!SAFE_CONFIG_KEY.test(key) || keys.has(key)) throw new TypeError("Chave visual inválida ou duplicada: " + key);
+    if (!SAFE_CONFIG_KEY.test(key) || FORBIDDEN_CONFIG_KEYS.has(key) || keys.has(key)) throw new TypeError("Chave visual inválida ou duplicada: " + key);
     if (!ACTION_CONFIG_FIELD_TYPES.has(type) || !label || label.length > 100) throw new TypeError("Definição visual inválida para o campo " + key + ".");
     keys.add(key);
     const normalized = { key, label, type, required: field.required === true };
@@ -55,11 +72,9 @@ function normalizeActionConfigSchema(schema) {
     }
     if (Object.prototype.hasOwnProperty.call(field, "defaultValue")) {
       try {
-        const value = structuredClone(field.defaultValue);
-        if (typeof value === "function" || (value && typeof value === "object" && !Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) throw new Error("not inert");
-        normalized.defaultValue = value;
+        normalized.defaultValue = cloneInertConfigValue(field.defaultValue);
       } catch {
-        throw new TypeError("Valor padrão não serializável no campo " + key + ".");
+        throw new TypeError("Valor padrão não serializável ou não inerte no campo " + key + ".");
       }
     }
     return Object.freeze(normalized);
@@ -94,12 +109,8 @@ function validateActionConfig(config, schema) {
     } else if (field.type === "select") {
       if (typeof value !== "string" || !field.options.some(option => option.value === value)) errors.push("Opção inválida para " + field.label + ".");
     } else if (field.type === "json") {
-      try {
-        const serialized = JSON.stringify(value);
-        if (serialized === undefined) throw new Error("not JSON");
-      } catch {
-        errors.push(field.label + " precisa conter dados JSON válidos.");
-      }
+      try { cloneInertConfigValue(value); }
+      catch { errors.push(field.label + " precisa conter dados JSON inertes válidos."); }
     }
   }
   return errors;
