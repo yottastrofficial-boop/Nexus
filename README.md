@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão publicada mais recente é a **1.0.0.89**. O pacote foi confirmado e publicado, mas isso não substitui os testes visuais e funcionais no Foundry VTT 14 build 360.
+A última versão publicada é a **1.0.0.88**. A **1.0.0.89** está sendo preparada como build de teste da ficha; a publicação só será considerada concluída após o GitHub Actions confirmar o pacote e a Release.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
