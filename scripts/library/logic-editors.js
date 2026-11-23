@@ -64,7 +64,7 @@ const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 function createFlowBuilder(form, payload, runtime) {
   const root = make("div", "nexus-library-flow-builder");
   const types = [...new Set(runtime?.actionTypes ?? [])];
-  const data = { triggers: clone(payload.triggers ?? []), conditions: clone(payload.conditions ?? []), actions: clone(payload.actions ?? []) };
+  const data = { triggers: Array.isArray(payload.triggers) ? clone(payload.triggers) : [], conditions: Array.isArray(payload.conditions) ? clone(payload.conditions) : [], actions: Array.isArray(payload.actions) ? clone(payload.actions) : [] };
   const sections = {};
   const field = (title, control, wide = false) => { const label = make("label", "nexus-library-flow-field" + (wide ? " wide" : "")); label.append(make("span", "", title), control); return label; };
   const text = (value, placeholder) => { const node = make("input", ""); node.type = "text"; node.value = String(value ?? ""); node.placeholder = placeholder ?? ""; return node; };
