@@ -374,7 +374,10 @@ function createFlowGraphBuilder(form, payload, runtime) {
   });
   addNode.addEventListener("click", () => {
     if (!graph) return;
-    graph.nodes.push(freshNode(addType.value));
+    const node = freshNode(addType.value);
+    node.x = Math.max(40, ...graph.nodes.map(item => (Number(item.x) || 0) + 280));
+    node.y = 40;
+    graph.nodes.push(node);
     graph = layoutFlowGraph(graph);
     render();
   });
