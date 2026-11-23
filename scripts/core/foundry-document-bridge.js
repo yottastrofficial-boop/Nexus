@@ -42,28 +42,35 @@ export function createFoundryDocumentBridge({
     });
   };
 
-  const matches = (record, query) => !query ||
-    record.name.toLocaleLowerCase().includes(query) ||
-    record.folder.toLocaleLowerCase().includes(query);
+  const matches = (record, query, tags = []) => {
+    const textMatch = !query ||
+      record.name.toLocaleLowerCase().includes(query) ||
+      record.folder.toLocaleLowerCase().includes(query);
+    if (!textMatch) return false;
+    const recordTags = [record.type, record.isCompendium ? "compendium" : "world"].map(value => String(value).toLocaleLowerCase());
+    return !tags.length || tags.every(tag => recordTags.includes(String(tag).toLocaleLowerCase()));
+  };
 
   const list = async ({
     type = "all",
     query = "",
     offset = 0,
     limit = 50,
-    compendiumIds = []
+    compendiumIds = [],
+    tags = []
   } = {}) => {
     const requestedTypes = type === "all" ? Object.keys(DOCUMENT_TYPES) : [String(type)];
     const unknown = requestedTypes.filter(key => !DOCUMENT_TYPES[key]);
     if (unknown.length) throw new Error("Tipo de documento Foundry desconhecido: " + unknown.join(", "));
     const search = cleanQuery(query);
+    const requestedTags = Array.isArray(tags) ? tags.map(value => String(value).toLocaleLowerCase()).slice(0, 32) : [];
     const start = Math.max(0, Math.floor(Number(offset) || 0));
     const pageSize = safeLimit(limit);
     const items = [];
     let total = 0;
     const errors = [];
     const append = record => {
-      if (!matches(record, search)) return;
+      if (!matches(record, search, requestedTags)) return;
       if (total >= start && items.length < pageSize) items.push(record);
       total++;
     };
