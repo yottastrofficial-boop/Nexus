@@ -8713,3 +8713,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-node textarea{resize:vertical}
 .nexus-library-graph-edges{display:grid;gap:8px;min-width:0}
 @media(max-width:640px){.nexus-library-graph-toolbar-actions{width:100%}.nexus-library-graph-node{width:210px}}
+
+.nexus-library-graph-connect-hint{margin:0;padding:7px 10px;border:1px solid rgba(116,150,204,.35);border-radius:6px;color:var(--nexus-muted-color,#aab5c4);font-size:11px}
+.nexus-library-graph-port{font-size:10px;padding:3px 6px;white-space:nowrap}
+.nexus-library-graph-port:disabled{opacity:.4;cursor:not-allowed}
+.nexus-library-graph-node.is-connect-source{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
+.nexus-library-graph-toolbar-actions select{max-width:125px}
