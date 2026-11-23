@@ -62,9 +62,9 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
-## Fundação da Biblioteca universal — implementação em branches de trabalho
+## Fundação e integração da Biblioteca universal — implementação em branches de trabalho
 
-A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal, sem alterar a versão publicada 1.0.0.90:
+A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal; e a branch `feature/library-explorer-catalog-integration-2026-11-23` conecta a visão universal do Explorer ao catálogo, sem alterar a versão publicada 1.0.0.90:
 
 - `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
 - `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
