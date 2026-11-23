@@ -308,7 +308,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
         for (const schemaField of schemaFields) {
           const key = node.id + "::" + schemaField.key;
           if (!Object.prototype.hasOwnProperty.call(node.action.config, schemaField.key) && Object.prototype.hasOwnProperty.call(schemaField, "defaultValue")) {
-            node.action.config[schemaField.key] = clone(schemaField.defaultValue);
+            node.action.config[schemaField.key] = structuredClone(schemaField.defaultValue);
           }
           const stored = node.action.config[schemaField.key];
           let control;
@@ -318,7 +318,9 @@ function createFlowGraphBuilder(form, payload, runtime) {
             control.checked = stored === true;
             control.addEventListener("change", () => setNodeConfig(node, schemaField.key, control.checked));
           } else if (schemaField.type === "select") {
-            control = makeSelect(stored ?? "", schemaField.options.map(option => [option.value, option.label]));
+            const options = schemaField.options.map(option => [option.value, option.label]);
+            if (stored != null && !options.some(option => option[0] === stored)) options.unshift([String(stored), "Valor atual indisponível: " + stored]);
+            control = makeSelect(stored ?? "", options);
             control.addEventListener("change", () => setNodeConfig(node, schemaField.key, control.value));
           } else if (schemaField.type === "textarea" || schemaField.type === "json") {
             control = make("textarea", "");
