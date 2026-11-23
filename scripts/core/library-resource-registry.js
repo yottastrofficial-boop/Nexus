@@ -1,3 +1,4 @@
+import { THEME_PALETTES } from "./theme.js";
 /**
  * NEXUS Universal Library Resource Registry.
  *
@@ -8,7 +9,7 @@
 
 const PROVIDER_ID = /^[a-z][a-z0-9._-]{1,63}$/i;
 const MAX_PAGE_SIZE = 50;
-const LOGIC_COLLECTIONS = new Set(["properties", "rules", "behaviors", "flows", "functions"]);
+const LOGIC_COLLECTION_TYPES = Object.freeze({ properties: "property", rules: "rule", behaviors: "behavior", flows: "flow", functions: "function" });
 const COLLECTION_KINDS = Object.freeze({
   components: "component",
   groups: "composition",
@@ -156,7 +157,7 @@ export function createLibraryResourceRegistry() {
           items,
           total: Math.max(items.length, Number(page?.total) || 0),
           hasMore: Boolean(page?.hasMore),
-          nextCursor: page?.nextCursor ?? null,
+          nextCursor: page?.nextCursor === null || page?.nextCursor === undefined ? null : cloneReference(page.nextCursor),
           error: "",
           warnings: Array.isArray(page?.errors) ? page.errors : []
         };
@@ -232,7 +233,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         resources.push({
           id: collection + ":" + String(entry.id),
           kind: resourceKind,
-          type: collection,
+          type: LOGIC_COLLECTION_TYPES[collection] ?? collection,
           name: entry.name ?? entry.label ?? entry.title ?? entry.id,
           description: entry.description ?? "",
           tags: entry.tags ?? [],
@@ -258,7 +259,11 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         capabilities: ["resolve"]
       });
     }
-    for (const theme of Array.isArray(catalog.themes) ? catalog.themes : []) {
+    const builtInThemes = [
+      ...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })),
+      ...(Array.isArray(catalog.themes) ? catalog.themes : [])
+    ];
+    for (const theme of builtInThemes) {
       resources.push({
         id: "builtin-theme:" + String(theme.id ?? theme.key),
         kind: "theme",
@@ -294,7 +299,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
       return (catalog.assets ?? []).find(item => String(item.key) === String(reference.key)) ?? null;
     }
     if (reference?.builtin === "theme") {
-      return (catalog.themes ?? []).find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
+      return [...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })), ...(catalog.themes ?? [])].find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
     }
     const collections = await getCollections();
     const collection = String(reference?.collection ?? "");
