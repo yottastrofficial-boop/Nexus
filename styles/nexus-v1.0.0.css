@@ -8689,3 +8689,27 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-edge{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:8px;padding:8px;border-radius:6px;background:var(--nexus-panel-background,rgba(128,128,128,.05));min-width:0}
 .nexus-library-graph-edge label{min-width:0}
 @media(max-width:640px){.nexus-library-graph-node,.nexus-library-graph-edge{grid-template-columns:minmax(0,1fr)}.nexus-library-graph-node-head{grid-column:1}}
+
+/* Flow graph canvas */
+.nexus-library-graph-toolbar-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nexus-library-graph-canvas-scroll{max-width:100%;min-height:360px;max-height:620px;overflow:auto;border:1px solid var(--nexus-border-color,rgba(128,128,128,.25));border-radius:8px;background-color:var(--nexus-panel-background,rgba(20,24,30,.35));background-image:radial-gradient(var(--nexus-border-color,rgba(128,128,128,.24)) .8px,transparent .8px);background-size:18px 18px}
+.nexus-library-graph-canvas{position:relative;min-width:720px;min-height:360px}
+.nexus-library-graph-wires{position:absolute;inset:0;z-index:0;overflow:visible;pointer-events:none;color:var(--nexus-muted-color,#9aa0aa)}
+.nexus-library-graph-wire{fill:none;stroke:currentColor;stroke-width:2;opacity:.85}
+.nexus-library-graph-wire.is-true{stroke:#58b889}.nexus-library-graph-wire.is-false{stroke:#d6a451}
+.nexus-library-graph-wire-label{font-size:11px;fill:currentColor;stroke:var(--nexus-panel-background,#20242b);stroke-width:4px;paint-order:stroke;dominant-baseline:middle;text-anchor:middle}
+.nexus-library-graph-canvas-nodes{position:absolute;inset:0;z-index:1;pointer-events:none}
+.nexus-library-graph-node{position:absolute;width:220px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px;border:1px solid var(--nexus-border-color,rgba(128,128,128,.4));border-radius:8px;background:var(--nexus-background, #202630);box-shadow:0 5px 16px rgba(0,0,0,.22);pointer-events:auto;min-width:0}
+.nexus-library-graph-node-start{border-color:#5b9d7a}.nexus-library-graph-node-condition{border-color:#b58b4a}.nexus-library-graph-node-action{border-color:#548fa4}.nexus-library-graph-node-end{border-color:#7771a8}
+.nexus-library-graph-node-head{grid-column:1/-1;display:flex;align-items:center;gap:5px;flex-wrap:wrap;cursor:grab;touch-action:none;user-select:none}
+.nexus-library-graph-node-head:active{cursor:grabbing}
+.nexus-library-graph-node-head strong{font-size:11px;flex:1 1 90px}
+.nexus-library-graph-node-head select{max-width:100px;font-size:10px}
+.nexus-library-graph-node-head button{font-size:10px;padding:3px 6px}
+.nexus-library-graph-drag-handle{font-size:10px;color:var(--nexus-muted-color,#999);white-space:nowrap}
+.nexus-library-graph-node .wide{grid-column:1/-1}
+.nexus-library-graph-node .nexus-library-flow-field{min-width:0;font-size:10px}
+.nexus-library-graph-node input,.nexus-library-graph-node textarea,.nexus-library-graph-node select{width:100%;min-width:0;font-size:11px}
+.nexus-library-graph-node textarea{resize:vertical}
+.nexus-library-graph-edges{display:grid;gap:8px;min-width:0}
+@media(max-width:640px){.nexus-library-graph-toolbar-actions{width:100%}.nexus-library-graph-node{width:210px}}
