@@ -68,7 +68,7 @@ Temas padrão são somente leitura. Temas pessoais podem ser editados como defin
 ## Estado da implementação — 1.0.0.90
 
 Implementado nesta etapa:
-- visão universal de itens salvos, favoritos e recentes;
+- visão universal conectada ao catálogo de provedores (recursos NEXUS e referências de documentos Foundry), além de itens salvos, favoritos e recentes;
 - navegação sem agrupamentos técnicos separados por Lógica/Aparência/Outros;
 - pastas livres e pastas vinculadas a coleção;
 - chips de etiquetas derivados dos dados existentes;
