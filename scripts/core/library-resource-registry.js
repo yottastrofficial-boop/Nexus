@@ -139,7 +139,7 @@ export function createLibraryResourceRegistry() {
     const record = Object.freeze({
       id,
       label: cleanText(provider.label, 80) || id,
-      origin: cleanText(provider.origin, 48) || id,
+      origin: cleanText(provider.origin, 48) || (id === "nexus-library" ? "personal" : id === "foundry-documents" ? "world" : "module"),
       kinds: Object.freeze(Array.isArray(provider.kinds)
         ? [...new Set(provider.kinds.map(value => cleanText(value, 48)).filter(Boolean))]
         : []),
@@ -279,7 +279,7 @@ export function createLibraryResourceRegistry() {
   };
 
   const getProviders = () => Object.freeze([...providers.values()].map(provider => Object.freeze({
-    id: provider.id, label: provider.label, kinds: provider.kinds
+    id: provider.id, label: provider.label, origin: provider.origin, kinds: provider.kinds
   })));
 
   return Object.freeze({ register, list, resolve, getActions, executeAction, getProviders });
