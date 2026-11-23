@@ -155,6 +155,9 @@ export function createFoundryLogicEventBridge({ hooks = globalThis.Hooks, runtim
   let installed = false;
 
   const dispatch = (eventName, document, changes, options, userId) => {
+    // Hooks de documentos chegam a todos os clientes. Apenas o GM executa
+    // comportamentos de ciclo de vida para evitar efeitos colaterais duplicados.
+    if (gameRef?.user?.isGM !== true) return;
     if (!document || (typeof document !== "object" && typeof document !== "function")) return;
     let active = activeDocuments.get(document);
     if (!active) { active = new Set(); activeDocuments.set(document, active); }
