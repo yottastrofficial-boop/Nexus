@@ -254,7 +254,9 @@ export function createLibraryResourceRegistry() {
     const providerId = cleanText(reference?.providerId ?? resource?.providerId, 64);
     const provider = providers.get(providerId);
     if (typeof provider?.getActions !== "function") return Object.freeze([]);
-    const actions = provider.getActions(cloneReference(reference), resource);
+    let actions;
+    try { actions = provider.getActions(cloneReference(reference), resource); }
+    catch { return Object.freeze([]); }
     if (!Array.isArray(actions)) return Object.freeze([]);
     return Object.freeze(actions.map(action => Object.freeze({
       id: cleanText(action?.id, 48),
