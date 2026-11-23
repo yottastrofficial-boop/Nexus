@@ -138,7 +138,7 @@ test("executor nega escrita sem OWNER e rejeita caminhos fora de system", async 
   registry.register({
     id: "nexus.test.flow.denied",
     type: "flow",
-    payload: { actions: [{ id: "set-name", type: "nexus.actor.update", config: { path: "name", value: "Alterado" } }] }
+    payload: { actions: [{ id: "set-name", type: "nexus.actor.update", config: { path: "system.identity.alias", value: "Alterado" } }] }
   });
   registry.register({
     id: "nexus.test.behavior.denied",
@@ -223,7 +223,7 @@ test("runFlow preserva enabled e permissões quando recebe um ativo do Registry"
   registry.register({
     id: "nexus.test.behavior.permission",
     type: "behavior",
-    payload: { event: "test.event", flowId: "nexus.test.flow.permission" }
+    payload: { event: "actor.updated", flowId: "nexus.test.flow.permission" }
   });
   const runtime = createLogicRuntime({ registry });
   let calls = 0;
@@ -237,7 +237,7 @@ test("runFlow preserva enabled e permissões quando recebe um ativo do Registry"
   assert.equal(disabled.status, "disabled");
   const protectedResult = await runtime.runFlow(registry.resolve("nexus.test.flow.permission", "flow"), {});
   assert.equal(protectedResult.status, "failed");
-  const dispatched = await runtime.dispatch("test.event", {});
+  const dispatched = await runtime.dispatch("actor.updated", {});
   assert.equal(dispatched[0].result.status, "failed");
   assert.equal(calls, 0);
 });
@@ -262,4 +262,29 @@ test("permissões usam o usuário que originou o Hook, não os privilégios do G
     permissions: ["actor:update"], effects: ["write"],
     context: { actor, userId: "gm-1" }
   }), true);
+});
+
+test("executor rejeita caminhos fora de system mesmo sem schema prévio", async () => {
+  const registry = createLogicRegistry();
+  const runtime = createLogicRuntime({ registry });
+  const hooks = createHooks();
+  const user = { id: "gm-path", isGM: true };
+  const integration = installFoundryLogicIntegration({
+    hooks, runtime, gameRef: { user, users: { get: id => id === user.id ? user : null } },
+    constRef: { DOCUMENT_OWNERSHIP_LEVELS: { OBSERVER: 2, OWNER: 3 } },
+    logger: { warn() {}, error() {} }
+  });
+  const updates = [];
+  const actor = {
+    documentName: "Actor",
+    uuid: "Actor.invalid-path",
+    async update(changes) { updates.push(changes); }
+  };
+  const result = await runtime.runFlow({
+    actions: [{ id: "bad-path", type: "nexus.actor.update", config: { path: "name", value: "Não permitido" } }]
+  }, { actor, document: actor });
+  assert.equal(result.status, "failed");
+  assert.match(result.errors[0].message, /Caminho de atualização não permitido/);
+  assert.equal(updates.length, 0);
+  integration.uninstall();
 });
