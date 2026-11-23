@@ -1379,8 +1379,8 @@ assert.match(libraryView,/createLibraryFolder/,"A Biblioteca deve criar pastas p
 assert.match(libraryView,/toggleLibraryFavorite/,"A Biblioteca deve permitir favoritar itens");
 assert.match(libraryView,/recordLibraryRecent/,"A seleção deve alimentar a lista de recentes");
 assert.match(libraryView,/data-library-save-metadata/,"O inspector deve salvar metadados editáveis");
-assert.match(template,/data-library-collection-filter[^>]*>[\s\S]*?<option value="favorites">Favoritos<\/option>/,"A Biblioteca deve oferecer filtro de favoritos");
-assert.match(template,/data-library-collection-filter[^>]*>[\s\S]*?<option value="recent">Recentes<\/option>/,"A Biblioteca deve oferecer filtro de recentes");
+assert.doesNotMatch(template,/data-library-collection-filter/,"Favoritos e recentes não devem usar select genérico nesta barra");
+assert.doesNotMatch(template,/data-library-collection-filter/,"Favoritos e recentes não devem usar select genérico nesta barra");
 assert.match(template,/data-library-create-folder/,"A interface deve expor a criação de pastas");
 assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
 assert.match(template,/data-library-custom-folders/,"Pastas personalizadas devem aparecer na navegação lateral");
