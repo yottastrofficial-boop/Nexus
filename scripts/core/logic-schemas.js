@@ -72,6 +72,10 @@ function validateFlowGraph(graph, errors) {
     if (!SAFE_ID.test(id) || nodes.has(id)) errors.push("flow.graph.nodes[" + index + "].id inválido ou duplicado.");
     else nodes.set(id, node);
     if (!["start", "condition", "action", "end"].includes(node.type)) errors.push("flow.graph.nodes[" + index + "].type não reconhecido.");
+    if ((node.x !== undefined && (!Number.isFinite(node.x) || node.x < 0 || node.x > 4800)) ||
+        (node.y !== undefined && (!Number.isFinite(node.y) || node.y < 0 || node.y > 4800))) {
+      errors.push("flow.graph.nodes[" + index + "] possui coordenadas visuais inválidas.");
+    }
     if (node.type === "condition") checkExpression(node.expression, "flow.graph.nodes[" + index + "].expression", errors, "boolean");
     if (node.type === "action") {
       if (!isRecord(node.action)) errors.push("flow.graph.nodes[" + index + "].action precisa ser um objeto.");
