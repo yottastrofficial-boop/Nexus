@@ -188,7 +188,7 @@ export function createLibraryBackupService({
       const previewSignature = JSON.stringify({ added: previewAdded, skipped: previewSkipped, conflicts: plan.report.conflicts });
       const currentSignature = JSON.stringify({ added: merged.report.added, skipped: merged.report.skipped, conflicts: merged.report.conflicts });
       if (previewSignature !== currentSignature) {
-        throw new Error("A Biblioteca mudou desde a prévia. Prévia: " + previewSignature + " | Atual: " + currentSignature);
+        throw new Error("A Biblioteca mudou desde a prévia. Gere uma nova prévia antes de importar.");
       }
       committedReport = merged.report;
       return merged.store;
