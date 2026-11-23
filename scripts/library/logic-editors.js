@@ -122,6 +122,7 @@ function createFlowBuilder(form, payload, runtime) {
 function createFlowGraphBuilder(form, payload, runtime) {
   const root = make("section", "nexus-library-graph-builder");
   let graph = isRecord(payload.graph) ? clone(payload.graph) : null;
+  if (graph) { graph.nodes = Array.isArray(graph.nodes) ? graph.nodes : []; graph.edges = Array.isArray(graph.edges) ? graph.edges : []; }
   const toolbar = make("div", "nexus-library-graph-toolbar");
   const title = make("div", "");
   title.append(make("strong", "", "Grafo de execução"), make("small", "", "Construa caminhos com nós e conexões explícitas. O grafo tem prioridade sobre a sequência legada."));
@@ -185,7 +186,8 @@ function createFlowGraphBuilder(form, payload, runtime) {
         const availableTypes = [...actionTypes]; if (node.action?.type && !availableTypes.includes(node.action.type)) availableTypes.push(node.action.type);
         const actionType = availableTypes.length ? makeSelect(node.action?.type ?? "", availableTypes.map(value => [value, value])) : makeText(node.action?.type ?? "", "namespace.executor");
         actionType.addEventListener("change", () => { node.action.type = actionType.value; });
-        const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = JSON.stringify(node.action?.config ?? {}, null, 2);
+        const config = make("textarea", ""); config.rows = 3; config.spellcheck = false; config.value = node.action?.__configDraft ?? JSON.stringify(node.action?.config ?? {}, null, 2);
+        config.addEventListener("input", () => { node.action.__configDraft = config.value; });
         const enabled = make("input", ""); enabled.type = "checkbox"; enabled.checked = node.action?.enabled !== false;
         enabled.addEventListener("change", () => { node.action.enabled = enabled.checked; });
         const active = make("label", "nexus-library-flow-enabled"); active.append(enabled, make("span", "", "Ação ativa"));
@@ -246,6 +248,7 @@ function createFlowGraphBuilder(form, payload, runtime) {
           let config; try { config = JSON.parse(control.value || "{}"); } catch { throw new Error("Configuração do nó de ação deve ser JSON válido."); }
           if (!isRecord(config)) throw new Error("Configuração do nó de ação deve ser um objeto JSON.");
           node.action.config = config;
+          delete node.action.__configDraft;
         }
         if (caption === "Ação ativa" && node.action) node.action.enabled = control.checked;
       }
