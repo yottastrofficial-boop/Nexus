@@ -84,13 +84,16 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `scripts/core/logic-runtime.js` executa fluxos declarativos em sequência, avalia condições pelo parser seguro existente, aplica permissões por callback, limita ações/condições/tempo e retorna diagnóstico por ação.
 - Funções e ações são registradas explicitamente por código confiável; o runtime não interpreta JavaScript importado.
 - `game.nexus.logic.registerAction()` e `registerFunction()` expõem o registro de executores confiáveis a módulos; `runFlow()` e `dispatch()` expõem execução e despacho, e `getExecutors()` lista os IDs disponíveis. Nenhum executor padrão é presumido até que o Core defina operações e permissões específicas.
+- `foundry-logic-integration.js` conecta Hooks de criação/atualização/remoção de Actors, Items, Tokens e Combats, além de início/rodada/turno de combate, aos eventos `actor.*`, `item.*`, `token.*` e `combat.*` dos Comportamentos.
+- O despacho de eventos de ciclo de vida ocorre somente no GM ativo para evitar execução duplicada entre clientes. O executor inicial `nexus.actor.update` grava exclusivamente em caminhos `system.*`, exige propriedade OWNER e aceita somente valores JSON inertes.
+- O bridge limita reentrada por documento/evento, profundidade de encadeamento e captura falhas por Comportamento para que um fluxo defeituoso não interrompa os demais.
 - O armazenamento da Biblioteca passou ao schema 2, com coleções próprias para propriedades e funções. Backups da Biblioteca incluem essas coleções.
 
 ### Limitações restantes
 
 - A interface ainda não apresenta Propriedades, Regras, Comportamentos, Fluxos e Funções em uma única área visual Lógica.
 - Os schemas específicos de cada subtipo precisam ser registrados pelo Core ou por módulos; o registry fornece o contrato e a validação plugável.
-- A execução de ações depende de executores registrados e de um verificador de permissões configurado pelo sistema/módulo.
+- O Core fornece o executor `nexus.actor.update`; demais ações continuam dependendo de executores confiáveis registrados pelo Core ou por módulos. Eventos de ciclo de vida rodam apenas no GM ativo; interações locais de componentes continuam no mecanismo próprio da ficha.
 
 
 ## Implementação dos editores — Biblioteca universal
