@@ -443,6 +443,13 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
       detail.append(heading, form);
     };
     panel.addEventListener("click", async event => {
+      const openGlobalLibrary = event.target.closest("[data-library-open-global]");
+      if (openGlobalLibrary && panel.contains(openGlobalLibrary)) {
+        event.preventDefault();
+        try { await game.nexus?.library?.open?.(); }
+        catch (error) { ui.notifications?.error?.("Não foi possível abrir a Biblioteca: " + error.message); }
+        return;
+      }
       const folderDeleteButton = event.target.closest("[data-library-folder-delete]");
       if (folderDeleteButton && panel.contains(folderDeleteButton)) {
         event.preventDefault();
