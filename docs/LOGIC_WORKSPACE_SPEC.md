@@ -97,6 +97,6 @@ Coleções antigas de rules, behaviors e flows serão convertidas ao envelope co
 - `scripts/core/logic-schemas.js` registra validadores estruturais para Propriedades, Regras, Comportamentos, Fluxos e Funções.
 - O parser seguro do Core valida expressões; regras aceitam resultados booleanos, numéricos ou textuais conforme o tipo declarado.
 - `LogicRegistry.validateAsset()` permite validar rascunhos sem registrar ou persistir o ativo. O salvamento valida antes de gravar.
-- `scripts/library/logic-editors.js` fornece editores especializados iniciais para os cinco subtipos. Fluxos editam gatilhos, condições e ações como dados JSON declarativos; Funções editam assinatura/referência, nunca código executável.
+- `scripts/library/logic-editors.js` fornece editores especializados para os cinco subtipos. Fluxos possuem construtor visual declarativo para gatilhos, condições e ações, preservando IDs e payloads JSON; a configuração específica de cada executor continua em JSON. Funções editam assinatura/referência, nunca código executável.
 - O Inspector da janela independente integra esses editores e preserva o contrato de provedores.
 - Limitação restante: um construtor visual avançado de nós/ações e executores padrão do Core ainda exigem contratos específicos e testes ponta a ponta. Tipos de ação/função desconhecidos permanecem inertes até que um módulo confiável registre a implementação.
