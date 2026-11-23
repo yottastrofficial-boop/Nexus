@@ -550,7 +550,15 @@ function createFlowGraphBuilder(form, payload, runtime) {
       moveButton.addEventListener("click", () => {
         node.x = Math.max(0, Math.min(4800, (Number(node.x) || 0) + dx));
         node.y = Math.max(0, Math.min(4800, (Number(node.y) || 0) + dy));
-        render();
+        const card = [...nodesWrap.querySelectorAll("[data-node-id]")].find(item => item.dataset.nodeId === node.id);
+        if (card) {
+          card.style.left = node.x + "px";
+          card.style.top = node.y + "px";
+        }
+        const nextSize = getFlowGraphCanvasSize(graph);
+        canvas.style.width = nextSize.width + "px";
+        canvas.style.height = nextSize.height + "px";
+        drawEdges(nextSize);
       });
       moveGroup.append(moveButton);
     }
@@ -649,7 +657,12 @@ function createFlowGraphBuilder(form, payload, runtime) {
       const edit = make("button", "nexus-library-flow-add", node.id === selectedNodeId ? "Selecionado" : "Editar");
       edit.type = "button";
       edit.setAttribute("aria-pressed", node.id === selectedNodeId ? "true" : "false");
-      edit.addEventListener("click", () => { selectedNodeId = node.id; render(); });
+      edit.addEventListener("click", () => {
+        selectedNodeId = node.id;
+        render();
+        const selectedCard = [...nodesWrap.querySelectorAll("[data-node-id]")].find(item => item.dataset.nodeId === node.id);
+        selectedCard?.querySelector('button[aria-pressed="true"]')?.focus();
+      });
       head.append(edit);
       const type = makeSelect(node.type, node.type === "start" ? [["start", "Início"]] : nodeTypeOptions.map(([key, label]) => [key, label]));
       type.disabled = node.type === "start";
@@ -681,7 +694,16 @@ function createFlowGraphBuilder(form, payload, runtime) {
       drag.setAttribute("aria-hidden", "true");
       head.append(drag);
       card.addEventListener("keydown", event => {
-        if (event.target !== card || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+        if (event.target !== card) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectedNodeId = node.id;
+          render();
+          const selectedCard = [...nodesWrap.querySelectorAll("[data-node-id]")].find(item => item.dataset.nodeId === node.id);
+          selectedCard?.querySelector('button[aria-pressed="true"]')?.focus();
+          return;
+        }
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
         event.preventDefault();
         const step = event.shiftKey ? 80 : 20;
         if (event.key === "ArrowLeft") node.x = Math.max(0, (Number(node.x) || 0) - step);
