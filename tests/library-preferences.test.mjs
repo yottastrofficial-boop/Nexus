@@ -7,7 +7,12 @@ import {
   removeLibraryFolder,
   assignLibraryEntryFolder,
   toggleLibraryFavorite,
-  recordLibraryRecent
+  recordLibraryRecent,
+  createLibraryCollection,
+  renameLibraryCollection,
+  toggleLibraryCollectionResource,
+  removeLibraryCollection,
+  normalizeLibraryPreferences
 } from "../scripts/core/library-preferences.js";
 
 test("pastas universais podem ser criadas, renomeadas e removidas sem apagar recursos", () => {
@@ -41,4 +46,24 @@ test("favoritos e recentes aceitam identidades de provedores diferentes", () => 
   preferences = recordLibraryRecent(preferences, "world-flows", "flow-1");
   assert.deepEqual(preferences.favorites, ["foundry-documents:Actor.abc"]);
   assert.deepEqual(preferences.recent, ["world-flows:flow-1"]);
+});
+
+test("coleções universais agrupam referências de provedores e tipos diferentes", () => {
+  const legacy = { schemaVersion: 1, folders: [], assignments: {}, favorites: [], recent: [] };
+  const migrated = normalizeLibraryPreferences(legacy);
+  assert.equal(migrated.schemaVersion, 2);
+  assert.deepEqual(migrated.collections, []);
+
+  const created = createLibraryCollection(migrated, { id: "collection-session", name: "Sessão" });
+  let preferences = toggleLibraryCollectionResource(created.preferences, "collection-session", "nexus-library:components:health");
+  preferences = toggleLibraryCollectionResource(preferences, "collection-session", "foundry-documents:Actor.abc");
+  preferences = toggleLibraryCollectionResource(preferences, "collection-session", "nexus-library:world-flows:flow-1");
+  assert.equal(preferences.collections[0].resources.length, 3);
+
+  preferences = renameLibraryCollection(preferences, "collection-session", "Preparação");
+  assert.equal(preferences.collections[0].name, "Preparação");
+  preferences = toggleLibraryCollectionResource(preferences, "collection-session", "foundry-documents:Actor.abc");
+  assert.equal(preferences.collections[0].resources.length, 2);
+  preferences = removeLibraryCollection(preferences, "collection-session");
+  assert.equal(preferences.collections.length, 0);
 });
