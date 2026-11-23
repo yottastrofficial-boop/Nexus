@@ -7,7 +7,7 @@ export const NEXUS_LIBRARY_CATALOG = {
     {
       key: "core-health-bar",
       type: "sheet-resource",
-      label: "Indicador – Barra",
+      label: "Barra de recurso",
       category: "core",
       preview: "bar",
       template: {
@@ -23,7 +23,7 @@ export const NEXUS_LIBRARY_CATALOG = {
         h: 58
       },
       tags: ["recurso", "barra", "indicador"],
-      keywords: "recurso indicador barra progresso valor atual máximo"
+      keywords: "recurso barra indicador progresso valor atual máximo"
     }
   ],
   themes: []
