@@ -57,3 +57,20 @@ test("editor visual de fluxo salva gatilhos, condições e ações como dados es
   assert.equal(payload.actions[0].config.value, 2);
   assert.equal(payload.execution.retries, 1);
 });
+
+
+test("editor preserva grafo de Fluxo e permite removê-lo explicitamente", () => {
+  const graph = {
+    entryNodeId: "start-node",
+    nodes: [{ id: "start-node", type: "start" }, { id: "end-node", type: "end" }],
+    edges: [{ from: "start-node", to: "end-node", when: "next" }]
+  };
+  const withGraph = buildLogicEditorPayload("flow", {}, {
+    triggers: "[]", conditions: "[]", actions: "[]", conditionJoin: "all", onError: "stop", graph
+  });
+  assert.deepEqual(withGraph.graph, graph);
+  const withoutGraph = buildLogicEditorPayload("flow", { graph }, {
+    triggers: "[]", conditions: "[]", actions: "[]", conditionJoin: "all", onError: "stop", graph: null
+  });
+  assert.equal(Object.hasOwn(withoutGraph, "graph"), false);
+});
