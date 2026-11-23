@@ -8265,3 +8265,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-toolbar-unified .nexus-library-search-wrap { flex:1 1 100%!important; width:100%!important; }
   .nexus-library-toolbar-unified .nexus-library-count { display:none!important; }
 }
+
+/* A barra de recurso é neutra por definição; valores são representados apenas pelo preenchimento. */
+.nexus-sheet-resource-preview .nexus-sheet-resource-track { background:#293443!important; }
+.nexus-sheet-resource-preview .nexus-sheet-resource-track>i { background:#8994a3!important; }
