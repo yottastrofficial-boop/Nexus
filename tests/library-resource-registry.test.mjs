@@ -27,6 +27,7 @@ store.collections.media.push({
   tags: ["mapa"],
   url: "https://example.invalid/map.webp"
 });
+store.collections.properties.push({ id: "property-strength", name: "Força", type: "property", payload: { path: "system.attributes.for" } });
 store.collections.behaviors.push({
   id: "behavior-open",
   name: "Abrir painel",
@@ -95,6 +96,9 @@ const duplicateResult = await nexusProvider.executeAction("duplicate", component
 assert.equal(duplicateResult.duplicated, true);
 assert.notEqual(duplicateResult.entry.id, "component-health");
 assert.equal(duplicateResult.entry.name, "Indicador de vitalidade (cópia)");
+const duplicateProperty = await nexusProvider.executeAction("duplicate", { providerId: "nexus-library", collection: "properties", id: "property-strength" });
+assert.match(duplicateProperty.entry.id, /^nexus\\.personal\\.property\\.copy-/,
+  "IDs duplicados de propriedades devem usar o tipo singular válido no LogicRegistry.");
 const deleteResult = await nexusProvider.executeAction("delete", {
   providerId: "nexus-library",
   collection: "components",
