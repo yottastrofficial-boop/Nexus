@@ -50,7 +50,7 @@ export function layoutFlowGraph(graph, { force = false, columnGap = 280, rowGap 
   return next;
 }
 
-export function getFlowGraphCanvasSize(graph, { nodeWidth = 220, nodeHeight = 150, padding = 80 } = {}) {
+export function getFlowGraphCanvasSize(graph, { nodeWidth = 220, nodeHeight = 240, padding = 80 } = {}) {
   const nodes = Array.isArray(graph?.nodes) ? graph.nodes : [];
   return {
     width: Math.max(720, ...nodes.map(node => (Number(node.x) || 0) + nodeWidth + padding)),
