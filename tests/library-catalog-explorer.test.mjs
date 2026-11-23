@@ -1,3 +1,4 @@
+import test from "node:test";
 import assert from "node:assert/strict";
 import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect } from "../scripts/library/catalog-explorer.js";
 
