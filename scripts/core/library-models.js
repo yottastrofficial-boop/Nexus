@@ -21,7 +21,7 @@ function cloneSerializable(value) {
   return result;
 }
 
-export function createLibraryDefinition({ id, type, label, settings = {}, version = 1, metadata = {} } = {}) {
+export function createLibraryDefinition({ id, type, label, settings = {}, version = 1, metadata = {}, history = [] } = {}) {
   const definitionId = String(id ?? "").trim();
   const componentType = String(type ?? "").trim();
   if (!definitionId || !componentType) throw new Error("A definição precisa de identificador e tipo.");
@@ -35,7 +35,11 @@ export function createLibraryDefinition({ id, type, label, settings = {}, versio
     type: componentType,
     label: String(label ?? "Componente").trim().slice(0, 80) || "Componente",
     settings: cleanSettings,
-    metadata: cloneSerializable(metadata)
+    metadata: cloneSerializable(metadata),
+    history: (Array.isArray(history) ? history : []).map(entry => ({
+      version: Math.max(1, Number(entry?.version) || 1),
+      settings: cloneSerializable(entry?.settings ?? {})
+    })).filter(entry => entry.version < Math.max(1, Number(version) || 1))
   };
 }
 
@@ -65,7 +69,6 @@ export function createLibraryComponentInstance(definition, {
     y: Number.isFinite(y) ? y : 0,
     libraryDefinitionId: String(definition.id),
     libraryDefinitionVersion: Math.max(1, Number(definitionVersion ?? definition.version) || 1),
-    libraryDefinitionBaseline: cloneSerializable(definition.settings ?? {}),
     libraryOverrides: cleanOverrides
   };
 }
@@ -109,7 +112,13 @@ export function getLibraryDefinitionUpdateStatus(definition, instance) {
   if (String(instance.type) !== String(definition.type)) return "type-mismatch";
   const definitionVersion = Math.max(1, Number(definition.version) || 1);
   const instanceVersion = Math.max(1, Number(instance.libraryDefinitionVersion) || 1);
-  if (definitionVersion > instanceVersion) return instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object" ? "update-available" : "baseline-missing";
+  if (definitionVersion > instanceVersion) {
+    const hasInstanceBaseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object";
+    const hasDefinitionHistory = Array.isArray(definition.history) && definition.history.some(entry =>
+      Math.max(1, Number(entry?.version) || 1) === instanceVersion && entry?.settings && typeof entry.settings === "object"
+    );
+    return hasInstanceBaseline || hasDefinitionHistory ? "update-available" : "baseline-missing";
+  }
   if (definitionVersion < instanceVersion) return "instance-newer";
   return "current";
 }
@@ -123,9 +132,12 @@ export function updateLibraryComponentInstance(definition, instance) {
   if (!["update-available", "current"].includes(status)) {
     throw new Error("Esta instância não pode receber a definição selecionada: " + status);
   }
+  const historical = Array.isArray(definition.history)
+    ? definition.history.find(entry => Math.max(1, Number(entry?.version) || 1) === Math.max(1, Number(instance.libraryDefinitionVersion) || 1))
+    : null;
   const baseline = instance.libraryDefinitionBaseline && typeof instance.libraryDefinitionBaseline === "object"
     ? instance.libraryDefinitionBaseline
-    : definition.settings ?? {};
+    : historical?.settings ?? definition.settings ?? {};
   const overrides = collectLibraryInstanceOverrides({ settings: baseline }, instance);
   const updated = createLibraryComponentInstance(definition, {
     id: instance.id,
