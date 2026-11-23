@@ -507,13 +507,16 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   assert.equal(invalid.actions[0].status, "invalid-config");
   assert.equal(calls.length, 0);
 
+  const storedConfig = { target: "PV", amount: 3, mode: "add", metadata: null };
   const missing = await runtime.runFlow({
-    actions: [{ id: "configured", type: "test.configured", config: { target: "PV", amount: 3, mode: "add", metadata: null } }]
+    actions: [{ id: "configured", type: "test.configured", config: storedConfig }]
   });
   assert.equal(missing.status, "success");
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0].defaults, { nested: { enabled: true } });
   assert.equal(calls[0].requiredFlag, false);
+  assert.equal(Object.prototype.hasOwnProperty.call(storedConfig, "defaults"), false);
+  assert.equal(Object.prototype.hasOwnProperty.call(storedConfig, "requiredFlag"), false);
 
   const graphInvalid = await runtime.simulateFlow({
     graph: {
@@ -532,6 +535,27 @@ test("schemas visuais de executores são declarativos, isolados e validados em e
   assert.equal(graphInvalid.status, "invalid");
   assert.equal(graphInvalid.actions[0].status, "invalid-config");
   assert.equal(calls.length, 1);
+
+  const graphDefaulted = await runtime.runFlow({
+    graph: {
+      entryNodeId: "start",
+      nodes: [
+        { id: "start", type: "start" },
+        { id: "action", type: "action", action: {
+          id: "configured-graph", type: "test.configured",
+          config: { target: "PM", amount: 4, mode: "subtract", metadata: null }
+        } },
+        { id: "end", type: "end" }
+      ],
+      edges: [
+        { from: "start", to: "action", when: "next" },
+        { from: "action", to: "end", when: "next" }
+      ]
+    }
+  });
+  assert.equal(graphDefaulted.status, "success");
+  assert.deepEqual(calls[1].defaults, { nested: { enabled: true } });
+  assert.equal(calls[1].requiredFlag, false);
 
   assert.throws(() => runtime.registerAction({
     type: "test.bad-schema",
