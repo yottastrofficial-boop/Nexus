@@ -58,6 +58,8 @@ export function createLibraryCatalogExplorer({
   let currentFolder = "";
   let currentTag = "all";
   let currentOrigin = "all";
+  let currentKind = "all";
+  let currentType = "all";
   let currentViewMode = "grid";
   let currentCardSize = "medium";
   let smartOffset = 0;
@@ -265,12 +267,14 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, folderLabel, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, origin = currentOrigin, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
     currentTag = tag;
     currentOrigin = origin;
+    currentKind = kind || "all";
+    currentType = type || "all";
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
     const version = ++requestVersion;
@@ -297,8 +301,8 @@ export function createLibraryCatalogExplorer({
       if (references.length) {
         page = await registry.list({
           query: currentQuery,
-          kind: "all",
-          type: "all",
+          kind: currentKind,
+          type: currentType,
           limit: PAGE_SIZE,
           references,
           tags: currentTag === "all" ? [] : [currentTag],
@@ -320,8 +324,8 @@ export function createLibraryCatalogExplorer({
     } else {
       page = await registry.list({
         query: currentQuery,
-        kind: "all",
-        type: "all",
+        kind: currentKind,
+        type: currentType,
         limit: PAGE_SIZE,
         cursor,
         tags: currentTag === "all" ? [] : [currentTag],
