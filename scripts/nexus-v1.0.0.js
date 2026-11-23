@@ -116,6 +116,7 @@ Hooks.once("init", () => {
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
   game.nexus.logic.registerFunction = descriptor => game.nexus.logic.runtime.registerFunction(descriptor);
   game.nexus.logic.runFlow = (flow, context) => game.nexus.logic.runtime.runFlow(flow, context);
+  game.nexus.logic.simulateFlow = (flow, context) => game.nexus.logic.runtime.simulateFlow(flow, context);
   game.nexus.logic.dispatch = (eventName, context) => game.nexus.logic.runtime.dispatch(eventName, context);
   game.nexus.logic.getExecutors = () => ({
     actions: game.nexus.logic.runtime.actionTypes,
