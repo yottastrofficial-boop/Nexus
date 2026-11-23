@@ -78,3 +78,40 @@ test("backup import merges into the canonical store, preserves world-flow scope 
   assert.equal(worldFlows.length, 1);
   assert.equal(worldFlows[0].name, "Fluxo do mundo");
 });
+
+test("importação recusa uma prévia obsoleta quando surge conflito antes da confirmação", async () => {
+  const sourceStore = createEmptyNexusLibraryStore();
+  sourceStore.collections.components.push({ id: "component-a", label: "Token", type: "token", settings: { w: 100, h: 100 } });
+  const sourceUser = makeUser(sourceStore);
+  const sourceService = createLibraryBackupService({
+    getUser: () => sourceUser,
+    getCatalog: () => ({ assets: [] }),
+    getThemePalettes: () => ({}),
+    getComponentTypes: () => ["token"]
+  });
+  const code = sourceService.exportCode();
+
+  const targetUser = makeUser();
+  const targetService = createLibraryBackupService({
+    getUser: () => targetUser,
+    getCatalog: () => ({ assets: [] }),
+    getThemePalettes: () => ({}),
+    getComponentTypes: () => ["token"]
+  });
+  const preview = targetService.prepareImport(code, {
+    createId: (collection, index) => collection + "-planned-" + index
+  });
+
+  const changed = targetUser.flags.get("libraryStore");
+  changed.collections.components.push({
+    id: "existing-component",
+    sourceId: "component-a",
+    label: "Já existe",
+    type: "token",
+    settings: { w: 50, h: 50 }
+  });
+  await targetUser.setFlag("nexus", "libraryStore", changed);
+
+  await assert.rejects(targetService.commitImport(preview), /Biblioteca mudou desde a prévia/);
+  assert.equal(targetUser.flags.get("libraryStore").collections.components[0].label, "Já existe");
+});
