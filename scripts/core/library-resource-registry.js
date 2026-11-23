@@ -10,6 +10,30 @@ import { THEME_PALETTES } from "./theme.js";
 const PROVIDER_ID = /^[a-z][a-z0-9._-]{1,63}$/i;
 const MAX_PAGE_SIZE = 50;
 const LOGIC_COLLECTION_TYPES = Object.freeze({ properties: "property", rules: "rule", behaviors: "behavior", flows: "flow", functions: "function" });
+const COLLECTION_TYPES = Object.freeze({
+  components: "component",
+  groups: "composition",
+  layouts: "layout",
+  templates: "template",
+  assets: "asset",
+  media: "media",
+  themes: "theme",
+  styles: "style",
+  properties: "property",
+  rules: "rule",
+  behaviors: "behavior",
+  flows: "flow",
+  functions: "function"
+});
+const THEME_LABELS = Object.freeze({
+  "nexus-dark": "NEXUS Escuro",
+  midnight: "Meia-noite",
+  light: "Claro",
+  steam: "Steam",
+  linux: "Linux",
+  medieval: "Medieval",
+  "pixel-art": "Pixel Art"
+});
 const COLLECTION_KINDS = Object.freeze({
   components: "component",
   groups: "composition",
@@ -233,7 +257,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         resources.push({
           id: collection + ":" + String(entry.id),
           kind: resourceKind,
-          type: LOGIC_COLLECTION_TYPES[collection] ?? collection,
+          type: COLLECTION_TYPES[collection] === "component" ? String(entry.type ?? "component") : COLLECTION_TYPES[collection] ?? collection,
           name: entry.name ?? entry.label ?? entry.title ?? entry.id,
           description: entry.description ?? "",
           tags: entry.tags ?? [],
@@ -268,7 +292,7 @@ export function createNexusLibraryProvider({ getUser, catalog = {} } = {}) {
         id: "builtin-theme:" + String(theme.id ?? theme.key),
         kind: "theme",
         type: "theme",
-        name: theme.name ?? theme.label ?? theme.id,
+        name: theme.name ?? theme.label ?? THEME_LABELS[theme.id] ?? theme.id,
         description: theme.description ?? "",
         tags: theme.tags ?? [],
         origin: "core",
