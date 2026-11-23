@@ -3,6 +3,107 @@ import { evaluateNexusCondition } from "./formula-engine.js";
 const SAFE_PATH = /^[a-zA-Z][a-zA-Z0-9_-]*(?:\.[a-zA-Z][a-zA-Z0-9_-]*)*$/;
 const FORBIDDEN = new Set(["__proto__", "prototype", "constructor"]);
 const DEFAULT_LIMITS = Object.freeze({ maxActions: 32, maxConditions: 32, timeoutMs: 10000 });
+const ACTION_CONFIG_FIELD_TYPES = new Set(["text", "number", "checkbox", "textarea", "json", "select"]);
+const SAFE_CONFIG_KEY = /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/;
+
+function normalizeActionConfigSchema(schema) {
+  if (schema == null) return null;
+  if (!schema || typeof schema !== "object" || Array.isArray(schema) || !Array.isArray(schema.fields) || schema.fields.length > 32) {
+    throw new TypeError("Schema visual de configuração inválido.");
+  }
+  const keys = new Set();
+  const fields = schema.fields.map((field, index) => {
+    if (!field || typeof field !== "object" || Array.isArray(field)) throw new TypeError("Campo visual inválido na posição " + index + ".");
+    const key = String(field.key ?? "").trim();
+    const type = String(field.type ?? "text").toLowerCase();
+    const label = String(field.label ?? "").trim();
+    if (!SAFE_CONFIG_KEY.test(key) || keys.has(key)) throw new TypeError("Chave visual inválida ou duplicada: " + key);
+    if (!ACTION_CONFIG_FIELD_TYPES.has(type) || !label || label.length > 100) throw new TypeError("Definição visual inválida para o campo " + key + ".");
+    keys.add(key);
+    const normalized = { key, label, type, required: field.required === true };
+    for (const name of ["placeholder", "help"]) {
+      if (field[name] != null) normalized[name] = String(field[name]).slice(0, 240);
+    }
+    if (type === "textarea") normalized.rows = Math.max(2, Math.min(8, Number(field.rows) || 3));
+    if (type === "number") {
+      for (const name of ["min", "max"]) {
+        if (field[name] !== undefined) {
+          if (typeof field[name] !== "number" || !Number.isFinite(field[name])) throw new TypeError("Limite numérico inválido no campo " + key + ".");
+          normalized[name] = field[name];
+        }
+      }
+      if (normalized.min !== undefined && normalized.max !== undefined && normalized.min > normalized.max) {
+        throw new TypeError("Limite mínimo supera o máximo no campo " + key + ".");
+      }
+      if (field.step !== undefined) {
+        if (field.step !== "any" && (typeof field.step !== "number" || !Number.isFinite(field.step) || field.step <= 0)) {
+          throw new TypeError("Incremento inválido no campo " + key + ".");
+        }
+        normalized.step = field.step;
+      }
+    }
+    if (type === "select") {
+      if (!Array.isArray(field.options) || !field.options.length || field.options.length > 64) throw new TypeError("Opções inválidas no campo " + key + ".");
+      const values = new Set();
+      normalized.options = field.options.map(option => {
+        const value = String(option?.value ?? "");
+        const optionLabel = String(option?.label ?? "").trim();
+        if (!value || !optionLabel || values.has(value)) throw new TypeError("Opção inválida ou duplicada no campo " + key + ".");
+        values.add(value);
+        return Object.freeze({ value, label: optionLabel });
+      });
+    }
+    if (Object.prototype.hasOwnProperty.call(field, "defaultValue")) {
+      try {
+        const value = structuredClone(field.defaultValue);
+        if (typeof value === "function" || (value && typeof value === "object" && !Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) throw new Error("not inert");
+        normalized.defaultValue = value;
+      } catch {
+        throw new TypeError("Valor padrão não serializável no campo " + key + ".");
+      }
+    }
+    return Object.freeze(normalized);
+  });
+  return Object.freeze({ fields: Object.freeze(fields) });
+}
+
+function cloneActionConfigSchema(schema) {
+  return schema ? { fields: schema.fields.map(field => ({ ...field, options: field.options?.map(option => ({ ...option })) })) } : null;
+}
+
+function validateActionConfig(config, schema) {
+  if (!schema) return [];
+  if (!config || typeof config !== "object" || Array.isArray(config)) return ["A configuração do executor precisa ser um objeto."];
+  const errors = [];
+  for (const field of schema.fields) {
+    const present = Object.prototype.hasOwnProperty.call(config, field.key);
+    const value = config[field.key];
+    const empty = !present || value === null || value === undefined || (typeof value === "string" && value.trim() === "");
+    if (field.required && empty) {
+      errors.push("Campo obrigatório: " + field.label + ".");
+      continue;
+    }
+    if (empty) continue;
+    if (field.type === "text" || field.type === "textarea") {
+      if (typeof value !== "string") errors.push(field.label + " precisa ser texto.");
+    } else if (field.type === "number") {
+      if (typeof value !== "number" || !Number.isFinite(value)) errors.push(field.label + " precisa ser um número finito.");
+      else if ((field.min !== undefined && value < field.min) || (field.max !== undefined && value > field.max)) errors.push(field.label + " está fora dos limites permitidos.");
+    } else if (field.type === "checkbox") {
+      if (typeof value !== "boolean") errors.push(field.label + " precisa ser verdadeiro/falso.");
+    } else if (field.type === "select") {
+      if (typeof value !== "string" || !field.options.some(option => option.value === value)) errors.push("Opção inválida para " + field.label + ".");
+    } else if (field.type === "json") {
+      try {
+        const serialized = JSON.stringify(value);
+        if (serialized === undefined) throw new Error("not JSON");
+      } catch {
+        errors.push(field.label + " precisa conter dados JSON válidos.");
+      }
+    }
+  }
+  return errors;
+}
 
 function readContextPath(context, path) {
   const key = String(path ?? "").replace(/^@/, "");
@@ -27,12 +128,24 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     if (typeof resolver !== "function") throw new TypeError("O verificador de permissões precisa ser uma função.");
     permissionResolver = resolver;
   };
-  const registerAction = ({ type, execute, effects = ["write"], permissions = [] } = {}) => {
+  const registerAction = ({ type, execute, effects = ["write"], permissions = [], configSchema } = {}) => {
     const id = String(type ?? "").trim().toLowerCase();
     if (!/^[a-z][a-z0-9._-]{0,63}$/.test(id) || typeof execute !== "function") throw new TypeError("Executor de ação inválido.");
     if (actions.has(id)) throw new Error("Executor já registrado: " + id);
-    actions.set(id, Object.freeze({ execute, effects: [...new Set(effects)], permissions: [...new Set(permissions)] }));
+    const schema = normalizeActionConfigSchema(configSchema);
+    actions.set(id, Object.freeze({ execute, effects: [...new Set(effects)], permissions: [...new Set(permissions)], configSchema: schema }));
     return id;
+  };
+  const getActionDefinitions = () => [...actions.entries()].map(([type, descriptor]) => ({
+    type,
+    effects: [...descriptor.effects],
+    permissions: [...descriptor.permissions],
+    configSchema: cloneActionConfigSchema(descriptor.configSchema)
+  }));
+  const getActionDefinition = type => {
+    const key = String(type ?? "").trim().toLowerCase();
+    const descriptor = actions.get(key);
+    return descriptor ? { type: key, effects: [...descriptor.effects], permissions: [...descriptor.permissions], configSchema: cloneActionConfigSchema(descriptor.configSchema) } : null;
   };
   const registerFunction = ({ id, execute, effects = ["read"], permissions = [] } = {}) => {
     const key = String(id ?? "").trim().toLowerCase();
@@ -338,5 +451,5 @@ export function createLogicRuntime({ registry, resolveProperty, canExecute, limi
     }
     return results;
   };
-  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, runFlow, simulateFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get functionIds() { return [...functions.keys()]; } });
+  return Object.freeze({ setPermissionResolver, registerAction, registerFunction, getActionDefinitions, getActionDefinition, runFlow, simulateFlow, dispatch, invokeFunction, get actionTypes() { return [...actions.keys()]; }, get actionDefinitions() { return getActionDefinitions(); }, get functionIds() { return [...functions.keys()]; } });
 }
