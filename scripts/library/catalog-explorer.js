@@ -56,6 +56,7 @@ export function createLibraryCatalogExplorer({
   let currentQuery = "";
   let currentSmartView = "all";
   let currentFolder = "";
+  let currentCollectionId = "";
   let currentTag = "all";
   let currentOrigin = "all";
   let currentKind = "all";
@@ -272,10 +273,11 @@ export function createLibraryCatalogExplorer({
     detail.replaceChildren(heading, meta, description, facts, folderLabel, actions, advanced);
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
+    currentCollectionId = collectionId;
     currentTag = tag;
     currentOrigin = origin;
     currentKind = kind || "all";
@@ -296,9 +298,11 @@ export function createLibraryCatalogExplorer({
       ? preferences.favorites
       : currentSmartView === "recent"
         ? preferences.recent
-        : currentFolder
-          ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
-          : null;
+        : currentCollectionId
+          ? preferences.collections.find(collection => collection.id === currentCollectionId)?.resources ?? []
+          : currentFolder
+            ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
+            : null;
     let page;
     if (smartKeys) {
       const keyPage = smartKeys.slice(smartOffset, smartOffset + PAGE_SIZE);
