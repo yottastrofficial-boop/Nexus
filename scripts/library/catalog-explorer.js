@@ -7,7 +7,14 @@
  */
 const PAGE_SIZE = 30;
 
-const resourceKey = resource => `${resource.providerId}:${resource.id}`;
+export const getLibraryCatalogResourceKey = resource => {
+  const reference = resource?.reference ?? {};
+  if (resource?.providerId === "nexus-library" && reference.collection && reference.id) {
+    return `${reference.collection}:${reference.id}`;
+  }
+  return `${String(resource?.providerId ?? "")}:${String(resource?.id ?? "")}`;
+};
+const resourceKey = getLibraryCatalogResourceKey;
 const text = (value, fallback = "") => String(value ?? fallback);
 
 function makeElement(tag, className, content = "") {
@@ -218,7 +225,11 @@ export function createLibraryCatalogExplorer({
       event.preventDefault();
       event.stopPropagation();
       const preferences = getPreferences();
-      const key = `${favorite.dataset.libraryProvider}:${favorite.dataset.libraryResourceFavorite}`;
+      const resource = currentResources.find(item =>
+        item.providerId === favorite.dataset.libraryProvider && item.id === favorite.dataset.libraryResourceFavorite
+      );
+      if (!resource) return;
+      const key = resourceKey(resource);
       const favorites = preferences.favorites.includes(key)
         ? preferences.favorites.filter(item => item !== key)
         : [key, ...preferences.favorites].slice(0, 500);
