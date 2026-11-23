@@ -101,3 +101,30 @@ test("valida configuração do executor seguro de atualização de Actor", () =>
     payload: { actions: [{ type: "nexus.actor.update", config: { path: "system.resources.pv.value" } }] }
   }).valid, false);
 });
+
+
+test("valida grafo visual, ramificações obrigatórias e ausência de ciclos", () => {
+  const graph = {
+    entryNodeId: "start-node",
+    nodes: [
+      { id: "start-node", type: "start" },
+      { id: "check-node", type: "condition", expression: "@system.resources.pv.value > 0" },
+      { id: "yes-action", type: "action", action: { id: "set-flag", type: "nexus.actor.update", config: { path: "system.flags.active", value: true } } },
+      { id: "yes-end", type: "end" },
+      { id: "no-end", type: "end" }
+    ],
+    edges: [
+      { from: "start-node", to: "check-node", when: "next" },
+      { from: "check-node", to: "yes-action", when: "true" },
+      { from: "check-node", to: "no-end", when: "false" },
+      { from: "yes-action", to: "yes-end", when: "next" }
+    ]
+  };
+  assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-valid", type: "flow", payload: { graph } }).valid, true);
+  const missingBranch = structuredClone(graph);
+  missingBranch.edges = missingBranch.edges.filter(edge => edge.when !== "false");
+  assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-branch", type: "flow", payload: { graph: missingBranch } }).valid, false);
+  const cycle = structuredClone(graph);
+  cycle.edges.push({ from: "yes-end", to: "check-node", when: "next" });
+  assert.equal(registry.validateAsset({ id: "nexus.personal.flow.graph-cycle", type: "flow", payload: { graph: cycle } }).valid, false);
+});
