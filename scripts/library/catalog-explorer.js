@@ -180,13 +180,18 @@ export function createLibraryCatalogExplorer({
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
     const facts = makeElement("dl", "nexus-library-resource-facts");
-    for (const [label, value] of [
+    const resourceFacts = [
       ["Provedor", resource.providerId],
       ["Tipo", resource.type],
       ["Origem", resource.origin],
-      ["Pasta de origem", resource.folder],
+      ["Pasta", resource.folder],
       ["Etiquetas", resource.tags.join(", ") || "—"]
-    ]) {
+    ];
+    if (resource.providerId === "nexus-library" && resource.reference?.collection === "components") {
+      resourceFacts.push(["Versão", "v" + String(resource.version ?? resolved?.version ?? 1)]);
+      resourceFacts.push(["Versões anteriores", String(resolved?.history?.length ?? 0)]);
+    }
+    for (const [label, value] of resourceFacts) {
       if (!value) continue;
       facts.append(makeElement("dt", "", label), makeElement("dd", "", value));
     }
