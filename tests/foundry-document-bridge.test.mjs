@@ -33,3 +33,34 @@ test("rejeita tipos não integrados e UUIDs inexistentes", async () => {
   await assert.rejects(bridge.list({ type: "sounds" }), /desconhecido/);
   await assert.rejects(bridge.resolve("Actor.missing"), /não está mais disponível/);
 });
+
+test("reutiliza metadados e invalida somente o documento atualizado", async () => {
+  const listeners = new Map();
+  const previousHooks = globalThis.Hooks;
+  globalThis.Hooks = {
+    on(name, callback) {
+      const callbacks = listeners.get(name) ?? [];
+      callbacks.push(callback);
+      listeners.set(name, callbacks);
+    },
+    callAll(name, document) {
+      for (const callback of listeners.get(name) ?? []) callback(document);
+    }
+  };
+  try {
+    const actor = { id: "a2", uuid: "Actor.a2", documentName: "Actor", name: "Antes" };
+    const bridge = createFoundryDocumentBridge({ gameRef: { actors: new Map([["a2", actor]]) } });
+    const first = await bridge.list({ type: "actors" });
+    const second = await bridge.list({ type: "actors" });
+    assert.strictEqual(first.items[0], second.items[0], "A consulta repetida deve reutilizar o objeto leve de metadados.");
+
+    actor.name = "Depois";
+    globalThis.Hooks.callAll("updateActor", actor);
+    const refreshed = await bridge.list({ type: "actors", query: "Depois" });
+    assert.equal(refreshed.total, 1, "A atualização do documento deve invalidar os metadados antigos.");
+    assert.equal(refreshed.items[0].name, "Depois");
+  } finally {
+    if (previousHooks === undefined) delete globalThis.Hooks;
+    else globalThis.Hooks = previousHooks;
+  }
+});
