@@ -1,7 +1,7 @@
 import { evaluateNexusExpression } from "./formula-engine.js";
 import { INTERACTION_EVENTS } from "./interactions.js";
 
-const SAFE_PATH = /^[A-Za-z][A-Za-z0-9_-]*(?:\\.[A-Za-z][A-Za-z0-9_-]*)*$/;
+const SAFE_PATH = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
 const SAFE_ID = /^[a-z0-9][a-z0-9._:-]{2,159}$/i;
 const VALUE_TYPES = new Set(["string", "number", "boolean", "array", "object", "formula"]);
 const FORBIDDEN_CODE_KEYS = new Set(["javascript", "script", "sourceCode", "eval", "functionBody"]);
