@@ -53,6 +53,8 @@ export function createLibraryApplicationClass({
         folder: "",
         tag: "all",
         origin: "all",
+        kind: "all",
+        type: "all",
         viewMode: "grid",
         cardSize: "medium"
       };
@@ -89,11 +91,15 @@ export function createLibraryApplicationClass({
       const search = root.querySelector("[data-library-search]");
       const tag = root.querySelector("[data-library-tag]");
       const origin = root.querySelector("[data-library-origin]");
+      const kind = root.querySelector("[data-library-kind]");
+      const type = root.querySelector("[data-library-type]");
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
       if (search) search.value = this._state.query;
       if (tag) tag.value = this._state.tag;
       if (origin) origin.value = this._state.origin;
+      if (kind) kind.value = this._state.kind;
+      if (type) type.value = this._state.type;
       if (cardSize) cardSize.value = this._state.cardSize;
       viewControls.forEach(button => {
         const active = button.dataset.libraryCollectionViewMode === this._state.viewMode;
@@ -250,6 +256,14 @@ export function createLibraryApplicationClass({
       });
       origin?.addEventListener("change", () => {
         this._state.origin = origin.value || "all";
+        void render();
+      });
+      kind?.addEventListener("change", () => {
+        this._state.kind = kind.value || "all";
+        void render();
+      });
+      type?.addEventListener("change", () => {
+        this._state.type = type.value || "all";
         void render();
       });
       cardSize?.addEventListener("change", () => {
