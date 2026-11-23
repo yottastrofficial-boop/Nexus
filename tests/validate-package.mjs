@@ -2451,7 +2451,7 @@ assert.doesNotMatch(template,/data-library-card-size/,"O tamanho dos cartões n�
 assert.doesNotMatch(template,/data-library-origin-filter/,"A interface não deve exibir o seletor genérico de origem");
 assert.doesNotMatch(template,/data-library-collection-filter/,"A interface não deve exibir o seletor genérico de tipo/itens");
 assert.match(template,/data-library-filter-toggle/,"O filtro de etiquetas deve ser aberto por um botão contextual");
-assert.match(template,/data-library-tag-option="barra"/,"O filtro deve apresentar etiquetas como opções visuais");
+assert.match(template,/data-library-tag-option="all"/,"O filtro deve oferecer uma opção neutra quando nenhuma etiqueta estiver selecionada");
 assert.doesNotMatch(template,/Todas as origens|<option[^>]*>Todos os itens/,"A interface não deve exibir filtros genéricos textuais");
 assert.match(libraryView,/selectedTag/,"A seleção de etiqueta deve filtrar coleções salvas");
 assert.match(libraryView,/dataset\.libraryTags/,"Os recursos devem expor suas etiquetas como metadados filtráveis");
