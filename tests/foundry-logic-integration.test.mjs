@@ -399,7 +399,7 @@ test("executor nexus.actor.adjust altera propriedade numérica genérica e respe
   const actor = {
     documentName: "Actor",
     uuid: "Actor.adjust-test",
-    system: { customModule: { energy: 4 } },
+    system: Object.create({ customModule: { energy: 4 } }),
     async update(changes) { updates.push(changes); },
     testUserPermission: (_user, level) => level <= 3
   };
