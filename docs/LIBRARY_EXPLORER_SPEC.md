@@ -99,7 +99,7 @@ Módulos podem registrar provedores adicionais em `game.nexus.library.registerPr
 
 O fluxo desejado é: **origem → prévia/validação → destino compatível → confirmação**. Origens poderão incluir recursos NEXUS, documentos Foundry, compêndios explicitamente selecionados, arquivos do usuário e fontes externas compatíveis. Destinos poderão incluir documentos nativos, compêndios, fichas e coleções NEXUS.
 
-A descoberta universal está implementada na camada de serviço. Os adaptadores de importação, validação de formatos e destinos ainda são etapas futuras. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
+A descoberta universal está implementada na camada de serviço e sua primeira visão foi conectada ao Explorer existente por `scripts/library/catalog-explorer.js`. A ficha atua como adaptador, não como proprietária do catálogo. Os adaptadores de importação, validação de formatos e destinos ainda são etapas futuras. Conteúdo externo não será executado automaticamente; scripts, macros e comportamentos precisam de validação, permissões e confirmação explícita. Não incluir conteúdo protegido de terceiros no NEXUS: a integração deve operar sobre fontes e arquivos que o usuário tenha direito de utilizar.
 
 A interface final deve manter uma barra compacta de pesquisa e um único controle de filtros; ações aparecem contextualmente no Inspector/menu do recurso, não como uma fileira de botões permanentes para cada categoria.
 
