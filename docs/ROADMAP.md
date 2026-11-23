@@ -107,3 +107,5 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - Refinamento do Flow Builder: inclusão de criação de nós pela barra superior, conexão guiada por seleção de origem/destino, prevenção de conexões incompatíveis/ciclos e campos dedicados para o executor Core de atualização de Actor.
 
 - Executor Core genérico `nexus.actor.adjust` adicionado para incrementar/decrementar propriedades numéricas `system.*`, com limites opcionais e permissão OWNER, sem assumir que todo módulo usa PV/PM/PE.
+
+- Flow Builder: Inspector dedicado ao nó selecionado e schemas visuais declarativos opcionais para executores, com validação pelo runtime e fallback JSON para módulos legados.
