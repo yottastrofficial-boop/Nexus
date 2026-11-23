@@ -59,7 +59,7 @@ export function createLibraryApplicationClass({
         cardSize: "medium"
       };
       this._explorer = null;
-      this._searchFrame = 0;
+      this._searchTimer = 0;
     }
 
     async _prepareContext(options = {}) {
@@ -244,11 +244,11 @@ export function createLibraryApplicationClass({
       });
       search?.addEventListener("input", () => {
         this._state.query = search.value;
-        if (this._searchFrame) cancelAnimationFrame(this._searchFrame);
-        this._searchFrame = requestAnimationFrame(() => {
-          this._searchFrame = 0;
+        if (this._searchTimer) clearTimeout(this._searchTimer);
+        this._searchTimer = setTimeout(() => {
+          this._searchTimer = 0;
           void render();
-        });
+        }, 160);
       });
       tag?.addEventListener("change", () => {
         this._state.tag = tag.value || "all";
@@ -329,8 +329,8 @@ export function createLibraryApplicationClass({
     }
 
     async close(options = {}) {
-      if (this._searchFrame) cancelAnimationFrame(this._searchFrame);
-      this._searchFrame = 0;
+      if (this._searchTimer) clearTimeout(this._searchTimer);
+      this._searchTimer = 0;
       this._explorer = null;
       return super.close(options);
     }
