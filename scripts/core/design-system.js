@@ -18,6 +18,7 @@ const CORE_TAB_NAMES = new Set([
   "actors", "cards", "compendium", "items", "journal", "macros",
   "playlists", "rolltables", "scenes", "combat", "chat", "settings"
 ]);
+const CORE_CONFIGURATION_NAMES = new Set(["SettingsConfig", "UIConfig"]);
 
 const knownTheme = (value, themeIds) => {
   const id = String(value ?? "");
@@ -194,8 +195,10 @@ export function installNexusDesignSystem({
       || element?.classList?.contains?.("nexus-window")
       || element?.classList?.contains?.("nexus-panel-window")
       || name.startsWith("Nexus");
-    if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName)) return;
+    const isCoreConfiguration = CORE_CONFIGURATION_NAMES.has(name);
+    if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName) && !isCoreConfiguration) return;
     element?.classList?.add("nexus-themed-application");
+    if (isCoreConfiguration) element?.classList?.add("nexus-themed-configuration");
     if (CORE_DIRECTORY_NAMES.has(name) || ["actors", "cards", "items", "journal", "macros", "playlists", "rolltables", "scenes", "compendium"].includes(tabName)) {
       element?.classList?.add("nexus-themed-directory");
     }
