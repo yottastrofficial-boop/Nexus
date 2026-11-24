@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { getAxisAnchors, findBestAlignmentMatch } from "../scripts/core/canvas-geometry.js";
 
 const source = { x: 0, y: 0, w: 10, h: 10 };
-const target = { x: 14, y: 20, w: 10, h: 10 };
+const target = { x: 14, y: 14, w: 10, h: 10 };
 
 assert.deepEqual(getAxisAnchors(source, "x"), [0, 5, 10]);
 assert.deepEqual(getAxisAnchors(source, "y"), [0, 5, 10]);
