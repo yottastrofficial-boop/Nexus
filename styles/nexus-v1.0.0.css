@@ -8908,3 +8908,44 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   font-size:9px;
   font-weight:700;
 }
+
+
+/* Universal Library Inspector — preview contextual de temas. */
+.nexus-library-theme-preview {
+  margin:10px 0;
+  padding:10px;
+  border:1px solid var(--nexus-panel-border,#354b61);
+  border-radius:7px;
+  background:var(--nexus-panel-input,#172332);
+}
+.nexus-library-theme-preview[hidden] { display:none!important; }
+.nexus-library-theme-preview>strong {
+  display:block;
+  margin-bottom:9px;
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:10px;
+}
+.nexus-library-theme-swatches {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(54px,1fr));
+  gap:8px;
+}
+.nexus-library-theme-swatch {
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.nexus-library-theme-swatch>span {
+  display:block;
+  width:100%;
+  height:25px;
+  border:1px solid #ffffff44;
+  border-radius:5px;
+}
+.nexus-library-theme-swatch>small {
+  color:var(--nexus-panel-muted,#a5b6c9);
+  font-size:8px;
+  text-align:center;
+}
