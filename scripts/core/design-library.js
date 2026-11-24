@@ -31,7 +31,8 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
       if (index < 0 && entries.filter(entry => entry?.kind === "design-profile").length >= MAX_PROFILES) throw new Error("A Biblioteca atingiu o limite de 100 perfis de aparência.");
       let entryId = requestedId;
       if (!entryId) for (let attempt = 0; attempt < 5; attempt++) {
-        const candidate = String(makeId() ?? "").trim();
+        const seed = String(makeId() ?? "").trim();
+        const candidate = (attempt === 0 ? seed : seed + "-" + (attempt + 1)).slice(0, 128);
         if (candidate && !entries.some(entry => String(entry.id) === candidate)) { entryId = candidate; break; }
       }
       if (!entryId) throw new Error("Não foi possível gerar um identificador único para o perfil.");
