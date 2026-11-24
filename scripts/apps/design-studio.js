@@ -18,6 +18,7 @@ const clone = value => globalThis.foundry?.utils?.deepClone
 
 function setPath(target, path, value) {
   const parts = String(path).split(".");
+  if (parts.length === 1 && parts[0] === "name") { target.name = String(value).slice(0, 64); return true; }
   if (parts.length !== 2 || !["palette", "typography", "layout", "accessibility"].includes(parts[0])) return false;
   target[parts[0]] ??= {};
   target[parts[0]][parts[1]] = value;
