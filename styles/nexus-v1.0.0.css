@@ -8868,3 +8868,43 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   .nexus-library-application .nexus-library-toolbar-controls { flex-wrap:wrap; }
   .nexus-library-application .nexus-library-header-actions { margin-left:0; }
 }
+
+
+/* Biblioteca Universal — estado explícito do contexto de destino. */
+.nexus-library-application .nexus-library-context-indicator {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  padding:5px 9px;
+  border:1px solid var(--nexus-panel-border,#354b61);
+  border-radius:6px;
+  color:var(--nexus-panel-muted,#a5b6c9);
+  background:var(--nexus-panel-input,#151d27);
+  font:600 10px/1.3 var(--nexus-font-ui,system-ui,sans-serif);
+}
+.nexus-library-application .nexus-library-context-indicator[data-connected="true"] {
+  border-color:color-mix(in srgb,var(--nexus-state-success,#79c99a) 55%,var(--nexus-panel-border,#354b61));
+  color:var(--nexus-panel-text,#e7edf5);
+}
+.nexus-library-application .nexus-library-context-indicator[data-connected="true"] i {
+  color:var(--nexus-state-success,#79c99a);
+}
+.nexus-library-application .nexus-library-context-indicator span {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.nexus-tool-panel .nexus-library-header-actions [data-library-open-global] {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-width:32px;
+  padding:0 9px;
+}
+.nexus-tool-panel .nexus-library-header-actions [data-library-open-global] span {
+  font-size:9px;
+  font-weight:700;
+}
