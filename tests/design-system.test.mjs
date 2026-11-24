@@ -118,6 +118,45 @@ test("profile-to-layout maps custom tokens to the existing theme renderer contra
   assert.equal(layout.reducedMotion, true);
 });
 
+
+test("design system restores pre-existing inline CSS tokens when uninstalled", () => {
+  const values = new Map([["--nexus-panel-bg", "#abcdef"]]);
+  const root = {
+    style: {
+      setProperty(key, value) { values.set(key, value); },
+      getPropertyValue(key) { return values.get(key) ?? ""; },
+      getPropertyPriority() { return ""; },
+      removeProperty(key) { values.delete(key); }
+    },
+    dataset: { theme: "external-theme" },
+    classList: { values: new Set(), add(value) { this.values.add(value); }, remove(value) { this.values.delete(value); } }
+  };
+  let ready;
+  const hooks = { once(name, callback) { if (name === "ready") ready = callback; }, on() { return "hook"; }, off() {} };
+  const gameRef = {
+    user: { isGM: true },
+    settings: {
+      settings: new Map(),
+      register(namespace, key, config) { this.settings.set(namespace + "." + key, config); },
+      get(namespace, key) { return this.settings.get(namespace + "." + key)?.default; }
+    }
+  };
+  const design = installNexusDesignSystem({
+    gameRef,
+    documentRef: { documentElement: root },
+    hooks,
+    themeTokens: THEME_TOKENS,
+    applyThemeTokens
+  });
+  ready();
+  assert.notEqual(values.get("--nexus-panel-bg"), "#abcdef");
+  assert.notEqual(root.dataset.theme, "external-theme");
+  design.uninstall();
+  assert.equal(values.get("--nexus-panel-bg"), "#abcdef");
+  assert.equal(values.has("--nexus-font-family"), false);
+  assert.equal(root.dataset.theme, "external-theme");
+});
+
 test("Design System normalizes unknown theme IDs and malformed settings safely", () => {
   assert.deepEqual(normalizeDesignWorldSettings({ theme: "not-a-theme", allowPlayerOverrides: "false" }), {
     schemaVersion: 1,
