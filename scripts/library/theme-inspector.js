@@ -65,7 +65,8 @@ export function createLibraryThemeApplicationAdapter({
   confirm = options => globalThis.foundry?.applications?.api?.DialogV2?.confirm?.(options)
 } = {}) {
   const canApplyTheme = (resource, resolved, scope) => {
-    if (resource?.kind !== "theme" || resolved?.kind !== "design-profile" || !resolved?.profile) return false;
+    if (!["world", "user"].includes(scope) || resource?.kind !== "theme" ||
+        resolved?.kind !== "design-profile" || !resolved?.profile) return false;
     const version = Number(resolved.profile.schemaVersion ?? 1);
     if (!Number.isFinite(version) || version > DESIGN_PROFILE_SCHEMA_VERSION) return false;
     const design = getDesign();
