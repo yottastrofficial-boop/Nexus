@@ -1,7 +1,7 @@
 {
   "id": "nexus",
   "title": "NEXUS RPG",
-  "description": "Sistema NEXUS RPG para Foundry Virtual Tabletop, com ficha modular Canvas.",
+  "description": "Sistema NEXUS RPG para Foundry Virtual Tabletop, com ficha modular Canvas e interface visual unificada.",
   "version": "1.0.0.93",
   "compatibility": {
     "minimum": "14",
