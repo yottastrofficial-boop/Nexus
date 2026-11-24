@@ -170,42 +170,6 @@ export function createLibraryApplicationClass({
           if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
           childrenByParent.get(parentId).push(folder);
         }
-        const appendFolder = (folder, depth = 0) => {
-          const children = childrenByParent.get(folder.id) ?? [];
-          const expanded = !this._collapsedLibraryFolders.has(folder.id);
-          const row = document.createElement("div");
-          row.className = "nexus-library-folder-row";
-          row.dataset.libraryFolderDrop = folder.id;
-          row.dataset.depth = String(Math.min(depth, 8));
-          row.draggable = true;
-          const toggle = document.createElement("button");
-          toggle.type = "button";
-          toggle.className = "nexus-library-folder-toggle";
-          toggle.dataset.libraryFolderToggle = folder.id;
-          toggle.hidden = children.length === 0;
-          toggle.setAttribute("aria-label", expanded ? "Recolher subpastas" : "Expandir subpastas");
-          toggle.setAttribute("aria-expanded", String(expanded));
-          toggle.innerHTML = '<i class="fa-solid ' + (expanded ? "fa-chevron-down" : "fa-chevron-right") + '" aria-hidden="true"></i>';
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "nexus-library-custom-folder";
-          button.dataset.libraryFolder = folder.id;
-          button.innerHTML = '<i class="fa-regular fa-folder" aria-hidden="true"></i><span></span>';
-          button.querySelector("span").textContent = folder.name;
-          button.classList.toggle("active", this._state.folder === folder.id);
-          row.append(toggle, button);
-          nav.append(row);
-          if (children.length && expanded) {
-            const nested = document.createElement("div");
-            nested.className = "nexus-library-folder-children";
-            nested.dataset.parentFolder = folder.id;
-            for (const child of children) appendFolder(child, depth + 1, nested);
-            // appendFolder writes to the shared nav; move the just-created rows into this branch.
-            const rows = [...nav.querySelectorAll(":scope > .nexus-library-folder-row")].slice(-children.length);
-            for (const childRow of rows) nested.append(childRow);
-            nav.append(nested);
-          }
-        };
         // Render recursively into explicit containers, preserving folder order.
         const appendTree = (folder, parent, depth = 0) => {
           const children = childrenByParent.get(folder.id) ?? [];
@@ -214,6 +178,7 @@ export function createLibraryApplicationClass({
           row.className = "nexus-library-folder-row";
           row.dataset.libraryFolderDrop = folder.id;
           row.dataset.depth = String(Math.min(depth, 8));
+          row.style.paddingLeft = `${Math.min(depth, 8) * 13}px`;
           row.draggable = true;
           const toggle = document.createElement("button");
           toggle.type = "button";
