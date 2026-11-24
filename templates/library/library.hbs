@@ -1,10 +1,15 @@
 <section class="nexus-tool-panel nexus-library-panel nexus-library-standalone" data-tool-panel="library">
   <div class="nexus-library-toolbar nexus-library-toolbar-unified">
-    <label class="nexus-library-search-wrap">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na Biblioteca..." autocomplete="off">
-    </label>
-    <div class="nexus-library-filter-wrap">
+    <div class="nexus-library-search-row">
+      <label class="nexus-library-search-wrap">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na Biblioteca..." autocomplete="off">
+      </label>
+      <button type="button" class="nexus-library-filter-toggle" data-library-toggle-filters aria-expanded="false" aria-controls="nexus-library-filter-panel">
+        <i class="fa-solid fa-filter" aria-hidden="true"></i><span>Filtros</span>
+      </button>
+    </div>
+    <div class="nexus-library-filter-wrap" id="nexus-library-filter-panel" data-library-filter-panel hidden>
       <label class="nexus-library-app-filter">
         <span>Categoria</span>
         <select data-library-kind>
@@ -20,16 +25,10 @@
       <label class="nexus-library-app-filter">
         <span>Origem</span>
         <select data-library-origin>
-          <option value="all">Todas</option>
-          <option value="core">Padrão</option>
-          <option value="personal">Pessoais</option>
-          <option value="module">Módulos</option>
-          <option value="addon">Complementos</option>
-          <option value="world">Mundo</option>
-          <option value="compendium">Compêndios</option>
+          <option value="all">Todas</option><option value="core">Padrão</option><option value="personal">Pessoais</option><option value="module">Módulos</option><option value="addon">Complementos</option><option value="world">Mundo</option><option value="compendium">Compêndios</option>
         </select>
       </label>
-      <label class="nexus-library-app-filter">
+      <label class="nexus-library-app-filter nexus-library-compendium-filter">
         <span>Compêndios (seleção explícita)</span>
         <select data-library-compendiums multiple size="3" aria-label="Compêndios para incluir"></select>
       </label>
@@ -38,24 +37,24 @@
         <input type="text" data-library-tag value="all" placeholder="Todas as etiquetas" maxlength="48">
       </label>
     </div>
-    <div class="nexus-library-view-controls" role="group" aria-label="Modo de visualização">
-      <button type="button" data-library-collection-view-mode="grid" class="active" aria-pressed="true" title="Grade" aria-label="Visualização em grade"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
-      <button type="button" data-library-collection-view-mode="list" aria-pressed="false" title="Lista" aria-label="Visualização em lista"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
-    </div>
-    <label class="nexus-library-app-size">
-      <span>Tamanho</span>
-      <select data-library-card-size>
-        <option value="small">Pequeno</option>
-        <option value="medium" selected>Médio</option>
-        <option value="large">Grande</option>
-      </select>
-    </label>
-    <div class="nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca">
-      <button type="button" data-library-backup-copy title="Copiar backup" aria-label="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
-      <button type="button" data-library-backup-export title="Exportar backup" aria-label="Exportar backup"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
-      <button type="button" data-library-backup-import-code title="Importar código" aria-label="Importar código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
-      <button type="button" data-library-backup-import-file title="Importar arquivo" aria-label="Importar arquivo"><i class="fa-solid fa-file-import" aria-hidden="true"></i></button>
-      <input type="file" accept=".json,application/json" data-library-backup-file hidden>
+    <div class="nexus-library-toolbar-controls">
+      <div class="nexus-library-view-controls" role="group" aria-label="Modo de visualização">
+        <button type="button" data-library-collection-view-mode="grid" class="active" aria-pressed="true" title="Grade" aria-label="Visualização em grade"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
+        <button type="button" data-library-collection-view-mode="list" aria-pressed="false" title="Lista" aria-label="Visualização em lista"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
+      </div>
+      <label class="nexus-library-app-size">
+        <span>Tamanho dos cartões</span>
+        <select data-library-card-size>
+          <option value="small">Pequeno</option><option value="medium" selected>Médio</option><option value="large">Grande</option>
+        </select>
+      </label>
+      <div class="nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca">
+        <button type="button" data-library-backup-copy title="Copiar backup" aria-label="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
+        <button type="button" data-library-backup-export title="Exportar backup" aria-label="Exportar backup"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
+        <button type="button" data-library-backup-import-code title="Importar código" aria-label="Importar código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
+        <button type="button" data-library-backup-import-file title="Importar arquivo" aria-label="Importar arquivo"><i class="fa-solid fa-file-import" aria-hidden="true"></i></button>
+        <input type="file" accept=".json,application/json" data-library-backup-file hidden>
+      </div>
     </div>
   </div>
   <div class="nexus-library-body nexus-library-app-body">
