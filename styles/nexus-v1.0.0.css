@@ -9139,3 +9139,24 @@ html.nexus-design-system[data-nexus-reduced-motion="true"] *::after {
   scroll-behavior: auto !important;
   transition-duration: 0.01ms !important;
 }
+
+
+html.nexus-design-system #sidebar .directory-list .directory-item {
+  min-height: var(--nexus-control-height, 34px);
+  padding-block: calc(3px * var(--nexus-density-scale, 1));
+}
+html.nexus-design-system #sidebar input,
+html.nexus-design-system #sidebar select,
+html.nexus-design-system #sidebar textarea,
+html.nexus-design-system .nexus-themed-application input,
+html.nexus-design-system .nexus-themed-application select,
+html.nexus-design-system .nexus-themed-application textarea {
+  min-height: var(--nexus-control-height, 34px);
+  line-height: var(--nexus-line-height, 1.45);
+}
+html.nexus-design-system #sidebar button:focus-visible,
+html.nexus-design-system #sidebar a:focus-visible,
+html.nexus-design-system .nexus-themed-application :focus-visible {
+  outline: var(--nexus-contrast-outline-width, 2px) solid var(--nexus-focus-ring);
+  outline-offset: 2px;
+}
