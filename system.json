@@ -17,7 +17,8 @@
   ],
   "styles": [
     "styles/nexus-v1.0.0.css",
-    "styles/nexus-universal-library.css"
+    "styles/nexus-universal-library.css",
+    "styles/nexus-design-system.css"
   ],
   "languages": [
     {
