@@ -28,7 +28,7 @@ Essa separação orienta o planejamento do projeto. Nem todos esses recursos est
 
 ## Implementação atual na main — 1.0.0.96
 
-A linha atual da `main` (build de desenvolvimento 1.0.0.96) inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem as pastas da Biblioteca em árvore e normaliza dimensões de componentes em grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A linha atual da `main` (build de desenvolvimento 1.0.0.96) inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -49,7 +49,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Build atual da main | 1.0.0.96 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A build 1.0.0.96 consolida a integração da aparência nativa do Foundry e a geometria responsiva dos controles. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A build 1.0.0.96 consolida a integração da aparência nativa do Foundry e a geometria responsiva dos controles. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A última release estável publicada continua sendo **1.0.0.95**; a build de desenvolvimento atual da `main` é **1.0.0.96**. O pacote foi validado e anexado à Release; isso não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A última release estável publicada continua sendo **1.0.0.95**; a build de desenvolvimento atual da `main` é **1.0.0.96**. O ZIP da build .96 será produzido pelo CI; a validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 

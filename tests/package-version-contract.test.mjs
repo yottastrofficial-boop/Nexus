@@ -18,7 +18,7 @@ const isNewer = (current, previous) => {
 
 assert.ok(isNewer(system.version, stable.version),
   "The development package must be newer than the stable update manifest.");
-assert.match(system.download, new RegExp(`/v${stable.version.replaceAll(".", "\\\\.")}/nexus\\.zip$`),
+assert.ok(system.download.endsWith(`/v${stable.version}/nexus.zip`),
   "The development system metadata must retain the last published stable download URL.");
 assert.ok(readme.includes(system.version), "README must identify the current development build.");
 assert.ok(changelog.startsWith(`## ${system.version} —`),
