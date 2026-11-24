@@ -57,7 +57,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 - Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.96-rc.1`.
 - A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
-- O workflow altera a versão de `system.json` somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo de versão da `main` é modificado.
+- Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
 - O manifesto estável não é atualizado. Instalações normais do Foundry continuam recebendo a última release estável.
 
