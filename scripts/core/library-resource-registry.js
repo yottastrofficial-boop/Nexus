@@ -472,6 +472,11 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         if (!entry) throw new Error("O recurso não existe mais na Biblioteca.");
         if ("name" in entry || !("label" in entry)) entry.name = name;
         else entry.label = name;
+        if (collection === "themes" && entry.kind === "design-profile" && entry.profile &&
+            Number(entry.profile.schemaVersion ?? 1) <= 1) {
+          entry.profile.id = entry.id;
+          entry.profile.name = name;
+        }
         if ("description" in entry || description) entry.description = description;
         entry.tags = tags;
         return store;
@@ -489,6 +494,13 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       if (collection === "assets" && copy.key) copy.key = String(copy.key) + "-copy-" + suffix;
       if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
       else copy.label = String(original.label) + " (cópia)";
+      if (collection === "themes" && copy.kind === "design-profile" && copy.profile &&
+          Number(copy.profile.schemaVersion ?? 1) <= 1) {
+        copy.profile.id = copy.id;
+        copy.profile.name = String(copy.name ?? copy.label ?? "Aparência").slice(0, 64);
+        copy.palette = structuredClone(copy.profile.palette ?? copy.palette);
+        copy.updatedAt = new Date().toISOString();
+      }
       const saved = await updateNexusLibraryStore(user, store => { store.collections[collection].push(copy); return store; });
       await mirrorLegacy(saved);
       updateLogicRegistry(copy);

@@ -98,3 +98,17 @@ test("Universal Library indexa e resolve perfis salvos como recursos de tema", a
   assert.equal(resolved.profile.preset, "steam");
   assert.equal(resolved.profile.layout.density, "compact");
 });
+
+
+test("ações genéricas da Universal Library mantêm identidade e nome do perfil visual", async () => {
+  const user = makeUser(), library = createDesignLibraryService({ getUser: () => user, design: makeDesign(), createId: () => "indexed-theme" });
+  const saved = await library.save(createDefaultDesignProfile("medieval"));
+  const provider = createNexusLibraryProvider({ getUser: () => user, catalog: { assets: [], themes: [] } });
+  const reference = { providerId: "nexus-library", collection: "themes", id: saved.id };
+  await provider.executeAction("edit-metadata", reference, { name: "Cidadela" });
+  assert.equal(library.get(saved.id).profile.name, "Cidadela");
+  const duplicate = await provider.executeAction("duplicate", reference);
+  assert.notEqual(duplicate.entry.id, saved.id);
+  assert.equal(duplicate.entry.profile.id, duplicate.entry.id);
+  assert.equal(duplicate.entry.profile.name, duplicate.entry.name);
+});
