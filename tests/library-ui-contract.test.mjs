@@ -17,7 +17,10 @@ assert.match(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.act
   "Abas especializadas do Foundry devem receber estado ativo explícito.");
 assert.match(styles, /#ui-left, #ui-top\) \.ui-control/,
   "Controles nativos de UI devem compartilhar a superfície visual flutuante do NEXUS.");
-assert.match(libraryTemplate, /<option value="tables">RollTables<\\/option>/,\n  "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");\nassert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\\/option>/,\n  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");\nassert.match(styles, /:focus-visible/,
+assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
+  "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
+assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
+  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");\nassert.match(styles, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
 console.log("NEXUS universal library UI contract: OK");
