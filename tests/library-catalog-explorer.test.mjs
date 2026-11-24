@@ -158,13 +158,13 @@ test("resource Inspector previews expose safe summaries for components, groups a
     { kind: "composition", reference: { collection: "groups" } },
     { components: [{}, {}, {}], groups: [{}] }
   );
-  assert.equal(group.summary, "3 componentes · 1 subgrupos");
+  assert.equal(group.summary, "3 componentes · 1 subgrupo");
 
   const layout = getLibraryResourcePreviewModel(
     { kind: "layout", reference: { collection: "layouts" } },
     { name: "Ficha", layout: { width: 900, height: 700, components: [{}, {}], groups: [{}] } }
   );
-  assert.equal(layout.summary, "2 componentes · 1 grupos · 900 × 700 px");
+  assert.equal(layout.summary, "2 componentes · 1 grupo · 900 × 700 px");
 });
 
 test("media Inspector previews reject executable, traversal and SVG sources", () => {
@@ -186,6 +186,12 @@ test("media Inspector previews reject executable, traversal and SVG sources", ()
     { path: "icons/unsafe.svg" }
   );
   assert.equal(svg.mediaType, "unsupported");
+
+  const svgMime = getLibraryResourcePreviewModel(
+    { kind: "media", reference: { collection: "media" } },
+    { path: "icons/image.png", mimeType: "image/svg+xml" }
+  );
+  assert.equal(svgMime.mediaType, "unsupported");
 
   const video = getLibraryResourcePreviewModel(
     { kind: "media", reference: { collection: "media" } },
