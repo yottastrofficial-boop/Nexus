@@ -30,65 +30,82 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   const requestedFont = String(layout.fontFamily ?? fallbackFont);
   const fontFamily = allowedFonts.has(requestedFont) ? requestedFont : fallbackFont;
   const safeNumber = (value, min, max, fallback) => {
+    if (value === null || value === undefined || value === "") return fallback;
     const number = Number(value);
     return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
   };
   const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
   const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
-  const color = (key, fallback) => palette[key] ?? fallback;
+  const safeColor = (value, fallback) => {
+    const candidate = String(value ?? "").toLowerCase();
+    if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/.test(candidate)) return fallback;
+    return candidate.length === 4 ? "#" + [...candidate.slice(1)].map(channel => channel + channel).join("") : candidate;
+  };
+  const color = (key, fallback) => safeColor(palette[key], fallback);
+  const layoutColors = {
+    card: safeColor(layout.cardColor, color("card", theme.card)),
+    accent: safeColor(layout.accentColor, color("accent", theme.accent)),
+    highlight: safeColor(layout.highlightColor, color("highlight", theme.highlight)),
+    button: safeColor(layout.buttonColor, color("button", theme.button)),
+    scroll: safeColor(layout.scrollColor, color("scroll", theme.scroll)),
+    windowHeader: safeColor(layout.windowHeaderColor, color("windowHeader", theme.windowHeader)),
+    windowContent: safeColor(layout.windowContentColor, color("windowContent", theme.windowContent)),
+    menu: safeColor(layout.menuColor, color("menu", theme.menu)),
+    placeholder: safeColor(layout.placeholderColor, color("placeholder", theme.placeholder))
+  };
   const values = {
     "--nexus-panel-bg": theme.panel,
-    "--nexus-panel-card": layout.cardColor ?? theme.card,
-    "--nexus-panel-accent": layout.accentColor ?? theme.accent,
-    "--nexus-canvas-scroll-bg": layout.scrollColor ?? theme.scroll,
-    "--nexus-window-header-bg": layout.windowHeaderColor ?? theme.windowHeader,
-    "--nexus-window-content-bg": layout.windowContentColor ?? theme.windowContent,
-    "--nexus-button-bg": layout.buttonColor ?? theme.button,
-    "--nexus-button-hover-bg": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 82%, ${color("text", theme.text)})`,
-    "--nexus-button-active-bg": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 72%, ${color("highlight", layout.highlightColor ?? theme.highlight)})`,
-    "--nexus-button-active-border": color("highlight", layout.highlightColor ?? theme.highlight),
+    "--nexus-panel-card": layoutColors.card,
+    "--nexus-panel-accent": layoutColors.accent,
+    "--nexus-canvas-scroll-bg": layoutColors.scroll,
+    "--nexus-window-header-bg": layoutColors.windowHeader,
+    "--nexus-window-content-bg": layoutColors.windowContent,
+    "--nexus-button-bg": layoutColors.button,
+    "--nexus-button-hover-bg": `color-mix(in srgb, ${color("button", layoutColors.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-button-active-bg": `color-mix(in srgb, ${color("button", layoutColors.button)} 72%, ${color("highlight", layoutColors.highlight)})`,
+    "--nexus-button-active-border": color("highlight", layoutColors.highlight),
     "--nexus-button-active-text": color("text", theme.text),
-    "--nexus-button-active": color("highlight", layout.highlightColor ?? theme.highlight),
+    "--nexus-button-active": color("highlight", layoutColors.highlight),
     "--nexus-panel-surface": theme.surface,
     "--nexus-panel-input": theme.input,
     "--nexus-panel-border": theme.border,
     "--nexus-panel-text": theme.text,
     "--nexus-panel-muted": theme.muted,
     "--nexus-panel-hover": theme.hover,
-    "--nexus-scroll-bg": layout.scrollColor ?? theme.scroll,
-    "--nexus-scroll-thumb": layout.accentColor ?? theme.accent,
-    "--nexus-scrollbar-track": layout.scrollColor ?? theme.scroll,
-    "--nexus-scrollbar-thumb": layout.accentColor ?? theme.accent,
-    "--nexus-scrollbar-thumb-hover": layout.highlightColor ?? theme.highlight,
-    "--nexus-surface-raised": layout.cardColor ?? theme.card,
+    "--nexus-scroll-bg": layoutColors.scroll,
+    "--nexus-scroll-thumb": layoutColors.accent,
+    "--nexus-scrollbar-track": layoutColors.scroll,
+    "--nexus-scrollbar-thumb": layoutColors.accent,
+    "--nexus-scrollbar-thumb-hover": layoutColors.highlight,
+    "--nexus-surface-raised": layoutColors.card,
     "--nexus-surface-sunken": theme.input,
     "--nexus-border-subtle": `color-mix(in srgb, ${color("border", theme.border)} 58%, transparent)`,
     "--nexus-border-strong": layout.accentColor ?? theme.border,
     "--nexus-text-primary": theme.text,
     "--nexus-text-secondary": theme.muted,
     "--nexus-text-disabled": `color-mix(in srgb, ${color("muted", theme.muted)} 58%, transparent)`,
-    "--nexus-focus-ring": color("highlight", layout.highlightColor ?? theme.highlight),
+    "--nexus-focus-ring": color("highlight", layoutColors.highlight),
     "--nexus-field-bg": theme.input,
     "--nexus-field-text": theme.text,
     "--nexus-field-border": theme.border,
-    "--nexus-field-focus": color("highlight", layout.highlightColor ?? theme.highlight),
-    "--nexus-button-primary": layout.buttonColor ?? theme.button,
-    "--nexus-button-primary-hover": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-field-focus": color("highlight", layoutColors.highlight),
+    "--nexus-button-primary": layoutColors.button,
+    "--nexus-button-primary-hover": `color-mix(in srgb, ${color("button", layoutColors.button)} 82%, ${color("text", theme.text)})`,
     "--nexus-button-primary-text": color("text", theme.text),
     "--nexus-state-success": layout.theme === "light" ? "#247647" : "#79c99a",
     "--nexus-state-warning": layout.theme === "light" ? "#8a5a12" : "#e6bd68",
     "--nexus-state-danger": layout.theme === "light" ? "#a83232" : "#e58a8a",
     "--nexus-state-info": layout.theme === "light" ? "#245f91" : "#83bce8",
     "--nexus-resource-button": theme.resourceButton,
-    "--nexus-window-header": layout.windowHeaderColor ?? theme.windowHeader,
-    "--nexus-window-content": layout.windowContentColor ?? theme.windowContent,
-    "--nexus-menu-bg": layout.menuColor ?? theme.menu,
-    "--nexus-placeholder-color": layout.placeholderColor ?? theme.placeholder,
+    "--nexus-window-header": layoutColors.windowHeader,
+    "--nexus-window-content": layoutColors.windowContent,
+    "--nexus-menu-bg": layoutColors.menu,
+    "--nexus-placeholder-color": layoutColors.placeholder,
     "--nexus-canvas-color": layout.canvasColor ?? theme.canvas,
-    "--nexus-card-color": layout.cardColor ?? theme.card,
-    "--nexus-accent-color": layout.accentColor ?? theme.accent,
-    "--nexus-highlight-color": layout.highlightColor ?? theme.highlight,
-    "--nexus-button-color": layout.buttonColor ?? theme.button,
+    "--nexus-card-color": layoutColors.card,
+    "--nexus-accent-color": layoutColors.accent,
+    "--nexus-highlight-color": layoutColors.highlight,
+    "--nexus-button-color": layoutColors.button,
     "--nexus-font-family": `${fontFamilyToken}, sans-serif`,
     "--nexus-control-bg": theme.input, "--nexus-control-text": theme.text,
     "--nexus-control-border": theme.border, "--nexus-control-hover": theme.hover,
@@ -221,7 +238,8 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-foundry-control-hover": "hover"
   };
   for (const [token, key] of Object.entries(paletteTokens)) {
-    if (palette[key]) values[token] = palette[key];
+    const value = color(key, null);
+    if (value) values[token] = value;
   }
 
   const density = layout.density === "compact" ? 0.88 : layout.density === "spacious" ? 1.14 : 1;
