@@ -8768,6 +8768,8 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   color: var(--nexus-foundry-sidebar-text);
   background: var(--nexus-foundry-sidebar-bg);
   border-color: var(--nexus-foundry-sidebar-border);
+  font-family: var(--nexus-font-family, system-ui, sans-serif);
+  font-size: var(--nexus-font-size, 13px);
 }
 html.nexus-design-system #sidebar .sidebar-tabs > .item {
   color: var(--nexus-foundry-sidebar-muted);
@@ -8792,6 +8794,13 @@ html.nexus-design-system #sidebar .sidebar-tab.journal-sidebar,
 html.nexus-design-system #sidebar .sidebar-tab.playlists-sidebar,
 html.nexus-design-system #sidebar .sidebar-tab.compendium-sidebar,
 html.nexus-design-system #sidebar .sidebar-tab.scenes-sidebar {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-directory-bg);
+}
+html.nexus-design-system #sidebar .directory-list.plain,
+html.nexus-design-system #sidebar .sidebar-tab.directory.flexcol.active,
+html.nexus-design-system #sidebar .sidebar-tab.directory.flexcol.cards-sidebar.active,
+html.nexus-design-system #sidebar .sidebar-tab.directory.flexcol.actors-sidebar.active {
   color: var(--nexus-foundry-sidebar-text);
   background: var(--nexus-foundry-directory-bg);
 }
@@ -8861,6 +8870,7 @@ html.nexus-design-system #navigation #scene-list,
 html.nexus-design-system #navigation .scene {
   color: var(--nexus-foundry-sidebar-text);
   border-color: var(--nexus-foundry-sidebar-border);
+  font-family: var(--nexus-font-family, system-ui, sans-serif);
 }
 html.nexus-design-system #navigation #scene-list,
 html.nexus-design-system #navigation .scene {
