@@ -144,17 +144,41 @@ jobs:
         with:
           name: nexus-${{ needs.validate.outputs.version }}
 
-      - name: Ensure release tag is unused
+      - name: Check existing release
+        id: release_state
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: v${{ needs.validate.outputs.version }}
         run: |
-          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
-            echo "::error::Tag ${RELEASE_TAG} already exists. Releases are immutable; choose a new version."
-            exit 1
+          if TAG_REF=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" 2>/dev/null); then
+            TAG_TYPE=$(printf '%s' "$TAG_REF" | jq -r '.object.type')
+            TAG_OBJECT_SHA=$(printf '%s' "$TAG_REF" | jq -r '.object.sha')
+            if [ "$TAG_TYPE" = "tag" ]; then
+              TARGET_SHA=$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/${TAG_OBJECT_SHA}" --jq '.object.sha')
+            else
+              TARGET_SHA="$TAG_OBJECT_SHA"
+            fi
+            if [ "$TARGET_SHA" != "$GITHUB_SHA" ]; then
+              echo "::error::Tag ${RELEASE_TAG} already points to another commit."
+              exit 1
+            fi
+            RELEASE=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" 2>/dev/null) || {
+              echo "::error::Tag ${RELEASE_TAG} exists but its GitHub Release is missing."
+              exit 1
+            }
+            ASSET_STATE=$(printf '%s' "$RELEASE" | jq -r '[.assets[] | select(.name == "nexus.zip") | .state][0] // ""')
+            if [ "$ASSET_STATE" != "uploaded" ]; then
+              echo "::error::Release ${RELEASE_TAG} exists without a verified nexus.zip asset."
+              exit 1
+            fi
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Existing release matches this commit and has a verified package; continuing idempotently."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish GitHub Release
+        if: steps.release_state.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.validate.outputs.version }}
