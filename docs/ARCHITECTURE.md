@@ -31,8 +31,12 @@ A arquitetura deve ser evoluída por mudanças pequenas, preservando contratos e
 | Editor/Canvas | Seleção, gestos, posicionamento e ferramentas | Persistir diretamente o mapa completo |
 | Groups | Relações estruturais e operações de grupo | Ser apenas decoração CSS |
 | Library | Definições reutilizáveis e importação/exportação | Alterar instâncias sem confirmação |
-| Design system | Tokens, temas e estilos | Alterar dados ou mecânicas |
+| Design system | Tokens, temas e estilos; precedência sistema/campanha/usuário | Alterar dados ou mecânicas |
 | Media | Resolver e apresentar mídia | Executar conteúdo não confiável |
+
+### Design System e propriedade da aparência
+
+A aparência global deve manter ownership separado dos documentos de jogo. O padrão NEXUS é a restauração do sistema; o tema da campanha usa configuração Foundry de escopo `world`; a preferência individual usa escopo `user`. O cliente aplica os tokens localmente. Uma política mundial pode permitir ou forçar o tema da campanha sem apagar preferências pessoais. Integrações com a interface nativa devem ser escopadas a superfícies Foundry identificadas, sem aplicar estilos indiscriminadamente a janelas de módulos externos.
 
 ## Sequência segura de refatoração
 
