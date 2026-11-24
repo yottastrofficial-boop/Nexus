@@ -174,6 +174,9 @@ export function importDesignProfile(payload) {
   if (!isRecord(parsed) || parsed.format !== DESIGN_PROFILE_FORMAT || !isRecord(parsed.profile)) {
     throw new TypeError("Formato de perfil NEXUS inválido ou incompatível.");
   }
+  if (Number(parsed.profile.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {
+    throw new RangeError("O perfil foi criado por uma versão mais recente do NEXUS.");
+  }
   return normalizeDesignProfile(parsed.profile);
 }
 
