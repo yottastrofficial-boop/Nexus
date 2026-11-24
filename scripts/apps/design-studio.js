@@ -100,9 +100,12 @@ export function createDesignStudioApplicationClass({
     async _onRender(context, options) {
       await super._onRender(context, options);
       const root = this.element;
-      root?.addEventListener("input", event => this._onProfileInput(event));
-      root?.addEventListener("change", event => this._onProfileChange(event));
-      root?.addEventListener("click", event => void this._onStudioAction(event));
+      this._listeners?.abort();
+      this._listeners = new AbortController();
+      const listenerOptions = { signal: this._listeners.signal };
+      root?.addEventListener("input", event => this._onProfileInput(event), listenerOptions);
+      root?.addEventListener("change", event => this._onProfileChange(event), listenerOptions);
+      root?.addEventListener("click", event => void this._onStudioAction(event), listenerOptions);
       if (this._dirty) this._applyPreview();
     }
 
@@ -160,6 +163,8 @@ export function createDesignStudioApplicationClass({
           const next = select?.value === "user" ? "user" : "world";
           if (next === "world" && !design.canEditScope("world")) throw new Error("Somente o Mestre pode editar a aparência da campanha.");
           if (next === "user" && !design.canEditScope("user")) throw new Error("A campanha não permite uma aparência individual.");
+          design.clearPreview();
+          this._previewing = false;
           this._target = next;
           this._draft = clone(design.getProfile(next));
           this._dirty = false;
@@ -225,6 +230,8 @@ export function createDesignStudioApplicationClass({
     }
 
     async _onClose(options) {
+      this._listeners?.abort();
+      this._listeners = null;
       if (this._previewing) design.clearPreview();
       this._previewing = false;
       await super._onClose(options);
