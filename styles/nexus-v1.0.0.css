@@ -8940,3 +8940,202 @@ html.nexus-design-system .nexus-themed-application button:hover {
   background: var(--nexus-foundry-control-hover);
   border-color: var(--nexus-foundry-sidebar-active);
 }
+
+
+/* Design Studio — isolated editor surface and live preview. */
+.nexus-design-studio {
+  min-width: min(92vw, 720px);
+  color: var(--nexus-panel-text, #e7edf5);
+  background: var(--nexus-panel-bg, #182330);
+  font-family: var(--nexus-font-family, system-ui, sans-serif);
+}
+.nexus-design-studio .window-content {
+  padding: 0;
+  overflow: hidden;
+  background: var(--nexus-panel-bg, #182330);
+}
+.nexus-design-studio-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  color: var(--nexus-panel-text);
+  background: var(--nexus-panel-bg);
+  font-size: var(--nexus-font-size, 13px);
+}
+.nexus-design-studio-toolbar,
+.nexus-design-studio-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--nexus-panel-border);
+  background: var(--nexus-panel-surface);
+}
+.nexus-design-studio-identity,
+.nexus-design-studio-target,
+.nexus-design-studio-file-actions,
+.nexus-design-studio-save-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.nexus-design-studio-identity { min-width: 0; }
+.nexus-design-studio-identity > div { display: grid; gap: 3px; }
+.nexus-design-studio-identity strong { font-size: 14px; }
+.nexus-design-studio-identity small,
+.nexus-design-studio-target label,
+.nexus-design-preview-heading span { color: var(--nexus-panel-muted); font-size: 11px; }
+.nexus-design-studio-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: var(--nexus-radius-panel);
+  color: var(--nexus-panel-text);
+  background: var(--nexus-panel-accent);
+}
+.nexus-design-studio-target { flex-wrap: wrap; justify-content: flex-end; }
+.nexus-design-studio-target label { width: 100%; text-align: right; }
+.nexus-design-studio select,
+.nexus-design-studio input:not([type="color"]):not([type="range"]):not([type="checkbox"]) {
+  min-height: var(--nexus-control-height, 34px);
+  color: var(--nexus-panel-text);
+  background: var(--nexus-panel-input);
+  border: var(--nexus-contrast-border-width, 1px) solid var(--nexus-panel-border);
+  border-radius: var(--nexus-radius-small, 6px);
+}
+.nexus-design-studio button {
+  min-height: 32px;
+  padding: 5px 10px;
+  color: var(--nexus-panel-text);
+  background: var(--nexus-panel-surface);
+  border: 1px solid var(--nexus-panel-border);
+  border-radius: var(--nexus-radius-small, 6px);
+  cursor: pointer;
+}
+.nexus-design-studio button:hover { background: var(--nexus-panel-hover); border-color: var(--nexus-panel-accent); }
+.nexus-design-studio :focus-visible {
+  outline: var(--nexus-contrast-outline-width, 2px) solid var(--nexus-highlight-color);
+  outline-offset: 2px;
+}
+.nexus-design-studio-body {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) 230px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.nexus-design-studio-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 8px;
+  border-right: 1px solid var(--nexus-panel-border);
+  background: var(--nexus-panel-bg);
+}
+.nexus-design-studio-nav a {
+  padding: 9px;
+  color: var(--nexus-panel-muted);
+  border-radius: var(--nexus-radius-small);
+  text-decoration: none;
+  font-size: 11px;
+}
+.nexus-design-studio-nav a:hover { color: var(--nexus-panel-text); background: var(--nexus-panel-hover); }
+.nexus-design-studio-editor { min-width: 0; overflow: auto; padding: 16px; }
+.nexus-design-studio-section { display: grid; gap: 14px; padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--nexus-panel-border); }
+.nexus-design-section-heading h3 { margin: 0 0 4px; font-size: 14px; }
+.nexus-design-section-heading p { margin: 0; color: var(--nexus-panel-muted); font-size: 11px; line-height: 1.45; }
+.nexus-design-field { display: grid; gap: 6px; min-width: 0; color: var(--nexus-panel-muted); font-size: 11px; }
+.nexus-design-field output { color: var(--nexus-panel-text); font-variant-numeric: tabular-nums; }
+.nexus-design-preset { max-width: 300px; }
+.nexus-design-preset select { width: 100%; }
+.nexus-design-color-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.nexus-design-color-field {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--nexus-panel-border);
+  border-radius: var(--nexus-radius-small);
+  background: var(--nexus-panel-surface);
+}
+.nexus-design-color-field span { grid-column: 1 / -1; color: var(--nexus-panel-muted); font-size: 10px; }
+.nexus-design-color-field input[type="color"] { width: 28px; height: 28px; padding: 1px; border: 0; background: transparent; cursor: pointer; }
+.nexus-design-color-field code { overflow: hidden; color: var(--nexus-panel-text); font-size: 10px; text-overflow: ellipsis; }
+.nexus-design-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.nexus-design-settings-grid select { width: 100%; }
+.nexus-design-settings-grid input[type="range"] { width: 100%; accent-color: var(--nexus-highlight-color); }
+.nexus-design-check { display: flex; align-items: center; gap: 8px; color: var(--nexus-panel-text); font-size: 11px; }
+.nexus-design-check input { accent-color: var(--nexus-highlight-color); }
+.nexus-design-type-preview {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--nexus-panel-border);
+  border-radius: var(--nexus-radius-panel);
+  background: var(--nexus-panel-surface);
+  font-family: var(--nexus-font-family);
+}
+.nexus-design-type-preview strong { font-size: var(--nexus-value-font-size); }
+.nexus-design-type-preview p { margin: 0; line-height: var(--nexus-line-height); }
+.nexus-design-type-preview span { color: var(--nexus-panel-muted); font-size: var(--nexus-secondary-font-size); }
+.nexus-design-diagnostics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 12px; margin: 0; padding-left: 18px; font-size: 10px; }
+.nexus-design-diagnostics .is-valid { color: var(--nexus-state-success); }
+.nexus-design-diagnostics .is-warning,
+.nexus-design-warning { color: var(--nexus-state-warning); }
+.nexus-design-success { color: var(--nexus-state-success); }
+.nexus-design-warning,
+.nexus-design-success { margin: 0; font-size: 11px; }
+.nexus-design-studio-preview { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-left: 1px solid var(--nexus-panel-border); background: var(--nexus-panel-bg); }
+.nexus-design-preview-heading { display: grid; gap: 4px; }
+.nexus-design-preview-card { overflow: hidden; border: 1px solid var(--nexus-panel-border); border-radius: var(--nexus-radius-panel); background: var(--nexus-panel-surface); box-shadow: var(--nexus-card-shadow); }
+.nexus-design-preview-top { display: flex; align-items: center; gap: 7px; padding: 10px; color: var(--nexus-panel-muted); background: var(--nexus-window-header-bg); font-size: 9px; letter-spacing: .08em; }
+.nexus-design-preview-top i { margin-left: auto; }
+.nexus-design-preview-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nexus-highlight-color); }
+.nexus-design-preview-content { display: grid; gap: 8px; padding: 12px; }
+.nexus-design-preview-content > small,
+.nexus-design-preview-stats small { color: var(--nexus-panel-muted); font-size: 9px; letter-spacing: .08em; }
+.nexus-design-preview-content h3 { margin: 0; font-size: 15px; }
+.nexus-design-preview-content p { margin: 0; color: var(--nexus-panel-muted); font-size: 10px; }
+.nexus-design-preview-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.nexus-design-preview-stats > div { display: grid; gap: 4px; padding: 8px; border: 1px solid var(--nexus-panel-border); border-radius: var(--nexus-radius-small); background: var(--nexus-panel-bg); }
+.nexus-design-preview-stats strong { font-size: 14px; }
+.nexus-design-preview-progress { height: 7px; overflow: hidden; border-radius: 99px; background: var(--nexus-panel-input); }
+.nexus-design-preview-progress span { display: block; width: 80%; height: 100%; background: var(--nexus-highlight-color); }
+.nexus-design-preview-actions { display: flex; gap: 6px; }
+.nexus-design-preview-actions button { flex: 1; min-height: 29px; font-size: 10px; }
+.nexus-design-preview-note { margin: 0; color: var(--nexus-panel-muted); font-size: 10px; line-height: 1.45; }
+.nexus-design-studio-footer { border-top: 1px solid var(--nexus-panel-border); border-bottom: 0; }
+.nexus-design-studio-save-actions { justify-content: flex-end; }
+.nexus-design-studio .nexus-design-save { color: var(--nexus-panel-text); background: var(--nexus-button-primary); border-color: var(--nexus-highlight-color); }
+@media (max-width: 850px) {
+  .nexus-design-studio-body { grid-template-columns: 105px minmax(0, 1fr); }
+  .nexus-design-studio-preview { display: none; }
+}
+@media (max-width: 620px) {
+  .nexus-design-studio-toolbar,
+  .nexus-design-studio-footer { align-items: stretch; flex-direction: column; }
+  .nexus-design-studio-body { grid-template-columns: minmax(0, 1fr); }
+  .nexus-design-studio-nav { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--nexus-panel-border); }
+  .nexus-design-color-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nexus-design-settings-grid { grid-template-columns: minmax(0, 1fr); }
+  .nexus-design-studio-target { justify-content: flex-start; }
+  .nexus-design-studio-target label { text-align: left; }
+}
+html.nexus-design-system[data-nexus-contrast="high"] {
+  --nexus-contrast-border-width: 2px;
+  --nexus-contrast-outline-width: 3px;
+}
+html.nexus-design-system[data-nexus-reduced-motion="true"] *,
+html.nexus-design-system[data-nexus-reduced-motion="true"] *::before,
+html.nexus-design-system[data-nexus-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
