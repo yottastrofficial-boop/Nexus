@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryThemePreviewColors } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -124,4 +124,22 @@ test("catalog cards use semantic icons for each resource family", () => {
   assert.equal(getLibraryResourceIcon({ kind: "document", type: "Actor" }), "fa-solid fa-user");
   assert.equal(getLibraryResourceIcon({ kind: "document", type: "Scene" }), "fa-solid fa-map");
   assert.equal(getLibraryResourceIcon({ kind: "unknown" }), "fa-solid fa-cube");
+});
+
+test("theme Inspector preview exposes only supported valid palette colors", () => {
+  assert.deepEqual(getLibraryThemePreviewColors({
+    palette: {
+      canvasColor: "#101820",
+      cardColor: "#223344",
+      highlightColor: "#abc",
+      buttonColor: "url(javascript:alert(1))",
+      unknown: "#ffffff"
+    }
+  }), [
+    { label: "Canvas", value: "#101820" },
+    { label: "Cartão", value: "#223344" },
+    { label: "Destaque", value: "#abc" }
+  ]);
+  assert.deepEqual(getLibraryThemePreviewColors({ palette: null }), []);
+  assert.deepEqual(getLibraryThemePreviewColors({}), []);
 });
