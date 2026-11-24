@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.96 (build de desenvolvimento da main) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.96 (última release publicada; main em desenvolvimento pós-release) · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Versão publicada para validação:** 1.0.0.95. Esta versão consolida o Design System global, os controles flutuantes integrados à janela nativa, a Biblioteca Explorer hierárquica e as prévias visuais tipadas do Inspector. O pacote 1.0.0.96 é uma build de desenvolvimento para validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada. A release estável 1.0.0.95 permanece no manifesto de atualização automática.
+**Última release publicada:** 1.0.0.96. O pacote `nexus.zip` foi publicado em 24/11/2026 após a validação automatizada, e o manifesto de instalação aponta para essa versão. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado dentro do Foundry permanece na 1.0.0.70.
 
 ## Visão geral
 
@@ -26,9 +26,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual na main — 1.0.0.96
+## Base da implementação atual na main — 1.0.0.96
 
-A linha atual da `main` (build de desenvolvimento 1.0.0.96) inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A release 1.0.0.96 consolida a integração nativa do Design System e a geometria responsiva dos controles. A `main` continua em desenvolvimento pós-release e pode conter alterações ainda não distribuídas. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 

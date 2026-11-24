@@ -5,9 +5,10 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
-- Última release estável publicada: `1.0.0.95` (Design System global, controles flutuantes e Biblioteca Explorer; validação funcional pendente)
-- Build de desenvolvimento atual da main: `1.0.0.96` (integração da configuração nativa do Foundry e geometria responsiva dos controles; validação funcional pendente)
-- Esta build destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
+- Última release estável publicada: `1.0.0.96` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
+- Base de versão declarada na main: `1.0.0.96`; a branch segue em desenvolvimento pós-release e pode conter alterações ainda não distribuídas.
+- Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
+- A release 1.0.0.96 destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 

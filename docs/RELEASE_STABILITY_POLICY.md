@@ -25,11 +25,12 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última release estável publicada:** `1.0.0.95`, com Design System global e Biblioteca Explorer; continua sem validação funcional completa no Foundry VTT 14 build 360.
-- **Build de desenvolvimento atual da main:** `1.0.0.96`, com integração nativa da configuração visual e geometria responsiva dos controles; disponível para teste, ainda sem validação funcional no Foundry.
-- **Código da main após a release .95:** inclui correções de infraestrutura de CI e ciclo de vida do DOM. Essas alterações ainda não foram distribuídas em um novo pacote estável.
+- **Última release estável publicada:** `1.0.0.96`, com `nexus.zip` publicado e asset confirmado após CI; continua sem validação funcional completa no Foundry VTT 14 build 360.
+- **Estado da main:** base de versão declarada `1.0.0.96`; a branch está em desenvolvimento pós-release e pode conter alterações ainda não distribuídas.
+- **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
+- **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
 - **Próxima candidata prevista:** `1.0.0.97-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.
-- **Manifesto estável:** permanece apontando para a última release estável confirmada até que uma nova release estável tenha ZIP anexado e verificado.
+- **Manifesto estável:** aponta para a `1.0.0.96`, cujo ZIP foi anexado e verificado. A release publicada antes desta sincronização ainda contém o campo `download` legado em seu `system.json`; o manifesto canônico continua apontando corretamente para a .96. A sincronização de `system.json` passa a fazer parte do fluxo das próximas releases.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
 A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.

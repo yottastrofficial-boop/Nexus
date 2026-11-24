@@ -83,6 +83,12 @@ jobs:
             throw new Error("Não foi possível habilitar o canal de candidata.");
           }
 
+          if (channel === "stable") {
+            system.manifest = `https://raw.githubusercontent.com/${process.env.GITHUB_REPOSITORY}/main/manifest.json`;
+            system.download = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/nexus.zip`;
+            fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\n");
+          }
+
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `value=${version}\nchannel=${channel}\nprevious=${system.version}\n`);
           console.log(`Canal: ${channel}; pacote: ${version}`);
           NODE
@@ -136,7 +142,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     permissions:
-      contents: write # tag, GitHub Release and the stable manifest commit
+      contents: write # tag, GitHub Release and synchronized stable metadata
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -208,7 +214,7 @@ jobs:
           echo "::error::The release asset nexus.zip was not confirmed as uploaded."
           exit 1
 
-      - name: Publish stable Foundry manifest after the package is available
+      - name: Synchronize stable Foundry metadata after the package is available
         if: needs.validate.outputs.channel == 'stable'
         uses: actions/github-script@v7
         env:
@@ -216,32 +222,56 @@ jobs:
         with:
           script: |
             const fs = require("node:fs");
-            const manifest = JSON.parse(fs.readFileSync("system.json", "utf8"));
             const version = process.env.RELEASE_VERSION;
-            if (manifest.version !== version) {
-              throw new Error(`Manifest version mismatch: expected ${version}, received ${manifest.version}`);
+            const manifestUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/main/manifest.json`;
+            const downloadUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/download/v${version}/nexus.zip`;
+            const packageMetadata = JSON.parse(fs.readFileSync("system.json", "utf8"));
+            if (packageMetadata.version !== version) {
+              throw new Error(`Manifest version mismatch: expected ${version}, received ${packageMetadata.version}`);
             }
-            manifest.manifest = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/main/manifest.json`;
-            manifest.download = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/download/v${version}/nexus.zip`;
-            const content = JSON.stringify(manifest, null, 2) + "\n";
-            const current = await github.rest.repos.getContent({
+
+            const updateTextFile = async (path, content, message) => {
+              const current = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path,
+                ref: "main"
+              });
+              const currentText = Buffer.from(current.data.content, "base64").toString("utf8");
+              if (currentText === content) {
+                core.info(`${path} already matches the published release.`);
+                return;
+              }
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path,
+                message,
+                content: Buffer.from(content, "utf8").toString("base64"),
+                sha: current.data.sha,
+                branch: "main"
+              });
+              core.info(`${path} synchronized to NEXUS ${version}.`);
+            };
+
+            const manifestContent = JSON.stringify({
+              ...packageMetadata,
+              manifest: manifestUrl,
+              download: downloadUrl
+            }, null, 2) + "\n";
+            await updateTextFile("manifest.json", manifestContent, `[manifest] Publica NEXUS ${version} após confirmar o pacote`);
+
+            const systemCurrent = await github.rest.repos.getContent({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              path: "manifest.json",
+              path: "system.json",
               ref: "main"
             });
-            const currentText = Buffer.from(current.data.content, "base64").toString("utf8");
-            if (currentText === content) {
-              core.info("Stable manifest already matches the published release.");
-              return;
+            const systemMetadata = JSON.parse(Buffer.from(systemCurrent.data.content, "base64").toString("utf8"));
+            if (systemMetadata.version !== version) {
+              throw new Error(`system.json version mismatch: expected ${version}, received ${systemMetadata.version}`);
             }
-            await github.rest.repos.createOrUpdateFileContents({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: "manifest.json",
-              message: `[manifest] Publica NEXUS ${version} após confirmar o pacote`,
-              content: Buffer.from(content, "utf8").toString("base64"),
-              sha: current.data.sha,
-              branch: "main"
-            });
-            core.info(`Stable manifest updated to NEXUS ${version} after asset upload.`);
+            systemMetadata.manifest = manifestUrl;
+            systemMetadata.download = downloadUrl;
+            await updateTextFile("system.json", JSON.stringify(systemMetadata, null, 2) + "\n",
+              `[system] Sincroniza download do NEXUS ${version}`);
