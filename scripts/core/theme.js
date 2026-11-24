@@ -27,6 +27,8 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
   const fontFamily = layout.fontFamily ?? theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : "Inter");
   const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
+  const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
+  const color = (key, fallback) => palette[key] ?? fallback;
   const values = {
     "--nexus-panel-bg": theme.panel,
     "--nexus-panel-card": layout.cardColor ?? theme.card,
@@ -36,10 +38,10 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-window-content-bg": layout.windowContentColor ?? theme.windowContent,
     "--nexus-button-bg": layout.buttonColor ?? theme.button,
     "--nexus-button-border": layout.accentColor ?? theme.border,
-    "--nexus-button-hover-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
-    "--nexus-button-active-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 72%, ${layout.highlightColor ?? theme.highlight})`,
-    "--nexus-button-active-border": layout.highlightColor ?? theme.highlight,
-    "--nexus-button-active-text": layout.palette?.text ?? theme.text,
+    "--nexus-button-hover-bg": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-button-active-bg": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 72%, ${color("highlight", layout.highlightColor ?? theme.highlight)})`,
+    "--nexus-button-active-border": color("highlight", layout.highlightColor ?? theme.highlight),
+    "--nexus-button-active-text": color("text", theme.text),
     "--nexus-button-active": layout.highlightColor ?? theme.highlight,
     "--nexus-panel-surface": theme.surface,
     "--nexus-panel-input": theme.input,
@@ -54,19 +56,19 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-scrollbar-thumb-hover": layout.highlightColor ?? theme.highlight,
     "--nexus-surface-raised": layout.cardColor ?? theme.card,
     "--nexus-surface-sunken": theme.input,
-    "--nexus-border-subtle": `color-mix(in srgb, ${layout.palette?.border ?? theme.border} 58%, transparent)`,
+    "--nexus-border-subtle": `color-mix(in srgb, ${color("border", theme.border)} 58%, transparent)`,
     "--nexus-border-strong": layout.accentColor ?? theme.border,
     "--nexus-text-primary": theme.text,
     "--nexus-text-secondary": theme.muted,
-    "--nexus-text-disabled": `color-mix(in srgb, ${theme.muted} 58%, transparent)`,
-    "--nexus-focus-ring": layout.highlightColor ?? theme.highlight,
+    "--nexus-text-disabled": `color-mix(in srgb, ${color("muted", theme.muted)} 58%, transparent)`,
+    "--nexus-focus-ring": color("highlight", layout.highlightColor ?? theme.highlight),
     "--nexus-field-bg": theme.input,
     "--nexus-field-text": theme.text,
     "--nexus-field-border": theme.border,
-    "--nexus-field-focus": layout.highlightColor ?? theme.highlight,
+    "--nexus-field-focus": color("highlight", layout.highlightColor ?? theme.highlight),
     "--nexus-button-primary": layout.buttonColor ?? theme.button,
-    "--nexus-button-primary-hover": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
-    "--nexus-button-primary-text": layout.palette?.text ?? theme.text,
+    "--nexus-button-primary-hover": `color-mix(in srgb, ${color("button", layout.buttonColor ?? theme.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-button-primary-text": color("text", theme.text),
     "--nexus-state-success": layout.theme === "light" ? "#247647" : "#79c99a",
     "--nexus-state-warning": layout.theme === "light" ? "#8a5a12" : "#e6bd68",
     "--nexus-state-danger": layout.theme === "light" ? "#a83232" : "#e58a8a",
@@ -94,8 +96,8 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-radius-panel": layout.theme === "steam" ? "2px" : "8px",
     "--nexus-spacing-unit": layout.theme === "steam" ? "6px" : "8px",
     "--nexus-font-ui": `${fontFamilyToken}, sans-serif`,
-    "--nexus-button-border": layout.palette?.accent ?? layout.accentColor ?? theme.border,
-    "--nexus-button-text": layout.palette?.text ?? theme.text,
+    "--nexus-button-border": color("accent", layout.accentColor ?? theme.border),
+    "--nexus-button-text": color("text", theme.text),
     "--nexus-navigation-bg": theme.panel,
     "--nexus-navigation-active": theme.accent,
     "--nexus-input-focus": theme.highlight,
@@ -133,7 +135,6 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-foundry-control-border": theme.border,
     "--nexus-foundry-control-hover": theme.hover
   };
-  const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
   const paletteTokens = {
     "--nexus-panel-bg": "panel",
     "--nexus-panel-card": "card",
