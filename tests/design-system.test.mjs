@@ -8,6 +8,14 @@ import {
   installNexusDesignSystem
 } from "../scripts/core/design-system.js";
 import { THEME_TOKENS, applyThemeTokens } from "../scripts/core/theme.js";
+import {
+  createDefaultDesignProfile,
+  normalizeDesignProfile,
+  getDesignProfileDiagnostics,
+  exportDesignProfile,
+  importDesignProfile,
+  profileToThemeLayout
+} from "../scripts/core/design-profile.js";
 
 
 test("theme typography uses its preset font unless a layout explicitly overrides it", () => {
@@ -28,6 +36,60 @@ test("theme typography uses its preset font unless a layout explicitly overrides
 
   applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter" });
   assert.equal(values.get("--nexus-font-family"), '"Inter", sans-serif');
+});
+
+
+test("design profiles normalize values, reject unsafe CSS payloads and preserve schema", () => {
+  const profile = normalizeDesignProfile({
+    preset: "medieval",
+    name: "  Minha campanha  ",
+    palette: { panel: "url(javascript:alert(1))", text: "#fff", accent: "#12abef" },
+    typography: { family: "url(https://example.invalid/font)", baseSize: 99, lineHeight: 0.2 },
+    layout: { density: "extreme", radius: "sharp", spacing: 9, controlHeight: 100 },
+    accessibility: { contrast: "high", reducedMotion: true }
+  });
+  assert.equal(profile.preset, "medieval");
+  assert.equal(profile.name, "Minha campanha");
+  assert.equal(profile.palette.panel, THEME_TOKENS.medieval.panel);
+  assert.equal(profile.palette.text, "#fff");
+  assert.equal(profile.typography.family, "Georgia");
+  assert.equal(profile.typography.baseSize, 18);
+  assert.equal(profile.typography.lineHeight, 1.2);
+  assert.equal(profile.layout.density, "soft" === profile.layout.density ? "soft" : "comfortable");
+  assert.equal(profile.layout.radius, "sharp");
+  assert.equal(profile.layout.spacing, 1.5);
+  assert.equal(profile.layout.controlHeight, 44);
+  assert.equal(profile.accessibility.contrast, "high");
+  assert.equal(profile.accessibility.reducedMotion, true);
+});
+
+test("design profile diagnostics calculate text contrast and imports use a versioned safe envelope", () => {
+  const dark = createDefaultDesignProfile("nexus-dark");
+  const report = getDesignProfileDiagnostics(dark);
+  assert.equal(report.checks.length, 4);
+  assert.ok(report.checks.every(check => Number.isFinite(check.ratio)));
+  const serialized = exportDesignProfile(dark);
+  assert.deepEqual(importDesignProfile(serialized), dark);
+  assert.throws(() => importDesignProfile('{"format":"OTHER","profile":{}}'), /incompatível/);
+  assert.throws(() => importDesignProfile("x".repeat(64 * 1024 + 1)), /64 KB/);
+  assert.throws(() => importDesignProfile("{invalid"), /JSON válido/);
+});
+
+test("profile-to-layout maps custom tokens to the existing theme renderer contract", () => {
+  const profile = createDefaultDesignProfile("pixel-art");
+  profile.palette.panel = "#112233";
+  profile.typography.baseSize = 15;
+  profile.layout.density = "spacious";
+  profile.layout.controlHeight = 40;
+  profile.accessibility.reducedMotion = true;
+  const layout = profileToThemeLayout(profile);
+  assert.equal(layout.theme, "pixel-art");
+  assert.equal(layout.palette.panel, "#112233");
+  assert.equal(layout.fontFamily, "monospace");
+  assert.equal(layout.fontSize, 15);
+  assert.equal(layout.density, "spacious");
+  assert.equal(layout.controlHeight, 40);
+  assert.equal(layout.reducedMotion, true);
 });
 
 test("Design System normalizes unknown theme IDs and malformed settings safely", () => {
