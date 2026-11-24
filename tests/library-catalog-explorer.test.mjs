@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryThemePreviewColors, getLibraryResourcePreviewModel } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryThemePreviewColors, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -165,6 +165,41 @@ test("resource Inspector previews expose safe summaries for components, groups a
     { name: "Ficha", layout: { width: 900, height: 700, components: [{}, {}], groups: [{}] } }
   );
   assert.equal(layout.summary, "2 componentes · 1 grupo · 900 × 700 px");
+});
+
+test("media image resources expose only safe browser-native insertion sources", () => {
+  const resource = { kind: "media", reference: { collection: "media" } };
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/portrait.webp",
+    mimeType: "image/webp"
+  }), "media/portrait.webp");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    url: "https://cdn.example.test/portrait",
+    mimeType: "image/png"
+  }), "https://cdn.example.test/portrait");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/portrait.heic",
+    mimeType: "image/heic"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/portrait.svg",
+    mimeType: "image/svg+xml"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/sound.ogg",
+    mimeType: "audio/ogg"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/preview.mp4",
+    mimeType: "video/mp4"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "../private/portrait.png",
+    mimeType: "image/png"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
+    thumbnail: "media/thumb.png"
+  }), "");
 });
 
 test("media Inspector previews reject executable, traversal and SVG sources", () => {
