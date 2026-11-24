@@ -236,7 +236,7 @@ export function installNexusDesignSystem({
       name: "Meu tema pessoal",
       hint: "Tema utilizado quando sua preferência estiver definida como Minha aparência.",
       scope: "user",
-      config: true,
+      config: false,
       type: String,
       choices: themeChoices,
       default: DEFAULT_DESIGN_THEME,
