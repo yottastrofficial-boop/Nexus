@@ -6,7 +6,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit de referência: `2bf4ea6c16130a898d3564916a4560a1ec0126dc`
+- Commit de referência: `HEAD da main`
 - Última release estável publicada: `1.0.0.95` (Design System global e Biblioteca Explorer; validação funcional pendente)
 - Build de desenvolvimento atual da main: `1.0.0.96` (integração da configuração nativa do Foundry e geometria responsiva dos controles; CI em validação e teste funcional no Foundry pendente)
 - Publicação condicionada à aprovação do CI e à geração do pacote; validação funcional no Foundry real permanece pendente.

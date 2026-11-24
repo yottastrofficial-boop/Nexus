@@ -4,7 +4,7 @@
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
-- Commit de referência: `2bf4ea6c16130a898d3564916a4560a1ec0126dc`
+- Commit de referência: `HEAD da main`
 - Última release estável publicada: `1.0.0.95` (Design System global, controles flutuantes e Biblioteca Explorer; validação funcional pendente)
 - Build de desenvolvimento atual da main: `1.0.0.96` (integração da configuração nativa do Foundry e geometria responsiva dos controles; validação funcional pendente)
 - Esta build destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
