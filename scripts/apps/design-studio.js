@@ -8,8 +8,9 @@ import {
   DESIGN_FONT_CHOICES,
   DESIGN_DENSITY_CHOICES,
   DESIGN_RADIUS_CHOICES,
-  DESIGN_CONTRAST_CHOICES
+  DESIGN_CONTRAST_CHOICES,
 } from "../core/design-profile.js";
+import { DESIGN_THEME_CHOICES } from "../core/design-system.js";
 
 const clone = value => globalThis.foundry?.utils?.deepClone
   ? globalThis.foundry.utils.deepClone(value)
@@ -73,6 +74,11 @@ export function createDesignStudioApplicationClass({
         target: this._target,
         canEditWorld: globalThis.game?.user?.isGM === true,
         canEditUser: design.canEditScope("user"),
+        targetOptions: [
+          ...(design.canEditScope("world") ? [{ value: "world", label: "Campanha", selected: this._target === "world" }] : []),
+          ...(design.canEditScope("user") ? [{ value: "user", label: "Meu usuário", selected: this._target === "user" }] : [])
+        ],
+        presetChoices: Object.entries(DESIGN_THEME_CHOICES).map(([value, label]) => ({ value, label, selected: value === this._draft.preset })),
         paletteFields: DESIGN_PROFILE_PALETTE_KEYS.map(key => ({ key, value: this._draft.palette[key], label: ({
           panel: "Painel", surface: "Superfície", input: "Campos", border: "Bordas",
           text: "Texto principal", muted: "Texto secundário", hover: "Realce ao passar",
@@ -97,7 +103,7 @@ export function createDesignStudioApplicationClass({
       root?.addEventListener("input", event => this._onProfileInput(event));
       root?.addEventListener("change", event => this._onProfileChange(event));
       root?.addEventListener("click", event => void this._onStudioAction(event));
-      this._applyPreview();
+      if (this._dirty) this._applyPreview();
     }
 
     _onProfileInput(event) {
@@ -219,7 +225,7 @@ export function createDesignStudioApplicationClass({
     }
 
     async _onClose(options) {
-      if (this._previewing && this._dirty) design.clearPreview();
+      if (this._previewing) design.clearPreview();
       this._previewing = false;
       await super._onClose(options);
     }
