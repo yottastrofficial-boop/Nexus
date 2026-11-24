@@ -8949,3 +8949,64 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   font-size:8px;
   text-align:center;
 }
+
+
+/* Biblioteca Universal — prévias contextuais inertes do Inspector. */
+.nexus-library-resource-preview {
+  display:grid;
+  gap:8px;
+  min-width:0;
+  margin:10px 0;
+  padding:10px;
+  border:1px solid var(--nexus-panel-border,#354b61);
+  border-radius:7px;
+  background:var(--nexus-panel-input,#151d27);
+}
+.nexus-library-resource-preview-title {
+  color:var(--nexus-panel-text,#e7edf5);
+  font-size:11px;
+  font-weight:700;
+}
+.nexus-library-resource-preview-summary {
+  margin:0;
+  color:var(--nexus-panel-muted,#a5b6c9);
+  font-size:10px;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.nexus-library-resource-preview img,
+.nexus-library-resource-preview video {
+  display:block;
+  width:100%;
+  max-width:100%;
+  max-height:180px;
+  object-fit:contain;
+  border-radius:5px;
+  background:var(--nexus-panel-bg,#101820);
+}
+.nexus-library-resource-preview audio { width:100%; max-width:100%; }
+.nexus-library-resource-preview-colors {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.nexus-library-resource-preview-swatch {
+  width:24px;
+  height:24px;
+  border:1px solid var(--nexus-panel-border,#43546a);
+  border-radius:5px;
+}
+.nexus-library-resource-preview-facts {
+  display:grid;
+  grid-template-columns:minmax(80px,.65fr) minmax(0,1fr);
+  gap:5px 9px;
+  margin:0;
+  font-size:10px;
+}
+.nexus-library-resource-preview-facts dt { color:var(--nexus-panel-muted,#a5b6c9); }
+.nexus-library-resource-preview-facts dd {
+  min-width:0;
+  margin:0;
+  color:var(--nexus-panel-text,#e7edf5);
+  overflow-wrap:anywhere;
+}
