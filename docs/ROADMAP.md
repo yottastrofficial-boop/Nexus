@@ -6,9 +6,9 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
-- Versão publicada: `1.0.0.90` (release de teste; a validação funcional no Foundry continua pendente)
-- Versão candidata em preparação: `1.0.0.91` (Biblioteca universal integrada; CI e validação funcional no Foundry pendentes).
+- Commit: `7a9f30ba794b50c7499a5d193573cdee31a1dcef`
+- Versão publicada: `1.0.0.91` (release de teste; a validação funcional no Foundry continua pendente)
+- Versão candidata em preparação: `1.0.0.92` (Design System e Inspector de Aparências integrados; pacote destinado à validação no Foundry VTT 14 build 360).
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
@@ -132,3 +132,13 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - Perfis de schema futuro são preservados e ficam sem prévia interpretada ou ações destrutivas/aplicação.
 - Testes automatizados cobrem normalização visual segura, schema futuro, ownership, confirmação da campanha e cancelamento sem gravação.
 - Pendente: validar a apresentação em Foundry VTT 14 build 360 com diferentes dimensões de janela, GM e jogador; a prévia é representativa, não uma captura pixel-perfect de todas as aplicações.
+
+
+## Design System global — build de teste 1.0.0.92
+
+- O Design System foi integrado à `main`, com precedência explícita entre aparência padrão do sistema, perfil compartilhado da campanha e preferência pessoal.
+- O Estúdio de Aparência ApplicationV2 oferece perfis versionados, prévia local, tokens semânticos, tipografia, layout, acessibilidade, diagnóstico de contraste e importação/exportação.
+- A Biblioteca reutiliza a coleção canônica `themes`; não cria armazenamento paralelo nem grava aparência em Actor, Item, Token ou Scene.
+- O Inspector apresenta prévia isolada e aplicação contextual explícita, respeitando permissões e confirmação para alterações compartilhadas.
+- Testes automatizados e empacotamento são executados pelo CI; a inspeção real em Foundry VTT 14 build 360, com clientes GM e jogador, permanece pendente.
+- A versão 1.0.0.92 é uma build para teste, não um checkpoint funcional confirmado.
