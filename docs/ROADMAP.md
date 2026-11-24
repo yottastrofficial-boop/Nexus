@@ -8,7 +8,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit: `7a9f30ba794b50c7499a5d193573cdee31a1dcef`
 - Versão publicada: `1.0.0.91` (release de teste; a validação funcional no Foundry continua pendente)
-- Versão candidata em preparação: `1.0.0.92` (Design System e Inspector de Aparências integrados; pacote destinado à validação no Foundry VTT 14 build 360).
+- Versão candidata em preparação: `1.0.0.93` (refinamento do shell visual, Biblioteca, Chat, controles nativos e hierarquia das ferramentas flutuantes).
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
@@ -142,3 +142,13 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 - O Inspector apresenta prévia isolada e aplicação contextual explícita, respeitando permissões e confirmação para alterações compartilhadas.
 - Testes automatizados e empacotamento são executados pelo CI; a inspeção real em Foundry VTT 14 build 360, com clientes GM e jogador, permanece pendente.
 - A versão 1.0.0.92 é uma build para teste, não um checkpoint funcional confirmado.
+
+
+## Refinamento da interface global — candidata 1.0.0.93
+
+- O shell visual compartilhado agora marca todas as aplicações ApplicationV2 do próprio NEXUS, sem ampliar indiscriminadamente o tema para aplicações de módulos externos.
+- A Biblioteca independente e o painel da ficha passam a consumir a paleta semântica ativa em cartões, filtros, navegação, controles e Inspector; a validação em diferentes tamanhos de janela ainda é necessária.
+- Os controles nativos do Canvas são apresentados como grupos flutuantes, com estados de foco/seleção alinhados aos tokens NEXUS.
+- O Chat recebe cartões unificados. Mídia enriquecida nativa (imagens, GIFs, vídeos, áudio, links e embeds) recebe limites responsivos e herda a paleta; a renderização continua sob as regras de enriquecimento/permissão do Foundry.
+- Corrigida a precedência dos trilhos da ficha: um painel aberto, mas inativo, não pode mantê-los atrás; o painel ativo permanece no topo.
+- Teste unitário cobre a precedência de camadas. Testes de empilhamento, foco, interação e aparência ainda devem ser executados no Foundry VTT 14 build 360.
