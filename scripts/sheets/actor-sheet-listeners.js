@@ -340,7 +340,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (!detail || !asset) return;
       detail.dataset.selectedType = asset.type;
       detail.dataset.selectedAssetKey = asset.key ?? `${asset.category}-${NEXUS_LIBRARY_CATALOG.assets.indexOf(asset)}`;
-      const pathOptions = resourcePaths.map(path => `<option value="${path.replace(/&/g,"&amp;").replace(/\"/g,"&quot;")}">${path}</option>`).join("");
+      const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+      const pathOptions = resourcePaths.map(path => `<option value="${escapeHtml(path)}">${escapeHtml(path)}</option>`).join("");
       if (asset.type === "custom-card") {
         detail.innerHTML = `<div class="nexus-library-detail-heading"><strong class="nexus-library-detail-title">Card de conteúdo</strong></div>
           <div class="nexus-library-config-grid">
@@ -401,7 +402,17 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         return;
       }
       if (asset.type !== "sheet-resource") {
-        detail.innerHTML = `<div class="nexus-library-detail-heading"><strong class="nexus-library-detail-title">${asset.label}</strong></div><button type="button" data-library-add>Adicionar à ficha</button>`;
+        const heading = document.createElement("div");
+        heading.className = "nexus-library-detail-heading";
+        const title = document.createElement("strong");
+        title.className = "nexus-library-detail-title";
+        title.textContent = String(asset.label ?? "Elemento");
+        heading.append(title);
+        const addButton = document.createElement("button");
+        addButton.type = "button";
+        addButton.dataset.libraryAdd = "";
+        addButton.textContent = "Adicionar à ficha";
+        detail.replaceChildren(heading, addButton);
         appendSaveConfiguredButton(detail);
         return;
       }
@@ -418,8 +429,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         </div>
         <div class="nexus-library-content-picker">
           <strong>Conteúdo vinculado</strong>
-          <label>Valor atual<select data-resource-current>${resourcePaths.filter(path => !path.endsWith(".max")).map(path => `<option value="${path.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}" ${path === "resources.pv.value" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
-          <label>Valor máximo<select data-resource-max>${resourcePaths.filter(path => !path.endsWith(".value")).map(path => `<option value="${path.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}" ${path === "resources.pv.max" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
+          <label>Valor atual<select data-resource-current>${resourcePaths.filter(path => !path.endsWith(".max")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.value" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
+          <label>Valor máximo<select data-resource-max>${resourcePaths.filter(path => !path.endsWith(".value")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.max" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
           
         </div>
         <button type="button" data-library-add>Adicionar ao Canvas</button>`;
@@ -669,20 +680,27 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         picker.type = "file";
         picker.accept = ".json,application/json,text/plain";
         picker.hidden = true;
+        const cleanupPicker = () => picker.remove();
+        picker.addEventListener("cancel", cleanupPicker, { once: true });
         picker.addEventListener("change", async () => {
           const file = picker.files?.[0];
-          if (!file) { picker.remove(); return; }
+          if (!file) { cleanupPicker(); return; }
           try {
             await sheet._importLibraryBackupFile(file);
           } catch (error) {
             console.warn("NEXUS | Backup de Biblioteca inválido", error);
             ui.notifications?.warn?.(error?.message || "Não foi possível importar o backup da Biblioteca.");
           } finally {
-            picker.remove();
+            cleanupPicker();
           }
         }, { once: true });
-        document.body.append(picker);
-        picker.click();
+        try {
+          document.body.append(picker);
+          picker.click();
+        } catch (error) {
+          cleanupPicker();
+          ui.notifications?.warn?.(error?.message || "Não foi possível abrir o seletor de arquivo.");
+        }
         return;
       }
 
@@ -948,19 +966,26 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         picker.type = "file";
         picker.accept = ".json,application/json,text/plain";
         picker.hidden = true;
+        const cleanupPicker = () => picker.remove();
+        picker.addEventListener("cancel", cleanupPicker, { once: true });
         picker.addEventListener("change", async () => {
           const file = picker.files?.[0];
-          if (!file) { picker.remove(); return; }
+          if (!file) { cleanupPicker(); return; }
           try {
             await sheet._importLibraryPackageFile(file);
           } catch (error) {
             ui.notifications?.warn?.(error?.message || "Não foi possível importar o arquivo do grupo.");
           } finally {
-            picker.remove();
+            cleanupPicker();
           }
         }, { once: true });
-        document.body.append(picker);
-        picker.click();
+        try {
+          document.body.append(picker);
+          picker.click();
+        } catch (error) {
+          cleanupPicker();
+          ui.notifications?.warn?.(error?.message || "Não foi possível abrir o seletor de arquivo.");
+        }
         return;
       }
       const importGroupButton = target?.closest("[data-library-import-group]");
