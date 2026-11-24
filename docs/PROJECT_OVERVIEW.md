@@ -4,9 +4,9 @@
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
-- Commit de referência: `07180fd6b0de691eae32b03da69390d285a1e53d`
-- Versão publicada: `1.0.0.93` (shell visual, Biblioteca, Chat e hierarquia de janelas refinados; validação funcional pendente)
-- Versão candidata: nenhuma; a próxima etapa depende do relatório de validação funcional da 1.0.0.93.
+- Commit de referência: `c78da4b85b9c54c799f255e6b2fd2c3e02c3f37f`
+- Versão de referência: `1.0.0.94` (Biblioteca Universal e shell visual estabilizados; validação funcional pendente)
+- Esta build destina-se à validação no Foundry VTT 14 build 360; a publicação depende da aprovação do CI e do empacotamento.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -37,7 +37,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na candidata 1.0.0.93 (build de teste; validação funcional pendente)
+## Implementação presente na versão 1.0.0.94 (build de teste; validação funcional pendente)
 
 A árvore atual contém, entre outros:
 
