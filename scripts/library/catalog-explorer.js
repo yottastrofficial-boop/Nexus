@@ -159,7 +159,7 @@ const safeDimension = value => {
 };
 const countLabel = (count, singular, plural = singular + "s") => String(count) + " " + (count === 1 ? singular : plural);
 
-function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
+export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
   const reference = resource?.reference ?? {};
   const collection = String(reference.collection ?? "");
   const data = resolved && typeof resolved === "object" && !Array.isArray(resolved) ? resolved : {};
