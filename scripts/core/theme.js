@@ -25,7 +25,14 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
 export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
-  const fontFamily = layout.fontFamily ?? theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : "Inter");
+  const allowedFonts = new Set(["Inter", "Arial", "Georgia", "Trebuchet MS", "Verdana", "system-ui", "monospace"]);
+  const fallbackFont = theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : layout.theme === "pixel-art" ? "monospace" : "Inter");
+  const requestedFont = String(layout.fontFamily ?? fallbackFont);
+  const fontFamily = allowedFonts.has(requestedFont) ? requestedFont : fallbackFont;
+  const safeNumber = (value, min, max, fallback) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+  };
   const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
   const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
   const color = (key, fallback) => palette[key] ?? fallback;
@@ -102,9 +109,9 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-input-focus": color("highlight", theme.highlight),
     "--nexus-scroll-track": theme.scroll,
     "--nexus-scroll-handle": theme.accent,
-    "--nexus-font-size": `${Number(layout.fontSize) || 13}px`,
-    "--nexus-secondary-font-size": `${Number(layout.secondaryFontSize) || 11}px`,
-    "--nexus-value-font-size": `${Number(layout.valueFontSize) || 20}px`,
+    "--nexus-font-size": `${safeNumber(layout.fontSize, 11, 18, 13)}px`,
+    "--nexus-secondary-font-size": `${safeNumber(layout.secondaryFontSize, 9, 16, 11)}px`,
+    "--nexus-value-font-size": `${safeNumber(layout.valueFontSize, 14, 28, 20)}px`,
     "--nexus-space-1": "4px",
     "--nexus-space-2": "8px",
     "--nexus-space-3": "12px",
@@ -218,9 +225,9 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   }
 
   const density = layout.density === "compact" ? 0.88 : layout.density === "spacious" ? 1.14 : 1;
-  const spacing = Math.min(1.5, Math.max(0.75, Number(layout.spacing) || 1)) * density;
+  const spacing = safeNumber(layout.spacing, 0.75, 1.5, 1) * density;
   const radius = layout.radius === "sharp" ? 0 : layout.radius === "soft" ? 5 : 9;
-  const controlHeight = Math.min(44, Math.max(28, Number(layout.controlHeight) || 34));
+  const controlHeight = safeNumber(layout.controlHeight, 28, 44, 34);
   values["--nexus-density-scale"] = String(density);
   values["--nexus-radius-small"] = `${radius}px`;
   values["--nexus-radius-panel"] = `${Math.max(0, radius - 1)}px`;
@@ -230,7 +237,7 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   values["--nexus-space-3"] = `${12 * spacing}px`;
   values["--nexus-space-4"] = `${16 * spacing}px`;
   values["--nexus-control-height"] = `${controlHeight}px`;
-  values["--nexus-line-height"] = String(Math.min(1.8, Math.max(1.2, Number(layout.lineHeight) || 1.45)));
+  values["--nexus-line-height"] = String(safeNumber(layout.lineHeight, 1.2, 1.8, 1.45));
   values["--nexus-contrast-border-width"] = layout.contrast === "high" ? "2px" : "1px";
   values["--nexus-contrast-outline-width"] = layout.contrast === "high" ? "3px" : "2px";
   values["--nexus-motion-duration"] = layout.reducedMotion ? "0ms" : "140ms";
