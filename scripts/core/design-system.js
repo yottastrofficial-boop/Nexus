@@ -190,9 +190,9 @@ export function installNexusDesignSystem({
   const onRenderApplication = (application, element) => {
     const name = application?.constructor?.name ?? "";
     const tabName = String(application?.tabName ?? "").toLowerCase();
-    const isNexusApplication = element?.classList?.contains("nexus")
-      || element?.classList?.contains("nexus-window")
-      || element?.classList?.contains("nexus-panel-window")
+    const isNexusApplication = element?.classList?.contains?.("nexus")
+      || element?.classList?.contains?.("nexus-window")
+      || element?.classList?.contains?.("nexus-panel-window")
       || name.startsWith("Nexus");
     if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName)) return;
     element?.classList?.add("nexus-themed-application");
