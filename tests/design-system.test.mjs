@@ -55,7 +55,7 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
   assert.equal(profile.typography.family, "Georgia");
   assert.equal(profile.typography.baseSize, 18);
   assert.equal(profile.typography.lineHeight, 1.2);
-  assert.equal(profile.layout.density, "soft" === profile.layout.density ? "soft" : "comfortable");
+  assert.equal(profile.layout.density, "comfortable");
   assert.equal(profile.layout.radius, "sharp");
   assert.equal(profile.layout.spacing, 1.5);
   assert.equal(profile.layout.controlHeight, 44);
