@@ -284,7 +284,46 @@ html.nexus-design-system :is(.application, .window-app) :is(.context-menu, .appl
   background: var(--nexus-ui-surface-hover);
 }
 
+html.nexus-design-system :is(.context-menu, .application-menu) {
+  border: 1px solid var(--nexus-ui-border);
+  border-radius: 8px;
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface);
+  box-shadow: 0 8px 24px #0005;
+  text-shadow: none !important;
+}
+
+html.nexus-design-system :is(.context-menu, .application-menu) :is(button, .context-item, a) {
+  color: var(--nexus-ui-text);
+  background: transparent;
+  text-shadow: none !important;
+}
+
+html.nexus-design-system :is(.context-menu, .application-menu) :is(button, .context-item, a):hover {
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+}
+
+html.nexus-design-system :is(.application, .window-app) :is(.panel, .card, .directory-list, .directory-header) {
+  border-color: var(--nexus-ui-border);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface);
+}
+
 /* Native Foundry navigation and scene controls use the same independent button surface. */
+html.nexus-design-system #sidebar .sidebar-tabs {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html.nexus-design-system #controls .control-tools,
+html.nexus-design-system #controls .control-tools .control-tool-group {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 html.nexus-design-system #sidebar .sidebar-tabs > .item,
 html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
   border: 1px solid transparent;
