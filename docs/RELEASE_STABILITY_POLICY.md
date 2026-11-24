@@ -65,7 +65,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 - Primeiro, atualizar `system.json` para a nova versão estável e integrar essa alteração à `main`.
 - A publicação exige um commit na `main` cuja mensagem contenha o marcador exato `[release]`; variações como `[release-candidate]` não publicam uma versão estável.
-- O workflow valida novamente a suíte, gera o ZIP e recusa tags já existentes. Releases e tags são tratadas como imutáveis.
+- O workflow valida novamente a suíte e gera o ZIP. Tags que apontem para outro commit ou releases sem ZIP verificado são recusadas; uma reexecução do mesmo commit pode continuar sem sobrescrever assets. Releases e tags permanecem imutáveis.
 - Depois de confirmar que `nexus.zip` está anexado e acessível, o workflow atualiza `manifest.json` para a nova versão.
 - Se a validação, o empacotamento, a publicação ou a verificação do ZIP falhar, o manifesto estável não avança.
 
