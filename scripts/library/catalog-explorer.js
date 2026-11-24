@@ -249,6 +249,7 @@ export function createLibraryCatalogExplorer({
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
     const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
     const themePreview = makeElement("section", "nexus-library-theme-preview");
+    themePreview.hidden = themeColors.length === 0;
     if (themeColors.length) {
       themePreview.append(makeElement("strong", "", "Prévia da paleta"));
       const swatches = makeElement("div", "nexus-library-theme-swatches");
