@@ -18,6 +18,7 @@ import { createLibraryTransferRegistry } from "./core/library-transfer-registry.
 import { NEXUS_COMPONENTS } from "./core/component-types.js";
 import { THEME_PALETTES, THEME_TOKENS, applyThemeTokens } from "./core/theme.js";
 import { installNexusDesignSystem } from "./core/design-system.js";
+import { createDesignStudioApplicationClass } from "./apps/design-studio.js";
 import { getInteractionLibrary } from "./core/interactions.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
@@ -32,6 +33,23 @@ Hooks.once("init", () => {
     themeTokens: THEME_TOKENS,
     applyThemeTokens
   });
+  const DesignStudioApplication = createDesignStudioApplicationClass({
+    ApplicationV2: foundry.applications.api.ApplicationV2,
+    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+    design: game.nexus.design
+  });
+  game.nexus.design.Studio = DesignStudioApplication;
+  game.nexus.design.registerStudio(DesignStudioApplication);
+  game.nexus.design.openStudio = () => {
+    const current = game.nexus.design.application;
+    if (current?.rendered) {
+      current.bringToFront?.();
+      return Promise.resolve(current);
+    }
+    const application = new DesignStudioApplication();
+    game.nexus.design.application = application;
+    return Promise.resolve(application.render({ force: true })).then(() => application);
+  };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
   game.nexus.resources ??= createResourceLifecycleManager();
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
