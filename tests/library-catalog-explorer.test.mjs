@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource, getLibraryThemePreviewColors } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -133,3 +133,41 @@ assert.equal(getLibraryResourcePreviewModel({ kind: "media", reference: { collec
 
 const logicPreview = getLibraryResourcePreviewModel({ kind: "logic", type: "flow" }, { payload: { triggers: [{}], conditions: [{}, {}], actions: [{}, {}, {}] } });
 assert.equal(logicPreview.details.find(([label]) => label === "Ações")[1], "3");
+
+
+test("theme detail previews expose only known, safe palette colors", () => {
+  assert.deepEqual(
+    getLibraryThemePreviewColors({
+      palette: {
+        canvasColor: "#101820",
+        cardColor: "#223344",
+        highlightColor: "#abc",
+        buttonColor: "url(javascript:alert(1))",
+        unknownColor: "#ffffff"
+      }
+    }),
+    [
+      { label: "Canvas", value: "#101820" },
+      { label: "Cartão", value: "#223344" },
+      { label: "Destaque", value: "#abc" }
+    ]
+  );
+  assert.deepEqual(getLibraryThemePreviewColors({ palette: { canvasColor: "red" } }), []);
+});
+
+test("component inspector preview model carries safe appearance data", () => {
+  const preview = getLibraryResourcePreviewModel(
+    { kind: "component", type: "asset-meter", name: "Barra de recurso", reference: { collection: "components", id: "meter" } },
+    { type: "asset-meter", settings: { label: "PV", previewCurrent: 18, previewMax: 30, w: 220, h: 58 } }
+  );
+  assert.equal(preview.kind, "component");
+  assert.equal(preview.preview.label, "PV");
+  assert.equal(preview.preview.current, 18);
+  assert.equal(preview.preview.max, 30);
+  assert.equal(preview.summary, "asset-meter · 220 × 58 px");
+  const unsafe = getLibraryResourcePreviewModel(
+    { kind: "component", type: "asset-image", name: "Imagem", reference: { collection: "components", id: "image" } },
+    { type: "asset-image", settings: { src: "javascript:alert(1)" } }
+  );
+  assert.equal(unsafe.preview.source, "");
+});
