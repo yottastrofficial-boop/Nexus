@@ -3560,7 +3560,9 @@ if (!hasPath) propertyValueInput.value = "";
         <div class="nexus-floating-tabs"></div>
         <button type="button" class="nexus-floating-add" data-floating-new-layout title="Adicionar página">＋</button>
       </div>`;
-    if (getComputedStyle(app).position === "static") app.style.position = "relative";
+    const restoreAppPosition = getComputedStyle(app).position === "static";
+    const originalAppPosition = app.style.position;
+    if (restoreAppPosition) app.style.position = "relative";
     app.appendChild(portal);
 
     const panels = new Map();
@@ -3814,6 +3816,7 @@ if (!hasPath) propertyValueInput.value = "";
         this._nexusPanelWindows.clear();
       }
       portal.remove();
+      if (restoreAppPosition && app.style.position === "relative") app.style.position = originalAppPosition;
     };
 
     // Reassocia os novos painéis renderizados às janelas existentes sem focá-las.
