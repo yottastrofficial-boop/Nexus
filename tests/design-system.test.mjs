@@ -7,7 +7,22 @@ import {
   resolveDesignTheme,
   installNexusDesignSystem
 } from "../scripts/core/design-system.js";
-import { THEME_TOKENS } from "../scripts/core/theme.js";
+import { THEME_TOKENS, applyThemeTokens } from "../scripts/core/theme.js";
+
+
+test("theme typography uses its preset font unless a layout explicitly overrides it", () => {
+  const values = new Map();
+  const element = {
+    style: { setProperty(key, value) { values.set(key, value); } },
+    dataset: {}
+  };
+  applyThemeTokens(element, { theme: "medieval" });
+  assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
+  assert.equal(values.get("--nexus-font-ui"), '"Georgia", sans-serif');
+
+  applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter" });
+  assert.equal(values.get("--nexus-font-family"), '"Inter", sans-serif');
+});
 
 test("Design System normalizes unknown theme IDs and malformed settings safely", () => {
   assert.deepEqual(normalizeDesignWorldSettings({ theme: "not-a-theme", allowPlayerOverrides: "false" }), {
