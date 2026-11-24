@@ -6,7 +6,7 @@
 - Branch de referência: `main`
 - Commit de referência: `7a9f30ba794b50c7499a5d193573cdee31a1dcef`
 - Versão publicada: `1.0.0.91` (Biblioteca universal integrada; validação funcional pendente)
-- Versão candidata: `1.0.0.92` (Design System e Inspector de Aparências integrados; validação funcional no Foundry pendente)
+- Versão candidata: `1.0.0.93` (shell visual compartilhado, Biblioteca, Chat e hierarquia de janelas refinados; validação funcional pendente)
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -105,6 +105,11 @@ A branch `feature/library-universal-completion-2026-11-23` adiciona `scripts/lib
 Em caso de divergência, registrar separadamente o que dizem os livros, o que especificam os documentos técnicos e o que o código efetivamente executa. Não presumir que uma proposta está implementada nem que uma implementação representa uma regra oficial.
 
 
-## Design System e Inspector de Aparências — candidata 1.0.0.92
+## Design System e Inspector de Aparências — base 1.0.0.92
 
 A `main` inclui o Design System global para Foundry VTT 14, com perfis versionados, tokens semânticos, temas de campanha e usuário, Estúdio de Aparência ApplicationV2 e prévia isolada de perfis no Inspector da Biblioteca. A aparência é aplicada por cliente e não é persistida em documentos de jogo. A aplicação à campanha exige permissão de GM e confirmação; a preferência pessoal respeita a política do mundo. A build 1.0.0.92 foi preparada para validação manual e não deve ser tratada como funcionalmente confirmada até a rodada em Foundry VTT 14 build 360.
+
+
+## Refinamento de interface — candidata 1.0.0.93
+
+A candidata expande o shell de aparência para todas as aplicações NEXUS ApplicationV2, mantendo aplicações de terceiros fora do escopo automático. Biblioteca independente e painel embutido passam a usar os tokens semânticos do Design System. Controles do Canvas, navegação, Hotbar e jogadores recebem apresentação de grupos flutuantes. Mensagens do Chat passam a usar cartões unificados, com mídia enriquecida nativa responsiva. A hierarquia dos trilhos flutuantes foi corrigida para que painéis inativos não cubram os controles da ficha. A implementação possui teste unitário de precedência de camadas, mas requer validação visual/funcional real no Foundry VTT 14 build 360.
