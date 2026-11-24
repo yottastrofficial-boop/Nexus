@@ -14,7 +14,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     return readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store.collections.themes
-      .filter(entry => entry?.kind === "design-profile" && entry.profile)
+      .filter(entry => entry?.kind === "design-profile" && entry.profile && Number(entry.profile.schemaVersion ?? 1) <= 1)
       .map(entry => ({ ...clone(entry), profile: normalizeDesignProfile(entry.profile) }));
   };
   const get = id => { const entry = readEntries().find(item => item.id === String(id ?? "")); return entry ? clone(entry) : null; };
@@ -28,6 +28,9 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
       const entries = store.collections.themes;
       const index = requestedId ? entries.findIndex(entry => String(entry.id) === requestedId && entry.kind === "design-profile") : -1;
       if (requestedId && index < 0) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
+      if (index >= 0 && Number(entries[index].profile?.schemaVersion ?? 1) > 1) {
+        throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser sobrescrito.");
+      }
       if (index < 0 && entries.length >= MAX_PROFILES) throw new Error("A coleção de temas da Biblioteca atingiu o limite de 100 itens.");
       let entryId = requestedId;
       if (!entryId) for (let attempt = 0; attempt < 5; attempt++) {
@@ -61,6 +64,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryStore(user, store => {
       const entry = store.collections.themes.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
+      if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS.");
       entry.name = nextName; entry.profile = normalizeDesignProfile({ ...entry.profile, id: entry.id, name: nextName });
       entry.palette = clone(entry.profile.palette); entry.updatedAt = new Date().toISOString(); renamed = clone(entry); return store;
     });

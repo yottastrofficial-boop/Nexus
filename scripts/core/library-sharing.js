@@ -454,15 +454,18 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
       typeof theme.name !== "string" || !theme.profile || typeof theme.profile !== "object" ||
       Array.isArray(theme.profile) || !theme.profile.palette || typeof theme.profile.palette !== "object"
     )) throw new Error("Um perfil visual da Biblioteca possui estrutura inválida.");
+    if (isDesignProfile && Number(theme.profile.schemaVersion ?? 1) > 1) {
+      throw new Error("O backup contém um perfil visual criado por uma versão mais recente do NEXUS.");
+    }
     for (const [key, value] of Object.entries(palette ?? {})) {
       if (typeof value !== "string" || !/^#[0-9a-f]{3,8}$/i.test(value)) {
         throw new Error("Um tema contém uma cor inválida.");
       }
     }
   }
-  const code = "NEXUS-LIBRARY/2\\n" + JSON.stringify({
+  const code = "NEXUS-LIBRARY/3\\n" + JSON.stringify({
     format: "nexus-library",
-    version: 2,
+    version: 3,
     name: String(snapshot.name ?? "Biblioteca NEXUS").trim().slice(0, 64) || "Biblioteca NEXUS",
     collections
   }, null, 2);
@@ -475,14 +478,15 @@ export function parseNexusLibraryBackup(code, componentTypes = []) {
   let source = String(code ?? "").trim();
   if (!source || source.length > MAX_LIBRARY_BACKUP_LENGTH) throw new Error("O arquivo está vazio ou excede o limite de 1 MB.");
   source = source.replace(/^\\x60{3}(?:json)?\\s*/i, "").replace(/\\s*\\x60{3}$/, "");
-  if (source.startsWith("NEXUS-LIBRARY/2")) source = source.slice("NEXUS-LIBRARY/2".length).trim();
+  if (source.startsWith("NEXUS-LIBRARY/3")) source = source.slice("NEXUS-LIBRARY/3".length).trim();
+  else if (source.startsWith("NEXUS-LIBRARY/2")) source = source.slice("NEXUS-LIBRARY/2".length).trim();
   else if (source.startsWith("NEXUS-LIBRARY/1")) source = source.slice("NEXUS-LIBRARY/1".length).trim();
   const start = source.indexOf("{"), end = source.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Não encontrei um backup JSON válido da Biblioteca.");
   let raw;
   try { raw = JSON.parse(source.slice(start, end + 1)); }
   catch (_) { throw new Error("O backup da Biblioteca não contém JSON válido."); }
-  if (raw?.format !== "nexus-library" || ![1, 2].includes(raw.version)) throw new Error("Formato ou versão de backup da Biblioteca não reconhecido.");
+  if (raw?.format !== "nexus-library" || ![1, 2, 3].includes(raw.version)) throw new Error("Formato ou versão de backup da Biblioteca não reconhecido.");
   const data = raw.collections;
   if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("As coleções do backup estão ausentes ou inválidas.");
   const allowed = new Set(componentTypes.map(String));

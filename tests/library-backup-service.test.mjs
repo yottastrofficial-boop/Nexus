@@ -141,6 +141,7 @@ test("backup round-trips complete custom design profiles without flattening them
     getComponentTypes: () => ["token"]
   });
   const code = service.exportCode();
+  assert.ok(code.startsWith("NEXUS-LIBRARY/3"));
   const target = makeUser();
   const targetService = createLibraryBackupService({
     getUser: () => target,
@@ -155,4 +156,23 @@ test("backup round-trips complete custom design profiles without flattening them
   assert.equal(incoming.profile.typography.baseSize, 16);
   assert.equal(incoming.profile.layout.density, "spacious");
   assert.equal(incoming.profile.accessibility.reducedMotion, true);
+});
+
+
+test("backup refuses to downgrade a future design profile schema", () => {
+  const user = makeUser();
+  const service = createLibraryBackupService({
+    getUser: () => user,
+    getCatalog: () => ({ assets: [] }),
+    getThemePalettes: () => ({}),
+    getComponentTypes: () => ["token"]
+  });
+  const futureBackup = "NEXUS-LIBRARY/3\\n" + JSON.stringify({
+    format: "nexus-library", version: 3, name: "Future",
+    collections: { themes: { "design-profile-future": {
+      __nexusDesignProfile: 1, name: "Future", palette: { panel: "#112233" },
+      profile: { schemaVersion: 99, palette: { panel: "#112233" } }
+    } } }
+  });
+  assert.throws(() => service.prepareImport(futureBackup), /versão mais recente/);
 });
