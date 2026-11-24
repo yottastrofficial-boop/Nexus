@@ -1,3 +1,15 @@
+## 1.0.0.95 — Design System global e Biblioteca Explorer
+
+- Consolida o Design System estrutural para fichas, aplicações NEXUS e superfícies nativas selecionadas do Foundry, preservando handlers e janelas de módulos de terceiros.
+- Vincula os trilhos flutuantes à janela ApplicationV2 da ficha para acompanhar o empilhamento nativo do Foundry, sem camada global independente.
+- Remove o efeito de vidro dos controles flutuantes, unifica botões/ícones e remove sombras de texto do padrão visual.
+- Simplifica a barra da Biblioteca com pesquisa unificada, filtros recolhíveis e controles compactos.
+- Reorganiza favoritos e pastas, adicionando hierarquia, subpastas, movimentação por arrastar/soltar e exclusão recursiva sem apagar recursos.
+- Corrige a prévia de paletas no Inspector e adiciona prévias visuais tipadas e seguras para componentes e assets.
+- Normaliza dimensões do Canvas e dos componentes em múltiplos de 10 px; ajusta a barra de recurso para 220×60.
+- Adiciona testes automatizados de regressão, contratos do Design System, migração/hierarquia de pastas e grade de dimensões.
+- Não altera regras mecânicas do RPG nem schemas mecânicos de Actors/Items. Validação visual e funcional no Foundry VTT 14 build 360 continua necessária após a instalação.
+
 ## 1.0.0.94 — Biblioteca Universal e shell visual estabilizados
 
 - Consolida a janela independente da Biblioteca Universal em três áreas: navegação por categorias, exploração de recursos e Inspector contextual.
