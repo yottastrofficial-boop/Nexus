@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.value }}
+      channel: ${{ steps.version.outputs.channel }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,7 +55,7 @@ jobs:
           const ref = process.env.GITHUB_REF;
           let channel = "validate";
 
-          const stableMarker = /(?:^|\\s)\\[release\\](?=$|\\s)/m;
+          const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;
           if (eventName === "push" && ref === "refs/heads/main" && stableMarker.test(event.head_commit?.message ?? "")) {
             channel = "stable";
           }
@@ -62,7 +63,7 @@ jobs:
           if (eventName === "workflow_dispatch" && process.env.RELEASE_CHANNEL_INPUT === "candidate") {
             if (ref !== "refs/heads/main") throw new Error("Versões candidatas só podem ser geradas a partir da main.");
             const candidate = process.env.CANDIDATE_VERSION_INPUT ?? "";
-            if (!/^\\d+\\.\\d+\\.\\d+-rc\\.\\d+$/.test(candidate)) {
+            if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(candidate)) {
               throw new Error("Versão candidata inválida. Use o formato 1.0.0.96-rc.1.");
             }
             const core = value => value.split("-")[0].split(".").map(Number);
@@ -73,7 +74,7 @@ jobs:
               throw new Error(`A candidata deve avançar a versão estável atual (${system.version}).`);
             }
             system.version = candidate;
-            fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\\n");
+            fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\n");
             channel = "candidate";
           }
 
@@ -81,7 +82,7 @@ jobs:
             throw new Error("Não foi possível habilitar o canal de candidata.");
           }
 
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `value=${system.version}\\nchannel=${channel}\\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `value=${system.version}\nchannel=${channel}\n`);
           console.log(`Canal: ${channel}; pacote: ${system.version}`);
           NODE
 
