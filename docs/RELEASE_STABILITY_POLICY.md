@@ -25,11 +25,11 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última versão publicada antes desta integração:** `1.0.0.94`, com Biblioteca Universal e shell visual consolidados.
-- **Versão candidata em preparação:** `1.0.0.95`, com Design System global, Biblioteca Explorer hierárquica e trilhos flutuantes vinculados à janela nativa; validação funcional no Foundry ainda pendente.
-- **Gate de publicação:** aprovação do CI e confirmação do pacote ZIP; a validação visual e funcional no Foundry VTT 14 build 360 continua pendente.
-- **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
-- A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
+- **Última release publicada:** `1.0.0.95`, com Design System global e Biblioteca Explorer; continua sem validação funcional completa no Foundry VTT 14 build 360.
+- **Código da main após a release .95:** inclui correções de infraestrutura de CI e ciclo de vida do DOM. Essas alterações ainda não foram distribuídas em um novo pacote estável.
+- **Próxima candidata prevista:** `1.0.0.96-rc.1`, gerada manualmente a partir da main quando a rodada de testes estiver pronta.
+- **Manifesto estável:** permanece apontando para a última release estável confirmada até que uma nova release estável tenha ZIP anexado e verificado.
+- **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
 A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.
 
@@ -43,6 +43,36 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 - O manifesto de instalação só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível.
 - Uma release só é declarada funcionalmente estável após validação no Foundry real.
 
+## Canais de publicação no GitHub Actions
+
+O workflow `.github/workflows/release.yml` separa validação, candidata e release estável:
+
+### 1. Validação comum
+
+- Pull requests, pushes de desenvolvimento e execução manual com a opção `validate` executam a suíte unificada e empacotam um artefato temporário.
+- O artefato de validação não cria uma GitHub Release e não altera `manifest.json`.
+- O artefato temporário expira conforme a retenção configurada no workflow.
+
+### 2. Release candidata
+
+- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.96-rc.1`.
+- A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
+- Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
+- A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
+- O manifesto estável não é atualizado. Instalações normais do Foundry continuam recebendo a última release estável.
+
+### 3. Release estável
+
+- Primeiro, atualizar `system.json` para a nova versão estável e integrar essa alteração à `main`.
+- A publicação exige um commit na `main` cuja mensagem contenha o marcador exato `[release]`; variações como `[release-candidate]` não publicam uma versão estável.
+- O workflow valida novamente a suíte e gera o ZIP. Tags que apontem para outro commit ou releases sem ZIP verificado são recusadas; uma reexecução do mesmo commit pode continuar sem sobrescrever assets. Releases e tags permanecem imutáveis.
+- Depois de confirmar que `nexus.zip` está anexado e acessível, o workflow atualiza `manifest.json` para a nova versão.
+- Se a validação, o empacotamento, a publicação ou a verificação do ZIP falhar, o manifesto estável não avança.
+
+### 4. Estabilidade funcional
+
+Candidata ou release estável não equivale a checkpoint funcional. A promoção do checkpoint continua dependendo da execução e do registro dos testes no Foundry VTT 14 build 360, conforme os critérios desta política.
+
 ## O que é preservado
 
 - Releases e tags antigas não são apagadas automaticamente.
@@ -55,4 +85,4 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
-A versão 1.0.0.94 tem finalidade explícita de validação da Biblioteca Universal, do Inspector com prévias tipadas, dos filtros e do shell visual responsivo. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
+A versão 1.0.0.95 tem finalidade explícita de validação do Design System global, da Biblioteca Explorer hierárquica e dos trilhos flutuantes vinculados à janela nativa. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
