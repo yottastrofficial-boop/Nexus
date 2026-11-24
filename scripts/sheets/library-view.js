@@ -530,34 +530,60 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
               const component = layout.components[componentIndex];
               if (component.libraryDefinitionId !== resource.reference.id || component.type !== definition.type) return false;
 
-              const updatedDefinition = createLibraryDefinition({
-                id: definition.id,
-                type: definition.type,
-                label: definition.label,
-                version: Math.max(1, Number(definition.version) || 1) + 1,
-                settings: { ...component },
-                metadata: definition.metadata ?? {},
-                history: [
-                  ...(definition.history ?? []).filter(entry => Number(entry.version) !== Number(definition.version)),
-                  { version: definition.version, settings: definition.settings ?? {} }
-                ],
+              const selectedComponentSnapshot = foundry.utils.deepClone(component);
+              let updatedDefinition = null;
+              const savedStore = await updateNexusLibraryStore(game.user, store => {
+                const definitionIndex = store.collections.components.findIndex(entry => String(entry.id) === String(definition.id));
+                if (definitionIndex < 0) throw new Error("A definição original não foi encontrada na Biblioteca.");
+                const currentDefinition = store.collections.components[definitionIndex];
+                const currentVersion = Math.max(1, Number(currentDefinition.version) || 1);
+                if (currentVersion !== Math.max(1, Number(definition.version) || 1)) {
+                  throw new Error("A definição foi alterada desde que o Inspector foi aberto. Reabra o recurso e revise a versão atual.");
+                }
+                updatedDefinition = createLibraryDefinition({
+                  id: currentDefinition.id,
+                  type: currentDefinition.type,
+                  label: currentDefinition.label,
+                  version: currentVersion + 1,
+                  settings: { ...selectedComponentSnapshot },
+                  metadata: currentDefinition.metadata ?? {},
+                  history: [
+                    ...(currentDefinition.history ?? []).filter(entry => Number(entry.version) !== currentVersion),
+                    { version: currentVersion, settings: currentDefinition.settings ?? {} }
+                  ],
+                });
+                store.collections.components[definitionIndex] = updatedDefinition;
+                return store;
               });
-              const currentStore = readNexusLibraryStore(game.user, getLegacyNexusLibraryFlags(game.user)).store;
-              const entries = currentStore.collections.components.map(entry =>
-                entry.id === definition.id ? updatedDefinition : entry
-              );
-              if (!entries.some(entry => entry.id === definition.id)) throw new Error("A definição original não foi encontrada na Biblioteca.");
-              await writeNexusLibraryCollection(game.user, "components", entries);
+              try {
+                await mirrorLegacyCollection("components", savedStore);
+              } catch (mirrorError) {
+                console.warn("NEXUS | Falha ao espelhar a definição atualizada na coleção legada.", mirrorError);
+              }
+
+              const latestLayouts = await sheet._readLayouts();
+              const latestLayout = latestLayouts[active];
+              const latestComponentIndex = latestLayout?.components?.findIndex(item => item.id === selectedIds[0]) ?? -1;
+              const latestComponent = latestComponentIndex >= 0 ? latestLayout.components[latestComponentIndex] : null;
+              if (!latestComponent || JSON.stringify(latestComponent) !== JSON.stringify(selectedComponentSnapshot)) {
+                ui.notifications?.warn?.("A definição foi salva na Biblioteca, mas a instância selecionada mudou durante a operação e foi preservada. Revise a atualização das instâncias para aplicar a nova versão com segurança.");
+                return true;
+              }
 
               const updatedInstance = createLibraryComponentInstance(updatedDefinition, {
-                id: component.id,
-                position: { x: component.x, y: component.y }
+                id: latestComponent.id,
+                position: { x: latestComponent.x, y: latestComponent.y }
               });
-              for (const key of ["z", "stackOrder"]) if (component[key] !== undefined) updatedInstance[key] = component[key];
+              for (const key of ["z", "stackOrder"]) if (latestComponent[key] !== undefined) updatedInstance[key] = latestComponent[key];
               sheet._captureHistory?.();
-              layout.components[componentIndex] = updatedInstance;
-              await sheet._writeLayouts(layouts, active);
-              sheet._currentLayout = layout;
+              latestLayout.components[latestComponentIndex] = updatedInstance;
+              try {
+                await sheet._writeLayouts(latestLayouts, active);
+              } catch (writeError) {
+                ui.notifications?.warn?.("A definição foi salva, mas a instância não pôde ser atualizada. Ela foi preservada para revisão manual: " + writeError.message);
+                return true;
+              }
+              sheet._currentLayout = latestLayout;
               await sheet.render({ force: true });
               ui.notifications?.info?.("Definição atualizada para a versão " + updatedDefinition.version + ". As outras instâncias continuam independentes e podem receber a atualização separadamente.");
               return true;
