@@ -150,6 +150,15 @@ export function createDesignStudioApplicationClass({
         item.textContent = check.label + " — " + check.ratio + ":1";
         container.append(item);
       }
+      const message = this.element?.querySelector("[data-design-diagnostics-message]");
+      if (message) {
+        const hasWarnings = diagnostics.warnings.length > 0;
+        message.classList.toggle("nexus-design-warning", hasWarnings);
+        message.classList.toggle("nexus-design-success", !hasWarnings);
+        message.textContent = hasWarnings
+          ? "Alguns pares de cores precisam de mais contraste. Revise a paleta antes de compartilhar."
+          : "Os pares de texto avaliados atendem ao contraste selecionado.";
+      }
     }
 
     _applyPreview() {
