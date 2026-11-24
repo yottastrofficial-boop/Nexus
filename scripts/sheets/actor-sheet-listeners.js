@@ -1,6 +1,7 @@
 import { validateGroupParent } from "../core/group-hierarchy.js";
 import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
+import { applyScopedTheme } from "../core/theme.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
 import { activateActorPropertyPickerListeners } from "./actor-property-picker-listeners.js";
@@ -1844,7 +1845,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       await sheet._writeLayouts(layouts,active); sheet.render({force:true});
     });
     const appWindow = html[0].closest(".application, .window-app");
-    if (appWindow) { appWindow.classList.add("nexus-window"); appWindow.style.setProperty("--nexus-window-accent", sheet._currentLayout?.accentColor ?? "#52647b"); }
+    if (appWindow) { appWindow.classList.add("nexus-window"); applyScopedTheme(appWindow, sheet._currentLayout ?? {}, { base: false, windowTokens: true }); }
     sheet._activateCanvas(html);
     sheet._mountFloatingUI(html);
 }

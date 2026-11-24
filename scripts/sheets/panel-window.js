@@ -1,4 +1,4 @@
-import { DEFAULT_LAYOUT, applyThemeTokens } from "../core/theme.js";
+import { DEFAULT_LAYOUT, applyScopedTheme } from "../core/theme.js";
 
 const ApplicationV2 = foundry.applications.api.ApplicationV2;
 const NexusPanelWindowBase = foundry.applications.api.HandlebarsApplicationMixin(ApplicationV2);
@@ -35,7 +35,7 @@ export class NexusPanelWindow extends NexusPanelWindowBase {
   _mountPanel() {
     const content = this.window?.content ?? this.element?.querySelector(".window-content, .application-content");
     if (!content || !this.panel) return;
-    applyThemeTokens(this.element, this.sheet?._currentLayout ?? DEFAULT_LAYOUT);
+    applyScopedTheme(this.element, this.sheet?._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
     if (this.panel.parentElement !== content) content.replaceChildren(this.panel);
     this.panel.hidden = false;
     this.panel.classList.add("nexus-native-panel-content");
