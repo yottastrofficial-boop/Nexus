@@ -5,8 +5,8 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `07180fd6b0de691eae32b03da69390d285a1e53d`
-- Versão publicada: `1.0.0.92` (Design System e Inspector integrados; validação funcional pendente)
-- Versão candidata: `1.0.0.93` (shell visual compartilhado, Biblioteca, Chat e hierarquia de janelas refinados; validação funcional pendente)
+- Versão publicada: `1.0.0.93` (shell visual, Biblioteca, Chat e hierarquia de janelas refinados; validação funcional pendente)
+- Versão candidata: nenhuma; a próxima etapa depende do relatório de validação funcional da 1.0.0.93.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
