@@ -20,7 +20,8 @@ assert.match(styles, /#ui-left, #ui-top\) \.ui-control/,
 assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
   "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
 assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
-  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");\nassert.match(styles, /:focus-visible/,
+  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");
+assert.match(styles, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
 console.log("NEXUS universal library UI contract: OK");
