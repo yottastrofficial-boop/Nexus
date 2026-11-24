@@ -48,7 +48,16 @@ assert.equal(repaired.parentById.get("a"), "");
 assert.equal(repaired.parentById.get("b"), "a");
 assert.equal(repaired.depthById.get("c"), 2);
 assert.equal(validateGroupParent(cyclicGroups, "b", "c"), false, "a descendant cannot become its ancestor");
-assert.equal(validateGroupParent(cyclicGroups, "b", "a"), true, "moving a group beneath an unrelated ancestor remains valid");
+assert.equal(validateGroupParent(cyclicGroups, "b", "a"), false, "a corrupt ancestor cycle must not be accepted as a new parent");
+assert.equal(
+  validateGroupParent([
+    { id: "root", parentGroupId: "" },
+    { id: "child", parentGroupId: "root" },
+    { id: "sibling", parentGroupId: "root" }
+  ], "child", "root"),
+  true,
+  "moving a group beneath its valid existing ancestor remains valid"
+);
 assert.equal(validateGroupParent(cyclicGroups, "b", "missing"), false);
 assert.equal(validateGroupParent(cyclicGroups, "b", "b"), false);
 
