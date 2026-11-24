@@ -25,7 +25,8 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Versão em preparação:** `1.0.0.94`, com Biblioteca Universal e shell visual consolidados.
+- **Última versão publicada antes desta integração:** `1.0.0.94`, com Biblioteca Universal e shell visual consolidados.
+- **Versão candidata em preparação:** `1.0.0.95`, com Design System global, Biblioteca Explorer hierárquica e trilhos flutuantes vinculados à janela nativa; validação funcional no Foundry ainda pendente.
 - **Gate de publicação:** aprovação do CI e confirmação do pacote ZIP; a validação visual e funcional no Foundry VTT 14 build 360 continua pendente.
 - **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
