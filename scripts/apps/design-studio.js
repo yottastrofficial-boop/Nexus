@@ -178,6 +178,17 @@ export function createDesignStudioApplicationClass({
           const next = select?.value === "user" ? "user" : "world";
           if (next === "world" && !design.canEditScope("world")) throw new Error("Somente o Mestre pode editar a aparência da campanha.");
           if (next === "user" && !design.canEditScope("user")) throw new Error("A campanha não permite uma aparência individual.");
+          if (this._dirty) {
+            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+            const accepted = typeof confirm === "function" && await confirm({
+              window: { title: "Descartar alterações?" },
+              content: "<p>O rascunho atual ainda não foi salvo. Deseja descartá-lo e trocar o destino?</p>",
+              yes: { label: "Descartar e trocar" },
+              no: { label: "Continuar editando" },
+              rejectClose: false
+            });
+            if (!accepted) return;
+          }
           design.clearPreview();
           this._previewing = false;
           this._target = next;
@@ -190,7 +201,8 @@ export function createDesignStudioApplicationClass({
           this._draft = normalizeDesignProfile(this._draft);
           await design.saveProfile(this._draft, this._target);
           this._dirty = false;
-          this._previewing = false;
+          design.preview(this._draft);
+          this._previewing = true;
           globalThis.ui?.notifications?.info?.("Aparência salva.");
           await this.render({ force: true });
           return;
