@@ -35,8 +35,10 @@ assert.match(workflow, /make_latest: \$\{\{ needs\.validate\.outputs\.channel ==
   "Candidate releases must never become the latest stable release.");
 assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable'\n\s+uses: actions\/github-script@v7/,
   "Only stable releases may update Foundry's installation manifest.");
-assert.match(workflow, /Ensure release tag is unused[\s\S]*?already exists[\s\S]*?exit 1/,
-  "Existing release tags must be rejected instead of overwritten.");
+assert.match(workflow, /Check existing release[\s\S]*?TARGET_SHA.*GITHUB_SHA[\s\S]*?ASSET_STATE[\s\S]*?uploaded/,
+  "An existing release may be reused only when its tag points to this commit and its ZIP is uploaded.");
+assert.match(workflow, /Publish GitHub Release\n\s+if: steps\.release_state\.outputs\.exists != 'true'/,
+  "A verified existing release must be skipped on a safe workflow rerun.");
 assert.match(workflow, /overwrite_files: false/,
   "Published release assets must be immutable.");
 
