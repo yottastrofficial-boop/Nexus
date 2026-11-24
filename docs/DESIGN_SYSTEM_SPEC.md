@@ -43,5 +43,7 @@ A integração não aplica seletores globais a toda classe `.application`, `.dir
 - Esta etapa padroniza paleta, superfícies, bordas, campos, estados e realces; não substitui templates nativos nem muda a estrutura/ordem dos diretórios.
 - O estilo de componentes internos que usem HTML/CSS próprio ou Shadow DOM pode exigir adaptador específico.
 - Novos temas devem declarar tokens completos ou receber fallback seguro.
-- Temas com tipografia, densidade, espaçamento e componentes customizados poderão ampliar o schema sem alterar os níveis de propriedade.
+- A tipografia definida pelo tema é usada como padrão; uma fonte explicitamente definida pelo layout tem precedência local.
+- Densidade, espaçamento e componentes customizados poderão ampliar o schema sem alterar os níveis de propriedade.
 - A validação automatizada não substitui a inspeção visual em Foundry VTT 14 build 360 e a compatibilidade com módulos usados na campanha.
+- O roteiro obrigatório de validação manual está em `docs/FOUNDRY_THEME_VALIDATION.md`.
