@@ -25,6 +25,7 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
 export const applyThemeTokens = (element, layout = {}) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
+  const fontFamily = layout.fontFamily ?? theme.fontFamily ?? "Inter";
   const values = {
     "--nexus-panel-bg": theme.panel,
     "--nexus-panel-card": layout.cardColor ?? theme.card,
