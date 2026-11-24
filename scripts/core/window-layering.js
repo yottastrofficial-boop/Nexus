@@ -10,7 +10,7 @@ export function resolveNexusFloatingLayer({ sheetZIndex = 100, sheetFocused = fa
     : Number(activePanelZIndex);
   const desired = Math.max(1, sheetZ + (sheetFocused ? 2 : -1));
   const railZ = !sheetFocused && Number.isFinite(panelZ)
-    ? Math.max(1, Math.min(desired, panelZ - 1))
+    ? Math.max(1, Math.min(Math.max(sheetZ + 1, panelZ - 1), panelZ - 1))
     : desired;
   return { railZ, activePanelZIndex: Number.isFinite(panelZ) ? panelZ : null };
 }
