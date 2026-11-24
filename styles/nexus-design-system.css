@@ -361,6 +361,7 @@ html.nexus-design-system .nexus-floating-ui {
 
 html.nexus-design-system .nexus-floating-ui .nexus-floating-left,
 html.nexus-design-system .nexus-floating-ui .nexus-floating-right {
+  position: absolute !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
