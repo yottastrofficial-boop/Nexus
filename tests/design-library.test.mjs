@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createEmptyNexusLibraryStore, readNexusLibraryStore } from "../scripts/core/library-store.js";
 import { createDesignLibraryService } from "../scripts/core/design-library.js";
+import { createNexusLibraryProvider } from "../scripts/core/library-resource-registry.js";
 import { createDefaultDesignProfile } from "../scripts/core/design-profile.js";
 function makeUser(store = createEmptyNexusLibraryStore()) {
   const flags = new Map([["libraryStore", store]]);
@@ -81,4 +82,19 @@ test("preserva perfis de schema futuro sem expor nem sobrescrever dados desconhe
   await assert.rejects(library.rename("future-profile", "Alterado"), /versão mais recente/);
   await assert.rejects(library.remove("future-profile"), /versão mais recente/);
   assert.deepEqual(user.flags.get("libraryStore").collections.themes[0].profile.futureField, { keep: true });
+});
+
+
+test("Universal Library indexa e resolve perfis salvos como recursos de tema", async () => {
+  const user = makeUser(), library = createDesignLibraryService({ getUser: () => user, design: makeDesign(), createId: () => "indexed-theme" });
+  const saved = await library.save(createDefaultDesignProfile("steam"));
+  const provider = createNexusLibraryProvider({ getUser: () => user, catalog: { assets: [], themes: [] } });
+  const result = await provider.list({ kind: "theme" });
+  const resource = result.items.find(item => item.reference?.collection === "themes" && item.reference.id === saved.id);
+  assert.ok(resource);
+  assert.equal(resource.kind, "theme");
+  const resolved = await provider.resolve(resource.reference, resource);
+  assert.equal(resolved.kind, "design-profile");
+  assert.equal(resolved.profile.preset, "steam");
+  assert.equal(resolved.profile.layout.density, "compact");
 });
