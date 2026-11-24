@@ -111,11 +111,15 @@ function renderDesignProfilePreview(resource, resolved) {
   content.append(makeElement("small", "", "PERSONAGEM · EXEMPLO"));
   content.append(makeElement("strong", "nexus-library-design-preview-value", "42 / 50"));
   content.append(makeElement("span", "nexus-library-design-preview-track"));
+  const sampleCard = makeElement("div", "nexus-library-design-preview-card");
+  sampleCard.append(makeElement("small", "", "ATRIBUTO"), makeElement("strong", "", "FOR 16"));
+  content.append(sampleCard);
   content.append(makeElement("p", "", "Amostra de texto secundário e conteúdo de painel."));
   const controls = makeElement("div", "nexus-library-design-preview-controls");
   controls.append(makeElement("span", "", "Campo de exemplo"), makeElement("button", "", "Ação"));
   content.append(controls);
-  body.append(nav, content);
+  const scroll = makeElement("span", "nexus-library-design-preview-scroll");
+  body.append(nav, content, scroll);
   mockWindow.append(header, body);
   stage.append(mockWindow);
   section.append(stage);
