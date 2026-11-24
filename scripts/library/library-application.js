@@ -626,9 +626,11 @@ export function createLibraryApplicationClass({
         try {
           const current = normalizeLibraryPreferences(this._getPreferences());
           const parentId = this._state.folder || "";
+          const parent = parentId ? current.folders.find(folder => folder.id === parentId) : null;
           const created = createLibraryFolder(current, {
             id: globalThis.foundry?.utils?.randomID?.(10),
             name,
+            collection: parent?.collection ?? "",
             parentId
           });
           if (parentId) this._collapsedLibraryFolders.delete(parentId);
