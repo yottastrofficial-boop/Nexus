@@ -20,7 +20,7 @@ export const NEXUS_LIBRARY_CATALOG = {
         currentPath: "",
         maxPath: "",
         w: 220,
-        h: 58
+        h: 60
       },
       tags: ["recurso", "barra", "indicador"],
       keywords: "recurso barra indicador progresso valor atual máximo"
