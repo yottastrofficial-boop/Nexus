@@ -26,13 +26,18 @@ export function getLibraryDesignProfilePreviewModel(raw) {
   const source = entry.profile && typeof entry.profile === "object" ? entry.profile : entry;
   if (!source || typeof source !== "object" || Array.isArray(source)) return null;
   const version = Number(source.schemaVersion ?? 1);
-  if (!Number.isInteger(version) || version < 1 || version > DESIGN_PROFILE_SCHEMA_VERSION) {
+  if (!Number.isInteger(version) || version < 1) {
     return {
       supported: false,
       schemaVersion: Number.isFinite(version) ? version : null,
-      message: version > DESIGN_PROFILE_SCHEMA_VERSION
-        ? "Este perfil foi criado por uma versão mais recente do NEXUS. A prévia e a aplicação foram desativadas para preservar seus dados."
-        : "A versão do schema deste perfil é inválida. A prévia e a aplicação foram desativadas para preservar seus dados."
+      message: "A versão do schema deste perfil é inválida. A prévia e a aplicação foram desativadas para preservar seus dados."
+    };
+  }
+  if (version > DESIGN_PROFILE_SCHEMA_VERSION) {
+    return {
+      supported: false,
+      schemaVersion: version,
+      message: "Este perfil foi criado por uma versão mais recente do NEXUS. A prévia e a aplicação foram desativadas para preservar seus dados."
     };
   }
   const profile = normalizeDesignProfile(source);
