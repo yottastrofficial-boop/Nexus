@@ -52,9 +52,12 @@ assert.match(libraryApplication, /parentId:\s*folderId/,
 
 console.log("NEXUS global design system contract: OK");
 
-assert.match(designSystem, /html\\.nexus-design-system \\.nexus-sheet[\\s\\S]*?background: var\\(--nexus-panel-bg, #[0-9a-f]{6}\\) !important/,
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet {") &&
+  designSystem.includes("background: var(--nexus-panel-bg, #182330) !important;"),
   "The legacy sheet shell must use the active global theme instead of its fixed background.");
-assert.match(designSystem, /html\\.nexus-design-system \\.nexus-sheet \\.nexus-component:not\\(\\.is-group-member\\)[\\s\\S]*?background-color: var\\(--nexus-panel-card/,
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-component:not(.is-group-member) {") &&
+  designSystem.includes("background-color: var(--nexus-panel-card, var(--nexus-panel-surface, #273443));"),
   "Sheet components must inherit the active semantic card color.");
-assert.match(designSystem, /html\\.nexus-design-system \\.nexus-sheet \\.nexus-sheet-element[\\s\\S]*?background: var\\(--nexus-panel-surface/,
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-sheet-element {") &&
+  designSystem.includes("background: var(--nexus-panel-surface, #202e3e);"),
   "Sheet elements must inherit the active semantic surface color.");
