@@ -82,3 +82,11 @@ A Biblioteca independente e o painel da ficha usam os mesmos tokens para toolbar
 Os controles nativos do Foundry (Controls, Navigation, Players e Hotbar) recebem adaptação visual por seletores de superfície. O Chat apresenta cada mensagem como cartão com cabeçalho e corpo da mesma família cromática; conteúdo enriquecido nativo recebe limites responsivos para imagens, GIFs, vídeo, áudio, links e embeds. O NEXUS não transforma URLs em embeds automaticamente nem executa HTML/CSS/JS importado: a resolução do conteúdo continua sujeita ao pipeline e às permissões do Foundry.
 
 A hierarquia das ferramentas flutuantes usa o z-index da própria janela e a API de foco da ApplicationV2. Somente o painel atualmente ativo pode ficar acima dos trilhos da ficha; painéis abertos mas inativos não bloqueiam a interação com a ficha. Não se define um z-index global fixo para aplicações de terceiros.
+
+## Geometria responsiva dos controles nativos
+
+A camada final de interface consome `--nexus-control-height` e os tokens de espaçamento derivados do perfil ativo. Controles do Canvas e trilhos flutuantes compartilham a mesma dimensão calculada, com limites seguros para telas estreitas. Os ícones preservam proporção e não são comprimidos pelo tamanho do botão.
+
+A navegação de cenas mantém a estrutura e os eventos nativos do Foundry. A lista pode rolar horizontalmente quando não couber na viewport; cenas visualizadas e ativas recebem um estado visual próprio, sem substituir as classes ou os indicadores de permissão do Foundry. Os trilhos flutuantes das fichas permanecem portais dentro da janela nativa NEXUS, fora do conteúdo dos painéis, e passam a rolar independentemente quando sua altura excede a área disponível.
+
+Esta camada é estritamente de apresentação: não reordena controles, não cria botões nativos substitutos, não intercepta eventos e não altera permissões ou estado de cenas. O suporte a `prefers-reduced-motion` complementa a opção de acessibilidade do perfil.

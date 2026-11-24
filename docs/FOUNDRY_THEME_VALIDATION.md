@@ -98,3 +98,14 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Enviar mensagens curtas e longas no Chat; conferir cabeçalho e corpo como um único cartão visual.
 - [ ] Conferir imagens, GIFs, vídeos, áudio, links e embeds enriquecidos nativos no Chat; validar contenção, tamanho e rolagem.
 - [ ] Confirmar que URLs comuns não são convertidas em conteúdo executável e que o NEXUS não injeta scripts de mídia.
+
+## Geometria e navegação — etapa de integração nativa
+
+- [ ] Alterar a altura dos controles no Estúdio (mínimo, padrão e máximo) e confirmar que controles nativos e trilhos flutuantes acompanham o perfil.
+- [ ] Confirmar que os ícones dos controles laterais permanecem centralizados, proporcionais e sem cortes.
+- [ ] Abrir uma cena com nome longo e um mundo com muitas cenas; confirmar rolagem horizontal sem sobreposição ou perda de acesso.
+- [ ] Diferenciar visualmente cena visualizada e cena ativa; confirmar que os indicadores nativos de permissão GM continuam legíveis.
+- [ ] Redimensionar a viewport para uma largura estreita; confirmar que os controles continuam acessíveis e que os trilhos flutuantes rolam verticalmente quando necessário.
+- [ ] Abrir painéis da ficha e confirmar que os trilhos esquerdo/direito ficam fora do conteúdo dos painéis e não bloqueiam seus controles.
+- [ ] Testar foco por teclado e `prefers-reduced-motion`.
+- [ ] Repetir os testes nos perfis escuro, claro e alto contraste, em cliente GM e jogador.

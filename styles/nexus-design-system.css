@@ -1174,3 +1174,135 @@ html.nexus-design-system .nexus-library-search-clear:hover {
 html.nexus-design-system .nexus-library-search-clear[hidden] {
   display: none !important;
 }
+
+/* Final native-control geometry layer: profile-driven dimensions, unclipped icons and independent rails. */
+html.nexus-design-system {
+  --nexus-ui-control-size: clamp(30px, var(--nexus-control-height, 34px), 44px);
+  --nexus-ui-control-gap: clamp(4px, var(--nexus-space-2, 8px), 12px);
+}
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) {
+  box-sizing: border-box;
+  max-inline-size: calc(100vw - 8px);
+  overflow: visible;
+}
+html.nexus-design-system #controls .control-tools,
+html.nexus-design-system #controls .control-tool-group {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-inline-size: 0;
+  overflow: visible;
+}
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) :is(.ui-control, .control-tool) {
+  box-sizing: border-box;
+  flex: 0 0 var(--nexus-ui-control-size);
+  inline-size: var(--nexus-ui-control-size);
+  min-inline-size: var(--nexus-ui-control-size);
+  max-inline-size: var(--nexus-ui-control-size);
+  block-size: var(--nexus-ui-control-size);
+  min-block-size: var(--nexus-ui-control-size);
+  max-block-size: var(--nexus-ui-control-size);
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  line-height: 1;
+  font-size: calc(var(--nexus-ui-control-size) * .46);
+}
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) :is(.ui-control, .control-tool) :is(i, svg, img) {
+  flex: 0 0 auto;
+  inline-size: 1em;
+  block-size: 1em;
+  max-inline-size: 1em;
+  max-block-size: 1em;
+  object-fit: contain;
+  line-height: 1;
+}
+html.nexus-design-system #navigation {
+  box-sizing: border-box;
+  max-inline-size: calc(100vw - 12px);
+  min-inline-size: 0;
+  overflow: visible;
+}
+html.nexus-design-system #navigation #scene-list {
+  display: flex;
+  align-items: center;
+  gap: var(--nexus-ui-control-gap);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+html.nexus-design-system #navigation .scene {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-inline-size: 0;
+  max-inline-size: min(220px, 34vw);
+  min-block-size: var(--nexus-ui-control-size);
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--nexus-ui-radius);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color .14s ease, background-color .14s ease, border-color .14s ease;
+}
+html.nexus-design-system #navigation .scene:is(.active, .view) {
+  border-color: var(--nexus-ui-accent);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+  box-shadow: inset 0 -2px var(--nexus-ui-accent);
+}
+html.nexus-design-system #navigation .scene:focus-visible {
+  outline: 2px solid var(--nexus-ui-accent);
+  outline-offset: 2px;
+}
+html.nexus-design-system .nexus-floating-ui :is(.nexus-floating-left, .nexus-floating-right) {
+  box-sizing: border-box;
+  max-block-size: calc(100dvh - 24px);
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--nexus-ui-accent) transparent;
+}
+html.nexus-design-system .nexus-floating-ui .nexus-floating-right {
+  align-items: center !important;
+}
+html.nexus-design-system .nexus-floating-ui :is(
+  .nexus-floating-left-rail > button,
+  .nexus-floating-tabs .nexus-layout-tab,
+  .nexus-floating-add
+) {
+  box-sizing: border-box;
+  flex: 0 0 var(--nexus-ui-control-size);
+  inline-size: var(--nexus-ui-control-size) !important;
+  min-inline-size: var(--nexus-ui-control-size) !important;
+  block-size: var(--nexus-ui-control-size) !important;
+  min-block-size: var(--nexus-ui-control-size) !important;
+  padding: 0 !important;
+  line-height: 1;
+}
+html.nexus-design-system .nexus-floating-ui :is(
+  .nexus-floating-left-rail > button,
+  .nexus-floating-tabs .nexus-layout-tab,
+  .nexus-floating-add
+):focus-visible {
+  outline: 2px solid var(--nexus-ui-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  html.nexus-design-system {
+    --nexus-ui-control-size: clamp(30px, var(--nexus-control-height, 34px), 36px);
+    --nexus-ui-control-gap: 5px;
+  }
+  html.nexus-design-system #navigation .scene {
+    max-inline-size: min(180px, 42vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.nexus-design-system :is(#navigation .scene, #controls .control-tool, #ui-left .ui-control, #ui-top .ui-control) {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

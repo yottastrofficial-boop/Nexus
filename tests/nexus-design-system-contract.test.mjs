@@ -61,3 +61,18 @@ assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-co
 assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-sheet-element {") &&
   designSystem.includes("background: var(--nexus-panel-surface, #202e3e);"),
   "Sheet elements must inherit the active semantic surface color.");
+
+assert.match(designSystem, /--nexus-ui-control-size:\s*clamp\(30px,\s*var\(--nexus-control-height/,
+  "Native control geometry must consume the active Design Studio control-height token.");
+assert.match(designSystem, /:is\(#controls, #ui-left, #ui-top\)[\s\S]*?overflow:\s*visible/,
+  "Foundry control rails must not clip their own icon surfaces.");
+assert.match(designSystem, /#navigation \.scene:is\(\.active, \.view\)/,
+  "Scene navigation must distinguish the viewed and active scene states.");
+assert.match(designSystem, /#navigation #scene-list[\s\S]*?overflow-x:\s*auto/,
+  "Long scene lists must remain horizontally navigable instead of forcing clipped controls.");
+assert.match(designSystem, /\.nexus-floating-ui :is\(\.nexus-floating-left, \.nexus-floating-right\)[\s\S]*?overflow-y:\s*auto/,
+  "Floating sheet rails must remain independently scrollable within the viewport.");
+assert.match(designSystem, /\.nexus-floating-tabs \.nexus-layout-tab[\s\S]*?var\(--nexus-ui-control-size\)/,
+  "Floating page controls must follow the same profile-driven dimensions as Foundry controls.");
+assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
+  "Native control transitions must respect the operating system reduced-motion preference.");
