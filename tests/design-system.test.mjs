@@ -97,9 +97,28 @@ test("installer registers authoritative world settings and per-user preferences"
   records.get("nexus.designWorldTheme").onChange("medieval");
   assert.equal(root.dataset.nexusTheme, "medieval");
 
+  values.set("nexus.designUserMode", "personal");
+  values.set("nexus.designUserTheme", "light");
+  design.apply();
+  assert.equal(root.dataset.nexusTheme, "light");
+  assert.equal(root.dataset.nexusThemeSource, "user");
+
+  values.set("nexus.designAllowPlayerOverrides", false);
+  design.apply();
+  assert.equal(root.dataset.nexusTheme, "medieval");
+  assert.equal(root.dataset.nexusThemeSource, "world");
+
   class ActorDirectory {}
-  handlers.get("renderApplicationV2")?.(new ActorDirectory(), { classList: { values: new Set(), add(value) { this.values.add(value); } } });
-  assert.ok(applied.length >= 2);
+  const directoryElement = { classList: { values: new Set(), add(value) { this.values.add(value); } } };
+  handlers.get("renderApplicationV2")?.(new ActorDirectory(), directoryElement);
+  assert.ok(directoryElement.classList.values.has("nexus-themed-application"));
+  assert.ok(directoryElement.classList.values.has("nexus-themed-directory"));
+
+  class ThirdPartyWindow {}
+  const thirdPartyElement = { classList: { values: new Set(), add(value) { this.values.add(value); } } };
+  handlers.get("renderApplicationV2")?.(new ThirdPartyWindow(), thirdPartyElement);
+  assert.equal(thirdPartyElement.classList.values.size, 0);
+  assert.ok(handlers.has("updateSetting"), "A sincronização de configurações do mundo deve reaplicar o tema.");
   design.uninstall();
   assert.equal(root.classList.values.has("nexus-design-system"), false);
 });
