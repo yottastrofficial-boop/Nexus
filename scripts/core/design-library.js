@@ -72,7 +72,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
   const remove = async id => {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
-    await updateNexusLibraryCollection(user, "themes", entries => {
+    await updateNexusLibraryCollection(user, "themes", (entries, store) => {
       const entry = entries.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
       if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser excluído.");
