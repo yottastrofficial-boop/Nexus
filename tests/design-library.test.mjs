@@ -1,0 +1,58 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { createEmptyNexusLibraryStore, readNexusLibraryStore } from "../scripts/core/library-store.js";
+import { createDesignLibraryService } from "../scripts/core/design-library.js";
+import { createDefaultDesignProfile } from "../scripts/core/design-profile.js";
+function makeUser(store = createEmptyNexusLibraryStore()) {
+  const flags = new Map([["libraryStore", store]]);
+  return { getFlag(scope, key) { return scope === "nexus" ? flags.get(key) : undefined; },
+    async setFlag(scope, key, value) { if (scope === "nexus") flags.set(key, structuredClone(value)); return value; }, flags };
+}
+function makeDesign() { const applied = []; return { applied, async saveProfile(profile, scope) { applied.push({ profile: structuredClone(profile), scope }); return profile; } }; }
+
+test("salva perfis completos na coleção themes canônica", async () => {
+  const user = makeUser(), design = makeDesign(); let sequence = 0;
+  const library = createDesignLibraryService({ getUser: () => user, design, createId: () => "theme-" + (++sequence) });
+  const profile = createDefaultDesignProfile("medieval");
+  profile.name = "Bosque Antigo"; profile.palette.panel = "#123456"; profile.typography.baseSize = 16;
+  profile.layout.density = "spacious"; profile.accessibility.reducedMotion = true;
+  const saved = await library.save(profile);
+  assert.equal(saved.id, "theme-1"); assert.equal(saved.kind, "design-profile");
+  assert.equal(saved.profile.palette.panel, "#123456"); assert.equal(saved.profile.typography.baseSize, 16);
+  assert.equal(saved.profile.layout.density, "spacious"); assert.equal(saved.profile.accessibility.reducedMotion, true);
+  assert.equal(library.list().length, 1); assert.equal(readNexusLibraryStore(user).store.collections.themes.length, 1);
+});
+test("duplica, renomeia, aplica e exclui sem alterar o perfil ativo implicitamente", async () => {
+  const user = makeUser(), design = makeDesign();
+  const library = createDesignLibraryService({ getUser: () => user, design, createId: () => "copy-1" });
+  const saved = await library.save(createDefaultDesignProfile("midnight")), copy = await library.duplicate(saved.id);
+  assert.notEqual(copy.id, saved.id); assert.match(copy.name, /cópia/);
+  const renamed = await library.rename(copy.id, "Noite de Inverno"); assert.equal(renamed.name, "Noite de Inverno");
+  const applied = await library.apply(copy.id, "world");
+  assert.equal(applied.applied, true); assert.equal(design.applied[0].scope, "world");
+  assert.equal(design.applied[0].profile.name, "Noite de Inverno");
+  assert.equal((await library.remove(copy.id)).removed, true);
+  assert.equal(library.get(copy.id), null); assert.equal(library.get(saved.id).name, saved.name);
+});
+test("exporta e importa perfis usando NEXUS-DESIGN/1", async () => {
+  const source = makeUser(), target = makeUser(), design = makeDesign();
+  const a = createDesignLibraryService({ getUser: () => source, design, createId: () => "source-theme" });
+  const b = createDesignLibraryService({ getUser: () => target, design, createId: () => "target-theme" });
+  const profile = createDefaultDesignProfile("pixel-art"); profile.name = "Pixel NEXUS"; profile.palette.accent = "#abcdef";
+  await a.save(profile); const imported = await b.import(a.export("source-theme"));
+  assert.equal(imported.profile.preset, "pixel-art"); assert.equal(imported.profile.palette.accent, "#abcdef");
+  assert.equal(imported.profile.typography.family, "monospace");
+});
+test("serializa gravações concorrentes e preserva todos os perfis", async () => {
+  const user = makeUser(); let sequence = 0;
+  const library = createDesignLibraryService({ getUser: () => user, design: makeDesign(), createId: () => "parallel-" + (++sequence) });
+  await Promise.all([library.save(createDefaultDesignProfile("light")), library.save(createDefaultDesignProfile("steam")), library.save(createDefaultDesignProfile("linux"))]);
+  assert.equal(library.list().length, 3); assert.equal(new Set(library.list().map(entry => entry.id)).size, 3);
+});
+test("rejeita importação inválida e operações sobre perfis inexistentes", async () => {
+  const library = createDesignLibraryService({ getUser: () => makeUser(), design: makeDesign(), createId: () => "theme-a" });
+  await assert.rejects(library.import("{invalid"), /JSON válido/);
+  await assert.rejects(library.rename("missing", "Novo nome"), /não existe/);
+  await assert.rejects(library.apply("missing", "world"), /não existe/);
+  await assert.rejects(library.remove("missing"), /não existe/);
+});

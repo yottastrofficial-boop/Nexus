@@ -89,6 +89,33 @@
         </div>
       </div>
       <p class="nexus-design-preview-note">A prévia não salva alterações. Fechar o estúdio descarta um rascunho não salvo.</p>
+
+      {{#if hasDesignLibrary}}
+      <section class="nexus-design-library-panel" aria-label="Biblioteca de aparências">
+        <div class="nexus-design-library-heading"><div><strong>Biblioteca de aparências</strong><small>Perfis reutilizáveis da sua coleção pessoal</small></div><span>{{libraryProfiles.length}}</span></div>
+        <button type="button" class="nexus-design-library-save" data-design-action="save-library"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Salvar rascunho na Biblioteca</button>
+        {{#if libraryProfiles.length}}
+          <div class="nexus-design-library-list">
+            {{#each libraryProfiles}}
+            <article class="nexus-design-library-entry" data-design-profile-row>
+              <div class="nexus-design-library-entry-heading"><strong>{{name}}</strong><small>{{preset}} · {{updatedAt}}</small></div>
+              <input type="text" maxlength="64" value="{{name}}" data-design-rename-input aria-label="Novo nome de {{name}}">
+              <div class="nexus-design-library-entry-actions">
+                <button type="button" data-design-action="load-library" data-profile-id="{{id}}">Carregar</button>
+                <button type="button" data-design-action="apply-library" data-profile-id="{{id}}">Aplicar</button>
+                <button type="button" data-design-action="duplicate-library" data-profile-id="{{id}}" title="Duplicar"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
+                <button type="button" data-design-action="rename-library" data-profile-id="{{id}}" title="Renomear"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+                <button type="button" data-design-action="export-library" data-profile-id="{{id}}" title="Exportar"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
+                <button type="button" data-design-action="delete-library" data-profile-id="{{id}}" title="Excluir"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              </div>
+            </article>
+            {{/each}}
+          </div>
+        {{else}}
+          <p class="nexus-design-library-empty">Nenhum perfil salvo. Personalize a aparência e salve uma cópia para reutilizar depois.</p>
+        {{/if}}
+      </section>
+      {{/if}}
     </aside>
   </div>
 

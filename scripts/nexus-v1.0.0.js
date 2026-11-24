@@ -19,6 +19,7 @@ import { NEXUS_COMPONENTS } from "./core/component-types.js";
 import { THEME_PALETTES, THEME_TOKENS, applyThemeTokens } from "./core/theme.js";
 import { installNexusDesignSystem } from "./core/design-system.js";
 import { createDesignStudioApplicationClass } from "./apps/design-studio.js";
+import { createDesignLibraryService } from "./core/design-library.js";
 import { getInteractionLibrary } from "./core/interactions.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
@@ -33,10 +34,12 @@ Hooks.once("init", () => {
     themeTokens: THEME_TOKENS,
     applyThemeTokens
   });
+  game.nexus.design.library ??= createDesignLibraryService({ getUser: () => game.user, design: game.nexus.design });
   const DesignStudioApplication = createDesignStudioApplicationClass({
     ApplicationV2: foundry.applications.api.ApplicationV2,
     HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
-    design: game.nexus.design
+    design: game.nexus.design,
+    library: game.nexus.design.library
   });
   game.nexus.design.Studio = DesignStudioApplication;
   game.nexus.design.registerStudio(DesignStudioApplication);
@@ -57,6 +60,7 @@ Hooks.once("init", () => {
   // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
   // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
   game.nexus.library ??= {};
+  game.nexus.library.designProfiles ??= game.nexus.design.library;
   game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
     getUser: () => game.user,
     getWorldFlows: () => {

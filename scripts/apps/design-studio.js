@@ -28,7 +28,8 @@ function setPath(target, path, value) {
 export function createDesignStudioApplicationClass({
   ApplicationV2,
   HandlebarsApplicationMixin,
-  design
+  design,
+  library = null
 } = {}) {
   if (typeof ApplicationV2 !== "function" || typeof HandlebarsApplicationMixin !== "function") {
     throw new TypeError("ApplicationV2 e HandlebarsApplicationMixin são obrigatórios.");
@@ -60,6 +61,7 @@ export function createDesignStudioApplicationClass({
     constructor(options = {}) {
       super(options);
       this._target = globalThis.game?.user?.isGM ? "world" : "user";
+      this._library = library;
       this._draft = null;
       this._dirty = false;
       this._previewing = false;
@@ -78,10 +80,13 @@ export function createDesignStudioApplicationClass({
       const context = await super._prepareContext(options);
       this._draft ??= clone(design.getProfile(this._target));
       const diagnostics = getDesignProfileDiagnostics(this._draft);
+      const libraryProfiles = this._library?.list?.() ?? [];
       return {
         ...context,
         profile: this._draft,
         target: this._target,
+        libraryProfiles,
+        hasDesignLibrary: Boolean(this._library),
         canEditWorld: globalThis.game?.user?.isGM === true,
         canEditUser: design.canEditScope("user"),
         targetOptions: [
@@ -202,6 +207,81 @@ export function createDesignStudioApplicationClass({
           this._draft = clone(design.getProfile(next));
           this._dirty = false;
           await this.render({ force: true });
+          return;
+        }
+        if (action === "save-library") {
+          if (!this._library?.save) throw new Error("A Biblioteca de Aparências não está disponível.");
+          const entry = await this._library.save(this._draft);
+          globalThis.ui?.notifications?.info?.("Perfil salvo na Biblioteca: " + entry.name + ".");
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "load-library") {
+          const entry = this._library?.get?.(button.dataset.profileId);
+          if (!entry) throw new Error("O perfil não existe mais na Biblioteca.");
+          if (this._dirty) {
+            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+            const accepted = typeof confirm === "function" && await confirm({
+              window: { title: "Substituir rascunho?" },
+              content: "<p>O rascunho atual ainda não foi salvo. Deseja carregá-lo por outro perfil?</p>",
+              yes: { label: "Carregar perfil" }, no: { label: "Continuar editando" }, rejectClose: false
+            });
+            if (!accepted) return;
+          }
+          this._draft = clone(entry.profile);
+          this._dirty = true;
+          this._applyPreview();
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "apply-library") {
+          const result = await this._library?.apply?.(button.dataset.profileId, this._target);
+          if (!result?.applied) throw new Error("Não foi possível aplicar o perfil selecionado.");
+          this._draft = clone(result.profile);
+          this._dirty = false;
+          this._previewing = true;
+          globalThis.ui?.notifications?.info?.(this._target === "world" ? "Aparência aplicada à campanha." : "Aparência aplicada ao seu usuário.");
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "duplicate-library") {
+          const entry = await this._library?.duplicate?.(button.dataset.profileId);
+          if (!entry) throw new Error("Não foi possível duplicar o perfil.");
+          globalThis.ui?.notifications?.info?.("Cópia criada na Biblioteca.");
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "rename-library") {
+          const row = button.closest("[data-design-profile-row]");
+          const entry = await this._library?.rename?.(button.dataset.profileId, row?.querySelector("[data-design-rename-input]")?.value);
+          if (!entry) throw new Error("Não foi possível renomear o perfil.");
+          globalThis.ui?.notifications?.info?.("Perfil renomeado.");
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "delete-library") {
+          const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+          const accepted = typeof confirm === "function" && await confirm({
+            window: { title: "Excluir perfil salvo?" },
+            content: "<p>Esta ação remove somente a cópia da Biblioteca. A aparência atualmente aplicada à campanha ou ao usuário não será alterada.</p>",
+            yes: { label: "Excluir perfil" }, no: { label: "Cancelar" }, rejectClose: false
+          });
+          if (!accepted) return;
+          await this._library?.remove?.(button.dataset.profileId);
+          globalThis.ui?.notifications?.info?.("Perfil removido da Biblioteca.");
+          await this.render({ force: true });
+          return;
+        }
+        if (action === "export-library") {
+          const code = this._library?.export?.(button.dataset.profileId);
+          if (!code) throw new Error("Não foi possível exportar o perfil.");
+          const blob = new Blob([code], { type: "application/json;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "nexus-design-profile-" + button.dataset.profileId + ".json";
+          link.click();
+          globalThis.setTimeout?.(() => URL.revokeObjectURL(url), 1000);
           return;
         }
         if (action === "save") {
