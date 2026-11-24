@@ -105,7 +105,29 @@ export const applyThemeTokens = (element, layout = {}) => {
     "--nexus-space-3": "12px",
     "--nexus-space-4": "16px",
     "--nexus-control-height": "34px",
-    "--nexus-line-height": "1.45"
+    "--nexus-line-height": "1.45",
+    "--nexus-foundry-sidebar-bg": theme.panel,
+    "--nexus-foundry-sidebar-surface": theme.surface,
+    "--nexus-foundry-sidebar-input": theme.input,
+    "--nexus-foundry-sidebar-border": theme.border,
+    "--nexus-foundry-sidebar-text": theme.text,
+    "--nexus-foundry-sidebar-muted": theme.muted,
+    "--nexus-foundry-sidebar-hover": theme.hover,
+    "--nexus-foundry-sidebar-active": theme.accent,
+    "--nexus-foundry-directory-bg": theme.panel,
+    "--nexus-foundry-directory-item-bg": theme.surface,
+    "--nexus-foundry-directory-item-border": theme.border,
+    "--nexus-foundry-directory-item-hover": theme.hover,
+    "--nexus-foundry-directory-folder-bg": theme.panel,
+    "--nexus-foundry-directory-search-bg": theme.input,
+    "--nexus-foundry-navigation-bg": theme.panel,
+    "--nexus-foundry-navigation-active": theme.accent,
+    "--nexus-foundry-application-bg": theme.windowContent,
+    "--nexus-foundry-application-header": theme.windowHeader,
+    "--nexus-foundry-application-border": theme.border,
+    "--nexus-foundry-control-bg": theme.input,
+    "--nexus-foundry-control-border": theme.border,
+    "--nexus-foundry-control-hover": theme.hover
   };
   values["--nexus-theme-id"] = layout.theme ?? "nexus-dark";
   for (const [key, value] of Object.entries(values)) element.style.setProperty(key, value);
