@@ -6,11 +6,12 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
-- Versão publicada: `1.0.0.90` (release de teste; a validação funcional no Foundry continua pendente)
-- Versão candidata em preparação: `1.0.0.91` (Biblioteca universal integrada; CI e validação funcional no Foundry pendentes).
+- Commit: `4555715099fc678b90e606809953d3b287b144f7` (HEAD da `main` verificado em 2026-11-23)
+- Versão publicada: `1.0.0.91` (release e ZIP anexado em 2026-11-23)
+- CI de publicação: execução `45153746614` aprovada
+- Último checkpoint funcional confirmado no Foundry: `1.0.0.70`
 - Alvo: Foundry VTT 14, build 360.
-- Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
+- Estado: 1.0.0.91 publicada e validada automaticamente; a etapa imediata é a validação funcional manual descrita em `docs/VALIDATION_CHECKLIST_1.0.0.91.md`.
 
 ## Estado atual por domínio
 
@@ -26,14 +27,14 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Existe armazenamento unificado com coleções, preferências, backups e compatibilidade de leitura legada.
 - A interface Explorer possui navegação universal, visão de todos os itens salvos, favoritos, recentes, pastas livres, filtros de etiquetas dinâmicos, cartões padronizados, grade/lista e Inspector contextual.\n- O Inspector permite editar metadados, organizar por pastas, duplicar e excluir itens salvos; exclusão de ativos lógicos com dependentes é bloqueada.\n- A visão universal é agregadora; ações específicas de inserção/aplicação continuam disponíveis nas áreas especializadas correspondentes.
 - Definições reutilizáveis e instâncias inseridas na ficha devem continuar isoladas.
-- Editores especializados completos para todos os tipos e aplicação direta de qualquer tipo a partir da visão universal ainda não estão concluídos; a validação visual/funcional no Foundry real permanece pendente.
+- Os editores especializados iniciais de Lógica estão integrados ao Inspector da Biblioteca; ações de aplicação continuam dependentes dos provedores e do contexto compatível. A validação visual/funcional no Foundry real permanece pendente.
 - Pastas, favoritos, recentes, metadados e operações de duplicação/exclusão/importação exigem testes de persistência em cenário real.
 
 ### Lógica
 
 - A infraestrutura possui registry tipado, dependências, detecção de ciclos, persistência e runtime declarativo.
 - Os cinco tipos permanecem distintos: Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões.
-- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos possuem construtor visual inicial e simulação sem execução de ações. Eventos de ciclo de vida do Foundry estão conectados ao runtime, com execução no GM ativo e executor inicial `nexus.actor.update` protegido pelas permissões do usuário originador. O núcleo inicial de grafo opcional para Fluxos (nós start/condition/action/end, conexões next/true/false, validação de ciclos/alcançabilidade, execução e simulação do caminho) está implementado e coberto por testes. O editor estruturado de nós/conexões e campos específicos já está integrado ao Inspector; arrastar/soltar e canvas com conectores gráficos, mais executores e testes ponta a ponta no cliente Foundry ainda estão pendentes.
+- Schemas estruturais e editores especializados dos cinco tipos estão integrados ao Inspector; Fluxos possuem editor sequencial, construtor de grafo e simulação sem execução de ações. Eventos de ciclo de vida do Foundry estão conectados ao runtime, com execução no GM ativo e executores iniciais `nexus.actor.update` e `nexus.actor.adjust` protegidos pelas permissões do usuário originador. O grafo opcional (nós start/condition/action/end, conexões next/true/false, validação de ciclos/alcançabilidade, execução e simulação do caminho) e o editor com nós arrastáveis/conectores SVG estão cobertos por testes automatizados. Ainda faltam validação ponta a ponta no cliente Foundry, refinamentos de zoom/visão geral e novos executores confiáveis.
 - Payloads lógicos importados devem permanecer inertes até serem validados por um editor e contrato específico.
 
 ### Mídia
@@ -62,19 +63,20 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
-## Biblioteca universal — integração concluída na candidata 1.0.0.91
+## Biblioteca universal — integração publicada na 1.0.0.91
 
 - **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
 - **PR #59 / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
 - **PR #60 / `feature/library-explorer-catalog-integration-2026-11-23`:** primeira integração do Explorer existente com o catálogo universal.
 - **Branch de conclusão / `feature/library-universal-completion-2026-11-23`:** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas/coleções mistas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
-- **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
+- **Estado:** a cadeia foi consolidada na `main`, a CI de publicação `45153746614` passou e o ZIP foi anexado à release `v1.0.0.91`.
+- **Próxima etapa imediata:** executar o roteiro de validação manual em `docs/VALIDATION_CHECKLIST_1.0.0.91.md`. Não criar uma nova release nem declarar estabilidade funcional antes de registrar os resultados no Foundry VTT 14 build 360.
 - **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem e o Core agora define o registro de adaptadores de origem/destino com limites, validação de dados inertes, prévia e confirmação. Ainda faltam adaptadores concretos para formatos externos e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
 - **Lógica:** evoluir o construtor visual de Fluxos (nós, ramificações e simulação), registrar executores confiáveis e integrar eventos e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
 - **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
 - **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
-A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+A etapa foi publicada como 1.0.0.91 e passou pela CI. A validação funcional no cliente Foundry 14 build 360 continua sendo um bloqueio para declarar estabilidade e iniciar uma nova etapa de mudanças estruturais.
 
 ## Critérios para concluir uma etapa
 
