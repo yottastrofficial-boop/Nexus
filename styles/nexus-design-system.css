@@ -951,3 +951,122 @@ html.nexus-design-system .nexus-library-folder-row[draggable="true"] {
 html.nexus-design-system .nexus-library-folder-row[draggable="true"]:active {
   cursor: grabbing;
 }
+
+
+/* Sheet theme bridge: the legacy sheet must consume the same live profile as NEXUS windows. */
+html.nexus-design-system .nexus-sheet {
+  color: var(--nexus-text-primary, var(--nexus-panel-text, #e7edf5)) !important;
+  background: var(--nexus-panel-bg, #182330) !important;
+  font-family: var(--nexus-font-family, system-ui, sans-serif);
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-header,
+  .nexus-sidebar,
+  .nexus-sidebar-right,
+  .nexus-side-section,
+  .nexus-tool-panel,
+  .nexus-modes
+) {
+  color: var(--nexus-panel-text, #e7edf5);
+  border-color: var(--nexus-panel-border, #3c5067);
+  background-color: var(--nexus-panel-surface, #202e3e);
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-header,
+  .nexus-sidebar-right
+) {
+  background: var(--nexus-window-header-bg, var(--nexus-panel-surface, #202e3e));
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-side-section h3,
+  .nexus-tool-panel h3,
+  .nexus-sheet-element,
+  .nexus-sheet-element > strong
+) {
+  color: var(--nexus-panel-text, #e7edf5);
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-side-section p,
+  .nexus-side-section label,
+  .nexus-tool-panel p,
+  .nexus-tool-panel label,
+  .nexus-sheet-element > small
+) {
+  color: var(--nexus-panel-muted, #9aadc2);
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-modes,
+  .nexus-tool-panel,
+  .nexus-side-section
+) {
+  background-color: var(--nexus-panel-bg, #182330);
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-modes button,
+  .nexus-side-section button,
+  .nexus-sidebar-right button,
+  .nexus-save-layout
+) {
+  color: var(--nexus-button-text, var(--nexus-panel-text, #e7edf5));
+  border-color: var(--nexus-button-border, var(--nexus-panel-border, #3c5067));
+  background: var(--nexus-button-bg, var(--nexus-panel-surface, #202e3e));
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-modes button:hover,
+  .nexus-side-section button:hover,
+  .nexus-sidebar-right button:hover,
+  .nexus-save-layout:hover
+) {
+  background: var(--nexus-button-hover-bg, var(--nexus-panel-hover, #2a3d52));
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-modes button.active,
+  .nexus-layout-tab.active
+) {
+  color: var(--nexus-button-active-text, var(--nexus-panel-text, #e7edf5));
+  border-color: var(--nexus-button-active-border, var(--nexus-highlight-color, #78b7e8));
+  background: var(--nexus-button-active-bg, var(--nexus-button-bg, #315b7d));
+}
+
+html.nexus-design-system .nexus-sheet :is(
+  .nexus-tool-panel input:not([type="checkbox"]),
+  .nexus-side-section input:not([type="checkbox"]),
+  .nexus-side-section select
+) {
+  color: var(--nexus-field-text, var(--nexus-panel-text, #e7edf5));
+  border-color: var(--nexus-field-border, var(--nexus-panel-border, #3c5067));
+  background: var(--nexus-field-bg, var(--nexus-panel-input, #111b27));
+}
+
+html.nexus-design-system .nexus-sheet .nexus-canvas-stage {
+  background: var(--nexus-window-content-bg, var(--nexus-panel-bg, #182330));
+}
+
+html.nexus-design-system .nexus-sheet .nexus-canvas {
+  border-color: var(--nexus-panel-border, #3c5067);
+  background-color: var(--nexus-canvas-color, var(--nexus-canvas-scroll-bg, #171f2a));
+}
+
+html.nexus-design-system .nexus-sheet .nexus-component:not(.is-group-member) {
+  border-color: var(--nexus-component-border, var(--nexus-panel-border, #3c5067));
+  background-color: var(--nexus-panel-card, var(--nexus-panel-surface, #273443));
+  color: var(--nexus-panel-text, #e7edf5);
+}
+
+html.nexus-design-system .nexus-sheet .nexus-sheet-element {
+  border-color: var(--nexus-panel-border, #3c5067);
+  background: var(--nexus-panel-surface, #202e3e);
+  color: var(--nexus-panel-text, #e7edf5);
+}
+
+html.nexus-design-system .nexus-sheet .nexus-sheet-element :is(small, span, label) {
+  color: var(--nexus-panel-muted, #9aadc2);
+}
