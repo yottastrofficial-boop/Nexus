@@ -55,7 +55,10 @@ A Biblioteca de Aparências reutiliza a coleção canônica `themes` do Universa
 - Diretórios de Actors, Cards, Itens, Journals, Playlists, Compêndios, RollTables e Cenas.
 - Campos e controles dentro da Sidebar.
 - Navegação de Cenas, controles, Hotbar, Players e Chat em seus contêineres principais.
+- Configuração nativa de interface do Foundry (`UIConfig`) e a tela de configurações (`SettingsConfig`), identificadas por allowlist no hook `renderApplicationV2`.
 - Janelas ApplicationV2 de diretórios nativos reconhecidos, marcadas por uma allowlist no hook `renderApplicationV2`.
+
+O NEXUS não substitui nem reimplementa `UIConfig`: a configuração nativa continua responsável pelas preferências gerais do Foundry e recebe apenas a identidade visual permitida pelo Design System. O Estúdio de Aparência continua sendo uma ApplicationV2 própria, acessível pelo submenu nativo registrado com `game.settings.registerMenu()`; isso não cria uma aba paralela nem altera a navegação do Foundry.
 
 A integração não aplica seletores globais a toda classe `.application`, `.directory` ou `.window-app`. Aplicações de módulos externos permanecem fora do escopo, exceto se futuramente forem integradas por contrato explícito.
 
