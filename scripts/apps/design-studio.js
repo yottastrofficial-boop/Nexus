@@ -63,6 +63,7 @@ export function createDesignStudioApplicationClass({
       this._draft = null;
       this._dirty = false;
       this._previewing = false;
+      this._busy = false;
     }
 
     _canRender(options) {
@@ -175,6 +176,9 @@ export function createDesignStudioApplicationClass({
       if (!button) return;
       event.preventDefault();
       const action = button.dataset.designAction;
+      if (this._busy) return;
+      this._busy = true;
+      button.disabled = true;
       try {
         if (action === "target") {
           const select = this.element?.querySelector("[data-design-target]");
@@ -232,13 +236,16 @@ export function createDesignStudioApplicationClass({
           link.href = url;
           link.download = "nexus-design-" + this._draft.preset + ".json";
           link.click();
-          URL.revokeObjectURL(url);
+          globalThis.setTimeout?.(() => URL.revokeObjectURL(url), 1000);
           return;
         }
         if (action === "import") {
           const input = document.createElement("input");
           input.type = "file";
           input.accept = ".json,application/json";
+          input.hidden = true;
+          document.body.append(input);
+          input.addEventListener("cancel", () => input.remove(), { once: true });
           input.addEventListener("change", async () => {
             const file = input.files?.[0];
             if (!file) return;
@@ -250,12 +257,17 @@ export function createDesignStudioApplicationClass({
               await this.render({ force: true });
             } catch (error) {
               globalThis.ui?.notifications?.error?.("Importação recusada: " + error.message);
+            } finally {
+              input.remove();
             }
           }, { once: true });
           input.click();
         }
       } catch (error) {
         globalThis.ui?.notifications?.error?.(error.message);
+      } finally {
+        this._busy = false;
+        if (button.isConnected) button.disabled = false;
       }
     }
 
