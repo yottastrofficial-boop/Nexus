@@ -1,4 +1,4 @@
-import { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES } from "./design-system.js";
+import { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES } from "./design-constants.js";
 import { THEME_TOKENS } from "./theme.js";
 
 export const DESIGN_PROFILE_SCHEMA_VERSION = 1;
