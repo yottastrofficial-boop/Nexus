@@ -73,7 +73,7 @@
         <ul class="nexus-design-diagnostics" data-design-diagnostics>
           {{#each diagnostics.checks}}<li class="{{#if passes}}is-valid{{else}}is-warning{{/if}}">{{label}} — {{ratio}}:1</li>{{/each}}
         </ul>
-        <p class="nexus-design-warning" data-design-diagnostics-message>{{#if warnings.length}}<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Alguns pares de cores precisam de mais contraste. Revise a paleta antes de compartilhar.{{else}}<i class="fa-solid fa-check" aria-hidden="true"></i> Os pares de texto avaliados atendem ao contraste selecionado.{{/if}}</p>
+        <p class="{{#if warnings.length}}nexus-design-warning{{else}}nexus-design-success{{/if}}" data-design-diagnostics-message>{{#if warnings.length}}<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Alguns pares de cores precisam de mais contraste. Revise a paleta antes de compartilhar.{{else}}<i class="fa-solid fa-check" aria-hidden="true"></i> Os pares de texto avaliados atendem ao contraste selecionado.{{/if}}</p>
       </section>
     </main>
 
