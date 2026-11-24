@@ -331,11 +331,11 @@ export function createDesignStudioApplicationClass({
           input.type = "file";
           input.accept = ".json,application/json";
           input.hidden = true;
-          document.body.append(input);
-          input.addEventListener("cancel", () => input.remove(), { once: true });
+          const cleanupInput = () => input.remove();
+          input.addEventListener("cancel", cleanupInput, { once: true });
           input.addEventListener("change", async () => {
             const file = input.files?.[0];
-            if (!file) return;
+            if (!file) { cleanupInput(); return; }
             try {
               if (file.size > 64 * 1024) throw new RangeError("O arquivo excede 64 KB.");
               this._draft = importDesignProfile(await file.text());
@@ -345,10 +345,16 @@ export function createDesignStudioApplicationClass({
             } catch (error) {
               globalThis.ui?.notifications?.error?.("Importação recusada: " + error.message);
             } finally {
-              input.remove();
+              cleanupInput();
             }
           }, { once: true });
-          input.click();
+          try {
+            document.body.append(input);
+            input.click();
+          } catch (error) {
+            cleanupInput();
+            throw error;
+          }
         }
       } catch (error) {
         globalThis.ui?.notifications?.error?.(error.message);
