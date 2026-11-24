@@ -23,7 +23,7 @@ A campanha possui a opção **Permitir temas individuais**. Quando desativada, a
 
 - IDs de tema são validados contra `THEME_TOKENS`; valores desconhecidos retornam ao padrão seguro.
 - Configuração visual nunca é persistida em Actor, Item, Token ou Scene.
-- Configuração de campanha é uma configuração Foundry `world`; preferências pessoais usam escopo `user`.
+- Configuração de campanha é uma configuração Foundry `world`; preferências pessoais usam escopo `user` (não `client`), para representar a preferência do usuário Foundry em vez de uma preferência acidental do navegador.
 - As configurações são registradas sem exigir recarga; `onChange` reaplica os tokens ao documento raiz.
 - Tokens são aplicados no `document.documentElement`, permitindo que a mesma paleta alcance as fichas e as superfícies Foundry cobertas pelo CSS.
 - `game.nexus.design.apply()` reaplica o tema; `getEffectiveTheme()` informa tema, origem e política efetivos.
