@@ -145,3 +145,20 @@ test("theme application rejects invalid scope and profiles without write side ef
   );
   assert.equal(writes, 0);
 });
+
+
+test("campaign application fails visibly when the Foundry confirmation API is unavailable", async () => {
+  let writes = 0;
+  const adapter = createLibraryThemeApplicationAdapter({
+    getDesign: () => ({
+      canEditScope: scope => scope === "world",
+      saveProfile: async () => { writes++; }
+    }),
+    confirm: async () => null
+  });
+  await assert.rejects(
+    adapter.onApplyTheme({ kind: "theme" }, { kind: "design-profile", profile: createDefaultDesignProfile() }, "world"),
+    /confirmação do Foundry não está disponível/
+  );
+  assert.equal(writes, 0);
+});
