@@ -55,7 +55,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 ### 2. Release candidata
 
-- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH-rc.N`, por exemplo `1.0.0.96-rc.1`.
+- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.96-rc.1`.
 - A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
 - O workflow altera a versão de `system.json` somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo de versão da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
