@@ -17,6 +17,10 @@ assert.match(designSystem, /#controls[\s\S]*?\.control-tool/,
   "Foundry scene controls must inherit the NEXUS control surface.");
 assert.match(designSystem, /#sidebar[\s\S]*?sidebar-tabs/,
   "Foundry sidebar tabs must inherit the NEXUS design system.");
+assert.match(designSystem, /\.application\.nexus-themed-application/,
+  "NEXUS and explicitly supported Foundry applications must receive the shared styles.");
+assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.application,\s*\.window-app\)/,
+  "Unrelated third-party application windows must not be globally restyled.");
 assert.match(designSystem, /\.nexus-floating-left[\s\S]*?background:\s*transparent\s*!important/,
   "The left rail wrapper must not draw a panel surface.");
 assert.match(designSystem, /\.nexus-floating-right[\s\S]*?background:\s*transparent\s*!important/,
