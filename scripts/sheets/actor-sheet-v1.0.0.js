@@ -3650,21 +3650,21 @@ if (!hasPath) propertyValueInput.value = "";
       const leftY = clamp(rect.top + leftOffset.y, 8, Math.max(8, window.innerHeight - 100)) - rect.top;
       const rightX = clamp(rect.right + rightOffset.x, 4, Math.max(4, window.innerWidth - rightWidth - 4)) - rect.left;
       const rightY = clamp(rect.top + rightOffset.y, 8, Math.max(8, window.innerHeight - 100)) - rect.top;
-      const availableHeight = Math.max(120, Math.min(
-        appHeight - Math.max(0, leftY) - 8,
-        window.innerHeight - Math.max(0, rect.top + leftY) - 12
+      const availableHeightAt = top => Math.max(120, Math.min(
+        appHeight - Math.max(0, top) - 8,
+        window.innerHeight - Math.max(0, rect.top + top) - 12
       ));
       Object.assign(left.style, {
         position: "absolute",
         left: `${leftX}px`,
         top: `${leftY}px`,
-        maxHeight: `${availableHeight}px`
+        maxHeight: `${availableHeightAt(leftY)}px`
       });
       Object.assign(right.style, {
         position: "absolute",
         left: `${rightX}px`,
         top: `${rightY}px`,
-        maxHeight: `${availableHeight}px`
+        maxHeight: `${availableHeightAt(rightY)}px`
       });
     };
     const onDocumentPointerDown = event => {
