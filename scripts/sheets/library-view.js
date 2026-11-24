@@ -1,5 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect, getLibraryMediaInsertionSource } from "../library/catalog-explorer.js";
 import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
@@ -474,12 +474,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
         event.preventDefault();
         try {
           sheet._getLibraryBackupService?.();
-          const canApplyResource = resource => {
+          const canApplyResource = (resource, resolved) => {
             const reference = resource?.reference ?? {};
-            return sheet.rendered === true && reference.providerId === "nexus-library" && (
-              ["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) ||
-              reference.builtin === "asset" || reference.builtin === "theme"
-            );
+            if (sheet.rendered !== true || reference.providerId !== "nexus-library") return false;
+            if (["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) || ["asset", "theme"].includes(reference.builtin)) return true;
+            return reference.collection === "media" && Boolean(getLibraryMediaInsertionSource(resource, resolved));
           };
           const applyResource = async (resource, resolved) => {
             if (sheet.rendered !== true) { ui.notifications?.warn?.("Abra a ficha de destino para inserir este recurso."); return false; }
@@ -490,6 +489,11 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             if (reference.collection === "layouts") return sheet._addSavedLayoutToActor?.(reference.id) ?? false;
             if (reference.collection === "themes") return sheet._applyLibraryCustomTheme?.(reference.id) ?? false;
             if (reference.builtin === "theme") return sheet._applyThemePreset?.(resolved?.id) ?? false;
+            if (reference.collection === "media") {
+              const source = getLibraryMediaInsertionSource(resource, resolved);
+              if (!source || typeof sheet._addComponent !== "function") return false;
+              return sheet._addComponent("asset-image", { template: { dataPath: source } });
+            }
             if (reference.collection === "assets" || reference.builtin === "asset") {
               const componentType = String(resolved?.type ?? resolved?.componentType ?? "");
               if (!componentType || typeof sheet._addComponent !== "function") return false;
