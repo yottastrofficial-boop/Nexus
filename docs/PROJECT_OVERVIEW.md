@@ -4,9 +4,9 @@
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
-- Commit de referência: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
-- Versão publicada: `1.0.0.90` (Biblioteca Explorer unificada; validação funcional pendente)
-- Versão candidata: `1.0.0.91` (Biblioteca universal integrada; CI/publicação e validação funcional no Foundry pendentes)
+- Commit de referência: `7a9f30ba794b50c7499a5d193573cdee31a1dcef`
+- Versão publicada: `1.0.0.91` (Biblioteca universal integrada; validação funcional pendente)
+- Versão candidata: `1.0.0.92` (Design System e Inspector de Aparências integrados; validação funcional no Foundry pendente)
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -37,7 +37,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na candidata 1.0.0.91 (publicação e validação funcional pendentes)
+## Implementação presente na candidata 1.0.0.92 (build de teste; validação funcional pendente)
 
 A árvore atual contém, entre outros:
 
@@ -55,7 +55,7 @@ A árvore atual contém, entre outros:
 - Tipos de Actor `player-character`, `npc` e `character`.
 - Token de protótipo vinculado ao Actor por padrão, preservando a possibilidade de desvincular depois.
 - Grupos hierárquicos e composição visual com modos de organização.
-- Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas.
+- Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas. Perfis visuais completos usam a coleção canônica de temas.
 - Separação entre definições reutilizáveis e instâncias inseridas nas fichas.
 - Motor de expressões seguro, sem execução arbitrária de JavaScript.
 - Infraestrutura tipada de Lógica, persistência e runtime declarativo.
@@ -103,3 +103,8 @@ A branch `feature/library-universal-completion-2026-11-23` adiciona `scripts/lib
 - **Compatibilidade externa:** documentação oficial do Foundry VTT 14.
 
 Em caso de divergência, registrar separadamente o que dizem os livros, o que especificam os documentos técnicos e o que o código efetivamente executa. Não presumir que uma proposta está implementada nem que uma implementação representa uma regra oficial.
+
+
+## Design System e Inspector de Aparências — candidata 1.0.0.92
+
+A `main` inclui o Design System global para Foundry VTT 14, com perfis versionados, tokens semânticos, temas de campanha e usuário, Estúdio de Aparência ApplicationV2 e prévia isolada de perfis no Inspector da Biblioteca. A aparência é aplicada por cliente e não é persistida em documentos de jogo. A aplicação à campanha exige permissão de GM e confirmação; a preferência pessoal respeita a política do mundo. A build 1.0.0.92 foi preparada para validação manual e não deve ser tratada como funcionalmente confirmada até a rodada em Foundry VTT 14 build 360.
