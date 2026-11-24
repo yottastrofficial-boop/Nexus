@@ -39,6 +39,7 @@ export const DESIGN_CONTRAST_CHOICES = Object.freeze({
 
 const COLOR_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 const clamp = (value, min, max, fallback) => {
+  if (value === null || value === undefined || value === "") return fallback;
   const number = Number(value);
   return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
 };
