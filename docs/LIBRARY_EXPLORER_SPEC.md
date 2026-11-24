@@ -137,3 +137,16 @@ A branch de conclusão não deve ser considerada release até que a cadeia de PR
 ### Editores especializados iniciais
 
 O Inspector da aplicação independente carrega editores por subtipo lógico. Propriedades editam caminho, tipo e valor padrão; Regras editam expressão e tipo de resultado; Comportamentos editam eventos e referência de fluxo; Fluxos editam gatilhos, condições, ações e política de erro como dados JSON; Funções editam identificador, assinatura, argumentos e tipo de retorno. O salvamento valida o payload antes de persistir. Nenhum editor aceita ou executa código JavaScript importado.
+
+
+### Inspector de Aparências — prévia e aplicação contextual
+
+Perfis completos da coleção `themes` (`kind: "design-profile"`) recebem uma prévia isolada que representa painel, navegação, conteúdo, campos e botão. O Inspector também apresenta os 18 tokens semânticos, tipografia, densidade, raio, espaçamento, altura dos controles, acessibilidade e os quatro diagnósticos de contraste do schema. A prévia usa somente valores normalizados pelo contrato `NEXUS-DESIGN/1`; não injeta CSS arbitrário nem altera a aparência ativa.
+
+Ações de aplicação são separadas por ownership:
+- **Aplicar à campanha:** disponível somente quando `design.canEditScope("world")` autoriza (GM); exige confirmação explícita porque afeta os usuários que herdam o tema.
+- **Usar como minha aparência:** disponível somente quando `design.canEditScope("user")` autoriza; salva no escopo pessoal e respeita a política da campanha.
+- Perfis com schema futuro podem ser identificados, mas não recebem prévia interpretada nem ações de aplicação/edição nesta versão.
+- A Biblioteca continua pessoal; a ação copia o perfil validado para as configurações Foundry existentes e não compartilha a coleção do usuário.
+
+O adaptador é compartilhado pela janela independente e pela visão embutida na ficha. A prévia não é uma captura pixel-perfect de todas as aplicações Foundry; é uma amostra comparativa dos tokens e componentes semânticos do perfil.

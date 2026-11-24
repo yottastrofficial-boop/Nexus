@@ -1,5 +1,6 @@
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
+import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
 import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
 
 /**
@@ -95,6 +96,7 @@ export function createLibraryApplicationClass({
       this._state.viewMode = this._state.viewMode === "list" ? "list" : "grid";
       this._explorer = createLibraryCatalogExplorer({
         registry: this._registry,
+        ...createLibraryThemeApplicationAdapter(),
         container,
         detail,
         getPreferences: () => normalizeLibraryPreferences(this._getPreferences()),

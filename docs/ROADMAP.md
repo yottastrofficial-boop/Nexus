@@ -121,3 +121,14 @@ A etapa não está pronta para release: requer CI atualizado, revisão de compat
 
 - Fluxos sequenciais e grafos agora compartilham os campos visuais dos schemas dos executores; o runtime expõe pré-validação para os editores e mensagens acessíveis por campo.
 - Contrato público de `configSchema` documentado para módulos, incluindo tipos, limites, valores padrão, compatibilidade e preservação de dados sem schema.
+
+
+## Inspector de Aparências — etapa de 2026-11-24
+
+- Criado modelo de prévia para perfis completos da coleção `themes`, com paleta semântica, tipografia, layout, acessibilidade e diagnóstico de contraste.
+- Inspector mostra uma amostra visual isolada e não altera o tema efetivo durante a seleção.
+- Ações contextuais distinguem aplicação à campanha (GM + confirmação) e preferência pessoal (se permitida pelo mundo), ambas passando pelo serviço de Design System.
+- O mesmo adaptador de aplicação é usado pela Biblioteca independente e pelo Inspector embutido na ficha.
+- Perfis de schema futuro são preservados e ficam sem prévia interpretada ou ações destrutivas/aplicação.
+- Testes automatizados cobrem normalização visual segura, schema futuro, ownership, confirmação da campanha e cancelamento sem gravação.
+- Pendente: validar a apresentação em Foundry VTT 14 build 360 com diferentes dimensões de janela, GM e jogador; a prévia é representativa, não uma captura pixel-perfect de todas as aplicações.

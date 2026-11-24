@@ -1,5 +1,6 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "../library/catalog-explorer.js";
+import { createLibraryThemeApplicationAdapter } from "../library/theme-inspector.js";
 import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
 import { THEME_PALETTES } from "../core/theme.js";
 import { getInteractionLibrary } from "../core/interactions.js";
@@ -111,6 +112,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
     let universalCatalogSearchTimer = null;
     const universalCatalog = game.nexus?.library?.registry
       ? createLibraryCatalogExplorer({
+          ...createLibraryThemeApplicationAdapter(),
           registry: game.nexus.library.registry,
           container: panel.querySelector("[data-library-generic-items]"),
           detail: panel.querySelector("[data-library-generic-details]"),
