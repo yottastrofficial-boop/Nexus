@@ -25,3 +25,12 @@ assert.match(styles, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
 console.log("NEXUS universal library UI contract: OK");
+
+assert.match(libraryTemplate, /data-library-clear-search/,
+  "The search field must provide an explicit accessible clear action.");
+assert.match(libraryTemplate, /Buscar por nome, descrição ou etiqueta/,
+  "The search hint must explain the searchable resource fields.");
+assert.match(libraryTemplate, /<details class="nexus-library-actions-menu">[\\s\\S]*?data-library-backup-export[\\s\\S]*?data-library-backup-import-file/,
+  "Backup and restore actions must live in a compact overflow menu.");
+assert.doesNotMatch(libraryTemplate, /nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca"/,
+  "Backup actions must no longer occupy the primary toolbar row.");

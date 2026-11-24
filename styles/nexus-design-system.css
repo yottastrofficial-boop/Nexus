@@ -1070,3 +1070,108 @@ html.nexus-design-system .nexus-sheet .nexus-sheet-element {
 html.nexus-design-system .nexus-sheet .nexus-sheet-element :is(small, span, label) {
   color: var(--nexus-panel-muted, #9aadc2);
 }
+
+
+/* Library toolbar actions: keep search primary and move backup operations into overflow. */
+html.nexus-design-system .nexus-library-actions-menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+html.nexus-design-system .nexus-library-actions-menu > summary {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  border: 1px solid var(--nexus-ui-border);
+  border-radius: 7px;
+  color: var(--nexus-ui-muted);
+  background: var(--nexus-ui-surface);
+  cursor: pointer;
+  list-style: none;
+}
+
+html.nexus-design-system .nexus-library-actions-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+html.nexus-design-system .nexus-library-actions-menu[open] > summary,
+html.nexus-design-system .nexus-library-actions-menu > summary:hover {
+  border-color: var(--nexus-ui-accent);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+}
+
+html.nexus-design-system .nexus-library-actions-popover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 7px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: max-content;
+  min-width: 210px;
+  padding: 8px;
+  border: 1px solid var(--nexus-ui-border);
+  border-radius: 8px;
+  background: var(--nexus-ui-surface);
+  box-shadow: 0 10px 28px #0008;
+}
+
+html.nexus-design-system .nexus-library-actions-popover > strong {
+  padding: 4px 7px 7px;
+  color: var(--nexus-ui-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+html.nexus-design-system .nexus-library-actions-popover > button {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 9px;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  padding: 7px 9px !important;
+  border: 1px solid transparent !important;
+  border-radius: 5px !important;
+  color: var(--nexus-ui-text) !important;
+  background: transparent !important;
+  text-align: left;
+  box-shadow: none !important;
+}
+
+html.nexus-design-system .nexus-library-actions-popover > button:hover,
+html.nexus-design-system .nexus-library-actions-popover > button:focus-visible {
+  border-color: var(--nexus-ui-border) !important;
+  background: var(--nexus-ui-surface-hover) !important;
+}
+
+html.nexus-design-system .nexus-library-search-clear {
+  display: grid;
+  flex: 0 0 26px;
+  place-items: center;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  color: var(--nexus-ui-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+html.nexus-design-system .nexus-library-search-clear:hover {
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+}
+
+html.nexus-design-system .nexus-library-search-clear[hidden] {
+  display: none !important;
+}
