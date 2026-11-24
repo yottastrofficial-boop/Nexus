@@ -6,8 +6,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `7a9f30ba794b50c7499a5d193573cdee31a1dcef`
-- Versão publicada: `1.0.0.91` (release de teste; a validação funcional no Foundry continua pendente)
+- Commit: `07180fd6b0de691eae32b03da69390d285a1e53d`
+- Versão publicada: `1.0.0.92` (release de teste; a validação funcional no Foundry continua pendente)
 - Versão candidata em preparação: `1.0.0.93` (refinamento do shell visual, Biblioteca, Chat, controles nativos e hierarquia das ferramentas flutuantes).
 - Alvo: Foundry VTT 14, build 360.
 - Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
