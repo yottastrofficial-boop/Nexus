@@ -24,6 +24,7 @@ jobs:
       - name: Validate package and regressions
         run: |
           node --experimental-default-type=module tests/window-layering.test.mjs
+          node --experimental-default-type=module tests/canvas-geometry.test.mjs
           node --experimental-default-type=module tests/design-system.test.mjs
           node --experimental-default-type=module tests/design-library.test.mjs
           node --experimental-default-type=module tests/library-backup-service.test.mjs
