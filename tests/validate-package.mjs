@@ -2411,7 +2411,7 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
     behaviors:[{ id:"behavior-1", sourceId:"behavior:inspect", name:"Inspecionar", flow:{ triggers:[], conditions:[], actions:[] } }],
     functions:[{ id:"function-1", name:"Dobro", operation:"multiply" }]
   }, ["pv"]);
-  assert.match(backupCode,/NEXUS-LIBRARY\/2/);
+  assert.match(backupCode,/NEXUS-LIBRARY\/3/);
   const restored = parseNexusLibraryBackup(backupCode,["pv"]);
   assert.equal(restored.collections.templates.length,1);
   assert.equal(restored.collections.media.length,1);
