@@ -14,10 +14,9 @@ assert.match(workflow, /candidate_version:[\s\S]*?required: false/,
 assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;`),
   "Stable publication must require the exact [release] marker.");
 assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
-  "Candidate versions must use MAJOR.MINOR.PATCH-rc.N.");
+  "Candidate versions must use MAJOR.MINOR.PATCH.BUILD-rc.N.");
 assert.match(workflow, /Versões candidatas só podem ser geradas a partir da main/);
-assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
-  "Candidate versions must preserve NEXUS's four-part version core.");
+
 const validationIndex = workflow.indexOf("node tests/run-all.mjs");
 const candidateMetadataIndex = workflow.indexOf("Apply candidate version to package metadata");
 const packageBuildIndex = workflow.indexOf("Build Foundry package");
