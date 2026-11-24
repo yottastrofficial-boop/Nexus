@@ -130,6 +130,17 @@ export function createLibraryApplicationClass({
       const compendiums = root.querySelector("[data-library-compendiums]");
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
+      const contextIndicator = root.querySelector("[data-library-context-indicator]");
+      if (contextIndicator) {
+        const destination = String(this._context.destinationLabel ?? "").trim();
+        const connected = Boolean(destination && typeof this._context.applyResource === "function");
+        contextIndicator.dataset.connected = String(connected);
+        contextIndicator.title = connected
+          ? "Recursos compatíveis podem ser inseridos na ficha " + destination + "."
+          : "Abra a Biblioteca pelo botão da ficha para habilitar ações de inserção.";
+        const label = contextIndicator.querySelector("span");
+        if (label) label.textContent = connected ? "Destino: " + destination : "Sem ficha de destino";
+      }
       const filterToggle = root.querySelector("[data-library-toggle-filters]");
       const filterPanel = root.querySelector("[data-library-filter-panel]");
       if (filterToggle && filterPanel) {
