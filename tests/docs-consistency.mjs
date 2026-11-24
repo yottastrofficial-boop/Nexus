@@ -32,8 +32,8 @@ assert.equal(manifest.download, "https://github.com/yottastrofficial-boop/Nexus/
   "O manifesto estável deve apontar para o ZIP da própria versão publicada.");
 const systemDownloadVersion = String(system.download ?? "").match(/\/releases\/download\/v([^/]+)\/nexus\.zip$/)?.[1];
 assert.ok(systemDownloadVersion, "system.json deve conter uma URL de download Foundry válida.");
-assert.ok([manifest.version, system.version].includes(systemDownloadVersion),
-  "system.json deve apontar para a release estável atual ou para a versão que está sendo publicada.");
+assert.equal(systemDownloadVersion, manifest.version,
+  "system.json deve preservar a URL da última release estável publicada.");
 assert.equal(system.manifest, "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json",
   "system.json deve usar o manifesto estável canônico.");
 assert.match(releaseWorkflow, /system\.download =/, "O workflow deve preparar a URL do pacote antes do build estável.");

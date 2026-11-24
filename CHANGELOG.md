@@ -1,3 +1,11 @@
+## 1.0.0.97 — Em desenvolvimento
+
+- Recupera a inserção segura de imagens da coleção de mídia na Biblioteca da ficha.
+- Protege a atualização de definições reutilizáveis contra versões desatualizadas e alterações concorrentes da instância.
+- Consolida o histórico do changelog e alinha os metadados da release estável.
+- Adiciona contratos de regressão para a integração da Biblioteca e para a consistência documental.
+- Esta versão é uma base de desenvolvimento, ainda não publicada; a última release estável é a 1.0.0.96.
+
 ## 1.0.0.96 — Integração nativa e geometria responsiva do Foundry
 
 - Consolida a integração do Design System com as superfícies nativas de configuração do Foundry, sem substituir nem reimplementar `UIConfig` ou `SettingsConfig`.

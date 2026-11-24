@@ -5,12 +5,14 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch oficial: `main`
 - Commit de referência da auditoria: `2573c82845473f389fa150044c55458d4dec54d1`
+- Primeiro commit de consolidação: `91c54660e4a5c210e65ed988dbdbec91aff3b5af`
 - Release publicada: `v1.0.0.96`; asset `nexus.zip` confirmado, 461.715 bytes.
+- Versão de desenvolvimento declarada na main: `1.0.0.97`.
 - Manifesto estável: `1.0.0.96`.
 - Compatibilidade declarada: Foundry VTT 14, build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 
-A release 1.0.0.96 passou pela validação automatizada e foi publicada. Isso não comprova a validação visual e funcional dentro do cliente Foundry VTT 14. A próxima candidata não deve ser declarada estável antes dessa rodada manual.
+A release 1.0.0.96 passou pela validação automatizada e foi publicada. A main foi avançada para a base de desenvolvimento 1.0.0.97, mantendo o manifesto e o download estável em 1.0.0.96. Isso não comprova a validação visual e funcional dentro do cliente Foundry VTT 14. A próxima candidata não deve ser declarada estável antes dessa rodada manual.
 
 ## Inventário do repositório
 
@@ -57,7 +59,7 @@ Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quat
 
 As PRs recentes `#73`, `#74`, `#77`, `#78`, `#79` e `#80` estão integradas. As propostas duplicadas `#75` e `#76` foram encerradas; a linha final do controle de release foi integrada pela `#77`.
 
-A PR `#63` não deve ser mesclada integralmente: a branch está muito atrás da main. Foram recuperados para a arquitetura atual recursos aproveitáveis — inserção segura de imagens da coleção de mídia, aplicação de presets de tema e proteção contra atualização concorrente de definições.
+A PR `#63` não deve ser mesclada integralmente: a branch está muito atrás da main. Foram recuperados para a arquitetura atual recursos aproveitáveis — inserção segura de imagens da coleção de mídia, aplicação de presets de tema e proteção contra atualização concorrente de definições. A PR permanece aberta até a validação automatizada da adaptação.
 
 ### Branches
 
@@ -83,12 +85,14 @@ As branches associadas a PRs já integradas também são candidatas à exclusão
 
 ## Changelog e documentação
 
+A primeira execução do CI após a consolidação detectou a necessidade de avançar a versão de desenvolvimento para `1.0.0.97` e de preservar os contratos do fluxo de release. A correção mantém os testes ativos; não houve desativação de verificações.
+
 - O `CHANGELOG.md` continha duas entradas para 1.0.0.68 e duas para 1.0.0.67.
 - Uma cópia antiga do README havia sido anexada ao changelog.
 - As entradas repetidas foram consolidadas sem apagar as notas históricas.
 - A cópia indevida do README foi retirada.
 - README, visão do projeto, roadmap e política de estabilidade foram alinhados à release publicada 1.0.0.96.
-- `system.json` na main foi sincronizado para apontar para a release .96.
+- `system.json` na main usa a versão de desenvolvimento .97 e mantém `download` apontando para a release estável .96.
 - O ZIP já publicado da .96 é imutável e ainda contém a URL antiga em seu `system.json`; o manifesto canônico aponta corretamente para .96. O workflow de release passa a sincronizar também o `system.json` nos próximos pacotes.
 
 Os arquivos ativos `scripts/nexus-v1.0.0.js` e `styles/nexus-v1.0.0.css` são os caminhos efetivamente declarados em `system.json`; não são cópias descartáveis de releases antigas. O histórico de `CHANGELOG.md`, tags e releases deve ser preservado.

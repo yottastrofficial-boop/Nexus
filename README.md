@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.96 (última release publicada; main em desenvolvimento pós-release) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.97 (build de desenvolvimento da main; última release estável 1.0.0.96) · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.96-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.97-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -26,9 +26,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Base da implementação atual na main — 1.0.0.96
+## Implementação atual na main — 1.0.0.97
 
-A release 1.0.0.96 consolida a integração nativa do Design System e a geometria responsiva dos controles. A `main` continua em desenvolvimento pós-release e pode conter alterações ainda não distribuídas. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A release estável 1.0.0.96 consolidou a integração nativa do Design System e a geometria responsiva dos controles. A `main` está na versão de desenvolvimento 1.0.0.97 e contém alterações pós-release ainda não distribuídas. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
