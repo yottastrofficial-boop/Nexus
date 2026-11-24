@@ -1,3 +1,13 @@
+## 1.0.0.92 — Design System e Inspector de Aparências para Foundry VTT 14
+
+- Integra o Design System global do NEXUS às superfícies nativas selecionadas do Foundry, com temas de sistema, campanha e usuário.
+- Adiciona perfis visuais versionados com 18 cores semânticas, tipografia, densidade, espaçamento, geometria e opções de acessibilidade.
+- Adiciona o Estúdio de Aparência ApplicationV2, com prévia local, diagnóstico de contraste, importação/exportação e salvamento explícito por escopo.
+- Integra perfis completos à coleção canônica de temas da Biblioteca Universal e preserva compatibilidade dos backups NEXUS-LIBRARY/1 e /2 com o formato /3.
+- Adiciona prévia isolada de perfis no Inspector e ações explícitas para aplicar à campanha (GM, com confirmação) ou à aparência pessoal, respeitando permissões.
+- Inclui testes automatizados para normalização, permissões, persistência, prévias, importação/exportação, aplicação contextual e proteção contra schemas futuros.
+- Build de teste para Foundry VTT 14 build 360. A validação visual e funcional em clientes GM e jogador continua pendente; esta versão não é checkpoint funcional confirmado.
+
 ## 1.0.0.91 — Biblioteca universal integrada
 
 - Integra a Biblioteca universal com provedores NEXUS e Foundry, catálogo paginado e resolução sob demanda de recursos.
