@@ -67,3 +67,18 @@ test("bloqueia exclusão quando outra coleção referencia o perfil salvo", asyn
   await assert.rejects(library.remove(saved.id), /dependências/);
   assert.ok(library.get(saved.id));
 });
+
+
+test("preserva perfis de schema futuro sem expor nem sobrescrever dados desconhecidos", async () => {
+  const store = createEmptyNexusLibraryStore();
+  store.collections.themes.push({
+    id: "future-profile", sourceId: "design-profile-future", kind: "design-profile",
+    name: "Perfil futuro", profile: { schemaVersion: 99, futureField: { keep: true } }
+  });
+  const user = makeUser(store);
+  const library = createDesignLibraryService({ getUser: () => user, design: makeDesign(), createId: () => "safe-new" });
+  assert.equal(library.list().length, 0);
+  await assert.rejects(library.rename("future-profile", "Alterado"), /versão mais recente/);
+  await assert.rejects(library.remove("future-profile"), /versão mais recente/);
+  assert.deepEqual(user.flags.get("libraryStore").collections.themes[0].profile.futureField, { keep: true });
+});

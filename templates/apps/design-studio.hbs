@@ -93,6 +93,7 @@
       {{#if hasDesignLibrary}}
       <section class="nexus-design-library-panel" aria-label="Biblioteca de aparências">
         <div class="nexus-design-library-heading"><div><strong>Biblioteca de aparências</strong><small>Perfis reutilizáveis da sua coleção pessoal</small></div><span>{{libraryProfiles.length}}</span></div>
+        {{#if libraryUnavailable}}<p class="nexus-design-library-empty">A Biblioteca está indisponível no momento; a edição e a prévia continuam funcionando.</p>{{/if}}
         <button type="button" class="nexus-design-library-save" data-design-action="save-library"><i class="fa-solid fa-bookmark" aria-hidden="true"></i> Salvar rascunho na Biblioteca</button>
         {{#if libraryProfiles.length}}
           <div class="nexus-design-library-list">

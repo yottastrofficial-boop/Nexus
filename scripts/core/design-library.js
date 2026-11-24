@@ -76,6 +76,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryStore(user, store => {
       const entry = store.collections.themes.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
+      if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser excluído.");
       const dependents = Object.values(store.collections).flatMap(entries => entries.filter(item => item !== entry &&
         Array.isArray(item.dependencies) &&
         item.dependencies.some(value => String(typeof value === "string" ? value : value?.id ?? "") === String(id))));

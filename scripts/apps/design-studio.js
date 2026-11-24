@@ -80,13 +80,20 @@ export function createDesignStudioApplicationClass({
       const context = await super._prepareContext(options);
       this._draft ??= clone(design.getProfile(this._target));
       const diagnostics = getDesignProfileDiagnostics(this._draft);
-      const libraryProfiles = this._library?.list?.() ?? [];
+      let libraryProfiles = [];
+      let libraryUnavailable = false;
+      try { libraryProfiles = this._library?.list?.() ?? []; }
+      catch (error) {
+        libraryUnavailable = true;
+        globalThis.console?.warn?.("NEXUS | Biblioteca de Aparências indisponível.", error);
+      }
       return {
         ...context,
         profile: this._draft,
         target: this._target,
         libraryProfiles,
         hasDesignLibrary: Boolean(this._library),
+        libraryUnavailable,
         canEditWorld: globalThis.game?.user?.isGM === true,
         canEditUser: design.canEditScope("user"),
         targetOptions: [
