@@ -20,7 +20,7 @@ html.nexus-design-system {
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-floating-ui,
   .nexus-panel-window,
@@ -35,7 +35,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-floating-ui,
   .nexus-panel-window,
@@ -50,7 +50,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-floating-ui,
   .nexus-panel-window,
@@ -79,7 +79,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-floating-ui,
   .nexus-panel-window,
@@ -94,7 +94,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-floating-ui,
   .nexus-panel-window,
@@ -108,7 +108,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -117,7 +117,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -131,7 +131,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -150,7 +150,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -164,7 +164,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -177,7 +177,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -190,7 +190,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -203,7 +203,7 @@ html.nexus-design-system :is(
 html.nexus-design-system :is(
   .application,
   .window-app,
-  .tab.sidebar-tab.nexus-themed-application,
+  .tab.sidebar-tab,
   .nexus-sheet,
   .nexus-panel-window,
   .nexus-library-application,
@@ -325,7 +325,7 @@ html.nexus-design-system #controls .control-tools .control-tool-group {
 }
 
 html.nexus-design-system #sidebar .sidebar-tabs > .item,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
+html.nexus-design-system #sidebar .tab.sidebar-tab {
   border: 1px solid transparent;
   border-radius: var(--nexus-ui-radius);
   color: var(--nexus-ui-muted);
@@ -336,14 +336,14 @@ html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
 
 html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
 html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application :is(button, .button):hover {
+html.nexus-design-system #sidebar .tab.sidebar-tab :is(button, .button):hover {
   border-color: var(--nexus-ui-border);
   color: var(--nexus-ui-text);
   background: var(--nexus-ui-surface-hover);
 }
 
 html.nexus-design-system #sidebar .sidebar-tabs > .item.active,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
+html.nexus-design-system #sidebar .tab.sidebar-tab.active {
   border-color: var(--nexus-ui-accent);
   color: var(--nexus-ui-text);
   background: var(--nexus-ui-surface-hover);
