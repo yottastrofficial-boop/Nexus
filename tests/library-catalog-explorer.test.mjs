@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -113,4 +113,15 @@ test("GM can select visible supported compendiums without a player permission ch
     if (previousGame === undefined) delete globalThis.game; else globalThis.game = previousGame;
     if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
   }
+});
+
+test("catalog cards use semantic icons for each resource family", () => {
+  assert.equal(getLibraryResourceIcon({ kind: "component" }), "fa-solid fa-puzzle-piece");
+  assert.equal(getLibraryResourceIcon({ kind: "composition" }), "fa-solid fa-layer-group");
+  assert.equal(getLibraryResourceIcon({ kind: "theme" }), "fa-solid fa-palette");
+  assert.equal(getLibraryResourceIcon({ kind: "logic", type: "flow" }), "fa-solid fa-diagram-project");
+  assert.equal(getLibraryResourceIcon({ kind: "logic", type: "function" }), "fa-solid fa-code");
+  assert.equal(getLibraryResourceIcon({ kind: "document", type: "Actor" }), "fa-solid fa-user");
+  assert.equal(getLibraryResourceIcon({ kind: "document", type: "Scene" }), "fa-solid fa-map");
+  assert.equal(getLibraryResourceIcon({ kind: "unknown" }), "fa-solid fa-cube");
 });
