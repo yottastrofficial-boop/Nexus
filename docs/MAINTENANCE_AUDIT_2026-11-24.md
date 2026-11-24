@@ -51,6 +51,14 @@ O tamanho, isoladamente, não prova duplicação. A extração deve seguir contr
 
 ## Histórico, PRs e branches
 
+### Commits
+
+- Foram percorridos 1.142 commits da branch principal, de 09/11/2026 a 24/11/2026.
+- 106 mensagens usam `[release]` como prefixo; 158 mensagens contêm o marcador de release em algum ponto.
+- Há mensagens idênticas repetidas em diferentes commits — por exemplo, ciclos de publicação das versões .56 e .57. Isso indica churn de metadados e automação, mas não prova que os commits sejam vazios ou equivalentes.
+- O histórico não foi reescrito, compactado ou apagado. Commits, tags e releases publicados foram preservados.
+
+
 ### Pull requests
 
 Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quatro PRs abertas. Após a revisão, as quatro foram encerradas e não restam PRs abertas:
@@ -59,6 +67,8 @@ Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quat
 - `#32`: auditoria de estabilidade antiga — encerrada após confirmar que os contratos relevantes foram incorporados em etapas posteriores.
 - `#62`: documentação baseada na versão 1.0.0.91 — encerrada como desatualizada.
 - `#63`: shell antigo da Biblioteca — encerrada como superada após recuperar as melhorias úteis e aprovar o CI.
+
+Estado final: 80 PRs revisadas, 61 merged, 19 fechadas sem merge e nenhuma aberta. Não havia issues abertas na consulta final.
 
 As PRs recentes `#73`, `#74`, `#77`, `#78`, `#79` e `#80` estão integradas. As propostas duplicadas `#75` e `#76` foram encerradas; a linha final do controle de release foi integrada pela `#77`. Entre as 19 PRs fechadas sem merge, os recursos aproveitáveis encontrados foram recuperados quando ainda eram únicos: o Testing Bridge da `#4` é incorporado nesta etapa; as demais propostas relevantes já estão representadas na main ou foram superadas.
 
@@ -90,7 +100,7 @@ As branches associadas a PRs já integradas também são candidatas à exclusão
 
 ## Changelog e documentação
 
-A primeira execução do CI após a consolidação detectou a necessidade de avançar a versão de desenvolvimento para `1.0.0.97` e de preservar os contratos do fluxo de release. A correção mantém os testes ativos; não houve desativação de verificações. A rodada final no commit `356d237` aprovou a suíte de regressão e o empacotamento.
+A primeira execução do CI após a consolidação detectou a necessidade de avançar a versão de desenvolvimento para `1.0.0.97` e de preservar os contratos do fluxo de release. A correção mantém os testes ativos; não houve desativação de verificações. A rodada final no commit `356d237` aprovou a suíte de regressão e o empacotamento. A recuperação do Testing Bridge no commit `44fbe49` passou novamente por 35/35 arquivos de teste, validação do pacote e integridade do ZIP. O harness local ainda precisa ser executado em uma instalação real do Foundry.
 
 - O `CHANGELOG.md` continha duas entradas para 1.0.0.68 e duas para 1.0.0.67.
 - Uma cópia antiga do README havia sido anexada ao changelog.
