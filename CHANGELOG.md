@@ -1,3 +1,14 @@
+## 1.0.0.94 — Biblioteca Universal e shell visual estabilizados
+
+- Consolida a janela independente da Biblioteca Universal em três áreas: navegação por categorias, exploração de recursos e Inspector contextual.
+- Isola a rolagem da navegação, da lista de recursos e do Inspector; adapta a disposição para janelas estreitas.
+- Restringe dimensões de miniaturas e prévias de mídia para evitar transbordamento; mantém controles nativos de áudio e vídeo sem pré-carregamento.
+- Adiciona prévias tipadas no Inspector para mídia, composições, layouts, modelos, componentes, estilos e definições lógicas, sem executar payloads importados.
+- Corrige a chave de filtragem das RollTables e padroniza a apresentação de controles nativos do Foundry preservando seus handlers.
+- Inclui testes de contrato e regressão para a interface da Biblioteca e seus filtros.
+- Não altera regras mecânicas, schemas persistidos de Actor/Item ou dados de campanha.
+- Build destinada à validação no Foundry VTT 14 build 360; inspeção visual e funcional no cliente real continua pendente.
+
 ## 1.0.0.93 — Refinamento da interface NEXUS
 
 - Corrige a precedência visual dos trilhos flutuantes da ficha: ao focar a ficha, seus controles voltam à frente de painéis inativos; o painel realmente focado continua acima dos trilhos.
