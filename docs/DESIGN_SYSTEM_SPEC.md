@@ -28,6 +28,25 @@ A campanha possui a opção **Permitir temas individuais**. Quando desativada, a
 - Tokens são aplicados no `document.documentElement`, permitindo que a mesma paleta alcance as fichas e as superfícies Foundry cobertas pelo CSS.
 - `game.nexus.design.apply()` reaplica o tema; `getEffectiveTheme()` informa tema, origem e política efetivos.
 
+## Perfis e Estúdio de Aparência
+
+O contrato do perfil está em `scripts/core/design-profile.js` e é versionado por `DESIGN_PROFILE_SCHEMA_VERSION` (`NEXUS-DESIGN/1` no intercâmbio). O perfil separa quatro domínios:
+
+- `palette`: 18 cores semânticas de superfícies, texto, bordas, realces, botões e áreas do Foundry;
+- `typography`: família tipográfica em allowlist, tamanho principal/secundário/destacado e altura de linha;
+- `layout`: densidade, raio dos cantos, escala de espaçamento e altura dos controles;
+- `accessibility`: contraste normal/alto e redução de movimento.
+
+As cores aceitas são exclusivamente hexadecimais (`#RGB` ou `#RRGGBB`) e são normalizadas para seis dígitos. Famílias tipográficas, densidade, raio e contraste são enums fechados. Valores fora dos limites retornam aos padrões seguros; strings CSS arbitrárias não são aceitas.
+
+O Estúdio é uma ApplicationV2 independente registrada em Configurações do Jogo. Permite selecionar um preset, renomear o perfil, ajustar os tokens, ver prévia local em tempo real, avaliar quatro pares de contraste, importar/exportar JSON versionado (limite de 64 KB), restaurar o preset e salvar no escopo da campanha ou do usuário. A prévia não persiste; descartar/fechar restaura a aparência efetiva anterior.
+
+- `designWorldProfile`: perfil da campanha, escopo `world`.
+- `designUserProfile`: perfil pessoal, escopo `user`.
+- `game.nexus.design.getProfile(scope)`, `saveProfile(profile, scope)`, `preview(profile)`, `clearPreview()` e `openStudio()` compõem a API pública.
+- O salvamento no escopo `world` exige GM; o escopo `user` respeita a política de temas individuais da campanha.
+- O perfil pessoal não substitui a preferência de herança: `world`, `system` e `personal` continuam determinando a origem efetiva.
+
 ## Superfícies integradas nesta etapa
 
 - Sidebar principal e navegação de abas.
@@ -44,6 +63,6 @@ A integração não aplica seletores globais a toda classe `.application`, `.dir
 - O estilo de componentes internos que usem HTML/CSS próprio ou Shadow DOM pode exigir adaptador específico.
 - Novos temas devem declarar tokens completos ou receber fallback seguro.
 - A tipografia definida pelo tema é usada como padrão; uma fonte explicitamente definida pelo layout tem precedência local.
-- Densidade, espaçamento e componentes customizados poderão ampliar o schema sem alterar os níveis de propriedade.
+- Densidade, espaçamento, raio, altura de controles, tipografia e acessibilidade já fazem parte do schema do perfil; novos componentes podem consumir os mesmos tokens sem alterar os níveis de propriedade.
 - A validação automatizada não substitui a inspeção visual em Foundry VTT 14 build 360 e a compatibilidade com módulos usados na campanha.
 - O roteiro obrigatório de validação manual está em `docs/FOUNDRY_THEME_VALIDATION.md`.
