@@ -182,6 +182,10 @@ test("media image resources expose only safe browser-native insertion sources", 
     mimeType: "image/heic"
   }), "");
   assert.equal(getLibraryMediaInsertionSource(resource, {
+    path: "media/portrait.jpg",
+    mimeType: "image/heic"
+  }), "");
+  assert.equal(getLibraryMediaInsertionSource(resource, {
     path: "media/portrait.svg",
     mimeType: "image/svg+xml"
   }), "");
