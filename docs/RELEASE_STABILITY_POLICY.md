@@ -25,8 +25,8 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última versão publicada:** `1.0.0.92`.
-- **Versão candidata em preparação:** `1.0.0.93`. O refinamento visual da Biblioteca, do Chat, dos controles nativos e da hierarquia de janelas foi integrado à `main`; CI e empacotamento serão executados antes da publicação. A validação funcional no Foundry VTT 14 build 360, com clientes GM e jogador, continua pendente; o último checkpoint funcional confirmado continua sendo `1.0.0.70`.
+- **Última versão publicada:** `1.0.0.93`.
+- **Versão candidata em preparação:** nenhuma. A 1.0.0.93 foi publicada após CI e empacotamento aprovados; aguarda validação visual e funcional real no Foundry VTT 14 build 360.
 - **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
@@ -54,4 +54,4 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
-A build 1.0.0.93 tem finalidade explícita de teste do shell visual, da Biblioteca, do Chat, dos controles nativos e da hierarquia das janelas. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
+A versão 1.0.0.93 tem finalidade explícita de validação do shell visual, da Biblioteca, do Chat, dos controles nativos e da hierarquia das janelas. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
