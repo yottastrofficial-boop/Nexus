@@ -27,7 +27,6 @@ test("a Biblioteca pode ser construída sem dependência da ficha", () => {
   assert.equal(LibraryApplication.PARTS.main.template, "systems/nexus/templates/library/library.hbs");
   assert.ok(LibraryApplication.DEFAULT_OPTIONS.classes.includes("nexus-library-application"));
   assert.ok(LibraryApplication.DEFAULT_OPTIONS.classes.includes("nexus-window"));
-  assert.ok(LibraryApplication.DEFAULT_OPTIONS.classes.includes("nexus-window"));
   assert.strictEqual(application._registry, registry);
   const context = { canApplyResource: () => true, applyResource: async () => true };
   assert.strictEqual(application.setContext(context), application);
