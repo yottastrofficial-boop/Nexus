@@ -171,7 +171,8 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     const isSvg = mime === "image/svg+xml" || extension === "svg";
     const nativeImageMime = ["image/png", "image/jpeg", "image/gif", "image/apng", "image/webp", "image/avif", "image/bmp", "image/x-icon", "image/vnd.microsoft.icon"].includes(mime);
     const nativeImageExtension = ["png", "jpg", "jpeg", "gif", "apng", "webp", "avif", "bmp", "ico"].includes(extension);
-    const mediaType = (!isSvg && (nativeImageMime || nativeImageExtension))
+    const unsupportedDeclaredImage = mime.startsWith("image/") && !nativeImageMime;
+    const mediaType = (!isSvg && !unsupportedDeclaredImage && (nativeImageMime || nativeImageExtension))
       ? "image"
       : (mime.startsWith("audio/") || ["mp3","ogg","wav","m4a","flac","opus"].includes(extension))
         ? "audio"
