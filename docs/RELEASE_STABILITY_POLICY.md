@@ -55,7 +55,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 ### 2. Release candidata
 
-- Executar manualmente o workflow na branch `main), escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH-rc.N`, por exemplo `1.0.0.96-rc.1`.
+- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH-rc.N`, por exemplo `1.0.0.96-rc.1`.
 - A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
 - O workflow altera a versão de `system.json` somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo de versão da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
@@ -63,7 +63,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 ### 3. Release estável
 
-- Primeiro, atualizar `system.json` para a nova versão estável e integrar essa alteração à `main).
+- Primeiro, atualizar `system.json` para a nova versão estável e integrar essa alteração à `main`.
 - A publicação exige um commit na `main` cuja mensagem contenha o marcador exato `[release]`; variações como `[release-candidate]` não publicam uma versão estável.
 - O workflow valida novamente a suíte, gera o ZIP e recusa tags já existentes. Releases e tags são tratadas como imutáveis.
 - Depois de confirmar que `nexus.zip` está anexado e acessível, o workflow atualiza `manifest.json` para a nova versão.
@@ -85,4 +85,4 @@ Candidata ou release estável não equivale a checkpoint funcional. A promoção
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
-A versão 1.0.0.94 tem finalidade explícita de validação da Biblioteca Universal, do Inspector com prévias tipadas, dos filtros e do shell visual responsivo. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
+A versão 1.0.0.95 tem finalidade explícita de validação do Design System global, da Biblioteca Explorer hierárquica e dos trilhos flutuantes vinculados à janela nativa. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
