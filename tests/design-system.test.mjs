@@ -77,7 +77,7 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
   assert.equal(profile.preset, "medieval");
   assert.equal(profile.name, "Minha campanha");
   assert.equal(profile.palette.panel, THEME_TOKENS.medieval.panel);
-  assert.equal(profile.palette.text, "#fff");
+  assert.equal(profile.palette.text, "#ffffff");
   assert.equal(profile.typography.family, "Georgia");
   assert.equal(profile.typography.baseSize, 18);
   assert.equal(profile.typography.lineHeight, 1.2);
