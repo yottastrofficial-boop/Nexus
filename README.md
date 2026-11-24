@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.92 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.93 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.92-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.93-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Build de teste:** 1.0.0.92. Esta versão integra o Design System global, o Estúdio de Aparência e a prévia/aplicação contextual de perfis no Inspector da Biblioteca. O pacote é destinado à validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada.
+**Build de teste:** 1.0.0.93. Esta versão refina o shell visual compartilhado, a Biblioteca, os controles nativos do Foundry, o Chat em cartões e a hierarquia das ferramentas flutuantes da ficha. O pacote é destinado à validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada.
 
 ## Visão geral
 
@@ -26,7 +26,7 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual — 1.0.0.92
+## Implementação atual — 1.0.0.93
 
 A linha atual da `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Explorer, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
@@ -46,10 +46,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.92 |
+| Versão atual | 1.0.0.93 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.92 reúne o Design System e o Inspector visual de aparências. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.93 reúne o Design System e o Inspector visual de aparências. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
