@@ -1,4 +1,4 @@
-import { getLegacyNexusLibraryFlags, readNexusLibraryStore, updateNexusLibraryStore } from "./library-store.js";
+import { getLegacyNexusLibraryFlags, readNexusLibraryStore, updateNexusLibraryCollection } from "./library-store.js";
 import { normalizeDesignProfile, exportDesignProfile, importDesignProfile } from "./design-profile.js";
 
 const MAX_PROFILES = 100;
@@ -24,8 +24,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     const profile = normalizeDesignProfile(rawProfile), requestedId = String(id ?? "").trim();
     let savedEntry;
-    await updateNexusLibraryStore(user, store => {
-      const entries = store.collections.themes;
+    await updateNexusLibraryCollection(user, "themes", entries => {
       const index = requestedId ? entries.findIndex(entry => String(entry.id) === requestedId && entry.kind === "design-profile") : -1;
       if (requestedId && index < 0) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
       if (index >= 0 && Number(entries[index].profile?.schemaVersion ?? 1) > 1) {
@@ -46,7 +45,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
         tags: ["design", "theme"], palette: clone(profile.palette), profile: clone(profile),
         createdAt: previous?.createdAt ?? new Date().toISOString(), updatedAt: new Date().toISOString() };
       if (index >= 0) entries[index] = savedEntry; else entries.push(savedEntry);
-      return store;
+      return entries;
     });
     return clone(savedEntry);
   };
@@ -61,27 +60,27 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     if (!nextName) throw new Error("Informe um nome para o perfil.");
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     let renamed;
-    await updateNexusLibraryStore(user, store => {
-      const entry = store.collections.themes.find(item => String(item.id) === String(id) && item.kind === "design-profile");
+    await updateNexusLibraryCollection(user, "themes", entries => {
+      const entry = entries.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
       if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS.");
       entry.name = nextName; entry.profile = normalizeDesignProfile({ ...entry.profile, id: entry.id, name: nextName });
-      entry.palette = clone(entry.profile.palette); entry.updatedAt = new Date().toISOString(); renamed = clone(entry); return store;
+      entry.palette = clone(entry.profile.palette); entry.updatedAt = new Date().toISOString(); renamed = clone(entry); return entries;
     });
     return renamed;
   };
   const remove = async id => {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
-    await updateNexusLibraryStore(user, store => {
-      const entry = store.collections.themes.find(item => String(item.id) === String(id) && item.kind === "design-profile");
+    await updateNexusLibraryCollection(user, "themes", entries => {
+      const entry = entries.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
       if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser excluído.");
       const dependents = Object.values(store.collections).flatMap(entries => entries.filter(item => item !== entry &&
         Array.isArray(item.dependencies) &&
         item.dependencies.some(value => String(typeof value === "string" ? value : value?.id ?? "") === String(id))));
       if (dependents.length) throw new Error("Este perfil possui dependências e não pode ser excluído.");
-      store.collections.themes = store.collections.themes.filter(item => item !== entry); return store;
+      return entries.filter(item => item !== entry);
     });
     return { removed: true, id: String(id) };
   };

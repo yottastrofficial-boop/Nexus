@@ -22,6 +22,7 @@ test("salva perfis completos na coleção themes canônica", async () => {
   assert.equal(saved.profile.palette.panel, "#123456"); assert.equal(saved.profile.typography.baseSize, 16);
   assert.equal(saved.profile.layout.density, "spacious"); assert.equal(saved.profile.accessibility.reducedMotion, true);
   assert.equal(library.list().length, 1); assert.equal(readNexusLibraryStore(user).store.collections.themes.length, 1);
+  assert.equal(user.flags.get("libraryThemes").length, 1, "o flag legado deve acompanhar a coleção canônica");
 });
 test("duplica, renomeia, aplica e exclui sem alterar o perfil ativo implicitamente", async () => {
   const user = makeUser(), design = makeDesign();
