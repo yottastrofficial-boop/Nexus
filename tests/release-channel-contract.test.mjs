@@ -13,7 +13,7 @@ assert.match(workflow, /candidate_version:[\s\S]*?required: false/,
   "Candidate version must be an explicit input validated at runtime.");
 assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;`),
   "Stable publication must require the exact [release] marker.");
-assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
+assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(candidate))`),
   "Candidate versions must use MAJOR.MINOR.PATCH.BUILD-rc.N.");
 assert.match(workflow, /Versões candidatas só podem ser geradas a partir da main/);
 
