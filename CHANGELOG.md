@@ -1,3 +1,14 @@
+## 1.0.0.93 — Refinamento da interface NEXUS
+
+- Corrige a precedência visual dos trilhos flutuantes da ficha: ao focar a ficha, seus controles voltam à frente de painéis inativos; o painel realmente focado continua acima dos trilhos.
+- Ao interagir com a ficha ou com seus trilhos, solicita a elevação da janela da ficha pela API da própria ApplicationV2, sem impor z-index global às janelas de terceiros.
+- Expande a aplicação do shell visual compartilhado para todas as aplicações NEXUS ApplicationV2, não apenas diretórios nativos allowlisted.
+- Redesenha a Biblioteca com tokens semânticos do Design System, filtros responsivos, navegação, cartões e Inspector consistentes.
+- Padroniza controles nativos do Foundry como grupos flutuantes e atualiza Sidebar, navegação, Hotbar e lista de jogadores.
+- Apresenta mensagens do Chat como cartões unificados e adapta mídia enriquecida nativa (imagens, GIFs, vídeos, áudio, links e embeds) ao tema, sem executar conteúdo importado.
+- Inclui teste unitário para a precedência dos trilhos flutuantes.
+- Build para validação no Foundry VTT 14 build 360; a inspeção visual/funcional real continua pendente.
+
 ## 1.0.0.92 — Design System e Inspector de Aparências para Foundry VTT 14
 
 - Integra o Design System global do NEXUS às superfícies nativas selecionadas do Foundry, com temas de sistema, campanha e usuário.
