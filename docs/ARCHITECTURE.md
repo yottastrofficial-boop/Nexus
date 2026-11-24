@@ -36,7 +36,7 @@ A arquitetura deve ser evoluída por mudanças pequenas, preservando contratos e
 
 ### Design System e propriedade da aparência
 
-A aparência global deve manter ownership separado dos documentos de jogo. O padrão NEXUS é a restauração do sistema; o tema da campanha usa configuração Foundry de escopo `world`; a preferência individual usa escopo `user`. O cliente aplica os tokens localmente. Uma política mundial pode permitir ou forçar o tema da campanha sem apagar preferências pessoais. Integrações com a interface nativa devem ser escopadas a superfícies Foundry identificadas, sem aplicar estilos indiscriminadamente a janelas de módulos externos.
+A aparência global mantém ownership separado dos documentos de jogo. O padrão NEXUS é a restauração do sistema; o perfil da campanha usa configuração Foundry `world`; o perfil pessoal usa `user`; e a preferência `world/system/personal` define a origem efetiva. O `design-profile.js` valida paleta, tipografia, densidade, espaçamento, geometria e acessibilidade. O Estúdio ApplicationV2 edita rascunhos com prévia local, diagnóstico de contraste, importação/exportação versionada e salvamento explícito por escopo. O cliente aplica tokens localmente; uma política mundial pode forçar o perfil da campanha sem apagar preferências pessoais. Integrações nativas são limitadas a superfícies identificadas, sem estilos indiscriminados em módulos externos.
 
 ## Sequência segura de refatoração
 
