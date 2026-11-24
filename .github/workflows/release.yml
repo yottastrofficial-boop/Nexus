@@ -32,6 +32,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.value }}
       channel: ${{ steps.version.outputs.channel }}
+      previous: ${{ steps.version.outputs.previous }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +55,7 @@ jobs:
           const eventName = process.env.GITHUB_EVENT_NAME;
           const ref = process.env.GITHUB_REF;
           let channel = "validate";
+          let version = system.version;
 
           const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;
           if (eventName === "push" && ref === "refs/heads/main" && stableMarker.test(event.head_commit?.message ?? "")) {
@@ -89,6 +91,32 @@ jobs:
       - name: Validate manifest, templates, styles and regressions
         run: |
           node tests/run-all.mjs
+
+      - name: Apply candidate version to package metadata
+        if: steps.version.outputs.channel == 'candidate'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+          PREVIOUS_VERSION: ${{ steps.version.outputs.previous }}
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const version = process.env.RELEASE_VERSION;
+          const previous = process.env.PREVIOUS_VERSION;
+          const system = JSON.parse(fs.readFileSync("system.json", "utf8"));
+          if (system.version !== previous) throw new Error("A versão base mudou durante o empacotamento.");
+          system.version = version;
+          fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\\n");
+
+          const readme = fs.readFileSync("README.md", "utf8");
+          const readmeVersion = `Versão ${previous}`;
+          if (!readme.includes(readmeVersion)) throw new Error("A versão do README não corresponde à versão base.");
+          fs.writeFileSync("README.md", readme.replace(readmeVersion, `Versão ${version}`));
+
+          const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+          if (!changelog.startsWith(`## ${previous}`)) throw new Error("O CHANGELOG não começa pela versão base esperada.");
+          const notes = `## ${version} — Release candidata\\n\\n- Build candidata gerada a partir da main para validação no Foundry VTT 14 build 360.\\n- Inclui as alterações integradas após a última release estável.\\n- Esta candidata não altera o manifesto estável do Foundry.\\n\\n`;
+          fs.writeFileSync("CHANGELOG.md", notes + changelog);
+          NODE
 
       - name: Build Foundry package
         run: |
