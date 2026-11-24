@@ -8754,13 +8754,24 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 
 /* NEXUS Design System — Foundry V14 chrome.
    Deliberately scoped to core UI surfaces; unrelated module applications are not restyled. */
-html.nexus-design-system {
+html.nexus-design-system #sidebar,
+html.nexus-design-system #navigation,
+html.nexus-design-system #controls,
+html.nexus-design-system #hotbar,
+html.nexus-design-system #players,
+html.nexus-design-system #chat,
+html.nexus-design-system .nexus-themed-application {
   color-scheme: dark;
-  --color-border-highlight: var(--nexus-foundry-sidebar-active);
-  --color-border-focus: var(--nexus-foundry-sidebar-active);
-  --color-shadow-highlight: color-mix(in srgb, var(--nexus-foundry-sidebar-active) 32%, transparent);
 }
-html.nexus-design-system[data-nexus-theme-appearance="light"] { color-scheme: light; }
+html.nexus-design-system[data-nexus-theme-appearance="light"] #sidebar,
+html.nexus-design-system[data-nexus-theme-appearance="light"] #navigation,
+html.nexus-design-system[data-nexus-theme-appearance="light"] #controls,
+html.nexus-design-system[data-nexus-theme-appearance="light"] #hotbar,
+html.nexus-design-system[data-nexus-theme-appearance="light"] #players,
+html.nexus-design-system[data-nexus-theme-appearance="light"] #chat,
+html.nexus-design-system[data-nexus-theme-appearance="light"] .nexus-themed-application {
+  color-scheme: light;
+}
 
 html.nexus-design-system #sidebar,
 html.nexus-design-system #sidebar .sidebar-tab,
