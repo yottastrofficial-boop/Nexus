@@ -1,0 +1,293 @@
+/* NEXUS Universal Library and Foundry chrome — additive compatibility layer.
+   Loaded after the legacy sheet stylesheet so shared semantic tokens remain authoritative. */
+
+html.nexus-design-system :is(.application.nexus-library-application, .window-app.nexus-library-application) {
+  --nexus-library-inspector-width: clamp(248px, 25vw, 330px);
+  min-width: min(900px, 94vw);
+}
+html.nexus-design-system .nexus-library-application .window-content,
+html.nexus-design-system .nexus-library-application .application-content {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-panel {
+  display: grid !important;
+  grid-template-columns: 184px minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 12px !important;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-toolbar {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-body {
+  display: contents !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-section-tabs {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+  border: 1px solid var(--nexus-panel-border, #40546b) !important;
+  border-radius: var(--nexus-radius-panel, 9px);
+  background: var(--nexus-panel-surface, #202d3d) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-section-panel {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0 !important;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) var(--nexus-library-inspector-width) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-section-heading {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  max-height: none !important;
+  overflow: auto;
+  overscroll-behavior: contain;
+  align-content: start;
+  scrollbar-gutter: stable;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative !important;
+  inset: auto !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-height: none !important;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 14px !important;
+  border: 1px solid var(--nexus-panel-border, #40546b) !important;
+  border-radius: var(--nexus-radius-panel, 9px) !important;
+  background: var(--nexus-panel-surface, #202d3d) !important;
+  box-shadow: var(--nexus-card-shadow, 0 3px 12px #0003);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-detail-placeholder {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-height: 100%;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-card,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-card > * {
+  min-width: 0;
+  max-width: 100%;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-preview {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-preview img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* At constrained desktop widths keep the Inspector beside the browser.
+   On genuinely narrow screens it becomes a bounded lower pane, never disappears. */
+@media (max-width: 1040px) {
+  html.nexus-design-system .nexus-library-application {
+    --nexus-library-inspector-width: 232px;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-panel {
+    grid-template-columns: 154px minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 720px) {
+  html.nexus-design-system .nexus-library-application .nexus-library-panel {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-section-tabs {
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: row;
+    max-height: 76px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-section-panel {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-workspace {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(180px, 1fr) minmax(180px, .8fr) !important;
+    overflow: auto;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-details {
+    height: auto;
+    max-height: 340px !important;
+  }
+}
+
+/* Foundry sidebar tabs: include specialized tabs (Combat, Chat, Settings, etc.).
+   Foundry changes these class combinations between tab types; scope by #sidebar. */
+html.nexus-design-system #sidebar .sidebar-tabs > .item,
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
+  color: var(--nexus-foundry-sidebar-muted, #a5b6c9);
+  border-color: transparent;
+  border-radius: var(--nexus-radius-small, 6px);
+  transition: color .14s ease, background-color .14s ease, border-color .14s ease;
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
+html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible,
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application:hover,
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application:focus-within {
+  color: var(--nexus-foundry-sidebar-text, #edf0f6);
+  background: var(--nexus-foundry-sidebar-hover, #29384a);
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item.active,
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
+  color: var(--nexus-foundry-sidebar-text, #edf0f6);
+  border-color: var(--nexus-foundry-sidebar-active, #526b87);
+  background: var(--nexus-foundry-sidebar-active, #293d53);
+  box-shadow: inset 2px 0 var(--nexus-highlight-color, #8b83ff);
+}
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Foundry UI controls share the NEXUS floating-control visual language.
+   Keep their native placement and event targets; only normalize the button surface. */
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control,
+html.nexus-design-system #controls .control-tool {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 34px;
+  margin: 0;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: var(--nexus-radius-small, 7px);
+  color: var(--nexus-panel-text, #edf0f6);
+  background: var(--nexus-panel-surface, #202d3d);
+  box-shadow: 0 3px 10px #0003;
+  transition: background-color .14s ease, border-color .14s ease, transform .14s ease;
+}
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:hover,
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:focus-visible,
+html.nexus-design-system #controls .control-tool:hover,
+html.nexus-design-system #controls .control-tool.active {
+  color: var(--nexus-panel-text, #edf0f6);
+  border-color: var(--nexus-highlight-color, #8b83ff);
+  background: var(--nexus-panel-hover, #30445a);
+  transform: translateY(-1px);
+}
+html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:focus-visible {
+  outline: 2px solid var(--nexus-focus-ring, #8b83ff);
+  outline-offset: 2px;
+}
+
+
+/* Resource previews in the universal Inspector. */
+html.nexus-design-system .nexus-library-resource-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: var(--nexus-radius-panel, 9px);
+  background: var(--nexus-panel-card, #263649);
+}
+html.nexus-design-system .nexus-library-resource-preview-title {
+  color: var(--nexus-panel-text, #edf0f6);
+  font-size: 11px;
+}
+html.nexus-design-system .nexus-library-resource-preview-summary {
+  margin: 0;
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-resource-preview > img,
+html.nexus-design-system .nexus-library-resource-preview > video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #101923;
+}
+html.nexus-design-system .nexus-library-resource-preview > audio {
+  width: 100%;
+  max-width: 100%;
+}
+html.nexus-design-system .nexus-library-resource-preview-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+html.nexus-design-system .nexus-library-resource-preview-swatch {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #ffffff35;
+  border-radius: 5px;
+}
+html.nexus-design-system .nexus-library-resource-preview-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 5px 10px;
+  margin: 0;
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-resource-preview-facts dt {
+  color: var(--nexus-panel-muted, #a5b6c9);
+}
+html.nexus-design-system .nexus-library-resource-preview-facts dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--nexus-panel-text, #edf0f6);
+  overflow-wrap: anywhere;
+}

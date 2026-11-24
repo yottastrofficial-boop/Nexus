@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -114,3 +114,22 @@ test("GM can select visible supported compendiums without a player permission ch
     if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
   }
 });
+
+
+assert.equal(getLibraryResourceIcon({ kind: "document", type: "actors" }), "fa-solid fa-user");
+assert.equal(getLibraryResourceIcon({ kind: "logic", type: "rule" }), "fa-solid fa-scale-balanced");
+assert.equal(getLibraryResourceIcon({ kind: "media" }), "fa-solid fa-photo-film");
+
+const imageResource = { kind: "media", reference: { collection: "media" }, thumbnail: "maps/region.webp", name: "Mapa" };
+const imagePreview = getLibraryResourcePreviewModel(imageResource, { path: "maps/region.webp", mimeType: "image/webp" });
+assert.equal(imagePreview.mediaType, "image");
+assert.equal(getLibraryMediaInsertionSource(imageResource, { path: "maps/region.webp", mimeType: "image/webp" }), "maps/region.webp");
+assert.equal(getLibraryMediaInsertionSource(imageResource, { path: "maps/region.svg", mimeType: "image/svg+xml" }), "");
+assert.equal(getLibraryMediaInsertionSource(imageResource, { path: "javascript:alert(1)", mimeType: "image/png" }), "");
+
+const audioPreview = getLibraryResourcePreviewModel({ kind: "media", reference: { collection: "media" } }, { path: "audio/theme.ogg", mimeType: "audio/ogg" });
+assert.equal(audioPreview.mediaType, "audio");
+assert.equal(getLibraryResourcePreviewModel({ kind: "media", reference: { collection: "media" } }, { path: "data:image/png;base64,AAAA" }).mediaType, "unsupported");
+
+const logicPreview = getLibraryResourcePreviewModel({ kind: "logic", type: "flow" }, { payload: { triggers: [{}], conditions: [{}, {}], actions: [{}, {}, {}] } });
+assert.equal(logicPreview.details.find(([label]) => label === "Ações")[1], "3");

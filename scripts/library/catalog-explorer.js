@@ -76,6 +76,43 @@ function makeElement(tag, className, content = "") {
   return element;
 }
 
+const LIBRARY_RESOURCE_ICONS = Object.freeze({
+  component: "fa-solid fa-puzzle-piece",
+  composition: "fa-solid fa-layer-group",
+  layout: "fa-solid fa-table-columns",
+  template: "fa-solid fa-file-lines",
+  asset: "fa-solid fa-cube",
+  media: "fa-solid fa-photo-film",
+  theme: "fa-solid fa-palette",
+  style: "fa-solid fa-swatchbook",
+  logic: "fa-solid fa-diagram-project",
+  document: "fa-solid fa-file",
+  property: "fa-solid fa-list-check",
+  rule: "fa-solid fa-scale-balanced",
+  behavior: "fa-solid fa-bolt",
+  flow: "fa-solid fa-diagram-project",
+  function: "fa-solid fa-code"
+});
+
+const DOCUMENT_RESOURCE_ICONS = Object.freeze({
+  actors: "fa-solid fa-user",
+  items: "fa-solid fa-box",
+  scenes: "fa-solid fa-map",
+  journals: "fa-solid fa-book-open",
+  macros: "fa-solid fa-code",
+  playlists: "fa-solid fa-music",
+  tables: "fa-solid fa-dice",
+  cards: "fa-solid fa-clone"
+});
+
+export function getLibraryResourceIcon(resource = {}) {
+  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\s_-]/g, "");
+  if (resource.kind === "logic") return LIBRARY_RESOURCE_ICONS[type] ?? LIBRARY_RESOURCE_ICONS.logic;
+  if (resource.kind === "document") return DOCUMENT_RESOURCE_ICONS[type] ?? LIBRARY_RESOURCE_ICONS.document;
+  return LIBRARY_RESOURCE_ICONS[resource.kind] ?? LIBRARY_RESOURCE_ICONS.asset;
+}
+
+
 function renderDesignProfilePreview(resource, resolved) {
   if (resource?.kind !== "theme" || resolved?.kind !== "design-profile" || !resolved.profile) return null;
   const model = getLibraryDesignProfilePreviewModel(resolved);
@@ -165,6 +202,209 @@ function renderDesignProfilePreview(resource, resolved) {
   return section;
 }
 
+const safeMediaSource = value => {
+  const source = String(value ?? "").trim();
+  if (!source || source.length > 2048 || source.includes(String.fromCharCode(92)) || /[\u0000-\u001f]/.test(source)) return "";
+  if (/^https?:\/\//i.test(source)) {
+    try {
+      const parsed = new URL(source);
+      return ["http:", "https:"].includes(parsed.protocol) && !parsed.username && !parsed.password ? parsed.href : "";
+    } catch { return ""; }
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(source) || source.startsWith("//")) return "";
+  const path = source.split(/[?#]/, 1)[0];
+  let segments;
+  try { segments = path.split("/").map(segment => decodeURIComponent(segment)); }
+  catch { return ""; }
+  if (segments.some(segment => segment === "." || segment === ".." || segment.includes("/"))) return "";
+  if (source.startsWith("/")) return /^\/[a-z0-9_./-]+(?:[?#][^\s]*)?$/i.test(source) ? source : "";
+  return /^[a-z0-9_.-]+(?:\/[a-z0-9_.-]+)*(?:[?#][^\s]*)?$/i.test(source) ? source : "";
+};
+
+const safeCount = value => Array.isArray(value) ? value.length : 0;
+
+const safeDimension = value => {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.round(number) : null;
+};
+const countLabel = (count, singular, plural = singular + "s") => String(count) + " " + (count === 1 ? singular : plural);
+
+export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
+  const reference = resource?.reference ?? {};
+  const collection = String(reference.collection ?? "");
+  const data = resolved && typeof resolved === "object" && !Array.isArray(resolved) ? resolved : {};
+  if (resource.kind === "theme" || collection === "themes") return null;
+  if (resource.kind === "media" || collection === "media") {
+    const source = safeMediaSource(data.path ?? data.url ?? data.src ?? resource.thumbnail);
+    const mime = String(data.mimeType ?? data.mime ?? data.type ?? "").split(";", 1)[0].trim().toLowerCase();
+    const extension = (source.split(/[?#]/, 1)[0].split(".").pop() ?? "").toLowerCase();
+    const isSvg = mime === "image/svg+xml" || extension === "svg";
+    const nativeImageMime = ["image/png", "image/jpeg", "image/gif", "image/apng", "image/webp", "image/avif", "image/bmp", "image/x-icon", "image/vnd.microsoft.icon"].includes(mime);
+    const nativeImageExtension = ["png", "jpg", "jpeg", "gif", "apng", "webp", "avif", "bmp", "ico"].includes(extension);
+    const unsupportedDeclaredImage = mime.startsWith("image/") && !nativeImageMime;
+    const mediaType = (!isSvg && !unsupportedDeclaredImage && (nativeImageMime || nativeImageExtension))
+      ? "image"
+      : (mime.startsWith("audio/") || ["mp3","ogg","wav","m4a","flac","opus"].includes(extension))
+        ? "audio"
+        : (mime.startsWith("video/") || ["mp4","webm","ogv","mov"].includes(extension))
+          ? "video" : "unsupported";
+    return {
+      kind: "media",
+      title: "Prévia de mídia",
+      summary: source ? (mediaType === "unsupported" ? "Formato sem prévia nativa reconhecida." : "Recurso de mídia disponível.") : "Este recurso não possui uma origem de mídia segura para pré-visualização.",
+      source,
+      mediaType
+    };
+  }
+  if (resource.kind === "composition" || collection === "groups") {
+    const components = safeCount(data.components ?? data.members);
+    const groups = safeCount(data.groups);
+    return {
+      kind: "composition",
+      title: "Composição",
+      summary: `${countLabel(components, "componente")} · ${countLabel(groups, "subgrupo")}`,
+      details: [
+        ["Componentes", String(components)],
+        ["Subgrupos", String(groups)],
+        ["Organização", data.groupSettings?.layoutMode ?? data.layoutMode ?? "Preservada na composição"]
+      ]
+    };
+  }
+  if (resource.kind === "layout" || collection === "layouts" || collection === "templates") {
+    const layout = data.layout && typeof data.layout === "object" ? data.layout : data;
+    const components = safeCount(layout.components);
+    const groups = safeCount(layout.groups);
+    const width = safeDimension(layout.width);
+    const height = safeDimension(layout.height);
+    return {
+      kind: collection === "templates" ? "template" : "layout",
+      title: collection === "templates" ? "Modelo de ficha" : "Layout de ficha",
+      summary: `${countLabel(components, "componente")} · ${countLabel(groups, "grupo")}${width && height ? ` · ${width} × ${height} px` : ""}`,
+      details: [
+        ["Componentes", String(components)],
+        ["Grupos", String(groups)],
+        ...(width && height ? [["Dimensões", `${width} × ${height} px`]] : [])
+      ]
+    };
+  }
+  if (resource.kind === "component" || collection === "components" || reference.builtin === "asset") {
+    const settings = data.settings && typeof data.settings === "object" ? data.settings
+      : data.template && typeof data.template === "object" ? data.template : {};
+    const width = safeDimension(settings.w ?? data.w);
+    const height = safeDimension(settings.h ?? data.h);
+    const type = String(data.type ?? resource.type ?? "componente").slice(0, 64);
+    return {
+      kind: "component",
+      title: "Componente reutilizável",
+      summary: `${type}${width && height ? ` · ${width} × ${height} px` : ""}`,
+      details: [
+        ["Tipo", type],
+        ["Configurações", String(Object.keys(settings).length)],
+        ...(width && height ? [["Dimensões iniciais", `${width} × ${height} px`]] : [])
+      ]
+    };
+  }
+  if (resource.kind === "style" || collection === "styles") {
+    const tokens = data.tokens ?? data.palette ?? data.styles ?? {};
+    const colors = Object.entries(tokens && typeof tokens === "object" && !Array.isArray(tokens) ? tokens : {})
+      .filter(([key, value]) => /color|background|border|accent|surface/i.test(key) && typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value))
+      .slice(0, 12)
+      .map(([label, value]) => ({ label: label.slice(0, 40), value }));
+    return { kind: "style", title: "Prévia de estilo", summary: countLabel(colors.length, "cor reconhecida", "cores reconhecidas"), colors };
+  }
+  if (resource.kind === "logic") {
+    const payload = data.payload ?? data.flow ?? data;
+    const details = [];
+    if (resource.type === "property") {
+      details.push(["Caminho", String(payload.path ?? payload.key ?? "Não definido").slice(0, 120)]);
+      details.push(["Tipo", String(payload.valueType ?? payload.type ?? "Não definido").slice(0, 64)]);
+    } else if (resource.type === "rule") {
+      details.push(["Expressão", String(payload.expression ?? "Não definida").slice(0, 180)]);
+    } else if (["behavior", "flow"].includes(resource.type)) {
+      details.push(["Gatilhos", String(safeCount(payload.triggers))]);
+      details.push(["Condições", String(safeCount(payload.conditions))]);
+      details.push(["Ações", String(safeCount(payload.actions ?? payload.nodes))]);
+    } else if (resource.type === "function") {
+      details.push(["Operação", String(payload.operation ?? payload.signature ?? "Não definida").slice(0, 120)]);
+      if (payload.returnType) details.push(["Retorno", String(payload.returnType).slice(0, 64)]);
+    }
+    return {
+      kind: "logic",
+      title: "Definição de lógica",
+      summary: `${resource.type || "Ativo lógico"} · ${data.enabled === false ? "Desativado" : "Definição inerte"}`,
+      details
+    };
+  }
+  if (resource.kind === "asset") {
+    const width = safeDimension(data.w ?? data.width);
+    const height = safeDimension(data.h ?? data.height);
+    return {
+      kind: "asset",
+      title: "Recurso",
+      summary: `${String(data.type ?? resource.type ?? "Asset").slice(0, 64)}${width && height ? ` · ${width} × ${height} px` : ""}`,
+      details: width && height ? [["Dimensões", `${width} × ${height} px`]] : []
+    };
+  }
+  return null;
+}
+
+export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
+  if (resource?.kind !== "media" || resource?.reference?.collection !== "media") return "";
+  const rawSource = resolved?.path ?? resolved?.url ?? resolved?.src;
+  if (typeof rawSource !== "string" || !rawSource.trim()) return "";
+  const preview = getLibraryResourcePreviewModel(resource, resolved);
+  const source = rawSource.trim();
+  return preview?.mediaType === "image" && preview.source === source ? source : "";
+}
+
+function renderLibraryResourcePreview(resource, resolved) {
+  const model = getLibraryResourcePreviewModel(resource, resolved);
+  if (!model) return null;
+  const section = makeElement("section", "nexus-library-resource-preview");
+  section.dataset.previewKind = model.kind;
+  section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
+  section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  if (model.source && model.mediaType !== "unsupported") {
+    let media;
+    if (model.mediaType === "image") {
+      media = document.createElement("img");
+      media.alt = resource.name || "Prévia de mídia";
+      media.loading = "lazy";
+      media.decoding = "async";
+    } else if (model.mediaType === "audio") {
+      media = document.createElement("audio");
+      media.controls = true;
+      media.preload = "none";
+    } else {
+      media = document.createElement("video");
+      media.controls = true;
+      media.preload = "none";
+      media.playsInline = true;
+    }
+    media.src = model.source;
+    section.append(media);
+  }
+  if (model.colors?.length) {
+    const colors = makeElement("div", "nexus-library-resource-preview-colors");
+    for (const color of model.colors) {
+      const swatch = makeElement("span", "nexus-library-resource-preview-swatch");
+      swatch.style.backgroundColor = color.value;
+      swatch.title = `${color.label}: ${color.value}`;
+      swatch.setAttribute("aria-label", `${color.label}: ${color.value}`);
+      colors.append(swatch);
+    }
+    section.append(colors);
+  }
+  if (model.details?.length) {
+    const facts = makeElement("dl", "nexus-library-resource-preview-facts");
+    for (const [label, value] of model.details) {
+      facts.append(makeElement("dt", "", label), makeElement("dd", "", value));
+    }
+    section.append(facts);
+  }
+  return section;
+}
+
 export function createLibraryCatalogExplorer({
   registry,
   container,
@@ -173,8 +413,6 @@ export function createLibraryCatalogExplorer({
   savePreferences,
   canApplyResource = () => false,
   onApplyResource = null,
-  canApplyTheme = () => false,
-  onApplyTheme = null,
   applyLabel = "Aplicar ao contexto",
   getUpdateInfo = null,
   onUpdateInstances = null,
@@ -230,7 +468,7 @@ export function createLibraryCatalogExplorer({
       image.decoding = "async";
       preview.append(image);
     } else {
-      const icon = makeElement("i", "fa-solid fa-cube");
+      const icon = makeElement("i", getLibraryResourceIcon(resource));
       icon.setAttribute("aria-hidden", "true");
       preview.append(icon);
     }
@@ -282,14 +520,33 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
-    const designPreview = renderDesignProfilePreview(resource, resolved);
+    const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
+    const resourcePreview = renderLibraryResourcePreview(resource, resolved);
+    const themePreview = makeElement("section", "nexus-library-theme-preview");
+    themePreview.hidden = themeColors.length === 0;
+    if (themeColors.length) {
+      themePreview.append(makeElement("strong", "", "Prévia da paleta"));
+      const swatches = makeElement("div", "nexus-library-theme-swatches");
+      for (const color of themeColors) {
+        const swatch = makeElement("div", "nexus-library-theme-swatch");
+        const sample = makeElement("span", "");
+        sample.style.backgroundColor = color.value;
+        sample.setAttribute("aria-label", color.label + ": " + color.value);
+        sample.title = color.label + " · " + color.value;
+        swatch.append(sample, makeElement("small", "", color.label));
+        swatches.append(swatch);
+      }
+      themePreview.append(swatches);
+    }
     const facts = makeElement("dl", "nexus-library-resource-facts");
     const resourceFacts = [
       ["Provedor", resource.providerId],
       ["Tipo", resource.type],
       ["Origem", resource.origin],
       ["Pasta", resource.folder],
-      ["Etiquetas", resource.tags.join(", ") || "—"]
+      ["Etiquetas", resource.tags.join(", ") || "—"],
+      ["Versão", "v" + String(resource.version ?? 1)],
+      ["Capacidades", resource.capabilities?.length ? resource.capabilities.join(", ") : "—"]
     ];
     if (resource.providerId === "nexus-library" && resource.reference?.collection === "components") {
       resourceFacts.push(["Versão", "v" + String(resource.version ?? resolved?.version ?? 1)]);
@@ -428,7 +685,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, save);
-          detail.replaceChildren(heading, meta, description, ...(designPreview ? [designPreview] : []), facts, folderLabel, collectionSection, updateSection, editor, actions);
+          detail.replaceChildren(heading, meta, description, themePreview, ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
 
@@ -463,30 +720,6 @@ export function createLibraryCatalogExplorer({
         }
       });
       actions.append(button);
-    }
-
-    if (typeof onApplyTheme === "function" && designPreview && getLibraryDesignProfilePreviewModel(resolved)?.supported) {
-      for (const scope of ["world", "user"]) {
-        if (!canApplyTheme(resource, resolved, scope)) continue;
-        const label = scope === "world" ? "Aplicar à campanha" : "Usar como minha aparência";
-        const applyTheme = makeElement("button", "nexus-library-apply-theme", label);
-        applyTheme.type = "button";
-        applyTheme.dataset.themeApplyScope = scope;
-        applyTheme.addEventListener("click", async () => {
-          applyTheme.disabled = true;
-          try {
-            const result = await onApplyTheme(resource, resolved, scope);
-            if (result !== false) globalThis.ui?.notifications?.info?.(scope === "world"
-              ? "A aparência da campanha foi atualizada."
-              : "Sua aparência pessoal foi atualizada.");
-          } catch (error) {
-            detail.append(makeElement("p", "nexus-library-empty", "Não foi possível aplicar a aparência: " + String(error?.message ?? error)));
-          } finally {
-            applyTheme.disabled = false;
-          }
-        });
-        actions.append(applyTheme);
-      }
     }
 
     if (typeof onApplyResource === "function" && canApplyResource(resource, resolved)) {
@@ -525,7 +758,7 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, ...(designPreview ? [designPreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    detail.replaceChildren(heading, meta, description, themePreview, ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);

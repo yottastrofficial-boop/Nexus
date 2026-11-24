@@ -61,6 +61,18 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 6. O Inspector consulta ações declaradas pelo provedor e apresenta apenas as compatíveis.
 7. A ação final é encaminhada ao adaptador do domínio de destino. Inserir um componente no Canvas é responsabilidade da integração da ficha, não do registro universal.
 
+## Inspector e prévias por família
+
+O Inspector resolve o recurso selecionado sob demanda e apresenta uma prévia específica quando existe um formato seguro e verificável:
+
+- Perfis de aparência usam a prévia isolada do Design System; não aplicam o tema à interface.
+- Componentes, composições, layouts/modelos, assets, estilos e definições de Lógica apresentam metadados estruturais. Payloads de Lógica continuam inertes e nunca são executados pela prévia.
+- Imagens usam apenas origens HTTP(S) sem credenciais ou caminhos relativos seguros e formatos de imagem nativamente reconhecidos. SVG, esquemas `data:`, protocolos executáveis, caminhos de travessia e formatos desconhecidos não são tratados como imagens.
+- Áudio e vídeo usam controles nativos do navegador com pré-carregamento desativado; isso não implica conversão nem suporte a codecs que o ambiente não decodifique.
+- Documentos Foundry exibem metadados leves e oferecem a ação de abrir a ficha nativa. A resolução revalida permissões do usuário e do compêndio.
+
+Os identificadores de tipo do filtro devem corresponder às chaves de `FoundryDocumentBridge.types`; por exemplo, RollTables usa a chave interna `tables`. A interface pode exibir rótulos mais amigáveis sem alterar o contrato do provedor.
+
 ## Persistência e identidade
 
 - Definições pessoais ficam no armazenamento canônico do usuário; flags antigas são espelhadas durante compatibilidade.
