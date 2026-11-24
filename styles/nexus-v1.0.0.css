@@ -9291,7 +9291,6 @@ html.nexus-design-system {
 }
 html.nexus-design-system :is(.application.nexus, .application.nexus-themed-application, .window-app.nexus-window, .window-app.nexus-panel-window) {
   color: var(--nexus-text-primary, var(--nexus-panel-text, #e7edf5)) !important;
-  color-scheme: var(--nexus-native-color-scheme, dark);
   font-family: var(--nexus-font-family, system-ui, sans-serif);
   font-size: var(--nexus-font-size, 13px);
 }
