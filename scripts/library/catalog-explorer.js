@@ -95,13 +95,13 @@ const LIBRARY_RESOURCE_ICONS = Object.freeze({
 });
 
 const DOCUMENT_RESOURCE_ICONS = Object.freeze({
-  actor: "fa-solid fa-user",
-  item: "fa-solid fa-box",
-  scene: "fa-solid fa-map",
-  journalentry: "fa-solid fa-book-open",
-  macro: "fa-solid fa-code",
-  playlist: "fa-solid fa-music",
-  rolltable: "fa-solid fa-dice",
+  actors: "fa-solid fa-user",
+  items: "fa-solid fa-box",
+  scenes: "fa-solid fa-map",
+  journals: "fa-solid fa-book-open",
+  macros: "fa-solid fa-code",
+  playlists: "fa-solid fa-music",
+  tables: "fa-solid fa-dice",
   cards: "fa-solid fa-clone"
 });
 
