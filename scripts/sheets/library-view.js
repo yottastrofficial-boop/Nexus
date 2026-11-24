@@ -502,6 +502,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
           };
           await game.nexus?.library?.open?.({
             layout: sheet._currentLayout ?? null,
+            destinationLabel: String(sheet.actor?.name ?? sheet.document?.name ?? "Ficha atual"),
             canApplyResource,
             applyResource,
             applyLabel: "Inserir na ficha",
