@@ -7,8 +7,7 @@
     <div class="nexus-design-studio-target">
       <label for="nexus-design-target">Aplicar em</label>
       <select id="nexus-design-target" data-design-target>
-        {{#if canEditWorld}}<option value="world" {{#if (eq target "world")}}selected{{/if}}>Campanha</option>{{/if}}
-        {{#if canEditUser}}<option value="user" {{#if (eq target "user")}}selected{{/if}}>Meu usuário</option>{{/if}}
+        {{#each targetOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
       </select>
       <button type="button" data-design-action="target" title="Carregar perfil do destino"><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i></button>
     </div>
@@ -28,13 +27,7 @@
         <label class="nexus-design-field nexus-design-preset">
           <span>Preset base</span>
           <select data-design-preset>
-            <option value="nexus-dark" {{#if (eq profile.preset "nexus-dark")}}selected{{/if}}>NEXUS — Escuro</option>
-            <option value="midnight" {{#if (eq profile.preset "midnight")}}selected{{/if}}>Meia-noite</option>
-            <option value="light" {{#if (eq profile.preset "light")}}selected{{/if}}>Claro</option>
-            <option value="steam" {{#if (eq profile.preset "steam")}}selected{{/if}}>Steam</option>
-            <option value="linux" {{#if (eq profile.preset "linux")}}selected{{/if}}>Linux</option>
-            <option value="medieval" {{#if (eq profile.preset "medieval")}}selected{{/if}}>Medieval</option>
-            <option value="pixel-art" {{#if (eq profile.preset "pixel-art")}}selected{{/if}}>Pixel Art</option>
+            {{#each presetChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
           </select>
         </label>
         <div class="nexus-design-color-grid">
