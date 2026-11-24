@@ -429,8 +429,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         </div>
         <div class="nexus-library-content-picker">
           <strong>Conteúdo vinculado</strong>
-          <label>Valor atual<select data-resource-current>${resourcePaths.filter(path => !path.endsWith(".max")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.value" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
-          <label>Valor máximo<select data-resource-max>${resourcePaths.filter(path => !path.endsWith(".value")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.max" ? "selected" : ""}>${path}</option>`).join("")}</select></label>
+          <label>Valor atual<select data-resource-current>${resourcePaths.filter(path => !path.endsWith(".max")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.value" ? "selected" : ""}>${escapeHtml(path)}</option>`).join("")}</select></label>
+          <label>Valor máximo<select data-resource-max>${resourcePaths.filter(path => !path.endsWith(".value")).map(path => `<option value="${escapeHtml(path)}" ${path === "resources.pv.max" ? "selected" : ""}>${escapeHtml(path)}</option>`).join("")}</select></label>
           
         </div>
         <button type="button" data-library-add>Adicionar ao Canvas</button>`;
