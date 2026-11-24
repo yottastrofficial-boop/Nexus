@@ -204,7 +204,7 @@ export function installNexusDesignSystem({
       name: "Tema padrão da campanha",
       hint: "Define a aparência compartilhada do NEXUS para este mundo.",
       scope: "world",
-      config: true,
+      config: false,
       type: String,
       choices: themeChoices,
       default: DEFAULT_DESIGN_THEME,
