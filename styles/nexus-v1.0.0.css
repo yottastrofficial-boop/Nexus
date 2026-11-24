@@ -9160,3 +9160,13 @@ html.nexus-design-system .nexus-themed-application :focus-visible {
   outline: var(--nexus-contrast-outline-width, 2px) solid var(--nexus-focus-ring);
   outline-offset: 2px;
 }
+
+
+html.nexus-design-system .nexus-themed-application {
+  font-family: var(--nexus-font-family, system-ui, sans-serif);
+  font-size: var(--nexus-font-size, 13px);
+  line-height: var(--nexus-line-height, 1.45);
+}
+html.nexus-design-system .nexus-themed-application .directory-item {
+  padding-block: calc(4px * var(--nexus-density-scale, 1));
+}
