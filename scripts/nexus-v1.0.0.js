@@ -16,13 +16,43 @@ import { normalizeLibraryPreferences } from "./core/library-preferences.js";
 import { createLibraryBackupService } from "./library/library-backup-service.js";
 import { createLibraryTransferRegistry } from "./core/library-transfer-registry.js";
 import { NEXUS_COMPONENTS } from "./core/component-types.js";
-import { THEME_PALETTES } from "./core/theme.js";
+import { THEME_PALETTES, THEME_TOKENS, applyThemeTokens } from "./core/theme.js";
+import { installNexusDesignSystem } from "./core/design-system.js";
+import { createDesignStudioApplicationClass } from "./apps/design-studio.js";
+import { createDesignLibraryService } from "./core/design-library.js";
 import { getInteractionLibrary } from "./core/interactions.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
+  // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
+  game.nexus.design ??= installNexusDesignSystem({
+    gameRef: game,
+    documentRef: document,
+    hooks: Hooks,
+    themeTokens: THEME_TOKENS,
+    applyThemeTokens
+  });
+  game.nexus.design.library ??= createDesignLibraryService({ getUser: () => game.user, design: game.nexus.design });
+  const DesignStudioApplication = createDesignStudioApplicationClass({
+    ApplicationV2: foundry.applications.api.ApplicationV2,
+    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+    design: game.nexus.design,
+    library: game.nexus.design.library
+  });
+  game.nexus.design.Studio = DesignStudioApplication;
+  game.nexus.design.registerStudio(DesignStudioApplication);
+  game.nexus.design.openStudio = () => {
+    const current = game.nexus.design.application;
+    if (current?.rendered) {
+      current.bringToFront?.();
+      return Promise.resolve(current);
+    }
+    const application = new DesignStudioApplication();
+    game.nexus.design.application = application;
+    return Promise.resolve(application.render({ force: true })).then(() => application);
+  };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
   game.nexus.resources ??= createResourceLifecycleManager();
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
@@ -30,6 +60,7 @@ Hooks.once("init", () => {
   // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
   // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
   game.nexus.library ??= {};
+  game.nexus.library.designProfiles ??= game.nexus.design.library;
   game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
     getUser: () => game.user,
     getWorldFlows: () => {

@@ -255,3 +255,23 @@ export function writeNexusLibraryCollection(user, collection, entries) {
     return saved.collections[collection];
   });
 }
+
+
+/** Atomically updates one collection and mirrors its legacy flag for older NEXUS builds. */
+export function updateNexusLibraryCollection(user, collection, updater) {
+  if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection)) throw new Error("Coleção desconhecida: " + collection);
+  if (typeof updater !== "function") throw new TypeError("A atualização da Biblioteca precisa ser uma função.");
+  if (typeof user?.setFlag !== "function") throw new Error("Não foi possível acessar o armazenamento pessoal da Biblioteca.");
+  return enqueueLibraryWrite(user, async () => {
+    const { store } = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user));
+    const nextEntries = await updater(store.collections[collection], store);
+    if (nextEntries !== undefined) store.collections[collection] = nextEntries;
+    if (!Array.isArray(store.collections[collection])) throw new Error("A coleção \"" + collection + "\" precisa ser uma lista.");
+    const saved = normalizeNexusLibraryStore(store);
+    await user.setFlag("nexus", "libraryStore", saved);
+    const legacyFlag = LEGACY_LIBRARY_FLAG_BY_COLLECTION[collection];
+    if (legacyFlag) await user.setFlag("nexus", legacyFlag, saved.collections[collection]);
+    globalThis.Hooks?.callAll?.("nexusLibraryUpdated", user);
+    return saved.collections[collection];
+  });
+}

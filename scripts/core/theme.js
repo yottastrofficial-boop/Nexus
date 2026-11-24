@@ -22,92 +22,246 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
   menuColor: theme.menu, placeholderColor: theme.placeholder
 }]));
 
-export const applyThemeTokens = (element, layout = {}) => {
+export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
+  const allowedFonts = new Set(["Inter", "Arial", "Georgia", "Trebuchet MS", "Verdana", "system-ui", "monospace"]);
+  const fallbackFont = theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : layout.theme === "pixel-art" ? "monospace" : "Inter");
+  const requestedFont = String(layout.fontFamily ?? fallbackFont);
+  const fontFamily = allowedFonts.has(requestedFont) ? requestedFont : fallbackFont;
+  const safeNumber = (value, min, max, fallback) => {
+    if (value === null || value === undefined || value === "") return fallback;
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
+  };
+  const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
+  const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
+  const safeColor = (value, fallback) => {
+    const candidate = String(value ?? "").toLowerCase();
+    if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/.test(candidate)) return fallback;
+    return candidate.length === 4 ? "#" + [...candidate.slice(1)].map(channel => channel + channel).join("") : candidate;
+  };
+  const color = (key, fallback) => safeColor(palette[key], fallback);
+  const layoutColors = {
+    card: safeColor(layout.cardColor, color("card", theme.card)),
+    accent: safeColor(layout.accentColor, color("accent", theme.accent)),
+    highlight: safeColor(layout.highlightColor, color("highlight", theme.highlight)),
+    button: safeColor(layout.buttonColor, color("button", theme.button)),
+    scroll: safeColor(layout.scrollColor, color("scroll", theme.scroll)),
+    windowHeader: safeColor(layout.windowHeaderColor, color("windowHeader", theme.windowHeader)),
+    windowContent: safeColor(layout.windowContentColor, color("windowContent", theme.windowContent)),
+    menu: safeColor(layout.menuColor, color("menu", theme.menu)),
+    placeholder: safeColor(layout.placeholderColor, color("placeholder", theme.placeholder))
+  };
   const values = {
     "--nexus-panel-bg": theme.panel,
-    "--nexus-panel-card": layout.cardColor ?? theme.card,
-    "--nexus-panel-accent": layout.accentColor ?? theme.accent,
-    "--nexus-canvas-scroll-bg": layout.scrollColor ?? theme.scroll,
-    "--nexus-window-header-bg": layout.windowHeaderColor ?? theme.windowHeader,
-    "--nexus-window-content-bg": layout.windowContentColor ?? theme.windowContent,
-    "--nexus-button-bg": layout.buttonColor ?? theme.button,
-    "--nexus-button-border": layout.accentColor ?? theme.border,
-    "--nexus-button-hover-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
-    "--nexus-button-active-bg": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 72%, ${layout.highlightColor ?? theme.highlight})`,
-    "--nexus-button-active-border": layout.highlightColor ?? theme.highlight,
-    "--nexus-button-active-text": theme.text,
-    "--nexus-button-active": layout.highlightColor ?? theme.highlight,
+    "--nexus-panel-card": layoutColors.card,
+    "--nexus-panel-accent": layoutColors.accent,
+    "--nexus-canvas-scroll-bg": layoutColors.scroll,
+    "--nexus-window-header-bg": layoutColors.windowHeader,
+    "--nexus-window-content-bg": layoutColors.windowContent,
+    "--nexus-button-bg": layoutColors.button,
+    "--nexus-button-hover-bg": `color-mix(in srgb, ${color("button", layoutColors.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-button-active-bg": `color-mix(in srgb, ${color("button", layoutColors.button)} 72%, ${color("highlight", layoutColors.highlight)})`,
+    "--nexus-button-active-border": color("highlight", layoutColors.highlight),
+    "--nexus-button-active-text": color("text", theme.text),
+    "--nexus-button-active": color("highlight", layoutColors.highlight),
     "--nexus-panel-surface": theme.surface,
     "--nexus-panel-input": theme.input,
     "--nexus-panel-border": theme.border,
     "--nexus-panel-text": theme.text,
     "--nexus-panel-muted": theme.muted,
     "--nexus-panel-hover": theme.hover,
-    "--nexus-scroll-bg": layout.scrollColor ?? theme.scroll,
-    "--nexus-scroll-thumb": layout.accentColor ?? theme.accent,
-    "--nexus-scrollbar-track": layout.scrollColor ?? theme.scroll,
-    "--nexus-scrollbar-thumb": layout.accentColor ?? theme.accent,
-    "--nexus-scrollbar-thumb-hover": layout.highlightColor ?? theme.highlight,
-    "--nexus-surface-raised": layout.cardColor ?? theme.card,
+    "--nexus-scroll-bg": layoutColors.scroll,
+    "--nexus-scroll-thumb": layoutColors.accent,
+    "--nexus-scrollbar-track": layoutColors.scroll,
+    "--nexus-scrollbar-thumb": layoutColors.accent,
+    "--nexus-scrollbar-thumb-hover": layoutColors.highlight,
+    "--nexus-surface-raised": layoutColors.card,
     "--nexus-surface-sunken": theme.input,
-    "--nexus-border-subtle": `color-mix(in srgb, ${theme.border} 58%, transparent)`,
-    "--nexus-border-strong": layout.accentColor ?? theme.border,
+    "--nexus-border-subtle": `color-mix(in srgb, ${color("border", theme.border)} 58%, transparent)`,
+    "--nexus-border-strong": layoutColors.accent,
     "--nexus-text-primary": theme.text,
     "--nexus-text-secondary": theme.muted,
-    "--nexus-text-disabled": `color-mix(in srgb, ${theme.muted} 58%, transparent)`,
-    "--nexus-focus-ring": layout.highlightColor ?? theme.highlight,
+    "--nexus-text-disabled": `color-mix(in srgb, ${color("muted", theme.muted)} 58%, transparent)`,
+    "--nexus-focus-ring": color("highlight", layoutColors.highlight),
     "--nexus-field-bg": theme.input,
     "--nexus-field-text": theme.text,
     "--nexus-field-border": theme.border,
-    "--nexus-field-focus": layout.highlightColor ?? theme.highlight,
-    "--nexus-button-primary": layout.buttonColor ?? theme.button,
-    "--nexus-button-primary-hover": `color-mix(in srgb, ${layout.buttonColor ?? theme.button} 82%, ${theme.text})`,
-    "--nexus-button-primary-text": theme.text,
+    "--nexus-field-focus": color("highlight", layoutColors.highlight),
+    "--nexus-button-primary": layoutColors.button,
+    "--nexus-button-primary-hover": `color-mix(in srgb, ${color("button", layoutColors.button)} 82%, ${color("text", theme.text)})`,
+    "--nexus-button-primary-text": color("text", theme.text),
     "--nexus-state-success": layout.theme === "light" ? "#247647" : "#79c99a",
     "--nexus-state-warning": layout.theme === "light" ? "#8a5a12" : "#e6bd68",
     "--nexus-state-danger": layout.theme === "light" ? "#a83232" : "#e58a8a",
     "--nexus-state-info": layout.theme === "light" ? "#245f91" : "#83bce8",
     "--nexus-resource-button": theme.resourceButton,
-    "--nexus-window-header": layout.windowHeaderColor ?? theme.windowHeader,
-    "--nexus-window-content": layout.windowContentColor ?? theme.windowContent,
-    "--nexus-menu-bg": layout.menuColor ?? theme.menu,
-    "--nexus-placeholder-color": layout.placeholderColor ?? theme.placeholder,
-    "--nexus-canvas-color": layout.canvasColor ?? theme.canvas,
-    "--nexus-card-color": layout.cardColor ?? theme.card,
-    "--nexus-accent-color": layout.accentColor ?? theme.accent,
-    "--nexus-highlight-color": layout.highlightColor ?? theme.highlight,
-    "--nexus-button-color": layout.buttonColor ?? theme.button,
-    "--nexus-font-family": `"${layout.fontFamily ?? "Inter"}", sans-serif`,
+    "--nexus-window-header": layoutColors.windowHeader,
+    "--nexus-window-content": layoutColors.windowContent,
+    "--nexus-menu-bg": layoutColors.menu,
+    "--nexus-placeholder-color": layoutColors.placeholder,
+    "--nexus-canvas-color": safeColor(layout.canvasColor, color("canvas", theme.canvas)),
+    "--nexus-card-color": layoutColors.card,
+    "--nexus-accent-color": layoutColors.accent,
+    "--nexus-highlight-color": layoutColors.highlight,
+    "--nexus-button-color": layoutColors.button,
+    "--nexus-font-family": `${fontFamilyToken}, sans-serif`,
     "--nexus-control-bg": theme.input, "--nexus-control-text": theme.text,
     "--nexus-control-border": theme.border, "--nexus-control-hover": theme.hover,
-    "--nexus-tab-bg": theme.panel, "--nexus-tab-active": theme.accent,
-    "--nexus-header-text": theme.text, "--nexus-card-border": theme.border,
+    "--nexus-tab-bg": color("panel", theme.panel), "--nexus-tab-active": color("accent", theme.accent),
+    "--nexus-header-text": color("text", theme.text), "--nexus-card-border": theme.border,
     "--nexus-card-shadow": layout.theme === "steam" ? "0 4px 14px #0007" : "0 2px 8px #0003",
     "--nexus-nav-bg": theme.panel, "--nexus-nav-hover": theme.hover,
-    "--nexus-menu-border": theme.border, "--nexus-button-text": theme.text,
-    "--nexus-button-hover": theme.hover,
+    "--nexus-menu-border": theme.border,
+    "--nexus-button-hover": color("hover", theme.hover),
     "--nexus-radius-small": ["steam", "pixel-art"].includes(layout.theme) ? "0px" : layout.theme === "medieval" ? "5px" : "6px",
     "--nexus-radius-panel": layout.theme === "steam" ? "2px" : "8px",
     "--nexus-spacing-unit": layout.theme === "steam" ? "6px" : "8px",
-    "--nexus-font-ui": layout.theme === "steam" ? "Arial, Helvetica, sans-serif" : `"${layout.fontFamily ?? "Inter"}", sans-serif`,
-    "--nexus-navigation-bg": theme.panel,
-    "--nexus-navigation-active": theme.accent,
-    "--nexus-input-focus": theme.highlight,
+    "--nexus-font-ui": `${fontFamilyToken}, sans-serif`,
+    "--nexus-button-border": color("accent", layout.accentColor ?? theme.border),
+    "--nexus-button-text": color("text", theme.text),
+    "--nexus-navigation-bg": color("panel", theme.panel),
+    "--nexus-navigation-active": color("accent", theme.accent),
+    "--nexus-input-focus": color("highlight", theme.highlight),
     "--nexus-scroll-track": theme.scroll,
     "--nexus-scroll-handle": theme.accent,
-    "--nexus-font-size": `${Number(layout.fontSize) || 13}px`,
-    "--nexus-secondary-font-size": `${Number(layout.secondaryFontSize) || 11}px`,
-    "--nexus-value-font-size": `${Number(layout.valueFontSize) || 20}px`,
+    "--nexus-font-size": `${safeNumber(layout.fontSize, 11, 18, 13)}px`,
+    "--nexus-secondary-font-size": `${safeNumber(layout.secondaryFontSize, 9, 16, 11)}px`,
+    "--nexus-value-font-size": `${safeNumber(layout.valueFontSize, 14, 28, 20)}px`,
     "--nexus-space-1": "4px",
     "--nexus-space-2": "8px",
     "--nexus-space-3": "12px",
     "--nexus-space-4": "16px",
     "--nexus-control-height": "34px",
-    "--nexus-line-height": "1.45"
+    "--nexus-line-height": "1.45",
+    "--nexus-foundry-sidebar-bg": theme.panel,
+    "--nexus-foundry-sidebar-surface": theme.surface,
+    "--nexus-foundry-sidebar-input": theme.input,
+    "--nexus-foundry-sidebar-border": theme.border,
+    "--nexus-foundry-sidebar-text": theme.text,
+    "--nexus-foundry-sidebar-muted": theme.muted,
+    "--nexus-foundry-sidebar-hover": theme.hover,
+    "--nexus-foundry-sidebar-active": theme.accent,
+    "--nexus-foundry-directory-bg": theme.panel,
+    "--nexus-foundry-directory-item-bg": theme.surface,
+    "--nexus-foundry-directory-item-border": theme.border,
+    "--nexus-foundry-directory-item-hover": theme.hover,
+    "--nexus-foundry-directory-folder-bg": theme.panel,
+    "--nexus-foundry-directory-search-bg": theme.input,
+    "--nexus-foundry-navigation-bg": theme.panel,
+    "--nexus-foundry-navigation-active": theme.accent,
+    "--nexus-foundry-application-bg": theme.windowContent,
+    "--nexus-foundry-application-header": theme.windowHeader,
+    "--nexus-foundry-application-border": theme.border,
+    "--nexus-foundry-control-bg": theme.input,
+    "--nexus-foundry-control-border": theme.border,
+    "--nexus-foundry-control-hover": theme.hover
   };
+  const paletteTokens = {
+    "--nexus-panel-bg": "panel",
+    "--nexus-panel-card": "card",
+    "--nexus-panel-accent": "accent",
+    "--nexus-canvas-scroll-bg": "scroll",
+    "--nexus-window-header-bg": "windowHeader",
+    "--nexus-window-content-bg": "windowContent",
+    "--nexus-button-bg": "button",
+    "--nexus-panel-surface": "surface",
+    "--nexus-panel-input": "input",
+    "--nexus-panel-border": "border",
+    "--nexus-panel-text": "text",
+    "--nexus-panel-muted": "muted",
+    "--nexus-panel-hover": "hover",
+    "--nexus-scroll-bg": "scroll",
+    "--nexus-scroll-thumb": "accent",
+    "--nexus-scrollbar-track": "scroll",
+    "--nexus-scrollbar-thumb": "accent",
+    "--nexus-scrollbar-thumb-hover": "highlight",
+    "--nexus-surface-raised": "card",
+    "--nexus-surface-sunken": "input",
+    "--nexus-border-strong": "border",
+    "--nexus-text-primary": "text",
+    "--nexus-text-secondary": "muted",
+    "--nexus-field-bg": "input",
+    "--nexus-field-text": "text",
+    "--nexus-field-border": "border",
+    "--nexus-field-focus": "highlight",
+    "--nexus-resource-button": "resourceButton",
+    "--nexus-window-header": "windowHeader",
+    "--nexus-window-content": "windowContent",
+    "--nexus-menu-bg": "menu",
+    "--nexus-placeholder-color": "placeholder",
+    "--nexus-canvas-color": "canvas",
+    "--nexus-card-color": "card",
+    "--nexus-accent-color": "accent",
+    "--nexus-highlight-color": "highlight",
+    "--nexus-button-color": "button",
+    "--nexus-control-bg": "input",
+    "--nexus-control-text": "text",
+    "--nexus-control-border": "border",
+    "--nexus-control-hover": "hover",
+    "--nexus-tab-bg": "panel",
+    "--nexus-tab-active": "accent",
+    "--nexus-header-text": "text",
+    "--nexus-card-border": "border",
+    "--nexus-nav-bg": "panel",
+    "--nexus-nav-hover": "hover",
+    "--nexus-menu-border": "border",
+    "--nexus-button-text": "text",
+    "--nexus-button-hover": "hover",
+    "--nexus-navigation-bg": "panel",
+    "--nexus-navigation-active": "accent",
+    "--nexus-input-focus": "highlight",
+    "--nexus-scroll-track": "scroll",
+    "--nexus-scroll-handle": "accent",
+    "--nexus-foundry-sidebar-bg": "panel",
+    "--nexus-foundry-sidebar-surface": "surface",
+    "--nexus-foundry-sidebar-input": "input",
+    "--nexus-foundry-sidebar-border": "border",
+    "--nexus-foundry-sidebar-text": "text",
+    "--nexus-foundry-sidebar-muted": "muted",
+    "--nexus-foundry-sidebar-hover": "hover",
+    "--nexus-foundry-sidebar-active": "accent",
+    "--nexus-foundry-directory-bg": "panel",
+    "--nexus-foundry-directory-item-bg": "surface",
+    "--nexus-foundry-directory-item-border": "border",
+    "--nexus-foundry-directory-item-hover": "hover",
+    "--nexus-foundry-directory-folder-bg": "panel",
+    "--nexus-foundry-directory-search-bg": "input",
+    "--nexus-foundry-navigation-bg": "panel",
+    "--nexus-foundry-navigation-active": "accent",
+    "--nexus-foundry-application-bg": "windowContent",
+    "--nexus-foundry-application-header": "windowHeader",
+    "--nexus-foundry-application-border": "border",
+    "--nexus-foundry-control-bg": "input",
+    "--nexus-foundry-control-border": "border",
+    "--nexus-foundry-control-hover": "hover"
+  };
+  for (const [token, key] of Object.entries(paletteTokens)) {
+    const value = color(key, null);
+    if (value) values[token] = value;
+  }
+
+  const density = layout.density === "compact" ? 0.88 : layout.density === "spacious" ? 1.14 : 1;
+  const spacing = safeNumber(layout.spacing, 0.75, 1.5, 1) * density;
+  const radius = layout.radius === "sharp" ? 0 : layout.radius === "soft" ? 5 : 9;
+  const controlHeight = safeNumber(layout.controlHeight, 28, 44, 34);
+  values["--nexus-density-scale"] = String(density);
+  values["--nexus-radius-small"] = `${radius}px`;
+  values["--nexus-radius-panel"] = `${Math.max(0, radius - 1)}px`;
+  values["--nexus-spacing-unit"] = `${8 * spacing}px`;
+  values["--nexus-space-1"] = `${4 * spacing}px`;
+  values["--nexus-space-2"] = `${8 * spacing}px`;
+  values["--nexus-space-3"] = `${12 * spacing}px`;
+  values["--nexus-space-4"] = `${16 * spacing}px`;
+  values["--nexus-control-height"] = `${controlHeight}px`;
+  values["--nexus-line-height"] = String(safeNumber(layout.lineHeight, 1.2, 1.8, 1.45));
+  values["--nexus-contrast-border-width"] = layout.contrast === "high" ? "2px" : "1px";
+  values["--nexus-contrast-outline-width"] = layout.contrast === "high" ? "3px" : "2px";
+  values["--nexus-motion-duration"] = layout.reducedMotion ? "0ms" : "140ms";
   values["--nexus-theme-id"] = layout.theme ?? "nexus-dark";
+  if (typeof beforeApply === "function") beforeApply(values);
   for (const [key, value] of Object.entries(values)) element.style.setProperty(key, value);
   element.dataset.theme = layout.theme ?? "nexus-dark";
+  return Object.keys(values);
 };

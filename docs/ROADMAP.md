@@ -71,10 +71,18 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
 - **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem e o Core agora define o registro de adaptadores de origem/destino com limites, validação de dados inertes, prévia e confirmação. Ainda faltam adaptadores concretos para formatos externos e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
 - **Lógica:** evoluir o construtor visual de Fluxos (nós, ramificações e simulação), registrar executores confiáveis e integrar eventos e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
-- **Tema:** estabelecer tokens e componentes visuais NEXUS para interfaces próprias; depois avaliar integrações escopadas com Sidebar, Combat Tracker e outras interfaces nativas sem sobrescrever DOM interno de terceiros.
+- **Tema:** a branch do Design System agora inclui perfis tipados, Estúdio ApplicationV2, prévia local, validação de contraste, importação/exportação versionada e persistência world/user. A integração visual nativa continua escopada por allowlist. Validação real no Foundry V14 build 360 e refinamento dos adaptadores nativos permanecem pendentes.
 - **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
 A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+
+## Biblioteca de Aparências — integração inicial
+
+- Perfis visuais completos reutilizam a coleção `themes` do `libraryStore`, identificados por `kind: "design-profile"`.
+- O Estúdio oferece salvar rascunho, carregar, aplicar ao escopo atual, duplicar, renomear, excluir e exportar perfis salvos.
+- A importação de perfil utiliza o envelope versionado `NEXUS-DESIGN/1`; o backup universal preserva o objeto completo do perfil e mantém compatibilidade com temas legados que armazenam somente paletas.
+- A coleção continua pessoal; o perfil ativo da campanha continua em configuração `world`. Aplicar um perfil ao mundo compartilha a aparência efetiva, não a biblioteca privada do usuário.
+- Próximas evoluções: integração de preview e ação contextual no Inspector da Biblioteca, coleções compartilhadas de campanha somente após definir ownership/permissões e teste real de sincronização entre clientes.
 
 ## Critérios para concluir uma etapa
 
