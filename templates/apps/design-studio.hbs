@@ -1,0 +1,112 @@
+<section class="nexus-design-studio-shell" data-design-studio>
+  <header class="nexus-design-studio-toolbar">
+    <div class="nexus-design-studio-identity">
+      <span class="nexus-design-studio-mark"><i class="fa-solid fa-palette" aria-hidden="true"></i></span>
+      <div><strong>Estúdio de Aparência</strong><small>Personalize a identidade visual sem alterar dados da campanha.</small></div>
+    </div>
+    <div class="nexus-design-studio-target">
+      <label for="nexus-design-target">Aplicar em</label>
+      <select id="nexus-design-target" data-design-target>
+        {{#if canEditWorld}}<option value="world" {{#if (eq target "world")}}selected{{/if}}>Campanha</option>{{/if}}
+        {{#if canEditUser}}<option value="user" {{#if (eq target "user")}}selected{{/if}}>Meu usuário</option>{{/if}}
+      </select>
+      <button type="button" data-design-action="target" title="Carregar perfil do destino"><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i></button>
+    </div>
+  </header>
+
+  <div class="nexus-design-studio-body">
+    <nav class="nexus-design-studio-nav" aria-label="Seções do editor">
+      <a href="#nexus-design-palette">Paleta</a>
+      <a href="#nexus-design-typography">Tipografia</a>
+      <a href="#nexus-design-layout">Layout</a>
+      <a href="#nexus-design-accessibility">Acessibilidade</a>
+    </nav>
+
+    <main class="nexus-design-studio-editor">
+      <section class="nexus-design-studio-section" id="nexus-design-palette">
+        <div class="nexus-design-section-heading"><div><h3>Paleta de cores</h3><p>Escolha um preset como ponto de partida e ajuste cada superfície individualmente.</p></div></div>
+        <label class="nexus-design-field nexus-design-preset">
+          <span>Preset base</span>
+          <select data-design-preset>
+            <option value="nexus-dark" {{#if (eq profile.preset "nexus-dark")}}selected{{/if}}>NEXUS — Escuro</option>
+            <option value="midnight" {{#if (eq profile.preset "midnight")}}selected{{/if}}>Meia-noite</option>
+            <option value="light" {{#if (eq profile.preset "light")}}selected{{/if}}>Claro</option>
+            <option value="steam" {{#if (eq profile.preset "steam")}}selected{{/if}}>Steam</option>
+            <option value="linux" {{#if (eq profile.preset "linux")}}selected{{/if}}>Linux</option>
+            <option value="medieval" {{#if (eq profile.preset "medieval")}}selected{{/if}}>Medieval</option>
+            <option value="pixel-art" {{#if (eq profile.preset "pixel-art")}}selected{{/if}}>Pixel Art</option>
+          </select>
+        </label>
+        <div class="nexus-design-color-grid">
+          {{#each paletteFields}}
+          <label class="nexus-design-color-field">
+            <span>{{label}}</span>
+            <input type="color" data-design-path="palette.{{key}}" value="{{value}}" aria-label="{{label}}">
+            <code>{{value}}</code>
+          </label>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="nexus-design-studio-section" id="nexus-design-typography">
+        <div class="nexus-design-section-heading"><div><h3>Tipografia</h3><p>Controle a família tipográfica e a hierarquia de leitura.</p></div></div>
+        <div class="nexus-design-settings-grid">
+          <label class="nexus-design-field"><span>Família tipográfica</span><select data-design-path="typography.family">{{#each fontChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+          <label class="nexus-design-field"><span>Tamanho principal <output data-design-output="typography.baseSize">{{profile.typography.baseSize}}</output> px</span><input type="range" min="11" max="18" step="1" value="{{profile.typography.baseSize}}" data-design-path="typography.baseSize"></label>
+          <label class="nexus-design-field"><span>Texto secundário <output data-design-output="typography.secondarySize">{{profile.typography.secondarySize}}</output> px</span><input type="range" min="9" max="16" step="1" value="{{profile.typography.secondarySize}}" data-design-path="typography.secondarySize"></label>
+          <label class="nexus-design-field"><span>Valores destacados <output data-design-output="typography.valueSize">{{profile.typography.valueSize}}</output> px</span><input type="range" min="14" max="28" step="1" value="{{profile.typography.valueSize}}" data-design-path="typography.valueSize"></label>
+          <label class="nexus-design-field"><span>Altura de linha <output data-design-output="typography.lineHeight">{{profile.typography.lineHeight}}</output></span><input type="range" min="1.2" max="1.8" step="0.05" value="{{profile.typography.lineHeight}}" data-design-path="typography.lineHeight"></label>
+        </div>
+        <div class="nexus-design-type-preview"><strong>O destino de NEXUS</strong><p>Uma interface clara ajuda a organizar informações, reconhecer prioridades e acompanhar a sessão sem competir com o conteúdo da ficha.</p><span>Texto auxiliar · Exemplo de hierarquia visual</span></div>
+      </section>
+
+      <section class="nexus-design-studio-section" id="nexus-design-layout">
+        <div class="nexus-design-section-heading"><div><h3>Layout e densidade</h3><p>Ajuste o ritmo visual e o tamanho dos controles.</p></div></div>
+        <div class="nexus-design-settings-grid">
+          <label class="nexus-design-field"><span>Densidade</span><select data-design-path="layout.density">{{#each densityChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+          <label class="nexus-design-field"><span>Formato dos cantos</span><select data-design-path="layout.radius">{{#each radiusChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+          <label class="nexus-design-field"><span>Espaçamento <output data-design-output="layout.spacing">{{profile.layout.spacing}}</output>×</span><input type="range" min="0.75" max="1.5" step="0.05" value="{{profile.layout.spacing}}" data-design-path="layout.spacing"></label>
+          <label class="nexus-design-field"><span>Altura dos controles <output data-design-output="layout.controlHeight">{{profile.layout.controlHeight}}</output> px</span><input type="range" min="28" max="44" step="1" value="{{profile.layout.controlHeight}}" data-design-path="layout.controlHeight"></label>
+        </div>
+      </section>
+
+      <section class="nexus-design-studio-section" id="nexus-design-accessibility">
+        <div class="nexus-design-section-heading"><div><h3>Acessibilidade</h3><p>Verificações de contraste são recomendações; o perfil continua editável.</p></div></div>
+        <div class="nexus-design-settings-grid">
+          <label class="nexus-design-field"><span>Nível de contraste</span><select data-design-path="accessibility.contrast">{{#each contrastChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+          <label class="nexus-design-check"><input type="checkbox" data-design-path="accessibility.reducedMotion" {{#if profile.accessibility.reducedMotion}}checked{{/if}}><span>Reduzir animações e transições</span></label>
+        </div>
+        <ul class="nexus-design-diagnostics" data-design-diagnostics>
+          {{#each diagnostics.checks}}<li class="{{#if passes}}is-valid{{else}}is-warning{{/if}}">{{label}} — {{ratio}}:1</li>{{/each}}
+        </ul>
+        {{#if warnings.length}}<p class="nexus-design-warning"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Alguns pares de cores precisam de mais contraste. Revise a paleta antes de compartilhar.</p>{{else}}<p class="nexus-design-success"><i class="fa-solid fa-check" aria-hidden="true"></i> Os pares de texto avaliados atendem ao contraste selecionado.</p>{{/if}}
+      </section>
+    </main>
+
+    <aside class="nexus-design-studio-preview">
+      <div class="nexus-design-preview-heading"><strong>Pré-visualização</strong><span>Ao vivo · somente neste cliente</span></div>
+      <div class="nexus-design-preview-card">
+        <div class="nexus-design-preview-top"><span class="nexus-design-preview-dot"></span><span>FICHA NEXUS</span><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></div>
+        <div class="nexus-design-preview-content">
+          <small>PERSONAGEM</small><h3>Guardião do Limiar</h3><p>Explorador · Nível 4</p>
+          <div class="nexus-design-preview-stats"><div><small>PV</small><strong>24 / 30</strong></div><div><small>PM</small><strong>12 / 16</strong></div></div>
+          <div class="nexus-design-preview-progress"><span></span></div>
+          <div class="nexus-design-preview-actions"><button type="button">Ação</button><button type="button">Detalhes</button></div>
+        </div>
+      </div>
+      <p class="nexus-design-preview-note">A prévia não salva alterações. Fechar o estúdio descarta um rascunho não salvo.</p>
+    </aside>
+  </div>
+
+  <footer class="nexus-design-studio-footer">
+    <div class="nexus-design-studio-file-actions">
+      <button type="button" data-design-action="import"><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar</button>
+      <button type="button" data-design-action="export"><i class="fa-solid fa-file-export" aria-hidden="true"></i> Exportar</button>
+      <button type="button" data-design-action="reset"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Restaurar preset</button>
+    </div>
+    <div class="nexus-design-studio-save-actions">
+      <button type="button" data-design-action="discard">Descartar</button>
+      <button type="button" class="nexus-design-save" data-design-action="save"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Salvar aparência</button>
+    </div>
+  </footer>
+</section>
