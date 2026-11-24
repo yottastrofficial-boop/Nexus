@@ -84,3 +84,17 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - **Reprovado:** sincronização, persistência, isolamento, legibilidade ou funcionamento de recursos existentes falhou.
 
 Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos, usuário afetado, tema selecionado e evidências de cada falha. Não marcar a PR como pronta para release enquanto houver falha bloqueadora ou itens funcionais não testados.
+
+
+## Refinamento visual 1.0.0.93
+
+- [ ] Confirmar que todas as aplicações NEXUS (Biblioteca, Estúdio, painéis da ficha e janelas futuras) herdam o shell sem alterar janelas de módulos externos.
+- [ ] Abrir Biblioteca pela janela independente e pelo painel da ficha; comparar filtros, cartões, Inspector, estados ativos e rolagem.
+- [ ] Redimensionar Biblioteca para largura estreita e confirmar que filtros não ficam cortados nem comprimidos.
+- [ ] Clicar na ficha depois de abrir um painel flutuante; confirmar que os trilhos laterais voltam à frente e recebem interação.
+- [ ] Clicar no painel flutuante; confirmar que ele próprio fica à frente e os trilhos não roubam o foco.
+- [ ] Abrir duas fichas e vários painéis; alternar foco e confirmar que cada conjunto de trilhos acompanha sua ficha.
+- [ ] Conferir controles do Canvas, navegação, Hotbar e Players em estados normal, hover, ativo e foco.
+- [ ] Enviar mensagens curtas e longas no Chat; conferir cabeçalho e corpo como um único cartão visual.
+- [ ] Conferir imagens, GIFs, vídeos, áudio, links e embeds enriquecidos nativos no Chat; validar contenção, tamanho e rolagem.
+- [ ] Confirmar que URLs comuns não são convertidas em conteúdo executável e que o NEXUS não injeta scripts de mídia.
