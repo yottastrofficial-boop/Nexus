@@ -1,5 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { NEXUS_COMPONENTS as COMPONENTS } from "../core/component-types.js";
+import { NEXUS_COMPONENTS as COMPONENTS, normalizeNexusComponentDimension } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
@@ -877,9 +877,9 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _normalizeLayout(layout) {
-    layout.width = clamp(Number(layout.width) || 800, 800, 1000);
-    layout.height = clamp(Number(layout.height) || 800, 300, 3000);
-    layout.gridSize = clamp(Number(layout.gridSize) || 20, 5, 100);
+    layout.width = clamp(normalizeNexusComponentDimension(Number(layout.width) || 800, 800), 800, 1000);
+    layout.height = clamp(normalizeNexusComponentDimension(Number(layout.height) || 800, 800), 300, 3000);
+    layout.gridSize = clamp(normalizeNexusComponentDimension(Number(layout.gridSize) || 20, 20), 10, 100);
     layout.gridEnabled ??= true; layout.snapEnabled ??= true; layout.guidesEnabled ??= true;
     layout.fontSize ??= 13; layout.secondaryFontSize ??= 11; layout.valueFontSize ??= 20;
     layout.theme ??= "nexus-dark"; layout.fontFamily ??= THEME_TOKENS[layout.theme]?.fontFamily ?? "Inter";
@@ -911,12 +911,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       c.stackOrder = Number.isFinite(Number(c.stackOrder)) ? Math.max(0, Math.trunc(Number(c.stackOrder))) : index;
     });
     for (const c of layout.components) {
-      const d = COMPONENTS[c.type]; if (!d) continue;
+      const d = COMPONENTS[c.type] ?? { w: 100, h: 100 };
+      // Tamanhos são normalizados em unidades de 10 px; posições continuam
+      // respeitando o snap configurável do Canvas.
+      c.w = clamp(normalizeNexusComponentDimension(Number(c.w) || d.w, d.w), 20, layout.width);
+      c.h = clamp(normalizeNexusComponentDimension(Number(c.h) || d.h, d.h), 20, layout.height);
+      if (!COMPONENTS[c.type]) continue;
       // Tokens antigos que apontavam para Actor.img passam a consumir a propriedade
       // própria do prototype token; a imagem personalizada continua sendo um override.
       if (c.type === "token" && (!String(c.dataPath ?? "").trim() || c.dataPath === "img")) c.dataPath = "identity.token.img";
-      c.w = clamp(Number(c.w) || d.w, 20, layout.width);
-      c.h = clamp(Number(c.h) || d.h, 20, layout.height);
       // Sem override salvo, o componente herda a tipografia global do tema.
       // Na primeira leitura, os valores padrão gravados pela 1.28.x viram herança.
       if (migrateTypographyInheritance && Number(c.fontSize) === 13) delete c.fontSize;
