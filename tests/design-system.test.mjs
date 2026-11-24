@@ -351,3 +351,53 @@ test("installer registers authoritative world settings and per-user preferences"
   design.uninstall();
   assert.equal(root.classList.values.has("nexus-design-system"), false);
 });
+
+
+test("Design System themes native Foundry UI configuration without touching third-party applications", () => {
+  const handlers = new Map();
+  const gameRef = {
+    user: { isGM: false },
+    settings: {
+      settings: new Map(),
+      register(namespace, key, config) { this.settings.set(`${namespace}.${key}`, config); },
+      get(namespace, key) { return this.settings.get(`${namespace}.${key}`)?.default; }
+    }
+  };
+  const root = {
+    style: { setProperty() {}, getPropertyValue() { return ""; }, getPropertyPriority() { return ""; }, removeProperty() {} },
+    dataset: {},
+    classList: { add() {}, remove() {} }
+  };
+  const hooks = {
+    once() {},
+    on(name, callback) { handlers.set(name, callback); return name; },
+    off(name) { handlers.delete(name); }
+  };
+  installNexusDesignSystem({
+    gameRef,
+    documentRef: { documentElement: root },
+    hooks,
+    themeTokens: THEME_TOKENS,
+    applyThemeTokens() {}
+  });
+
+  const render = handlers.get("renderApplicationV2");
+  assert.equal(typeof render, "function");
+  for (const name of ["UIConfig", "SettingsConfig"]) {
+    const classes = new Set();
+    const element = { classList: { add: value => classes.add(value), contains: value => classes.has(value) } };
+    render({ constructor: { name } }, element);
+    assert.ok(classes.has("nexus-themed-application"), `${name} should inherit the active NEXUS profile.`);
+    assert.ok(classes.has("nexus-themed-configuration"), `${name} should be identified as a native configuration surface.`);
+  }
+
+  const thirdPartyClasses = new Set();
+  const thirdPartyElement = {
+    classList: {
+      add: value => thirdPartyClasses.add(value),
+      contains: value => thirdPartyClasses.has(value)
+    }
+  };
+  render({ constructor: { name: "ThirdPartyConfiguration" } }, thirdPartyElement);
+  assert.equal(thirdPartyClasses.size, 0, "Unregistered third-party applications must remain untouched.");
+});
