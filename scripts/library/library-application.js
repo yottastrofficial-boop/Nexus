@@ -1,4 +1,4 @@
-import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect, getLibraryCatalogResourceKey } from "./catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
 import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
@@ -169,6 +169,9 @@ export function createLibraryApplicationClass({
           const parentId = folder.parentId || "";
           if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
           childrenByParent.get(parentId).push(folder);
+        }
+        for (const children of childrenByParent.values()) {
+          children.sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }));
         }
         // Render recursively into explicit containers, preserving folder order.
         const appendTree = (folder, parent, depth = 0) => {
@@ -622,11 +625,13 @@ export function createLibraryApplicationClass({
         if (!name) return;
         try {
           const current = normalizeLibraryPreferences(this._getPreferences());
+          const parentId = this._state.folder || "";
           const created = createLibraryFolder(current, {
             id: globalThis.foundry?.utils?.randomID?.(10),
             name,
-            parentId: this._state.folder || ""
+            parentId
           });
+          if (parentId) this._collapsedLibraryFolders.delete(parentId);
           await this._savePreferences(created.preferences);
           this._state.folder = created.folder.id;
           this._state.collectionId = "";
