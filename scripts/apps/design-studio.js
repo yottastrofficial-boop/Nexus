@@ -10,7 +10,7 @@ import {
   DESIGN_RADIUS_CHOICES,
   DESIGN_CONTRAST_CHOICES,
 } from "../core/design-profile.js";
-import { DESIGN_THEME_CHOICES } from "../core/design-system.js";
+import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";
 
 const clone = value => globalThis.foundry?.utils?.deepClone
   ? globalThis.foundry.utils.deepClone(value)
