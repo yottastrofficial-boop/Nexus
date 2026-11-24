@@ -1,5 +1,4 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
-import { resolveNexusFloatingLayer } from "../core/window-layering.js";
 import { NEXUS_COMPONENTS as COMPONENTS } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
@@ -3524,6 +3523,7 @@ if (!hasPath) propertyValueInput.value = "";
     const floatingGeneration = (this._nexusFloatingGeneration ?? 0) + 1;
     this._nexusFloatingGeneration = floatingGeneration;
     const app = root.closest(".application, .window-app, .app") || root;
+    app.classList.add("nexus-window");
     document.querySelector(`[data-nexus-floating-for="${this.id}"]`)?.remove();
     const leftRail = root.querySelector(".nexus-appearance-rail");
     const sourceDrawer = root.querySelector(".nexus-appearance-drawer");
@@ -3557,7 +3557,8 @@ if (!hasPath) propertyValueInput.value = "";
         <div class="nexus-floating-tabs"></div>
         <button type="button" class="nexus-floating-add" data-floating-new-layout title="Adicionar página">＋</button>
       </div>`;
-    document.body.appendChild(portal);
+    if (getComputedStyle(app).position === "static") app.style.position = "relative";
+    app.appendChild(portal);
 
     const panels = new Map();
     for (const key of panelKeys) {
@@ -3631,32 +3632,29 @@ if (!hasPath) propertyValueInput.value = "";
       }
     };
 
-    const syncRailFocus = (focused = false) => {
-      if (!portal.isConnected) return;
-      const z = Number.parseInt(app.style.zIndex || getComputedStyle(app).zIndex, 10);
-      const baseZ = Number.isFinite(z) ? z : 100;
-      const activePanel = this._activePanelWindowKey
-        ? this._nexusPanelWindows.get(this._activePanelWindowKey)
-        : null;
-      const activePanelZ = activePanel?.rendered && activePanel.element?.isConnected
-        ? Number.parseInt(activePanel.element.style.zIndex || getComputedStyle(activePanel.element).zIndex, 10)
-        : null;
-      const layer = resolveNexusFloatingLayer({ sheetZIndex: baseZ, sheetFocused: focused, activePanelZIndex: activePanelZ });
-      portal.style.setProperty("z-index", String(layer.railZ), "important");
-      portal.classList.toggle("is-sheet-focused", focused && activePanelZ === null);
-    };
     const positionRails = () => {
       if (!app.isConnected || !portal.isConnected) return;
-      const r = app.getBoundingClientRect();
-      const leftW = 42, rightW = 58;
+      const rect = app.getBoundingClientRect();
+      const appWidth = app.clientWidth || rect.width;
+      const appHeight = app.clientHeight || rect.height;
       this._appearanceRailOffsets ??= { left: { x: -51, y: 72 }, right: { x: 9, y: 72 } };
-      const lo = this._appearanceRailOffsets.left, ro = this._appearanceRailOffsets.right;
-      const lx = clamp(r.left + lo.x, 4, Math.max(4, window.innerWidth - leftW - 4));
-      const ly = clamp(r.top + lo.y, 8, Math.max(8, window.innerHeight - 100));
-      const rx = clamp(r.right + ro.x, 4, Math.max(4, window.innerWidth - rightW - 4));
-      const ry = clamp(r.top + ro.y, 8, Math.max(8, window.innerHeight - 100));
-      Object.assign(left.style, { position: "fixed", left: `${lx}px`, top: `${ly}px`, maxHeight: `${Math.max(160, window.innerHeight - ly - 12)}px` });
-      Object.assign(right.style, { position: "fixed", left: `${rx}px`, top: `${ry}px`, maxHeight: `${Math.max(160, window.innerHeight - ry - 12)}px` });
+      const leftOffset = this._appearanceRailOffsets.left;
+      const rightOffset = this._appearanceRailOffsets.right;
+      const leftTop = clamp(leftOffset.y, 8, Math.max(8, appHeight - 100));
+      const rightTop = clamp(rightOffset.y, 8, Math.max(8, appHeight - 100));
+      const availableHeight = Math.max(120, Math.min(appHeight - 8, window.innerHeight - Math.max(0, rect.top) - 12));
+      Object.assign(left.style, {
+        position: "absolute",
+        left: `${leftOffset.x}px`,
+        top: `${leftTop}px`,
+        maxHeight: `${availableHeight}px`
+      });
+      Object.assign(right.style, {
+        position: "absolute",
+        left: `${appWidth + rightOffset.x}px`,
+        top: `${rightTop}px`,
+        maxHeight: `${availableHeight}px`
+      });
     };
     const onDocumentPointerDown = event => {
       const target = event.target;
@@ -3664,18 +3662,13 @@ if (!hasPath) propertyValueInput.value = "";
       if (panelElement) {
         const panelKey = [...this._nexusPanelWindows].find(([, instance]) => instance.element === panelElement)?.[0] ?? null;
         setActivePanel(panelKey);
-        syncRailFocus(false);
         return;
       }
       const sheetWasFocused = app.contains(target) || left?.contains(target) || right?.contains(target);
       setActivePanel(null);
       if (sheetWasFocused) {
         this.bringToFront?.();
-        syncRailFocus(true);
         positionRails();
-      } else {
-        // A janela clicada fora do NEXUS deve continuar sob controle do Foundry.
-        syncRailFocus(false);
       }
     };
     document.addEventListener("pointerdown", onDocumentPointerDown, true);
@@ -3687,7 +3680,7 @@ if (!hasPath) propertyValueInput.value = "";
       } else if (app.contains(event.target)) {
         this.bringToFront?.();
         setActivePanel(null);
-        syncRailFocus(true);
+        positionRails();
       }
     };
     document.addEventListener("focusin", onDocumentFocusIn, true);
@@ -3729,7 +3722,6 @@ if (!hasPath) propertyValueInput.value = "";
         current.setPanel(panel);
         if (current.rendered && focus) {
           focusPanelWindow(current);
-          syncRailFocus(false);
         }
         return;
       }
@@ -3756,7 +3748,6 @@ if (!hasPath) propertyValueInput.value = "";
         }
         applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
         focusPanelWindow(instance);
-        syncRailFocus(false);
       }).catch(error => {
         console.error(`NEXUS | Falha ao abrir janela ${key}`, error);
         this._onPanelWindowClosed(key, instance);
@@ -3769,11 +3760,9 @@ if (!hasPath) propertyValueInput.value = "";
         await this._setMode("appearance");
         return;
       }
-      syncRailFocus(true);
       const instance = this._nexusPanelWindows.get(key);
       if (instance?.rendered) {
         focusPanelWindow(instance);
-        syncRailFocus(false);
       } else await openPanel(key);
     };
     portal.querySelectorAll("[data-floating-panel]").forEach(button => button.addEventListener("click", () => {
@@ -3800,7 +3789,6 @@ if (!hasPath) propertyValueInput.value = "";
     portal.querySelector("[data-floating-new-layout]")?.addEventListener("click", () => this._newLayout());
     setMode();
     positionRails();
-    if (root.dataset.mode === "appearance") syncRailFocus(true);
     requestAnimationFrame(() => { setMode(); positionRails(); });
     const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(positionRails) : null;
     resizeObserver?.observe(app);
