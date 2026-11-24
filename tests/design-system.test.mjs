@@ -20,6 +20,12 @@ test("theme typography uses its preset font unless a layout explicitly overrides
   assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
   assert.equal(values.get("--nexus-font-ui"), '"Georgia", sans-serif');
 
+  applyThemeTokens(element, { theme: "pixel-art" });
+  assert.equal(values.get("--nexus-font-family"), "monospace, sans-serif");
+
+  applyThemeTokens(element, { theme: "steam" });
+  assert.equal(values.get("--nexus-font-family"), '"Arial", sans-serif');
+
   applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter" });
   assert.equal(values.get("--nexus-font-family"), '"Inter", sans-serif');
 });
