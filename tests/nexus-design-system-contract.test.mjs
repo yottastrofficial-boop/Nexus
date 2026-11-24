@@ -51,3 +51,13 @@ assert.match(libraryApplication, /parentId:\s*folderId/,
   "The folder context action must be able to create subfolders.");
 
 console.log("NEXUS global design system contract: OK");
+
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet {") &&
+  designSystem.includes("background: var(--nexus-panel-bg, #182330) !important;"),
+  "The legacy sheet shell must use the active global theme instead of its fixed background.");
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-component:not(.is-group-member) {") &&
+  designSystem.includes("background-color: var(--nexus-panel-card, var(--nexus-panel-surface, #273443));"),
+  "Sheet components must inherit the active semantic card color.");
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-sheet-element {") &&
+  designSystem.includes("background: var(--nexus-panel-surface, #202e3e);"),
+  "Sheet elements must inherit the active semantic surface color.");
