@@ -25,9 +25,10 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última release publicada:** `1.0.0.95`, com Design System global e Biblioteca Explorer; continua sem validação funcional completa no Foundry VTT 14 build 360.
+- **Última release estável publicada:** `1.0.0.95`, com Design System global e Biblioteca Explorer; continua sem validação funcional completa no Foundry VTT 14 build 360.
+- **Build de desenvolvimento atual da main:** `1.0.0.96`, com integração nativa da configuração visual e geometria responsiva dos controles; disponível para teste, ainda sem validação funcional no Foundry.
 - **Código da main após a release .95:** inclui correções de infraestrutura de CI e ciclo de vida do DOM. Essas alterações ainda não foram distribuídas em um novo pacote estável.
-- **Próxima candidata prevista:** `1.0.0.96-rc.1`, gerada manualmente a partir da main quando a rodada de testes estiver pronta.
+- **Próxima candidata prevista:** `1.0.0.97-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.
 - **Manifesto estável:** permanece apontando para a última release estável confirmada até que uma nova release estável tenha ZIP anexado e verificado.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
@@ -85,4 +86,4 @@ Candidata ou release estável não equivale a checkpoint funcional. A promoção
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
-A versão 1.0.0.95 tem finalidade explícita de validação do Design System global, da Biblioteca Explorer hierárquica e dos trilhos flutuantes vinculados à janela nativa. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
+A versão 1.0.0.96 tem finalidade explícita de validação da integração da aparência nativa do Foundry, da geometria responsiva dos controles e dos trilhos flutuantes vinculados à janela nativa. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.

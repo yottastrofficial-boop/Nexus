@@ -1,3 +1,14 @@
+## 1.0.0.96 — Integração nativa e geometria responsiva do Foundry
+
+- Consolida a integração do Design System com as superfícies nativas de configuração do Foundry, sem substituir nem reimplementar `UIConfig` ou `SettingsConfig`.
+- Padroniza a geometria dos controles nativos a partir da altura configurada no perfil visual, com limites responsivos e dimensionamento coerente dos ícones.
+- Evita cortes nos controles laterais, permite navegação horizontal em listas longas de cenas e diferencia estados de cena visualizada e ativa.
+- Mantém trilhos flutuantes da ficha com rolagem vertical independente e dimensões alinhadas aos controles nativos.
+- Preserva foco visível por teclado e respeita `prefers-reduced-motion`.
+- Adiciona contratos automatizados e roteiro de validação manual para telas estreitas, cenas numerosas, temas, acessibilidade e clientes GM/jogador.
+- Atualiza a versão do pacote de desenvolvimento para 1.0.0.96. O manifesto estável continua em 1.0.0.95 até que uma nova release seja publicada e seu ZIP verificado.
+- Build destinada à validação no Foundry VTT 14 build 360; CI verde não substitui testes funcionais no cliente real.
+
 ## 1.0.0.95 — Design System global e Biblioteca Explorer
 
 - Consolida o Design System estrutural para fichas, aplicações NEXUS e superfícies nativas selecionadas do Foundry, preservando handlers e janelas de módulos de terceiros.
