@@ -4,11 +4,12 @@
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
-- Commit de referência: `7f78e2c1e539e615f4d5772d1f05ba68a7d460ce`
-- Versão publicada: `1.0.0.90` (Biblioteca Explorer unificada; validação funcional pendente)
-- Versão candidata: `1.0.0.91` (Biblioteca universal integrada; CI/publicação e validação funcional no Foundry pendentes)
+- Commit de referência: `4555715099fc678b90e606809953d3b287b144f7` (HEAD da `main` verificado em 2026-11-23)
+- Versão publicada: `1.0.0.91` (release publicada em 2026-11-23; ZIP `nexus.zip` anexado)
+- CI de publicação: execução `45153746614` concluída com sucesso
+- Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`
 - Compatibilidade declarada: Foundry VTT 14, build 360
-- Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
+- Estado: a 1.0.0.91 está publicada e passou pela validação automatizada; a validação funcional no cliente Foundry continua pendente.
 
 Este documento descreve a implementação observada no repositório e separa recursos presentes, infraestrutura parcial e objetivos futuros. Não substitui os livros oficiais do NEXUS RPG.
 
@@ -37,7 +38,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na candidata 1.0.0.91 (publicação e validação funcional pendentes)
+## Implementação presente na main e publicada como 1.0.0.91 (validação funcional pendente)
 
 A árvore atual contém, entre outros:
 
@@ -63,9 +64,9 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
-## Fundação e integração da Biblioteca universal — implementação em branches de trabalho
+## Fundação e integração da Biblioteca universal — publicada na 1.0.0.91
 
-A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal; e a branch `feature/library-explorer-catalog-integration-2026-11-23` conecta a visão universal do Explorer ao catálogo, sem alterar a versão publicada 1.0.0.90:
+As branches `feature/universal-library-resource-foundation-2026-11-23`, `feature/universal-library-catalog-2026-11-23` e `feature/library-explorer-catalog-integration-2026-11-23` foram a origem histórica da implementação consolidada e publicada na 1.0.0.91:
 
 - `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
 - `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
@@ -74,12 +75,12 @@ A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a
 - A listagem constrói metadados leves, pagina cada provedor separadamente e resolve o conteúdo completo sob demanda. Módulos podem contribuir com conteúdo sem adicionar janelas ou botões independentes.
 - Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
 
-A branch `feature/library-universal-completion-2026-11-23` adiciona `scripts/library/library-application.js` para a janela independente, `scripts/library/catalog-explorer.js` para a visão universal e `scripts/library/library-backup-service.js` para backup completo com prévia e importação confirmada. A Biblioteca agora oferece ações contextuais por provedor, filtros por origem/categoria/tipo/etiqueta, seleção explícita de compêndios visíveis, favoritos/recentes/pastas/coleções mistas por referência e metadados Foundry com cache invalidado por hooks. Ainda faltam adaptadores de importação de fontes externas e destinos especializados, editores completos de todos os tipos de Lógica e validação real no Foundry VTT 14 build 360. O fluxo inspirado no Plutonium está parcialmente atendido pelo backup; não se deve confundir backup com importação de fontes externas. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador.
+A branch `feature/library-universal-completion-2026-11-23` originou `scripts/library/library-application.js`, `scripts/library/catalog-explorer.js` e `scripts/library/library-backup-service.js`, agora presentes na `main`. A Biblioteca oferece ações contextuais por provedor, filtros por origem/categoria/tipo/etiqueta, seleção explícita de compêndios visíveis, favoritos/recentes/pastas/coleções mistas por referência e metadados Foundry com cache invalidado por hooks. Permanecem pendentes adaptadores concretos para importar formatos externos e destinos especializados. O backup interno com prévia e confirmação não deve ser confundido com importação de fontes externas. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador.
 
 ## Limitações conhecidas e trabalho pendente
 
-- A área Lógica ainda precisa de editores especializados completos para cada subtipo, com schemas, validação e integração de ponta a ponta.
-- O runtime não deve ser considerado um sistema de automação pronto enquanto os executores e permissões necessários não estiverem registrados e testados.
+- A área Lógica já possui schemas e editores especializados iniciais para Propriedades, Regras, Comportamentos, Fluxos e Funções/Expressões; o Flow Builder inclui editor de grafo e simulação. A validação ponta a ponta no cliente Foundry continua pendente.
+- O runtime oferece executores confiáveis iniciais (`nexus.actor.update` e `nexus.actor.adjust`); outras operações dependem de registro explícito por código confiável e de testes de permissões.
 - Não há binários WASM FFmpeg/libjxl incluídos na base atual; decodificação especializada de AV1/JXL não deve ser anunciada como concluída.
 - Nenhum backend externo de armazenamento compartilhado vem configurado por padrão.
 - A classe principal da ficha e alguns controladores ainda são grandes e concentram responsabilidades; a extração deve ser incremental e guiada por dependências e testes.
