@@ -6,8 +6,8 @@
 - Mantém trilhos flutuantes da ficha com rolagem vertical independente e dimensões alinhadas aos controles nativos.
 - Preserva foco visível por teclado e respeita `prefers-reduced-motion`.
 - Adiciona contratos automatizados e roteiro de validação manual para telas estreitas, cenas numerosas, temas, acessibilidade e clientes GM/jogador.
-- Atualiza a versão do pacote de desenvolvimento para 1.0.0.96. O manifesto estável continua em 1.0.0.95 até que uma nova release seja publicada e seu ZIP verificado.
-- Build destinada à validação no Foundry VTT 14 build 360; CI verde não substitui testes funcionais no cliente real.
+- Publicada como release estável 1.0.0.96 após validação automatizada do pacote e confirmação do asset `nexus.zip`.
+- A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; a publicação não representa aprovação desses testes manuais.
 
 ## 1.0.0.95 — Design System global e Biblioteca Explorer
 
