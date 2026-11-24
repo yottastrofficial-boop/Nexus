@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
+const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
@@ -24,13 +25,21 @@ assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/op
 assert.match(styles, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
-console.log("NEXUS universal library UI contract: OK");
-
 assert.match(libraryTemplate, /data-library-clear-search/,
   "The search field must provide an explicit accessible clear action.");
 assert.match(libraryTemplate, /Buscar por nome, descrição ou etiqueta/,
   "The search hint must explain the searchable resource fields.");
-assert.match(libraryTemplate, /<details class="nexus-library-actions-menu">[\\s\\S]*?data-library-backup-export[\\s\\S]*?data-library-backup-import-file/,
+assert.ok(libraryTemplate.includes('<details class="nexus-library-actions-menu">') &&
+  libraryTemplate.includes('data-library-backup-export') &&
+  libraryTemplate.includes('data-library-backup-import-file'),
   "Backup and restore actions must live in a compact overflow menu.");
 assert.doesNotMatch(libraryTemplate, /nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca"/,
   "Backup actions must no longer occupy the primary toolbar row.");
+assert.ok(libraryApplication.includes('root.querySelector("[data-library-clear-search]")') &&
+  libraryApplication.includes('searchClear?.addEventListener("click", clearSearch)'),
+  "The search clear control must be wired to the library query state.");
+assert.ok(libraryApplication.includes('event.key !== "Escape"') &&
+  libraryApplication.includes('syncSearchClear();'),
+  "Escape must clear an active search and keep the clear control synchronized.");
+
+console.log("NEXUS universal library UI contract: OK");
