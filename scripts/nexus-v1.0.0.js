@@ -16,13 +16,22 @@ import { normalizeLibraryPreferences } from "./core/library-preferences.js";
 import { createLibraryBackupService } from "./library/library-backup-service.js";
 import { createLibraryTransferRegistry } from "./core/library-transfer-registry.js";
 import { NEXUS_COMPONENTS } from "./core/component-types.js";
-import { THEME_PALETTES } from "./core/theme.js";
+import { THEME_PALETTES, THEME_TOKENS, applyThemeTokens } from "./core/theme.js";
+import { installNexusDesignSystem } from "./core/design-system.js";
 import { getInteractionLibrary } from "./core/interactions.js";
 import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
+  // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
+  game.nexus.design ??= installNexusDesignSystem({
+    gameRef: game,
+    documentRef: document,
+    hooks: Hooks,
+    themeTokens: THEME_TOKENS,
+    applyThemeTokens
+  });
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
   game.nexus.resources ??= createResourceLifecycleManager();
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
