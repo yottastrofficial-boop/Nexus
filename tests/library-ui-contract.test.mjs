@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
+const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
@@ -16,7 +17,7 @@ assert.match(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.act
   "Abas especializadas do Foundry devem receber estado ativo explícito.");
 assert.match(styles, /#ui-left, #ui-top\) \.ui-control/,
   "Controles nativos de UI devem compartilhar a superfície visual flutuante do NEXUS.");
-assert.match(styles, /:focus-visible/,
+assert.match(libraryTemplate, /<option value="tables">RollTables<\\/option>/,\n  "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");\nassert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\\/option>/,\n  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");\nassert.match(styles, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
 console.log("NEXUS universal library UI contract: OK");
