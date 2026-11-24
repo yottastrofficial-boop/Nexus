@@ -68,6 +68,42 @@ export const getLibraryCatalogPreferenceReference = key => {
 };
 const text = (value, fallback = "") => String(value ?? fallback);
 
+const LIBRARY_RESOURCE_ICONS = Object.freeze({
+  component: "fa-solid fa-puzzle-piece",
+  composition: "fa-solid fa-layer-group",
+  layout: "fa-solid fa-table-columns",
+  template: "fa-solid fa-file-lines",
+  asset: "fa-solid fa-cube",
+  media: "fa-solid fa-photo-film",
+  theme: "fa-solid fa-palette",
+  style: "fa-solid fa-swatchbook",
+  logic: "fa-solid fa-diagram-project",
+  document: "fa-solid fa-file",
+  property: "fa-solid fa-list-check",
+  rule: "fa-solid fa-scale-balanced",
+  behavior: "fa-solid fa-bolt",
+  flow: "fa-solid fa-diagram-project",
+  function: "fa-solid fa-code"
+});
+
+const DOCUMENT_RESOURCE_ICONS = Object.freeze({
+  actor: "fa-solid fa-user",
+  item: "fa-solid fa-box",
+  scene: "fa-solid fa-map",
+  journalentry: "fa-solid fa-book-open",
+  macro: "fa-solid fa-code",
+  playlist: "fa-solid fa-music",
+  rolltable: "fa-solid fa-dice",
+  cards: "fa-solid fa-clone"
+});
+
+export function getLibraryResourceIcon(resource = {}) {
+  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\\s_-]/g, "");
+  if (resource.kind === "logic") return LIBRARY_RESOURCE_ICONS[type] ?? LIBRARY_RESOURCE_ICONS.logic;
+  if (resource.kind === "document") return DOCUMENT_RESOURCE_ICONS[type] ?? LIBRARY_RESOURCE_ICONS.document;
+  return LIBRARY_RESOURCE_ICONS[resource.kind] ?? LIBRARY_RESOURCE_ICONS.asset;
+}
+
 function makeElement(tag, className, content = "") {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -138,7 +174,7 @@ export function createLibraryCatalogExplorer({
       image.decoding = "async";
       preview.append(image);
     } else {
-      const icon = makeElement("i", "fa-solid fa-cube");
+      const icon = makeElement("i", getLibraryResourceIcon(resource));
       icon.setAttribute("aria-hidden", "true");
       preview.append(icon);
     }
