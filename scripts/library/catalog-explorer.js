@@ -104,6 +104,27 @@ export function getLibraryResourceIcon(resource = {}) {
   return LIBRARY_RESOURCE_ICONS[resource.kind] ?? LIBRARY_RESOURCE_ICONS.asset;
 }
 
+const THEME_PREVIEW_FIELDS = Object.freeze([
+  ["Canvas", "canvasColor"],
+  ["Cartão", "cardColor"],
+  ["Destaque", "highlightColor"],
+  ["Acento", "accentColor"],
+  ["Botão", "buttonColor"],
+  ["Cabeçalho", "windowHeaderColor"],
+  ["Conteúdo", "windowContentColor"],
+  ["Menu", "menuColor"],
+  ["Rolagem", "scrollColor"]
+]);
+
+export function getLibraryThemePreviewColors(resolved) {
+  const palette = resolved?.palette;
+  if (!palette || typeof palette !== "object" || Array.isArray(palette)) return [];
+  return THEME_PREVIEW_FIELDS.flatMap(([label, key]) => {
+    const value = String(palette[key] ?? "").trim();
+    return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value) ? [{ label, value }] : [];
+  });
+}
+
 function makeElement(tag, className, content = "") {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -226,13 +247,31 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
+    const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
+    const themePreview = makeElement("section", "nexus-library-theme-preview");
+    if (themeColors.length) {
+      themePreview.append(makeElement("strong", "", "Prévia da paleta"));
+      const swatches = makeElement("div", "nexus-library-theme-swatches");
+      for (const color of themeColors) {
+        const swatch = makeElement("div", "nexus-library-theme-swatch");
+        const sample = makeElement("span", "");
+        sample.style.backgroundColor = color.value;
+        sample.setAttribute("aria-label", color.label + ": " + color.value);
+        sample.title = color.label + " · " + color.value;
+        swatch.append(sample, makeElement("small", "", color.label));
+        swatches.append(swatch);
+      }
+      themePreview.append(swatches);
+    }
     const facts = makeElement("dl", "nexus-library-resource-facts");
     const resourceFacts = [
       ["Provedor", resource.providerId],
       ["Tipo", resource.type],
       ["Origem", resource.origin],
       ["Pasta", resource.folder],
-      ["Etiquetas", resource.tags.join(", ") || "—"]
+      ["Etiquetas", resource.tags.join(", ") || "—"],
+      ["Versão", "v" + String(resource.version ?? 1)],
+      ["Capacidades", resource.capabilities?.length ? resource.capabilities.join(", ") : "—"]
     ];
     if (resource.providerId === "nexus-library" && resource.reference?.collection === "components") {
       resourceFacts.push(["Versão", "v" + String(resource.version ?? resolved?.version ?? 1)]);
@@ -371,7 +410,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, save);
-          detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, editor, actions);
+          detail.replaceChildren(heading, meta, description, themePreview, facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
 
@@ -444,7 +483,7 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    detail.replaceChildren(heading, meta, description, themePreview, facts, folderLabel, collectionSection, updateSection, actions, advanced);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);
