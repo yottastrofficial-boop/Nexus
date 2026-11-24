@@ -23,25 +23,4 @@ jobs:
           node-version: 22
       - name: Validate package and regressions
         run: |
-          node --experimental-default-type=module tests/window-layering.test.mjs
-          node --experimental-default-type=module tests/component-grid.test.mjs
-          node --experimental-default-type=module tests/nexus-design-system-contract.test.mjs
-          node --experimental-default-type=module tests/library-preferences.test.mjs
-          node --experimental-default-type=module tests/library-ui-contract.test.mjs
-          node --experimental-default-type=module tests/canvas-geometry.test.mjs
-          node --experimental-default-type=module tests/group-hierarchy.test.mjs
-          node --experimental-default-type=module tests/design-system.test.mjs
-          node --experimental-default-type=module tests/design-library.test.mjs
-          node --experimental-default-type=module tests/library-backup-service.test.mjs
-          node --experimental-default-type=module tests/library-catalog-explorer.test.mjs
-          node --experimental-default-type=module tests/theme-inspector.test.mjs
-          node --experimental-default-type=module tests/media-format-registry.mjs
-          node --experimental-default-type=module tests/logic-infrastructure.mjs
-          node --experimental-default-type=module tests/logic-schemas.test.mjs
-          node --experimental-default-type=module tests/logic-editors.test.mjs
-          node --experimental-default-type=module tests/foundry-logic-integration.test.mjs
-          node --experimental-default-type=module tests/media-infrastructure.mjs
-          node --experimental-default-type=module tests/core-regressions.mjs
-          node --experimental-default-type=module tests/validate-package.mjs
-          node --experimental-default-type=module tests/docs-consistency.mjs
-          node --experimental-default-type=module tests/group-render-performance.mjs
+          node tests/run-all.mjs
