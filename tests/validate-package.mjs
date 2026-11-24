@@ -402,7 +402,7 @@ assert.match(template, /nexus-property-value-field[\s\S]*data-property-value/, "
 assert.match(propertyPickerView, /nexus-property-option-heading/, "O seletor deve organizar nome e caminho em linhas separadas");
 assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
-assert.match(sheet, /highestPanelZ === null \? desiredZ : Math\.min\(desiredZ, highestPanelZ - 1\)/, "As barras laterais não podem sobrepor janelas abertas");
+assert.match(sheet, /resolveNexusFloatingLayer\(\{ sheetZIndex: baseZ, sheetFocused: focused, activePanelZIndex: activePanelZ \}\)/, "A hierarquia dos trilhos deve acompanhar a ficha ou o painel ativo");
 assert.match(css, /nexus-behavior-editor button:not\(:disabled\)[\s\S]*cursor:pointer!important/, "Botões de comportamento devem restaurar o cursor de interação");
 assert.match(canvasPlayInteractions, /onPointerMove[\s\S]*card\.style\.setProperty\("cursor", "pointer", "important"\)/, "Cards com gatilhos devem exibir a mãozinha no Modo Padrão");
 assert.equal(normalizeNexusPropertyPath("for.value"), "attributes.for.value");
