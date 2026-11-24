@@ -56,3 +56,14 @@ test("rejeita importação inválida e operações sobre perfis inexistentes", a
   await assert.rejects(library.apply("missing", "world"), /não existe/);
   await assert.rejects(library.remove("missing"), /não existe/);
 });
+
+
+test("bloqueia exclusão quando outra coleção referencia o perfil salvo", async () => {
+  const user = makeUser(), library = createDesignLibraryService({ getUser: () => user, design: makeDesign(), createId: () => "theme-dependent" });
+  const saved = await library.save(createDefaultDesignProfile("medieval"));
+  const store = user.flags.get("libraryStore");
+  store.collections.components.push({ id: "dependent-component", dependencies: [saved.id] });
+  await user.setFlag("nexus", "libraryStore", store);
+  await assert.rejects(library.remove(saved.id), /dependências/);
+  assert.ok(library.get(saved.id));
+});

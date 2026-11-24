@@ -28,7 +28,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
       const entries = store.collections.themes;
       const index = requestedId ? entries.findIndex(entry => String(entry.id) === requestedId && entry.kind === "design-profile") : -1;
       if (requestedId && index < 0) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
-      if (index < 0 && entries.filter(entry => entry?.kind === "design-profile").length >= MAX_PROFILES) throw new Error("A Biblioteca atingiu o limite de 100 perfis de aparência.");
+      if (index < 0 && entries.length >= MAX_PROFILES) throw new Error("A coleção de temas da Biblioteca atingiu o limite de 100 itens.");
       let entryId = requestedId;
       if (!entryId) for (let attempt = 0; attempt < 5; attempt++) {
         const seed = String(makeId() ?? "").trim();
@@ -72,8 +72,9 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryStore(user, store => {
       const entry = store.collections.themes.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
-      const dependents = store.collections.themes.filter(item => item !== entry && Array.isArray(item.dependencies) &&
-        item.dependencies.some(value => String(typeof value === "string" ? value : value?.id ?? "") === String(id)));
+      const dependents = Object.values(store.collections).flatMap(entries => entries.filter(item => item !== entry &&
+        Array.isArray(item.dependencies) &&
+        item.dependencies.some(value => String(typeof value === "string" ? value : value?.id ?? "") === String(id))));
       if (dependents.length) throw new Error("Este perfil possui dependências e não pode ser excluído.");
       store.collections.themes = store.collections.themes.filter(item => item !== entry); return store;
     });
