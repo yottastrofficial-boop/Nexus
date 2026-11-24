@@ -166,10 +166,12 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
   if (resource.kind === "theme" || collection === "themes") return null;
   if (resource.kind === "media" || collection === "media") {
     const source = safeMediaSource(data.path ?? data.url ?? data.src ?? resource.thumbnail);
-    const mime = String(data.mimeType ?? data.mime ?? data.type ?? "").toLowerCase();
+    const mime = String(data.mimeType ?? data.mime ?? data.type ?? "").split(";", 1)[0].trim().toLowerCase();
     const extension = (source.split(/[?#]/, 1)[0].split(".").pop() ?? "").toLowerCase();
     const isSvg = mime === "image/svg+xml" || extension === "svg";
-    const mediaType = (!isSvg && (mime.startsWith("image/") || ["png","jpg","jpeg","gif","webp","avif"].includes(extension)))
+    const nativeImageMime = ["image/png", "image/jpeg", "image/gif", "image/apng", "image/webp", "image/avif", "image/bmp", "image/x-icon", "image/vnd.microsoft.icon"].includes(mime);
+    const nativeImageExtension = ["png", "jpg", "jpeg", "gif", "apng", "webp", "avif", "bmp", "ico"].includes(extension);
+    const mediaType = (!isSvg && (nativeImageMime || nativeImageExtension))
       ? "image"
       : (mime.startsWith("audio/") || ["mp3","ogg","wav","m4a","flac","opus"].includes(extension))
         ? "audio"
@@ -273,6 +275,15 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     };
   }
   return null;
+}
+
+export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
+  if (resource?.kind !== "media" || resource?.reference?.collection !== "media") return "";
+  const rawSource = resolved?.path ?? resolved?.url ?? resolved?.src;
+  if (typeof rawSource !== "string" || !rawSource.trim()) return "";
+  const preview = getLibraryResourcePreviewModel(resource, resolved);
+  const source = rawSource.trim();
+  return preview?.mediaType === "image" && preview.source === source ? source : "";
 }
 
 function renderLibraryResourcePreview(resource, resolved) {
