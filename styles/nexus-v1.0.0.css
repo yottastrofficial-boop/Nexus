@@ -9170,3 +9170,40 @@ html.nexus-design-system .nexus-themed-application {
 html.nexus-design-system .nexus-themed-application .directory-item {
   padding-block: calc(4px * var(--nexus-density-scale, 1));
 }
+
+/* Theme Library — scoped to the NEXUS Design Studio. */
+.nexus-design-studio .nexus-design-library-panel {
+  display: flex; flex-direction: column; gap: 0.65rem; margin-top: 1rem; padding: 0.85rem;
+  border: 1px solid var(--nexus-panel-border, var(--color-border-light-2));
+  border-radius: var(--nexus-radius-medium, 10px);
+  background: var(--nexus-panel-bg, var(--color-cool-5)); color: var(--nexus-panel-text, var(--color-text-primary));
+}
+.nexus-design-studio .nexus-design-library-heading,
+.nexus-design-studio .nexus-design-library-entry-heading {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+}
+.nexus-design-studio .nexus-design-library-heading > div,
+.nexus-design-studio .nexus-design-library-entry-heading { min-width: 0; }
+.nexus-design-studio .nexus-design-library-heading small,
+.nexus-design-studio .nexus-design-library-entry-heading small {
+  display: block; margin-top: 0.2rem; color: var(--nexus-panel-muted, var(--color-text-secondary)); font-size: 0.78rem;
+}
+.nexus-design-studio .nexus-design-library-heading > span {
+  flex: 0 0 auto; min-width: 1.6rem; padding: 0.15rem 0.4rem; border-radius: 999px;
+  background: var(--nexus-panel-surface, var(--color-cool-4)); text-align: center;
+}
+.nexus-design-studio .nexus-design-library-save {
+  width: 100%; min-height: 2.25rem; border: 1px solid var(--nexus-panel-accent, var(--color-border-highlight));
+  border-radius: var(--nexus-radius-small, 6px); background: var(--nexus-panel-accent, var(--color-cool-4));
+  color: var(--nexus-panel-text, var(--color-text-primary));
+}
+.nexus-design-studio .nexus-design-library-list { display: flex; flex-direction: column; gap: 0.55rem; max-height: 24rem; overflow: auto; }
+.nexus-design-studio .nexus-design-library-entry {
+  display: flex; flex-direction: column; gap: 0.4rem; padding: 0.6rem;
+  border: 1px solid var(--nexus-panel-border, var(--color-border-light-2));
+  border-radius: var(--nexus-radius-small, 6px); background: var(--nexus-panel-surface, var(--color-cool-4));
+}
+.nexus-design-studio .nexus-design-library-entry input { width: 100%; min-width: 0; }
+.nexus-design-studio .nexus-design-library-entry-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.nexus-design-studio .nexus-design-library-entry-actions button { flex: 1 1 auto; min-width: 2rem; min-height: 1.9rem; padding: 0.2rem 0.4rem; }
+.nexus-design-studio .nexus-design-library-empty { margin: 0; color: var(--nexus-panel-muted, var(--color-text-secondary)); font-size: 0.82rem; }

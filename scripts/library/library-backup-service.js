@@ -1,4 +1,5 @@
 import { createNexusLibraryBackup, parseNexusLibraryBackup } from "../core/library-sharing.js";
+import { normalizeDesignProfile } from "../core/design-profile.js";
 import {
   NEXUS_LIBRARY_COLLECTIONS,
   createEmptyNexusLibraryStore,
@@ -50,12 +51,17 @@ export function createLibraryBackupService({
 
     store.collections.themes = Object.entries(data.themes ?? {})
       .filter(([id]) => !builtinThemeIds.has(String(id)))
-      .map(([sourceId, palette], index) => ({
-        id: makeEntryId("themes", index),
-        sourceId: String(sourceId),
-        name: String(sourceId),
-        palette: structuredClone(palette)
-      }));
+      .map(([sourceId, value], index) => {
+        const isDesignProfile = value && typeof value === "object" && value.__nexusDesignProfile === 1 && value.profile;
+        const id = makeEntryId("themes", index);
+        return {
+          id,
+          sourceId: String(sourceId),
+          name: String(isDesignProfile ? value.name ?? sourceId : sourceId),
+          palette: structuredClone(isDesignProfile ? value.palette : value),
+          ...(isDesignProfile ? { kind: "design-profile", profile: normalizeDesignProfile({ ...value.profile, id }) } : {})
+        };
+      });
 
     store.collections.flows = (Array.isArray(data.flows) ? data.flows : [])
       .filter(entry => entry?.origin !== "world")
@@ -105,7 +111,14 @@ export function createLibraryBackupService({
 
     const personalThemes = Object.fromEntries((store.collections.themes ?? [])
       .filter(theme => theme?.palette && typeof theme.palette === "object")
-      .map(theme => [String(theme.sourceId ?? theme.id), theme.palette]));
+      .map(theme => [String(theme.sourceId ?? theme.id), theme.kind === "design-profile" && theme.profile
+        ? {
+            __nexusDesignProfile: 1,
+            name: String(theme.name ?? theme.profile.name ?? "Aparência"),
+            palette: theme.palette,
+            profile: normalizeDesignProfile(theme.profile)
+          }
+        : theme.palette]));
 
     return createNexusLibraryBackup({
       name: "Biblioteca NEXUS",

@@ -76,6 +76,14 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
 
+## Biblioteca de Aparências — integração inicial
+
+- Perfis visuais completos reutilizam a coleção `themes` do `libraryStore`, identificados por `kind: "design-profile"`.
+- O Estúdio oferece salvar rascunho, carregar, aplicar ao escopo atual, duplicar, renomear, excluir e exportar perfis salvos.
+- A importação de perfil utiliza o envelope versionado `NEXUS-DESIGN/1`; o backup universal preserva o objeto completo do perfil e mantém compatibilidade com temas legados que armazenam somente paletas.
+- A coleção continua pessoal; o perfil ativo da campanha continua em configuração `world`. Aplicar um perfil ao mundo compartilha a aparência efetiva, não a biblioteca privada do usuário.
+- Próximas evoluções: integração de preview e ação contextual no Inspector da Biblioteca, coleções compartilhadas de campanha somente após definir ownership/permissões e teste real de sincronização entre clientes.
+
 ## Critérios para concluir uma etapa
 
 - Escopo pequeno e explícito.

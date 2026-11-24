@@ -38,6 +38,8 @@ A arquitetura deve ser evoluída por mudanças pequenas, preservando contratos e
 
 A aparência global mantém ownership separado dos documentos de jogo. O padrão NEXUS é a restauração do sistema; o perfil da campanha usa configuração Foundry `world`; o perfil pessoal usa `user`; e a preferência `world/system/personal` define a origem efetiva. O `design-profile.js` valida paleta, tipografia, densidade, espaçamento, geometria e acessibilidade. O Estúdio ApplicationV2 edita rascunhos com prévia local, diagnóstico de contraste, importação/exportação versionada e salvamento explícito por escopo. O cliente aplica tokens localmente; uma política mundial pode forçar o perfil da campanha sem apagar preferências pessoais. Integrações nativas são limitadas a superfícies identificadas, sem estilos indiscriminados em módulos externos.
 
+Perfis reutilizáveis ficam na coleção `themes` do armazenamento canônico da Universal Library, por meio de `scripts/core/design-library.js`. O serviço mantém operações de criação, leitura, atualização, duplicação, renomeação, remoção, aplicação e intercâmbio de perfis completos. A Biblioteca pessoal e o perfil ativo da campanha têm responsabilidades distintas: aplicar um perfil copia seus dados validados para as configurações Foundry já existentes, sem compartilhar a coleção pessoal nem introduzir um segundo armazenamento de aparência mundial.
+
 ## Sequência segura de refatoração
 
 ### Etapa 0 — Linha de base atual

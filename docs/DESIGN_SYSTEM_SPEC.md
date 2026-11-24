@@ -41,6 +41,8 @@ As cores aceitas são exclusivamente hexadecimais (`#RGB` ou `#RRGGBB`) e são n
 
 O Estúdio é uma ApplicationV2 independente registrada em Configurações do Jogo. Permite selecionar um preset, renomear o perfil, ajustar os tokens, ver prévia local em tempo real, avaliar quatro pares de contraste, importar/exportar JSON versionado (limite de 64 KB), restaurar o preset e salvar no escopo da campanha ou do usuário. A prévia não persiste; descartar/fechar restaura a aparência efetiva anterior.
 
+A Biblioteca de Aparências reutiliza a coleção canônica `themes` do Universal Library (`libraryStore`), identificando perfis completos por `kind: "design-profile"`. Cada entrada mantém metadados, paleta e o perfil versionado integral. O usuário pode salvar, carregar, duplicar, renomear, excluir, exportar e aplicar uma cópia à campanha (GM) ou à própria preferência (quando permitido). Aplicar copia o perfil validado para a configuração Foundry existente; não cria uma segunda configuração ativa nem altera a origem de herança. O backup universal preserva o perfil completo sem quebrar entradas antigas que contêm somente paletas.
+
 - `designWorldProfile`: perfil da campanha, escopo `world`.
 - `designUserProfile`: perfil pessoal, escopo `user`.
 - `game.nexus.design.getProfile(scope)`, `saveProfile(profile, scope)`, `preview(profile)`, `clearPreview()` e `openStudio()` compõem a API pública.

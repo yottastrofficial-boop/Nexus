@@ -115,3 +115,44 @@ test("importação recusa uma prévia obsoleta quando surge conflito antes da co
   await assert.rejects(targetService.commitImport(preview), /Biblioteca mudou desde a prévia/);
   assert.equal(targetUser.flags.get("libraryStore").collections.components[0].label, "Já existe");
 });
+
+
+test("backup round-trips complete custom design profiles without flattening them into palettes", () => {
+  const store = createEmptyNexusLibraryStore();
+  store.collections.themes.push({
+    id: "design-forest",
+    sourceId: "design-profile:design-forest",
+    kind: "design-profile",
+    name: "Bosque Antigo",
+    palette: { panel: "#123456" },
+    profile: {
+      schemaVersion: 1, id: "design-forest", name: "Bosque Antigo", preset: "medieval",
+      palette: { panel: "#123456" },
+      typography: { family: "Georgia", baseSize: 16 },
+      layout: { density: "spacious" },
+      accessibility: { reducedMotion: true }
+    }
+  });
+  const user = makeUser(store);
+  const service = createLibraryBackupService({
+    getUser: () => user,
+    getCatalog: () => ({ assets: [] }),
+    getThemePalettes: () => ({ "nexus-dark": { panel: "#000000" } }),
+    getComponentTypes: () => ["token"]
+  });
+  const code = service.exportCode();
+  const target = makeUser();
+  const targetService = createLibraryBackupService({
+    getUser: () => target,
+    getCatalog: () => ({ assets: [] }),
+    getThemePalettes: () => ({ "nexus-dark": { panel: "#000000" } }),
+    getComponentTypes: () => ["token"]
+  });
+  const preview = targetService.prepareImport(code, { createId: () => "imported-design-profile" });
+  const incoming = preview.incoming.collections.themes.find(entry => entry.kind === "design-profile");
+  assert.equal(incoming.name, "Bosque Antigo");
+  assert.equal(incoming.profile.palette.panel, "#123456");
+  assert.equal(incoming.profile.typography.baseSize, 16);
+  assert.equal(incoming.profile.layout.density, "spacious");
+  assert.equal(incoming.profile.accessibility.reducedMotion, true);
+});
