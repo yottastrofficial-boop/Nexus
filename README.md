@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.93 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.94 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.93-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.94-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -14,7 +14,7 @@
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Versão publicada para validação:** 1.0.0.93. Esta versão refina o shell visual compartilhado, a Biblioteca, os controles nativos do Foundry, o Chat em cartões e a hierarquia das ferramentas flutuantes da ficha. O pacote é destinado à validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada.
+**Versão publicada para validação:** 1.0.0.94. Esta versão consolida a janela da Biblioteca Universal, o Inspector com prévias tipadas, os filtros e o shell visual compartilhado. O pacote é destinado à validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada. O pacote é destinado à validação no Foundry VTT 14 build 360; ainda não é uma versão funcionalmente confirmada.
 
 ## Visão geral
 
@@ -26,9 +26,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual — 1.0.0.93
+## Implementação atual — 1.0.0.94
 
-A linha atual da `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Explorer, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A linha atual da `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -46,10 +46,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Versão atual | 1.0.0.93 |
+| Versão atual | 1.0.0.94 |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.93 reúne o Design System, o Inspector visual, o shell compartilhado, os cartões do Chat e os controles nativos refinados. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A versão 1.0.0.94 consolida a Biblioteca Universal, suas prévias tipadas e o shell visual responsivo. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A última versão publicada é a **1.0.0.93**. O pacote foi validado e anexado à Release; isso não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A última versão publicada é a **1.0.0.94**. O pacote foi validado e anexado à Release; isso não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
