@@ -6,6 +6,8 @@
 - Branch oficial: `main`
 - Commit de referência da auditoria: `2573c82845473f389fa150044c55458d4dec54d1`
 - Primeiro commit de consolidação: `91c54660e4a5c210e65ed988dbdbec91aff3b5af`
+- Commit de alinhamento de versão: `e6409eb8c6b872c675773a8771e62c305614726a`
+- Commit de validação final: `356d237504b0303ccce235b86c8a4bcc01bebdc3`
 - Release publicada: `v1.0.0.96`; asset `nexus.zip` confirmado, 461.715 bytes.
 - Versão de desenvolvimento declarada na main: `1.0.0.97`.
 - Manifesto estável: `1.0.0.96`.
@@ -50,16 +52,16 @@ O tamanho, isoladamente, não prova duplicação. A extração deve seguir contr
 
 ### Pull requests
 
-Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quatro PRs abertas:
+Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quatro PRs abertas. Após a revisão, as quatro foram encerradas e não restam PRs abertas:
 
 - `#8`: editor de interações antigo — encerrada como superada pela implementação atual.
 - `#32`: auditoria de estabilidade antiga — encerrada após confirmar que os contratos relevantes foram incorporados em etapas posteriores.
 - `#62`: documentação baseada na versão 1.0.0.91 — encerrada como desatualizada.
-- `#63`: shell antigo da Biblioteca — mantida aberta durante a recuperação seletiva de melhorias e a validação automatizada.
+- `#63`: shell antigo da Biblioteca — encerrada como superada após recuperar as melhorias úteis e aprovar o CI.
 
 As PRs recentes `#73`, `#74`, `#77`, `#78`, `#79` e `#80` estão integradas. As propostas duplicadas `#75` e `#76` foram encerradas; a linha final do controle de release foi integrada pela `#77`.
 
-A PR `#63` não deve ser mesclada integralmente: a branch está muito atrás da main. Foram recuperados para a arquitetura atual recursos aproveitáveis — inserção segura de imagens da coleção de mídia, aplicação de presets de tema e proteção contra atualização concorrente de definições. A PR permanece aberta até a validação automatizada da adaptação.
+A PR `#63` não foi mesclada integralmente: a branch estava muito atrás da main. Foram recuperados para a arquitetura atual a inserção segura de imagens da coleção de mídia, a aplicação de presets de tema e a proteção contra atualização concorrente de definições. A PR foi encerrada após a adaptação e a aprovação do CI no commit `356d237`.
 
 ### Branches
 
@@ -85,13 +87,13 @@ As branches associadas a PRs já integradas também são candidatas à exclusão
 
 ## Changelog e documentação
 
-A primeira execução do CI após a consolidação detectou a necessidade de avançar a versão de desenvolvimento para `1.0.0.97` e de preservar os contratos do fluxo de release. A correção mantém os testes ativos; não houve desativação de verificações.
+A primeira execução do CI após a consolidação detectou a necessidade de avançar a versão de desenvolvimento para `1.0.0.97` e de preservar os contratos do fluxo de release. A correção mantém os testes ativos; não houve desativação de verificações. A rodada final no commit `356d237` aprovou a suíte de regressão e o empacotamento.
 
 - O `CHANGELOG.md` continha duas entradas para 1.0.0.68 e duas para 1.0.0.67.
 - Uma cópia antiga do README havia sido anexada ao changelog.
 - As entradas repetidas foram consolidadas sem apagar as notas históricas.
 - A cópia indevida do README foi retirada.
-- README, visão do projeto, roadmap e política de estabilidade foram alinhados à release publicada 1.0.0.96.
+- README, visão do projeto, roadmap e política de estabilidade foram alinhados à base de desenvolvimento 1.0.0.97 e à release estável publicada 1.0.0.96.
 - `system.json` na main usa a versão de desenvolvimento .97 e mantém `download` apontando para a release estável .96.
 - O ZIP já publicado da .96 é imutável e ainda contém a URL antiga em seu `system.json`; o manifesto canônico aponta corretamente para .96. O workflow de release passa a sincronizar também o `system.json` nos próximos pacotes.
 

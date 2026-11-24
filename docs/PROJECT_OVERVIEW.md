@@ -65,9 +65,9 @@ A árvore atual contém, entre outros:
 
 A presença de uma infraestrutura não significa que todos os seus editores, adaptadores ou executores estejam conectados à interface.
 
-## Fundação e integração da Biblioteca universal — implementação em branches de trabalho
+## Fundação e integração da Biblioteca universal — consolidada na main
 
-A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a base de RAM e referências Foundry; a branch `feature/universal-library-catalog-2026-11-23` conecta essas fontes ao catálogo universal; e a branch `feature/library-explorer-catalog-integration-2026-11-23` conecta a visão universal do Explorer ao catálogo, sem alterar a versão publicada 1.0.0.90:
+A fundação foi desenvolvida em etapas nas PRs `#58`, `#59` e `#60` e consolidada na `main` pela PR `#61`. As branches originais são referências históricas, não linhas ativas de implementação:
 
 - `scripts/core/foundry-document-bridge.js` consulta Actors, Items, Scenes, Journal Entries, Macros, Playlists, RollTables e Cards como referências UUID, com paginação e consulta opcional aos índices de compêndios.
 - `scripts/core/resource-lifecycle.js` controla recursos transitórios em RAM por carregamento sob demanda, deduplicação de carregamentos, referências ativas, reservas de pré-carregamento, limite estimado e descarregamento de recursos ociosos.
@@ -76,11 +76,11 @@ A branch `feature/universal-library-resource-foundation-2026-11-23` estabelece a
 - A listagem constrói metadados leves, pagina cada provedor separadamente e resolve o conteúdo completo sob demanda. Módulos podem contribuir com conteúdo sem adicionar janelas ou botões independentes.
 - Documentos nativos não são duplicados nem têm permissões contornadas. Macros continuam documentos Foundry; Propriedades, Regras, Comportamentos, Fluxos e Funções continuam tipos próprios do NEXUS.
 
-A branch `feature/library-universal-completion-2026-11-23` adiciona `scripts/library/library-application.js` para a janela independente, `scripts/library/catalog-explorer.js` para a visão universal e `scripts/library/library-backup-service.js` para backup completo com prévia e importação confirmada. A Biblioteca agora oferece ações contextuais por provedor, filtros por origem/categoria/tipo/etiqueta, seleção explícita de compêndios visíveis, favoritos/recentes/pastas/coleções mistas por referência e metadados Foundry com cache invalidado por hooks. Ainda faltam adaptadores de importação de fontes externas e destinos especializados, editores completos de todos os tipos de Lógica e validação real no Foundry VTT 14 build 360. O fluxo inspirado no Plutonium está parcialmente atendido pelo backup; não se deve confundir backup com importação de fontes externas. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador.
+A `main` contém `scripts/library/library-application.js` para a janela independente, `scripts/library/catalog-explorer.js` para a visão universal e `scripts/library/library-backup-service.js` para backup completo com prévia e importação confirmada. A Biblioteca oferece ações contextuais por provedor, filtros por origem/categoria/tipo/etiqueta, seleção explícita de compêndios visíveis, favoritos/recentes/pastas/coleções mistas por referência e metadados Foundry com cache invalidado por hooks. Ainda faltam adaptadores de importação de fontes externas e destinos especializados, editores completos de todos os tipos de Lógica e validação real no Foundry VTT 14 build 360. O fluxo inspirado no Plutonium está parcialmente atendido pelo backup; não se deve confundir backup com importação de fontes externas. Os limites de RAM são estimativas contábeis, não leitura exata do consumo do navegador.
 
 ## Limitações conhecidas e trabalho pendente
 
-- A área Lógica ainda precisa de editores especializados completos para cada subtipo, com schemas, validação e integração de ponta a ponta.
+- A área Lógica já possui schemas e editores especializados integrados ao Inspector; o editor de Fluxos ainda é inicial, com conectores gráficos, arrastar/soltar, mais executores e testes ponta a ponta pendentes.
 - O runtime não deve ser considerado um sistema de automação pronto enquanto os executores e permissões necessários não estiverem registrados e testados.
 - Não há binários WASM FFmpeg/libjxl incluídos na base atual; decodificação especializada de AV1/JXL não deve ser anunciada como concluída.
 - Nenhum backend externo de armazenamento compartilhado vem configurado por padrão.

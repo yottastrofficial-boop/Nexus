@@ -64,19 +64,18 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 8. **Higiene do repositório:** reconciliar branches divergentes, documentar decisões e arquivar linhas antigas sem apagar histórico útil.
 9. **Documentação:** manter README, arquitetura, roadmap, changelog e política de release coerentes com o código e com o pacote publicado.
 
-## Biblioteca universal — integração concluída na candidata 1.0.0.91
+## Biblioteca universal — integração incorporada à main (histórico das PRs #58–#61)
 
-- **PR #58 / `feature/universal-library-resource-foundation-2026-11-23`:** ciclo de vida em RAM e ponte UUID para documentos nativos do Foundry.
-- **PR #59 / `feature/universal-library-catalog-2026-11-23`:** catálogo de recursos com provedores para coleções NEXUS, os cinco tipos de Lógica e documentos Foundry; paginação por provedor, metadados leves e resolução sob demanda.
-- **PR #60 / `feature/library-explorer-catalog-integration-2026-11-23`:** primeira integração do Explorer existente com o catálogo universal.
-- **Branch de conclusão / `feature/library-universal-completion-2026-11-23`:** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas/coleções mistas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
-- **Próxima etapa:** validar a cadeia de PRs e a experiência dentro do Foundry VTT 14 build 360; corrigir incompatibilidades antes de release.
+- **Origem da fundação (PRs #58–#60):** ciclo de vida em RAM, ponte UUID para documentos nativos, catálogo extensível e primeira integração do Explorer.
+- **Consolidação (PR #61, integrada):** janela independente ApplicationV2, filtros por categoria/tipo/origem/etiqueta, favoritos/recentes/pastas/coleções mistas por referência, ações contextuais declaradas por provedores e backup completo com prévia e confirmação.
+- **Estado atual:** esses serviços estão na `main`; as branches originais não devem ser usadas como base para novas integrações.
+- **Próxima etapa:** validar a implementação atual no Foundry VTT 14 build 360 e concluir adaptadores externos/destinos especializados; não reabrir a cadeia antiga de PRs.
 - **Importação integrada inspirada no Plutonium:** o backup interno da Biblioteca já possui validação/prévia/mesclagem e o Core agora define o registro de adaptadores de origem/destino com limites, validação de dados inertes, prévia e confirmação. Ainda faltam adaptadores concretos para formatos externos e destinos compatíveis (documentos Foundry, compêndios, fichas e coleções NEXUS). Não importar conteúdo sem direitos de uso nem executar payloads automaticamente.
-- **Lógica:** evoluir o construtor visual de Fluxos (nós, ramificações e simulação), registrar executores confiáveis e integrar eventos e ações de aplicação para Propriedades, Regras, Comportamentos, Fluxos e Funções, sem colapsar seus schemas.
-- **Tema:** a branch do Design System agora inclui perfis tipados, Estúdio ApplicationV2, prévia local, validação de contraste, importação/exportação versionada e persistência world/user. A integração visual nativa continua escopada por allowlist. Validação real no Foundry V14 build 360 e refinamento dos adaptadores nativos permanecem pendentes.
+- **Lógica:** o construtor visual inicial de Fluxos, os schemas e os editores estruturados já estão na `main`. Permanecem pendentes conectores gráficos, arrastar/soltar, mais executores confiáveis e testes ponta a ponta no Foundry, sem colapsar os cinco schemas.
+- **Tema:** a integração do Design System está na `main` (PR #80), com perfis tipados, Estúdio ApplicationV2, prévia local, validação de contraste, importação/exportação versionada e persistência world/user. A integração visual nativa continua escopada por allowlist. Validação real no Foundry V14 build 360 e refinamento dos adaptadores nativos permanecem pendentes.
 - **Preparação de sessão:** implementar manifesto de recursos, prioridades e reservas sobre o gerenciador de RAM; nunca pré-carregar conteúdo pesado no init.
 
-A etapa não está pronta para release: requer CI atualizado, revisão de compatibilidade Foundry V14 build 360 e validação funcional em cliente real.
+A integração está na `main` e o CI está aprovado; ainda não está pronta para promoção funcional até concluir a revisão de compatibilidade e a validação real no Foundry VTT 14 build 360.
 
 ## Biblioteca de Aparências — integração inicial
 
