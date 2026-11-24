@@ -65,6 +65,11 @@ export function createDesignStudioApplicationClass({
       this._previewing = false;
     }
 
+    _canRender(options) {
+      if (!design.canEditScope("world") && !design.canEditScope("user")) return false;
+      return super._canRender?.(options);
+    }
+
     async _prepareContext(options = {}) {
       const context = await super._prepareContext(options);
       this._draft ??= clone(design.getProfile(this._target));
