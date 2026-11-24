@@ -65,7 +65,7 @@ jobs:
           if (eventName === "workflow_dispatch" && process.env.RELEASE_CHANNEL_INPUT === "candidate") {
             if (ref !== "refs/heads/main") throw new Error("Versões candidatas só podem ser geradas a partir da main.");
             const candidate = process.env.CANDIDATE_VERSION_INPUT ?? "";
-            if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate)) {
+            if (!/^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(candidate)) {
               throw new Error("Versão candidata inválida. Use o formato 1.0.0.96-rc.1.");
             }
             const core = value => value.split("-")[0].split(".").map(Number);
