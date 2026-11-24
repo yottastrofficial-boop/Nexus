@@ -43,7 +43,11 @@ const clamp = (value, min, max, fallback) => {
   return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
 };
 const isRecord = value => value !== null && typeof value === "object" && !Array.isArray(value);
-const normalizeColor = (value, fallback) => COLOR_PATTERN.test(String(value ?? "")) ? String(value).toLowerCase() : fallback;
+const normalizeColor = (value, fallback) => {
+  const color = String(value ?? "").toLowerCase();
+  if (!COLOR_PATTERN.test(color)) return fallback;
+  return color.length === 4 ? "#" + [...color.slice(1)].map(channel => channel + channel).join("") : color;
+};
 
 export function createDefaultDesignProfile(themeId = DEFAULT_DESIGN_THEME) {
   const theme = THEME_TOKENS[themeId] ?? THEME_TOKENS[DEFAULT_DESIGN_THEME];
@@ -120,18 +124,6 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
   };
 }
 
-export function resolveDesignProfile(profile, { themeId } = {}) {
-  const normalized = normalizeDesignProfile(profile ?? createDefaultDesignProfile(themeId));
-  const preset = themeId && Object.hasOwn(DESIGN_THEME_CHOICES, themeId) ? themeId : normalized.preset;
-  const base = createDefaultDesignProfile(preset);
-  const resolved = normalizeDesignProfile({ ...normalized, preset });
-  return {
-    ...resolved,
-    palette: { ...base.palette, ...resolved.palette },
-    typography: { ...base.typography, ...resolved.typography },
-    layout: { ...base.layout, ...resolved.layout }
-  };
-}
 
 function hexToRgb(color) {
   const hex = color.slice(1);
