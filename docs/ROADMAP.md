@@ -25,7 +25,9 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 ### Biblioteca
 
 - Existe armazenamento unificado com coleções, preferências, backups e compatibilidade de leitura legada.
-- A interface Explorer possui navegação universal, visão de todos os itens salvos, favoritos, recentes, pastas livres, filtros de etiquetas dinâmicos, cartões padronizados, grade/lista e Inspector contextual.\n- O Inspector permite editar metadados, organizar por pastas, duplicar e excluir itens salvos; exclusão de ativos lógicos com dependentes é bloqueada.\n- A visão universal é agregadora; ações específicas de inserção/aplicação continuam disponíveis nas áreas especializadas correspondentes.
+- A interface Explorer possui navegação universal, visão de todos os itens salvos, favoritos, recentes, pastas livres, filtros de etiquetas dinâmicos, cartões padronizados, grade/lista e Inspector contextual.
+- O Inspector permite editar metadados, organizar por pastas, duplicar e excluir itens salvos; exclusão de ativos lógicos com dependentes é bloqueada.
+- A visão universal é agregadora; ações específicas de inserção/aplicação continuam disponíveis nas áreas especializadas correspondentes.
 - Definições reutilizáveis e instâncias inseridas na ficha devem continuar isoladas.
 - Os editores especializados iniciais de Lógica estão integrados ao Inspector da Biblioteca; ações de aplicação continuam dependentes dos provedores e do contexto compatível. A validação visual/funcional no Foundry real permanece pendente.
 - Pastas, favoritos, recentes, metadados e operações de duplicação/exclusão/importação exigem testes de persistência em cenário real.
