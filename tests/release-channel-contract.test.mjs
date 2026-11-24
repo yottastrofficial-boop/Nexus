@@ -13,9 +13,19 @@ assert.match(workflow, /candidate_version:[\s\S]*?required: false/,
   "Candidate version must be an explicit input validated at runtime.");
 assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;`),
   "Stable publication must require the exact [release] marker.");
-assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
+assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
   "Candidate versions must use MAJOR.MINOR.PATCH-rc.N.");
 assert.match(workflow, /Versões candidatas só podem ser geradas a partir da main/);
+assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.\d+$/.test(candidate))`),
+  "Candidate versions must preserve NEXUS's four-part version core.");
+const validationIndex = workflow.indexOf("node tests/run-all.mjs");
+const candidateMetadataIndex = workflow.indexOf("Apply candidate version to package metadata");
+const packageBuildIndex = workflow.indexOf("Build Foundry package");
+assert.ok(validationIndex >= 0 && validationIndex < candidateMetadataIndex && candidateMetadataIndex < packageBuildIndex,
+  "Candidate metadata must be applied only after the unmodified source passes validation.");
+const resolveStep = workflow.slice(workflow.indexOf("Resolve release channel and package version"), validationIndex);
+assert.doesNotMatch(resolveStep, /writeFileSync|system\.version\s*=/,
+  "Resolving a candidate must not mutate the source package before validation.");
 assert.match(workflow, /channel: \$\{\{ steps\.version\.outputs\.channel \}\}/,
   "The resolved channel must be exposed to the release job.");
 assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable' \|\| needs\.validate\.outputs\.channel == 'candidate'/,
