@@ -27,6 +27,21 @@ Este roteiro é o gate funcional da primeira versão do Design System global. A 
 - [ ] Desativar e reativar a permissão individual; confirmar que a preferência pessoal é preservada e volta a valer quando permitido.
 - [ ] Sair e entrar novamente no mundo; confirmar a persistência da preferência individual.
 
+## Estúdio de Aparência
+
+- [ ] Abrir o Estúdio pelo menu de Configurações do Jogo.
+- [ ] Confirmar que GM pode editar campanha e que jogador pode editar apenas o próprio perfil quando permitido.
+- [ ] Alterar preset e nome do perfil; confirmar prévia imediata sem persistência automática.
+- [ ] Ajustar as 18 cores, tipografia, tamanhos, densidade, espaçamento, raio e altura dos controles.
+- [ ] Confirmar diagnóstico dos quatro pares de contraste e comportamento do modo alto contraste.
+- [ ] Ativar redução de movimento e confirmar que transições/animações são reduzidas.
+- [ ] Salvar perfil da campanha e confirmar sincronização no cliente do jogador.
+- [ ] Salvar perfil pessoal e confirmar que ele não altera a aparência dos outros usuários.
+- [ ] Descartar alterações e fechar o Estúdio com rascunho aberto; confirmar restauração da aparência anterior.
+- [ ] Exportar e reimportar um perfil JSON válido; confirmar preservação dos valores.
+- [ ] Tentar importar arquivo JSON inválido, formato incompatível e arquivo acima de 64 KB; confirmar rejeição segura.
+- [ ] Restaurar preset e confirmar que todas as personalizações do rascunho são substituídas.
+
 ## Superfícies do Foundry
 
 Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e conteúdo longo quando aplicável.
