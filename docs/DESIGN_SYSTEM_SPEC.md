@@ -68,3 +68,14 @@ A integração não aplica seletores globais a toda classe `.application`, `.dir
 - Densidade, espaçamento, raio, altura de controles, tipografia e acessibilidade já fazem parte do schema do perfil; novos componentes podem consumir os mesmos tokens sem alterar os níveis de propriedade.
 - A validação automatizada não substitui a inspeção visual em Foundry VTT 14 build 360 e a compatibilidade com módulos usados na campanha.
 - O roteiro obrigatório de validação manual está em `docs/FOUNDRY_THEME_VALIDATION.md`.
+
+
+## Shell compartilhado e adaptadores nativos — candidata 1.0.0.93
+
+O shell visual é compartilhado: aplicações NEXUS ApplicationV2 recebem a classe de superfície NEXUS pelo hook de renderização e consomem os mesmos tokens semânticos de janelas, cabeçalhos, conteúdo, campos, botões, bordas e foco. Não se cria uma janela-base diferente para cada ferramenta; cada aplicação mantém seu ciclo de vida e estrutura, enquanto o shell central fornece identidade visual comum. Aplicações de módulos externos continuam fora da aplicação automática do tema.
+
+A Biblioteca independente e o painel da ficha usam os mesmos tokens para toolbar, busca, filtros, navegação, cartões, metadados e Inspector. O CSS de compatibilidade legado é sobrescrito apenas dentro dessas superfícies NEXUS.
+
+Os controles nativos do Foundry (Controls, Navigation, Players e Hotbar) recebem adaptação visual por seletores de superfície. O Chat apresenta cada mensagem como cartão com cabeçalho e corpo da mesma família cromática; conteúdo enriquecido nativo recebe limites responsivos para imagens, GIFs, vídeo, áudio, links e embeds. O NEXUS não transforma URLs em embeds automaticamente nem executa HTML/CSS/JS importado: a resolução do conteúdo continua sujeita ao pipeline e às permissões do Foundry.
+
+A hierarquia das ferramentas flutuantes usa o z-index da própria janela e a API de foco da ApplicationV2. Somente o painel atualmente ativo pode ficar acima dos trilhos da ficha; painéis abertos mas inativos não bloqueiam a interação com a ficha. Não se define um z-index global fixo para aplicações de terceiros.
