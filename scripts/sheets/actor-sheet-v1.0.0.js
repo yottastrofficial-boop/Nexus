@@ -1,4 +1,5 @@
 import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
+import { resolveNexusFloatingLayer } from "../core/window-layering.js";
 import { NEXUS_COMPONENTS as COMPONENTS } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
@@ -3634,16 +3635,15 @@ if (!hasPath) propertyValueInput.value = "";
       if (!portal.isConnected) return;
       const z = Number.parseInt(app.style.zIndex || getComputedStyle(app).zIndex, 10);
       const baseZ = Number.isFinite(z) ? z : 100;
-      const desiredZ = Math.max(1, baseZ + (focused ? 2 : -1));
-      // Rails nunca ultrapassam janelas abertas do Inspector ou Comportamento.
-      const openPanelZ = [...this._nexusPanelWindows.values()]
-        .filter(instance => instance?.rendered && instance.element?.isConnected)
-        .map(instance => Number.parseInt(instance.element.style.zIndex || getComputedStyle(instance.element).zIndex, 10))
-        .filter(Number.isFinite);
-      const highestPanelZ = openPanelZ.length ? Math.max(...openPanelZ) : null;
-      const railZ = highestPanelZ === null ? desiredZ : Math.min(desiredZ, highestPanelZ - 1);
-      portal.style.setProperty("z-index", String(Math.max(1, railZ)), "important");
-      portal.classList.toggle("is-sheet-focused", focused && highestPanelZ === null);
+      const activePanel = this._activePanelWindowKey
+        ? this._nexusPanelWindows.get(this._activePanelWindowKey)
+        : null;
+      const activePanelZ = activePanel?.rendered && activePanel.element?.isConnected
+        ? Number.parseInt(activePanel.element.style.zIndex || getComputedStyle(activePanel.element).zIndex, 10)
+        : null;
+      const layer = resolveNexusFloatingLayer({ sheetZIndex: baseZ, sheetFocused: focused, activePanelZIndex: activePanelZ });
+      portal.style.setProperty("z-index", String(layer.railZ), "important");
+      portal.classList.toggle("is-sheet-focused", focused && activePanelZ === null);
     };
     const positionRails = () => {
       if (!app.isConnected || !portal.isConnected) return;
@@ -3670,6 +3670,7 @@ if (!hasPath) propertyValueInput.value = "";
       const sheetWasFocused = app.contains(target) || left?.contains(target) || right?.contains(target);
       setActivePanel(null);
       if (sheetWasFocused) {
+        this.bringToFront?.();
         syncRailFocus(true);
         positionRails();
       } else {
@@ -3684,6 +3685,7 @@ if (!hasPath) propertyValueInput.value = "";
         const panelKey = [...this._nexusPanelWindows].find(([, instance]) => instance.element === panelElement)?.[0] ?? null;
         setActivePanel(panelKey);
       } else if (app.contains(event.target)) {
+        this.bringToFront?.();
         setActivePanel(null);
         syncRailFocus(true);
       }
