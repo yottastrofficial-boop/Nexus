@@ -26,11 +26,13 @@ export function getLibraryDesignProfilePreviewModel(raw) {
   const source = entry.profile && typeof entry.profile === "object" ? entry.profile : entry;
   if (!source || typeof source !== "object" || Array.isArray(source)) return null;
   const version = Number(source.schemaVersion ?? 1);
-  if (version > DESIGN_PROFILE_SCHEMA_VERSION) {
+  if (!Number.isInteger(version) || version < 1 || version > DESIGN_PROFILE_SCHEMA_VERSION) {
     return {
       supported: false,
       schemaVersion: Number.isFinite(version) ? version : null,
-      message: "Este perfil foi criado por uma versão mais recente do NEXUS. A prévia e a aplicação foram desativadas para preservar seus dados."
+      message: version > DESIGN_PROFILE_SCHEMA_VERSION
+        ? "Este perfil foi criado por uma versão mais recente do NEXUS. A prévia e a aplicação foram desativadas para preservar seus dados."
+        : "A versão do schema deste perfil é inválida. A prévia e a aplicação foram desativadas para preservar seus dados."
     };
   }
   const profile = normalizeDesignProfile(source);
@@ -68,7 +70,7 @@ export function createLibraryThemeApplicationAdapter({
     if (!["world", "user"].includes(scope) || resource?.kind !== "theme" ||
         resolved?.kind !== "design-profile" || !resolved?.profile) return false;
     const version = Number(resolved.profile.schemaVersion ?? 1);
-    if (!Number.isFinite(version) || version > DESIGN_PROFILE_SCHEMA_VERSION) return false;
+    if (!Number.isInteger(version) || version < 1 || version > DESIGN_PROFILE_SCHEMA_VERSION) return false;
     const design = getDesign();
     return typeof design?.canEditScope === "function" && design.canEditScope(scope) === true;
   };
