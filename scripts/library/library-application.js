@@ -1,6 +1,7 @@
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
+import { DEFAULT_LAYOUT, applyThemeTokens } from "../core/theme.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
@@ -73,6 +74,7 @@ export function createLibraryApplicationClass({
 
     setContext(context = {}) {
       this._context = context && typeof context === "object" ? context : {};
+      if (this.element) applyThemeTokens(this.element, this._context.layout ?? DEFAULT_LAYOUT);
       return this;
     }
 
@@ -83,6 +85,7 @@ export function createLibraryApplicationClass({
 
     async _onRender(context, options) {
       await super._onRender(context, options);
+      applyThemeTokens(this.element, this._context.layout ?? DEFAULT_LAYOUT);
       this._mountExplorer();
     }
 
