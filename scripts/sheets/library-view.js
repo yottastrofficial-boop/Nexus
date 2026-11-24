@@ -478,7 +478,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             const reference = resource?.reference ?? {};
             return sheet.rendered === true && reference.providerId === "nexus-library" && (
               ["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) ||
-              reference.builtin === "asset"
+              reference.builtin === "asset" || reference.builtin === "theme"
             );
           };
           const applyResource = async (resource, resolved) => {
@@ -489,6 +489,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             if (reference.collection === "groups") return sheet._addSavedGroupToCanvas?.(reference.id) ?? false;
             if (reference.collection === "layouts") return sheet._addSavedLayoutToActor?.(reference.id) ?? false;
             if (reference.collection === "themes") return sheet._applyLibraryCustomTheme?.(reference.id) ?? false;
+            if (reference.builtin === "theme") return sheet._applyThemePreset?.(resolved?.id) ?? false;
             if (reference.collection === "assets" || reference.builtin === "asset") {
               const componentType = String(resolved?.type ?? resolved?.componentType ?? "");
               if (!componentType || typeof sheet._addComponent !== "function") return false;
@@ -500,6 +501,7 @@ export function mountLibraryView(sheet, panel, { createSheetResourcePreview, fit
             return false;
           };
           await game.nexus?.library?.open?.({
+            layout: sheet._currentLayout ?? null,
             canApplyResource,
             applyResource,
             applyLabel: "Inserir na ficha",
