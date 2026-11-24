@@ -22,7 +22,7 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
   menuColor: theme.menu, placeholderColor: theme.placeholder
 }]));
 
-export const applyThemeTokens = (element, layout = {}) => {
+export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
   const fontFamily = layout.fontFamily ?? theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : "Inter");
@@ -235,6 +235,8 @@ export const applyThemeTokens = (element, layout = {}) => {
   values["--nexus-contrast-outline-width"] = layout.contrast === "high" ? "3px" : "2px";
   values["--nexus-motion-duration"] = layout.reducedMotion ? "0ms" : "140ms";
   values["--nexus-theme-id"] = layout.theme ?? "nexus-dark";
+  if (typeof beforeApply === "function") beforeApply(values);
   for (const [key, value] of Object.entries(values)) element.style.setProperty(key, value);
   element.dataset.theme = layout.theme ?? "nexus-dark";
+  return Object.keys(values);
 };
