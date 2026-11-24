@@ -463,7 +463,7 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
       }
     }
   }
-  const code = "NEXUS-LIBRARY/3\\n" + JSON.stringify({
+  const code = "NEXUS-LIBRARY/3\n" + JSON.stringify({
     format: "nexus-library",
     version: 3,
     name: String(snapshot.name ?? "Biblioteca NEXUS").trim().slice(0, 64) || "Biblioteca NEXUS",

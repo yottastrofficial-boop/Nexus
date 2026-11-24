@@ -2398,7 +2398,7 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.throws(()=>createLibraryComponentInstance({id:"broken",type:"x"}),/definição do componente é inválida/);
 }
 
-/* Version 2 library backups include reusable rule, behavior, style, media and template collections. */
+/* Version 3 library backups include complete visual profiles and all reusable collections. */
 {
   const backupCode = createNexusLibraryBackup({
     name:"Biblioteca de teste",
@@ -2420,7 +2420,9 @@ assert.equal(futureActor.writes, 0, "Um esquema futuro não deve receber gravaç
   assert.equal(restored.collections.rules.length,1);
   assert.equal(restored.collections.behaviors.length,1);
   assert.equal(restored.collections.functions.length,1);
-  const legacyCode = backupCode.replace("NEXUS-LIBRARY/2","NEXUS-LIBRARY/1").replace('"version": 2','"version": 1');
+  const version2Code = backupCode.replace("NEXUS-LIBRARY/3","NEXUS-LIBRARY/2").replace('"version": 3','"version": 2');
+  assert.equal(parseNexusLibraryBackup(version2Code,["pv"]).collections.rules.length,1);
+  const legacyCode = backupCode.replace("NEXUS-LIBRARY/3","NEXUS-LIBRARY/1").replace('"version": 3','"version": 1');
   assert.equal(parseNexusLibraryBackup(legacyCode,["pv"]).collections.rules.length,1);
 }
 
