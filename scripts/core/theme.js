@@ -25,7 +25,8 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
 export const applyThemeTokens = (element, layout = {}) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
-  const fontFamily = layout.fontFamily ?? theme.fontFamily ?? "Inter";
+  const fontFamily = layout.fontFamily ?? theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : "Inter");
+  const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
   const values = {
     "--nexus-panel-bg": theme.panel,
     "--nexus-panel-card": layout.cardColor ?? theme.card,
@@ -80,7 +81,7 @@ export const applyThemeTokens = (element, layout = {}) => {
     "--nexus-accent-color": layout.accentColor ?? theme.accent,
     "--nexus-highlight-color": layout.highlightColor ?? theme.highlight,
     "--nexus-button-color": layout.buttonColor ?? theme.button,
-    "--nexus-font-family": `"${fontFamily}", sans-serif`,
+    "--nexus-font-family": `${fontFamilyToken}, sans-serif`,
     "--nexus-control-bg": theme.input, "--nexus-control-text": theme.text,
     "--nexus-control-border": theme.border, "--nexus-control-hover": theme.hover,
     "--nexus-tab-bg": theme.panel, "--nexus-tab-active": theme.accent,
@@ -92,7 +93,7 @@ export const applyThemeTokens = (element, layout = {}) => {
     "--nexus-radius-small": ["steam", "pixel-art"].includes(layout.theme) ? "0px" : layout.theme === "medieval" ? "5px" : "6px",
     "--nexus-radius-panel": layout.theme === "steam" ? "2px" : "8px",
     "--nexus-spacing-unit": layout.theme === "steam" ? "6px" : "8px",
-    "--nexus-font-ui": `"${fontFamily}", sans-serif`,
+    "--nexus-font-ui": `${fontFamilyToken}, sans-serif`,
     "--nexus-navigation-bg": theme.panel,
     "--nexus-navigation-active": theme.accent,
     "--nexus-input-focus": theme.highlight,
