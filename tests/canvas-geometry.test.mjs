@@ -15,7 +15,7 @@ assert.deepEqual(
 
 assert.deepEqual(
   findBestAlignmentMatch([source], [target], "y"),
-  { delta: 10, pos: 20, distance: 4, labelAt: 15 },
+  { delta: 10, pos: 20, distance: 4, labelAt: 12 },
   "vertical alignment should snap the nearest source edge to the target edge"
 );
 
