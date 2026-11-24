@@ -47,4 +47,11 @@ assert.match(policy, /Release candidata/);
 assert.match(policy, /Release estável/);
 assert.match(policy, /O manifesto estável não é atualizado/);
 
+assert.match(workflow, /\npermissions:\n  contents: read\n\njobs:/,
+  "The workflow default must be read-only.");
+assert.match(workflow, /needs: validate\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write/,
+  "Only the publishing job may write repository contents.");
+const validateJob = workflow.slice(workflow.indexOf("  validate:"), workflow.indexOf("  release:"));
+assert.doesNotMatch(validateJob, /contents: write/, "The validation job must not receive write access.");
+
 console.log("NEXUS release channel contract: OK");

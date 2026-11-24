@@ -42,4 +42,11 @@ assert.ok(libraryApplication.includes('event.key !== "Escape"') &&
   libraryApplication.includes('syncSearchClear();'),
   "Escape must clear an active search and keep the clear control synchronized.");
 
+assert.ok(libraryApplication.includes("event.stopPropagation();\n        clearSearch();"),
+  "Escape that clears the search must not also dismiss the window.");
+assert.ok(libraryApplication.includes('root.querySelector(".nexus-library-actions-menu")') &&
+  libraryApplication.includes('actionsMenu.addEventListener("focusout"') &&
+  libraryApplication.includes('actionsMenu.querySelector("summary")?.focus()'),
+  "The backup menu must close after an action, with Escape and when focus leaves it.");
+
 console.log("NEXUS universal library UI contract: OK");

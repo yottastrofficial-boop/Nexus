@@ -2,7 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { NEXUS_COMPONENTS as COMPONENTS, normalizeNexusComponentDimension } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
-import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens } from "../core/theme.js";
+import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
@@ -2351,7 +2351,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     }
     const portalRoot = document.querySelector(`[data-nexus-floating-for="${this.id}"]`);
     const themeTargets = [portalRoot, this.element?.querySelector(".nexus-sheet"), this.element?.closest(".application, .window-app"), ...panelRoots];
-    for (const target of new Set(themeTargets.filter(Boolean))) applyThemeTokens(target, layout);
+    for (const target of new Set(themeTargets.filter(Boolean))) applyScopedTheme(target, layout);
     if (["width", "height"].includes(key)) {
       const appWidth = clamp(layout.width + 40, 800, Math.max(800, window.innerWidth - 24));
       const appHeight = clamp(Math.min(layout.height + 100, window.innerHeight - 24), 500, Math.max(500, window.innerHeight - 24));
@@ -2366,16 +2366,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       canvas.dataset.guides = String(layout.guidesEnabled);
       canvas.style.width = `${layout.width}px`; canvas.style.height = `${layout.height}px`;
       canvas.style.setProperty("--nexus-grid-size", `${layout.gridSize}px`);
-      canvas.style.setProperty("--nexus-canvas-color", layout.canvasColor);
-      canvas.style.setProperty("--nexus-card-color", layout.cardColor);
-      canvas.style.setProperty("--nexus-accent-color", layout.accentColor);
-      canvas.style.setProperty("--nexus-highlight-color", layout.highlightColor ?? "#78b7e8");
-      canvas.style.setProperty("--nexus-button-color", layout.buttonColor ?? "#315b7d");
-      applyThemeTokens(canvas, layout);
-      this.element?.closest(".application, .window-app")?.style.setProperty("--nexus-window-accent", layout.accentColor);
-      const portal=document.querySelector(`[data-nexus-floating-for="${this.id}"]`); portal?.style.setProperty("--nexus-accent-color", layout.accentColor); portal?.style.setProperty("--nexus-highlight-color",layout.highlightColor??"#78b7e8"); portal?.style.setProperty("--nexus-button-color",layout.buttonColor??"#315b7d"); portal?.style.setProperty("--nexus-font-family",`"${layout.fontFamily??"Inter"}", sans-serif`);
-      const app=this.element?.closest(".application, .window-app"); app?.style.setProperty("--nexus-highlight-color",layout.highlightColor??"#78b7e8"); app?.style.setProperty("--nexus-button-color",layout.buttonColor??"#315b7d"); app?.style.setProperty("--nexus-font-family",`"${layout.fontFamily??"Inter"}", sans-serif`);
-      for(const instance of this._nexusPanelWindows?.values?.()??[]){const panelElement=instance.element;if(panelElement){panelElement.style.setProperty("--nexus-highlight-color",layout.highlightColor??"#78b7e8");panelElement.style.setProperty("--nexus-button-color",layout.buttonColor??"#315b7d");panelElement.style.setProperty("--nexus-font-family",`"${layout.fontFamily??"Inter"}", sans-serif`);}}
+      applyScopedTheme(canvas, layout, { colors: true });
+      const appElement = this.element?.closest(".application, .window-app");
+      const portalElement = document.querySelector(`[data-nexus-floating-for="${this.id}"]`);
+      const panelElements = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element);
+      for (const target of [appElement, portalElement, ...panelElements]) {
+        applyScopedTheme(target, layout, { base: false, colors: true, windowTokens: true });
+      }
       this._fitNexusCanvas?.();
     }
   }
@@ -2736,8 +2733,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     Object.assign(layout, clone(theme.palette));
     await this._writeLayouts(layouts, active);
     this._currentLayout = layout;
-    applyThemeTokens(this.element, layout);
-    for (const instance of this._nexusPanelWindows?.values?.() ?? []) applyThemeTokens(instance.element, layout);
+    applyScopedTheme(this.element, layout);
+    for (const instance of this._nexusPanelWindows?.values?.() ?? []) applyScopedTheme(instance.element, layout);
     await this.render({ force: true });
     ui.notifications?.info?.(`Tema "${theme.name ?? "Personalizado"}" aplicado.`);
     return true;
@@ -3577,10 +3574,7 @@ if (!hasPath) propertyValueInput.value = "";
     const portal = document.createElement("div");
     portal.className = "nexus-floating-ui";
     portal.dataset.nexusFloatingFor = this.id;
-    portal.style.setProperty("--nexus-accent-color", this._currentLayout?.accentColor ?? "#52647b");
-    portal.style.setProperty("--nexus-highlight-color",this._currentLayout?.highlightColor??"#78b7e8");
-    portal.style.setProperty("--nexus-button-color",this._currentLayout?.buttonColor??"#315b7d");
-    applyThemeTokens(portal, this._currentLayout ?? DEFAULT_LAYOUT);
+    applyScopedTheme(portal, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
     portal.innerHTML = `
       <div class="nexus-floating-left" aria-label="Ferramentas da ficha">
         <div class="nexus-floating-left-rail">
@@ -3791,10 +3785,10 @@ if (!hasPath) propertyValueInput.value = "";
         }
         if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) {
           // A newer sheet render now owns this still-open panel; preserve it.
-          applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+          applyScopedTheme(instance.element, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
           return;
         }
-        applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+        applyScopedTheme(instance.element, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
         focusPanelWindow(instance);
       }).catch(error => {
         console.error(`NEXUS | Falha ao abrir janela ${key}`, error);

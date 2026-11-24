@@ -265,3 +265,84 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   element.dataset.theme = layout.theme ?? "nexus-dark";
   return Object.keys(values);
 };
+
+// ---------------------------------------------------------------------------
+// Sheet-local theme scope
+//
+// The global Design System writes its tokens on <html>. A sheet layout also
+// stores a theme and palette, and used to write them inline on the sheet
+// elements, which silently shadowed the global profile. The helpers below make
+// the precedence explicit: a sheet writes its own tokens only when its layout
+// was deliberately customized AND the campaign policy allows local overrides.
+// Otherwise it writes nothing and inherits the global profile live.
+// ---------------------------------------------------------------------------
+const LOCAL_COLOR_TOKENS = [
+  ["--nexus-canvas-color", "canvasColor", "#171f2a"],
+  ["--nexus-card-color", "cardColor", "#273443"],
+  ["--nexus-accent-color", "accentColor", "#52647b"],
+  ["--nexus-highlight-color", "highlightColor", "#78b7e8"],
+  ["--nexus-button-color", "buttonColor", "#315b7d"]
+];
+const LOCAL_WINDOW_TOKENS = ["--nexus-window-accent", "--nexus-font-family"];
+const scopedTokenKeys = new WeakMap();
+const sameColor = (left, right) => String(left ?? "").toLowerCase() === String(right ?? "").toLowerCase();
+
+/** True when a layout carries a deliberate local appearance (not just the saved defaults). */
+export const isLayoutThemeCustomized = (layout = {}) => {
+  if (layout.customThemeId) return true;
+  const themeId = layout.theme ?? "nexus-dark";
+  if (themeId !== "nexus-dark") return true;
+  const palette = THEME_PALETTES[themeId] ?? {};
+  if (Object.entries(palette).some(([key, value]) => layout[key] != null && !sameColor(layout[key], value))) return true;
+  const defaultFont = THEME_TOKENS[themeId]?.fontFamily ?? "Inter";
+  return layout.fontFamily != null && layout.fontFamily !== defaultFont;
+};
+
+const resolveGlobalDesign = ({ design = globalThis.game?.nexus?.design, root = globalThis.document?.documentElement } = {}) => {
+  if (!root?.classList?.contains?.("nexus-design-system")) return null;
+  try { return design?.getEffectiveTheme?.() ?? null; } catch { return null; }
+};
+
+/** Whether a sheet should write its own theme tokens instead of inheriting the global profile. */
+export const shouldUseLocalTheme = (layout = {}, environment = {}) => {
+  const effective = resolveGlobalDesign(environment);
+  if (!effective) return true; // Design System inactive: keep the legacy per-sheet behavior.
+  if (effective.allowPlayerOverrides === false) return false; // Campaign policy forces the global theme.
+  return isLayoutThemeCustomized(layout);
+};
+
+/**
+ * Applies (or clears) the sheet-local theme on one element.
+ * options.base: write the full token set; colors: legacy color shortcuts;
+ * windowTokens: window accent and font family for the application element.
+ */
+export const applyScopedTheme = (element, layout = {}, options = {}, environment = {}) => {
+  if (!element?.style) return [];
+  const { base = true, colors = false, windowTokens = false } = options;
+  const previous = scopedTokenKeys.get(element) ?? [];
+  if (shouldUseLocalTheme(layout, environment)) {
+    const keys = new Set(base ? (applyThemeTokens(element, layout) ?? []) : []);
+    if (colors) for (const [token, key, fallback] of LOCAL_COLOR_TOKENS) {
+      element.style.setProperty(token, layout[key] ?? fallback);
+      keys.add(token);
+    }
+    if (windowTokens) {
+      element.style.setProperty("--nexus-window-accent", layout.accentColor ?? "#52647b");
+      element.style.setProperty("--nexus-font-family", `"${layout.fontFamily ?? "Inter"}", sans-serif`);
+      LOCAL_WINDOW_TOKENS.forEach(token => keys.add(token));
+    }
+    // Calls with different options share one element; remember every token we ever wrote
+    // so a later switch to the global profile can clear all of them.
+    scopedTokenKeys.set(element, [...new Set([...previous, ...keys])]);
+    return [...keys];
+  }
+  const tokens = new Set([...previous, ...LOCAL_COLOR_TOKENS.map(([token]) => token), ...LOCAL_WINDOW_TOKENS]);
+  for (const token of tokens) element.style.removeProperty(token);
+  scopedTokenKeys.delete(element);
+  const effective = resolveGlobalDesign(environment);
+  // The window frame derives its accent from this token; point it at the global profile.
+  if (windowTokens) element.style.setProperty("--nexus-window-accent", "var(--nexus-panel-accent)");
+  // Legacy [data-theme] selectors (light canvas text) must follow the global preset.
+  if (element.dataset && effective?.theme) element.dataset.theme = effective.theme;
+  return [];
+};

@@ -363,9 +363,32 @@ export function createLibraryApplicationClass({
       searchClear?.addEventListener("click", clearSearch);
       search?.addEventListener("keydown", event => {
         if (event.key !== "Escape" || !search.value) return;
+        // Escape clears the query first; stop it here so it does not also dismiss the window.
         event.preventDefault();
+        event.stopPropagation();
         clearSearch();
       });
+
+      // The backup menu is a native <details>: close it after an action, with Escape,
+      // and when focus leaves it. The menu element is recreated on every render, so
+      // these listeners need no separate cleanup.
+      const actionsMenu = root.querySelector(".nexus-library-actions-menu");
+      if (actionsMenu) {
+        const closeActionsMenu = () => { actionsMenu.open = false; };
+        actionsMenu.addEventListener("click", event => {
+          if (event.target.closest?.(".nexus-library-actions-popover button")) closeActionsMenu();
+        });
+        actionsMenu.addEventListener("keydown", event => {
+          if (event.key !== "Escape" || !actionsMenu.open) return;
+          event.preventDefault();
+          event.stopPropagation();
+          closeActionsMenu();
+          actionsMenu.querySelector("summary")?.focus();
+        });
+        actionsMenu.addEventListener("focusout", event => {
+          if (actionsMenu.open && !actionsMenu.contains(event.relatedTarget)) closeActionsMenu();
+        });
+      }
       search?.addEventListener("input", () => {
         this._state.query = search.value;
         syncSearchClear();
