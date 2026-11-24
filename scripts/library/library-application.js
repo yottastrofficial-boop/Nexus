@@ -25,7 +25,7 @@ export function createLibraryApplicationClass({
   const BaseApplication = HandlebarsApplicationMixin(ApplicationV2);
   const applicationOptions = {
     id: "nexus-library",
-    classes: ["nexus", "nexus-library-application"],
+    classes: ["nexus", "nexus-window", "nexus-library-application"],
     position: { width: 1180, height: 760 },
     window: {
       title: "Biblioteca NEXUS",
@@ -63,7 +63,8 @@ export function createLibraryApplicationClass({
         type: "all",
         compendiumIds: [],
         viewMode: "grid",
-        cardSize: "medium"
+        cardSize: "medium",
+        filtersOpen: false
       };
       this._explorer = null;
       this._context = {};
@@ -126,6 +127,17 @@ export function createLibraryApplicationClass({
       const compendiums = root.querySelector("[data-library-compendiums]");
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
+      const filterToggle = root.querySelector("[data-library-toggle-filters]");
+      const filterPanel = root.querySelector("[data-library-filter-panel]");
+      if (filterToggle && filterPanel) {
+        filterPanel.hidden = !this._state.filtersOpen;
+        filterToggle.setAttribute("aria-expanded", String(this._state.filtersOpen));
+        filterToggle.addEventListener("click", () => {
+          this._state.filtersOpen = !this._state.filtersOpen;
+          filterPanel.hidden = !this._state.filtersOpen;
+          filterToggle.setAttribute("aria-expanded", String(this._state.filtersOpen));
+        });
+      }
       if (search) search.value = this._state.query;
       if (tag) tag.value = this._state.tag;
       if (origin) origin.value = this._state.origin;
