@@ -229,3 +229,65 @@ html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:focus-vis
   outline: 2px solid var(--nexus-focus-ring, #8b83ff);
   outline-offset: 2px;
 }
+
+
+/* Resource previews in the universal Inspector. */
+html.nexus-design-system .nexus-library-resource-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: var(--nexus-radius-panel, 9px);
+  background: var(--nexus-panel-card, #263649);
+}
+html.nexus-design-system .nexus-library-resource-preview-title {
+  color: var(--nexus-panel-text, #edf0f6);
+  font-size: 11px;
+}
+html.nexus-design-system .nexus-library-resource-preview-summary {
+  margin: 0;
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-resource-preview > img,
+html.nexus-design-system .nexus-library-resource-preview > video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #101923;
+}
+html.nexus-design-system .nexus-library-resource-preview > audio {
+  width: 100%;
+  max-width: 100%;
+}
+html.nexus-design-system .nexus-library-resource-preview-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+html.nexus-design-system .nexus-library-resource-preview-swatch {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #ffffff35;
+  border-radius: 5px;
+}
+html.nexus-design-system .nexus-library-resource-preview-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 5px 10px;
+  margin: 0;
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-resource-preview-facts dt {
+  color: var(--nexus-panel-muted, #a5b6c9);
+}
+html.nexus-design-system .nexus-library-resource-preview-facts dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--nexus-panel-text, #edf0f6);
+  overflow-wrap: anywhere;
+}
