@@ -11,24 +11,51 @@ const cleanText = (value, limit = 80) => String(value ?? "").trim().slice(0, lim
 const referenceKey = (collection, entryId) => `${String(collection ?? "")}:${String(entryId ?? "")}`;
 
 export function createEmptyLibraryPreferences() {
-  return { schemaVersion: 2, folders: [], assignments: {}, favorites: [], recent: [], collections: [] };
+  return { schemaVersion: 3, folders: [], assignments: {}, favorites: [], recent: [], collections: [] };
 }
 
 export function normalizeLibraryPreferences(raw = {}) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return createEmptyLibraryPreferences();
-  const source = [1, 2].includes(raw.schemaVersion) ? raw : {};
-  const folders = Array.isArray(source.folders) ? source.folders : [];
+  const source = [1, 2, 3].includes(raw.schemaVersion) ? raw : {};
+  const rawFolders = Array.isArray(source.folders) ? source.folders : [];
   const assignments = source.assignments && typeof source.assignments === "object" && !Array.isArray(source.assignments) ? source.assignments : {};
   const favorites = Array.isArray(source.favorites) ? source.favorites : [];
   const recent = Array.isArray(source.recent) ? source.recent : [];
   const collections = Array.isArray(source.collections) ? source.collections : [];
+  const folders = [...new Map(rawFolders.map(folder => {
+    const id = cleanText(folder?.id, 64);
+    return [id, id ? {
+      id,
+      name: cleanText(folder?.name) || "Pasta sem nome",
+      collection: cleanText(folder?.collection, 32),
+      parentId: cleanText(folder?.parentId, 64)
+    } : null];
+  }).filter(([id, value]) => id && value)).values()].slice(0, MAX_FOLDERS);
+  const folderById = new Map(folders.map(folder => [folder.id, folder]));
+  for (const folder of folders) {
+    const parent = folderById.get(folder.parentId);
+    if (!parent || parent.id === folder.id || parent.collection !== folder.collection) folder.parentId = "";
+  }
+  // Repair corrupt legacy/imported cycles deterministically instead of hiding the tree.
+  for (const folder of folders) {
+    const visited = new Set([folder.id]);
+    let parentId = folder.parentId;
+    while (parentId) {
+      if (visited.has(parentId)) {
+        folder.parentId = "";
+        break;
+      }
+      visited.add(parentId);
+      parentId = folderById.get(parentId)?.parentId ?? "";
+    }
+  }
+  const validFolderIds = new Set(folders.map(folder => folder.id));
   return {
-    schemaVersion: 2,
-    folders: [...new Map(folders.map(folder => {
-      const id = cleanText(folder?.id, 64);
-      return [id, id ? { id, name: cleanText(folder?.name) || "Pasta sem nome", collection: cleanText(folder?.collection, 32) } : null];
-    }).filter(([id, value]) => id && value)).values()].slice(0, MAX_FOLDERS),
-    assignments: Object.fromEntries(Object.entries(assignments).filter(([key, value]) => key.length <= 160 && typeof value === "string").map(([key, value]) => [key, cleanText(value, 64)])),
+    schemaVersion: 3,
+    folders,
+    assignments: Object.fromEntries(Object.entries(assignments)
+      .filter(([key, value]) => key.length <= 160 && typeof value === "string" && validFolderIds.has(value))
+      .map(([key, value]) => [key, cleanText(value, 64)])),
     favorites: [...new Set(favorites.filter(value => typeof value === "string" && value.length <= 160))].slice(0, MAX_FAVORITES),
     recent: [...new Set(recent.filter(value => typeof value === "string" && value.length <= 160))].slice(0, MAX_RECENT),
     collections: [...new Map(collections.map(collection => {
@@ -47,15 +74,24 @@ export function normalizeLibraryPreferences(raw = {}) {
   };
 }
 
-export function createLibraryFolder(raw, { id, name, collection = "" } = {}) {
+export function createLibraryFolder(raw, { id, name, collection = "", parentId = "" } = {}) {
   const preferences = normalizeLibraryPreferences(raw);
   const cleanName = cleanText(name);
+  const cleanCollection = cleanText(collection, 32);
+  const cleanParentId = cleanText(parentId, 64);
   if (!cleanName) throw new Error("Informe um nome para a pasta.");
-  if (preferences.folders.some(folder => folder.name.toLocaleLowerCase("pt-BR") === cleanName.toLocaleLowerCase("pt-BR") && folder.collection === cleanText(collection, 32))) {
-    throw new Error("Já existe uma pasta com esse nome nesta coleção.");
+  const parent = cleanParentId ? preferences.folders.find(folder => folder.id === cleanParentId) : null;
+  if (cleanParentId && (!parent || parent.collection !== cleanCollection)) {
+    throw new Error("A pasta superior não pertence a esta coleção.");
   }
+  if (preferences.folders.some(folder =>
+    folder.name.toLocaleLowerCase("pt-BR") === cleanName.toLocaleLowerCase("pt-BR") &&
+    folder.collection === cleanCollection && folder.parentId === cleanParentId
+  )) throw new Error("Já existe uma pasta com esse nome neste local.");
   if (preferences.folders.length >= MAX_FOLDERS) throw new Error("A Biblioteca atingiu o limite de pastas.");
-  const folder = { id: cleanText(id, 64) || `folder-${preferences.folders.length + 1}`, name: cleanName, collection: cleanText(collection, 32) };
+  const folderId = cleanText(id, 64) || `folder-${preferences.folders.length + 1}`;
+  if (preferences.folders.some(folder => folder.id === folderId)) throw new Error("Já existe uma pasta com este identificador.");
+  const folder = { id: folderId, name: cleanName, collection: cleanCollection, parentId: cleanParentId };
   preferences.folders.push(folder);
   return { preferences, folder };
 }
@@ -100,6 +136,7 @@ export function renameLibraryFolder(raw, folderId, name) {
   if (preferences.folders.some(item =>
     item.id !== folderId &&
     item.collection === folder.collection &&
+    item.parentId === folder.parentId &&
     item.name.toLocaleLowerCase("pt-BR") === cleanName.toLocaleLowerCase("pt-BR")
   )) {
     throw new Error("Já existe uma pasta com esse nome nesta coleção.");
@@ -160,9 +197,43 @@ export function removeLibraryCollection(raw, collectionId) {
   return preferences;
 }
 
+export function moveLibraryFolder(raw, folderId, parentId = "") {
+  const preferences = normalizeLibraryPreferences(raw);
+  const folder = preferences.folders.find(item => item.id === folderId);
+  if (!folder) throw new Error("A pasta selecionada não existe.");
+  const nextParentId = cleanText(parentId, 64);
+  const parent = nextParentId ? preferences.folders.find(item => item.id === nextParentId) : null;
+  if (nextParentId && (!parent || parent.collection !== folder.collection)) {
+    throw new Error("A pasta de destino não pertence à mesma coleção.");
+  }
+  if (nextParentId === folderId) throw new Error("Uma pasta não pode conter a si mesma.");
+  let ancestor = parent;
+  while (ancestor) {
+    if (ancestor.id === folderId) throw new Error("Não é possível mover uma pasta para dentro de sua própria hierarquia.");
+    ancestor = preferences.folders.find(item => item.id === ancestor.parentId);
+  }
+  if (preferences.folders.some(item =>
+    item.id !== folderId && item.collection === folder.collection && item.parentId === nextParentId &&
+    item.name.toLocaleLowerCase("pt-BR") === folder.name.toLocaleLowerCase("pt-BR")
+  )) throw new Error("Já existe uma pasta com esse nome no destino.");
+  folder.parentId = nextParentId;
+  return preferences;
+}
+
 export function removeLibraryFolder(raw, folderId) {
   const preferences = normalizeLibraryPreferences(raw);
-  preferences.folders = preferences.folders.filter(folder => folder.id !== folderId);
-  for (const [key, value] of Object.entries(preferences.assignments)) if (value === folderId) delete preferences.assignments[key];
+  const descendants = new Set([folderId]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const folder of preferences.folders) {
+      if (folder.parentId && descendants.has(folder.parentId) && !descendants.has(folder.id)) {
+        descendants.add(folder.id);
+        changed = true;
+      }
+    }
+  }
+  preferences.folders = preferences.folders.filter(folder => !descendants.has(folder.id));
+  for (const [key, value] of Object.entries(preferences.assignments)) if (descendants.has(value)) delete preferences.assignments[key];
   return preferences;
 }
