@@ -28,7 +28,7 @@ O NEXUS terá camada própria e extensível para identificar, pré-visualizar, a
 A integração inicial permite inserir na ficha apenas mídias de imagem que possam ser exibidas diretamente pelo elemento de imagem do navegador:
 
 - A origem precisa estar presente no registro resolvido (`path`, `url` ou `src`) e passar pela validação de origem segura da Biblioteca.
-- A aplicação cria um componente `asset-image` e grava a origem como vínculo do componente; não copia nem incorpora o arquivo em flags do Actor.
+- A aplicação cria um componente `asset-image` e grava o caminho/URL em `dataPath` na instância; não copia nem incorpora os bytes do arquivo nos dados do Actor.
 - A prévia e a inserção aceitam formatos de imagem nativamente reconhecidos pelo navegador (PNG, JPEG, GIF/APNG, WebP, AVIF, BMP e ICO), com MIME coerente quando declarado.
 - SVG, formatos que dependem de decoder especializado, origens inseguras, caminhos de travessia e apenas miniaturas de cartão não são oferecidos como inserção.
 - Áudio e vídeo podem ter prévia no Inspector quando o navegador reconhece o formato, mas não são inseridos no Canvas por esta integração. Exigem componentes e contratos próprios antes de serem aplicáveis.
