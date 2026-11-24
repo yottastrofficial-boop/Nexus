@@ -6,6 +6,7 @@
  * The caller supplies the registry and user-preference callbacks.
  */
 import { toggleLibraryCollectionResource } from "../core/library-preferences.js";
+import { getLibraryDesignProfilePreviewModel } from "./theme-inspector.js";
 
 const PAGE_SIZE = 30;
 const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions", "world-flows"]);
@@ -75,6 +76,90 @@ function makeElement(tag, className, content = "") {
   return element;
 }
 
+function renderDesignProfilePreview(resource, resolved) {
+  if (resource?.kind !== "theme" || resolved?.kind !== "design-profile" || !resolved.profile) return null;
+  const model = getLibraryDesignProfilePreviewModel(resolved);
+  if (!model) return null;
+  const section = makeElement("section", "nexus-library-design-preview");
+  section.append(makeElement("strong", "nexus-library-design-preview-heading", "Prévia do perfil"));
+  if (!model.supported) {
+    section.append(makeElement("p", "nexus-library-design-preview-warning", model.message));
+    return section;
+  }
+
+  const palette = Object.fromEntries(model.palette.map(color => [color.key, color.value]));
+  for (const [key, value] of Object.entries(palette)) section.style.setProperty("--nexus-inspector-" + key, value);
+  section.dataset.radius = model.layout.radius;
+  section.dataset.density = model.layout.density;
+  section.style.setProperty("--nexus-inspector-font", model.typography.family);
+  section.style.setProperty("--nexus-inspector-font-size", model.typography.baseSize + "px");
+  section.style.setProperty("--nexus-inspector-line-height", String(model.typography.lineHeight));
+  section.style.setProperty("--nexus-inspector-spacing", String(model.layout.spacing));
+  section.style.setProperty("--nexus-inspector-control-height", model.layout.controlHeight + "px");
+
+  const stage = makeElement("div", "nexus-library-design-preview-stage");
+  stage.setAttribute("role", "img");
+  stage.setAttribute("aria-label", "Exemplo de painel NEXUS com a paleta, tipografia e geometria deste perfil.");
+  const mockWindow = makeElement("div", "nexus-library-design-preview-window");
+  const header = makeElement("div", "nexus-library-design-preview-window-header");
+  header.append(makeElement("span", "nexus-library-design-preview-window-dot"), makeElement("strong", "", model.name), makeElement("small", "", model.presetLabel));
+  const body = makeElement("div", "nexus-library-design-preview-window-body");
+  const nav = makeElement("div", "nexus-library-design-preview-nav");
+  nav.append(makeElement("span", "is-active", "Ficha"), makeElement("span", "", "Inventário"), makeElement("span", "", "Efeitos"));
+  const content = makeElement("div", "nexus-library-design-preview-content");
+  content.append(makeElement("small", "", "PERSONAGEM · EXEMPLO"));
+  content.append(makeElement("strong", "nexus-library-design-preview-value", "42 / 50"));
+  content.append(makeElement("span", "nexus-library-design-preview-track"));
+  content.append(makeElement("p", "", "Amostra de texto secundário e conteúdo de painel."));
+  const controls = makeElement("div", "nexus-library-design-preview-controls");
+  controls.append(makeElement("span", "", "Campo de exemplo"), makeElement("button", "", "Ação"));
+  content.append(controls);
+  body.append(nav, content);
+  mockWindow.append(header, body);
+  stage.append(mockWindow);
+  section.append(stage);
+
+  const swatches = makeElement("div", "nexus-library-design-preview-palette");
+  for (const color of model.palette) {
+    const item = makeElement("div", "nexus-library-design-preview-color");
+    const sample = makeElement("span", "");
+    sample.style.backgroundColor = color.value;
+    sample.setAttribute("aria-label", color.label + ": " + color.value);
+    sample.title = color.label + " · " + color.value;
+    item.append(sample, makeElement("small", "", color.label));
+    swatches.append(item);
+  }
+  section.append(makeElement("strong", "nexus-library-design-preview-subheading", "Paleta semântica"), swatches);
+
+  const settings = makeElement("dl", "nexus-library-design-preview-settings");
+  const facts = [
+    ["Preset", model.presetLabel], ["Tipografia", model.typography.family],
+    ["Tamanho base", model.typography.baseSize + " px"], ["Densidade", model.layout.densityLabel],
+    ["Cantos", model.layout.radiusLabel], ["Espaçamento", model.layout.spacing + "×"],
+    ["Altura dos controles", model.layout.controlHeight + " px"],
+    ["Contraste", model.accessibility.contrast === "high" ? "Alto" : "Padrão"],
+    ["Movimento reduzido", model.accessibility.reducedMotion ? "Ativado" : "Desativado"]
+  ];
+  for (const [label, value] of facts) settings.append(makeElement("dt", "", label), makeElement("dd", "", value));
+  section.append(makeElement("strong", "nexus-library-design-preview-subheading", "Configuração visual"), settings);
+
+  const diagnostics = makeElement("div", "nexus-library-design-preview-diagnostics");
+  diagnostics.append(makeElement("strong", "nexus-library-design-preview-subheading", "Contraste"));
+  for (const check of model.diagnostics.checks) {
+    const row = makeElement("p", check.passes ? "is-passing" : "is-warning");
+    row.append(makeElement("span", "", check.label), makeElement("strong", "", check.ratio + ":1"));
+    diagnostics.append(row);
+  }
+  diagnostics.append(makeElement("p",
+    model.diagnostics.warnings.length ? "nexus-library-design-preview-warning" : "nexus-library-design-preview-success",
+    model.diagnostics.warnings.length
+      ? "Há combinações que não atingem o contraste recomendado."
+      : "Todos os pares avaliados atingem o limite selecionado."
+  ));
+  section.append(diagnostics);
+  return section;
+}
+
 export function createLibraryCatalogExplorer({
   registry,
   container,
@@ -83,6 +168,8 @@ export function createLibraryCatalogExplorer({
   savePreferences,
   canApplyResource = () => false,
   onApplyResource = null,
+  canApplyTheme = () => false,
+  onApplyTheme = null,
   applyLabel = "Aplicar ao contexto",
   getUpdateInfo = null,
   onUpdateInstances = null,
@@ -190,6 +277,7 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
+    const designPreview = renderDesignProfilePreview(resource, resolved);
     const facts = makeElement("dl", "nexus-library-resource-facts");
     const resourceFacts = [
       ["Provedor", resource.providerId],
@@ -335,7 +423,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, save);
-          detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, editor, actions);
+          detail.replaceChildren(heading, meta, description, ...(designPreview ? [designPreview] : []), facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
 
@@ -370,6 +458,30 @@ export function createLibraryCatalogExplorer({
         }
       });
       actions.append(button);
+    }
+
+    if (typeof onApplyTheme === "function" && designPreview && getLibraryDesignProfilePreviewModel(resolved)?.supported) {
+      for (const scope of ["world", "user"]) {
+        if (!canApplyTheme(resource, resolved, scope)) continue;
+        const label = scope === "world" ? "Aplicar à campanha" : "Usar como minha aparência";
+        const applyTheme = makeElement("button", "nexus-library-apply-theme", label);
+        applyTheme.type = "button";
+        applyTheme.dataset.themeApplyScope = scope;
+        applyTheme.addEventListener("click", async () => {
+          applyTheme.disabled = true;
+          try {
+            const result = await onApplyTheme(resource, resolved, scope);
+            if (result !== false) globalThis.ui?.notifications?.info?.(scope === "world"
+              ? "A aparência da campanha foi atualizada."
+              : "Sua aparência pessoal foi atualizada.");
+          } catch (error) {
+            detail.append(makeElement("p", "nexus-library-empty", "Não foi possível aplicar a aparência: " + String(error?.message ?? error)));
+          } finally {
+            applyTheme.disabled = false;
+          }
+        });
+        actions.append(applyTheme);
+      }
     }
 
     if (typeof onApplyResource === "function" && canApplyResource(resource, resolved)) {
@@ -408,7 +520,7 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    detail.replaceChildren(heading, meta, description, ...(designPreview ? [designPreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);
