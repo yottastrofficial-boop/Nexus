@@ -1,3 +1,4 @@
+import { normalizeDesignProfile, createDefaultDesignProfile, profileToThemeLayout } from "./design-profile.js";
 export const DEFAULT_DESIGN_THEME = "nexus-dark";
 export const DESIGN_THEME_CHOICES = {
   "nexus-dark": "NEXUS — Escuro",
@@ -20,6 +21,8 @@ const WORLD_THEME_SETTING = "designWorldTheme";
 const WORLD_OVERRIDE_SETTING = "designAllowPlayerOverrides";
 const USER_MODE_SETTING = "designUserMode";
 const USER_THEME_SETTING = "designUserTheme";
+const WORLD_PROFILE_SETTING = "designWorldProfile";
+const USER_PROFILE_SETTING = "designUserProfile";
 const CORE_DIRECTORY_NAMES = new Set([
   "ActorDirectory", "CardsDirectory", "CompendiumDirectory", "ItemDirectory",
   "JournalDirectory", "MacroDirectory", "PlaylistDirectory", "RollTableDirectory",
@@ -99,31 +102,80 @@ export function installNexusDesignSystem({
   const hookIds = [];
   let installed = false;
 
-  const getEffectiveTheme = () => resolveDesignTheme(
-    {
-      theme: readSetting(gameRef, WORLD_THEME_SETTING, DEFAULT_DESIGN_THEME),
-      allowPlayerOverrides: readSetting(gameRef, WORLD_OVERRIDE_SETTING, true)
-    },
-    {
-      mode: readSetting(gameRef, USER_MODE_SETTING, "world"),
-      theme: readSetting(gameRef, USER_THEME_SETTING, DEFAULT_DESIGN_THEME)
-    },
-    themeIds
-  );
+  let previewProfile = null;
+
+  const getProfile = (scope = "world") => {
+    const isUser = scope === "user";
+    const fallbackPreset = readSetting(gameRef, isUser ? USER_THEME_SETTING : WORLD_THEME_SETTING, DEFAULT_DESIGN_THEME);
+    const raw = readSetting(gameRef, isUser ? USER_PROFILE_SETTING : WORLD_PROFILE_SETTING, {});
+    return normalizeDesignProfile(raw, { fallbackPreset: knownTheme(fallbackPreset, themeIds) });
+  };
+
+  const getEffectiveTheme = () => {
+    const resolved = resolveDesignTheme(
+      {
+        theme: readSetting(gameRef, WORLD_THEME_SETTING, DEFAULT_DESIGN_THEME),
+        allowPlayerOverrides: readSetting(gameRef, WORLD_OVERRIDE_SETTING, true)
+      },
+      {
+        mode: readSetting(gameRef, USER_MODE_SETTING, "world"),
+        theme: readSetting(gameRef, USER_THEME_SETTING, DEFAULT_DESIGN_THEME)
+      },
+      themeIds
+    );
+    const profile = previewProfile
+      ? normalizeDesignProfile(previewProfile)
+      : resolved.source === "user"
+        ? getProfile("user")
+        : resolved.source === "system"
+          ? createDefaultDesignProfile(DEFAULT_DESIGN_THEME)
+          : getProfile("world");
+    return { ...resolved, theme: profile.preset, profile };
+  };
 
   const apply = () => {
     const root = documentRef?.documentElement;
-    if (!root?.style || !themeTokens[getEffectiveTheme().theme]) return getEffectiveTheme();
     const resolved = getEffectiveTheme();
-    applyThemeTokens(root, { theme: resolved.theme });
+    if (!root?.style || !themeTokens[resolved.theme]) return resolved;
+    applyThemeTokens(root, profileToThemeLayout(resolved.profile));
     root.classList?.add("nexus-design-system");
     if (root.dataset) {
       root.dataset.nexusDesignSystem = "true";
       root.dataset.nexusTheme = resolved.theme;
-      root.dataset.nexusThemeSource = resolved.source;
+      root.dataset.nexusThemeSource = previewProfile ? "preview" : resolved.source;
       root.dataset.nexusThemeAppearance = resolved.theme === "light" ? "light" : "dark";
     }
     return resolved;
+  };
+
+  const canEditScope = scope => scope === "world"
+    ? gameRef?.user?.isGM === true
+    : scope === "user" && readSetting(gameRef, WORLD_OVERRIDE_SETTING, true) !== false;
+
+  const saveProfile = async (raw, scope = "world") => {
+    if (!canEditScope(scope)) throw new Error(scope === "world"
+      ? "Somente o Mestre pode alterar a aparência da campanha."
+      : "A campanha não permite temas individuais.");
+    const profile = normalizeDesignProfile(raw);
+    const isUser = scope === "user";
+    const profileKey = isUser ? USER_PROFILE_SETTING : WORLD_PROFILE_SETTING;
+    const themeKey = isUser ? USER_THEME_SETTING : WORLD_THEME_SETTING;
+    await gameRef.settings.set(SYSTEM_ID, profileKey, profile);
+    await gameRef.settings.set(SYSTEM_ID, themeKey, profile.preset);
+    if (isUser) await gameRef.settings.set(SYSTEM_ID, USER_MODE_SETTING, "personal");
+    previewProfile = null;
+    refresh();
+    return profile;
+  };
+
+  const preview = raw => {
+    previewProfile = normalizeDesignProfile(raw);
+    return apply();
+  };
+
+  const clearPreview = () => {
+    previewProfile = null;
+    return apply();
   };
 
   const refresh = () => {
@@ -187,6 +239,24 @@ export function installNexusDesignSystem({
       requiresReload: false,
       onChange: refresh
     });
+    registerSetting(gameRef, WORLD_PROFILE_SETTING, {
+      name: "Perfil visual da campanha",
+      hint: "Perfil visual avançado editado pelo Estúdio de Aparência.",
+      scope: "world",
+      config: false,
+      type: Object,
+      default: {},
+      onChange: refresh
+    });
+    registerSetting(gameRef, USER_PROFILE_SETTING, {
+      name: "Perfil visual pessoal",
+      hint: "Perfil visual avançado deste usuário.",
+      scope: "user",
+      config: false,
+      type: Object,
+      default: {},
+      onChange: refresh
+    });
     if (typeof hooks?.once === "function") {
       hooks.once("ready", refresh);
     } else {
@@ -215,5 +285,30 @@ export function installNexusDesignSystem({
   };
 
   register();
-  return { apply, getEffectiveTheme, uninstall };
+  const registerStudio = ApplicationClass => {
+    if (typeof ApplicationClass !== "function" || typeof gameRef?.settings?.registerMenu !== "function") return false;
+    const menuKey = "designStudio";
+    if (gameRef.settings.menus?.has?.(`${SYSTEM_ID}.${menuKey}`)) return false;
+    gameRef.settings.registerMenu(SYSTEM_ID, menuKey, {
+      name: "Estúdio de Aparência",
+      label: "Abrir Estúdio",
+      hint: "Personalize paleta, tipografia, densidade, acessibilidade e perfis visuais.",
+      icon: "fa-solid fa-palette",
+      type: ApplicationClass,
+      restricted: false
+    });
+    return true;
+  };
+
+  return {
+    apply,
+    getEffectiveTheme,
+    getProfile,
+    canEditScope,
+    saveProfile,
+    preview,
+    clearPreview,
+    registerStudio,
+    uninstall
+  };
 }
