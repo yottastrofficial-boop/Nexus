@@ -1,3 +1,12 @@
+export const NEXUS_COMPONENT_GRID_UNIT = 10;
+
+export function normalizeNexusComponentDimension(value, fallback = NEXUS_COMPONENT_GRID_UNIT) {
+  const numeric = Number(value);
+  const safeValue = Number.isFinite(numeric) && numeric > 0 ? numeric : Number(fallback);
+  const base = Number.isFinite(safeValue) && safeValue > 0 ? safeValue : NEXUS_COMPONENT_GRID_UNIT;
+  return Math.max(NEXUS_COMPONENT_GRID_UNIT, Math.round(base / NEXUS_COMPONENT_GRID_UNIT) * NEXUS_COMPONENT_GRID_UNIT);
+}
+
 /**
  * Canonical component type definitions shared by the sheet adapter and
  * Library transfer validation. Keep this registry data-only.
