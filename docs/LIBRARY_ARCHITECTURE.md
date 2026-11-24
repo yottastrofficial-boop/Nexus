@@ -66,7 +66,9 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 O Inspector resolve o recurso selecionado sob demanda e apresenta uma prévia específica quando existe um formato seguro e verificável:
 
 - Perfis de aparência usam a prévia isolada do Design System; não aplicam o tema à interface.
-- Componentes, composições, layouts/modelos, assets, estilos e definições de Lógica apresentam metadados estruturais. Payloads de Lógica continuam inertes e nunca são executados pela prévia.
+- Componentes e assets usam prévias visuais tipadas quando o formato é reconhecido (por exemplo, barras de recurso, campos, tabelas e imagens). As prévias são demonstrativas e não executam HTML, CSS, JavaScript ou payloads importados.
+- Composições, layouts/modelos, estilos e definições de Lógica apresentam metadados estruturais. Payloads de Lógica continuam inertes e nunca são executados pela prévia.
+- Paletas de tema exibem somente cores hexadecimais reconhecidas; a prévia não aplica o tema à interface.
 - Imagens usam apenas origens HTTP(S) sem credenciais ou caminhos relativos seguros e formatos de imagem nativamente reconhecidos. SVG, esquemas `data:`, protocolos executáveis, caminhos de travessia e formatos desconhecidos não são tratados como imagens.
 - Áudio e vídeo usam controles nativos do navegador com pré-carregamento desativado; isso não implica conversão nem suporte a codecs que o ambiente não decodifique.
 - Documentos Foundry exibem metadados leves e oferecem a ação de abrir a ficha nativa. A resolução revalida permissões do usuário e do compêndio.
@@ -79,6 +81,9 @@ Os identificadores de tipo do filtro devem corresponder às chaves de `FoundryDo
 - Pastas, favoritos e recentes armazenam referências estáveis, não cópias de documentos.
 - Chaves antigas como `components:<id>` continuam resolvíveis; documentos Foundry usam `foundry-documents:<uuid>`.
 - Pastas globais podem organizar recursos de provedores diferentes; pastas vinculadas a uma coleção respeitam seu escopo.
+- Preferências usam `schemaVersion: 3`. Pastas têm `parentId`, suportam subpastas e podem ser movidas por arrastar e soltar; a migração preserva pastas antigas como raiz e repara ciclos/referências inválidas.
+- Excluir uma pasta remove também suas subpastas e limpa apenas as atribuições de pasta; os recursos originais permanecem intactos.
+- A barra de pesquisa usa uma única superfície; filtros secundários ficam recolhidos. Favoritos usam controle de ícone sem painel decorativo.
 - Coleções universais são agrupamentos curados independentes de pastas; podem conter referências de qualquer provedor e tipo, sem duplicar os recursos.
 - Documentos Foundry não são duplicados. O UUID é resolvido pelo bridge e as permissões nativas continuam válidas.
 - A importação de backup preserva escopos: fluxos pessoais permanecem pessoais e fluxos do mundo permanecem no setting do mundo.
@@ -118,7 +123,11 @@ Conteúdo importado permanece dado inerte. HTML, CSS, JavaScript, macros ou comp
 
 ## Estado e limitações
 
-A integração atual possui catálogo universal, ações contextuais para recursos pessoais NEXUS, abertura de documentos Foundry, pastas/favoritos/recentes e coleções mistas por referência, filtros por categoria/tipo/origem/etiqueta, janela independente e backup completo com prévia.
+A integração atual possui catálogo universal, ações contextuais para recursos pessoais NEXUS, abertura de documentos Foundry, pastas hierárquicas, favoritos/recentes, coleções mistas por referência, filtros por categoria/tipo/origem/etiqueta, janela independente e backup completo com prévia.
+
+O Design System global é carregado depois das folhas legadas e cobre as aplicações NEXUS e superfícies nativas suportadas do Foundry (diretórios, abas laterais, controles de cena, menus e campos). Janelas de módulos de terceiros não são forçadas a usar o tema NEXUS, preservando a compatibilidade. Os trilhos flutuantes da ficha são descendentes da própria ApplicationV2, portanto acompanham o empilhamento nativo da janela em vez de manter uma camada global separada.
+
+O padrão de dimensões de componentes usa múltiplos de 10 px. Dimensões de layouts salvos são normalizadas ao serem carregadas/salvas; novos recursos e redimensionamentos devem respeitar essa unidade.
 
 Ainda não estão concluídos:
 - construtor visual avançado de Fluxos e simulação de ações; os editores estruturados iniciais para os cinco tipos já existem;

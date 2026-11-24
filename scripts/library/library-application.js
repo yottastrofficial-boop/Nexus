@@ -1,7 +1,7 @@
 import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
-import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
+import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
@@ -121,6 +121,16 @@ export function createLibraryApplicationClass({
       });
 
       const search = root.querySelector("[data-library-search]");
+      const filterToggle = root.querySelector("[data-library-toggle-filters]");
+      const filterPanel = root.querySelector("[data-library-filter-panel]");
+      filterToggle?.addEventListener("click", () => {
+        if (!filterPanel) return;
+        filterPanel.hidden = !filterPanel.hidden;
+        filterToggle.setAttribute("aria-expanded", String(!filterPanel.hidden));
+        filterToggle.setAttribute("aria-label", filterPanel.hidden ? "Mostrar filtros" : "Ocultar filtros");
+        filterToggle.title = filterPanel.hidden ? "Mostrar filtros" : "Ocultar filtros";
+        filterToggle.classList.toggle("active", !filterPanel.hidden);
+      });
       const tag = root.querySelector("[data-library-tag]");
       const origin = root.querySelector("[data-library-origin]");
       const kind = root.querySelector("[data-library-kind]");
@@ -141,26 +151,64 @@ export function createLibraryApplicationClass({
         button.setAttribute("aria-pressed", String(active));
       });
 
+      this._collapsedLibraryFolders ??= new Set();
       const refreshFolders = () => {
         const nav = root.querySelector("[data-library-app-folders]");
         if (!nav) return;
+        const preferences = normalizeLibraryPreferences(this._getPreferences());
         nav.replaceChildren();
         const clear = document.createElement("button");
         clear.type = "button";
         clear.dataset.libraryFolderClear = "";
-        clear.className = "nexus-library-custom-folder";
-        clear.textContent = "Todas as pastas";
+        clear.className = "nexus-library-custom-folder nexus-library-folder-clear";
+        clear.innerHTML = '<i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Todas as pastas</span>';
         clear.classList.toggle("active", !this._state.folder && !this._state.collectionId && this._state.smartView === "all");
         nav.append(clear);
-        for (const folder of normalizeLibraryPreferences(this._getPreferences()).folders) {
+        const childrenByParent = new Map();
+        for (const folder of preferences.folders) {
+          const parentId = folder.parentId || "";
+          if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
+          childrenByParent.get(parentId).push(folder);
+        }
+        for (const children of childrenByParent.values()) {
+          children.sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }));
+        }
+        // Render recursively into explicit containers, preserving folder order.
+        const appendTree = (folder, parent, depth = 0) => {
+          const children = childrenByParent.get(folder.id) ?? [];
+          const expanded = !this._collapsedLibraryFolders.has(folder.id);
+          const row = document.createElement("div");
+          row.className = "nexus-library-folder-row";
+          row.dataset.libraryFolderDrop = folder.id;
+          row.dataset.depth = String(Math.min(depth, 8));
+          row.style.paddingLeft = `${Math.min(depth, 8) * 13}px`;
+          row.draggable = true;
+          const toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.className = "nexus-library-folder-toggle";
+          toggle.dataset.libraryFolderToggle = folder.id;
+          toggle.hidden = children.length === 0;
+          toggle.setAttribute("aria-label", expanded ? "Recolher subpastas" : "Expandir subpastas");
+          toggle.setAttribute("aria-expanded", String(expanded));
+          toggle.innerHTML = '<i class="fa-solid ' + (expanded ? "fa-chevron-down" : "fa-chevron-right") + '" aria-hidden="true"></i>';
           const button = document.createElement("button");
           button.type = "button";
           button.className = "nexus-library-custom-folder";
           button.dataset.libraryFolder = folder.id;
-          button.textContent = folder.name;
+          button.innerHTML = '<i class="fa-regular fa-folder" aria-hidden="true"></i><span></span>';
+          button.querySelector("span").textContent = folder.name;
           button.classList.toggle("active", this._state.folder === folder.id);
-          nav.append(button);
-        }
+          row.append(toggle, button);
+          parent.append(row);
+          if (children.length && expanded) {
+            const nested = document.createElement("div");
+            nested.className = "nexus-library-folder-children";
+            nested.dataset.parentFolder = folder.id;
+            for (const child of children) appendTree(child, nested, depth + 1);
+            parent.append(nested);
+          }
+        };
+        for (const folder of childrenByParent.get("") ?? []) appendTree(folder, nav);
       };
       refreshFolders();
       const refreshCollections = () => {
@@ -342,8 +390,17 @@ export function createLibraryApplicationClass({
         refreshCollections();
         void render();
       }));
-      root.querySelector("[data-library-app-folders]")?.addEventListener("click", async event => {
+      const folderNav = root.querySelector("[data-library-app-folders]");
+      folderNav?.addEventListener("click", async event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const toggle = target?.closest("[data-library-folder-toggle]");
+        if (toggle) {
+          const id = toggle.dataset.libraryFolderToggle;
+          if (this._collapsedLibraryFolders.has(id)) this._collapsedLibraryFolders.delete(id);
+          else this._collapsedLibraryFolders.add(id);
+          refreshFolders();
+          return;
+        }
         const clear = target?.closest("[data-library-folder-clear]");
         const folderButton = target?.closest("[data-library-folder]");
         if (!clear && !folderButton) return;
@@ -354,6 +411,43 @@ export function createLibraryApplicationClass({
         refreshFolders();
         refreshCollections();
         await render();
+      });
+      folderNav?.addEventListener("dragstart", event => {
+        const row = event.target instanceof Element ? event.target.closest("[data-library-folder-drop]") : null;
+        if (!row || !event.dataTransfer) return;
+        event.dataTransfer.setData("application/x-nexus-library-folder", row.dataset.libraryFolderDrop);
+        event.dataTransfer.effectAllowed = "move";
+      });
+      folderNav?.addEventListener("dragover", event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        if (!target?.closest("[data-library-folder-drop], [data-library-folder-clear]")) return;
+        event.preventDefault();
+        target.closest("[data-library-folder-drop], [data-library-folder-clear]")?.classList.add("is-drop-target");
+      });
+      folderNav?.addEventListener("dragleave", event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        target?.closest("[data-library-folder-drop], [data-library-folder-clear]")?.classList.remove("is-drop-target");
+      });
+      folderNav?.addEventListener("drop", async event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const folderRow = target?.closest("[data-library-folder-drop]");
+        const clear = target?.closest("[data-library-folder-clear]");
+        const targetFolderId = clear ? "" : folderRow?.dataset.libraryFolderDrop ?? "";
+        if (!folderRow && !clear) return;
+        event.preventDefault();
+        folderNav.querySelectorAll(".is-drop-target").forEach(item => item.classList.remove("is-drop-target"));
+        try {
+          const resourcePayload = event.dataTransfer?.getData("application/x-nexus-library-resource");
+          const folderPayload = event.dataTransfer?.getData("application/x-nexus-library-folder");
+          if (resourcePayload) {
+            const reference = JSON.parse(resourcePayload);
+            await this._savePreferences(assignLibraryEntryFolder(this._getPreferences(), reference.collection, reference.entryId, targetFolderId));
+          } else if (folderPayload) {
+            await this._savePreferences(moveLibraryFolder(this._getPreferences(), folderPayload, targetFolderId));
+          } else return;
+          refreshFolders();
+          await render();
+        } catch (error) { notify("warn", error.message); }
       });
       root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", async event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
@@ -371,26 +465,58 @@ export function createLibraryApplicationClass({
             window: { title: "Gerenciar pasta" },
             content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
             ok: { label: "Renomear" },
-            buttons: [{
-              action: "delete-folder",
-              label: "Excluir pasta",
-              class: "nexus-library-delete-folder",
-              callback: () => ({ action: "delete-folder" })
-            }],
+            buttons: [
+              {
+                action: "create-subfolder",
+                label: "Nova subpasta",
+                class: "nexus-library-create-subfolder",
+                callback: () => ({ action: "create-subfolder" })
+              },
+              {
+                action: "delete-folder",
+                label: "Excluir pasta",
+                class: "nexus-library-delete-folder",
+                callback: () => ({ action: "delete-folder" })
+              }
+            ],
             rejectClose: false
           });
-          if (result?.action === "delete-folder") {
+          if (result?.action === "create-subfolder") {
+            const child = await input({
+              window: { title: "Nova subpasta" },
+              content: '<label>Nome da subpasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+              ok: { label: "Criar subpasta" },
+              rejectClose: false
+            });
+            const childName = String(child?.name ?? "").trim();
+            if (!childName) return;
+            await this._savePreferences(createLibraryFolder(this._getPreferences(), {
+              id: globalThis.foundry?.utils?.randomID?.(10),
+              name: childName,
+              collection: folder.collection,
+              parentId: folderId
+            }).preferences);
+            this._collapsedLibraryFolders.delete(folderId);
+          } else if (result?.action === "delete-folder") {
             const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
             const accepted = typeof confirm === "function" && await confirm({
               window: { title: "Excluir pasta" },
-              content: "<p>Os recursos serão mantidos, mas ficarão sem pasta.</p>",
+              content: "<p>Os recursos serão mantidos sem pasta. As subpastas também serão removidas.</p>",
               yes: { label: "Excluir" },
               no: { label: "Cancelar" },
               rejectClose: false
             });
             if (!accepted) return;
-            await this._savePreferences(removeLibraryFolder(this._getPreferences(), folderId));
-            if (this._state.folder === folderId) this._state.folder = "";
+            const before = normalizeLibraryPreferences(this._getPreferences());
+            const descendants = new Set([folderId]);
+            let changed = true;
+            while (changed) {
+              changed = false;
+              for (const item of before.folders) if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) { descendants.add(item.id); changed = true; }
+            }
+            await this._savePreferences(removeLibraryFolder(before, folderId));
+            if (descendants.has(this._state.folder)) this._state.folder = "";
+            for (const id of descendants) this._collapsedLibraryFolders.delete(id);
           } else {
             const name = String(result?.name ?? "").trim();
             if (!name) return;
@@ -499,10 +625,15 @@ export function createLibraryApplicationClass({
         if (!name) return;
         try {
           const current = normalizeLibraryPreferences(this._getPreferences());
+          const parentId = this._state.folder || "";
+          const parent = parentId ? current.folders.find(folder => folder.id === parentId) : null;
           const created = createLibraryFolder(current, {
             id: globalThis.foundry?.utils?.randomID?.(10),
-            name
+            name,
+            collection: parent?.collection ?? "",
+            parentId
           });
+          if (parentId) this._collapsedLibraryFolders.delete(parentId);
           await this._savePreferences(created.preferences);
           this._state.folder = created.folder.id;
           this._state.collectionId = "";

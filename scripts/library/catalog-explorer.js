@@ -113,6 +113,29 @@ export function getLibraryResourceIcon(resource = {}) {
 }
 
 
+const THEME_PREVIEW_LABELS = Object.freeze({
+  canvasColor: "Canvas", canvas: "Canvas",
+  cardColor: "Cartão", card: "Cartão",
+  highlightColor: "Destaque", highlight: "Destaque",
+  buttonColor: "Botão", button: "Botão",
+  accentColor: "Acento", accent: "Acento",
+  panelColor: "Painel", panel: "Painel",
+  surfaceColor: "Superfície", surface: "Superfície"
+});
+
+export function getLibraryThemePreviewColors(raw = {}) {
+  const entry = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const profile = entry.profile && typeof entry.profile === "object" ? entry.profile : entry;
+  const palette = profile.palette ?? entry.palette ?? entry.tokens ?? {};
+  if (!palette || typeof palette !== "object" || Array.isArray(palette)) return [];
+  return Object.entries(palette)
+    .filter(([key, value]) => THEME_PREVIEW_LABELS[key] && typeof value === "string" &&
+      /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()))
+    .slice(0, 12)
+    .map(([key, value]) => ({ label: THEME_PREVIEW_LABELS[key], value: value.trim() }));
+}
+
+
 function renderDesignProfilePreview(resource, resolved) {
   if (resource?.kind !== "theme" || resolved?.kind !== "design-profile" || !resolved.profile) return null;
   const model = getLibraryDesignProfilePreviewModel(resolved);
@@ -287,16 +310,30 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
       ]
     };
   }
-  if (resource.kind === "component" || collection === "components" || reference.builtin === "asset") {
+  if (resource.kind === "component" || resource.kind === "asset" || collection === "components" || reference.builtin === "asset") {
     const settings = data.settings && typeof data.settings === "object" ? data.settings
-      : data.template && typeof data.template === "object" ? data.template : {};
+      : data.template && typeof data.template === "object" ? data.template : data;
     const width = safeDimension(settings.w ?? data.w);
     const height = safeDimension(settings.h ?? data.h);
     const type = String(data.type ?? resource.type ?? "componente").slice(0, 64);
+    const source = safeMediaSource(settings.src ?? settings.path ?? settings.url ?? settings.image ?? data.src ?? data.path);
+    const sourcePreview = source
+      ? getLibraryResourcePreviewModel({ kind: "media", reference: { collection: "media" } }, { path: source })
+      : null;
+    const preview = {
+      type,
+      label: String(settings.label ?? settings.title ?? data.label ?? resource.name ?? type).slice(0, 80),
+      value: String(settings.previewValue ?? settings.value ?? settings.text ?? data.previewValue ?? "").slice(0, 80),
+      current: Number(settings.previewCurrent ?? settings.current ?? 32),
+      max: Number(settings.previewMax ?? settings.max ?? 40),
+      source: sourcePreview?.mediaType === "image" ? sourcePreview.source : ""
+    };
     return {
       kind: "component",
-      title: "Componente reutilizável",
+      title: "Prévia do componente",
       summary: `${type}${width && height ? ` · ${width} × ${height} px` : ""}`,
+      type,
+      preview,
       details: [
         ["Tipo", type],
         ["Configurações", String(Object.keys(settings).length)],
@@ -335,16 +372,6 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
       details
     };
   }
-  if (resource.kind === "asset") {
-    const width = safeDimension(data.w ?? data.width);
-    const height = safeDimension(data.h ?? data.height);
-    return {
-      kind: "asset",
-      title: "Recurso",
-      summary: `${String(data.type ?? resource.type ?? "Asset").slice(0, 64)}${width && height ? ` · ${width} × ${height} px` : ""}`,
-      details: width && height ? [["Dimensões", `${width} × ${height} px`]] : []
-    };
-  }
   return null;
 }
 
@@ -364,6 +391,53 @@ function renderLibraryResourcePreview(resource, resolved) {
   section.dataset.previewKind = model.kind;
   section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
   section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  if (model.kind === "component" && model.preview) {
+    const preview = model.preview;
+    const type = String(preview.type ?? "").toLowerCase();
+    const stage = makeElement("div", "nexus-library-component-preview");
+    const surface = makeElement("div", "nexus-library-component-preview-surface");
+    surface.dataset.componentType = type;
+    if (["resource-meter", "asset-meter", "pv", "sheet-resource"].includes(type)) {
+      const heading = makeElement("div", "nexus-library-component-preview-heading");
+      heading.append(makeElement("strong", "", preview.label), makeElement("small", "", "32 / 40"));
+      const track = makeElement("span", "nexus-library-component-preview-track");
+      const fill = makeElement("i", "");
+      const current = Number.isFinite(preview.current) ? preview.current : 32;
+      const maximum = Number.isFinite(preview.max) && preview.max > 0 ? preview.max : 40;
+      fill.style.width = Math.max(0, Math.min(100, current / maximum * 100)) + "%";
+      track.append(fill);
+      surface.append(heading, track);
+    } else if (["asset-image", "token"].includes(type)) {
+      if (preview.source) {
+        const image = document.createElement("img");
+        image.src = preview.source;
+        image.alt = preview.label;
+        image.loading = "lazy";
+        image.decoding = "async";
+        surface.append(image);
+      } else {
+        surface.append(makeElement("i", "fa-solid fa-image"), makeElement("small", "", preview.label));
+      }
+    } else if (["asset-table", "table"].includes(type)) {
+      const table = makeElement("div", "nexus-library-component-preview-table");
+      for (let index = 0; index < 9; index += 1) table.append(makeElement("span", index < 3 ? "is-heading" : ""));
+      surface.append(makeElement("strong", "", preview.label), table);
+    } else if (["asset-notes", "notes"].includes(type)) {
+      surface.append(makeElement("strong", "", preview.label));
+      for (let index = 0; index < 3; index += 1) surface.append(makeElement("span", "nexus-library-component-preview-line"));
+    } else if (["asset-field", "text-field", "sheet-name", "sheet-lineage"].includes(type)) {
+      surface.append(makeElement("small", "", preview.label), makeElement("span", "nexus-library-component-preview-input", preview.value || "Conteúdo de exemplo"));
+    } else if (["asset-value", "sheet-level"].includes(type)) {
+      surface.append(makeElement("small", "", preview.label), makeElement("strong", "nexus-library-component-preview-value", preview.value || "16"));
+    } else if (type === "asset-link") {
+      surface.append(makeElement("strong", "", preview.label), makeElement("span", "nexus-library-component-preview-link", "Abrir recurso"));
+    } else {
+      surface.append(makeElement("strong", "", preview.label), makeElement("small", "", type || "Componente"));
+      if (preview.value) surface.append(makeElement("span", "nexus-library-component-preview-input", preview.value));
+    }
+    stage.append(surface);
+    section.append(stage);
+  }
   if (model.source && model.mediaType !== "unsupported") {
     let media;
     if (model.mediaType === "image") {
@@ -477,12 +551,26 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("small", "", `${resource.type} · ${resource.origin}`);
     select.append(preview, title, meta);
 
-    const favorite = makeElement("button", "nexus-library-favorite", preferences.favorites.includes(key) ? "★" : "☆");
+    const isFavorite = preferences.favorites.includes(key);
+    const favorite = makeElement("button", "nexus-library-favorite");
     favorite.type = "button";
     favorite.dataset.libraryResourceFavorite = resource.id;
     favorite.dataset.libraryProvider = resource.providerId;
-    favorite.setAttribute("aria-pressed", String(preferences.favorites.includes(key)));
-    favorite.setAttribute("aria-label", preferences.favorites.includes(key) ? "Remover dos favoritos" : "Adicionar aos favoritos");
+    favorite.classList.toggle("is-favorite", isFavorite);
+    favorite.setAttribute("aria-pressed", String(isFavorite));
+    favorite.setAttribute("aria-label", isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos");
+    favorite.title = isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos";
+    favorite.append(makeElement("i", isFavorite ? "fa-solid fa-star" : "fa-regular fa-star"));
+    card.draggable = true;
+    card.addEventListener("dragstart", event => {
+      const separator = key.indexOf(":");
+      if (separator <= 0 || !event.dataTransfer) return;
+      event.dataTransfer.setData("application/x-nexus-library-resource", JSON.stringify({
+        collection: key.slice(0, separator),
+        entryId: key.slice(separator + 1)
+      }));
+      event.dataTransfer.effectAllowed = "move";
+    });
     card.append(select, favorite);
     return card;
   };

@@ -45,6 +45,9 @@ jobs:
       - name: Validate manifest, templates, styles and regressions
         run: |
           node --experimental-default-type=module tests/window-layering.test.mjs
+          node --experimental-default-type=module tests/component-grid.test.mjs
+          node --experimental-default-type=module tests/nexus-design-system-contract.test.mjs
+          node --experimental-default-type=module tests/library-preferences.test.mjs
           node --experimental-default-type=module tests/library-ui-contract.test.mjs
           node --experimental-default-type=module tests/canvas-geometry.test.mjs
           node --experimental-default-type=module tests/group-hierarchy.test.mjs
