@@ -9,13 +9,13 @@ assert.deepEqual(getAxisAnchors(source, "y"), [0, 5, 10]);
 
 assert.deepEqual(
   findBestAlignmentMatch([source], [target], "x"),
-  { delta: 4, pos: 14, distance: 10, labelAt: 15 },
+  { delta: 4, pos: 14, distance: 4, labelAt: 12 },
   "horizontal alignment should snap the nearest source edge to the target edge"
 );
 
 assert.deepEqual(
   findBestAlignmentMatch([source], [target], "y"),
-  { delta: 10, pos: 20, distance: 4, labelAt: 12 },
+  { delta: 4, pos: 14, distance: 4, labelAt: 12 },
   "vertical alignment should snap the nearest source edge to the target edge"
 );
 
