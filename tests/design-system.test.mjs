@@ -67,6 +67,16 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
   assert.equal(values.get("--nexus-line-height"), "1.6");
   assert.equal(values.get("--nexus-contrast-border-width"), "2px");
   assert.equal(values.get("--nexus-motion-duration"), "0ms");
+
+  applyThemeTokens(element, {
+    theme: "medieval",
+    palette: { panel: "url(javascript:alert(1))", text: "red", accent: "#abc" },
+    canvasColor: "url(https://example.invalid/track)"
+  });
+  assert.equal(values.get("--nexus-panel-bg"), THEME_TOKENS.medieval.panel);
+  assert.equal(values.get("--nexus-panel-text"), THEME_TOKENS.medieval.text);
+  assert.equal(values.get("--nexus-panel-accent"), "#aabbcc");
+  assert.equal(values.get("--nexus-canvas-color"), THEME_TOKENS.medieval.canvas);
 });
 
 
