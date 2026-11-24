@@ -37,6 +37,9 @@ test("theme typography uses its preset font unless a layout explicitly overrides
 
   applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter" });
   assert.equal(values.get("--nexus-font-family"), '"Inter", sans-serif');
+
+  applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter; color: red" });
+  assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
 });
 
 
@@ -108,8 +111,8 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
     preset: "medieval",
     name: "  Minha campanha  ",
     palette: { panel: "url(javascript:alert(1))", text: "#fff", accent: "#12abef" },
-    typography: { family: "url(https://example.invalid/font)", baseSize: 99, lineHeight: 0.2 },
-    layout: { density: "extreme", radius: "sharp", spacing: 9, controlHeight: 100 },
+    typography: { family: "url(https://example.invalid/font)", baseSize: 99, secondarySize: null, lineHeight: 0.2 },
+    layout: { density: "extreme", radius: "sharp", spacing: null, controlHeight: 100 },
     accessibility: { contrast: "high", reducedMotion: true }
   });
   assert.equal(profile.preset, "medieval");
@@ -118,10 +121,11 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
   assert.equal(profile.palette.text, "#ffffff");
   assert.equal(profile.typography.family, "Georgia");
   assert.equal(profile.typography.baseSize, 18);
+  assert.equal(profile.typography.secondarySize, 11);
   assert.equal(profile.typography.lineHeight, 1.2);
   assert.equal(profile.layout.density, "comfortable");
   assert.equal(profile.layout.radius, "sharp");
-  assert.equal(profile.layout.spacing, 1.5);
+  assert.equal(profile.layout.spacing, 1);
   assert.equal(profile.layout.controlHeight, 44);
   assert.equal(profile.accessibility.contrast, "high");
   assert.equal(profile.accessibility.reducedMotion, true);
