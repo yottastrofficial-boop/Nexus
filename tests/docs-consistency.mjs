@@ -36,7 +36,7 @@ assert.equal(systemDownloadVersion, manifest.version,
   "system.json deve preservar a URL da última release estável publicada.");
 assert.equal(system.manifest, "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json",
   "system.json deve usar o manifesto estável canônico.");
-assert.match(releaseWorkflow, /system\.download =/, "O workflow deve preparar a URL do pacote antes do build estável.");
+assert.match(releaseWorkflow, /systemMetadata\.download = downloadUrl/, "O workflow deve sincronizar o download estável após confirmar o asset.");
 assert.match(releaseWorkflow, /updateTextFile\("system\.json"/, "O workflow deve sincronizar system.json após confirmar o asset.");
 assert.ok(changelog.startsWith("## " + system.version + " —"), "O CHANGELOG deve começar com a versão candidata.");
 const changelogVersions = [...changelog.matchAll(/^## (1\.0\.0\.\d+)(?:\s|$)/gm)].map(match => match[1]);
