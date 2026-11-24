@@ -90,6 +90,8 @@ export function installNexusDesignSystem({
 
   let previewProfile = null;
   let originalInlineTokens = null;
+  let originalDatasetTheme;
+  let hasOriginalDatasetTheme = false;
 
   const getProfile = (scope = "world") => {
     const isUser = scope === "user";
@@ -124,6 +126,10 @@ export function installNexusDesignSystem({
     const root = documentRef?.documentElement;
     const resolved = getEffectiveTheme();
     if (!root?.style || !themeTokens[resolved.theme]) return resolved;
+    if (!hasOriginalDatasetTheme) {
+      originalDatasetTheme = root.dataset?.theme;
+      hasOriginalDatasetTheme = true;
+    }
     applyThemeTokens(root, profileToThemeLayout(resolved.profile), values => {
       if (originalInlineTokens) return;
       originalInlineTokens = new Map();
@@ -287,8 +293,11 @@ export function installNexusDesignSystem({
       delete root.dataset.nexusThemeAppearance;
       delete root.dataset.nexusContrast;
       delete root.dataset.nexusReducedMotion;
-      delete root.dataset.theme;
+      if (originalDatasetTheme === undefined) delete root.dataset.theme;
+      else root.dataset.theme = originalDatasetTheme;
     }
+    originalDatasetTheme = undefined;
+    hasOriginalDatasetTheme = false;
     installed = false;
   };
 
