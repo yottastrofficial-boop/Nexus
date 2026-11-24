@@ -135,6 +135,7 @@ test("design profile diagnostics calculate text contrast and imports use a versi
   const serialized = exportDesignProfile(dark);
   assert.deepEqual(importDesignProfile(serialized), dark);
   assert.throws(() => importDesignProfile('{"format":"OTHER","profile":{}}'), /incompatível/);
+  assert.throws(() => importDesignProfile(JSON.stringify({ format: "NEXUS-DESIGN/1", profile: { schemaVersion: 99 } })), /versão mais recente/);
   assert.throws(() => importDesignProfile("x".repeat(64 * 1024 + 1)), /64 KB/);
   assert.throws(() => importDesignProfile("{invalid"), /JSON válido/);
 });
@@ -274,9 +275,11 @@ test("installer registers authoritative world settings and per-user preferences"
   });
 
   assert.equal(records.get("nexus.designWorldTheme").scope, "world");
+  assert.equal(records.get("nexus.designWorldTheme").config, false);
   assert.equal(records.get("nexus.designAllowPlayerOverrides").scope, "world");
   assert.equal(records.get("nexus.designUserMode").scope, "user");
   assert.equal(records.get("nexus.designUserTheme").scope, "user");
+  assert.equal(records.get("nexus.designUserTheme").config, false);
   assert.equal(records.get("nexus.designWorldProfile").scope, "world");
   assert.equal(records.get("nexus.designUserProfile").scope, "user");
   assert.equal(design.canEditScope("world"), true);
