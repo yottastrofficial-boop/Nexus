@@ -18,18 +18,19 @@ A release 1.0.0.96 passou pela validação automatizada e foi publicada. A main 
 
 ## Inventário do repositório
 
-A árvore inspecionada antes desta manutenção continha 136 arquivos. Este conjunto de alterações acrescenta um teste e um documento de auditoria, totalizando 138 arquivos.
+A árvore inspecionada antes da consolidação continha 136 arquivos. A consolidação anterior acrescentou um teste e um documento de auditoria; esta etapa recupera o Testing Bridge local da PR #4, acrescentando seis arquivos de ferramenta, um teste de contrato e a documentação de execução. Total após esta etapa: 146 arquivos.
 
 | Área | Arquivos após esta manutenção |
 |---|---:|
 | Scripts | 63 |
-| Testes | 35 |
-| Documentação | 23 |
+| Testes | 36 |
+| Documentação | 24 |
 | Templates | 4 |
 | Estilos | 3 |
 | Assets | 2 |
 | Idiomas | 1 |
 | Configuração GitHub | 2 |
+| Ferramentas locais | 6 |
 
 ### Arquivos que merecem refatoração por domínio
 
@@ -59,9 +60,11 @@ Foram encontrados 80 PRs no repositório. Na abertura desta auditoria havia quat
 - `#62`: documentação baseada na versão 1.0.0.91 — encerrada como desatualizada.
 - `#63`: shell antigo da Biblioteca — encerrada como superada após recuperar as melhorias úteis e aprovar o CI.
 
-As PRs recentes `#73`, `#74`, `#77`, `#78`, `#79` e `#80` estão integradas. As propostas duplicadas `#75` e `#76` foram encerradas; a linha final do controle de release foi integrada pela `#77`.
+As PRs recentes `#73`, `#74`, `#77`, `#78`, `#79` e `#80` estão integradas. As propostas duplicadas `#75` e `#76` foram encerradas; a linha final do controle de release foi integrada pela `#77`. Entre as 19 PRs fechadas sem merge, os recursos aproveitáveis encontrados foram recuperados quando ainda eram únicos: o Testing Bridge da `#4` é incorporado nesta etapa; as demais propostas relevantes já estão representadas na main ou foram superadas.
 
 A PR `#63` não foi mesclada integralmente: a branch estava muito atrás da main. Foram recuperados para a arquitetura atual a inserção segura de imagens da coleção de mídia, a aplicação de presets de tema e a proteção contra atualização concorrente de definições. A PR foi encerrada após a adaptação e a aprovação do CI no commit `356d237`.
+
+A PR `#4` também foi encerrada sem merge e sua branch não existe mais. Seu harness Playwright foi recuperado e modernizado em `tools/foundry-testing/`. Ele exige o ID explícito de um mundo descartável, guarda a sessão apenas em `.auth/` ignorado pelo Git e cria/exclui somente o Actor temporário que ele próprio cria.
 
 ### Branches
 
@@ -110,7 +113,8 @@ Os arquivos ativos `scripts/nexus-v1.0.0.js` e `styles/nexus-v1.0.0.css` são os
 
 ### P0 — validação real
 
-- Instalar o pacote publicado e validar instalação limpa, criação/edição de Actors, persistência, Biblioteca, Lógica, Mídia, Canvas e janelas no Foundry VTT 14 build 360.
+- Executar `tools/foundry-testing/` em uma instalação local do Foundry VTT 14, com mundo descartável e `FOUNDRY_TEST_WORLD_ID` explícito; o smoke test cobre inicialização, sessão GM e criação/renderização/remoção de Actor temporário.
+- Expandir o harness para validar instalação limpa, persistência, Biblioteca, Lógica, Mídia, Canvas e janelas no Foundry VTT 14 build 360.
 - Repetir os fluxos em cliente GM e jogador quando aplicável.
 - Não promover a release .96 a checkpoint funcional apenas com base no CI.
 
