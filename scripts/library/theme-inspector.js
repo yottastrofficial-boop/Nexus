@@ -69,7 +69,10 @@ export function getLibraryDesignProfilePreviewModel(raw) {
 /** Explicit scope-aware adapter shared by the standalone and embedded Library inspectors. */
 export function createLibraryThemeApplicationAdapter({
   getDesign = () => globalThis.game?.nexus?.design,
-  confirm = options => globalThis.foundry?.applications?.api?.DialogV2?.confirm?.(options)
+  confirm = options => {
+    const handler = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
+    return typeof handler === "function" ? handler(options) : null;
+  }
 } = {}) {
   const canApplyTheme = (resource, resolved, scope) => {
     if (!["world", "user"].includes(scope) || resource?.kind !== "theme" ||
@@ -94,6 +97,7 @@ export function createLibraryThemeApplicationAdapter({
         no: { label: "Cancelar" },
         rejectClose: false
       });
+      if (accepted === null || accepted === undefined) throw new Error("O diálogo de confirmação do Foundry não está disponível.");
       if (!accepted) return false;
     }
     await design.saveProfile(resolved.profile, scope);
