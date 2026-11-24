@@ -157,6 +157,7 @@ const safeDimension = value => {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? Math.round(number) : null;
 };
+const countLabel = (count, singular, plural = singular + "s") => String(count) + " " + (count === 1 ? singular : plural);
 
 function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
   const reference = resource?.reference ?? {};
@@ -167,7 +168,8 @@ function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     const source = safeMediaSource(data.path ?? data.url ?? data.src ?? resource.thumbnail);
     const mime = String(data.mimeType ?? data.mime ?? data.type ?? "").toLowerCase();
     const extension = (source.split(/[?#]/, 1)[0].split(".").pop() ?? "").toLowerCase();
-    const mediaType = ((mime.startsWith("image/") && mime !== "image/svg+xml") || ["png","jpg","jpeg","gif","webp","avif"].includes(extension))
+    const isSvg = mime === "image/svg+xml" || extension === "svg";
+    const mediaType = (!isSvg && (mime.startsWith("image/") || ["png","jpg","jpeg","gif","webp","avif"].includes(extension)))
       ? "image"
       : (mime.startsWith("audio/") || ["mp3","ogg","wav","m4a","flac","opus"].includes(extension))
         ? "audio"
@@ -187,7 +189,7 @@ function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     return {
       kind: "composition",
       title: "Composição",
-      summary: `${components} componentes · ${groups} subgrupos`,
+      summary: `${countLabel(components, "componente")} · ${countLabel(groups, "subgrupo")}`,
       details: [
         ["Componentes", String(components)],
         ["Subgrupos", String(groups)],
@@ -204,7 +206,7 @@ function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     return {
       kind: collection === "templates" ? "template" : "layout",
       title: collection === "templates" ? "Modelo de ficha" : "Layout de ficha",
-      summary: `${components} componentes · ${groups} grupos${width && height ? ` · ${width} × ${height} px` : ""}`,
+      summary: `${countLabel(components, "componente")} · ${countLabel(groups, "grupo")}${width && height ? ` · ${width} × ${height} px` : ""}`,
       details: [
         ["Componentes", String(components)],
         ["Grupos", String(groups)],
@@ -235,7 +237,7 @@ function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
       .filter(([key, value]) => /color|background|border|accent|surface/i.test(key) && typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value))
       .slice(0, 12)
       .map(([label, value]) => ({ label: label.slice(0, 40), value }));
-    return { kind: "style", title: "Prévia de estilo", summary: `${colors.length} cores reconhecidas`, colors };
+    return { kind: "style", title: "Prévia de estilo", summary: countLabel(colors.length, "cor reconhecida", "cores reconhecidas"), colors };
   }
   if (resource.kind === "logic") {
     const payload = data.payload ?? data.flow ?? data;
