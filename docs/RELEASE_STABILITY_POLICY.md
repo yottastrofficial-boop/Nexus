@@ -25,9 +25,10 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-23
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última versão publicada:** `1.0.0.90`.
-- **Versão candidata em preparação:** `1.0.0.91`. A integração da Biblioteca universal foi incorporada à `main`; CI e empacotamento precisam ser aprovados antes de publicar; a validação funcional no Foundry VTT 14 build 360 continuará pendente. O manifesto estável permanece na 1.0.0.90 até o ZIP da 1.0.0.91 estar disponível. O pacote foi construído, validado pelo CI e anexado à Release. A versão permanece sem confirmação funcional no cliente Foundry; o último checkpoint funcional continua sendo `1.0.0.70`.
-- **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
+- **Última versão publicada:** `1.0.0.91` (release `v1.0.0.91`, ZIP `nexus.zip` anexado).
+- **CI:** execução `45153746614` concluída com sucesso; o pacote foi construído, validado automaticamente e anexado à release.
+- **Validação funcional:** a 1.0.0.91 ainda não foi confirmada dentro do cliente Foundry VTT 14 build 360. O último checkpoint funcional continua sendo `1.0.0.70`.
+- **Interpretação correta:** publicação, ZIP disponível e CI verde comprovam a entrega automatizada, mas não comprovam por si só o funcionamento da ficha, Biblioteca, Lógica, Mídia, permissões e persistência no cliente Foundry. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
 A ausência de confirmação funcional posterior não é prova de que versões intermediárias estejam defeituosas. Significa apenas que ainda não há evidência suficiente para substituir o checkpoint confirmado.
@@ -51,4 +52,4 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 
 ## Próximo checkpoint
 
-A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
+A próxima etapa é executar `docs/VALIDATION_CHECKLIST_1.0.0.91.md` no Foundry VTT 14 build 360 e registrar ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultados, erros de console e evidências de persistência. Até a conclusão e revisão desse relatório, manter 1.0.0.70 como último checkpoint funcional confirmado; não usar a release 1.0.0.91 como base funcional comprovada.
