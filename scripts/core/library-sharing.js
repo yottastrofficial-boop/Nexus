@@ -448,7 +448,13 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
     if (!/^[a-zA-Z0-9_-]{1,64}$/.test(id) || !theme || typeof theme !== "object" || Array.isArray(theme)) {
       throw new Error("O catálogo de temas contém uma definição inválida.");
     }
-    for (const [key, value] of Object.entries(theme)) {
+    const isDesignProfile = theme.__nexusDesignProfile === 1;
+    const palette = isDesignProfile ? theme.palette : theme;
+    if (isDesignProfile && (
+      typeof theme.name !== "string" || !theme.profile || typeof theme.profile !== "object" ||
+      Array.isArray(theme.profile) || !theme.profile.palette || typeof theme.profile.palette !== "object"
+    )) throw new Error("Um perfil visual da Biblioteca possui estrutura inválida.");
+    for (const [key, value] of Object.entries(palette ?? {})) {
       if (typeof value !== "string" || !/^#[0-9a-f]{3,8}$/i.test(value)) {
         throw new Error("Um tema contém uma cor inválida.");
       }

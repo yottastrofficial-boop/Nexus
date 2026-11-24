@@ -121,7 +121,7 @@ test("backup round-trips complete custom design profiles without flattening them
   const store = createEmptyNexusLibraryStore();
   store.collections.themes.push({
     id: "design-forest",
-    sourceId: "design-profile:design-forest",
+    sourceId: "design-profile-design-forest",
     kind: "design-profile",
     name: "Bosque Antigo",
     palette: { panel: "#123456" },

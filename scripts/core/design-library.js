@@ -38,7 +38,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
       if (!entryId) throw new Error("Não foi possível gerar um identificador único para o perfil.");
       profile.id = entryId;
       const previous = index >= 0 ? entries[index] : null;
-      savedEntry = { ...(previous ?? {}), id: entryId, sourceId: "design-profile:" + entryId, kind: "design-profile",
+      savedEntry = { ...(previous ?? {}), id: entryId, sourceId: "design-profile-" + entryId, kind: "design-profile",
         name: cleanName(profile.name) || "Aparência sem nome", description: "Perfil visual completo do NEXUS.",
         tags: ["design", "theme"], palette: clone(profile.palette), profile: clone(profile),
         createdAt: previous?.createdAt ?? new Date().toISOString(), updatedAt: new Date().toISOString() };
