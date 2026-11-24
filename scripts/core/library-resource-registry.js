@@ -424,6 +424,11 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     const collection = String(reference?.collection ?? "");
     const id = String(reference?.id ?? "");
     if (!NEXUS_LIBRARY_COLLECTIONS.includes(collection) || collection === "world-flows" || !id) return [];
+    if (collection === "themes") {
+      const canonical = getUser()?.getFlag?.("nexus", "libraryStore");
+      const entry = canonical?.collections?.themes?.find(item => String(item.id) === id);
+      if (entry?.kind === "design-profile" && Number(entry.profile?.schemaVersion ?? 1) > 1) return [];
+    }
     return [
       { id: "edit-metadata", label: "Editar metadados" },
       { id: "duplicate", label: "Duplicar" },
@@ -442,6 +447,9 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     const current = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
     const original = current.collections[collection].find(entry => String(entry.id) === id);
     if (!original) throw new Error("O recurso não existe mais na Biblioteca.");
+    if (collection === "themes" && original.kind === "design-profile" && Number(original.profile?.schemaVersion ?? 1) > 1) {
+      throw new Error("Este perfil foi criado por uma versão mais recente do NEXUS e não pode ser alterado nesta versão.");
+    }
     const logicCollections = new Set(["properties", "rules", "behaviors", "flows", "functions"]);
     const legacyFlags = {
       components: "libraryComponents", groups: "libraryGroups", layouts: "libraryLayouts",

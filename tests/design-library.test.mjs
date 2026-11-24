@@ -113,3 +113,16 @@ test("ações genéricas da Universal Library mantêm identidade e nome do perfi
   assert.equal(duplicate.entry.profile.id, duplicate.entry.id);
   assert.equal(duplicate.entry.profile.name, duplicate.entry.name);
 });
+
+
+test("Universal Library bloqueia operações genéricas em perfis com schema futuro", async () => {
+  const store = createEmptyNexusLibraryStore();
+  store.collections.themes.push({ id: "future-profile", sourceId: "design-profile-future", kind: "design-profile",
+    name: "Perfil futuro", profile: { schemaVersion: 99, palette: { panel: "#123456" } } });
+  const user = makeUser(store);
+  const provider = createNexusLibraryProvider({ getUser: () => user, catalog: { assets: [], themes: [] } });
+  const reference = { providerId: "nexus-library", collection: "themes", id: "future-profile" };
+  assert.deepEqual(provider.getActions(reference), []);
+  await assert.rejects(provider.executeAction("delete", reference), /versão mais recente/);
+  assert.equal(user.flags.get("libraryStore").collections.themes[0].profile.schemaVersion, 99);
+});
