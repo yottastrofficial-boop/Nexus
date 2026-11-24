@@ -121,6 +121,7 @@ export function createLibraryApplicationClass({
       });
 
       const search = root.querySelector("[data-library-search]");
+      const searchClear = root.querySelector("[data-library-clear-search]");
       const filterToggle = root.querySelector("[data-library-toggle-filters]");
       const filterPanel = root.querySelector("[data-library-filter-panel]");
       filterToggle?.addEventListener("click", () => {
@@ -139,6 +140,11 @@ export function createLibraryApplicationClass({
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
       if (search) search.value = this._state.query;
+      const syncSearchClear = () => {
+        const hasQuery = Boolean(search?.value?.trim());
+        if (searchClear) searchClear.hidden = !hasQuery;
+      };
+      syncSearchClear();
       if (tag) tag.value = this._state.tag;
       if (origin) origin.value = this._state.origin;
       if (kind) kind.value = this._state.kind;
@@ -342,8 +348,27 @@ export function createLibraryApplicationClass({
         } catch (error) { notify("error", "Não foi possível importar o arquivo: " + error.message); }
         finally { backupFile.value = ""; }
       });
+      const clearSearch = () => {
+        if (!search) return;
+        search.value = "";
+        this._state.query = "";
+        if (this._searchTimer) {
+          clearTimeout(this._searchTimer);
+          this._searchTimer = 0;
+        }
+        syncSearchClear();
+        void render();
+        search.focus();
+      };
+      searchClear?.addEventListener("click", clearSearch);
+      search?.addEventListener("keydown", event => {
+        if (event.key !== "Escape" || !search.value) return;
+        event.preventDefault();
+        clearSearch();
+      });
       search?.addEventListener("input", () => {
         this._state.query = search.value;
+        syncSearchClear();
         if (this._searchTimer) clearTimeout(this._searchTimer);
         this._searchTimer = setTimeout(() => {
           this._searchTimer = 0;

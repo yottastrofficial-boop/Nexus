@@ -1,10 +1,13 @@
 <section class="nexus-tool-panel nexus-library-panel nexus-library-standalone" data-tool-panel="library">
   <div class="nexus-library-toolbar nexus-library-toolbar-unified">
     <div class="nexus-library-toolbar-main">
-      <label class="nexus-library-search-wrap">
+      <div class="nexus-library-search-wrap">
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input type="search" class="nexus-library-search" data-library-search placeholder="Pesquisar na Biblioteca..." autocomplete="off">
-      </label>
+        <input type="search" class="nexus-library-search" data-library-search aria-label="Pesquisar recursos da Biblioteca" placeholder="Buscar por nome, descrição ou etiqueta..." autocomplete="off">
+        <button type="button" class="nexus-library-search-clear" data-library-clear-search aria-label="Limpar pesquisa" title="Limpar pesquisa" hidden>
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
       <div class="nexus-library-toolbar-controls">
         <button type="button" class="nexus-library-filter-toggle" data-library-toggle-filters aria-expanded="false" aria-controls="nexus-library-filter-panel" title="Mostrar filtros" aria-label="Mostrar filtros">
           <i class="fa-solid fa-filter" aria-hidden="true"></i>
@@ -13,12 +16,20 @@
           <button type="button" data-library-collection-view-mode="grid" class="active" aria-pressed="true" title="Grade" aria-label="Visualização em grade"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
           <button type="button" data-library-collection-view-mode="list" aria-pressed="false" title="Lista" aria-label="Visualização em lista"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
         </div>
-        <div class="nexus-library-header-actions" role="group" aria-label="Backup da Biblioteca">
-          <button type="button" data-library-backup-copy title="Copiar backup" aria-label="Copiar backup"><i class="fa-solid fa-copy" aria-hidden="true"></i></button>
-          <button type="button" data-library-backup-export title="Exportar backup" aria-label="Exportar backup"><i class="fa-solid fa-file-export" aria-hidden="true"></i></button>
-          <button type="button" data-library-backup-import-code title="Importar código" aria-label="Importar código"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
-          <button type="button" data-library-backup-import-file title="Importar arquivo" aria-label="Importar arquivo"><i class="fa-solid fa-file-import" aria-hidden="true"></i></button>
-          <input type="file" accept=".json,application/json" data-library-backup-file hidden>
+        <div class="nexus-library-header-actions">
+          <details class="nexus-library-actions-menu">
+            <summary title="Mais ações da Biblioteca" aria-label="Mais ações da Biblioteca">
+              <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+            </summary>
+            <div class="nexus-library-actions-popover">
+              <strong>Backup e restauração</strong>
+              <button type="button" data-library-backup-copy><i class="fa-solid fa-copy" aria-hidden="true"></i><span>Copiar backup</span></button>
+              <button type="button" data-library-backup-export><i class="fa-solid fa-file-export" aria-hidden="true"></i><span>Exportar backup</span></button>
+              <button type="button" data-library-backup-import-code><i class="fa-solid fa-code" aria-hidden="true"></i><span>Importar código</span></button>
+              <button type="button" data-library-backup-import-file><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar arquivo</span></button>
+              <input type="file" accept=".json,application/json" data-library-backup-file hidden>
+            </div>
+          </details>
         </div>
       </div>
     </div>
