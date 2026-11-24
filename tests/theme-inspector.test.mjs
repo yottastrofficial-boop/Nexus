@@ -62,6 +62,14 @@ test("Inspector refuses to normalize or preview future profile schemas", () => {
   assert.match(model.message, /versão mais recente/);
 });
 
+test("Inspector refuses malformed schema versions instead of downgrading them", () => {
+  for (const schemaVersion of [0, -1, 1.5, "not-a-version"]) {
+    const model = getLibraryDesignProfilePreviewModel({ schemaVersion, palette: { panel: "#123456" } });
+    assert.equal(model.supported, false);
+    assert.match(model.message, /schema.*inválida/i);
+  }
+});
+
 test("theme application adapter exposes only scopes authorized by the Design System", () => {
   const calls = [];
   const design = {
