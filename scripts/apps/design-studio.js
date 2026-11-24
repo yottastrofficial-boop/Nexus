@@ -66,7 +66,10 @@ export function createDesignStudioApplicationClass({
     }
 
     _canRender(options) {
-      if (!design.canEditScope("world") && !design.canEditScope("user")) return false;
+      if (!design.canEditScope("world") && !design.canEditScope("user")) {
+        globalThis.ui?.notifications?.warn?.("O Mestre desativou a personalização visual para esta campanha.");
+        return false;
+      }
       return super._canRender?.(options);
     }
 
