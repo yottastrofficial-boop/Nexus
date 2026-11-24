@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryThemePreviewColors } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryThemePreviewColors, getLibraryResourcePreviewModel } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -142,4 +142,71 @@ test("theme Inspector preview exposes only supported valid palette colors", () =
   ]);
   assert.deepEqual(getLibraryThemePreviewColors({ palette: null }), []);
   assert.deepEqual(getLibraryThemePreviewColors({}), []);
+});
+
+
+test("resource Inspector previews expose safe summaries for components, groups and layouts", () => {
+  const component = getLibraryResourcePreviewModel(
+    { kind: "component", type: "sheet-resource", reference: { collection: "components" } },
+    { type: "sheet-resource", settings: { w: 220, h: 58, sheetCode: "PV" } }
+  );
+  assert.equal(component.kind, "component");
+  assert.match(component.summary, /220 × 58 px/);
+  assert.equal(component.details.find(([label]) => label === "Configurações")[1], "3");
+
+  const group = getLibraryResourcePreviewModel(
+    { kind: "composition", reference: { collection: "groups" } },
+    { components: [{}, {}, {}], groups: [{}] }
+  );
+  assert.equal(group.summary, "3 componentes · 1 subgrupos");
+
+  const layout = getLibraryResourcePreviewModel(
+    { kind: "layout", reference: { collection: "layouts" } },
+    { name: "Ficha", layout: { width: 900, height: 700, components: [{}, {}], groups: [{}] } }
+  );
+  assert.equal(layout.summary, "2 componentes · 1 grupos · 900 × 700 px");
+});
+
+test("media Inspector previews reject executable, traversal and SVG sources", () => {
+  const unsafe = getLibraryResourcePreviewModel(
+    { kind: "media", reference: { collection: "media" } },
+    { url: "javascript:alert(1)" }
+  );
+  assert.equal(unsafe.source, "");
+  assert.equal(unsafe.mediaType, "unsupported");
+
+  const traversal = getLibraryResourcePreviewModel(
+    { kind: "media", reference: { collection: "media" } },
+    { path: "../private/secret.png" }
+  );
+  assert.equal(traversal.source, "");
+
+  const svg = getLibraryResourcePreviewModel(
+    { kind: "media", reference: { collection: "media" } },
+    { path: "icons/unsafe.svg" }
+  );
+  assert.equal(svg.mediaType, "unsupported");
+
+  const video = getLibraryResourcePreviewModel(
+    { kind: "media", reference: { collection: "media" } },
+    { path: "media/preview.mp4" }
+  );
+  assert.equal(video.mediaType, "video");
+  assert.equal(video.source, "media/preview.mp4");
+});
+
+test("logic Inspector previews remain descriptive and do not execute payloads", () => {
+  const flow = getLibraryResourcePreviewModel(
+    { kind: "logic", type: "flow" },
+    { flow: { triggers: [{}], conditions: [{}, {}], actions: [{}, {}, {}] } }
+  );
+  assert.equal(flow.details.find(([label]) => label === "Gatilhos")[1], "1");
+  assert.equal(flow.details.find(([label]) => label === "Condições")[1], "2");
+  assert.equal(flow.details.find(([label]) => label === "Ações")[1], "3");
+
+  const rule = getLibraryResourcePreviewModel(
+    { kind: "logic", type: "rule" },
+    { payload: { expression: "@resources.pv.value > 0" } }
+  );
+  assert.equal(rule.details[0][1], "@resources.pv.value > 0");
 });
