@@ -6,7 +6,7 @@ Unificar a identidade visual das fichas, ferramentas NEXUS e superfícies nativa
 
 ## Propriedade e precedência
 
-A configuração visual possui três níveis explícitos:
+A configuração visual possui três níveis explícitos. A configuração de campanha é autoritativa no armazenamento do mundo Foundry; a aplicação de CSS e tokens acontece em cada cliente, porque a interface é renderizada no navegador:
 
 1. **Padrão do sistema:** `nexus-dark`, sempre disponível como restauração da identidade original NEXUS.
 2. **Padrão da campanha:** tema salvo em uma configuração Foundry de escopo `world`, editável pelo GM e sincronizado no mundo.
