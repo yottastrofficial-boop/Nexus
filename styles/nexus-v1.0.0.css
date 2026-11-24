@@ -8750,3 +8750,121 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-node:focus-visible,.nexus-library-graph-node button:focus-visible,.nexus-library-graph-inspector :focus-visible,.nexus-library-flow-builder :focus-visible{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
 .nexus-library-graph-drag-handle{user-select:none}
 @media(max-width:640px){.nexus-library-flow-action-head,.nexus-library-flow-config-fields{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-config-fields .wide{grid-column:1}}
+
+
+/* Biblioteca Universal — moldura NEXUS e barra de ferramentas compacta */
+.nexus-library-application .window-header {
+  min-height:38px !important;
+  padding:6px 10px !important;
+  border-bottom:1px solid var(--nexus-panel-border,#354356) !important;
+  background:var(--nexus-window-header,#1b2430) !important;
+  color:var(--nexus-panel-text,#e7edf5) !important;
+  font:650 12px/1.2 var(--font-primary,system-ui,sans-serif) !important;
+}
+.nexus-library-application .window-header .window-title,
+.nexus-library-application .window-header button {
+  color:var(--nexus-panel-text,#e7edf5) !important;
+}
+.nexus-library-application .window-header button:hover,
+.nexus-library-application .window-header button:focus-visible {
+  color:#fff !important;
+  outline:1px solid var(--nexus-accent-color,#7188a4) !important;
+}
+.nexus-library-application .window-content,
+.nexus-library-application .application-content {
+  padding:10px !important;
+  background:var(--nexus-window-content,#111923) !important;
+}
+.nexus-library-application .nexus-library-toolbar-unified {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  gap:8px !important;
+  flex:0 0 auto !important;
+}
+.nexus-library-application .nexus-library-search-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.nexus-library-application .nexus-library-filter-toggle {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-width:92px;
+  min-height:36px;
+  padding:6px 12px;
+  border:1px solid var(--nexus-panel-border,#43546a);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#e7edf5);
+  background:var(--nexus-panel-card,#263749);
+  font-size:10px;
+  font-weight:650;
+}
+.nexus-library-application .nexus-library-filter-toggle[aria-expanded="true"] {
+  border-color:var(--nexus-accent-color,#7188a4);
+  background:var(--nexus-panel-surface,#30445a);
+}
+.nexus-library-application .nexus-library-filter-wrap {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  align-items:end;
+  gap:9px;
+  width:100%;
+  padding:10px;
+  border:1px solid var(--nexus-panel-border,#354b61);
+  border-radius:7px;
+  background:var(--nexus-panel-input,#151d27);
+}
+.nexus-library-application .nexus-library-filter-wrap[hidden] { display:none !important; }
+.nexus-library-application .nexus-library-app-filter { min-width:0; width:100%; }
+.nexus-library-application .nexus-library-app-filter select,
+.nexus-library-application .nexus-library-app-filter input {
+  width:100%;
+  max-width:none;
+  box-sizing:border-box;
+}
+.nexus-library-application .nexus-library-compendium-filter select[multiple] {
+  min-height:88px;
+  max-height:120px;
+  overflow:auto;
+}
+.nexus-library-application .nexus-library-toolbar-controls {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--nexus-panel-border,#354b61);
+}
+.nexus-library-application .nexus-library-app-size { min-width:130px; }
+.nexus-library-application .nexus-library-app-size select { width:100%; max-width:none; }
+.nexus-library-application .nexus-library-header-actions {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-left:auto;
+}
+.nexus-library-application .nexus-library-header-actions button,
+.nexus-library-application .nexus-library-view-controls button {
+  display:inline-grid;
+  place-items:center;
+  min-width:32px;
+  min-height:32px;
+  border:1px solid var(--nexus-panel-border,#43546a);
+  border-radius:6px;
+  color:var(--nexus-panel-text,#dce6f2);
+  background:var(--nexus-panel-card,#263749);
+}
+.nexus-library-application .nexus-library-header-actions button:hover,
+.nexus-library-application .nexus-library-view-controls button:hover {
+  border-color:var(--nexus-accent-color,#7188a4);
+  background:var(--nexus-panel-surface,#30445a);
+}
+@media(max-width:760px) {
+  .nexus-library-application .nexus-library-toolbar-controls { flex-wrap:wrap; }
+  .nexus-library-application .nexus-library-header-actions { margin-left:0; }
+}
