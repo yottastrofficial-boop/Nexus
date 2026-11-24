@@ -124,6 +124,33 @@ const refreshedPage = await nexusProvider.list({ query: "Trilha ambiente" });
 assert.equal(refreshedPage.items.length, 1,
   "A gravação canônica deve invalidar o índice leve da Biblioteca.");
 
+const concurrentUser = {
+  libraryStore: createEmptyNexusLibraryStore(),
+  getFlag(scope, key) {
+    return scope === "nexus" && key === "libraryStore" ? this.libraryStore : undefined;
+  },
+  async setFlag(scope, key, value) {
+    if (scope === "nexus" && key === "libraryStore") {
+      await new Promise(resolve => setTimeout(resolve, 5));
+      this.libraryStore = structuredClone(value);
+    }
+    return value;
+  }
+};
+await Promise.all([
+  updateNexusLibraryStore(concurrentUser, current => {
+    current.collections.components.push({ id: "concurrent-component" });
+    return current;
+  }),
+  updateNexusLibraryStore(concurrentUser, current => {
+    current.collections.media.push({ id: "concurrent-media" });
+    return current;
+  })
+]);
+assert.ok(concurrentUser.libraryStore.collections.components.some(entry => entry.id === "concurrent-component"));
+assert.ok(concurrentUser.libraryStore.collections.media.some(entry => entry.id === "concurrent-media"),
+  "Atualizações concorrentes em coleções distintas não podem sobrescrever a gravação anterior.");
+
 const bridgeCalls = [];
 const documentBridge = {
   types: { actors: {}, items: {}, scenes: {}, journals: {}, macros: {}, playlists: {}, tables: {}, cards: {} },
