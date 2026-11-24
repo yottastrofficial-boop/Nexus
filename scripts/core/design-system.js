@@ -89,6 +89,7 @@ export function installNexusDesignSystem({
   let installed = false;
 
   let previewProfile = null;
+  let originalInlineTokens = null;
 
   const getProfile = (scope = "world") => {
     const isUser = scope === "user";
@@ -123,7 +124,16 @@ export function installNexusDesignSystem({
     const root = documentRef?.documentElement;
     const resolved = getEffectiveTheme();
     if (!root?.style || !themeTokens[resolved.theme]) return resolved;
-    applyThemeTokens(root, profileToThemeLayout(resolved.profile));
+    applyThemeTokens(root, profileToThemeLayout(resolved.profile), values => {
+      if (originalInlineTokens) return;
+      originalInlineTokens = new Map();
+      for (const key of Object.keys(values)) {
+        originalInlineTokens.set(key, {
+          value: root.style.getPropertyValue?.(key) ?? "",
+          priority: root.style.getPropertyPriority?.(key) ?? ""
+        });
+      }
+    });
     root.classList?.add("nexus-design-system");
     if (root.dataset) {
       root.dataset.nexusDesignSystem = "true";
@@ -263,6 +273,13 @@ export function installNexusDesignSystem({
     hookIds.length = 0;
     const root = documentRef?.documentElement;
     root?.classList?.remove("nexus-design-system");
+    if (root?.style && originalInlineTokens) {
+      for (const [key, original] of originalInlineTokens) {
+        if (original.value) root.style.setProperty(key, original.value, original.priority);
+        else root.style.removeProperty?.(key);
+      }
+    }
+    originalInlineTokens = null;
     if (root?.dataset) {
       delete root.dataset.nexusDesignSystem;
       delete root.dataset.nexusTheme;
@@ -270,6 +287,7 @@ export function installNexusDesignSystem({
       delete root.dataset.nexusThemeAppearance;
       delete root.dataset.nexusContrast;
       delete root.dataset.nexusReducedMotion;
+      delete root.dataset.theme;
     }
     installed = false;
   };
