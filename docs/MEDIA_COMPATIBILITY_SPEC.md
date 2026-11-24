@@ -23,6 +23,17 @@ O NEXUS terá camada própria e extensível para identificar, pré-visualizar, a
 | PDF | Visualizador dedicado | Fora do escopo do FFmpeg |
 | Fontes, modelos 3D, arquivos compactados | Adaptadores por família | Reconhecer extensão não significa suportar leitura |
 
+## Integração da Biblioteca com o Canvas
+
+A integração inicial permite inserir na ficha apenas mídias de imagem que possam ser exibidas diretamente pelo elemento de imagem do navegador:
+
+- A origem precisa estar presente no registro resolvido (`path`, `url` ou `src`) e passar pela validação de origem segura da Biblioteca.
+- A aplicação cria um componente `asset-image` e grava a origem como vínculo do componente; não copia nem incorpora o arquivo em flags do Actor.
+- A prévia e a inserção aceitam formatos de imagem nativamente reconhecidos pelo navegador (PNG, JPEG, GIF/APNG, WebP, AVIF, BMP e ICO), com MIME coerente quando declarado.
+- SVG, formatos que dependem de decoder especializado, origens inseguras, caminhos de travessia e apenas miniaturas de cartão não são oferecidos como inserção.
+- Áudio e vídeo podem ter prévia no Inspector quando o navegador reconhece o formato, mas não são inseridos no Canvas por esta integração. Exigem componentes e contratos próprios antes de serem aplicáveis.
+
+Essa integração não declara conversão de mídia nem substitui o pipeline de processamento, armazenamento e cache descrito acima. A disponibilidade efetiva da origem depende de ela continuar acessível no Foundry ou no backend externo configurado.
 ## Identificação
 Prioridade: assinatura binária, metadados do contêiner, MIME e extensão. Extensão não prova o conteúdo. AV1 em WebM/MP4 só é confirmado após identificar a faixa; Ogg não deve ser rotulado como Opus sem verificar o codec.
 
