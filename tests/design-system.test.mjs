@@ -39,6 +39,32 @@ test("theme typography uses its preset font unless a layout explicitly overrides
 });
 
 
+
+test("theme renderer applies custom palette, density, spacing and accessibility tokens", () => {
+  const values = new Map();
+  const element = { style: { setProperty(key, value) { values.set(key, value); } }, dataset: {} };
+  applyThemeTokens(element, {
+    theme: "nexus-dark",
+    palette: { panel: "#101010", text: "#fefefe", border: "#aaaaaa", accent: "#334455" },
+    density: "compact",
+    spacing: 1.25,
+    radius: "sharp",
+    controlHeight: 40,
+    lineHeight: 1.6,
+    contrast: "high",
+    reducedMotion: true
+  });
+  assert.equal(values.get("--nexus-panel-bg"), "#101010");
+  assert.equal(values.get("--nexus-panel-text"), "#fefefe");
+  assert.equal(values.get("--nexus-panel-border"), "#aaaaaa");
+  assert.equal(values.get("--nexus-density-scale"), "0.88");
+  assert.equal(values.get("--nexus-radius-small"), "0px");
+  assert.equal(values.get("--nexus-control-height"), "40px");
+  assert.equal(values.get("--nexus-line-height"), "1.6");
+  assert.equal(values.get("--nexus-contrast-border-width"), "2px");
+  assert.equal(values.get("--nexus-motion-duration"), "0ms");
+});
+
 test("design profiles normalize values, reject unsafe CSS payloads and preserve schema", () => {
   const profile = normalizeDesignProfile({
     preset: "medieval",
@@ -126,14 +152,18 @@ test("campaign can enforce its theme without deleting personal preferences", () 
   ), { theme: "medieval", source: "world", mode: "world", allowPlayerOverrides: false });
 });
 
-test("installer registers authoritative world settings and per-user preferences", () => {
+test("installer registers authoritative world settings and per-user preferences", async () => {
   const records = new Map();
+  const menus = new Map();
   const values = new Map();
   const handlers = new Map();
   let ready;
   const gameRef = {
+    user: { isGM: true },
     settings: {
       settings: records,
+      menus,
+      registerMenu(namespace, key, config) { menus.set(`${namespace}.${key}`, config); },
       register(namespace, key, config) {
         const id = `${namespace}.${key}`;
         records.set(id, config);
@@ -170,11 +200,31 @@ test("installer registers authoritative world settings and per-user preferences"
   assert.equal(records.get("nexus.designAllowPlayerOverrides").scope, "world");
   assert.equal(records.get("nexus.designUserMode").scope, "user");
   assert.equal(records.get("nexus.designUserTheme").scope, "user");
+  assert.equal(records.get("nexus.designWorldProfile").scope, "world");
+  assert.equal(records.get("nexus.designUserProfile").scope, "user");
+  assert.equal(design.canEditScope("world"), true);
+  assert.equal(design.registerStudio(class DesignStudio {}), true);
+  assert.equal(menus.get("nexus.designStudio").restricted, false);
 
   ready();
   assert.equal(root.dataset.nexusTheme, "nexus-dark");
   assert.equal(root.dataset.nexusThemeSource, "world");
   assert.ok(root.classList.values.has("nexus-design-system"));
+
+  const campaignProfile = createDefaultDesignProfile("medieval");
+  campaignProfile.name = "Campanha de Teste";
+  campaignProfile.palette.panel = "#302010";
+  await design.saveProfile(campaignProfile, "world");
+  assert.equal(design.getProfile("world").name, "Campanha de Teste");
+  assert.equal(design.getEffectiveTheme().theme, "medieval");
+  assert.equal(root.dataset.nexusTheme, "medieval");
+
+  const previewProfile = createDefaultDesignProfile("light");
+  design.preview(previewProfile);
+  assert.equal(root.dataset.nexusTheme, "light");
+  assert.equal(root.dataset.nexusThemeSource, "preview");
+  design.clearPreview();
+  assert.equal(root.dataset.nexusTheme, "medieval");
 
   values.set("nexus.designWorldTheme", "medieval");
   records.get("nexus.designWorldTheme").onChange("medieval");
@@ -187,6 +237,8 @@ test("installer registers authoritative world settings and per-user preferences"
   assert.equal(root.dataset.nexusThemeSource, "user");
 
   values.set("nexus.designAllowPlayerOverrides", false);
+  assert.equal(design.canEditScope("user"), false);
+  await assert.rejects(() => design.saveProfile(createDefaultDesignProfile("light"), "user"), /não permite/);
   design.apply();
   assert.equal(root.dataset.nexusTheme, "medieval");
   assert.equal(root.dataset.nexusThemeSource, "world");
