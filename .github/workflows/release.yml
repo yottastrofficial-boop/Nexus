@@ -44,6 +44,7 @@ jobs:
 
       - name: Validate manifest, templates, styles and regressions
         run: |
+          node --experimental-default-type=module tests/design-system.test.mjs
           node --experimental-default-type=module tests/media-format-registry.mjs
           node --experimental-default-type=module tests/logic-infrastructure.mjs
           node --experimental-default-type=module tests/foundry-logic-integration.test.mjs
