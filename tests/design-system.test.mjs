@@ -8,6 +8,7 @@ import {
   installNexusDesignSystem
 } from "../scripts/core/design-system.js";
 import { THEME_TOKENS, applyThemeTokens } from "../scripts/core/theme.js";
+import { createDesignStudioApplicationClass } from "../scripts/apps/design-studio.js";
 import {
   createDefaultDesignProfile,
   normalizeDesignProfile,
@@ -63,6 +64,43 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
   assert.equal(values.get("--nexus-line-height"), "1.6");
   assert.equal(values.get("--nexus-contrast-border-width"), "2px");
   assert.equal(values.get("--nexus-motion-duration"), "0ms");
+});
+
+
+test("Design Studio uses ApplicationV2, exposes allowed scopes and blocks unauthorized users", async () => {
+  class FakeApplicationV2 {
+    static DEFAULT_OPTIONS = {};
+    async _prepareContext() { return { baseContext: true }; }
+    _canRender() { return true; }
+    async _onRender() {}
+    async _onClose() {}
+  }
+  const design = {
+    getProfile: () => createDefaultDesignProfile("midnight"),
+    canEditScope: scope => scope === "user",
+    saveProfile: async profile => profile,
+    preview() {},
+    clearPreview() {}
+  };
+  const Application = createDesignStudioApplicationClass({
+    ApplicationV2: FakeApplicationV2,
+    HandlebarsApplicationMixin: Base => class extends Base {},
+    design
+  });
+  const app = new Application();
+  const context = await app._prepareContext();
+  assert.equal(context.baseContext, true);
+  assert.equal(context.profile.preset, "midnight");
+  assert.equal(context.targetOptions.length, 1);
+  assert.equal(context.targetOptions[0].value, "user");
+  assert.equal(app._canRender({}), true);
+
+  const denied = createDesignStudioApplicationClass({
+    ApplicationV2: FakeApplicationV2,
+    HandlebarsApplicationMixin: Base => class extends Base {},
+    design: { ...design, canEditScope: () => false }
+  });
+  assert.equal(new denied()._canRender({}), false);
 });
 
 test("design profiles normalize values, reject unsafe CSS payloads and preserve schema", () => {
