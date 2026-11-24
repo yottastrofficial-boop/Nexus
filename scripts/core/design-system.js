@@ -193,8 +193,10 @@ export function installNexusDesignSystem({
       refresh();
     }
     if (typeof hooks?.on === "function") {
-      const id = hooks.on("renderApplicationV2", onRenderApplication);
-      if (id) hookIds.push(id);
+      const renderHookId = hooks.on("renderApplicationV2", onRenderApplication);
+      if (renderHookId) hookIds.push(renderHookId);
+      const settingHookId = hooks.on("updateSetting", refresh);
+      if (settingHookId) hookIds.push(settingHookId);
     }
   };
 
