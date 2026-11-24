@@ -3642,22 +3642,28 @@ if (!hasPath) propertyValueInput.value = "";
       const rect = app.getBoundingClientRect();
       const appWidth = app.clientWidth || rect.width;
       const appHeight = app.clientHeight || rect.height;
+      const leftWidth = 36, rightWidth = 36;
       this._appearanceRailOffsets ??= { left: { x: -51, y: 72 }, right: { x: 9, y: 72 } };
       const leftOffset = this._appearanceRailOffsets.left;
       const rightOffset = this._appearanceRailOffsets.right;
-      const leftTop = clamp(leftOffset.y, 8, Math.max(8, appHeight - 100));
-      const rightTop = clamp(rightOffset.y, 8, Math.max(8, appHeight - 100));
-      const availableHeight = Math.max(120, Math.min(appHeight - 8, window.innerHeight - Math.max(0, rect.top) - 12));
+      const leftX = clamp(rect.left + leftOffset.x, 4, Math.max(4, window.innerWidth - leftWidth - 4)) - rect.left;
+      const leftY = clamp(rect.top + leftOffset.y, 8, Math.max(8, window.innerHeight - 100)) - rect.top;
+      const rightX = clamp(rect.right + rightOffset.x, 4, Math.max(4, window.innerWidth - rightWidth - 4)) - rect.left;
+      const rightY = clamp(rect.top + rightOffset.y, 8, Math.max(8, window.innerHeight - 100)) - rect.top;
+      const availableHeight = Math.max(120, Math.min(
+        appHeight - Math.max(0, leftY) - 8,
+        window.innerHeight - Math.max(0, rect.top + leftY) - 12
+      ));
       Object.assign(left.style, {
         position: "absolute",
-        left: `${leftOffset.x}px`,
-        top: `${leftTop}px`,
+        left: `${leftX}px`,
+        top: `${leftY}px`,
         maxHeight: `${availableHeight}px`
       });
       Object.assign(right.style, {
         position: "absolute",
-        left: `${appWidth + rightOffset.x}px`,
-        top: `${rightTop}px`,
+        left: `${rightX}px`,
+        top: `${rightY}px`,
         maxHeight: `${availableHeight}px`
       });
     };
