@@ -131,6 +131,107 @@ export const applyThemeTokens = (element, layout = {}) => {
     "--nexus-foundry-control-border": theme.border,
     "--nexus-foundry-control-hover": theme.hover
   };
+  const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
+  const paletteTokens = {
+    "--nexus-panel-bg": "panel",
+    "--nexus-panel-card": "card",
+    "--nexus-panel-accent": "accent",
+    "--nexus-canvas-scroll-bg": "scroll",
+    "--nexus-window-header-bg": "windowHeader",
+    "--nexus-window-content-bg": "windowContent",
+    "--nexus-button-bg": "button",
+    "--nexus-panel-surface": "surface",
+    "--nexus-panel-input": "input",
+    "--nexus-panel-border": "border",
+    "--nexus-panel-text": "text",
+    "--nexus-panel-muted": "muted",
+    "--nexus-panel-hover": "hover",
+    "--nexus-scroll-bg": "scroll",
+    "--nexus-scroll-thumb": "accent",
+    "--nexus-scrollbar-track": "scroll",
+    "--nexus-scrollbar-thumb": "accent",
+    "--nexus-scrollbar-thumb-hover": "highlight",
+    "--nexus-surface-raised": "card",
+    "--nexus-surface-sunken": "input",
+    "--nexus-border-strong": "border",
+    "--nexus-text-primary": "text",
+    "--nexus-text-secondary": "muted",
+    "--nexus-field-bg": "input",
+    "--nexus-field-text": "text",
+    "--nexus-field-border": "border",
+    "--nexus-field-focus": "highlight",
+    "--nexus-resource-button": "resourceButton",
+    "--nexus-window-header": "windowHeader",
+    "--nexus-window-content": "windowContent",
+    "--nexus-menu-bg": "menu",
+    "--nexus-placeholder-color": "placeholder",
+    "--nexus-canvas-color": "canvas",
+    "--nexus-card-color": "card",
+    "--nexus-accent-color": "accent",
+    "--nexus-highlight-color": "highlight",
+    "--nexus-button-color": "button",
+    "--nexus-control-bg": "input",
+    "--nexus-control-text": "text",
+    "--nexus-control-border": "border",
+    "--nexus-control-hover": "hover",
+    "--nexus-tab-bg": "panel",
+    "--nexus-tab-active": "accent",
+    "--nexus-header-text": "text",
+    "--nexus-card-border": "border",
+    "--nexus-nav-bg": "panel",
+    "--nexus-nav-hover": "hover",
+    "--nexus-menu-border": "border",
+    "--nexus-button-text": "text",
+    "--nexus-button-hover": "hover",
+    "--nexus-navigation-bg": "panel",
+    "--nexus-navigation-active": "accent",
+    "--nexus-input-focus": "highlight",
+    "--nexus-scroll-track": "scroll",
+    "--nexus-scroll-handle": "accent",
+    "--nexus-foundry-sidebar-bg": "panel",
+    "--nexus-foundry-sidebar-surface": "surface",
+    "--nexus-foundry-sidebar-input": "input",
+    "--nexus-foundry-sidebar-border": "border",
+    "--nexus-foundry-sidebar-text": "text",
+    "--nexus-foundry-sidebar-muted": "muted",
+    "--nexus-foundry-sidebar-hover": "hover",
+    "--nexus-foundry-sidebar-active": "accent",
+    "--nexus-foundry-directory-bg": "panel",
+    "--nexus-foundry-directory-item-bg": "surface",
+    "--nexus-foundry-directory-item-border": "border",
+    "--nexus-foundry-directory-item-hover": "hover",
+    "--nexus-foundry-directory-folder-bg": "panel",
+    "--nexus-foundry-directory-search-bg": "input",
+    "--nexus-foundry-navigation-bg": "panel",
+    "--nexus-foundry-navigation-active": "accent",
+    "--nexus-foundry-application-bg": "windowContent",
+    "--nexus-foundry-application-header": "windowHeader",
+    "--nexus-foundry-application-border": "border",
+    "--nexus-foundry-control-bg": "input",
+    "--nexus-foundry-control-border": "border",
+    "--nexus-foundry-control-hover": "hover"
+  };
+  for (const [token, key] of Object.entries(paletteTokens)) {
+    if (palette[key]) values[token] = palette[key];
+  }
+
+  const density = layout.density === "compact" ? 0.88 : layout.density === "spacious" ? 1.14 : 1;
+  const spacing = Math.min(1.5, Math.max(0.75, Number(layout.spacing) || 1)) * density;
+  const radius = layout.radius === "sharp" ? 0 : layout.radius === "soft" ? 5 : 9;
+  const controlHeight = Math.min(44, Math.max(28, Number(layout.controlHeight) || 34));
+  values["--nexus-density-scale"] = String(density);
+  values["--nexus-radius-small"] = `${radius}px`;
+  values["--nexus-radius-panel"] = `${Math.max(0, radius - 1)}px`;
+  values["--nexus-spacing-unit"] = `${8 * spacing}px`;
+  values["--nexus-space-1"] = `${4 * spacing}px`;
+  values["--nexus-space-2"] = `${8 * spacing}px`;
+  values["--nexus-space-3"] = `${12 * spacing}px`;
+  values["--nexus-space-4"] = `${16 * spacing}px`;
+  values["--nexus-control-height"] = `${controlHeight}px`;
+  values["--nexus-line-height"] = String(Math.min(1.8, Math.max(1.2, Number(layout.lineHeight) || 1.45)));
+  values["--nexus-contrast-border-width"] = layout.contrast === "high" ? "2px" : "1px";
+  values["--nexus-contrast-outline-width"] = layout.contrast === "high" ? "3px" : "2px";
+  values["--nexus-motion-duration"] = layout.reducedMotion ? "0ms" : "140ms";
   values["--nexus-theme-id"] = layout.theme ?? "nexus-dark";
   for (const [key, value] of Object.entries(values)) element.style.setProperty(key, value);
   element.dataset.theme = layout.theme ?? "nexus-dark";
