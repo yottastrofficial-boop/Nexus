@@ -144,6 +144,8 @@ export function installNexusDesignSystem({
       root.dataset.nexusTheme = resolved.theme;
       root.dataset.nexusThemeSource = previewProfile ? "preview" : resolved.source;
       root.dataset.nexusThemeAppearance = resolved.theme === "light" ? "light" : "dark";
+      root.dataset.nexusContrast = resolved.profile.accessibility.contrast;
+      root.dataset.nexusReducedMotion = String(resolved.profile.accessibility.reducedMotion);
     }
     return resolved;
   };
@@ -280,6 +282,8 @@ export function installNexusDesignSystem({
       delete root.dataset.nexusTheme;
       delete root.dataset.nexusThemeSource;
       delete root.dataset.nexusThemeAppearance;
+      delete root.dataset.nexusContrast;
+      delete root.dataset.nexusReducedMotion;
     }
     installed = false;
   };
