@@ -6,12 +6,12 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
-- Commit: `c78da4b85b9c54c799f255e6b2fd2c3e02c3f37f`
-- Versão de referência da main antes desta integração: `1.0.0.94` (Biblioteca Universal e shell visual; validação funcional pendente)
-- Versão candidata nesta branch: `1.0.0.95` (Design System global, trilhos nativos, Biblioteca Explorer hierárquica e grade de componentes de 10 px; CI em validação e teste funcional no Foundry pendente)
+- Commit de referência: `2bf4ea6c16130a898d3564916a4560a1ec0126dc`
+- Última release estável publicada: `1.0.0.95` (Design System global e Biblioteca Explorer; validação funcional pendente)
+- Build de desenvolvimento atual da main: `1.0.0.96` (integração da configuração nativa do Foundry e geometria responsiva dos controles; CI em validação e teste funcional no Foundry pendente)
 - Publicação condicionada à aprovação do CI e à geração do pacote; validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
-- Estado: build candidato para validação manual da ficha; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
+- Estado: build de desenvolvimento para validação manual; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
 
 ## Estado atual por domínio
 
