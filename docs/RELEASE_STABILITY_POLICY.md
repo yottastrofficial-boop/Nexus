@@ -22,11 +22,11 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-23
+## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última versão publicada:** `1.0.0.90`.
-- **Versão candidata em preparação:** `1.0.0.91`. A integração da Biblioteca universal foi incorporada à `main`; CI e empacotamento precisam ser aprovados antes de publicar; a validação funcional no Foundry VTT 14 build 360 continuará pendente. O manifesto estável permanece na 1.0.0.90 até o ZIP da 1.0.0.91 estar disponível. O pacote foi construído, validado pelo CI e anexado à Release. A versão permanece sem confirmação funcional no cliente Foundry; o último checkpoint funcional continua sendo `1.0.0.70`.
+- **Última versão publicada antes da build atual:** `1.0.0.91`.
+- **Versão candidata em preparação:** `1.0.0.92`. O Design System global e o Inspector visual de aparências foram integrados à `main`; a build de teste será validada pelo CI e empacotada antes da publicação. O manifesto estável permanece na 1.0.0.91 até que o ZIP da 1.0.0.92 esteja disponível. A validação funcional no Foundry VTT 14 build 360, com clientes GM e jogador, continua pendente; o último checkpoint funcional confirmado continua sendo `1.0.0.70`.
 - **Interpretação correta:** 1.0.0.90 reúne alterações funcionais na Biblioteca e correções de interface, mas ainda depende de validação no Foundry VTT 14 build 360; não é checkpoint funcional confirmado. O último checkpoint confirmado continua sendo 1.0.0.70.
 - A confirmação do ZIP/release demonstra que o artefato foi produzido e publicado; não demonstra, por si só, que todos os fluxos da ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 
@@ -52,3 +52,6 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 ## Próximo checkpoint
 
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
+
+
+A build 1.0.0.92 tem finalidade explícita de teste do Design System e do Inspector de Aparências. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
