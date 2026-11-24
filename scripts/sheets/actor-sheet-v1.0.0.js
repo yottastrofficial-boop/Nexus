@@ -2542,7 +2542,20 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const code = createNexusLayoutShareCode({ ...clone(entry.layout), name: entry.name });
     let copied = false;
     try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(code); copied = true; } } catch (_) {}
-    if (!copied) { const field = document.createElement("textarea"); field.value = code; field.setAttribute("readonly", ""); field.style.position = "fixed"; field.style.opacity = "0"; document.body.append(field); field.select(); copied = document.execCommand?.("copy") === true; field.remove(); }
+    if (!copied) {
+      const field = document.createElement("textarea");
+      field.value = code; field.setAttribute("readonly", "");
+      field.style.position = "fixed"; field.style.opacity = "0";
+      try {
+        document.body.append(field);
+        field.select();
+        copied = document.execCommand?.("copy") === true;
+      } catch (_) {
+        copied = false;
+      } finally {
+        field.remove();
+      }
+    }
     if (!copied) { ui.notifications?.warn?.("Não foi possível copiar o código do layout."); return false; }
     ui.notifications?.info?.("Código do layout completo copiado."); return true;
   }
@@ -2619,9 +2632,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
       const field = document.createElement("textarea");
       field.value = code; field.setAttribute("readonly", "");
       field.style.position = "fixed"; field.style.opacity = "0";
-      document.body.append(field); field.select();
-      copied = document.execCommand?.("copy") === true;
-      field.remove();
+      try {
+        document.body.append(field);
+        field.select();
+        copied = document.execCommand?.("copy") === true;
+      } catch (_) {
+        copied = false;
+      } finally {
+        field.remove();
+      }
     }
     if (!copied) {
       ui.notifications?.warn?.("Não foi possível copiar o backup. Tente exportar o arquivo JSON.");
@@ -2636,8 +2655,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const blob = new Blob([code], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob), anchor = document.createElement("a");
     anchor.href = url; anchor.download = "nexus-biblioteca-completa.json"; anchor.hidden = true;
-    document.body.append(anchor); anchor.click(); anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    try {
+      document.body.append(anchor);
+      anchor.click();
+    } finally {
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
     ui.notifications?.info?.("Backup completo da Biblioteca exportado em JSON.");
     return true;
   }
@@ -2734,8 +2758,16 @@ export class NexusActorSheet extends NexusActorSheetBase {
     try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(code); copied = true; } } catch (_) {}
     if (!copied) {
       const field = document.createElement("textarea"); field.value = code; field.setAttribute("readonly", "");
-      field.style.position = "fixed"; field.style.opacity = "0"; document.body.append(field); field.select();
-      copied = document.execCommand?.("copy") === true; field.remove();
+      field.style.position = "fixed"; field.style.opacity = "0";
+      try {
+        document.body.append(field);
+        field.select();
+        copied = document.execCommand?.("copy") === true;
+      } catch (_) {
+        copied = false;
+      } finally {
+        field.remove();
+      }
     }
     if (!copied) { ui.notifications?.warn?.("Não foi possível copiar o pacote. Tente novamente em uma janela segura do navegador."); return false; }
     ui.notifications?.info?.("Pacote NEXUS copiado. Você pode colá-lo em outra instalação ou enviá-lo para análise.");
@@ -2751,8 +2783,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const safeName = String(entry.name ?? entry.label ?? kind).normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
       .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || kind;
     anchor.href = url; anchor.download = `nexus-${kind}-${safeName}.json`; anchor.hidden = true;
-    document.body.append(anchor); anchor.click(); anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    try {
+      document.body.append(anchor);
+      anchor.click();
+    } finally {
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
     ui.notifications?.info?.(`Pacote "${entry.name ?? entry.label ?? kind}" exportado em JSON.`);
     return true;
   }
@@ -3866,6 +3903,9 @@ if (!hasPath) propertyValueInput.value = "";
     if (this._nexusActorUpdateHookId) Hooks.off("updateActor", this._nexusActorUpdateHookId);
     this._nexusActorUpdateHookId = null;
     if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
+    document.querySelectorAll("[data-nexus-property-owner]").forEach(list => {
+      if (list.dataset.nexusPropertyOwner === String(this.id)) list.remove();
+    });
     this._nexusFloatingCleanup?.();
     for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
     this._nexusPanelWindows?.clear?.();

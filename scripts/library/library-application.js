@@ -288,10 +288,13 @@ export function createLibraryApplicationClass({
             field.setAttribute("readonly", "");
             field.style.position = "fixed";
             field.style.opacity = "0";
-            document.body.append(field);
-            field.select();
-            copied = document.execCommand?.("copy") === true;
-            field.remove();
+            try {
+              document.body.append(field);
+              field.select();
+              copied = document.execCommand?.("copy") === true;
+            } finally {
+              field.remove();
+            }
           }
           if (!copied) throw new Error("Não foi possível copiar o backup.");
           notify("info", "Backup da Biblioteca copiado.");
