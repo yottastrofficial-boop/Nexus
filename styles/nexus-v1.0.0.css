@@ -8750,3 +8750,172 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-library-graph-node:focus-visible,.nexus-library-graph-node button:focus-visible,.nexus-library-graph-inspector :focus-visible,.nexus-library-flow-builder :focus-visible{outline:2px solid var(--nexus-accent-color,#8b78ff);outline-offset:2px}
 .nexus-library-graph-drag-handle{user-select:none}
 @media(max-width:640px){.nexus-library-flow-action-head,.nexus-library-flow-config-fields{grid-template-columns:minmax(0,1fr)}.nexus-library-flow-config-fields .wide{grid-column:1}}
+
+
+/* NEXUS Design System — Foundry V14 chrome.
+   Deliberately scoped to core UI surfaces; unrelated module applications are not restyled. */
+html.nexus-design-system {
+  color-scheme: dark;
+  --color-border-highlight: var(--nexus-foundry-sidebar-active);
+  --color-border-focus: var(--nexus-foundry-sidebar-active);
+  --color-shadow-highlight: color-mix(in srgb, var(--nexus-foundry-sidebar-active) 32%, transparent);
+}
+html.nexus-design-system[data-nexus-theme-appearance="light"] { color-scheme: light; }
+
+html.nexus-design-system #sidebar,
+html.nexus-design-system #sidebar .sidebar-tab,
+html.nexus-design-system #sidebar .sidebar-tabs {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-sidebar-bg);
+  border-color: var(--nexus-foundry-sidebar-border);
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item {
+  color: var(--nexus-foundry-sidebar-muted);
+  border-color: transparent;
+  transition: color .14s ease, background-color .14s ease, border-color .14s ease;
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
+html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-sidebar-hover);
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item.active {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-sidebar-active);
+  border-color: var(--nexus-foundry-sidebar-active);
+}
+html.nexus-design-system #sidebar .sidebar-tab.directory,
+html.nexus-design-system #sidebar .sidebar-tab.actors-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.cards-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.items-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.journal-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.playlists-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.compendium-sidebar,
+html.nexus-design-system #sidebar .sidebar-tab.scenes-sidebar {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-directory-bg);
+}
+html.nexus-design-system #sidebar .directory-header,
+html.nexus-design-system #sidebar .directory-footer,
+html.nexus-design-system #sidebar .directory-list,
+html.nexus-design-system #sidebar .directory-list .directory-item,
+html.nexus-design-system #sidebar .directory-list .folder,
+html.nexus-design-system #sidebar .directory-list .folder-header {
+  color: var(--nexus-foundry-sidebar-text);
+  border-color: var(--nexus-foundry-sidebar-border);
+}
+html.nexus-design-system #sidebar .directory-header,
+html.nexus-design-system #sidebar .directory-footer,
+html.nexus-design-system #sidebar .directory-list .folder-header {
+  background: var(--nexus-foundry-directory-folder-bg);
+}
+html.nexus-design-system #sidebar .directory-list .directory-item {
+  background: var(--nexus-foundry-directory-item-bg);
+  border: 1px solid var(--nexus-foundry-directory-item-border);
+  border-radius: var(--nexus-radius-small, 6px);
+  margin-block: 2px;
+}
+html.nexus-design-system #sidebar .directory-list .directory-item:hover,
+html.nexus-design-system #sidebar .directory-list .directory-item:focus-within,
+html.nexus-design-system #sidebar .directory-list .folder-header:hover {
+  background: var(--nexus-foundry-directory-item-hover);
+  border-color: var(--nexus-foundry-sidebar-active);
+}
+html.nexus-design-system #sidebar .directory-list .directory-item .entry-name,
+html.nexus-design-system #sidebar .directory-list .directory-item .document-name,
+html.nexus-design-system #sidebar .directory-list .folder-header .folder-name {
+  color: var(--nexus-foundry-sidebar-text);
+}
+html.nexus-design-system #sidebar .directory-list .directory-item .entry-name small,
+html.nexus-design-system #sidebar .directory-list .directory-item .document-name small,
+html.nexus-design-system #sidebar .directory-list .folder-header .folder-name small {
+  color: var(--nexus-foundry-sidebar-muted);
+}
+html.nexus-design-system #sidebar input:not([type="checkbox"]):not([type="radio"]),
+html.nexus-design-system #sidebar select,
+html.nexus-design-system #sidebar textarea {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-directory-search-bg);
+  border: 1px solid var(--nexus-foundry-control-border);
+}
+html.nexus-design-system #sidebar input::placeholder,
+html.nexus-design-system #sidebar textarea::placeholder {
+  color: var(--nexus-foundry-sidebar-muted);
+}
+html.nexus-design-system #sidebar button:not(.item),
+html.nexus-design-system #sidebar .header-control {
+  color: var(--nexus-foundry-sidebar-text);
+  border-color: var(--nexus-foundry-control-border);
+}
+html.nexus-design-system #sidebar button:not(.item):hover,
+html.nexus-design-system #sidebar .header-control:hover {
+  background: var(--nexus-foundry-control-hover);
+  border-color: var(--nexus-foundry-sidebar-active);
+}
+html.nexus-design-system #sidebar,
+html.nexus-design-system #sidebar * {
+  scrollbar-color: var(--nexus-foundry-sidebar-active) var(--nexus-foundry-sidebar-bg);
+}
+html.nexus-design-system #navigation,
+html.nexus-design-system #navigation #scene-list,
+html.nexus-design-system #navigation .scene {
+  color: var(--nexus-foundry-sidebar-text);
+  border-color: var(--nexus-foundry-sidebar-border);
+}
+html.nexus-design-system #navigation #scene-list,
+html.nexus-design-system #navigation .scene {
+  background: var(--nexus-foundry-navigation-bg);
+}
+html.nexus-design-system #navigation .scene.active,
+html.nexus-design-system #navigation .scene:hover {
+  background: var(--nexus-foundry-navigation-active);
+  color: var(--nexus-foundry-sidebar-text);
+}
+html.nexus-design-system #controls .control-tools,
+html.nexus-design-system #controls .control-tool,
+html.nexus-design-system #hotbar,
+html.nexus-design-system #hotbar .bar-controls,
+html.nexus-design-system #players,
+html.nexus-design-system #chat {
+  color: var(--nexus-foundry-sidebar-text);
+  background-color: var(--nexus-foundry-sidebar-bg);
+  border-color: var(--nexus-foundry-sidebar-border);
+}
+html.nexus-design-system #controls .control-tool:hover,
+html.nexus-design-system #controls .control-tool.active,
+html.nexus-design-system #hotbar .macro:hover,
+html.nexus-design-system #players .player:hover {
+  background-color: var(--nexus-foundry-sidebar-hover);
+  border-color: var(--nexus-foundry-sidebar-active);
+}
+html.nexus-design-system .nexus-themed-application {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-application-bg);
+  border-color: var(--nexus-foundry-application-border);
+}
+html.nexus-design-system .nexus-themed-application .window-header,
+html.nexus-design-system .nexus-themed-application header {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-application-header);
+  border-color: var(--nexus-foundry-application-border);
+}
+html.nexus-design-system .nexus-themed-application .window-content,
+html.nexus-design-system .nexus-themed-application .application-content {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-application-bg);
+}
+html.nexus-design-system .nexus-themed-application input,
+html.nexus-design-system .nexus-themed-application select,
+html.nexus-design-system .nexus-themed-application textarea {
+  color: var(--nexus-foundry-sidebar-text);
+  background: var(--nexus-foundry-control-bg);
+  border-color: var(--nexus-foundry-control-border);
+}
+html.nexus-design-system .nexus-themed-application button {
+  color: var(--nexus-foundry-sidebar-text);
+  border-color: var(--nexus-foundry-control-border);
+}
+html.nexus-design-system .nexus-themed-application button:hover {
+  background: var(--nexus-foundry-control-hover);
+  border-color: var(--nexus-foundry-sidebar-active);
+}
