@@ -91,6 +91,7 @@ function renderDesignProfilePreview(resource, resolved) {
   for (const [key, value] of Object.entries(palette)) section.style.setProperty("--nexus-inspector-" + key, value);
   section.dataset.radius = model.layout.radius;
   section.dataset.density = model.layout.density;
+  section.style.setProperty("--nexus-inspector-radius", model.layout.radius === "sharp" ? "0px" : model.layout.radius === "soft" ? "5px" : "11px");
   section.style.setProperty("--nexus-inspector-font", model.typography.family);
   section.style.setProperty("--nexus-inspector-font-size", model.typography.baseSize + "px");
   section.style.setProperty("--nexus-inspector-line-height", String(model.typography.lineHeight));
