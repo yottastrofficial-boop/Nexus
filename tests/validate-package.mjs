@@ -471,7 +471,8 @@ assert.match(propertyPickerView, /button\.append\(heading, code\)/, "O caminho d
 assert.match(css, /nexus-property-option-name[\s\S]*nexus-property-option-path/, "O seletor deve exibir nome e caminho em duas linhas compactas");
 assert.match(propertyPickerView, /category\.append\(heading, arrow\)/, "Categorias devem exibir apenas título e indicador de navegação");
 assert.match(actorPropertyPickerListeners, /pointerdown.*data-property-category/s, "Navegar nas categorias deve manter o foco no campo de origem");
-assert.match(sheetListeners, /\.nexus-native-panel-content/, "O estado de rolagem dos painéis deve ser preservado entre renderizações");
+assert.match(sheetListeners, /const drawerScroll = \{ top: drawer\?\.scrollTop/, "O estado de rolagem do drawer interno deve ser capturado antes da atualização");
+assert.match(sheetListeners, /currentDrawer\.scrollTop = drawerScroll\.top/, "O estado de rolagem do drawer deve ser restaurado após renderizações");
 assert.match(themeModule, /--nexus-button-active-bg/);
 assert.match(themeModule, /--nexus-canvas-scroll-bg/);
 assert.match(sheet, /NEXUS_RULEBOOK_PROPERTY_DEFINITIONS/);
