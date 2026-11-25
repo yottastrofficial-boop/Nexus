@@ -81,7 +81,7 @@ assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-wo
   "NEXUS sheet layout must remain styled in the Foundry VTT preset.");
 assert.ok(!designSystem.includes('html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet'),
   "The native Foundry exception must not disable NEXUS-owned sheet styling.");
-assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/,
+assert.match(designSystem, /body[\s\S]*:not\(#sidebar\):not\(#sidebar \*\)[\s\S]*:not\(i\):not\(svg\):not\(code\):not\(pre\)[\s\S]*:not\(\[class\*="fa-"\]\)/,
   "Profile typography must exclude native icon elements and Font Awesome classes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");

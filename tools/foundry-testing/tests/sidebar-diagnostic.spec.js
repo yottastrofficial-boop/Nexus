@@ -98,7 +98,33 @@ test("diagnostica DOM, geometria e ícones do sidebar nativo V14", async ({ page
         }))
       };
     });
-    const sidebar = document.querySelector("#sidebar");
+    const sidebarApplication = game.sidebar ?? null;
+    const sidebar = sidebarApplication?.element ?? document.querySelector("#sidebar");
+    const describeTree = (element, depth = 0) => {
+      if (!element || depth > 4) return null;
+      return {
+        tag: element.tagName,
+        id: element.id || null,
+        className: typeof element.className === "string" ? element.className : null,
+        role: element.getAttribute("role"),
+        dataPart: element.getAttribute("data-application-part"),
+        dataGroup: element.getAttribute("data-group"),
+        dataTab: element.getAttribute("data-tab"),
+        rect: rect(element),
+        computed: style(element),
+        children: [...element.children].slice(0, 40).map(child => describeTree(child, depth + 1))
+      };
+    };
+    const ancestorChain = [];
+    for (let node = sidebar, depth = 0; node && depth < 7; node = node.parentElement, depth++) {
+      ancestorChain.push({
+        tag: node.tagName,
+        id: node.id || null,
+        className: typeof node.className === "string" ? node.className : null,
+        rect: rect(node),
+        computed: style(node)
+      });
+    }
     const iconNodes = [...(sidebar?.querySelectorAll("i, svg, [class*='fa-'], [class*='icon']") ?? [])]
       .slice(0, 80)
       .map(element => {
@@ -135,8 +161,18 @@ test("diagnostica DOM, geometria e ícones do sidebar nativo V14", async ({ page
         systemVersion: game.system?.version ?? null,
         moduleCount: game.modules?.size ?? null
       },
+      sidebarApplication: sidebarApplication ? {
+        constructor: sidebarApplication.constructor?.name ?? null,
+        id: sidebarApplication.id ?? null,
+        tabGroups: sidebarApplication.tabGroups ?? null,
+        activePrimaryTab: sidebarApplication.tabGroups?.primary ?? null,
+        partIds: Object.keys(sidebarApplication.constructor?.PARTS ?? {}),
+        tabIds: Object.keys(sidebarApplication.constructor?.TABS?.primary?.tabs ?? {})
+      } : null,
       sidebarRect: rect(sidebar),
       sidebarComputed: style(sidebar),
+      sidebarTree: describeTree(sidebar),
+      ancestorChain,
       candidates: elements,
       iconNodes,
       fontChecks: fonts,

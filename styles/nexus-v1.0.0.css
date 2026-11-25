@@ -8762,21 +8762,7 @@ html.nexus-design-system #sidebar .sidebar-tabs {
 }
 
 /* Native sidebar tab/icon typography is intentionally left to Foundry and Font Awesome. */
-html.nexus-design-system #sidebar .sidebar-tabs > .item {
-  color: var(--nexus-foundry-sidebar-muted);
-  border-color: transparent;
-  transition: color .14s ease, background-color .14s ease, border-color .14s ease;
-}
-html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
-html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible {
-  color: var(--nexus-foundry-sidebar-text);
-  background: var(--nexus-foundry-sidebar-hover);
-}
-html.nexus-design-system #sidebar .sidebar-tabs > .item.active {
-  color: var(--nexus-foundry-sidebar-text);
-  background: var(--nexus-foundry-sidebar-active);
-  border-color: var(--nexus-foundry-sidebar-active);
-}
+/* Sidebar tab states are owned by the canonical V14 block in nexus-design-system.css. */
 html.nexus-design-system #sidebar .sidebar-tab.directory,
 html.nexus-design-system #sidebar .sidebar-tab.actors-sidebar,
 html.nexus-design-system #sidebar .sidebar-tab.cards-sidebar,

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
+const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 
@@ -14,15 +15,17 @@ assert.match(styles, /\.nexus-library-application \.nexus-library-details[\s\S]*
   "O Inspector deve ter rolagem independente e não ser recortado.");
 assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.nexus-library-details/,
   "Em telas estreitas, o Inspector deve continuar acessível em painel responsivo.");
-assert.match(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/,
+assert.match(designSystem, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/,
   "Abas especializadas do Foundry devem receber estado ativo explícito.");
+assert.doesNotMatch(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application/,
+  "A Biblioteca Universal não deve estilizar o sidebar do Foundry.");
 assert.doesNotMatch(styles, /#ui-left|#ui-top|#controls/,
   "A camada da Biblioteca não deve impor botões flutuantes aos controles nativos do Foundry.");
 assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
   "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
 assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
   "A chave legada rolltables não deve impedir a filtragem do tipo tables.");
-assert.match(styles, /:focus-visible/,
+assert.match(designSystem, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
 assert.match(libraryTemplate, /data-library-clear-search/,
