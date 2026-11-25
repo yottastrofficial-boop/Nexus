@@ -32,3 +32,8 @@ Corrige o erro de construção do Estúdio de Aparência causado por opções de
 ## Correção direta do sidebar — commit 417acb4f663ba328e30f28db70ab976af0f18669
 
 A pedido do usuário, esta rodada não utiliza Playwright nem exige diagnóstico automatizado no navegador. O CSS do sidebar foi refeito diretamente na `main` para separar explicitamente a navegação dos painéis ApplicationV2: os controles de navegação são os elementos `.item` dentro de `#sidebar-tabs`/ `.sidebar-tabs`; os elementos `.tab.sidebar-tab` são tratados como painéis de conteúdo e não recebem dimensões de botão. A navegação passa a ser selecionada diretamente por ID e por classes de compatibilidade, com layout horizontal flexível, quebra de linha, estados de foco/seleção e preservação dos glifos nativos. O usuário fará a validação visual e funcional no Foundry VTT 14. Esta alteração ainda não é uma release nem altera a versão distribuída `1.0.0.106`.
+
+
+## Atualização 1.0.0.107 — pacote para teste manual
+
+A branch `main` prepara a versão `1.0.0.107` para que o mantenedor valide no Foundry VTT 14 build 360 a correção do sidebar integrada no commit `417acb4f663ba328e30f28db70ab976af0f18669`. O objetivo do teste é confirmar a navegação horizontal, os glifos nativos, a troca de abas e a exibição dos painéis. Não foi executado Playwright nem teste de navegador. A publicação do pacote não altera o estado de validação: o sidebar só será considerado concluído após confirmação manual no cliente real.
