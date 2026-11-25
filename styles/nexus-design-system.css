@@ -1395,6 +1395,14 @@ html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
   border-radius: 0;
 }
 
+/* Specialized Foundry sidebar applications keep their native active state,
+   while inheriting the same semantic surface as the rest of the sidebar. */
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
+  color: var(--nexus-foundry-sidebar-text, var(--nexus-ui-text));
+  background: var(--nexus-foundry-application-bg, var(--nexus-ui-surface));
+  border-color: var(--nexus-foundry-application-border, var(--nexus-ui-border));
+}
+
 /* Keyboard focus remains visible without changing native tab semantics. */
 html.nexus-design-system #sidebar-tabs > .item:focus-visible,
 html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible {
