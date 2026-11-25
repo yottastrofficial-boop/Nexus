@@ -32,7 +32,7 @@ assert.ok(sidebarBlock.includes("inline-flex"), "Os controles devem manter dimen
 assert.ok(sidebarBlock.includes("#sidebar-content"), "A área de conteúdo do sidebar deve ser contemplada");
 assert.doesNotMatch(sidebarBlock, /window-content|application-content/, "O layout não deve presumir um wrapper de janela comum");
 assert.doesNotMatch(sidebarBlock, /^\s*(?:font-family|content)\s*:/im, "O layout não deve substituir fontes ou glifos nativos");
-assert.doesNotMatch(sidebarBlock, /order\s*:/i, "A ordem DOM original do Foundry deve ser preservada");
+assert.doesNotMatch(sidebarBlock, /^\s*order\s*:/im, "A ordem DOM original do Foundry deve ser preservada");
 assert.ok(!designCss.includes("Minimal UI — Foundry V14 ApplicationV2 sidebar"), "O bloco estrutural anterior deve ser removido");
 assert.ok(designCss.includes('[class~="fas"]'));
 console.log("Foundry UI + Design Studio layout contracts passed.");
