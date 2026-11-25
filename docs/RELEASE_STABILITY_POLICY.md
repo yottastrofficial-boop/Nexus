@@ -68,7 +68,7 @@ A publicação de uma release estável não equivale a checkpoint funcional. A p
 
 ## Próximo checkpoint
 
-A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
+A próxima versão estável deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
 A versão 1.0.0.98 inclui a correção dos tokens semânticos de seleção e inspeção de grupos, além da integração visual do Design System. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
