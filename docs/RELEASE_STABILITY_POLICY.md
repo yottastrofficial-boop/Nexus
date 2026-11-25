@@ -24,7 +24,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 
 ## Estado de referência — 2026-11-25 (preparação da 1.0.0.112 para teste)
 
-- **Versão candidata preparada para a main:** `1.0.0.112`; pacote de teste autorizado antes da validação manual.
+- **Versão de teste preparada para a main:** `1.0.0.112`; pacote de teste autorizado antes da validação manual.
 - **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
 - **Teste manual pendente:** `1.0.0.112` complementa a largura integral do chat da .111 com espaçamento adaptativo por Container Queries, limites para mídia e rolagem interna de tabelas. CI deve ser confirmado novamente após corrigir a consistência documental; a validação manual no Foundry VTT 14 build 360 ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
