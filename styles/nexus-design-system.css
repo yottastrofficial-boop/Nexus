@@ -1264,7 +1264,7 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(i):not(svg)
 
 /* Foundry V14 Sidebar — one canonical layout layer.
    Sidebar is a dedicated ApplicationV2 instance. Its tab navigation is the
-   primary tab group, not an ordinary window-content toolbar. Keep its native
+   primary tab group, not a generic application toolbar. Keep its native
    anchors, data-tab/data-group attributes, icon markup and event delegation. */
 html.nexus-design-system #sidebar {
   display: flex;
