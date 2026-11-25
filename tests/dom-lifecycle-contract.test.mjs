@@ -8,7 +8,7 @@ const designStudio = read("../scripts/apps/design-studio.js");
 const libraryApplication = read("../scripts/library/library-application.js");
 
 assert.match(sheetListeners, /const escapeHtml = value => String\(value \?\? ""\)/,
-  "Dynamic property paths must be escaped before entering HTML templates.");
+  "Dynamic HTML values must pass through a dedicated escaping utility.");
 assert.doesNotMatch(sheetListeners, /detail\.innerHTML\s*=\s*`[^\n]*\$\{asset\.label\}/,
   "Catalog labels must be inserted as text, not interpolated into HTML.");
 assert.equal((sheetListeners.match(/picker\.addEventListener\("cancel"/g) ?? []).length, 2,
