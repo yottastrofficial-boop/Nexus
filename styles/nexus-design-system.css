@@ -312,6 +312,35 @@ html.nexus-design-system :is(.application.nexus-themed-application, .window-app.
   background: var(--nexus-ui-surface);
 }
 
+/* Keep Foundry's sidebar tabs integrated with the theme while leaving tool buttons native. */
+html.nexus-design-system #sidebar .sidebar-tabs {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item,
+html.nexus-design-system #sidebar .tab.sidebar-tab {
+  border: 1px solid transparent;
+  border-radius: var(--nexus-ui-radius);
+  color: var(--nexus-ui-muted);
+  background: transparent;
+  box-shadow: none;
+  text-shadow: none !important;
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
+html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible,
+html.nexus-design-system #sidebar .tab.sidebar-tab :is(button, .button):hover {
+  border-color: var(--nexus-ui-border);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item.active,
+html.nexus-design-system #sidebar .tab.sidebar-tab.active {
+  border-color: var(--nexus-ui-accent);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+  box-shadow: inset 2px 0 var(--nexus-ui-accent);
+}
 /* Native Foundry control rails retain their minimal Foundry appearance. */
 
 /* The rails are children of their ApplicationV2 sheet, so Foundry's own z-stack wins. */
