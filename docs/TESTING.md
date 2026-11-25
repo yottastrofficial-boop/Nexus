@@ -38,3 +38,8 @@ O smoke test atual confirma inicialização, mundo correto, sistema NEXUS, sess�
 - Mídia e comportamento em diferentes resoluções.
 - Duas fichas/janelas e concorrência de gravação.
 - Atualização sobre a versão anterior preservando Actors e layouts.
+
+
+## Diagnóstico funcional do sidebar V14
+
+O harness `tools/foundry-testing` inclui `sidebar-diagnostic.spec.js`, que captura a hierarquia DOM real, geometrias, estilos calculados, classes/fontes de ícones e screenshot do sidebar no Foundry VTT 14. Esse relatório é a fonte necessária para orientar alterações estruturais posteriores; testes estáticos de seletores CSS não comprovam a disposição visual.

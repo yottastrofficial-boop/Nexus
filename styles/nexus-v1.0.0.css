@@ -8758,9 +8758,10 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   color: var(--nexus-foundry-sidebar-text);
   background: var(--nexus-foundry-sidebar-bg);
   border-color: var(--nexus-foundry-sidebar-border);
-  font-family: var(--nexus-font-family, system-ui, sans-serif);
   font-size: var(--nexus-font-size, 13px);
 }
+
+/* Native sidebar tab/icon typography is intentionally left to Foundry and Font Awesome. */
 html.nexus-design-system #sidebar .sidebar-tabs > .item {
   color: var(--nexus-foundry-sidebar-muted);
   border-color: transparent;
