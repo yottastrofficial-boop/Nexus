@@ -31,7 +31,7 @@ assert.match(sidebar, /:is\(\.active, \[aria-selected="true"\]\)/,
   "Selected native tabs must be styled through active and accessible state.");
 assert.doesNotMatch(sidebar, /#sidebar-tabs[^{}]*\{[^{}]*font-family\s*:/,
   "The sidebar must not override the native icon font.");
-assert.doesNotMatch(sidebar, /#sidebar-tabs[^{}]*\{[^{}]*content\s*:/,
+assert.doesNotMatch(sidebar, /::before\s*\{[^{}]*content\s*:/,
   "The sidebar must not synthesize replacement icon glyphs.");
 
 // Lightweight stylesheet structural check: ignore comments and quoted strings,
