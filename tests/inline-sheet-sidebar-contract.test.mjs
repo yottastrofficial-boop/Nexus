@@ -31,6 +31,7 @@ test("character-sheet editing stays in the native sheet sidebars", () => {
 
 test("native Foundry chrome receives global typography and unified Chat surfaces", () => {
   assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\)/);
+  assert.match(designSystem, /html\.nexus-design-system body \{ color: var\(--nexus-ui-text\); \}/);
   assert.match(designSystem, /--nexus-font-family/);
   assert.match(designSystem, /#chat-log, \.chat-log, \.chat-scroll/);
   assert.match(designSystem, /#chat-log \.message-content[\s\S]*?background: var\(--nexus-ui-surface-raised\)/);

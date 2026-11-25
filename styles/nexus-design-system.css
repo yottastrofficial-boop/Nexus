@@ -1241,6 +1241,8 @@ html.nexus-design-system #chat-log :is(.message-header, .message-content) {
 html.nexus-design-system #chat-log .message-header { background: var(--nexus-ui-surface) !important; }
 html.nexus-design-system #chat-log .message-content { background: var(--nexus-ui-surface-raised) !important; }
 
+/* The selected profile supplies the default text color and font throughout Foundry. */
+html.nexus-design-system body { color: var(--nexus-ui-text); }
 /* Use the selected profile font throughout Foundry, while preserving icon and code fonts. */
 html.nexus-design-system body :not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
   font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
