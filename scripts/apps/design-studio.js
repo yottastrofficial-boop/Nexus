@@ -12,7 +12,8 @@ import {
   DESIGN_COMPONENT_CATEGORIES,
   DESIGN_BORDER_STYLE_CHOICES,
 } from "../core/design-profile.js";
-import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";\nimport { validateDesignCss } from "../core/design-custom-css.js";
+import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";
+import { validateDesignCss } from "../core/design-custom-css.js";
 
 const clone = value => globalThis.foundry?.utils?.deepClone
   ? globalThis.foundry.utils.deepClone(value)
