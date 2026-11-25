@@ -29,7 +29,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - **Estado da main:** base de versão declarada `1.0.0.101` (desenvolvimento pós-release); a última versão estável publicada permanece `1.0.0.98`.
 - **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
 - **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
-- **Próxima candidata prevista:** `1.0.0.101-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.
+- **Próxima candidata prevista:** `1.0.0.101-rc.1`, gerada a partir da main para validação visual e funcional no Foundry.
 - **Manifesto estável:** aponta para a `1.0.0.98`, cujo ZIP foi anexado e verificado. `system.json.download` e `manifest.json.download` usam a mesma URL do asset publicado.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 - **Rotação após release estável:** depois que o workflow atualizar `manifest.json` e `system.json.download`, incremente `system.version` para a próxima base de desenvolvimento e atualize README, CHANGELOG, roadmap e visão do projeto antes do próximo commit funcional. `system.json.download` deve continuar igual à versão estável em `manifest.json`.
@@ -58,11 +58,11 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 ### 2. Release candidata
 
-- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.101-rc.1`.
-- A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
+- A partir da `main`, um commit cuja mensagem contenha `[candidate]` gera automaticamente a candidata `system.version-rc.1`; alternativamente, executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.101-rc.1`.
+- A candidata pode usar o mesmo núcleo numérico da versão de desenvolvimento atual com sufixo `-rc.N`, ou avançar para um núcleo superior.
 - Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
-- O manifesto estável não é atualizado. Instalações normais do Foundry continuam recebendo a última release estável.
+- Após confirmar o ZIP, o workflow publica `manifest-preview.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O manifesto estável não é atualizado; instalações normais continuam recebendo a última release estável.
 
 ### 3. Release estável
 
