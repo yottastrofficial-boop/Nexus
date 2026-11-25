@@ -200,6 +200,8 @@ export function installNexusDesignSystem({
       || element?.classList?.contains?.("nexus-panel-window")
       || name.startsWith("Nexus");
     const isCoreConfiguration = CORE_CONFIGURATION_NAMES.has(name);
+    const preserveNativeFoundry = getEffectiveTheme().theme === "foundry";
+    if (preserveNativeFoundry && !isNexusApplication) return;
     if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName) && !isCoreConfiguration) return;
     element?.classList?.add("nexus-themed-application");
     if (isCoreConfiguration) element?.classList?.add("nexus-themed-configuration");

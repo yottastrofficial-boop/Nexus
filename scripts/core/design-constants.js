@@ -2,6 +2,7 @@ export const DEFAULT_DESIGN_THEME = "nexus-dark";
 
 export const DESIGN_THEME_CHOICES = Object.freeze({
   "nexus-dark": "NEXUS — Escuro",
+  foundry: "Foundry VTT",
   midnight: "Meia-noite",
   light: "Claro",
   steam: "Steam",

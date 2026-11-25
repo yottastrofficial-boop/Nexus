@@ -7,6 +7,7 @@ export const DEFAULT_LAYOUT = {
 
 export const THEME_TOKENS = {
   "nexus-dark": { panel: "#182330", surface: "#202e3e", input: "#111b27", border: "#3c5067", text: "#e7edf5", muted: "#9aadc2", hover: "#2a3d52", scroll: "#111923", windowHeader: "#223246", windowContent: "#192431", menu: "#202f40", placeholder: "#91a6bd", resourceButton: "#315b7d", canvas: "#171f2a", card: "#273443", accent: "#52647b", highlight: "#78b7e8", button: "#315b7d" },
+  foundry: { panel: "#191813", surface: "#25241f", input: "#11110f", border: "#4c4a43", text: "#e5e4d9", muted: "#a6a497", hover: "#333129", scroll: "#12120f", windowHeader: "#26251f", windowContent: "#1c1b17", menu: "#26251f", placeholder: "#8d8b7d", resourceButton: "#3f463c", canvas: "#191813", card: "#24231e", accent: "#6c6a5e", highlight: "#c9a64b", button: "#3f463c" },
   midnight: { panel: "#101a2b", surface: "#18283d", input: "#0b1422", border: "#304a68", text: "#e6f0fc", muted: "#91a9c5", hover: "#223c5a", scroll: "#0b1422", windowHeader: "#18283d", windowContent: "#101a2b", menu: "#18283d", placeholder: "#91a9c5", resourceButton: "#244c78", canvas: "#0c1220", card: "#18253a", accent: "#355477", highlight: "#80c8ff", button: "#244c78" },
   light: { panel: "#e8edf3", surface: "#ffffff", input: "#f5f7fa", border: "#aab8c8", text: "#243247", muted: "#586b80", hover: "#dce6f0", scroll: "#dce6f0", windowHeader: "#ffffff", windowContent: "#e8edf3", menu: "#ffffff", placeholder: "#718096", resourceButton: "#d7e8f7", canvas: "#e8edf3", card: "#ffffff", accent: "#8797aa", highlight: "#276fa8", button: "#d7e8f7" },
   steam: { panel: "#101b2b", surface: "#1b2d42", input: "#0b1624", border: "#31516b", text: "#e7f1fb", muted: "#9ab4cc", hover: "#263f58", scroll: "#0b1624", windowHeader: "#16283b", windowContent: "#101b2b", menu: "#1b2d42", placeholder: "#88a8c4", resourceButton: "#1769a6", canvas: "#0c1725", card: "#1b2d42", accent: "#367ba8", highlight: "#66c0f4", button: "#1769a6" },
@@ -122,6 +123,8 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-radius-panel": layout.theme === "steam" ? "2px" : "8px",
     "--nexus-spacing-unit": layout.theme === "steam" ? "6px" : "8px",
     "--nexus-font-ui": `${fontFamilyToken}, sans-serif`,
+    "--nexus-font-data": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    "--nexus-font-code": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     "--nexus-button-border": color("accent", layout.accentColor ?? theme.border),
     "--nexus-button-text": color("text", theme.text),
     "--nexus-navigation-bg": color("panel", theme.panel),
@@ -248,6 +251,24 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     if (value) values[token] = value;
   }
 
+  const componentDefaults = {
+    buttons: { background: layoutColors.button, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    panels: { background: theme.surface, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 8 },
+    containers: { background: layoutColors.card, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    highlights: { background: layoutColors.highlight, text: theme.panel, border: layoutColors.highlight, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    fields: { background: theme.input, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 }
+  };
+  const componentStyles = layout.components && typeof layout.components === "object" ? layout.components : {};
+  for (const [category, fallback] of Object.entries(componentDefaults)) {
+    const current = componentStyles[category] && typeof componentStyles[category] === "object" ? componentStyles[category] : {};
+    const borderStyle = ["solid", "dashed", "dotted", "none"].includes(current.borderStyle) ? current.borderStyle : fallback.borderStyle;
+    values[`--nexus-component-${category}-background`] = safeColor(current.background, fallback.background);
+    values[`--nexus-component-${category}-text`] = safeColor(current.text, fallback.text);
+    values[`--nexus-component-${category}-border`] = safeColor(current.border, fallback.border);
+    values[`--nexus-component-${category}-border-style`] = borderStyle;
+    values[`--nexus-component-${category}-border-width`] = `${safeNumber(current.borderWidth, 0, 4, fallback.borderWidth)}px`;
+    values[`--nexus-component-${category}-radius`] = `${safeNumber(current.radius, 0, 18, fallback.radius)}px`;
+  }
   const density = layout.density === "compact" ? 0.88 : layout.density === "spacious" ? 1.14 : 1;
   const spacing = safeNumber(layout.spacing, 0.75, 1.5, 1) * density;
   const radius = layout.radius === "sharp" ? 0 : layout.radius === "soft" ? 5 : 9;
