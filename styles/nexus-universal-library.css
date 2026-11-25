@@ -200,36 +200,7 @@ html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
   overflow: auto;
 }
 
-/* Foundry UI controls share the NEXUS floating-control visual language.
-   Keep their native placement and event targets; only normalize the button surface. */
-html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control,
-html.nexus-design-system #controls .control-tool {
-  display: grid;
-  place-items: center;
-  min-width: 34px;
-  min-height: 34px;
-  margin: 0;
-  border: 1px solid var(--nexus-panel-border, #40546b);
-  border-radius: var(--nexus-radius-small, 7px);
-  color: var(--nexus-panel-text, #edf0f6);
-  background: var(--nexus-panel-surface, #202d3d);
-  box-shadow: 0 3px 10px #0003;
-  transition: background-color .14s ease, border-color .14s ease, transform .14s ease;
-}
-html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:hover,
-html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:focus-visible,
-html.nexus-design-system #controls .control-tool:hover,
-html.nexus-design-system #controls .control-tool.active {
-  color: var(--nexus-panel-text, #edf0f6);
-  border-color: var(--nexus-highlight-color, #8b83ff);
-  background: var(--nexus-panel-hover, #30445a);
-  transform: translateY(-1px);
-}
-html.nexus-design-system :is(#controls, #ui-left, #ui-top) .ui-control:focus-visible {
-  outline: 2px solid var(--nexus-focus-ring, #8b83ff);
-  outline-offset: 2px;
-}
-
+/* Foundry native control rails retain their minimal appearance. */
 
 /* Resource previews in the universal Inspector. */
 html.nexus-design-system .nexus-library-resource-preview {
