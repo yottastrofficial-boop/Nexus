@@ -171,34 +171,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-previ
   }
 }
 
-/* Foundry sidebar tabs: include specialized tabs (Combat, Chat, Settings, etc.).
-   Foundry changes these class combinations between tab types; scope by #sidebar. */
-html.nexus-design-system #sidebar .sidebar-tabs > .item,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
-  color: var(--nexus-foundry-sidebar-muted, #a5b6c9);
-  border-color: transparent;
-  border-radius: var(--nexus-radius-small, 6px);
-  transition: color .14s ease, background-color .14s ease, border-color .14s ease;
-}
-html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
-html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application:hover,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application:focus-within {
-  color: var(--nexus-foundry-sidebar-text, #edf0f6);
-  background: var(--nexus-foundry-sidebar-hover, #29384a);
-}
-html.nexus-design-system #sidebar .sidebar-tabs > .item.active,
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
-  color: var(--nexus-foundry-sidebar-text, #edf0f6);
-  border-color: var(--nexus-foundry-sidebar-active, #526b87);
-  background: var(--nexus-foundry-sidebar-active, #293d53);
-  box-shadow: inset 2px 0 var(--nexus-highlight-color, #8b83ff);
-}
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-}
+/* Sidebar navigation is owned by nexus-design-system.css, not the library layer. */
 
 /* Foundry native control rails retain their minimal appearance. */
 
