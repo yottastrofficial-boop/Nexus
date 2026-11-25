@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const root = new URL("../", import.meta.url);
+const css = readFileSync(new URL("styles/nexus-v1.0.0.css", root), "utf8");
+const template = readFileSync(new URL("templates/apps/design-studio.hbs", root), "utf8");
+const app = readFileSync(new URL("scripts/apps/design-studio.js", root), "utf8");
+assert.match(css, /Font Awesome 6 Free/);
+assert.match(css, /\.sidebar-tab\.nexus-themed-directory/);
+assert.match(css, /\.directory-list \.directory-item/);
+assert.match(css, /grid-template-columns:\s*158px minmax\(0, 1\.12fr\) minmax\(260px, \.88fr\)/);
+assert.match(template, /data-design-category-filter/);
+assert.match(template, /data-design-preview-category/);
+assert.match(template, /nexus-design-catalog-item/);
+assert.match(app, /data-design-category-filter/);
+assert.match(app, /minWidth: 980/);
+console.log("Foundry UI + Design Studio layout contracts passed.");

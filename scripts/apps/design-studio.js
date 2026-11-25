@@ -54,7 +54,7 @@ export function createDesignStudioApplicationClass({
     ? globalThis.foundry.utils.mergeObject(ApplicationV2.DEFAULT_OPTIONS ?? {}, {
         id: "nexus-design-studio",
         classes: ["nexus", "nexus-design-studio"],
-        position: { width: 920, height: 760 },
+        position: { width: 1180, height: 800, minWidth: 980, minHeight: 640 },
         window: { title: "Estúdio de Aparência NEXUS", icon: "fa-solid fa-palette", frame: true, positioned: true, resizable: true }
       }, { inplace: false })
     : {
