@@ -1,12 +1,3 @@
-## 1.0.0.101 — Refinamento do Estúdio e correções da interface Foundry
-
-- Reorganiza o Estúdio de Aparência com melhor distribuição de espaço: navegação compacta, filtro de categoria no editor central e catálogo de elementos com prévias individuais à direita.
-- Aumenta a largura inicial da janela e melhora o comportamento responsivo para reduzir cortes e compressão dos controles.
-- Reforça a preservação da fonte dos ícones Font Awesome do Foundry ao aplicar tipografia de tema.
-- Corrige molduras e bordas redundantes nos wrappers de diretórios nativos (Actors, Items, Scenes e demais abas), mantendo separadores discretos nos itens e estados de hover/foco.
-- Adiciona contratos automatizados para a estrutura do Estúdio e o escopo das correções do chrome.
-- CI e empacotamento automatizados aprovados nesta PR. A inspeção visual no cliente Foundry VTT 14 build 360 continua necessária; não é declarada validação manual.
-
 ## 1.0.0.100 — Estabilização da interface e estilos por categoria
 
 - Adiciona o preset **Foundry VTT**, preservando a aparência nativa das janelas, diretórios, navegação e superfícies do Foundry; aplicações próprias do NEXUS continuam usando os tokens do sistema.
@@ -16,6 +7,12 @@
 - Adiciona acesso à Biblioteca Universal pelo menu de configurações do sistema, reutilizando a mesma instância e o mesmo contexto já usados pela ficha.
 - Inclui contratos de regressão para estilos por categoria, tema nativo do Foundry, tipografia de dados e abertura da Biblioteca.
 - Mantém a compatibilidade declarada com Foundry VTT 14 build 360. A publicação de distribuição 1.0.0.100 foi autorizada pelo mantenedor após CI e empacotamento aprovados; a validação visual e funcional no cliente real permanece pendente, e o checkpoint funcional confirmado continua sendo 1.0.0.70. A validação visual e funcional no cliente real continua necessária antes de considerar a interface confirmada.
+
+### Preparação da próxima versão — 1.0.0.101
+
+- Refinamento do Estúdio de Aparência com filtro por categoria, melhor distribuição de espaço e catálogo de elementos com prévias individuais.
+- Correção de ícones nativos e simplificação de molduras redundantes nos diretórios Foundry.
+- Alterações em revisão na PR #82; a versão de distribuição permanece 1.0.0.100 até a validação manual e publicação.
 
 ## 1.0.0.99 — Editor flutuante, tipografia nativa e refinamento visual
 

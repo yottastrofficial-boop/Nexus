@@ -8,7 +8,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão de código proposta para integração: `1.0.0.101`.
+- Versão integrada à main: `1.0.0.100`; a próxima candidata `1.0.0.101` está em revisão na PR #82.
 - Manifesto estável permanece em `1.0.0.100` até validação visual/funcional no Foundry 14 build 360 e publicação confirmada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
