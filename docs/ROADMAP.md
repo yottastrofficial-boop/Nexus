@@ -8,16 +8,16 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão estável atualmente na main: `1.0.0.99`.
-- Candidata `1.0.0.100`: branch de estabilização em revisão pela PR #81; ainda não mesclada nem publicada.
+- Versão de código integrada à main: `1.0.0.100` (ainda não publicada como estável).
+- Manifesto estável permanece em `1.0.0.99` até validação visual/funcional no Foundry 14 build 360 e publicação confirmada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
-## Atualização candidata 1.0.0.100
+## Atualização integrada 1.0.0.100
 
-A PR #81 concentra a estabilização visual, o tema Foundry VTT, as categorias de estilo, a tipografia de dados e o acesso à Biblioteca. O estado desta candidata depende da aprovação integral do CI e de validação visual/funcional no Foundry 14 build 360; não representa checkpoint funcional confirmado.
+A atualização integrada concentra a estabilização visual, o tema Foundry VTT, as categorias de estilo, a tipografia de dados e o acesso à Biblioteca. O CI passou; a validação visual/funcional no Foundry 14 build 360 ainda é necessária antes da publicação estável.
 
 ## Estado atual por domínio
 
