@@ -12,13 +12,14 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.96 já concluiu CI e geração do pacote; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
-- Estado: projeto em desenvolvimento pós-release; não declarar estabilidade funcional completa sem os testes reais descritos em `RELEASE_STABILITY_POLICY.md`.
+- Estado: projeto em desenvolvimento pós-release; CI atual em 37/37 arquivos de teste aprovados, mas a validação funcional/visual no Foundry real permanece pendente.
 
 ## Estado atual por domínio
 
 ### Ficha e Canvas
 
 - A ficha Canvas e os componentes configuráveis estão implementados.
+- A navegação de ferramentas usa barras laterais internas minimalistas; os trilhos flutuantes externos foram removidos. O acesso à Biblioteca Universal permanece integrado à ficha.
 - Grupos possuem hierarquia e composição estrutural; não são apenas decoração CSS.
 - A classe principal da ficha e alguns controladores ainda concentram muitas responsabilidades.
 - A refatoração deve mapear dependências, leitores/escritores e eventos antes de extrair ou remover código.

@@ -9,6 +9,8 @@ const styles = read("../styles/nexus-design-system.css");
 
 test("Design Studio sections switch inside the application without browser navigation", () => {
   assert.match(template, /role="tablist"/);
+  assert.match(template, /role="tabpanel" aria-labelledby="nexus-design-tab-palette"/);
+  assert.match(template, /aria-selected="true"/);
   for (const section of ["palette", "typography", "layout", "accessibility"]) {
     assert.match(template, new RegExp(`data-design-section="${section}"[^>]*role="tab"`));
     assert.match(template, new RegExp(`data-design-section-panel="${section}"`));

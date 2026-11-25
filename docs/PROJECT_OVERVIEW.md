@@ -53,11 +53,12 @@ A árvore atual contém, entre outros:
 
 ### Recursos e infraestrutura observados
 
-- Ficha Canvas modular, com componentes configuráveis e dados vinculados ao Actor.
+- Ficha Canvas modular, com componentes configuráveis e dados vinculados ao Actor; os painéis de edição e a navegação de layouts permanecem dentro das barras laterais da ficha, sem portal flutuante externo.
 - Tipos de Actor `player-character`, `npc` e `character`.
 - Token de protótipo vinculado ao Actor por padrão, preservando a possibilidade de desvincular depois.
 - Grupos hierárquicos e composição visual com modos de organização.
-- Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas. Perfis visuais completos usam a coleção canônica de temas.
+- Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas. O botão da ficha abre a mesma Biblioteca Universal com contexto de inserção. Perfis visuais completos usam a coleção canônica de temas.
+- Estúdio de Aparência com abas internas e prévia de painéis, containers, botões, tipografia, inputs, seletores, áreas de texto e rolagem; o Design System aplica a fonte do perfil globalmente e unifica as superfícies do Chat.
 - Separação entre definições reutilizáveis e instâncias inseridas nas fichas.
 - Motor de expressões seguro, sem execução arbitrária de JavaScript.
 - Infraestrutura tipada de Lógica, persistência e runtime declarativo.

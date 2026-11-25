@@ -1,8 +1,8 @@
 ## 1.0.0.97 — Em desenvolvimento
 
-- Reorganiza o Estúdio de Aparência com navegação interna por seções e prévia conjunta de painéis, containers, botões, tipografia, campos e rolagem.
-- Amplia a aplicação dos tokens visuais às superfícies nativas do Foundry, normaliza o Chat e os controles de janela e mantém a tipografia global herdável.
-- Retira a personalização de botões flutuantes da barra nativa do Foundry.
+- Reorganiza o Estúdio de Aparência com navegação interna por seções e prévia conjunta de painéis, containers, botões, tipografia, campos de texto, seletores, áreas de texto e rolagem.
+- Aplica a tipografia do perfil globalmente às superfícies do Foundry, preservando fontes de ícones e código; unifica as superfícies do Chat e arredonda os controles de janela.
+- Remove os trilhos flutuantes externos da ficha e restaura a navegação minimalista pelos painéis internos, sem alterar os controles nativos de navegação do Foundry.
 - Conecta a ficha à Biblioteca Universal e remove a antiga visualização embutida da Biblioteca.
 - A validação visual e funcional no Foundry VTT 14 build 360 continua pendente.
 - Recupera a inserção segura de imagens da coleção de mídia na Biblioteca da ficha.

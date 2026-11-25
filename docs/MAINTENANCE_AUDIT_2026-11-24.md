@@ -159,7 +159,7 @@ Após a auditoria, a main recebeu uma rodada integrada de refinamento visual e s
 - O Estúdio de Aparência passou a alternar Paleta, Tipografia, Layout e Acessibilidade dentro da própria janela, sem links âncora que alterem a navegação do navegador.
 - A prévia do tema passou a representar painel, container, botões com rótulos, tipografia, input e barra de rolagem.
 - O Design System passou a aplicar a família tipográfica como herança nas superfícies gerais do Foundry e a unificar fundos e bordas do Chat. Os controles de janela foram normalizados para manter os ícones sem blocos quadrados.
-- Foram removidas as regras específicas que davam aparência de botões flutuantes aos controles nativos da barra do Foundry; o posicionamento e os handlers nativos permanecem sob responsabilidade do Foundry.
+- Foram removidos o portal externo e a montagem dos trilhos flutuantes da ficha. A navegação voltou às barras laterais internas; os controles nativos do Foundry preservam posicionamento e handlers.
 - A ficha agora abre a Biblioteca Universal compartilhada. O painel embutido e seu adaptador antigo foram removidos, junto com o contrato de teste correspondente, substituído por um contrato de integração com a aplicação universal.
 - O texto selecionado na interface passa a usar o acento do tema, em vez do destaque padrão inconsistente do navegador.
 
@@ -174,3 +174,12 @@ A alteração é visual e de navegação; não altera schemas mecânicos de Acto
 - O Design Studio mantém a troca de seções no próprio aplicativo e a prévia reúne painéis, containers, botões, tipografia, inputs, seletores, área de texto e rolagem.
 - O Design System amplia a aplicação da fonte global nas superfícies centrais do Foundry e uniformiza as superfícies internas do Chat.
 - A validação visual e funcional real continua dependente de uma sessão no Foundry V14 build 360; testes automatizados não substituem esse gate.
+
+
+### Validação automatizada da interface minimalista
+
+- Commit validado: `2f81133847ad7d45c7e7243f9d86cd11ccd0d71b`.
+- CI: 37/37 arquivos de teste passaram.
+- Validação do pacote e geração do ZIP: aprovadas.
+- Artefato `nexus-1.0.0.97.zip` foi gerado no CI; é artefato de build, não release estável publicada.
+- A validação visual/funcional dentro do Foundry VTT 14 build 360 permanece pendente.

@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da primeira versão do Design System global. A validação deve ocorrer em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão atual do Design System. O CI no commit `2f811338` passou com 37/37 arquivos de teste e gerou o pacote de build; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 
@@ -30,6 +30,8 @@ Este roteiro é o gate funcional da primeira versão do Design System global. A 
 ## Estúdio de Aparência
 
 - [ ] Abrir o Estúdio pelo menu de Configurações do Jogo.
+- [ ] Clicar em Paleta, Tipografia, Layout e Acessibilidade; confirmar que as seções alternam dentro da mesma janela, sem abrir guias ou janelas do navegador.
+- [ ] Confirmar que cada aba expõe corretamente o estado selecionado e que a prévia mostra painel, container, botão com texto, tipografia, input, select, textarea e barra de rolagem.
 - [ ] Confirmar que GM pode editar campanha e que jogador pode editar apenas o próprio perfil quando permitido.
 - [ ] Alterar preset e nome do perfil; confirmar prévia imediata sem persistência automática.
 - [ ] Ajustar as 18 cores, tipografia, tamanhos, densidade, espaçamento, raio e altura dos controles.
@@ -54,7 +56,8 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - [ ] Controles de canvas.
 - [ ] Hotbar.
 - [ ] Lista de jogadores.
-- [ ] Chat.
+- [ ] Chat: conferir fundo geral, área de rolagem, cabeçalho e cartões internos sem áreas brancas residuais.
+- [ ] Controles de janela: conferir que minimizar, fechar e opções mantêm formato circular e ícones centralizados.
 - [ ] Janelas ApplicationV2 nativas identificadas pelo sistema.
 - [ ] Campos, menus, botões, ícones, bordas, rolagem e textos em cada superfície.
 
@@ -91,9 +94,10 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Confirmar que todas as aplicações NEXUS (Biblioteca, Estúdio, painéis da ficha e janelas futuras) herdam o shell sem alterar janelas de módulos externos.
 - [ ] Abrir Biblioteca pela janela independente e pelo painel da ficha; comparar filtros, cartões, Inspector, estados ativos e rolagem.
 - [ ] Redimensionar Biblioteca para largura estreita e confirmar que filtros não ficam cortados nem comprimidos.
-- [ ] Clicar na ficha depois de abrir um painel flutuante; confirmar que os trilhos laterais voltam à frente e recebem interação.
-- [ ] Clicar no painel flutuante; confirmar que ele próprio fica à frente e os trilhos não roubam o foco.
 - [ ] Abrir duas fichas; confirmar que as ferramentas de aparência e a navegação de layouts permanecem dentro das barras laterais de cada ficha, sem trilhos flutuantes externos.
+- [ ] Na ficha, abrir Configurações, Aparência, Propriedades, Organização, Estrutura de dados e Comportamento; confirmar que os painéis aparecem no drawer interno.
+- [ ] Sair dos painéis Propriedades/Comportamento e confirmar que a seleção do Canvas é limpa; alternar entre os dois e confirmar que a seleção é preservada.
+- [ ] Abrir a Biblioteca pelo botão interno da ficha e confirmar que a Biblioteca Universal recebe o contexto correto.
 - [ ] Conferir controles do Canvas, navegação, Hotbar e Players em estados normal, hover, ativo e foco; confirmar que fontes e controles nativos usam os tokens globais, preservando fontes de ícones.
 - [ ] Enviar mensagens curtas e longas no Chat; conferir que a área de rolagem, o cabeçalho e o corpo usam a mesma família de tema, com cartões internos elevados e sem áreas brancas residuais.
 - [ ] Conferir imagens, GIFs, vídeos, áudio, links e embeds enriquecidos nativos no Chat; validar contenção, tamanho e rolagem.
@@ -101,11 +105,11 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 
 ## Geometria e navegação — etapa de integração nativa
 
-- [ ] Alterar a altura dos controles no Estúdio (mínimo, padrão e máximo) e confirmar que controles nativos e trilhos flutuantes acompanham o perfil.
+- [ ] Alterar a altura dos controles no Estúdio (mínimo, padrão e máximo) e confirmar que controles nativos e barras internas da ficha acompanham o perfil.
 - [ ] Confirmar que os ícones dos controles laterais permanecem centralizados, proporcionais e sem cortes.
 - [ ] Abrir uma cena com nome longo e um mundo com muitas cenas; confirmar rolagem horizontal sem sobreposição ou perda de acesso.
 - [ ] Diferenciar visualmente cena visualizada e cena ativa; confirmar que os indicadores nativos de permissão GM continuam legíveis.
-- [ ] Redimensionar a viewport para uma largura estreita; confirmar que os controles continuam acessíveis e que os trilhos flutuantes rolam verticalmente quando necessário.
-- [ ] Abrir painéis da ficha e confirmar que os trilhos esquerdo/direito ficam fora do conteúdo dos painéis e não bloqueiam seus controles.
+- [ ] Redimensionar a viewport para uma largura estreita; confirmar que os controles continuam acessíveis e que as barras internas da ficha rolam sem cobrir o Canvas.
+- [ ] Abrir painéis da ficha e confirmar que o drawer interno e a barra de layouts não cobrem o Canvas nem bloqueiam os controles.
 - [ ] Testar foco por teclado e `prefers-reduced-motion`.
 - [ ] Repetir os testes nos perfis escuro, claro e alto contraste, em cliente GM e jogador.

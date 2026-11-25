@@ -137,6 +137,7 @@ export function createDesignStudioApplicationClass({
           const active = item === tab;
           item.classList.toggle("is-active", active);
           item.setAttribute("aria-pressed", String(active));
+          item.setAttribute("aria-selected", String(active));
         });
         root.querySelectorAll("[data-design-section-panel]").forEach(panel => {
           panel.hidden = panel.dataset.designSectionPanel !== selected;

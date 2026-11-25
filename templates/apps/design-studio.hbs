@@ -15,14 +15,14 @@
 
   <div class="nexus-design-studio-body">
     <nav class="nexus-design-studio-nav" aria-label="Seções do editor" role="tablist">
-      <button type="button" class="is-active" data-design-section="palette" role="tab" aria-controls="nexus-design-palette" aria-pressed="true">Paleta</button>
-      <button type="button" data-design-section="typography" role="tab" aria-controls="nexus-design-typography" aria-pressed="false">Tipografia</button>
-      <button type="button" data-design-section="layout" role="tab" aria-controls="nexus-design-layout" aria-pressed="false">Layout</button>
-      <button type="button" data-design-section="accessibility" role="tab" aria-controls="nexus-design-accessibility" aria-pressed="false">Acessibilidade</button>
+      <button type="button" class="is-active" id="nexus-design-tab-palette" data-design-section="palette" role="tab" aria-controls="nexus-design-palette" aria-selected="true" aria-pressed="true">Paleta</button>
+      <button type="button" id="nexus-design-tab-typography" data-design-section="typography" role="tab" aria-controls="nexus-design-typography" aria-selected="false" aria-pressed="false">Tipografia</button>
+      <button type="button" id="nexus-design-tab-layout" data-design-section="layout" role="tab" aria-controls="nexus-design-layout" aria-selected="false" aria-pressed="false">Layout</button>
+      <button type="button" id="nexus-design-tab-accessibility" data-design-section="accessibility" role="tab" aria-controls="nexus-design-accessibility" aria-selected="false" aria-pressed="false">Acessibilidade</button>
     </nav>
 
     <main class="nexus-design-studio-editor">
-      <section class="nexus-design-studio-section" id="nexus-design-palette" data-design-section-panel="palette">
+      <section class="nexus-design-studio-section" id="nexus-design-palette" data-design-section-panel="palette" role="tabpanel" aria-labelledby="nexus-design-tab-palette">
         <div class="nexus-design-section-heading"><div><h3>Paleta de cores</h3><p>Escolha um preset como ponto de partida e ajuste cada superfície individualmente.</p></div></div>
         <label class="nexus-design-field"><span>Nome do perfil</span><input type="text" maxlength="64" value="{{profile.name}}" data-design-path="name"></label>
         <label class="nexus-design-field nexus-design-preset">
@@ -42,7 +42,7 @@
         </div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-typography" data-design-section-panel="typography" hidden>
+      <section class="nexus-design-studio-section" id="nexus-design-typography" data-design-section-panel="typography" role="tabpanel" aria-labelledby="nexus-design-tab-typography" hidden>
         <div class="nexus-design-section-heading"><div><h3>Tipografia</h3><p>Controle a família tipográfica e a hierarquia de leitura.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Família tipográfica</span><select data-design-path="typography.family">{{#each fontChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
@@ -54,7 +54,7 @@
         <div class="nexus-design-type-preview"><strong>O destino de NEXUS</strong><p>Uma interface clara ajuda a organizar informações, reconhecer prioridades e acompanhar a sessão sem competir com o conteúdo da ficha.</p><span>Texto auxiliar · Exemplo de hierarquia visual</span></div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-layout" data-design-section-panel="layout" hidden>
+      <section class="nexus-design-studio-section" id="nexus-design-layout" data-design-section-panel="layout" role="tabpanel" aria-labelledby="nexus-design-tab-layout" hidden>
         <div class="nexus-design-section-heading"><div><h3>Layout e densidade</h3><p>Ajuste o ritmo visual e o tamanho dos controles.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Densidade</span><select data-design-path="layout.density">{{#each densityChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
@@ -64,7 +64,7 @@
         </div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-accessibility" data-design-section-panel="accessibility" hidden>
+      <section class="nexus-design-studio-section" id="nexus-design-accessibility" data-design-section-panel="accessibility" role="tabpanel" aria-labelledby="nexus-design-tab-accessibility" hidden>
         <div class="nexus-design-section-heading"><div><h3>Acessibilidade</h3><p>Verificações de contraste são recomendações; o perfil continua editável.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Nível de contraste</span><select data-design-path="accessibility.contrast">{{#each contrastChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
