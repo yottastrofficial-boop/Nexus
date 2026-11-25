@@ -3564,9 +3564,6 @@ if (!hasPath) propertyValueInput.value = "";
     const portal = document.createElement("div");
     portal.className = "nexus-floating-ui";
     portal.dataset.nexusFloatingFor = this.id;
-    portal.style.setProperty("--nexus-accent-color", this._currentLayout?.accentColor ?? "#52647b");
-    portal.style.setProperty("--nexus-highlight-color",this._currentLayout?.highlightColor??"#78b7e8");
-    portal.style.setProperty("--nexus-button-color",this._currentLayout?.buttonColor??"#315b7d");
     applyScopedTheme(portal, this._currentLayout ?? DEFAULT_LAYOUT);
     portal.innerHTML = `
       <div class="nexus-floating-left" aria-label="Ferramentas da ficha">

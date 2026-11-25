@@ -424,8 +424,9 @@ assert.match(template, /nexus-property-value-field[\s\S]*data-property-value/, "
 assert.match(propertyPickerView, /nexus-property-option-heading/, "O seletor deve organizar nome e caminho em linhas separadas");
 assert.match(sheet, /textRow\)textRow\.hidden=!one/, "Conteúdo deve estar disponível para qualquer card selecionado");
 assert.match(sheet, /dataRow\)dataRow\.hidden=!one/, "Propriedade relacionada deve estar disponível para qualquer card selecionado");
-assert.match(sheet, /_mountInlineEditorPanels/, "Os painéis de edição devem permanecer no drawer interno da ficha");
-assert.doesNotMatch(sheet, /data-nexus-floating-for|_mountFloatingUI|NexusPanelWindow/, "A ficha não deve montar trilhos ou janelas editoras externas");
+assert.match(sheet, /_mountFloatingUI/, "A ficha deve montar os trilhos flutuantes externos do editor");
+assert.match(sheet, /NexusPanelWindow/, "Cada ferramenta deve abrir em uma janela ApplicationV2 independente");
+assert.match(sheet, /data-nexus-floating-for/, "O portal flutuante deve pertencer à ficha que o criou");
 assert.match(template, /data-appearance-panel="settings"/, "O painel de configurações deve estar acessível pela barra lateral interna");
 assert.match(template, /data-appearance-panel="behavior"/, "O editor de comportamento deve estar acessível pela barra lateral interna");
 assert.match(css, /nexus-behavior-editor button:not\(:disabled\)[\s\S]*cursor:pointer!important/, "Botões de comportamento devem restaurar o cursor de interação");
