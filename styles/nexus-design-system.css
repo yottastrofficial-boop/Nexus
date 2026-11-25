@@ -1369,7 +1369,7 @@ html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[data-action=
 }
 
 /* Size only native navigation controls. Compatibility markup is handled without selecting panels.
-   .tab.sidebar-tab is a content panel, not an icon button. */
+   .tab.sidebar-tab is a content panel, never an icon button. */
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar .tabs[data-group="primary"] > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
