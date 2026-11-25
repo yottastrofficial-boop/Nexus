@@ -38,3 +38,13 @@ A pedido do usuário, esta rodada não utiliza Playwright nem exige diagnóstico
 ## Atualização 1.0.0.107 — pacote para teste manual
 
 A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmado e manifesto sincronizado. Ela contém a revisão do sidebar integrada no commit `417acb4f663ba328e30f28db70ab976af0f18669`, além dos ajustes de estilo e dos contratos de regressão desta etapa. O objetivo do teste manual é confirmar a navegação horizontal, os glifos nativos, a troca de abas e a exibição dos painéis. Não foi executado Playwright nem teste de navegador. A publicação do pacote não altera o estado de validação: o sidebar só será considerado concluído após confirmação manual no cliente real.
+
+
+## Checkpoint 25/11/2026 — tokens de seleção/foco
+
+- PR #93 integrada à `main` (commit `96fd0c7b73ec369d97b6884f5dea1586bd4e1787`).
+- Os estados de foco da Biblioteca e seleção/inspeção do Canvas passaram a usar `--nexus-accent-color`, com fallback seguro.
+- O teste de contrato `tests/sheet-theme-scope.test.mjs` cobre os três usos e a validação CI da integração passou.
+- A release distribuída continua sendo `1.0.0.107`; a execução de release após a PR foi ignorada, portanto não houve nova versão publicada.
+- Próximo passo funcional: corrigir o sidebar com evidência do DOM do Foundry VTT 14 build 360. Sem a captura real, não alterar seletores por suposição. Não usar Playwright.
+- Fichas, Canvas, Biblioteca e auditoria ampla de ícones continuam como etapas de trabalho, não como concluídas; a validação visual/funcional no Foundry permanece pendente.
