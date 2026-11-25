@@ -127,6 +127,20 @@ export function createDesignStudioApplicationClass({
       const listenerOptions = { signal: this._listeners.signal };
       root?.addEventListener("input", event => this._onProfileInput(event), listenerOptions);
       root?.addEventListener("change", event => this._onProfileChange(event), listenerOptions);
+      root?.addEventListener("click", event => {
+        const tab = event.target?.closest?.("[data-design-section]");
+        if (!tab || !root.contains(tab)) return;
+        event.preventDefault();
+        const selected = tab.dataset.designSection;
+        root.querySelectorAll("[data-design-section]").forEach(item => {
+          const active = item === tab;
+          item.classList.toggle("is-active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
+        root.querySelectorAll("[data-design-section-panel]").forEach(panel => {
+          panel.hidden = panel.dataset.designSectionPanel !== selected;
+        });
+      }, listenerOptions);
       root?.addEventListener("click", event => void this._onStudioAction(event), listenerOptions);
       if (this._dirty) this._applyPreview();
     }
