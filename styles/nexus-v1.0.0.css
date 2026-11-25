@@ -2061,10 +2061,10 @@
 .nexus-appearance-rail button:hover { border-color:var(--nexus-highlight-color,#78b7e8) !important; }
 .nexus-layer-row:focus-visible,
 .nexus-layer-state:focus-visible{ outline:2px solid var(--nexus-highlight-color,#78b7e8) !important; outline-offset:1px; }
-.nexus-canvas[data-theme="light"] .nexus-component { color:#243247 !important; }
+.nexus-canvas[data-theme="light"] .nexus-component { color:var(--nexus-panel-text,#243247) !important; }
 .nexus-canvas[data-theme="light"] .nexus-component-label,
-.nexus-canvas[data-theme="light"] .nexus-sheet-element small { color:#52657a !important; }
-.nexus-canvas[data-theme="light"] .nexus-group-surface { color:#243247; }
+.nexus-canvas[data-theme="light"] .nexus-sheet-element small { color:var(--nexus-panel-muted,#52657a) !important; }
+.nexus-canvas[data-theme="light"] .nexus-group-surface { color:var(--nexus-panel-text,#243247); }
 .nexus-panel-window button[data-action],
 .nexus-floating-ui .nexus-floating-left button,
 .nexus-floating-ui .nexus-floating-right button,
@@ -2202,7 +2202,7 @@
 .nexus-layer-folder.is-hidden .nexus-layer-state[data-layer-visibility] { color: var(--nexus-panel-muted, #9aadc2); }
 .nexus-layer-folder.is-locked .nexus-layer-state[data-layer-lock] { color: var(--nexus-highlight-color, #78b7e8); }
 .nexus-canvas[data-theme="light"] .nexus-component input,
-.nexus-canvas[data-theme="light"] .nexus-sheet-element input { color: #243247 !important; background: #f5f7fa !important; border-color: #aab8c8 !important; }
+.nexus-canvas[data-theme="light"] .nexus-sheet-element input { color: var(--nexus-panel-text, #243247) !important; background: var(--nexus-panel-input, #f5f7fa) !important; border-color: var(--nexus-panel-border, #aab8c8) !important; }
 
 
 /* Aplicação do tema à estrutura externa da ficha, não apenas ao Canvas. */

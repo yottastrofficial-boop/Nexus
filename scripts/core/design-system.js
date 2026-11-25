@@ -184,7 +184,11 @@ export function installNexusDesignSystem({
   };
 
   const refresh = () => {
-    try { apply(); }
+    try {
+      apply();
+      // Open NEXUS sheets re-scope their local theme when the effective profile or policy changes.
+      hooks?.callAll?.("nexusDesignApplied");
+    }
     catch (error) { console.error("NEXUS | Não foi possível aplicar o Design System.", error); }
   };
 

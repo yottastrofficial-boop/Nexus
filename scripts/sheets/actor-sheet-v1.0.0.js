@@ -1112,6 +1112,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const appWindow = form.closest(".application, .window-app");
     appWindow?.classList.add("nexus-window");
     this.activateListeners($(form));
+    if (!this._nexusDesignHookId) {
+      // The Design System announces profile/policy changes; re-scope this sheet's theme live.
+      this._nexusDesignHookId = Hooks.on("nexusDesignApplied", () => {
+        if (this.element?.isConnected) this._syncScopedThemeSurfaces();
+      });
+    }
     if (!this._nexusActorUpdateHookId) {
       this._nexusActorUpdateHookId = Hooks.on("updateActor", (updatedActor, changes) => {
         if (updatedActor?.id !== this.actor?.id || !this.element?.isConnected) return;
@@ -2347,8 +2353,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         });
       }
     }
-    const themeTargets = [this.element?.querySelector(".nexus-sheet"), this.element?.querySelector(".nexus-appearance-drawer"), this.element?.closest(".application, .window-app"), ...panelRoots];
-    for (const target of new Set(themeTargets.filter(Boolean))) applyScopedTheme(target, layout);
+    this._syncScopedThemeSurfaces(layout);
     if (["width", "height"].includes(key)) {
       const appWidth = clamp(layout.width + 40, 800, Math.max(800, window.innerWidth - 24));
       const appHeight = clamp(Math.min(layout.height + 100, window.innerHeight - 24), 500, Math.max(500, window.innerHeight - 24));
@@ -2363,12 +2368,6 @@ export class NexusActorSheet extends NexusActorSheetBase {
       canvas.dataset.guides = String(layout.guidesEnabled);
       canvas.style.width = `${layout.width}px`; canvas.style.height = `${layout.height}px`;
       canvas.style.setProperty("--nexus-grid-size", `${layout.gridSize}px`);
-      applyScopedTheme(canvas, layout, { colors: true });
-      const appElement = this.element?.closest(".application, .window-app");
-      const panelElements = [this.element?.querySelector(".nexus-appearance-drawer"), ...(this._nexusPanelWindows?.values?.() ?? []).map(instance => instance.element)];
-      for (const target of [appElement, ...panelElements]) {
-        applyScopedTheme(target, layout, { base: false, colors: true, windowTokens: true });
-      }
       this._fitNexusCanvas?.();
     }
   }
@@ -3624,6 +3623,24 @@ if (!hasPath) propertyValueInput.value = "";
     });
   }
 
+  /**
+   * Applies or clears the sheet-local theme on every themed surface of this sheet.
+   * Local tokens are written only for customized layouts when the campaign allows them;
+   * otherwise the sheet inherits the global Design System profile.
+   */
+  _syncScopedThemeSurfaces(layout = this._currentLayout) {
+    if (!layout || !this.element) return;
+    const sheetRoot = this.element.querySelector?.(".nexus-sheet");
+    const drawer = this.element.querySelector?.(".nexus-appearance-drawer");
+    const appElement = this.element.closest?.(".application, .window-app") ?? this.element;
+    const panels = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance?.element).filter(Boolean);
+    for (const target of new Set([sheetRoot, drawer, appElement, ...panels].filter(Boolean))) applyScopedTheme(target, layout);
+    applyScopedTheme(this.element.querySelector?.(".nexus-canvas"), layout, { colors: true });
+    for (const target of new Set([appElement, drawer, ...panels].filter(Boolean))) {
+      applyScopedTheme(target, layout, { base: false, colors: true, windowTokens: true });
+    }
+  }
+
   _onClose(options) {
     this._nexusRefreshGeneration = (this._nexusRefreshGeneration ?? 0) + 1;
     this._nexusRefreshScheduled = false;
@@ -3635,6 +3652,8 @@ if (!hasPath) propertyValueInput.value = "";
     this._nexusMediaObserver?.disconnect(); this._nexusMediaObserver = null; this._queueNexusMediaSource = null;
     this._refreshRichExpressions = null;
     if (this._nexusActorUpdateHookId) Hooks.off("updateActor", this._nexusActorUpdateHookId);
+    if (this._nexusDesignHookId) Hooks.off("nexusDesignApplied", this._nexusDesignHookId);
+    this._nexusDesignHookId = null;
     this._nexusActorUpdateHookId = null;
     if (this._nexusInspectorNamespace) $(document).off(this._nexusInspectorNamespace);
     document.querySelectorAll("[data-nexus-property-owner]").forEach(list => {
