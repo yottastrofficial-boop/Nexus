@@ -3562,6 +3562,9 @@ if (!hasPath) propertyValueInput.value = "";
       const panel = [...(drawer?.querySelectorAll("[data-tool-panel]") ?? [])]
         .find(item => item.dataset.toolPanel === String(key));
       if (!panel || this._mode !== "appearance") return false;
+      const editorWasOpen = [...this._openAppearancePanels].some(name => ["component", "behavior"].includes(name));
+      const nextIsEditor = ["component", "behavior"].includes(String(key));
+      if (editorWasOpen && !nextIsEditor && this.element?.isConnected) this._setSelection?.($(this.element), []);
       root.querySelectorAll("[data-appearance-panel]").forEach(button => {
         const active = button.dataset.appearancePanel === String(key);
         button.classList.toggle("active", active);
@@ -3581,6 +3584,8 @@ if (!hasPath) propertyValueInput.value = "";
       const initial = root.querySelector('.nexus-appearance-rail [data-appearance-panel].active')?.dataset.appearancePanel ?? "style";
       if (!setActivePanel(initial)) setActivePanel("style");
     } else {
+      const editorWasOpen = [...this._openAppearancePanels].some(name => ["component", "behavior"].includes(name));
+      if (editorWasOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
       drawer?.querySelectorAll("[data-tool-panel]").forEach(panel => {
         panel.hidden = true;
         panel.classList.remove("active");

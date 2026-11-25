@@ -12,6 +12,7 @@ const legacyStyles = read("../styles/nexus-v1.0.0.css");
 
 test("character-sheet editing stays in the native sheet sidebars", () => {
   assert.match(sheet, /_mountInlineEditorPanels/);
+  assert.match(sheet, /this\._setSelection\?\.\(\$\(this\.element\), \[\]\)/);
   assert.doesNotMatch(sheet, /_mountFloatingUI|NexusPanelWindow|data-nexus-floating-for|nexus-floating/);
   assert.doesNotMatch(listeners, /_mountFloatingUI|data-nexus-floating-for|data-floating-panel|_nexusPanelWindows/);
   assert.doesNotMatch(canvas, /data-nexus-floating-for|data-floating-panel|nexus-floating/);
