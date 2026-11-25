@@ -22,12 +22,12 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (atualização 1.0.0.106)
+## Estado de referência — 2026-11-25 (pós-release 1.0.0.106)
 
 - **Versão de código:** `1.0.0.106`; correção dos seletores nativos `.tab.sidebar-tab` do sidebar V14, destinada à validação no Foundry.
 - **Manifesto de distribuição:** será sincronizado para `1.0.0.106` somente após aprovação do CI, geração do ZIP e confirmação do asset.
 - **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente; a release de distribuição não promove o checkpoint funcional, que permanece em `1.0.0.70`.
-- **Distribuição:** `manifest.json` é o único endereço de instalação/atualização e só será sincronizado com `1.0.0.106` após a confirmação do pacote correspondente.
+- **Distribuição:** `manifest.json` aponta para `1.0.0.106`; nenhuma nova versão deve ser publicada antes de corrigir e validar o sidebar no Foundry real.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.
 - **Ambiente-alvo:** Foundry VTT 14, build 360.
@@ -54,7 +54,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 
 ## Estabilidade funcional
 
-A publicação de uma release estável não equivale a checkpoint funcional. A promoção do checkpoint depende da execução e do registro dos testes no Foundry VTT 14 build 360, conforme os critérios desta política.
+A publicação de uma release estável não equivale a checkpoint funcional. A evidência visual enviada após a instalação da 1.0.0.106 confirma que o sidebar permanece defeituoso. A promoção do checkpoint depende da execução e do registro dos testes no Foundry VTT 14 build 360, conforme os critérios desta política.
 
 ## O que é preservado
 
