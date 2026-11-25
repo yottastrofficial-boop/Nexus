@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
+const legacyStyles = readFileSync(new URL("../styles/nexus-v1.0.0.css", import.meta.url), "utf8");
 const sheet = readFileSync(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
@@ -64,3 +65,23 @@ assert.match(designSystem, /\.nexus-sheet \.nexus-appearance-drawer[\s\S]*?backg
   "Appearance tools must use the inline drawer instead of detached floating windows.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");
+
+
+const groupSelectionRules = [...legacyStyles.matchAll(/[^{}]*\.nexus-group-surface\.is-selected[^{}]*\{[^{}]*\}/g)].map(match => match[0]);
+assert.ok(groupSelectionRules.length >= 5, "Group selection must remain explicitly styled across its supported sheet states.");
+for (const rule of groupSelectionRules) {
+  const outlineDeclarations = rule.match(/outline(?:-color)?\s*:[^;]+;/gi) ?? [];
+  for (const declaration of outlineDeclarations) {
+    assert.match(declaration, /var\(--nexus-highlight-color/i,
+      "Selected groups must use the active semantic highlight token instead of a fixed or unrelated color.");
+  }
+}
+
+const groupInspectionRules = [...legacyStyles.matchAll(/[^{}]*\.nexus-component\.is-group-inspecting[^{}]*\{[^{}]*\}/g)].map(match => match[0]);
+assert.ok(groupInspectionRules.length >= 2, "Group inspection must retain its visual state in the sheet.");
+for (const rule of groupInspectionRules) {
+  assert.match(rule, /var\(--nexus-highlight-color/i,
+    "Group inspection must use the active semantic highlight token.");
+  assert.doesNotMatch(rule, /var\(--nexus-accent-color/i,
+    "Group inspection must not diverge from the dedicated highlight color.");
+}

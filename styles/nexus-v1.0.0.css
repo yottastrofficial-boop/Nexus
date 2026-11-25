@@ -120,7 +120,7 @@
 
 .nexus-component.is-group-inspecting { border-color:var(--nexus-highlight-color,#78b7e8) !important; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 40%,transparent),0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 35%,transparent) !important; background:color-mix(in srgb,var(--nexus-card-color,#273443) 88%,var(--nexus-highlight-color,#78b7e8) 12%) !important; }
 .nexus-group-surface { box-sizing:border-box; }
-.nexus-group-surface.is-selected { outline:2px solid #b2cbed; outline-offset:3px; }
+.nexus-group-surface.is-selected { outline:2px solid var(--nexus-highlight-color,#78b7e8); outline-offset:3px; }
 .nexus-sheet[data-mode="appearance"] .nexus-canvas-stage { width:100%; }
 
 
@@ -148,7 +148,7 @@
 .nexus-sheet input[type="checkbox"],.nexus-sheet input[type="radio"] { accent-color:var(--nexus-accent-color,#52647b) !important; }
 .nexus-layout-tab.active,.nexus-floating-left-rail button.active { border-color:var(--nexus-accent-color,#52647b) !important; box-shadow:inset 0 0 0 1px var(--nexus-accent-color,#52647b) !important; }
 .nexus-component.is-selected { outline:2px solid var(--nexus-accent-color,#a9c9ef) !important; box-shadow:0 0 0 2px color-mix(in srgb,var(--nexus-accent-color,#a9c9ef) 28%,transparent) !important; }
-.nexus-group-surface.is-selected { outline-color:var(--nexus-accent-color,#a9c9ef) !important; }
+.nexus-group-surface.is-selected { outline-color:var(--nexus-highlight-color,#78b7e8) !important; }
 .nexus-layer-controls { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
 .nexus-layer-controls button { min-width:0; padding:6px 4px; border:1px solid #43546a; border-radius:5px; color:#dce6f2; background:#263344; cursor:pointer; font-size:10px; }
 .nexus-tool-panel input:focus,.nexus-sheet input:focus { outline:1px solid var(--nexus-accent-color,#52647b) !important; box-shadow:0 0 0 2px color-mix(in srgb,var(--nexus-accent-color,#52647b) 24%,transparent) !important; }
@@ -170,7 +170,7 @@
 
 /* v0.8 — seleção não altera a pilha; o contorno respeita a camada real. */
 .nexus-component { z-index:var(--nexus-layer,1); }
-.nexus-component.is-group-inspecting { outline:1px dashed var(--nexus-accent-color,#9fc1e8); outline-offset:1px; }
+.nexus-component.is-group-inspecting { outline:1px dashed var(--nexus-highlight-color,#78b7e8); outline-offset:1px; }
 .nexus-layer-list button.active { border-color:var(--nexus-accent-color,#52647b); background:#344b65; }
 
 /* v0.9 — integração visual do chrome Foundry e editor responsivo */
@@ -267,8 +267,8 @@
 }
 .nexus-component.is-selected,
 .nexus-group-surface.is-selected {
-  outline-color: var(--nexus-accent-color) !important;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nexus-accent-color) 28%, transparent) !important;
+  outline-color: var(--nexus-highlight-color) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nexus-highlight-color) 28%, transparent) !important;
 }
 
 
@@ -1607,7 +1607,7 @@
   box-shadow:none !important;
 }
 .nexus-group-surface.is-selected {
-  outline:2px solid #9dbbe0 !important;
+  outline:2px solid var(--nexus-highlight-color,#78b7e8) !important;
   outline-offset:2px !important;
 }
 .nexus-component.is-group-member,
