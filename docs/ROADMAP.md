@@ -9,6 +9,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
 - Versão distribuída: `1.0.0.106` (release, ZIP e manifesto confirmados).
+- Build para teste manual: `1.0.0.107`; a suíte automatizada e o empacotamento passaram no commit `d7a1263c4eebe2893a932570cfd27036d22e3670`. A publicação estável ainda depende da execução do workflow de release e da confirmação do asset; o teste visual/funcional no Foundry 14 build 360 continua manual.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
 - A correção de CSS foi integrada e passou CI/empacotamento, mas o layout horizontal ainda não foi validado no cliente real. Não iniciar nova release antes de executar o diagnóstico e confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
