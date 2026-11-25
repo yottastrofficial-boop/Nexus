@@ -1383,11 +1383,20 @@ html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"
 /* Panels fill the remaining area. Do not set display/visibility: Foundry's
    tab controller is the single authority for which panel is active. */
 html.nexus-design-system #sidebar-content,
-html.nexus-design-system #sidebar .sidebar-content,
 html.nexus-design-system #sidebar > .tab.sidebar-tab,
-html.nexus-design-system #sidebar > .sidebar-tab.tab,
-html.nexus-design-system #sidebar .tab.sidebar-tab {
+html.nexus-design-system #sidebar > .sidebar-tab.tab {
   order: 1 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html.nexus-design-system #sidebar-content > .tab.sidebar-tab,
+html.nexus-design-system #sidebar-content > .sidebar-tab.tab,
+html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab,
+html.nexus-design-system #sidebar .sidebar-content > .sidebar-tab.tab {
   flex: 1 1 0 !important;
   min-width: 0 !important;
   min-height: 0 !important;
@@ -1404,14 +1413,18 @@ html.nexus-design-system #sidebar .sidebar-content {
   overscroll-behavior: contain;
 }
 
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
+html.nexus-design-system #sidebar > .tab.sidebar-tab.nexus-themed-application,
+html.nexus-design-system #sidebar-content > .tab.sidebar-tab.nexus-themed-application,
+html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab.nexus-themed-application {
   min-width: 0 !important;
   min-height: 0 !important;
   max-width: 100% !important;
   border-radius: 0;
 }
 
-html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
+html.nexus-design-system #sidebar > .tab.sidebar-tab.nexus-themed-application.active,
+html.nexus-design-system #sidebar-content > .tab.sidebar-tab.nexus-themed-application.active,
+html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab.nexus-themed-application.active {
   color: var(--nexus-foundry-sidebar-text, var(--nexus-ui-text));
   background: var(--nexus-foundry-application-bg, var(--nexus-ui-surface));
   border-color: var(--nexus-foundry-application-border, var(--nexus-ui-border));
