@@ -9,8 +9,8 @@ const libraryApplication = readFileSync(new URL("../scripts/library/library-appl
 
 assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The global design system must load after legacy and library styles.");
-assert.match(designSystem, /backdrop-filter:\s*none\s*!important/,
-  "Floating controls must not use the glass effect.");
+assert.doesNotMatch(designSystem, /backdrop-filter:\s*blur/i,
+  "The minimalist Design System must not apply a glass effect to interface surfaces.");
 assert.match(designSystem, /text-shadow:\s*none\s*!important/,
   "The default NEXUS surfaces must not add text shadows.");
 assert.doesNotMatch(designSystem, /:is\(#controls, #ui-left, #ui-top\)\s*:is\(\.ui-control, \.control-tool\)/,
