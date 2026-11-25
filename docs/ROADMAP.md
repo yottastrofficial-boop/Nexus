@@ -92,3 +92,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Correção: transformar o `menu.flexcol` real em faixa flex horizontal com quebra de linha e dimensionar seus `li` e botões descendentes. Sem alterar handlers, ordem DOM, controlador de abas ou painéis.
 - Adicionado contrato de regressão para a hierarquia real observada.
 - A correção permanece sujeita a teste manual no Foundry VTT 14; não declarar validação visual concluída.
+
+
+## Atualização 1.0.0.110 — correção estrutural da sidebar V14
+
+- Diagnóstico do DOM real recebido: `#sidebar-tabs` já era horizontal, mas `menu.flexcol` interno empilhava os controles e os seletores anteriores não alcançavam os botões aninhados em `li`.
+- PR #98 integrada: o menu real agora é faixa horizontal com quebra de linha; `li` e botões recebem dimensões consistentes sem alterar a estrutura ou os handlers nativos.
+- A correção dos glifos Font Awesome da 1.0.0.109 permanece incluída.
+- CI e testes de contrato aprovados na PR; validação visual manual no Foundry VTT 14 ainda pendente.
