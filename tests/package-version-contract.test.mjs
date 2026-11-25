@@ -17,9 +17,9 @@ const compareCore = (left, right) => {
 };
 
 const coreOrder = compareCore(system.version, stable.version);
-assert.ok(coreOrder > 0 || (coreOrder === 0 && /^\\d+\\.\\d+\\.\\d+\\.\\d+-rc\\.[1-9]\\d*$/.test(stable.version)),
+assert.ok(coreOrder > 0 || (coreOrder === 0 && /^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(stable.version)),
   "The development base must be newer than the installed manifest, or the manifest must be a candidate of that same base.");
-assert.match(system.download, /\\/releases\\/download\\/v[^/]+\\/nexus\\.zip$/,
+assert.match(system.download, /\/releases\/download\/v[^/]+\/nexus\.zip$/,
   "The development system metadata must retain a valid published package URL.");
 assert.equal(system.manifest, "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json",
   "The system metadata must use the original main manifest.");
