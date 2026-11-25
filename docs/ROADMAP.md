@@ -74,3 +74,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - A causa identificada foi a regra global de tipografia para controles (body :is(button, input, select, textarea) { font-family: inherit; }), que sobrescrevia a fonte do botão e, por herança, convertia os glifos Font Awesome em quadrados.
 - Correção proposta: manter a tipografia de perfil nos controles comuns, excluindo controles que carregam classes Font Awesome diretamente. O controlador de abas e o layout nativo não são alterados.
 - A navegação ainda aparece vertical na captura; essa parte requer inspeção do contêiner de navegação e da cascata computada antes de qualquer novo ajuste estrutural. Não considerar o layout visual concluído.
+
+
+## Atualização 1.0.0.109 — correção de fonte dos ícones
+
+- Diagnóstico baseado na captura real do usuário: os botões de abas têm classes Font Awesome no próprio BUTTON, mas o estilo computado aplicava Inter ao botão e ao pseudo-elemento ::before.
+- A regra global de tipografia dos controles aplicava font-family: inherit a todos os botões. A correção exclui as classes Font Awesome, preservando a fonte nativa dos glifos.
+- PR #97 integrada; CI de validação de pacote passou.
+- A correção dos ícones não resolve, por si só, a orientação vertical da navegação. Falta a geometria/estilos computados do contêiner #sidebar-tabs e seus ancestrais. Manter essa parte como pendente e não presumir seletores.
