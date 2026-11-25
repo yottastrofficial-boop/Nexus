@@ -5,6 +5,8 @@
  */
 
 html.nexus-design-system {
+  --nexus-ui-control-size: clamp(30px, var(--nexus-control-height, 34px), 44px);
+  --nexus-ui-control-gap: clamp(4px, var(--nexus-space-2, 8px), 12px);
   --nexus-ui-surface: var(--nexus-panel-surface, #202d3d);
   --nexus-ui-surface-raised: var(--nexus-panel-card, #26384b);
   --nexus-ui-surface-hover: var(--nexus-panel-hover, #30465d);
