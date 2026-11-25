@@ -8,10 +8,10 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão distribuída: `1.0.0.106` (release, ZIP e manifesto confirmados).
-- Build para teste manual: `1.0.0.107`; a suíte automatizada e o empacotamento passaram no commit `d7a1263c4eebe2893a932570cfd27036d22e3670`. A publicação estável ainda depende da execução do workflow de release e da confirmação do asset; o teste visual/funcional no Foundry 14 build 360 continua manual.
+- Versão distribuída: `1.0.0.107` (release, ZIP e manifesto confirmados).
+- Teste manual: `1.0.0.107` foi publicada após CI, empacotamento, verificação do asset `nexus.zip` e sincronização do manifesto. O layout visual e a troca de abas ainda aguardam conferência do mantenedor no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
-- A correção de CSS foi integrada e passou CI/empacotamento, mas o layout horizontal ainda não foi validado no cliente real. Não iniciar nova release antes de executar o diagnóstico e confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
+- A revisão CSS está distribuída na `1.0.0.107` para validação manual. Não declarar o sidebar funcionalmente concluído até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
@@ -37,4 +37,4 @@ A pedido do usuário, esta rodada não utiliza Playwright nem exige diagnóstico
 
 ## Atualização 1.0.0.107 — pacote para teste manual
 
-A branch `main` prepara a versão `1.0.0.107` para que o mantenedor valide no Foundry VTT 14 build 360 a correção do sidebar integrada no commit `417acb4f663ba328e30f28db70ab976af0f18669`. O objetivo do teste é confirmar a navegação horizontal, os glifos nativos, a troca de abas e a exibição dos painéis. Não foi executado Playwright nem teste de navegador. A publicação do pacote não altera o estado de validação: o sidebar só será considerado concluído após confirmação manual no cliente real.
+A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmado e manifesto sincronizado. Ela contém a revisão do sidebar integrada no commit `417acb4f663ba328e30f28db70ab976af0f18669`, além dos ajustes de estilo e dos contratos de regressão desta etapa. O objetivo do teste manual é confirmar a navegação horizontal, os glifos nativos, a troca de abas e a exibição dos painéis. Não foi executado Playwright nem teste de navegador. A publicação do pacote não altera o estado de validação: o sidebar só será considerado concluído após confirmação manual no cliente real.
