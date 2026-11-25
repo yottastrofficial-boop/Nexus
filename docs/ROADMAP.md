@@ -108,3 +108,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Correção: aplicar largura total e remover `max-width` dos elementos reais `.chat-log`, `.chat-controls` e `.chat-form`; ajustar cartões com espaçamento mais compacto e sem sombra excessiva.
 - Não alterar o controlador de abas, mensagens, handlers nem a margem nativa do contêiner até confirmar sua origem por estilo computado.
 - Testes de contrato cobrem a estrutura real; validação visual final ainda depende do usuário no Foundry VTT 14.
+
+
+## Atualização 1.0.0.111 — chat lateral compacto
+
+- Diagnóstico DOM: sidebar, #sidebar-content e #chat têm 540 px, enquanto OL.chat-log e FORM.chat-form ficam em 300 px.
+- As regras antigas de cartões usavam #chat-log, elemento que não existe na estrutura observada; o histórico real usa .chat-log.
+- PR #99 ajusta o CSS para os elementos reais, expande histórico/controles/compositor e reduz espaçamentos dos cartões.
+- CI e contratos de regressão aprovados. Teste visual manual no Foundry VTT 14 build 360 ainda pendente.
