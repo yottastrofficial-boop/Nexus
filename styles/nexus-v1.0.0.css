@@ -8761,14 +8761,7 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   font-size: var(--nexus-font-size, 13px);
 }
 
-/* Do not assign the profile typography to native sidebar tab controls.
-   Some Foundry tabs render their icon through an inherited/pseudo-element
-   font; overriding the tab's family turns Font Awesome glyphs into squares. */
-html.nexus-design-system #sidebar .sidebar-tabs,
-html.nexus-design-system #sidebar .sidebar-tab,
-html.nexus-design-system #sidebar .sidebar-tab::before {
-  font-family: revert;
-}
+/* Native sidebar tab/icon typography is intentionally left to Foundry and Font Awesome. */
 html.nexus-design-system #sidebar .sidebar-tabs > .item {
   color: var(--nexus-foundry-sidebar-muted);
   border-color: transparent;
