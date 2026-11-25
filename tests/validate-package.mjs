@@ -449,7 +449,8 @@ assert.match(sheet, /restoreScrollState\(element, state.scroll\)/, "A rolagem da
 assert.match(sheetCode, /buildPropertyPickerCatalog/);
 assert.match(sheetCode, /renderPropertyPicker/);
 assert.match(sheetCode, /activateCanvasInteractions/);
-assert.match(sheet, /await import\("\.\/library-view\.js"\)/, "A Biblioteca deve carregar seu módulo somente quando aberta");
+assert.match(sheetListeners, /game\.nexus\?\.library\?\.open/, "A ficha deve abrir a Biblioteca Universal pelo serviço global");
+assert.doesNotMatch(sheet, /library-view\.js|mountLibraryView|_mountLibrary/, "A ficha não deve carregar o adaptador legado");
 assert.ok(sheet.length < 300000, "A ficha principal deve permanecer como fachada modular, não como arquivo monolítico");
 assert.doesNotMatch(sheetCode, /data-property-list-expand|propertyListExpand/, "O controle antigo de expandir/reduzir deve ser removido");
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
