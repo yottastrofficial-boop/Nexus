@@ -7,21 +7,6 @@ on:
       - main
       - "fix/**"
       - "feature/**"
-  workflow_dispatch:
-    inputs:
-      release_channel:
-        description: "Ação manual: validar ou publicar uma versão candidata."
-        required: true
-        type: choice
-        options:
-          - validate
-          - candidate
-        default: validate
-      candidate_version:
-        description: "Versão candidata no formato 1.0.0.97-rc.1 (obrigatória para candidate)."
-        required: false
-        type: string
-
 permissions:
   contents: read
 
@@ -45,8 +30,6 @@ jobs:
       - name: Resolve release channel and package version
         id: version
         env:
-          RELEASE_CHANNEL_INPUT: ${{ inputs.release_channel }}
-          CANDIDATE_VERSION_INPUT: ${{ inputs.candidate_version }}
         run: |
           node <<'NODE'
           const fs = require("node:fs");
@@ -59,45 +42,6 @@ jobs:
 
           const commitMessage = event.head_commit?.message ?? "";
           const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;
-          const candidateMarker = /(?:^|\s)\[candidate\](?=$|\s)/m;
-          if (eventName === "push" && ref === "refs/heads/main" && stableMarker.test(commitMessage)) {
-            channel = "stable";
-          }
-          if (eventName === "push" && ref === "refs/heads/main" && candidateMarker.test(commitMessage)) {
-            const { execFileSync } = require("node:child_process");
-            const tagPrefix = `v${system.version}-rc.`;
-            const remoteTags = execFileSync("git", ["ls-remote", "--tags", "origin", `refs/tags/${tagPrefix}*`], { encoding: "utf8" });
-            const existingNumbers = [...remoteTags.matchAll(/refs\/tags\/v\d+\.\d+\.\d+\.\d+-rc\.(\d+)(?:\\^\\{\\})?$/gm)]
-              .map(match => Number(match[1]))
-              .filter(Number.isSafeInteger);
-            const nextCandidate = Math.max(0, ...existingNumbers) + 1;
-            version = `${system.version}-rc.${nextCandidate}`;
-            channel = "candidate";
-          }
-
-          if (eventName === "workflow_dispatch" && process.env.RELEASE_CHANNEL_INPUT === "candidate") {
-            if (ref !== "refs/heads/main") throw new Error("Versões candidatas só podem ser geradas a partir da main.");
-            const candidate = process.env.CANDIDATE_VERSION_INPUT ?? "";
-            if (!/^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(candidate)) {
-              throw new Error("Versão candidata inválida. Use o formato 1.0.0.97-rc.1.");
-            }
-            const proposedBase = candidate.split("-")[0];
-            const core = value => value.split(".").map(Number);
-            const current = core(system.version);
-            const proposed = core(proposedBase);
-            const comparison = proposed.findIndex((part, index) => part !== current[index]);
-            const sameBase = proposedBase === system.version;
-            if (!sameBase && (comparison === -1 || proposed[comparison] <= current[comparison])) {
-              throw new Error(`A candidata deve usar a versão base atual (${system.version}) ou avançar para uma versão superior.`);
-            }
-            version = candidate;
-            channel = "candidate";
-          }
-
-          if (eventName === "workflow_dispatch" && process.env.RELEASE_CHANNEL_INPUT === "candidate" && channel !== "candidate") {
-            throw new Error("Não foi possível habilitar o canal de candidata.");
-          }
-
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `value=${version}\nchannel=${channel}\nprevious=${system.version}\n`);
           console.log(`Canal: ${channel}; pacote: ${version}`);
           NODE
@@ -105,39 +49,6 @@ jobs:
       - name: Validate manifest, templates, styles and regressions
         run: |
           node tests/run-all.mjs
-
-      - name: Apply candidate version to package metadata
-        if: steps.version.outputs.channel == 'candidate'
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.value }}
-          PREVIOUS_VERSION: ${{ steps.version.outputs.previous }}
-        run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const version = process.env.RELEASE_VERSION;
-          const previous = process.env.PREVIOUS_VERSION;
-          const system = JSON.parse(fs.readFileSync("system.json", "utf8"));
-          if (system.version !== previous) throw new Error("A versão base mudou durante o empacotamento.");
-          const manifestUrl = "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json";
-          const downloadUrl = `https://github.com/yottastrofficial-boop/Nexus/releases/download/v${version}/nexus.zip`;
-          system.version = version;
-          system.manifest = manifestUrl;
-          system.download = downloadUrl;
-          if (system.manifest !== manifestUrl || system.download !== downloadUrl) {
-            throw new Error("Os endereços do manifesto candidato não foram sincronizados.");
-          }
-          fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\n");
-
-          const readme = fs.readFileSync("README.md", "utf8");
-          const readmeVersion = `Versão ${previous}`;
-          if (!readme.includes(readmeVersion)) throw new Error("A versão do README não corresponde à versão base.");
-          fs.writeFileSync("README.md", readme.replace(readmeVersion, `Versão ${version}`));
-
-          const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
-          if (!changelog.startsWith(`## ${previous}`)) throw new Error("O CHANGELOG não começa pela versão base esperada.");
-          const notes = `## ${version} — Release candidata\n\n- Build candidata gerada a partir da main para validação no Foundry VTT 14 build 360.\n- Inclui as alterações integradas após a última release estável.\n- O pacote candidato utiliza o manifesto original da main e aponta para seu próprio ZIP publicado.\n\n`;
-          fs.writeFileSync("CHANGELOG.md", notes + changelog);
-          NODE
 
       - name: Build Foundry package
         run: |
@@ -153,8 +64,8 @@ jobs:
           retention-days: 14
 
   release:
-    # Estável: push na main com [release] exato. Candidata: dispatch manual a partir da main.
-    if: needs.validate.outputs.channel == 'stable' || needs.validate.outputs.channel == 'candidate'
+    # Publicação estável: push na main com [release] exato.
+    if: needs.validate.outputs.channel == 'stable'
     needs: validate
     runs-on: ubuntu-latest
     permissions:
@@ -206,9 +117,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.validate.outputs.version }}
-          name: NEXUS ${{ needs.validate.outputs.version }}${{ needs.validate.outputs.channel == 'candidate' && ' (candidato)' || '' }}
+          name: NEXUS ${{ needs.validate.outputs.version }}
           generate_release_notes: true
-          prerelease: ${{ needs.validate.outputs.channel == 'candidate' }}
           make_latest: ${{ needs.validate.outputs.channel == 'stable' && 'true' || 'false' }}
           fail_on_unmatched_files: true
           overwrite_files: false
@@ -229,46 +139,6 @@ jobs:
           done
           echo "::error::The release asset nexus.zip was not confirmed as uploaded."
           exit 1
-
-      - name: Publish Foundry manifest.json for candidate after the package is available
-        if: needs.validate.outputs.channel == 'candidate'
-        uses: actions/github-script@v7
-        env:
-          RELEASE_VERSION: ${{ needs.validate.outputs.version }}
-        with:
-          script: |
-            const version = process.env.RELEASE_VERSION;
-            const manifestUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/main/manifest.json`;
-            const downloadUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/releases/download/v${version}/nexus.zip`;
-            const metadata = JSON.parse(require("node:fs").readFileSync("system.json", "utf8"));
-            metadata.version = version;
-            metadata.manifest = manifestUrl;
-            metadata.download = downloadUrl;
-            const content = JSON.stringify(metadata, null, 2) + "\n";
-            let sha;
-            try {
-              const current = await github.rest.repos.getContent({
-                owner: context.repo.owner, repo: context.repo.repo,
-                path: "manifest.json", ref: "main"
-              });
-              const currentText = Buffer.from(current.data.content, "base64").toString("utf8");
-              if (currentText === content) {
-                core.info("Main manifest already matches the verified candidate release.");
-                return;
-              }
-              sha = current.data.sha;
-            } catch (error) {
-              if (error.status !== 404) throw error;
-            }
-            await github.rest.repos.createOrUpdateFileContents({
-              owner: context.repo.owner, repo: context.repo.repo,
-              path: "manifest.json",
-              message: `[manifest] Atualiza manifest.json para NEXUS ${version}`,
-              content: Buffer.from(content, "utf8").toString("base64"),
-              ...(sha ? { sha } : {}),
-              branch: "main"
-            });
-            core.info(`Candidate manifest synchronized to NEXUS ${version}.`);
 
       - name: Publish stable Foundry manifest after the package is available
         if: needs.validate.outputs.channel == 'stable'
