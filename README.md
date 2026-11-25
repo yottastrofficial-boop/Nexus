@@ -46,10 +46,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Build atual da main | 1.0.0.96 |
+| Build atual da main | 1.0.0.97 (desenvolvimento) |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A build 1.0.0.96 consolida a integração da aparência nativa do Foundry e a geometria responsiva dos controles. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A release estável 1.0.0.96 consolida a integração da aparência nativa; a main 1.0.0.97 acrescenta refinamentos do Design System e da Biblioteca Universal ainda não publicados. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A última release estável publicada continua sendo **1.0.0.95**; a build de desenvolvimento atual da `main` é **1.0.0.96**. O ZIP da build .96 será produzido pelo CI; a validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A última release estável publicada é **1.0.0.96**; a build de desenvolvimento atual da `main` é **1.0.0.97**. A validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
