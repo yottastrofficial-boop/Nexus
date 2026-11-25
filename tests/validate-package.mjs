@@ -1028,8 +1028,8 @@ assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportame
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
 assert.match(template, /data-appearance-panel="behavior"/, "A navegação interna deve abrir o painel Comportamento");
 assert.match(template, /data-appearance-panel="settings"/, "A navegação interna deve abrir o painel Configurações");
-assert.match(sheetCode, /this\._openInlineEditorPanel/, "A ficha deve alternar os painéis pelo drawer interno");
-assert.match(css, /\.nexus-sheet\[data-mode="appearance"\] \.nexus-workspace\s*\{[^}]*grid-template-columns:\s*286px/, "O drawer interno deve manter a largura de trabalho dentro da ficha");
+assert.match(sheetCode, /this\._openFloatingPanel/, "A seleção deve ativar o painel flutuante de propriedades");
+assert.match(css, /\.nexus-sheet\[data-mode="appearance"\] \.nexus-workspace\.nexus-workspace-clean[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/, "A ficha deve recuperar toda a largura após remover as barras laterais internas");
 assert.match(sheetCode, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheetCode, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
@@ -1279,7 +1279,7 @@ for (const panel of ["settings", "style", "component", "layers", "aliases", "beh
   assert.ok(template.includes(`data-appearance-panel="${panel}"`), `The inline rail must expose the ${panel} panel`);
   assert.ok(template.includes(`data-tool-panel="${panel}"`), `The inline drawer must contain the ${panel} panel`);
 }
-assert.ok(sheetCode.includes("this._openInlineEditorPanel"), "Painéis devem alternar dentro do drawer interno");
+assert.ok(sheetCode.includes("_mountFloatingUI") && sheetCode.includes("NexusPanelWindow"), "Painéis devem abrir em janelas flutuantes independentes");
 assert.match(libraryApplication, /position: \{ width: 1180, height: 760 \}/, "A Biblioteca Universal deve manter uma janela independente dimensionada para o Explorer");
 assert.ok(template.includes('data-appearance-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(template.includes('data-appearance-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
