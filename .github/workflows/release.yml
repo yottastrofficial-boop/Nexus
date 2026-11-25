@@ -29,7 +29,6 @@ jobs:
 
       - name: Resolve release channel and package version
         id: version
-        env:
         run: |
           node <<'NODE'
           const fs = require("node:fs");
@@ -42,6 +41,9 @@ jobs:
 
           const commitMessage = event.head_commit?.message ?? "";
           const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;
+          if (eventName === "push" && ref === "refs/heads/main" && stableMarker.test(commitMessage)) {
+            channel = "stable";
+          }
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `value=${version}\nchannel=${channel}\nprevious=${system.version}\n`);
           console.log(`Canal: ${channel}; pacote: ${version}`);
           NODE
