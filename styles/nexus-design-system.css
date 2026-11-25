@@ -1400,6 +1400,12 @@ html.nexus-design-system #sidebar :is(
   }
 }
 
+html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible,
+html.nexus-design-system #sidebar .tab.sidebar-tab:focus-visible {
+  outline: 2px solid var(--nexus-ui-accent);
+  outline-offset: 2px;
+}
+
 /* Specialized ApplicationV2 sidebar tab panels.
    Keep their content sizing here; the Universal Library must not own sidebar layout. */
 html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application {
