@@ -1,3 +1,13 @@
+## 1.0.0.111 — Chat lateral de largura completa e visual compacto
+
+- Corrige os seletores para o DOM real do Foundry VTT 14: o histórico é OL.chat-log, sem o ID #chat-log usado por regras antigas.
+- Faz histórico, controles e formulário de mensagem ocuparem a largura disponível da sidebar, removendo a restrição estreita de 300 px.
+- Compacta espaçamentos, cabeçalhos e conteúdo dos cartões para uma apresentação mais densa e integrada, inspirada na ergonomia de temas compactos.
+- Mantém o controlador nativo de abas, os handlers, a estrutura de mensagens e os dados persistidos.
+- Adiciona testes de contrato para os seletores e dimensões do DOM real.
+- **Teste manual pendente:** conferir largura, quebra de conteúdo, rolagem, controles e composição de mensagem no Foundry VTT 14 build 360.
+- Sem alterações em regras de RPG, schemas ou dados persistidos.
+
 ## 1.0.0.110 — Correção da estrutura real da navegação lateral
 
 - Corrige a navegação da sidebar no DOM real do Foundry VTT 14: transforma `#sidebar-tabs > menu.flexcol` em faixa horizontal com quebra de linha.
