@@ -2,22 +2,20 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const libraryView = await readFile(new URL("../scripts/sheets/library-view.js", import.meta.url), "utf8");
+const sheetTemplate = await readFile(new URL("../templates/actors/actor-sheet.hbs", import.meta.url), "utf8");
+const sheetListeners = await readFile(new URL("../scripts/sheets/actor-sheet-listeners.js", import.meta.url), "utf8");
+const sheetController = await readFile(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
+const libraryApplication = await readFile(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 
-test("sheet Library only inserts media that passes the safe image-source resolver", () => {
-  assert.match(libraryView, /getLibraryMediaInsertionSource/);
-  assert.match(libraryView, /reference\.collection === "media" && Boolean\(getLibraryMediaInsertionSource\(resource, resolved\)\)/);
-  assert.match(libraryView, /return sheet\._addComponent\("asset-image", \{ template: \{ dataPath: source \} \}\);/);
+test("character sheet opens the shared Universal Library", () => {
+  assert.match(sheetTemplate, /data-open-nexus-library/);
+  assert.match(sheetListeners, /game\.nexus\?\.library\?\.open/);
+  assert.match(sheetListeners, /source: "actor-sheet"/);
+  assert.match(libraryApplication, /id: "nexus-library"/);
 });
 
-test("sheet Library can apply built-in theme presets", () => {
-  assert.match(libraryView, /reference\.builtin === "theme"/);
-  assert.match(libraryView, /sheet\._applyThemePreset\?\.\(resolved\?\.id\)/);
-});
-
-test("reusable component definition updates guard stale versions and preserve concurrent edits", () => {
-  assert.match(libraryView, /updateNexusLibraryCollection\(game\.user, "components", entries => \{/);
-  assert.match(libraryView, /currentVersion !== Math\.max\(1, Number\(definition\.version\) \|\| 1\)/);
-  assert.match(libraryView, /JSON\.stringify\(latestComponent\) !== JSON\.stringify\(selectedComponentSnapshot\)/);
-  assert.match(libraryView, /instância selecionada mudou durante a operação e foi preservada/);
+test("character sheet no longer mounts the legacy embedded library", () => {
+  assert.doesNotMatch(sheetTemplate, /nexus-library-panel|data-tool-panel="library"/);
+  assert.doesNotMatch(sheetListeners, /mountLibraryView|nexus-library-panel/);
+  assert.doesNotMatch(sheetController, /_mountLibrary\(/);
 });
