@@ -23,7 +23,7 @@ assert.match(sidebar, /#sidebar-content[\s\S]*?flex:\s*1 1 0\s*!important;/,
   "The panel area must consume the remaining sidebar height.");
 const panelRules = sidebar.slice(sidebar.indexOf("/* Panels fill the remaining area."));
 assert.ok(panelRules.length > 0, "The native panel sizing rules must exist.");
-assert.doesNotMatch(panelRules, /(?:display|visibility):\\s*(?:none|hidden)\\s*!important/i,
+assert.doesNotMatch(panelRules, /(?:display|visibility):\s*(?:none|hidden)\s*!important/i,
   "The stylesheet must leave panel visibility to Foundry's native tab controller.");
 assert.match(sidebar, /:focus-visible[\s\S]*?outline:\s*2px solid var\(--nexus-ui-accent/,
   "Keyboard focus must remain visible.");
