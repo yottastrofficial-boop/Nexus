@@ -45,9 +45,10 @@
 
       <section class="nexus-design-studio-section" id="nexus-design-components" data-design-section-panel="components" role="tabpanel" aria-labelledby="nexus-design-tab-components" hidden>
         <div class="nexus-design-section-heading"><div><h3>Estilos por categoria</h3><p>Personalize os elementos sem alterar suas funções. As alterações são aplicadas na prévia antes de salvar.</p></div></div>
+        <label class="nexus-design-field nexus-design-category-filter"><span>Categoria do elemento</span><select data-design-category-filter><option value="all">Todas as categorias</option>{{#each componentStyleCategories}}<option value="{{key}}">{{label}}</option>{{/each}}</select></label>
         <div class="nexus-design-style-categories">
           {{#each componentStyleCategories}}
-          <details class="nexus-design-style-category" {{#if @first}}open{{/if}}>
+          <details class="nexus-design-style-category" data-design-category="{{key}}" {{#if @first}}open{{/if}}>
             <summary><span><strong>{{label}}</strong><small>{{description}}</small></span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
             <div class="nexus-design-settings-grid">
               {{#each colors}}
@@ -137,6 +138,22 @@
         </div>
       </div>
       <p class="nexus-design-preview-note">A prévia não salva alterações. Fechar o estúdio descarta um rascunho não salvo.</p>
+<section class="nexus-design-preview-catalog" aria-label="Catálogo de elementos personalizáveis">
+        <div class="nexus-design-catalog-heading"><strong>Elementos visuais</strong><span>Prévia individual</span></div>
+        {{#each componentStyleCategories}}
+        <article class="nexus-design-catalog-item" data-design-preview-category="{{key}}">
+          <div class="nexus-design-catalog-item-head"><strong>{{label}}</strong><small>{{description}}</small></div>
+          <div class="nexus-design-catalog-sample" data-preview-kind="{{key}}">
+            {{#if (eq key "buttons")}}<button type="button" class="nexus-design-catalog-button">Ação principal</button><button type="button" class="nexus-design-catalog-button is-secondary">Secundário</button>{{/if}}
+            {{#if (eq key "panels")}}<div class="nexus-design-catalog-panel"><strong>Janela / painel</strong><span>Conteúdo do elemento</span></div>{{/if}}
+            {{#if (eq key "containers")}}<div class="nexus-design-catalog-container"><span>Container</span><strong>Valor 24</strong></div>{{/if}}
+            {{#if (eq key "highlights")}}<div class="nexus-design-catalog-highlight"><i class="fa-solid fa-check" aria-hidden="true"></i> Estado ativo</div>{{/if}}
+            {{#if (eq key "fields")}}<input class="nexus-design-catalog-input" type="text" value="Campo de entrada" readonly aria-label="Prévia de campo">{{/if}}
+          </div>
+        </article>
+        {{/each}}
+      </section>
+
 
       {{#if hasDesignLibrary}}
       <section class="nexus-design-library-panel" aria-label="Biblioteca de aparências">

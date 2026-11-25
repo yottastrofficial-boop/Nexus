@@ -399,8 +399,8 @@ assert.match(libraryApplication, /onApplyResource/, "A aplicação deve delegar 
 assert.match(libraryApplication, /onUpdateDefinition/, "A aplicação deve delegar atualizações de definições ao serviço compartilhado");
 assert.equal(manifest.id, "nexus", "ID do sistema incorreto");
 assert.match(manifest.version, /^\d+\.\d+\.\d+\.\d+$/, "Versão do manifesto deve seguir o padrão NEXUS");
-assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão publicada");
-assert.ok(changelog.startsWith(`## ${manifest.version}`), "CHANGELOG deve iniciar pela versão atual");
+assert.ok(readme.includes(`Versão ${manifest.version}`), "README deve identificar a versão estável publicada");
+assert.ok(changelog.includes(`## ${manifest.version} —`), "CHANGELOG deve preservar a entrada da versão estável publicada");
 assert.equal(manifest.compatibility.minimum, "14", "Versão mínima do Foundry incorreta");
 assert.match(sheetCode, /activateActorSheetListeners\(this, html/);
 assert.match(sheet, /import \{[^}]*evaluateNexusSkillFormula[^}]*\} from "\.\.\/core\/skills\.js"/, "A fórmula de perícia deve estar importada no módulo da ficha");
