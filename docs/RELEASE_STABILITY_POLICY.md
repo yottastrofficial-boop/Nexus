@@ -44,6 +44,8 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 - Um sistema antigo nunca deve rebaixar um Actor com versão de schema superior.
 - Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
 - O manifesto de instalação só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível.
+- O ZIP de uma candidata deve carregar em seu próprio `system.json` a URL de `manifest-preview.json` e o download da mesma tag candidata; não basta atualizar apenas o manifesto remoto.
+- Uma release candidata nunca deve redirecionar seu próprio pacote para o manifesto ou ZIP estável.
 - Uma release só é declarada funcionalmente estável após validação no Foundry real.
 
 ## Canais de publicação no GitHub Actions
