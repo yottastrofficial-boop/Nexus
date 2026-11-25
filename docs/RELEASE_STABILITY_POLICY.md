@@ -25,7 +25,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-25
 
 - **Versão estável da main:** `1.0.0.99`.
-- **Candidata em revisão:** `1.0.0.100` (PR #81); não mesclada nem publicada.
+- **Versão em revisão:** `1.0.0.100` (PR #81); ainda não mesclada nem publicada.
 - **Distribuição:** `manifest.json` é o único endereço de instalação/atualização e aponta para a última release estável com pacote confirmado.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.

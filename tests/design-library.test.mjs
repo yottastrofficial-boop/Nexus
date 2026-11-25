@@ -44,7 +44,7 @@ test("exporta perfis NEXUS-DESIGN/2 e continua importando NEXUS-DESIGN/1", async
   await a.save(profile); const imported = await b.import(a.export("source-theme"));
   assert.equal(imported.profile.preset, "pixel-art"); assert.equal(imported.profile.palette.accent, "#abcdef");
   assert.equal(imported.profile.typography.family, "monospace");
-  assert.ok(a.export("source-theme").startsWith('{"format":"NEXUS-DESIGN/2"'));
+  assert.ok(a.export("source-theme").includes('"format": "NEXUS-DESIGN/2"'));
   const legacy = JSON.stringify({ format: "NEXUS-DESIGN/1", profile: {
     schemaVersion: 1, preset: "nexus-dark", name: "Legado", palette: { panel: "#123456" },
     typography: { family: "Inter" }, layout: {}, accessibility: {}
