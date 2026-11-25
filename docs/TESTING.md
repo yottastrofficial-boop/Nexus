@@ -43,3 +43,17 @@ O smoke test atual confirma inicialização, mundo correto, sistema NEXUS, sess�
 ## Diagnóstico funcional do sidebar V14
 
 O harness `tools/foundry-testing` inclui `sidebar-diagnostic.spec.js`, que captura a hierarquia DOM real, geometrias, estilos calculados, classes/fontes de ícones e screenshot do sidebar no Foundry VTT 14. Esse relatório é a fonte necessária para orientar alterações estruturais posteriores; testes estáticos de seletores CSS não comprovam a disposição visual.
+
+
+## Navegação compacta do sidebar — candidata 1.0.0.113
+
+- [ ] Confirmar que todas as abas nativas e adicionadas por módulos permanecem visíveis em uma única linha.
+- [ ] Verificar que a navegação não cria rolagem horizontal nem uma segunda linha.
+- [ ] Alternar por clique entre todas as abas e confirmar que o controlador nativo mantém o painel correto.
+- [ ] Conferir os estados normal, hover, ativo e foco por teclado.
+- [ ] Confirmar que os ícones Font Awesome e SVG continuam com os glifos originais.
+- [ ] Testar recolhimento/expansão da sidebar e restauração da navegação após reabrir.
+- [ ] Testar com módulos que adicionam abas e registrar se a densidade prejudica a precisão dos cliques.
+- [ ] Confirmar que a largura padrão da sidebar não foi alterada.
+- [ ] Repetir em tema claro, escuro e alto contraste, no Foundry VTT 14 build 360.
+- [ ] Não considerar a etapa validada apenas pela aprovação do CI; anexar captura real do cliente Foundry.

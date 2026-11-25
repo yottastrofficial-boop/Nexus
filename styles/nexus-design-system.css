@@ -1274,22 +1274,10 @@ html.nexus-design-system .nexus-design-surface :is(input:not([type="checkbox"]):
    Layout is deliberately scoped to the native sidebar. Foundry owns tab
    registration, active-state changes, panel visibility and icon markup. */
 
-/* The sidebar is a two-row workspace: navigation first, active panel second.
-   Keep the host's position/width rules and only define its internal layout. */
-html.nexus-design-system #sidebar {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  gap: 0 !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-}
-
-/* Foundry V14's primary navigation is #sidebar-tabs. Compatibility selectors
-   cover the class-based nav used by themes without targeting panel elements. */
+/* Compact native navigation dock — one line, no horizontal scrolling.
+   Keep Foundry's original tab elements, order, icons, handlers and controller.
+   Equal flexible slots allow the complete native tab set to remain visible
+   without changing the sidebar's host width or hiding resource tabs. */
 html.nexus-design-system #sidebar-tabs,
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"],
 html.nexus-design-system #sidebar .tabs[data-group="primary"],
@@ -1298,21 +1286,20 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   position: relative !important;
   z-index: 1;
   display: flex !important;
-  flex: 0 0 auto !important;
+  flex: 0 0 38px !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
-  align-content: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 4px !important;
+  justify-content: stretch !important;
+  gap: 0 !important;
   box-sizing: border-box !important;
   width: 100% !important;
   min-width: 0 !important;
-  min-height: 42px !important;
-  height: auto !important;
+  min-height: 38px !important;
+  height: 38px !important;
   margin: 0 !important;
-  padding: 5px 6px !important;
-  overflow: visible !important;
+  padding: 3px 4px !important;
+  overflow: hidden !important;
   border: 0 !important;
   border-bottom: 1px solid var(--nexus-ui-border, #40546b) !important;
   border-radius: 0 !important;
@@ -1320,20 +1307,20 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   box-shadow: none !important;
 }
 
-/* Foundry V14 renders the primary tabs as NAV > MENU.flexcol > LI > BUTTON.
-   The nav itself is already a horizontal flex row, but the native flexcol menu
-   forces every tab into a vertical stack. Make that actual child the tab strip. */
+/* Foundry V14 renders the tab controls as NAV > MENU.flexcol > LI > BUTTON.
+   Flatten the native menu into a single flexible strip; no fixed 34px slots. */
 html.nexus-design-system #sidebar-tabs > menu.flexcol {
   display: flex !important;
-  flex: 0 0 auto !important;
+  flex: 1 1 auto !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-  align-content: flex-start !important;
-  justify-content: flex-start !important;
-  gap: 4px !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  align-content: center !important;
+  justify-content: stretch !important;
+  gap: 1px !important;
   width: 100% !important;
   min-width: 0 !important;
+  height: 30px !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
@@ -1341,13 +1328,13 @@ html.nexus-design-system #sidebar-tabs > menu.flexcol {
 
 html.nexus-design-system #sidebar-tabs > menu.flexcol > li {
   display: flex !important;
-  flex: 0 0 34px !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 34px !important;
-  min-width: 34px !important;
-  max-width: 34px !important;
-  height: 34px !important;
+  flex: 1 1 0 !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 30px !important;
   margin: 0 !important;
   padding: 0 !important;
   list-style: none !important;
@@ -1356,72 +1343,78 @@ html.nexus-design-system #sidebar-tabs > menu.flexcol > li {
 html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"],
 html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[data-action="toggleState"] {
   display: inline-flex !important;
-  flex: 0 0 34px !important;
+  flex: 1 1 auto !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 34px !important;
-  min-width: 34px !important;
-  max-width: 34px !important;
-  height: 34px !important;
-  min-height: 34px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 30px !important;
+  min-height: 30px !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 1px !important;
 }
 
-/* Size only native navigation controls. The exclusion is intentional:
-   .tab.sidebar-tab is a content panel, never an icon button. */
+/* Compatibility markup: size only direct native controls, never panel nodes.
+   .tab.sidebar-tab is a content panel, not an icon button. */
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar .tabs[data-group="primary"] > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)) {
   display: inline-flex !important;
   position: relative !important;
-  flex: 0 0 34px !important;
+  flex: 1 1 0 !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
-  width: 34px !important;
-  min-width: 34px !important;
-  max-width: 34px !important;
-  min-height: 34px !important;
-  height: 34px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 30px !important;
+  height: 30px !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 1px !important;
   border: 1px solid transparent !important;
-  border-radius: var(--nexus-ui-radius, 7px) !important;
+  border-radius: 6px !important;
   color: var(--nexus-ui-muted, #a5b6c9) !important;
   background: transparent !important;
   box-shadow: none !important;
   text-shadow: none !important;
+  transition: color .14s ease, background-color .14s ease, box-shadow .14s ease;
 }
 
-/* Pointer, keyboard and selected states use semantic theme tokens. */
+/* Compact hover and selected states: the active marker is an underline,
+   not a full tile, so the dock reads as one continuous navigation rail. */
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"]:is(:hover, :focus-visible),
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"]):is(:hover, :focus-visible),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"]):is(:hover, :focus-visible),
 html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"]):is(:hover, :focus-visible) {
-  border-color: var(--nexus-ui-border, #40546b) !important;
+  border-color: transparent !important;
   color: var(--nexus-ui-text, #edf2f8) !important;
   background: var(--nexus-ui-surface-hover, #30465d) !important;
 }
 
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"]:is(.active, [aria-selected="true"]),
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"]):is(.active, [aria-selected="true"]),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"]):is(.active, [aria-selected="true"]),
 html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"]):is(.active, [aria-selected="true"]) {
-  border-color: var(--nexus-ui-accent, #8da9c8) !important;
+  border-color: transparent !important;
   color: var(--nexus-ui-text, #edf2f8) !important;
-  background: var(--nexus-ui-surface-hover, #30465d) !important;
+  background: transparent !important;
   box-shadow: inset 0 -2px var(--nexus-ui-accent, #8da9c8) !important;
 }
 
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"]:focus-visible,
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"]):focus-visible,
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"]):focus-visible,
 html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"]):focus-visible {
   outline: 2px solid var(--nexus-ui-accent, #8da9c8) !important;
-  outline-offset: 1px !important;
+  outline-offset: -2px !important;
 }
 
 /* Native icon fonts/SVGs remain owned by Foundry and Font Awesome.
    Never assign font-family or synthesize/repaint their glyphs here. */
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"] :is(i, svg),
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"]) :is(i, svg),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"]) :is(i, svg),
 html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"]) :is(i, svg) {
@@ -1429,6 +1422,7 @@ html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"
   flex: 0 0 auto;
   width: 1em;
   height: 1em;
+  font-size: 14px;
   line-height: 1;
   vertical-align: middle;
 }

@@ -20,12 +20,16 @@ assert.match(manifest.styles.at(-1), /nexus-design-system\.css$/,
   "The sidebar stylesheet must load after the legacy styles.");
 assert.match(sidebar, /#sidebar\s*\{[\s\S]*?display:\s*flex\s*!important;[\s\S]*?flex-direction:\s*column\s*!important;/,
   "The sidebar shell must stack navigation above its panel.");
-assert.match(sidebar, /#sidebar-tabs[\s\S]*?flex-direction:\s*row\s*!important;[\s\S]*?flex-wrap:\s*wrap\s*!important;/,
-  "The native tab bar must lay out horizontally and wrap when needed.");
+assert.match(sidebar, /#sidebar-tabs[\s\S]*?flex-direction:\s*row\s*!important;[\s\S]*?flex-wrap:\s*nowrap\s*!important;/,
+  "The native tab bar must remain on one horizontal line without wrapping.");
 assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol[\s\S]*?flex-direction:\s*row\s*!important;/,
   "The actual Foundry V14 menu.flexcol child must be converted into a horizontal tab strip.");
-assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li[\s\S]*?flex:\s*0 0 34px\s*!important;/,
-  "Each native list item must occupy one horizontal tab slot.");
+assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li[\s\S]*?flex:\s*1 1 0\s*!important;[\s\S]*?min-width:\s*0\s*!important;/,
+  "Native tab slots must share the available width instead of forcing fixed-width columns.");
+assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li\s*>\s*button\[role="tab"\][\s\S]*?width:\s*100%\s*!important;[\s\S]*?height:\s*30px\s*!important;/,
+  "Each native tab button must fill its compact flexible slot.");
+assert.match(sidebar, /#sidebar-tabs[\s\S]*?overflow:\s*hidden\s*!important;/,
+  "The navigation dock must not introduce horizontal scrolling.");
 assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li\s*>\s*button\[role="tab"\]/,
   "Tab button geometry must target the actual nested Foundry V14 markup.");
 assert.match(sidebar, /#sidebar-tabs\s*>\s*:is\(\.item, button, \[role="tab"\], \.sidebar-tab:not\(\.tab\)\)/,

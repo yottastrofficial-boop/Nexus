@@ -1,3 +1,15 @@
+## 1.0.0.113 — Dock compacto de navegação do sidebar
+
+- Reorganiza as abas nativas do Foundry VTT 14 em uma única faixa horizontal contínua.
+- Substitui os slots fixos de 34 px por espaços flexíveis, distribuídos igualmente na largura já disponível da sidebar.
+- Remove a quebra em múltiplas linhas e evita rolagem horizontal na navegação.
+- Usa estados de hover discretos e indicador inferior para a aba ativa, preservando foco visível por teclado.
+- Mantém todos os elementos, a ordem DOM, os ícones Font Awesome/SVG, os handlers e o controlador nativo de abas; nenhuma aba de recurso é ocultada.
+- Não altera a largura padrão da sidebar nem a estrutura dos painéis.
+- Atualiza o contrato automatizado para exigir navegação em linha única e slots flexíveis.
+- **Teste manual pendente:** verificar a quantidade real de abas, legibilidade e precisão dos alvos de clique, módulos que acrescentam abas, recolhimento da sidebar e troca entre todas as abas no Foundry VTT 14 build 360.
+- Sem alterações em regras de RPG, schemas ou dados persistidos.
+
 ## 1.0.0.112 — Chat lateral com densidade adaptativa
 
 - Adapta o espaçamento interno do chat à largura real disponível, por meio de CSS Container Queries, sem modificar a largura padrão da sidebar.

@@ -113,3 +113,14 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Abrir painéis da ficha e confirmar que o drawer interno e a barra de layouts não cobrem o Canvas nem bloqueiam os controles.
 - [ ] Testar foco por teclado e `prefers-reduced-motion`.
 - [ ] Repetir os testes nos perfis escuro, claro e alto contraste, em cliente GM e jogador.
+
+
+## Dock compacto do sidebar — candidata 1.0.0.113
+
+- [ ] Conferir a faixa nativa de abas em uma única linha, sem quebra e sem barra de rolagem horizontal.
+- [ ] Confirmar que todas as abas nativas e de módulos continuam acessíveis.
+- [ ] Verificar ícones, hover, seleção, foco por teclado e tooltips nativos.
+- [ ] Testar alternância de todas as abas, recolhimento e expansão da sidebar.
+- [ ] Confirmar que a largura padrão da sidebar e o tamanho do painel de conteúdo permanecem inalterados.
+- [ ] Avaliar a precisão dos cliques com a quantidade real de abas e módulos ativos.
+- [ ] Registrar captura do Foundry VTT 14 build 360; o teste de contrato CSS não substitui essa validação.
