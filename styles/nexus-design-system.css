@@ -1262,10 +1262,10 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(i):not(svg)
   font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
 }
 
-/* Foundry V14 Sidebar — one canonical layout layer.
-   Sidebar is a dedicated ApplicationV2 instance. Its tab navigation is the
-   primary tab group, not a generic application toolbar. Keep its native
-   anchors, data-tab/data-group attributes, icon markup and event delegation. */
+/* Foundry V14 Sidebar — native horizontal tab strip.
+   The V14 Sidebar renders its primary navigation as .sidebar-tabs and its
+   controls as .tab.sidebar-tab. Keep native elements, data attributes,
+   icon markup, tab controller and delegated event handlers untouched. */
 html.nexus-design-system #sidebar {
   display: flex;
   flex-direction: column;
@@ -1275,8 +1275,8 @@ html.nexus-design-system #sidebar {
   overflow: hidden;
 }
 
-/* V14/core and compatible module navigation hooks. The aliases are deliberate:
-   Foundry's template markup has changed across major versions. */
+/* The actual V14 sidebar navigation. The other selectors are compatibility
+   fallbacks for Foundry versions/themes that expose the generic Tabs markup. */
 html.nexus-design-system #sidebar :is(
   #sidebar-tabs,
   .sidebar-tabs,
@@ -1305,13 +1305,14 @@ html.nexus-design-system #sidebar :is(
   box-shadow: none;
 }
 
-/* Keep each native tab as a native clickable element; only normalize its box. */
+/* Foundry V14's native tab control is .tab.sidebar-tab (not only .item).
+   Include both shapes without changing their semantic or interactive state. */
 html.nexus-design-system #sidebar :is(
   #sidebar-tabs,
   .sidebar-tabs,
   nav.tabs[data-group="primary"],
   .tabs[data-group="primary"]
-) > .item {
+) > :is(.tab.sidebar-tab, .sidebar-tab, .item) {
   display: inline-flex;
   flex: 0 0 34px;
   align-items: center;
@@ -1336,7 +1337,7 @@ html.nexus-design-system #sidebar :is(
   .sidebar-tabs,
   nav.tabs[data-group="primary"],
   .tabs[data-group="primary"]
-) > .item:is(:hover, :focus-visible) {
+) > :is(.tab.sidebar-tab, .sidebar-tab, .item):is(:hover, :focus-visible) {
   border-color: var(--nexus-ui-border);
   color: var(--nexus-ui-text);
   background: var(--nexus-ui-surface-hover);
@@ -1347,40 +1348,36 @@ html.nexus-design-system #sidebar :is(
   .sidebar-tabs,
   nav.tabs[data-group="primary"],
   .tabs[data-group="primary"]
-) > .item.active {
+) > :is(.tab.sidebar-tab, .sidebar-tab, .item).active {
   border-color: var(--nexus-ui-accent);
   color: var(--nexus-ui-text);
   background: var(--nexus-ui-surface-hover);
   box-shadow: inset 0 -2px var(--nexus-ui-accent);
 }
 
-/* No font or glyph declarations belong here.
-   Foundry's Font Awesome stylesheet remains the sole source of icon glyphs. */
+/* Never assign font-family, content, pseudo-glyphs or replacement icons.
+   Foundry's Font Awesome stylesheet owns the icon family and glyph mapping. */
 html.nexus-design-system #sidebar :is(
   #sidebar-tabs,
   .sidebar-tabs,
   nav.tabs[data-group="primary"],
   .tabs[data-group="primary"]
-) > .item :is(i, svg) {
+) > :is(.tab.sidebar-tab, .sidebar-tab, .item) :is(i, svg) {
   flex: 0 0 auto;
   line-height: 1;
   vertical-align: middle;
 }
 
-/* The sidebar content area grows below the tab strip without exposing
-   inactive tab panels or changing Foundry's tab activation classes. */
+/* Keep the tab content below the navigation and let its native tab controller
+   decide which panel is active. Do not force visibility on inactive panels. */
 html.nexus-design-system #sidebar :is(
   #sidebar-content,
   .sidebar-content,
   [data-application-part="tabs"]
 ) {
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
-}
-
-html.nexus-design-system #sidebar #sidebar-content,
-html.nexus-design-system #sidebar .sidebar-content {
-  flex: 1 1 auto;
   overflow: auto;
 }
 
@@ -1390,7 +1387,7 @@ html.nexus-design-system #sidebar .sidebar-content {
     .sidebar-tabs,
     nav.tabs[data-group="primary"],
     .tabs[data-group="primary"]
-  ) > .item {
+  ) > :is(.tab.sidebar-tab, .sidebar-tab, .item) {
     flex-basis: 32px;
     width: 32px;
     min-width: 32px;
