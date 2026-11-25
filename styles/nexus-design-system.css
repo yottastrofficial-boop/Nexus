@@ -1200,8 +1200,11 @@ html.nexus-design-system .nexus-floating-ui :is(
 
 /* Global Foundry presentation: shared theme tokens, native behavior preserved. */
 html.nexus-design-system body,
-html.nexus-design-system body :not(i):not(svg):not(code):not(pre):not(.fa):not([class*="icon-"]) {
+html.nexus-design-system :is(#sidebar, #hotbar, #navigation, #controls, .application, .window-app, .application .window-content, .window-app .window-content) {
   font-family: var(--nexus-font-family, system-ui, sans-serif);
+}
+html.nexus-design-system body :is(button, input, select, textarea) {
+  font-family: inherit;
 }
 html.nexus-design-system :is(#sidebar, #sidebar .tab, #hotbar, #navigation, #controls) { color: var(--nexus-ui-text); }
 html.nexus-design-system :is(#sidebar, #sidebar .tab, #hotbar, #navigation) :is(button, input, select, textarea) {
@@ -1281,3 +1284,16 @@ html.nexus-design-system .nexus-open-library {
 html.nexus-design-system .nexus-open-library:hover {
   border-color: var(--nexus-ui-accent); background: var(--nexus-ui-surface-hover);
 }
+
+
+/* The Design Studio uses in-app section switching, never hash navigation. */
+html.nexus-design-system .nexus-design-studio-nav [data-design-section] {
+  display: block; width: 100%; padding: 9px; border: 1px solid transparent;
+  border-radius: var(--nexus-ui-radius); color: var(--nexus-ui-muted);
+  background: transparent; font: inherit; font-size: 11px; text-align: left;
+}
+html.nexus-design-system .nexus-design-studio-nav [data-design-section]:hover,
+html.nexus-design-system .nexus-design-studio-nav [data-design-section].is-active {
+  color: var(--nexus-ui-text); border-color: var(--nexus-ui-border); background: var(--nexus-ui-surface-hover);
+}
+html.nexus-design-system .nexus-design-studio-section[hidden] { display: none !important; }
