@@ -34,14 +34,16 @@ assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPT
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
 const sidebarBlock = designCss.slice(
-  designCss.indexOf("/* Foundry V14 Sidebar — native horizontal tab strip."),
+  designCss.indexOf("/* Foundry V14 Sidebar — horizontal navigation with native ApplicationV2 panels."),
   designCss.indexOf("/* Advanced CSS editor */")
 );
 assert.ok(sidebarBlock.length > 0, "O bloco canônico do sidebar deve existir");
 assert.ok(sidebarBlock.includes("#sidebar-tabs"), "O seletor nativo de navegação deve ser contemplado");
 assert.ok(sidebarBlock.includes(".sidebar-tabs"), "A navegação real do Sidebar V14 deve ser contemplada");
 assert.ok(sidebarBlock.includes(".tab.sidebar-tab"), "Os controles nativos V14 precisam ser selecionados pela classe real");
-assert.ok(sidebarBlock.includes("> :is(.tab.sidebar-tab, .sidebar-tab, .item)"), "O dimensionamento deve atingir os botões nativos e manter compatibilidade");
+assert.ok(sidebarBlock.includes("#sidebar-tabs > .item"), "Os controles nativos devem receber dimensões uniformes sem selecionar painéis");
+assert.ok(sidebarBlock.includes("#sidebar .sidebar-tabs > .item"), "A navegação nativa dentro do Sidebar deve receber dimensões uniformes");
+assert.doesNotMatch(sidebarBlock, /\.tab\.sidebar-tab[^{}]*\{[^}]*width:\s*34px/i, "Painéis de conteúdo nunca devem receber dimensões de botão");
 assert.ok(sidebarBlock.includes("flex-direction: row !important"), "As abas nativas devem ser horizontais");
 assert.ok(sidebarBlock.includes("flex-wrap: wrap"), "Abas extras de módulos devem continuar acessíveis em múltiplas linhas");
 assert.ok(sidebarBlock.includes('nav.tabs[data-group="primary"]'), "A navegação ApplicationV2 deve ser contemplada");
