@@ -1076,7 +1076,7 @@ assert.match(sheetCode, /rollAliases/, "As sugestões devem incluir aliases curt
 assert.match(sheetCode, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
 assert.match(sheetCode, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
 assert.match(sheetCode, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
-assert.match(sheetCode, /is-grid/, "Grupos grandes devem usar uma miniatura em grade");
+assert.match(libraryCatalogExplorer, /gridMode = members\.length > 8 \|\| scale < 0\.12/, "Composições grandes ou muito dispersas devem usar miniatura em grade");
 assert.match(libraryCatalogExplorer, /renderLibraryResourcePreview/, "As prévias devem ser renderizadas pelo Explorer compartilhado");
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
@@ -1086,7 +1086,7 @@ assert.match(actorPropertyPickerListeners, /focusin\$\{inspectorNamespace\}/, "O
 assert.match(actorPropertyPickerListeners, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
 assert.match(sheetCode, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(canvasInteractions, /const applyKeyboardMoveFrame = \(\) => \{[\s\S]*?syncGroupBounds\(false\)/, "O movimento por teclado deve adiar o cálculo das conexões de cantos durante cada quadro");
-assert.match(sheetCode, /scale<0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
+assert.match(libraryCatalogExplorer, /scale < 0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
 
 assert.match(sheetCode, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
