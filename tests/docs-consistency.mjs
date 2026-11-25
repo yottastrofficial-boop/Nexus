@@ -32,22 +32,22 @@ assert.equal(manifest.download, "https://github.com/yottastrofficial-boop/Nexus/
   "O manifesto estável deve apontar para o ZIP da própria versão publicada.");
 const systemDownloadVersion = String(system.download ?? "").match(/\/releases\/download\/v([^/]+)\/nexus\.zip$/)?.[1];
 assert.ok(systemDownloadVersion, "system.json deve conter uma URL de download Foundry válida.");
-assert.equal(systemDownloadVersion, manifest.version,
-  "system.json deve preservar a URL da última release estável publicada.");
+assert.equal(systemDownloadVersion, system.version,
+  "system.json deve apontar para o pacote correspondente à versão incluída na main.");
 assert.equal(system.manifest, "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest.json",
   "system.json deve usar o manifesto estável canônico.");
 assert.match(releaseWorkflow, /systemMetadata\.download = downloadUrl/, "O workflow deve sincronizar o download estável após confirmar o asset.");
 assert.match(releaseWorkflow, /updateTextFile\("system\.json"/, "O workflow deve sincronizar system.json após confirmar o asset.");
-assert.ok(changelog.startsWith("## " + system.version + " —"), "O CHANGELOG deve começar com a versão candidata.");
+assert.ok(changelog.startsWith("## " + system.version + " —"), "O CHANGELOG deve começar com a versão atual da main.");
 const changelogVersions = [...changelog.matchAll(/^## (1\.0\.0\.\d+)(?:\s|$)/gm)].map(match => match[1]);
 assert.equal(new Set(changelogVersions).size, changelogVersions.length, "O CHANGELOG não pode repetir cabeçalhos de versão.");
 assert.doesNotMatch(changelog, /^# NEXUS RPG$/m, "O CHANGELOG não deve conter uma cópia do README.");
-assert.ok(readme.includes(system.version), "O README deve mencionar a versão candidata.");
+assert.ok(readme.includes(system.version), "O README deve mencionar a versão atual da main.");
 assert.ok(readme.includes("Foundry VTT 14"), "O README deve declarar a linha de compatibilidade atual.");
-assert.ok(roadmap.includes(system.version), "O roadmap deve mencionar a versão candidata.");
-assert.ok(overview.includes(system.version), "A visão do projeto deve mencionar a versão candidata.");
-assert.ok(stability.includes(system.version), "A política de estabilidade deve distinguir a versão candidata.");
+assert.ok(roadmap.includes(system.version), "O roadmap deve mencionar a versão atual da main.");
+assert.ok(overview.includes(system.version), "A visão do projeto deve mencionar a versão atual da main.");
+assert.ok(stability.includes(system.version), "A política de estabilidade deve mencionar a versão atual da main.");
 assert.ok(stability.toLowerCase().includes("último checkpoint funcional confirmado") && stability.includes("1.0.0.70"),
   "A política deve manter explícito o último checkpoint funcional comprovado.");
 
-console.log("NEXUS | Consistência documental aprovada para a versão candidata " + system.version + " (manifesto publicado: " + manifest.version + ").");
+console.log("NEXUS | Consistência documental aprovada para a versão " + system.version + " (manifesto estável: " + manifest.version + ").");
