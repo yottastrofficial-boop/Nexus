@@ -66,3 +66,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Inclui a reconstrução da sidebar da PR #95 e os contratos de regressão integrados à `main`.
 - A publicação não muda o estado de validação: no Foundry VTT 14 build 360 ainda é necessário conferir navegação, ícones, troca de abas, rolagem/altura dos painéis e compatibilidade com módulos.
 - Não marcar a sidebar como funcionalmente concluída até a confirmação manual.
+
+
+## Diagnóstico da sidebar após o teste da 1.0.0.108
+
+- A captura real do Foundry VTT 14 mostrou os botões nativos de abas com classes Font Awesome diretamente no próprio elemento BUTTON (por exemplo, fa-solid fa-comments) e font-family Inter no botão e em seu ::before.
+- A causa identificada foi a regra global de tipografia para controles (body :is(button, input, select, textarea) { font-family: inherit; }), que sobrescrevia a fonte do botão e, por herança, convertia os glifos Font Awesome em quadrados.
+- Correção proposta: manter a tipografia de perfil nos controles comuns, excluindo controles que carregam classes Font Awesome diretamente. O controlador de abas e o layout nativo não são alterados.
+- A navegação ainda aparece vertical na captura; essa parte requer inspeção do contêiner de navegação e da cascata computada antes de qualquer novo ajuste estrutural. Não considerar o layout visual concluído.
