@@ -5,10 +5,10 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
-- Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.101` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
+- Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
+- Base de versão declarada na main: `1.0.0.99`, preparada para distribuição após CI e confirmação do pacote.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A release 1.0.0.98 destina-se à validação no Foundry VTT 14 build 360; a base de desenvolvimento 1.0.0.101 restaura o editor flutuante, corrige a tipografia dos ícones nativos e refina o Estúdio de Aparência. O CI não substitui os testes funcionais no cliente real.
+- A base 1.0.0.99 restaura o editor flutuante, preserva a tipografia dos ícones nativos e refina o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -39,7 +39,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na base de desenvolvimento 1.0.0.101 (release estável 1.0.0.98; validação funcional pendente)
+## Implementação presente na base 1.0.0.99 (validação funcional pendente)
 
 A árvore atual contém, entre outros:
 
@@ -53,12 +53,12 @@ A árvore atual contém, entre outros:
 
 ### Recursos e infraestrutura observados
 
-- Ficha Canvas modular, com componentes configuráveis e dados vinculados ao Actor; os painéis de edição e a navegação de layouts permanecem dentro das barras laterais da ficha, sem portal flutuante externo.
+- Ficha Canvas modular, com componentes configuráveis e dados vinculados ao Actor; o editor usa trilhos flutuantes e ferramentas em janelas ApplicationV2 independentes, com ciclo de vida associado à ficha.
 - Tipos de Actor `player-character`, `npc` e `character`.
 - Token de protótipo vinculado ao Actor por padrão, preservando a possibilidade de desvincular depois.
 - Grupos hierárquicos e composição visual com modos de organização.
 - Biblioteca Explorer com visão universal de itens salvos, favoritos, recentes, pastas livres, etiquetas dinâmicas, cartões unificados, Inspector e CRUD seguro; definições e instâncias permanecem isoladas. O botão da ficha abre a mesma Biblioteca Universal com contexto de inserção. Perfis visuais completos usam a coleção canônica de temas.
-- Estúdio de Aparência com abas internas e prévia de painéis, containers, botões, tipografia, inputs, seletores, áreas de texto e rolagem; o Design System aplica a fonte do perfil globalmente e unifica as superfícies do Chat.
+- Estúdio de Aparência com abas internas e prévia de painéis, containers, botões, tipografia, inputs, seletores, áreas de texto e rolagem; o Design System aplica a tipografia do perfil às superfícies de texto, preserva as fontes nativas dos ícones e unifica as superfícies do Chat.
 - Separação entre definições reutilizáveis e instâncias inseridas nas fichas.
 - Motor de expressões seguro, sem execução arbitrária de JavaScript.
 - Infraestrutura tipada de Lógica, persistência e runtime declarativo.
@@ -113,6 +113,6 @@ Em caso de divergência, registrar separadamente o que dizem os livros, o que es
 A `main` inclui o Design System global para Foundry VTT 14, com perfis versionados, tokens semânticos, temas de campanha e usuário, Estúdio de Aparência ApplicationV2 e prévia isolada de perfis no Inspector da Biblioteca. A aparência é aplicada por cliente e não é persistida em documentos de jogo. A aplicação à campanha exige permissão de GM e confirmação; a preferência pessoal respeita a política do mundo. A build 1.0.0.92 foi preparada para validação manual e não deve ser tratada como funcionalmente confirmada até a rodada em Foundry VTT 14 build 360.
 
 
-## Refinamento de interface — candidata 1.0.0.93
+## Refinamento de interface — base de desenvolvimento 1.0.0.93
 
-A candidata expande o shell de aparência para todas as aplicações NEXUS ApplicationV2, mantendo aplicações de terceiros fora do escopo automático. Biblioteca independente e painel embutido passam a usar os tokens semânticos do Design System. Controles do Canvas, navegação, Hotbar e jogadores recebem apresentação de grupos flutuantes. Mensagens do Chat passam a usar cartões unificados, com mídia enriquecida nativa responsiva. A hierarquia dos trilhos flutuantes foi corrigida para que painéis inativos não cubram os controles da ficha. A implementação possui teste unitário de precedência de camadas, mas requer validação visual/funcional real no Foundry VTT 14 build 360.
+A base expande o shell de aparência para todas as aplicações NEXUS ApplicationV2, mantendo aplicações de terceiros fora do escopo automático. Biblioteca independente e painel embutido passam a usar os tokens semânticos do Design System. Controles do Canvas, navegação, Hotbar e jogadores recebem apresentação de grupos flutuantes. Mensagens do Chat passam a usar cartões unificados, com mídia enriquecida nativa responsiva. A hierarquia dos trilhos flutuantes foi corrigida para que painéis inativos não cubram os controles da ficha. A implementação possui teste unitário de precedência de camadas, mas requer validação visual/funcional real no Foundry VTT 14 build 360.

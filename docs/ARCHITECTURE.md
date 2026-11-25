@@ -2,7 +2,7 @@
 
 ## Estado deste documento
 
-Referência atual: branch `main`, commit `335db5149ede0d595bb69a3f3102d1f4495c6ff7`, versão `1.0.0.88`, Foundry VTT 14 build 360.
+Referência atual: branch `main`, versão `1.0.0.99`, Foundry VTT 14 build 360. O estado funcional e as limitações vigentes estão registrados em `PROJECT_OVERVIEW.md` e `ROADMAP.md`.
 
 Este documento reúne contratos arquiteturais e registros históricos de extrações incrementais. Seções que mencionam versões 1.0.0.1, 1.0.0.2 ou 1.0.0.70 descrevem o contexto da época; não devem ser interpretadas como a árvore atual nem como a sequência de trabalho vigente. Para o estado presente, consulte `PROJECT_OVERVIEW.md` e `ROADMAP.md`.
 
@@ -43,7 +43,7 @@ Perfis reutilizáveis ficam na coleção `themes` do armazenamento canônico da 
 ## Sequência segura de refatoração
 
 ### Etapa 0 — Linha de base atual
-- Usar a main 1.0.0.88 como referência de código, sem confundi-la com o último checkpoint funcional confirmado no Foundry.
+- Usar a main 1.0.0.99 como referência de código, sem confundi-la com o último checkpoint funcional confirmado no Foundry.
 - Validar manifesto, imports relativos, sintaxe, templates, testes de regressão e pacote antes de cada alteração.
 - Registrar limitações e cenários ainda não testados; consultar RELEASE_STABILITY_POLICY.md.
 

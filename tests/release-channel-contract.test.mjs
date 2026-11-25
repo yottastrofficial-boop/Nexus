@@ -23,9 +23,11 @@ assert.match(workflow, /overwrite_files: false/,
   "Os assets publicados devem permanecer imutáveis.");
 assert.doesNotMatch(workflow, /candidate|prerelease|-rc\./i,
   "O workflow não deve conter canal de candidata ou pré-release.");
-assert.match(policy, /Não há canal de candidata, pré-release/,
+assert.match(policy, /Uma release estável só é publicada/,
   "A política deve documentar a publicação exclusivamente estável.");
 assert.match(policy, /manifest\.json/);
+assert.doesNotMatch(policy, /candidata|pré-release|prerelease/i,
+  "A política não deve manter nomenclatura de canais experimentais.");
 assert.match(workflow, /\npermissions:\n  contents: read\n\njobs:/,
   "As permissões padrão do workflow devem ser somente leitura.");
 assert.match(workflow, /needs: validate\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write/,

@@ -1,25 +1,13 @@
-## 1.0.0.101 — Preservação da tipografia nativa dos ícones
+## 1.0.0.99 — Editor flutuante, tipografia nativa e refinamento visual
 
-- Remove a sobrescrita global da família Font Awesome; o Foundry volta a controlar família, peso e glifos dos ícones.
-- Mantém a tipografia do perfil nas superfícies de texto sem substituir a fonte dos controles nativos.
-- Acrescenta contrato de regressão para impedir que o Design System volte a forçar uma fonte de ícones.
-- Mantém a restauração dos trilhos flutuantes e o refinamento do Estúdio de Aparência introduzidos na base anterior.
-
-## 1.0.0.100 — Restauração do editor flutuante e refinamento visual
-
-- Restaura os trilhos flutuantes do editor da ficha e a abertura de ferramentas em janelas ApplicationV2 independentes, removendo o menu lateral permanente da área útil da ficha.
-- Reassocia o ciclo de vida das janelas ao ciclo de renderização e fechamento da ficha, preservando painéis abertos durante atualizações e limpando recursos ao fechar.
+- Restaura os trilhos flutuantes do editor da ficha e a abertura das ferramentas em janelas ApplicationV2 independentes, removendo o menu lateral permanente da área útil da ficha.
+- Reassocia o ciclo de vida das janelas à renderização e ao fechamento da ficha, preservando painéis abertos durante atualizações e limpando recursos ao fechar.
 - Ajusta o Design System para não reconstruir a antiga barra lateral interna da ficha.
-- Preserva a família tipográfica dos ícones Font Awesome do Foundry ao aplicar a tipografia global do perfil, recuperando controles nativos como navegação, atores, cenas e ações de janela.
-- Compacta a toolbar do Estúdio de Aparência, equilibra a coluna de pré-visualização e melhora amostras de botões primários/secundários, painéis, campos e barras de rolagem.
-- Adiciona contratos de regressão para a arquitetura flutuante, preservação dos ícones e densidade visual do Estúdio.
-- A validação automatizada será executada após o commit; a validação manual no Foundry VTT 14 build 360 permanece necessária.
-- A versão 1.0.0.100 é uma base de desenvolvimento; o manifesto continua apontando para a release estável 1.0.0.98 até aprovação de publicação.
-
-## 1.0.0.99 — Em desenvolvimento
-
-- Base de desenvolvimento aberta após a publicação estável 1.0.0.98; ainda não publicada.
-- O manifesto do Foundry permanece apontando para o pacote estável 1.0.0.98 até a próxima release aprovada.
+- Preserva a família tipográfica nativa dos ícones Font Awesome do Foundry; a tipografia configurada no perfil continua aplicada às superfícies de texto sem substituir fontes de ícones.
+- Refina o Estúdio de Aparência: compacta a toolbar, equilibra a coluna de pré-visualização e melhora as amostras de botões, painéis, campos e barras de rolagem.
+- Adiciona contratos de regressão para a arquitetura flutuante, o ciclo de vida das janelas, a preservação dos ícones nativos e a densidade visual do Estúdio.
+- Mantém a compatibilidade declarada com Foundry VTT 14 build 360; a validação visual e funcional no cliente real continua pendente.
+- O manifesto original só é sincronizado com a versão 1.0.0.99 depois que o workflow aprova os testes, gera o pacote e confirma o asset `nexus.zip`.
 
 ## 1.0.0.98 — Consistência de seleção e temas
 

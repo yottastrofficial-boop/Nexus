@@ -7,8 +7,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
 - Commit de referência: `HEAD da main`
-- Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.101` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
+- Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
+- Base de versão declarada na main: `1.0.0.99`, preparada para distribuição após CI e confirmação do pacote.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
@@ -146,7 +146,7 @@ A integração está na `main` e o CI está aprovado; ainda não está pronta pa
 - A versão 1.0.0.92 é uma build para teste, não um checkpoint funcional confirmado.
 
 
-## Refinamento da interface global — candidata 1.0.0.93
+## Refinamento da interface global — base de desenvolvimento 1.0.0.93
 
 - O shell visual compartilhado agora marca todas as aplicações ApplicationV2 do próprio NEXUS, sem ampliar indiscriminadamente o tema para aplicações de módulos externos.
 - A Biblioteca independente e o painel da ficha passam a consumir a paleta semântica ativa em cartões, filtros, navegação, controles e Inspector; a validação em diferentes tamanhos de janela ainda é necessária.
