@@ -125,3 +125,8 @@ A base expande o shell de aparência para todas as aplicações NEXUS Applicatio
 ## Revisão do sidebar após a 1.0.0.106
 
 Commit de correção na `main`: `417acb4f663ba328e30f28db70ab976af0f18669`. A implementação separa os controles de navegação (`.item` dentro de `#sidebar-tabs`/ `.sidebar-tabs`) dos painéis de conteúdo (`.tab.sidebar-tab`), evitando aplicar dimensões de ícone aos painéis ApplicationV2. O layout da navegação é horizontal, permite quebra de linha e preserva a marcação e as fontes de ícones nativas. A validação será manual pelo usuário no Foundry VTT 14; não foi executado Playwright. A versão distribuída permanece `1.0.0.106` até o retorno do teste manual.
+
+
+## Pacote 1.0.0.107 — validação manual do sidebar
+
+A revisão de CSS do sidebar está sendo empacotada na versão `1.0.0.107` para teste manual no Foundry VTT 14 build 360. O teste deve confirmar a navegação horizontal, a preservação dos ícones nativos, a troca de abas e a exibição dos painéis de conteúdo. A publicação do pacote não comprova funcionamento no cliente real; o último checkpoint funcional confirmado permanece `1.0.0.70` até o retorno do teste.
