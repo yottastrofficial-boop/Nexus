@@ -1,5 +1,7 @@
 ## 1.0.0.109 — Correção da fonte dos ícones nativos da sidebar
 
+- Pacote preparado e validado automaticamente no GitHub Actions; disponibilizado para teste no Foundry VTT 14.
+
 - Corrige a herança tipográfica global que substituía a fonte Font Awesome em botões nativos do Foundry VTT 14, fazendo os glifos aparecerem como quadrados.
 - Mantém a fonte de perfil nos controles comuns e preserva as classes/fonte nativas dos controles Font Awesome.
 - Adiciona teste de contrato para impedir regressão dessa regra.
