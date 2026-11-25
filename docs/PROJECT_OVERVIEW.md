@@ -120,3 +120,8 @@ A `main` inclui o Design System global para Foundry VTT 14, com perfis versionad
 ## Refinamento de interface — base de desenvolvimento 1.0.0.93
 
 A base expande o shell de aparência para todas as aplicações NEXUS ApplicationV2, mantendo aplicações de terceiros fora do escopo automático. Biblioteca independente e painel embutido passam a usar os tokens semânticos do Design System. Controles do Canvas, navegação, Hotbar e jogadores recebem apresentação de grupos flutuantes. Mensagens do Chat passam a usar cartões unificados, com mídia enriquecida nativa responsiva. A hierarquia dos trilhos flutuantes foi corrigida para que painéis inativos não cubram os controles da ficha. A implementação possui teste unitário de precedência de camadas, mas requer validação visual/funcional real no Foundry VTT 14 build 360.
+
+
+## Revisão do sidebar após a 1.0.0.106
+
+Commit de correção na `main`: `417acb4f663ba328e30f28db70ab976af0f18669`. A implementação separa os controles de navegação (`.item` dentro de `#sidebar-tabs`/ `.sidebar-tabs`) dos painéis de conteúdo (`.tab.sidebar-tab`), evitando aplicar dimensões de ícone aos painéis ApplicationV2. O layout da navegação é horizontal, permite quebra de linha e preserva a marcação e as fontes de ícones nativas. A validação será manual pelo usuário no Foundry VTT 14; não foi executado Playwright. A versão distribuída permanece `1.0.0.106` até o retorno do teste manual.
