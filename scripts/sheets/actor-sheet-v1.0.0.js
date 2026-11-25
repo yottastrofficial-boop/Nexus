@@ -3560,9 +3560,9 @@ if (!hasPath) propertyValueInput.value = "";
     const leftRail = root.querySelector(".nexus-appearance-rail");
     const sourceDrawer = root.querySelector(".nexus-appearance-drawer");
     const tabs = root.querySelector(".nexus-layout-tabs");
-    const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
-    const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
-    const panelSizes = { style: [400, 600], component: [400, 600], layers: [400, 600], library: [900, 600], aliases: [400, 600], settings: [400, 600], behavior: [900, 600] };
+    const panelKeys = ["style", "component", "layers", "aliases", "settings", "behavior"];
+    const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
+    const panelSizes = { style: [400, 600], component: [400, 600], layers: [400, 600], aliases: [400, 600], settings: [400, 600], behavior: [900, 600] };
     this._openAppearancePanels ??= new Set();
     this._nexusPanelWindows ??= new Map();
 
@@ -3576,7 +3576,7 @@ if (!hasPath) propertyValueInput.value = "";
           <button type="button" data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="style" title="Aparência global" aria-label="Aparência global"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
-          <button type="button" data-floating-panel="library" title="Biblioteca de elementos" aria-label="Biblioteca de elementos"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
+          <button type="button" data-floating-open-library title="Biblioteca Universal" aria-label="Abrir Biblioteca Universal"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
           <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt" aria-hidden="true"></i></button>
@@ -3742,18 +3742,6 @@ if (!hasPath) propertyValueInput.value = "";
     const openPanel = async (key, { focus = true } = {}) => {
       const panel = panels.get(key);
       if (!panel) return;
-      // A Biblioteca só carrega seu módulo e constrói cartões/prévias quando solicitada.
-      if (key === "library") {
-        try {
-          await this._mountLibrary(panel);
-        } catch (error) {
-          console.error("NEXUS | Falha ao carregar a Biblioteca", error);
-          return;
-        }
-        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) return;
-        this._libraryApplyFilter?.();
-        this._libraryRestoreSelection?.();
-      }
       const current = this._nexusPanelWindows.get(key);
       if (current) {
         current.setPanel(panel);
@@ -3802,6 +3790,17 @@ if (!hasPath) propertyValueInput.value = "";
         focusPanelWindow(instance);
       } else await openPanel(key);
     };
+    portal.querySelector("[data-floating-open-library]")?.addEventListener("click", () => {
+      const open = game.nexus?.library?.open;
+      if (typeof open !== "function") {
+        ui.notifications?.warn?.("A Biblioteca Universal ainda não está disponível.");
+        return;
+      }
+      void open({ source: "actor-sheet", actorUuid: this.actor?.uuid }).catch(error => {
+        console.error("NEXUS | Falha ao abrir a Biblioteca Universal.", error);
+        ui.notifications?.error?.("Não foi possível abrir a Biblioteca Universal.");
+      });
+    });
     portal.querySelectorAll("[data-floating-panel]").forEach(button => button.addEventListener("click", () => {
       if (root.dataset.mode !== "appearance") return;
       requestPanel(button.dataset.floatingPanel);
