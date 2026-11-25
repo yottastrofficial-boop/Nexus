@@ -2,7 +2,8 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { NEXUS_COMPONENTS as COMPONENTS, normalizeNexusComponentDimension } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
-import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
+import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, applyScopedTheme } from "../core/theme.js";
+import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
@@ -1157,7 +1158,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
         return;
       }
       this._setSelection($(root), [id]);
-      this._openInlineEditorPanel?.("component");
+      this._openFloatingPanel?.("component");
     });
   }
 
@@ -1675,7 +1676,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       if (config.uuid) { const document = await fromUuid(String(config.uuid)); if (document?.sheet) return document.sheet.render(true); }
       if (config.targetId) {
         this._setSelection($(this.element), [String(config.targetId)]);
-        this._openInlineEditorPanel?.("component");
+        this._openFloatingPanel?.("component");
       }
       return;
     }
@@ -3544,100 +3545,338 @@ if (!hasPath) propertyValueInput.value = "";
     sheetRoot?.querySelector?.(".nexus-canvas")?.dispatchEvent(new Event("nexus:selectionchange"));
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
-  _mountInlineEditorPanels(html) {
-    const root = html?.[0];
-    if (!root) return;
-    this._nexusInlineUiController?.abort();
-    const controller = new AbortController();
-    this._nexusInlineUiController = controller;
-    const { signal } = controller;
-    const app = root.closest(".application, .window-app, .app");
-    app?.classList.add("nexus-window");
-    this._nexusPanelWindows = new Map();
-    this._openAppearancePanels ??= new Set();
-    root.querySelector(".nexus-workspace")?.classList.remove("nexus-workspace-clean");
-    const drawer = root.querySelector(".nexus-appearance-drawer");
-    const setActivePanel = key => {
-      const panel = [...(drawer?.querySelectorAll("[data-tool-panel]") ?? [])]
-        .find(item => item.dataset.toolPanel === String(key));
-      if (!panel || this._mode !== "appearance") return false;
-      const editorWasOpen = [...this._openAppearancePanels].some(name => ["component", "behavior"].includes(name));
-      const nextIsEditor = ["component", "behavior"].includes(String(key));
-      if (editorWasOpen && !nextIsEditor && this.element?.isConnected) this._setSelection?.($(this.element), []);
-      root.querySelectorAll("[data-appearance-panel]").forEach(button => {
-        const active = button.dataset.appearancePanel === String(key);
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
-      drawer.querySelectorAll("[data-tool-panel]").forEach(item => {
-        const active = item === panel;
-        item.hidden = !active;
-        item.classList.toggle("active", active);
-      });
-      this._openAppearancePanels.clear();
-      this._openAppearancePanels.add(String(key));
-      return true;
-    };
-    this._openInlineEditorPanel = setActivePanel;
-    if (this._mode === "appearance") {
-      const initial = root.querySelector('.nexus-appearance-rail [data-appearance-panel].active')?.dataset.appearancePanel ?? "style";
-      if (!setActivePanel(initial)) setActivePanel("style");
-    } else {
-      const editorWasOpen = [...this._openAppearancePanels].some(name => ["component", "behavior"].includes(name));
-      if (editorWasOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
-      drawer?.querySelectorAll("[data-tool-panel]").forEach(panel => {
-        panel.hidden = true;
-        panel.classList.remove("active");
-      });
-      this._openAppearancePanels.clear();
-    }
+  _mountFloatingUI(html) {
+    const root = html[0];
+    this._nexusFloatingCleanup?.({ preserveWindows: true });
+    const floatingGeneration = (this._nexusFloatingGeneration ?? 0) + 1;
+    this._nexusFloatingGeneration = floatingGeneration;
+    const app = root.closest(".application, .window-app, .app") || root;
+    document.querySelector(`[data-nexus-floating-for="${this.id}"]`)?.remove();
+    const leftRail = root.querySelector(".nexus-appearance-rail");
+    const sourceDrawer = root.querySelector(".nexus-appearance-drawer");
     const tabs = root.querySelector(".nexus-layout-tabs");
-    tabs?.addEventListener("click", event => {
-      const tab = event.target?.closest?.("[data-layout-tab]");
-      if (!tab || !tabs.contains(tab) || event.detail > 1) return;
-      this._switchLayout(tab.dataset.layoutId);
-    }, { signal });
-    tabs?.addEventListener("dblclick", event => {
-      const tab = event.target?.closest?.("[data-layout-tab]");
-      if (!tab || !tabs.contains(tab)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation?.();
-      this._editLayoutTab(tab.dataset.layoutId);
-    }, { signal, capture: true });
-    const settingsPanel = drawer?.querySelector('[data-tool-panel="settings"]');
-    settingsPanel?.querySelectorAll("[data-settings-section]").forEach(button => {
-      button.addEventListener("click", () => {
-        const key = button.dataset.settingsSection;
-        settingsPanel.querySelectorAll("[data-settings-section]").forEach(item => {
-          const active = item === button;
-          item.classList.toggle("active", active);
-          item.setAttribute("aria-pressed", String(active));
-        });
-        settingsPanel.querySelectorAll("[data-settings-panel]").forEach(section => {
-          const active = section.dataset.settingsPanel === key;
-          section.hidden = !active;
-          section.classList.toggle("active", active);
-        });
-      }, { signal });
+    const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
+    const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
+    const panelSizes = { style: [400, 600], component: [400, 600], layers: [400, 600], library: [900, 600], aliases: [400, 600], settings: [400, 600], behavior: [900, 600] };
+    this._openAppearancePanels ??= new Set();
+    this._nexusPanelWindows ??= new Map();
+
+    const portal = document.createElement("div");
+    portal.className = "nexus-floating-ui";
+    portal.dataset.nexusFloatingFor = this.id;
+    portal.style.setProperty("--nexus-accent-color", this._currentLayout?.accentColor ?? "#52647b");
+    portal.style.setProperty("--nexus-highlight-color",this._currentLayout?.highlightColor??"#78b7e8");
+    portal.style.setProperty("--nexus-button-color",this._currentLayout?.buttonColor??"#315b7d");
+    applyThemeTokens(portal, this._currentLayout ?? DEFAULT_LAYOUT);
+    portal.innerHTML = `
+      <div class="nexus-floating-left" aria-label="Ferramentas da ficha">
+        <div class="nexus-floating-left-rail">
+          <button type="button" data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="style" title="Aparência global" aria-label="Aparência global"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="library" title="Biblioteca de elementos" aria-label="Biblioteca de elementos"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
+          <button type="button" data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div class="nexus-floating-right" aria-label="Navegação de páginas">
+        <div class="nexus-floating-tabs"></div>
+        <button type="button" class="nexus-floating-add" data-floating-new-layout title="Adicionar página">＋</button>
+      </div>`;
+    document.body.appendChild(portal);
+
+    const panels = new Map();
+    for (const key of panelKeys) {
+      const panel = sourceDrawer?.querySelector(`[data-tool-panel="${key}"]`);
+      if (!panel) continue;
+      panel.hidden = false;
+      panel.classList.add("nexus-native-panel-content");
+      panels.set(key, panel);
+    }
+    const settingsPanel = panels.get("settings");
+    settingsPanel?.querySelectorAll("[data-settings-section]").forEach(button => button.addEventListener("click", () => {
+      const key = button.dataset.settingsSection;
+      settingsPanel.querySelectorAll("[data-settings-section]").forEach(item => item.classList.toggle("active", item === button));
+      settingsPanel.querySelectorAll("[data-settings-panel]").forEach(section => {
+        const active = section.dataset.settingsPanel === key;
+        section.hidden = !active;
+        section.classList.toggle("active", active);
+      });
+    }));
+    sourceDrawer?.remove();
+    leftRail?.remove();
+    if (tabs) portal.querySelector(".nexus-floating-tabs").append(tabs);
+    const floatingTabs = portal.querySelector(".nexus-floating-tabs");
+    let pendingLayoutClick = null;
+    floatingTabs?.addEventListener("click", async event => {
+      const tab = event.target.closest(".nexus-layout-tab");
+      if (!tab || !floatingTabs.contains(tab)) return;
+      if (pendingLayoutClick) clearTimeout(pendingLayoutClick);
+      if (event.detail > 1) return;
+      pendingLayoutClick = setTimeout(() => {
+        pendingLayoutClick = null;
+        this._switchLayout(tab.dataset.layoutId);
+      }, 180);
     });
+    floatingTabs?.addEventListener("dblclick", event => {
+      const tab = event.target.closest(".nexus-layout-tab");
+      if (!tab || !floatingTabs.contains(tab)) return;
+      if (pendingLayoutClick) clearTimeout(pendingLayoutClick);
+      pendingLayoutClick = null;
+      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+      this._editLayoutTab(tab.dataset.layoutId);
+    }, true);
+    root.querySelector(".nexus-sidebar-left")?.remove();
+    root.querySelector(".nexus-sidebar-right")?.remove();
+    root.querySelector(".nexus-workspace")?.classList.add("nexus-workspace-clean");
+
+    const left = portal.querySelector(".nexus-floating-left");
+    const right = portal.querySelector(".nexus-floating-right");
+    const setActivePanel = key => {
+      const activeKey = key && this._nexusPanelWindows.has(key) ? key : null;
+      this._activePanelWindowKey = activeKey;
+      this._openFloatingPanel = requestPanel;
+    portal.querySelectorAll("[data-floating-panel]").forEach(button => {
+        button.classList.toggle("active", button.dataset.floatingPanel === activeKey);
+      });
+      for (const [panelKey, instance] of this._nexusPanelWindows) {
+        instance.element?.classList.toggle("nexus-window-active", panelKey === activeKey);
+      }
+    };
+    const setMode = () => {
+      if (this._mode) root.dataset.mode = this._mode;
+      const appearance = root.dataset.mode === "appearance";
+      left.hidden = !appearance;
+      portal.querySelector(".nexus-floating-add").hidden = !appearance;
+      if (!appearance) {
+        setActivePanel(null);
+        for (const [key, instance] of [...this._nexusPanelWindows]) {
+          this._openAppearancePanels.delete(key);
+          instance.close();
+        }
+        this._nexusPanelWindows.clear();
+      }
+    };
+
+    const syncRailFocus = (focused = false) => {
+      if (!portal.isConnected) return;
+      const z = Number.parseInt(app.style.zIndex || getComputedStyle(app).zIndex, 10);
+      const baseZ = Number.isFinite(z) ? z : 100;
+      const desiredZ = Math.max(1, baseZ + (focused ? 2 : -1));
+      // Rails nunca ultrapassam janelas abertas do Inspector ou Comportamento.
+      const openPanelZ = [...this._nexusPanelWindows.values()]
+        .filter(instance => instance?.rendered && instance.element?.isConnected)
+        .map(instance => Number.parseInt(instance.element.style.zIndex || getComputedStyle(instance.element).zIndex, 10))
+        .filter(Number.isFinite);
+      const highestPanelZ = openPanelZ.length ? Math.max(...openPanelZ) : null;
+      const railZ = highestPanelZ === null ? desiredZ : Math.min(desiredZ, highestPanelZ - 1);
+      portal.style.setProperty("z-index", String(Math.max(1, railZ)), "important");
+      portal.classList.toggle("is-sheet-focused", focused && highestPanelZ === null);
+    };
+    const positionRails = () => {
+      if (!app.isConnected || !portal.isConnected) return;
+      const r = app.getBoundingClientRect();
+      const leftW = 42, rightW = 58;
+      this._appearanceRailOffsets ??= { left: { x: -51, y: 72 }, right: { x: 9, y: 72 } };
+      const lo = this._appearanceRailOffsets.left, ro = this._appearanceRailOffsets.right;
+      const lx = clamp(r.left + lo.x, 4, Math.max(4, window.innerWidth - leftW - 4));
+      const ly = clamp(r.top + lo.y, 8, Math.max(8, window.innerHeight - 100));
+      const rx = clamp(r.right + ro.x, 4, Math.max(4, window.innerWidth - rightW - 4));
+      const ry = clamp(r.top + ro.y, 8, Math.max(8, window.innerHeight - 100));
+      Object.assign(left.style, { position: "fixed", left: `${lx}px`, top: `${ly}px`, maxHeight: `${Math.max(160, window.innerHeight - ly - 12)}px` });
+      Object.assign(right.style, { position: "fixed", left: `${rx}px`, top: `${ry}px`, maxHeight: `${Math.max(160, window.innerHeight - ry - 12)}px` });
+    };
+    const onDocumentPointerDown = event => {
+      const target = event.target;
+      const panelElement = target?.closest?.(".nexus-panel-window");
+      if (panelElement) {
+        const panelKey = [...this._nexusPanelWindows].find(([, instance]) => instance.element === panelElement)?.[0] ?? null;
+        setActivePanel(panelKey);
+        syncRailFocus(false);
+        return;
+      }
+      const sheetWasFocused = app.contains(target) || left?.contains(target) || right?.contains(target);
+      setActivePanel(null);
+      if (sheetWasFocused) {
+        syncRailFocus(true);
+        positionRails();
+      } else {
+        // A janela clicada fora do NEXUS deve continuar sob controle do Foundry.
+        syncRailFocus(false);
+      }
+    };
+    document.addEventListener("pointerdown", onDocumentPointerDown, true);
+    const onDocumentFocusIn = event => {
+      const panelElement = event.target?.closest?.(".nexus-panel-window");
+      if (panelElement) {
+        const panelKey = [...this._nexusPanelWindows].find(([, instance]) => instance.element === panelElement)?.[0] ?? null;
+        setActivePanel(panelKey);
+      } else if (app.contains(event.target)) {
+        setActivePanel(null);
+        syncRailFocus(true);
+      }
+    };
+    document.addEventListener("focusin", onDocumentFocusIn, true);
+
+    const focusPanelWindow = instance => {
+      if (!instance?.rendered || !instance.element) return;
+      instance.bringToFront?.();
+      setActivePanel(instance.panelKey);
+      const element = instance.element;
+      element.setAttribute("tabindex", "-1");
+      // ApplicationV2 gerencia a pilha de janelas. Não calculamos um z-index
+      // global próprio, pois isso fazia painéis do NEXUS sobreporem aplicações
+      // alheias à interação atual.
+      requestAnimationFrame(() => {
+        if (!element.isConnected) return;
+        element.focus({ preventScroll: true });
+        element.dispatchEvent(new Event("nexus:activate", { bubbles: true }));
+        setActivePanel(instance.panelKey);
+      });
+    };
+
+    const openPanel = async (key, { focus = true } = {}) => {
+      const panel = panels.get(key);
+      if (!panel) return;
+      // A Biblioteca só carrega seu módulo e constrói cartões/prévias quando solicitada.
+      if (key === "library") {
+        try {
+          await this._mountLibrary(panel);
+        } catch (error) {
+          console.error("NEXUS | Falha ao carregar a Biblioteca", error);
+          return;
+        }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) return;
+        this._libraryApplyFilter?.();
+        this._libraryRestoreSelection?.();
+      }
+      const current = this._nexusPanelWindows.get(key);
+      if (current) {
+        current.setPanel(panel);
+        if (current.rendered && focus) {
+          focusPanelWindow(current);
+          syncRailFocus(false);
+        }
+        return;
+      }
+      const [baseWidth, baseHeight] = panelSizes[key] ?? [420, 560];
+      const width = Math.min(baseWidth, window.innerWidth - 32);
+      const height = Math.min(baseHeight, window.innerHeight - 48);
+      const offset = panelKeys.indexOf(key) * 28;
+      const left = Math.min(Math.max(8, Math.round((window.innerWidth - width) / 2 + offset)), Math.max(8, window.innerWidth - width - 8));
+      const top = Math.min(Math.max(8, Math.round((window.innerHeight - height) / 2 + offset)), Math.max(8, window.innerHeight - height - 8));
+      const instance = new NexusPanelWindow({
+        sheet: this, key, panel, title: panelTitles[key], width, height, left, top
+      });
+      this._nexusPanelWindows.set(key, instance);
+      this._openAppearancePanels.add(key);
+      instance.render({ force: true }).then(() => {
+        if (this._nexusPanelWindows.get(key) !== instance) {
+          instance.close();
+          return;
+        }
+        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) {
+          // A newer sheet render now owns this still-open panel; preserve it.
+          applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+          return;
+        }
+        applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+        focusPanelWindow(instance);
+        syncRailFocus(false);
+      }).catch(error => {
+        console.error(`NEXUS | Falha ao abrir janela ${key}`, error);
+        this._onPanelWindowClosed(key, instance);
+      });
+    };
+
+    const requestPanel = async key => {
+      if (root.dataset.mode !== "appearance") {
+        this._openAppearancePanels.add(key);
+        await this._setMode("appearance");
+        return;
+      }
+      syncRailFocus(true);
+      const instance = this._nexusPanelWindows.get(key);
+      if (instance?.rendered) {
+        focusPanelWindow(instance);
+        syncRailFocus(false);
+      } else await openPanel(key);
+    };
+    portal.querySelectorAll("[data-floating-panel]").forEach(button => button.addEventListener("click", () => {
+      if (root.dataset.mode !== "appearance") return;
+      requestPanel(button.dataset.floatingPanel);
+    }));
+    root.querySelectorAll("[data-editor-open-panel]").forEach(button => button.addEventListener("click", () => {
+      requestPanel(button.dataset.editorOpenPanel);
+    }));
+    root.querySelectorAll("[data-editor-mode]").forEach(button => button.addEventListener("click", () => {
+      this._setMode(button.dataset.editorMode);
+    }));
+    root.querySelectorAll("[data-editor-insert]").forEach(button => button.addEventListener("click", async () => {
+      const type = button.dataset.editorInsert;
+      if (root.dataset.mode !== "appearance") await this._setMode("appearance");
+      await this._addComponent(type);
+      root.querySelectorAll("[data-editor-insert]").forEach(item => item.classList.toggle("is-active", item === button));
+    }));
+    root.querySelector("[data-editor-fit]")?.addEventListener("click", () => {
+      const scroller = root.querySelector(".nexus-canvas-scroll");
+      if (!scroller) return;
+      scroller.scrollTo({ left: Math.max(0, (scroller.scrollWidth - scroller.clientWidth) / 2), top: Math.max(0, (scroller.scrollHeight - scroller.clientHeight) / 2), behavior: "smooth" });
+    });
+    portal.querySelector("[data-floating-new-layout]")?.addEventListener("click", () => this._newLayout());
+    setMode();
+    positionRails();
+    if (root.dataset.mode === "appearance") syncRailFocus(true);
+    requestAnimationFrame(() => { setMode(); positionRails(); });
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(positionRails) : null;
+    resizeObserver?.observe(app);
+    const moveObserver = typeof MutationObserver !== "undefined" ? new MutationObserver(positionRails) : null;
+    moveObserver?.observe(app, { attributes: true, attributeFilter: ["style", "class"] });
+    window.addEventListener("resize", positionRails);
+    window.addEventListener("scroll", positionRails, true);
+
+    this._nexusFloatingCleanup = ({ preserveWindows = true } = {}) => {
+      if (this._nexusFloatingGeneration === floatingGeneration) this._nexusFloatingGeneration += 1;
+      if (pendingLayoutClick) clearTimeout(pendingLayoutClick);
+      pendingLayoutClick = null;
+      resizeObserver?.disconnect(); moveObserver?.disconnect();
+      window.removeEventListener("resize", positionRails);
+      window.removeEventListener("scroll", positionRails, true);
+      document.removeEventListener("pointerdown", onDocumentPointerDown, true);
+      document.removeEventListener("focusin", onDocumentFocusIn, true);
+      if (!preserveWindows) {
+        for (const instance of this._nexusPanelWindows.values()) instance.close();
+        this._nexusPanelWindows.clear();
+      }
+      portal.remove();
+    };
+
+    // Reassocia os novos painéis renderizados às janelas existentes sem focá-las.
+    for (const key of [...this._openAppearancePanels]) openPanel(key, { focus: false });
+    // Actor updates can rerender the sheet while a floating panel is being
+    // edited. Restore the panel's stacking order without stealing input focus.
+    const activePanelKey = this._activePanelWindowKey;
+    if (activePanelKey) requestAnimationFrame(() => {
+      const activePanel = this._nexusPanelWindows.get(activePanelKey);
+      if (!portal.isConnected || !activePanel?.rendered) return;
+      activePanel.bringToFront?.();
+      setActivePanel(activePanelKey);
+    });
+    if (this._pendingLibraryViewport) {
+      const viewport = this._pendingLibraryViewport;
+      requestAnimationFrame(() => requestAnimationFrame(() => this._restoreLibraryViewport(viewport)));
+    }
   }
 
-  /**
-   * Applies or clears the sheet-local theme on every themed surface of this sheet.
-   * Local tokens are written only for customized layouts when the campaign allows them;
-   * otherwise the sheet inherits the global Design System profile.
-   */
-  _syncScopedThemeSurfaces(layout = this._currentLayout) {
-    if (!layout || !this.element) return;
-    const sheetRoot = this.element.querySelector?.(".nexus-sheet");
-    const drawer = this.element.querySelector?.(".nexus-appearance-drawer");
-    const appElement = this.element.closest?.(".application, .window-app") ?? this.element;
-    const panels = [...(this._nexusPanelWindows?.values?.() ?? [])].map(instance => instance?.element).filter(Boolean);
-    for (const target of new Set([sheetRoot, drawer, appElement, ...panels].filter(Boolean))) applyScopedTheme(target, layout);
-    applyScopedTheme(this.element.querySelector?.(".nexus-canvas"), layout, { colors: true });
-    for (const target of new Set([appElement, drawer, ...panels].filter(Boolean))) {
-      applyScopedTheme(target, layout, { base: false, colors: true, windowTokens: true });
+  _onPanelWindowClosed(key, instance) {
+    if (this._nexusPanelWindows?.get(key) === instance) this._nexusPanelWindows.delete(key);
+    this._openAppearancePanels?.delete(key);
+    if (this._activePanelWindowKey === key) this._activePanelWindowKey = null;
+    document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="${key}"]`)?.classList.remove("active");
+    if (["component", "behavior"].includes(key)) {
+      const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.has(panelKey));
+      if (!editorPanelsOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
     }
   }
 
@@ -3661,6 +3900,9 @@ if (!hasPath) propertyValueInput.value = "";
     });
     this._nexusInlineUiController?.abort();
     this._nexusInlineUiController = null;
+    this._nexusFloatingCleanup?.({ preserveWindows: false });
+    this._openFloatingPanel = null;
+    for (const instance of this._nexusPanelWindows?.values?.() ?? []) instance.close();
     this._nexusPanelWindows?.clear?.();
     return super._onClose(options);
   }

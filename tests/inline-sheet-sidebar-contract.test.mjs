@@ -10,11 +10,15 @@ const template = read("../templates/actors/actor-sheet.hbs");
 const designSystem = read("../styles/nexus-design-system.css");
 const legacyStyles = read("../styles/nexus-v1.0.0.css");
 
-test("character-sheet editing stays in the native sheet sidebars", () => {
-  assert.match(sheet, /_mountInlineEditorPanels/);
+test("character-sheet tools open detached ApplicationV2 panels from floating rails", () => {
+  assert.match(sheet, /_mountFloatingUI/);
+  assert.match(sheet, /new NexusPanelWindow/);
+  assert.match(sheet, /_nexusFloatingCleanup\?\.\(\{ preserveWindows: false \}\)/);
   assert.match(sheet, /this\._setSelection\?\.\(\$\(this\.element\), \[\]\)/);
-  assert.doesNotMatch(sheet, /_mountFloatingUI|NexusPanelWindow|data-nexus-floating-for|nexus-floating/);
-  assert.doesNotMatch(listeners, /_mountFloatingUI|data-nexus-floating-for|data-floating-panel|_nexusPanelWindows/);
+  assert.match(sheet, /data-nexus-floating-for/);
+  assert.match(sheet, /data-floating-panel/);
+  assert.match(listeners, /sheet\._mountFloatingUI\(html\)/);
+  assert.doesNotMatch(listeners, /_openInlineEditorPanel/);
   assert.doesNotMatch(canvas, /data-nexus-floating-for|data-floating-panel|nexus-floating/);
   for (const panel of ["settings", "style", "component", "layers", "aliases", "behavior"]) {
     assert.match(template, new RegExp(`data-appearance-panel="${panel}"`));
@@ -24,15 +28,18 @@ test("character-sheet editing stays in the native sheet sidebars", () => {
   assert.match(template, /class="nexus-sidebar nexus-sidebar-right"/);
   assert.match(template, /data-open-nexus-library/);
   assert.doesNotMatch(designSystem, /nexus-floating/);
+  assert.match(legacyStyles, /\.nexus-floating-left/);
+  assert.match(legacyStyles, /\.nexus-panel-window/);
   assert.doesNotMatch(legacyStyles, /v0\.5 — barras flutuantes externas/);
   assert.match(legacyStyles, /\.nexus-group-surface \{ min-width:0; min-height:0;/,
     "The legacy stylesheet must preserve the existing group-surface sizing contract.");
 });
 
-test("native Foundry chrome receives global typography and unified Chat surfaces", () => {
+test("native Foundry chrome receives global typography without replacing icon fonts", () => {
   assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\)/);
   assert.match(designSystem, /html\.nexus-design-system body \{ color: var\(--nexus-ui-text\); \}/);
   assert.match(designSystem, /--nexus-font-family/);
   assert.match(designSystem, /#chat-log, \.chat-log, \.chat-scroll/);
   assert.match(designSystem, /#chat-log \.message-content[\s\S]*?background: var\(--nexus-ui-surface-raised\)/);
+  assert.match(designSystem, /fa-style-family/);
 });

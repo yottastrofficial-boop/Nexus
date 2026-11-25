@@ -309,10 +309,6 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     });
     html.find("[data-layout-select]").on("change", event => sheet._switchLayout(event.currentTarget.value));
     html.find("[data-layout-name]").on("change", event => sheet._updateLayoutName(event.currentTarget.value));
-    html.find("[data-appearance-panel]").on("click", event => {
-      event.preventDefault();
-      sheet._openInlineEditorPanel?.(event.currentTarget.dataset.appearancePanel);
-    });
     html.find("[data-open-nexus-library]").on("click", event => {
       event.preventDefault();
       const open = game.nexus?.library?.open;
@@ -993,5 +989,5 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const appWindow = html[0].closest(".application, .window-app");
     if (appWindow) { appWindow.classList.add("nexus-window"); applyScopedTheme(appWindow, sheet._currentLayout ?? {}, { base: false, windowTokens: true }); }
     sheet._activateCanvas(html);
-    sheet._mountInlineEditorPanels(html);
+    sheet._mountFloatingUI(html);
 }

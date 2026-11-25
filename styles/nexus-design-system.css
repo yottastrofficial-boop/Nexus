@@ -1169,38 +1169,20 @@ html.nexus-design-system .nexus-design-studio-section[hidden] { display: none !i
 
 /* Minimal in-sheet editor layout: navigation and inspectors stay inside the sheet. */
 html.nexus-design-system .nexus-sheet .nexus-workspace {
-  display: grid !important; position: relative !important;
-  grid-template-columns: minmax(0, 1fr) 72px !important; min-width: 0;
+  display: grid !important;
+  position: relative !important;
+  grid-template-columns: minmax(0, 1fr) 72px !important;
+  min-width: 0;
 }
-html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-workspace {
-  grid-template-columns: minmax(250px, 286px) minmax(0, 1fr) 72px !important;
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
-html.nexus-design-system .nexus-sheet .nexus-sidebar-left {
-  display: none; min-width: 0; padding: 0; overflow: hidden;
-  border-right: 1px solid var(--nexus-ui-border); background: var(--nexus-panel-bg, #182330);
-}
-html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-sidebar-left {
-  display: flex !important; flex-direction: row;
-}
-html.nexus-design-system .nexus-sheet .nexus-appearance-rail {
-  flex: 0 0 42px; display: flex; flex-direction: column; align-items: center;
-  gap: 5px; padding: 10px 5px; border-right: 1px solid var(--nexus-ui-border); background: transparent;
-}
-html.nexus-design-system .nexus-sheet .nexus-appearance-rail > button {
-  display: grid; place-items: center; inline-size: 30px; min-inline-size: 30px;
-  block-size: 30px; min-block-size: 30px; padding: 0; border: 1px solid transparent;
-  border-radius: 6px; color: var(--nexus-ui-muted); background: transparent; box-shadow: none;
-}
-html.nexus-design-system .nexus-sheet .nexus-appearance-rail > button:is(:hover, :focus-visible, .active) {
-  border-color: var(--nexus-ui-border); color: var(--nexus-ui-text); background: var(--nexus-ui-surface-hover);
-}
-html.nexus-design-system .nexus-sheet .nexus-appearance-drawer {
-  flex: 1 1 auto; min-width: 0; overflow: auto; padding: 12px;
-  color: var(--nexus-ui-text); background: var(--nexus-panel-bg, #182330);
-  scrollbar-color: var(--nexus-scroll-thumb, var(--nexus-ui-accent)) var(--nexus-ui-field);
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-sidebar-left,
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-sidebar-right {
+  display: none !important;
 }
 html.nexus-design-system .nexus-sheet .nexus-sidebar-right {
-  display: flex !important; flex-direction: column; align-items: stretch; gap: 7px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 7px;
   min-width: 0; padding: 9px 6px; overflow: auto;
   border-left: 1px solid var(--nexus-ui-border); background: var(--nexus-panel-bg, #182330);
 }
@@ -1253,3 +1235,11 @@ html.nexus-design-system .nexus-design-sample-type :is(select, textarea) {
   color: var(--nexus-ui-text); background: var(--nexus-ui-field); font: inherit;
 }
 html.nexus-design-system .nexus-design-sample-type textarea { resize: none; }
+
+/* Preserve Foundry's Font Awesome glyph family when global typography is applied. */
+html.nexus-design-system :is(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands, [class^="fa-"], [class*=" fa-"]) {
+  font-family: var(--fa-style-family, "Font Awesome 6 Free") !important;
+}
+html.nexus-design-system :is(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands, [class^="fa-"], [class*=" fa-"])::before {
+  font-family: inherit !important;
+}

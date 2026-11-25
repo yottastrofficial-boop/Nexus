@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const template = read("../templates/apps/design-studio.hbs");
 const script = read("../scripts/apps/design-studio.js");
 const styles = read("../styles/nexus-design-system.css");
+const legacyStyles = read("../styles/nexus-v1.0.0.css");
 
 test("Design Studio sections switch inside the application without browser navigation", () => {
   assert.match(template, /role="tablist"/);
@@ -32,5 +33,8 @@ test("theme preview demonstrates the real visual primitives controlled by the pr
   assert.match(template, /<input type="text"/);
   assert.match(template, /<select/);
   assert.match(template, /<textarea/);
-  assert.match(styles, /nexus-design-sample-scroll[\s\S]*?overflow-y:\s*auto/);
+  assert.match(styles + legacyStyles, /nexus-design-sample-scroll[\s\S]*?overflow-y:\s*auto/);
+  assert.match(legacyStyles, /nexus-design-studio-toolbar[\s\S]*?min-height:\s*58px/);
+  assert.match(legacyStyles, /nexus-design-studio-preview[\s\S]*?overflow:auto/);
+  assert.match(legacyStyles, /nexus-design-sample-buttons button\.is-secondary/);
 });

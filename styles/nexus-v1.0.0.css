@@ -9603,3 +9603,84 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   border-color: var(--nexus-highlight-color, #9fc5e8);
   background: var(--nexus-panel-hover, #30445a);
 }
+
+/* Design Studio — compact toolbar, balanced preview and clearer component samples. */
+.nexus-design-studio .nexus-design-studio-toolbar { flex:0 0 auto; min-height:58px; padding:8px 14px; gap:14px; }
+.nexus-design-studio .nexus-design-studio-identity { gap:10px; }
+.nexus-design-studio .nexus-design-studio-mark { width:34px; height:34px; }
+.nexus-design-studio .nexus-design-studio-identity strong { font-size:13px; line-height:1.2; }
+.nexus-design-studio .nexus-design-studio-identity small { font-size:10px; line-height:1.3; }
+.nexus-design-studio .nexus-design-studio-target { flex:0 1 310px; flex-wrap:nowrap; justify-content:flex-end; align-items:center; gap:8px; min-width:0; }
+.nexus-design-studio .nexus-design-studio-target label { flex:0 0 auto; width:auto; text-align:right; white-space:nowrap; }
+.nexus-design-studio .nexus-design-studio-target select { flex:1 1 170px; width:auto; min-width:120px; }
+.nexus-design-studio .nexus-design-studio-target button { flex:0 0 34px; min-width:34px; min-height:34px; padding:0; }
+.nexus-design-studio .nexus-design-studio-body { grid-template-columns:112px minmax(0,1fr) minmax(260px,290px); min-height:0; }
+.nexus-design-studio .nexus-design-studio-nav { gap:5px; padding:12px 7px; }
+.nexus-design-studio .nexus-design-studio-nav button { min-height:34px; padding:7px 8px; text-align:center; font-size:11px; }
+.nexus-design-studio .nexus-design-studio-editor,
+.nexus-design-studio .nexus-design-studio-preview {
+  min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin;
+  scrollbar-color:var(--nexus-scrollbar-thumb,#7188a4) var(--nexus-scrollbar-track,#172332);
+}
+.nexus-design-studio .nexus-design-studio-editor { padding:14px; }
+.nexus-design-studio .nexus-design-studio-preview { min-width:0; padding:12px; }
+.nexus-design-studio .nexus-design-preview-card { flex:0 0 auto; }
+.nexus-design-studio .nexus-design-preview-components,
+.nexus-design-studio .nexus-design-preview-sample { display:grid; gap:8px; min-width:0; }
+.nexus-design-studio .nexus-design-preview-label { color:var(--nexus-panel-muted); font-size:9px; font-weight:700; letter-spacing:.07em; }
+.nexus-design-studio .nexus-design-sample-panel {
+  display:grid; gap:8px; min-width:0; padding:10px; border:1px solid var(--nexus-panel-border);
+  border-radius:var(--nexus-radius-panel,8px); background:var(--nexus-panel-surface); box-shadow:var(--nexus-card-shadow,none);
+}
+.nexus-design-studio .nexus-design-sample-panel > strong { font-size:11px; }
+.nexus-design-studio .nexus-design-sample-container {
+  display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; padding:8px;
+  border:1px solid var(--nexus-panel-border); border-radius:var(--nexus-radius-small,6px);
+  background:var(--nexus-panel-bg); color:var(--nexus-panel-muted); font-size:10px;
+}
+.nexus-design-studio .nexus-design-sample-container b { color:var(--nexus-panel-text); }
+.nexus-design-studio .nexus-design-sample-buttons { display:flex; flex-wrap:wrap; gap:7px; }
+.nexus-design-studio .nexus-design-sample-buttons button {
+  flex:1 1 80px; min-height:32px; padding:6px 10px; background:var(--nexus-button-primary,var(--nexus-panel-accent));
+  border-color:var(--nexus-button-border,var(--nexus-panel-border)); color:var(--nexus-button-text,var(--nexus-panel-text));
+}
+.nexus-design-studio .nexus-design-sample-buttons button.is-secondary {
+  background:var(--nexus-button-secondary-bg,var(--nexus-panel-surface));
+  border-color:var(--nexus-button-secondary-border,var(--nexus-panel-border));
+  color:var(--nexus-button-secondary-text,var(--nexus-panel-text));
+}
+.nexus-design-studio .nexus-design-sample-type {
+  display:grid; gap:7px; min-width:0; padding:10px; border:1px solid var(--nexus-panel-border);
+  border-radius:var(--nexus-radius-panel,8px); background:var(--nexus-panel-surface);
+}
+.nexus-design-studio .nexus-design-sample-type > strong { font-size:11px; }
+.nexus-design-studio .nexus-design-sample-type > span { color:var(--nexus-panel-muted); font-size:10px; }
+.nexus-design-studio .nexus-design-sample-type :is(input,select,textarea) {
+  box-sizing:border-box; width:100%; min-width:0; min-height:30px; padding:6px 8px;
+  border:1px solid var(--nexus-panel-border); border-radius:var(--nexus-radius-small,6px);
+  background:var(--nexus-panel-input); color:var(--nexus-panel-text); font:inherit;
+}
+.nexus-design-studio .nexus-design-sample-scroll {
+  display:grid; gap:5px; max-height:88px; min-height:76px; overflow-y:auto; padding:7px;
+  border:1px solid var(--nexus-panel-border); border-radius:var(--nexus-radius-small,6px);
+  background:var(--nexus-panel-input); scrollbar-width:thin;
+  scrollbar-color:var(--nexus-scrollbar-thumb,#7188a4) var(--nexus-scrollbar-track,#172332);
+}
+.nexus-design-studio .nexus-design-sample-scroll > span {
+  display:block; padding:5px 7px; border:1px solid var(--nexus-panel-border); border-radius:4px;
+  background:var(--nexus-panel-surface); color:var(--nexus-panel-text); font-size:10px;
+}
+.nexus-design-studio :is(.nexus-design-studio-preview,.nexus-design-studio-editor,.nexus-design-sample-scroll)::-webkit-scrollbar { width:9px; height:9px; }
+.nexus-design-studio :is(.nexus-design-studio-preview,.nexus-design-studio-editor,.nexus-design-sample-scroll)::-webkit-scrollbar-track { border-radius:8px; background:var(--nexus-scrollbar-track,#172332); }
+.nexus-design-studio :is(.nexus-design-studio-preview,.nexus-design-studio-editor,.nexus-design-sample-scroll)::-webkit-scrollbar-thumb {
+  border:2px solid var(--nexus-scrollbar-track,#172332); border-radius:8px; background:var(--nexus-scrollbar-thumb,#7188a4);
+}
+@media (max-width:980px) {
+  .nexus-design-studio .nexus-design-studio-body { grid-template-columns:104px minmax(0,1fr); }
+  .nexus-design-studio .nexus-design-studio-preview { display:none; }
+}
+@media (max-width:620px) {
+  .nexus-design-studio .nexus-design-studio-toolbar { align-items:stretch; flex-direction:column; }
+  .nexus-design-studio .nexus-design-studio-target { flex:1 1 auto; justify-content:flex-start; }
+  .nexus-design-studio .nexus-design-studio-target label { text-align:left; }
+}

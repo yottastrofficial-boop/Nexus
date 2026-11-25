@@ -1,3 +1,14 @@
+## 1.0.0.100 — Restauração do editor flutuante e refinamento visual
+
+- Restaura os trilhos flutuantes do editor da ficha e a abertura de ferramentas em janelas ApplicationV2 independentes, removendo o menu lateral permanente da área útil da ficha.
+- Reassocia o ciclo de vida das janelas ao ciclo de renderização e fechamento da ficha, preservando painéis abertos durante atualizações e limpando recursos ao fechar.
+- Ajusta o Design System para não reconstruir a antiga barra lateral interna da ficha.
+- Preserva a família tipográfica dos ícones Font Awesome do Foundry ao aplicar a tipografia global do perfil, recuperando controles nativos como navegação, atores, cenas e ações de janela.
+- Compacta a toolbar do Estúdio de Aparência, equilibra a coluna de pré-visualização e melhora amostras de botões primários/secundários, painéis, campos e barras de rolagem.
+- Adiciona contratos de regressão para a arquitetura flutuante, preservação dos ícones e densidade visual do Estúdio.
+- A validação automatizada será executada após o commit; a validação manual no Foundry VTT 14 build 360 permanece necessária.
+- A versão 1.0.0.100 é uma base de desenvolvimento; o manifesto continua apontando para a release estável 1.0.0.98 até aprovação de publicação.
+
 ## 1.0.0.99 — Em desenvolvimento
 
 - Base de desenvolvimento aberta após a publicação estável 1.0.0.98; ainda não publicada.

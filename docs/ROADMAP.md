@@ -8,7 +8,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.99` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
+- Base de versão declarada na main: `1.0.0.100` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
@@ -19,7 +19,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 ### Ficha e Canvas
 
 - A ficha Canvas e os componentes configuráveis estão implementados.
-- A navegação de ferramentas usa barras laterais internas minimalistas; os trilhos flutuantes externos foram removidos. O acesso à Biblioteca Universal permanece integrado à ficha.
+- A navegação de ferramentas usa trilhos flutuantes externos e painéis independentes ApplicationV2; a ficha não mantém um menu lateral permanente durante a edição. O acesso à Biblioteca Universal permanece integrado à ficha.
 - Grupos possuem hierarquia e composição estrutural; não são apenas decoração CSS.
 - A classe principal da ficha e alguns controladores ainda concentram muitas responsabilidades.
 - A refatoração deve mapear dependências, leitores/escritores e eventos antes de extrair ou remover código.

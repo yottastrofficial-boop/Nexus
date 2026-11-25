@@ -24,10 +24,12 @@ assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.applicatio
   "Unrelated third-party application windows must not be globally restyled.");
 assert.doesNotMatch(designSystem, /nexus-floating/,
   "The active Design System must not contain external floating editor rails.");
-assert.doesNotMatch(sheet, /nexus-floating|data-nexus-floating-for|NexusPanelWindow|_mountFloatingUI/,
-  "The character sheet must keep its editor navigation inside the sheet.");
-assert.match(sheet, /_mountInlineEditorPanels/,
-  "The character sheet must initialize its in-sheet editor panels.");
+assert.match(sheet, /NexusPanelWindow/,
+  "Editor tools must open in independent native ApplicationV2 windows.");
+assert.match(sheet, /_mountFloatingUI/,
+  "The sheet must mount floating editor rails outside its content layout.");
+assert.match(sheet, /data-nexus-floating-for/,
+  "Floating editor portals must be scoped to their owning sheet.");
 assert.match(sheet, /normalizeNexusComponentDimension/,
   "Saved component dimensions must follow the 10px grid.");
 
@@ -53,16 +55,22 @@ assert.match(designSystem, /html\.nexus-design-system\s+\.nexus-sheet\s+\.nexus-
 
 assert.match(designSystem, /--nexus-ui-control-size:\s*clamp\(30px,\s*var\(--nexus-control-height/,
   "Native control geometry must consume the active Design Studio control-height token.");
-assert.match(designSystem, /\.nexus-appearance-rail[\s\S]*?var\(--nexus-ui-border\)/,
-  "The in-sheet editor rail must use the same semantic theme tokens as the rest of the interface.");
+assert.doesNotMatch(designSystem, /\.nexus-appearance-rail|\.nexus-appearance-drawer/,
+  "The global Design System must not rebuild the rejected in-sheet editor sidebar.");
+assert.match(designSystem, /nexus-workspace-clean[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/,
+  "The appearance workspace must reclaim the space formerly occupied by in-sheet sidebars.");
 assert.match(designSystem, /#navigation \.scene:is\(\.active, \.view\)/,
   "Scene navigation must distinguish the viewed and active scene states.");
 assert.match(designSystem, /#navigation #scene-list[\s\S]*?overflow-x:\s*auto/,
   "Long scene lists must remain horizontally navigable instead of forcing clipped controls.");
 assert.match(designSystem, /\.nexus-sheet \.nexus-sidebar-right[\s\S]*?overflow:\s*auto/,
   "Layout navigation must remain scrollable inside the character sheet.");
-assert.match(designSystem, /\.nexus-sheet \.nexus-appearance-drawer[\s\S]*?background:\s*var\(--nexus-panel-bg/,
-  "Appearance tools must use the inline drawer instead of detached floating windows.");
+assert.match(legacyStyles, /\.nexus-panel-window/,
+  "Appearance tools must retain independent native panel windows.");
+assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*58px/,
+  "The Design Studio toolbar must remain compact.");
+assert.match(designSystem, /fa-style-family/,
+  "Foundry Font Awesome icons must retain their icon font when profile typography changes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");
 
