@@ -721,8 +721,8 @@ assert.match(libraryCatalog, /label: "Barra de recurso"/, "A biblioteca deve man
 assert.match(libraryCatalog, /currentPath: ""/, "A barra neutra não deve vincular automaticamente o recurso PV");
 assert.match(libraryCatalog, /maxPath: ""/, "A barra neutra não deve vincular automaticamente o máximo de PV");
 assert.match(libraryCatalog, /themes: \[\]/, "A limpeza deve remover os temas de demonstração da biblioteca");
-assert.match(sheetCode, /const availableFolders=NEXUS_LIBRARY_CATALOG\.categories\?\?\[\]/, "As pastas da Biblioteca devem seguir o catálogo ativo");
-assert.match(sheetCode, /for\(const \{id,label,icon\} of availableFolders\)/, "A Biblioteca deve montar pastas diretamente do catálogo ativo");
+assert.match(libraryApplication, /refreshFolders/, "A árvore de pastas deve ser gerenciada pela aplicação universal");
+assert.match(libraryApplication, /createLibraryFolder/, "A Biblioteca Universal deve criar pastas pelo serviço compartilhado");
 assert.doesNotMatch(sheetCode, /\["standard", "Padrão do sistema · provisório"/, "Pastas antigas não devem permanecer hard-coded");
 
 
@@ -1063,7 +1063,7 @@ assert.match(sheetCode, /keyboardMoveHistoryCaptured/, "Movimentos por setas dev
 assert.match(sheetCode, /requestAnimationFrame\(applyKeyboardMoveFrame\)/, "Movimentos repetidos por teclado devem ser aplicados por frame");
 assert.match(sheetCode, /keyboardMoveKeyUp/, "A movimentação deve persistir ao soltar a tecla");
 assert.doesNotMatch(sheetCode, /scheduleKeyboardMoveSave/, "A movimentação não deve depender de debounce por repetição de tecla");
-assert.match(sheetCode, /nexus-library-saved-group-preview/, "Grupos salvos devem exibir uma miniatura composta");
+assert.match(libraryCatalogExplorer, /getLibraryResourcePreviewModel/, "O Explorer deve construir prévias tipadas para os recursos");
 assert.match(css, /nexus-library-saved-group-card/, "A miniatura de grupo deve representar os cards membros");
 assert.match(css, /\.nexus-group-surface \{ min-width:0; min-height:0;/, "Grupos pequenos não devem impor altura mínima artificial");
 console.log("NEXUS 1.0.0.7: regressões de desempenho, aliases e prévias de grupos verificadas.");
@@ -1077,7 +1077,7 @@ assert.match(sheetCode, /popover="manual"/, "O seletor de cores deve evitar fech
 assert.match(sheetCode, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
 assert.match(sheetCode, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
 assert.match(sheetCode, /is-grid/, "Grupos grandes devem usar uma miniatura em grade");
-assert.match(sheetCode, /nexus-library-saved-group-track/, "Pré-visualizações devem representar barras de recursos");
+assert.match(libraryCatalogExplorer, /renderLibraryResourcePreview/, "As prévias devem ser renderizadas pelo Explorer compartilhado");
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
 assert.match(sheetCode, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
@@ -1272,7 +1272,7 @@ assert.ok(sheetCode.includes("behavior: [900, 600]"), "Comportamento deve compar
 assert.ok(sheetCode.includes("component: [400, 600]"), "Propriedades deve seguir a geometria compacta dos painéis");
 assert.ok(sheetCode.includes("style: [400, 600]") && sheetCode.includes("layers: [400, 600]") && sheetCode.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
 assert.ok(sheetCode.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
-assert.ok(sheetCode.includes("library: [900, 600]") && sheetCode.includes("behavior: [900, 600]"), "Comportamento deve usar as mesmas dimensões da Biblioteca");
+assert.match(libraryApplication, /position: \{ width: 1180, height: 760 \}/, "A Biblioteca Universal deve manter uma janela independente dimensionada para o Explorer");
 assert.ok(sheetCode.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(sheetCode.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
 assert.ok(sheetCode.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
@@ -1385,8 +1385,8 @@ assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "groups"/,"Blocos e
 assert.match(sheet,/writeNexusLibraryCollection\(game\.user, "layouts"/,"Configurações completas de ficha devem ser persistidas no armazenamento unificado");
 assert.match(css,/aspect-ratio:1 \/ 1 !important/,"Os cartões da Biblioteca devem ter prévias quadradas");
 assert.match(css,/overflow:auto !important; overscroll-behavior:contain/,"As grades devem rolar independentemente para evitar cortes");
-assert.match(template,/Salvar elemento/,"A ação de salvar um elemento deve estar identificada por texto");
-assert.match(template,/Salvar composição selecionada/,"A ação de salvar uma composição deve estar identificada por texto");
+assert.match(template, /data-open-nexus-library/, "A ficha deve expor acesso à Biblioteca Universal");
+assert.match(libraryApplication, /data-library-backup-export/, "A aplicação deve expor exportação de backup");
 
 
 
