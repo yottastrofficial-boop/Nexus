@@ -22,13 +22,14 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (pós-release 1.0.0.107)
+## Estado de referência — 2026-11-25 (publicação antecipada da 1.0.0.108)
 
-- **Versão distribuída:** `1.0.0.107`; release, ZIP e manifesto confirmados.
-- **Teste manual pendente:** `1.0.0.107` atualiza o CSS do sidebar e os contratos de regressão. CI, empacotamento e publicação foram aprovados; a validação manual no Foundry VTT 14 build 360 ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
+- **Versão candidata na main:** `1.0.0.108`; publicação autorizada pelo mantenedor antes da validação manual.
+- **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
+- **Teste manual pendente:** `1.0.0.108` consolida o CSS do sidebar e os contratos de regressão. CI, empacotamento e publicação foram aprovados; a validação manual no Foundry VTT 14 build 360 ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
 - **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente. A captura anterior mostrou abas verticais, conteúdo sobreposto e ícones incorretos; a correção de CSS ainda não foi verificada no cliente real. O checkpoint funcional permanece em `1.0.0.70`.
-- **Distribuição:** `manifest.json` aponta para `1.0.0.107`, publicada por autorização do mantenedor para teste manual. O checkpoint funcional permanece em `1.0.0.70` até validação no Foundry real.
+- **Distribuição:** a `1.0.0.108` foi autorizada para publicação antecipada. O manifesto estável só será sincronizado após CI, empacotamento e confirmação do asset; o checkpoint funcional permanece em `1.0.0.70` até validação no Foundry real.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.
 - **Ambiente-alvo:** Foundry VTT 14, build 360.
