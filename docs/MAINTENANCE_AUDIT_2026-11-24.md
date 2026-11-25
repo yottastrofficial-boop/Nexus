@@ -151,3 +151,16 @@ Os arquivos ativos `scripts/nexus-v1.0.0.js` e `styles/nexus-v1.0.0.css` são os
 ## Critério de conclusão desta auditoria
 
 Uma pendência só pode ser marcada como concluída quando houver implementação verificável, teste automatizado adequado e, para fluxos de Foundry, validação funcional no cliente real. Esta auditoria não altera regras mecânicas do RPG.
+
+## Atualização de interface — 2026-11-24
+
+Após a auditoria, a main recebeu uma rodada integrada de refinamento visual e simplificação da Biblioteca:
+
+- O Estúdio de Aparência passou a alternar Paleta, Tipografia, Layout e Acessibilidade dentro da própria janela, sem links âncora que alterem a navegação do navegador.
+- A prévia do tema passou a representar painel, container, botões com rótulos, tipografia, input e barra de rolagem.
+- O Design System passou a aplicar a família tipográfica como herança nas superfícies gerais do Foundry e a unificar fundos e bordas do Chat. Os controles de janela foram normalizados para manter os ícones sem blocos quadrados.
+- Foram removidas as regras específicas que davam aparência de botões flutuantes aos controles nativos da barra do Foundry; o posicionamento e os handlers nativos permanecem sob responsabilidade do Foundry.
+- A ficha agora abre a Biblioteca Universal compartilhada. O painel embutido e seu adaptador antigo foram removidos, junto com o contrato de teste correspondente, substituído por um contrato de integração com a aplicação universal.
+- O texto selecionado na interface passa a usar o acento do tema, em vez do destaque padrão inconsistente do navegador.
+
+A alteração é visual e de navegação; não altera schemas mecânicos de Actors/Items nem dados de campanha. A validação estática/CI ainda precisa ser confirmada após esta atualização, e o teste funcional real no Foundry VTT 14 build 360 continua pendente. O link de referência visual do usuário não pôde ser carregado nesta sessão; uma captura anexada diretamente é necessária para comparar detalhes pixel a pixel.
