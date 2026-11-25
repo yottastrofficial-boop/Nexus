@@ -5,7 +5,7 @@
 - Reforça a preservação da fonte dos ícones Font Awesome do Foundry ao aplicar tipografia de tema.
 - Corrige molduras e bordas redundantes nos wrappers de diretórios nativos (Actors, Items, Scenes e demais abas), mantendo separadores discretos nos itens e estados de hover/foco.
 - Adiciona contratos automatizados para a estrutura do Estúdio e o escopo das correções do chrome.
-- CI e empacotamento automatizados aprovados. A inspeção visual no cliente Foundry VTT 14 build 360 continua necessária; esta candidata ainda não foi publicada como estável.
+- CI e empacotamento automatizados aprovados. O workflow publicou o GitHub Release v1.0.0.101 como release padrão; como a validação visual no Foundry VTT 14 build 360 permanece pendente, o manifesto estável foi restaurado para 1.0.0.100. A release .101 está disponível no GitHub, mas não foi validada manualmente no cliente.
 
 ## 1.0.0.100 — Estabilização da interface e estilos por categoria
 
