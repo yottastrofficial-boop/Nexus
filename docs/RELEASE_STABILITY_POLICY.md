@@ -29,8 +29,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - **Estado da main:** base de versão declarada `1.0.0.101` (desenvolvimento pós-release); a última versão estável publicada permanece `1.0.0.98`.
 - **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
 - **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
-- **Próxima candidata prevista:** `1.0.0.101-rc.3`, gerada a partir da main para validação visual e funcional no Foundry.
-- **Manifesto original:** `manifest.json` é o único endereço de instalação/atualização. Ele pode apontar para uma candidata em teste ou para uma release estável, sempre com ZIP publicado e verificado. A última release estável anterior a esta rodada é `1.0.0.98`.
+- **Manifesto original:** `manifest.json` é o único endereço de instalação/atualização e deve apontar para a última release estável publicada, com ZIP confirmado.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 - **Rotação após release estável:** depois que o workflow atualizar `manifest.json` e `system.json.download`, incremente `system.version` para a próxima base de desenvolvimento e atualize README, CHANGELOG, roadmap e visão do projeto antes do próximo commit funcional. `system.json.download` deve continuar igual à versão estável em `manifest.json`.
 
@@ -43,44 +42,26 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 - Migrações preservam propriedades desconhecidas, layouts, componentes, grupos, aliases e dados personalizados que não estejam diretamente envolvidos na mudança.
 - Um sistema antigo nunca deve rebaixar um Actor com versão de schema superior.
 - Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
-- O `manifest.json` original só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível. Isso vale tanto para candidatas quanto para versões estáveis.
-- O ZIP de uma candidata deve carregar em seu próprio `system.json` a URL do `manifest.json` original da `main` e o download da mesma tag candidata; o mesmo manifesto original é atualizado somente depois que o ZIP for publicado e verificado.
-- Uma release candidata usa o mesmo `manifest.json` da `main` que a instalação normal; a URL de download aponta para o ZIP da candidata publicada.
+- O `manifest.json` original só deve apontar para uma release estável depois de confirmar que o ZIP correspondente está anexado e acessível.
 - Uma release só é declarada funcionalmente estável após validação no Foundry real.
 
-## Canais de publicação no GitHub Actions
+## Publicação no GitHub Actions
 
-O workflow `.github/workflows/release.yml` separa validação, candidata e release estável, mas ambas as publicações utilizam o manifesto original `manifest.json` da `main`:
+- O workflow executa validação e empacotamento em pushes e pull requests.
+- Uma release só é publicada por um commit na branch `main` cuja mensagem contenha o marcador exato `[release]`.
+- Não há canal de candidata, pré-release ou publicação manual de versões experimentais.
+- Antes da publicação, a suíte automatizada e o ZIP são validados.
+- Depois de confirmar o asset `nexus.zip`, o workflow atualiza o `manifest.json` original para a release estável publicada.
+- Se validação, empacotamento, publicação ou verificação do ZIP falhar, o manifesto não avança.
+- O manifesto e o pacote devem apontar para a mesma versão estável. A versão-base de desenvolvimento em `system.json` pode avançar sem alterar o download estável.
 
-### 1. Validação comum
+## Estabilidade funcional
 
-- Pull requests, pushes de desenvolvimento e execução manual com a opção `validate` executam a suíte unificada e empacotam um artefato temporário.
-- O artefato de validação não cria uma GitHub Release e não altera `manifest.json`.
-- O artefato temporário expira conforme a retenção configurada no workflow.
-
-### 2. Release candidata
-
-- A partir da `main`, um commit cuja mensagem contenha `[candidate]` gera automaticamente a candidata `system.version-rc.1`; alternativamente, executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.101-rc.1`.
-- A candidata pode usar o mesmo núcleo numérico da versão de desenvolvimento atual com sufixo `-rc.N`, ou avançar para um núcleo superior.
-- Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
-- A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
-- Após confirmar o ZIP, o workflow publica `manifest.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O `manifest.json` original passa a apontar para a candidata, de modo que instalações pelo endereço normal recebem a atualização candidata.
-
-### 3. Release estável
-
-- Primeiro, atualizar `system.json` para a nova versão estável e integrar essa alteração à `main`.
-- A publicação exige um commit na `main` cuja mensagem contenha o marcador exato `[release]`; variações como `[release-candidate]` não publicam uma versão estável.
-- O workflow valida novamente a suíte e gera o ZIP. Tags que apontem para outro commit ou releases sem ZIP verificado são recusadas; uma reexecução do mesmo commit pode continuar sem sobrescrever assets. Releases e tags permanecem imutáveis.
-- Depois de confirmar que `nexus.zip` está anexado e acessível, o workflow atualiza `manifest.json` para a nova versão.
-- Se a validação, o empacotamento, a publicação ou a verificação do ZIP falhar, o manifesto estável não avança.
-
-### 4. Estabilidade funcional
-
-Candidata ou release estável não equivale a checkpoint funcional. A promoção do checkpoint continua dependendo da execução e do registro dos testes no Foundry VTT 14 build 360, conforme os critérios desta política.
+A publicação de uma release estável não equivale a checkpoint funcional. A promoção do checkpoint depende da execução e do registro dos testes no Foundry VTT 14 build 360, conforme os critérios desta política.
 
 ## O que é preservado
 
-- Releases e tags antigas não são apagadas automaticamente.
+- Releases e tags estáveis antigas são preservadas como histórico; pré-releases antigas precisam ser removidas manualmente quando a ferramenta de administração permitir.
 - O histórico Git é o registro permanente das alterações, inclusive protótipos e etapas instáveis.
 - Branches antigas podem ser arquivadas ou excluídas somente após comparação com a main e confirmação de que commits exclusivos foram preservados ou deliberadamente descartados.
 - A limpeza remove duplicações e código obsoleto da árvore ativa, não reescreve o histórico do projeto.
