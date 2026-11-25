@@ -22,6 +22,12 @@ assert.match(sidebar, /#sidebar\s*\{[\s\S]*?display:\s*flex\s*!important;[\s\S]*
   "The sidebar shell must stack navigation above its panel.");
 assert.match(sidebar, /#sidebar-tabs[\s\S]*?flex-direction:\s*row\s*!important;[\s\S]*?flex-wrap:\s*wrap\s*!important;/,
   "The native tab bar must lay out horizontally and wrap when needed.");
+assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol[\s\S]*?flex-direction:\s*row\s*!important;/,
+  "The actual Foundry V14 menu.flexcol child must be converted into a horizontal tab strip.");
+assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li[\s\S]*?flex:\s*0 0 34px\s*!important;/,
+  "Each native list item must occupy one horizontal tab slot.");
+assert.match(sidebar, /#sidebar-tabs\s*>\s*menu\.flexcol\s*>\s*li\s*>\s*button\[role="tab"\]/,
+  "Tab button geometry must target the actual nested Foundry V14 markup.");
 assert.match(sidebar, /#sidebar-tabs\s*>\s*:is\(\.item, button, \[role="tab"\], \.sidebar-tab:not\(\.tab\)\)/,
   "Only direct native tab controls may receive button geometry.");
 assert.match(sidebar, /\.tab\.sidebar-tab is a content panel, never an icon button/,

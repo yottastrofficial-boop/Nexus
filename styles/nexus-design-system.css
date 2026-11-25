@@ -1320,6 +1320,54 @@ html.nexus-design-system #sidebar .sidebar-tabs {
   box-shadow: none !important;
 }
 
+/* Foundry V14 renders the primary tabs as NAV > MENU.flexcol > LI > BUTTON.
+   The nav itself is already a horizontal flex row, but the native flexcol menu
+   forces every tab into a vertical stack. Make that actual child the tab strip. */
+html.nexus-design-system #sidebar-tabs > menu.flexcol {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li {
+  display: flex !important;
+  flex: 0 0 34px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[role="tab"],
+html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[data-action="toggleState"] {
+  display: inline-flex !important;
+  flex: 0 0 34px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 /* Size only native navigation controls. The exclusion is intentional:
    .tab.sidebar-tab is a content panel, never an icon button. */
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),

@@ -82,3 +82,13 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - A regra global de tipografia dos controles aplicava font-family: inherit a todos os botões. A correção exclui as classes Font Awesome, preservando a fonte nativa dos glifos.
 - PR #97 integrada; CI de validação de pacote passou.
 - A correção dos ícones não resolve, por si só, a orientação vertical da navegação. Falta a geometria/estilos computados do contêiner #sidebar-tabs e seus ancestrais. Manter essa parte como pendente e não presumir seletores.
+
+
+## Diagnóstico DOM e correção da navegação — Foundry VTT 14
+
+- A inspeção do usuário confirmou `#sidebar-tabs` como `NAV.tabs.faded-ui` (298 × 563, `display:flex`, `flex-direction:row`, `flex-wrap:wrap`). Portanto, o próprio NAV já é horizontal.
+- O HTML real contém `NAV#sidebar-tabs > MENU.flexcol > LI > BUTTON[role=tab]`. O menu interno `flexcol` era o elemento que mantinha os controles empilhados verticalmente.
+- Os seletores de geometria anteriores também tratavam os botões como filhos diretos de `#sidebar-tabs`, mas no DOM real eles estão dentro de `menu > li`; por isso não atingiam os botões.
+- Correção: transformar o `menu.flexcol` real em faixa flex horizontal com quebra de linha e dimensionar seus `li` e botões descendentes. Sem alterar handlers, ordem DOM, controlador de abas ou painéis.
+- Adicionado contrato de regressão para a hierarquia real observada.
+- A correção permanece sujeita a teste manual no Foundry VTT 14; não declarar validação visual concluída.
