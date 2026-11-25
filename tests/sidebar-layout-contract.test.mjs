@@ -32,6 +32,12 @@ assert.match(sidebar, /#sidebar-tabs\s*>\s*:is\(\.item, button, \[role="tab"\], 
   "Only direct native tab controls may receive button geometry.");
 assert.match(sidebar, /\.tab\.sidebar-tab is a content panel, never an icon button/,
   "The implementation must explicitly protect content panels from button sizing.");
+assert.match(sidebar, /#sidebar #chat \.chat-log[\s\S]*?width:\s*100%\s*!important;[\s\S]*?max-width:\s*none\s*!important;/,
+  "The actual OL.chat-log must fill the chat sidebar rather than remain constrained to a narrow default width.");
+assert.match(sidebar, /#sidebar #chat :is\(#chat-controls, \.chat-controls, #chat-form, \.chat-form\)[\s\S]*?width:\s*100%\s*!important;[\s\S]*?max-width:\s*none\s*!important;/,
+  "The actual chat controls and composer must span the sidebar width.");
+assert.match(sidebar, /#sidebar #chat \.chat-log :is\(\.chat-message, \.message\)[\s\S]*?max-width:\s*none\s*!important;[\s\S]*?margin:\s*5px 2px\s*!important;/,
+  "Chat cards should use compact spacing and avoid fixed narrow widths.");
 assert.match(sidebar, /#sidebar-content[\s\S]*?flex:\s*1 1 0\s*!important;/,
   "The panel area must consume the remaining sidebar height.");
 const panelRules = sidebar.slice(sidebar.indexOf("/* Panels fill the remaining area."));
