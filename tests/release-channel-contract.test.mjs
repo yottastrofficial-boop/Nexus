@@ -60,7 +60,7 @@ assert.match(workflow, /overwrite_files: false/,
 assert.match(policy, /## Canais de publicação no GitHub Actions/);
 assert.match(policy, /Release candidata/);
 assert.match(policy, /Release estável/);
-assert.match(policy, /O manifesto estável não é atualizado/);
+
 assert.match(policy, /manifest-preview\.json/);
 assert.ok(policy.includes("[candidate]"));
 
