@@ -22,13 +22,13 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (pós-release 1.0.0.106)
+## Estado de referência — 2026-11-25 (pós-release 1.0.0.107)
 
-- **Versão distribuída:** `1.0.0.106`; manifesto e asset permanecem inalterados.
-- **Build de teste em preparação:** `1.0.0.107` atualiza o CSS do sidebar e os contratos de regressão; depende de CI verde e validação manual no Foundry VTT 14 build 360. A publicação para teste não a promove automaticamente a checkpoint funcional.
+- **Versão distribuída:** `1.0.0.107`; release, ZIP e manifesto confirmados.
+- **Teste manual pendente:** `1.0.0.107` atualiza o CSS do sidebar e os contratos de regressão. CI, empacotamento e publicação foram aprovados; a validação manual no Foundry VTT 14 build 360 ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
 - **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente. A captura anterior mostrou abas verticais, conteúdo sobreposto e ícones incorretos; a correção de CSS ainda não foi verificada no cliente real. O checkpoint funcional permanece em `1.0.0.70`.
-- **Distribuição:** `manifest.json` aponta para `1.0.0.106`; nenhuma nova versão deve ser publicada antes de validar o sidebar no Foundry real.
+- **Distribuição:** `manifest.json` aponta para `1.0.0.107`, publicada por autorização do mantenedor para teste manual. O checkpoint funcional permanece em `1.0.0.70` até validação no Foundry real.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.
 - **Ambiente-alvo:** Foundry VTT 14, build 360.
