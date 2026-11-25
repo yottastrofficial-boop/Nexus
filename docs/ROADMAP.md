@@ -27,3 +27,8 @@ Corrige a aplicação das regras do Minimal UI à estrutura ApplicationV2 do Fou
 ## Atualização 1.0.0.104
 
 Corrige o erro de construção do Estúdio de Aparência causado por opções de janela congeladas recebidas pelo menu do Foundry. O código agora clona as opções herdadas e as estruturas mutáveis antes da construção da ApplicationV2. A navegação nativa do sidebar passa para uma faixa superior horizontal, mantendo a ordem DOM original do Foundry (de cima para baixo convertida em esquerda para direita). As classes Font Awesome legadas são excluídas da tipografia global. A validação no cliente Foundry VTT 14 build 360 permanece pendente.
+
+
+## Correção direta do sidebar — commit 417acb4f663ba328e30f28db70ab976af0f18669
+
+A pedido do usuário, esta rodada não utiliza Playwright nem exige diagnóstico automatizado no navegador. O CSS do sidebar foi refeito diretamente na `main` para separar explicitamente a navegação dos painéis ApplicationV2: os controles de navegação são os elementos `.item` dentro de `#sidebar-tabs`/ `.sidebar-tabs`; os elementos `.tab.sidebar-tab` são tratados como painéis de conteúdo e não recebem dimensões de botão. A navegação passa a ser selecionada diretamente por ID e por classes de compatibilidade, com layout horizontal flexível, quebra de linha, estados de foco/seleção e preservação dos glifos nativos. O usuário fará a validação visual e funcional no Foundry VTT 14. Esta alteração ainda não é uma release nem altera a versão distribuída `1.0.0.106`.
