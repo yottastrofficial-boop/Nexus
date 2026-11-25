@@ -41,5 +41,6 @@ test("native Foundry chrome receives global typography without replacing icon fo
   assert.match(designSystem, /--nexus-font-family/);
   assert.match(designSystem, /#chat-log, \.chat-log, \.chat-scroll/);
   assert.match(designSystem, /#chat-log \.message-content[\s\S]*?background: var\(--nexus-ui-surface-raised\)/);
-  assert.match(designSystem, /fa-style-family/);
+  assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-solid[^{}]*font-family/i);
+  assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/);
 });
