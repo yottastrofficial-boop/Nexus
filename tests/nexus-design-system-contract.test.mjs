@@ -21,21 +21,12 @@ assert.match(designSystem, /\.application\.nexus-themed-application/,
   "NEXUS and explicitly supported Foundry applications must receive the shared styles.");
 assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.application,\s*\.window-app\)/,
   "Unrelated third-party application windows must not be globally restyled.");
-assert.match(designSystem, /\.nexus-floating-left[\s\S]*?background:\s*transparent\s*!important/,
-  "The left rail wrapper must not draw a panel surface.");
-assert.match(designSystem, /\.nexus-floating-right[\s\S]*?background:\s*transparent\s*!important/,
-  "The right rail wrapper must not draw a panel surface.");
-assert.match(designSystem, /\.nexus-more-button::before[\s\S]*?\\f142/,
-  "The more button must have an explicit icon glyph.");
-assert.match(designSystem, /\.nexus-floating-close::before[\s\S]*?\\f00d/,
-  "The close button must have an explicit icon glyph.");
-
-assert.match(sheet, /app\.appendChild\(portal\)/,
-  "The floating portal must live inside the native sheet application.");
-assert.doesNotMatch(sheet, /document\.body\.appendChild\(portal\)/,
-  "The floating portal must not create an independent body-level stacking context.");
-assert.doesNotMatch(sheet, /syncRailFocus/,
-  "The floating rails must not use a parallel z-index focus system.");
+assert.doesNotMatch(designSystem, /nexus-floating/,
+  "The active Design System must not contain external floating editor rails.");
+assert.doesNotMatch(sheet, /nexus-floating|data-nexus-floating-for|NexusPanelWindow|_mountFloatingUI/,
+  "The character sheet must keep its editor navigation inside the sheet.");
+assert.match(sheet, /_mountInlineEditorPanels/,
+  "The character sheet must initialize its in-sheet editor panels.");
 assert.match(sheet, /normalizeNexusComponentDimension/,
   "Saved component dimensions must follow the 10px grid.");
 
@@ -64,15 +55,15 @@ assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-sh
 
 assert.match(designSystem, /--nexus-ui-control-size:\s*clamp\(30px,\s*var\(--nexus-control-height/,
   "Native control geometry must consume the active Design Studio control-height token.");
-assert.match(designSystem, /\.nexus-floating-ui[\s\S]*?var\(--nexus-ui-control-size\)/,
-  "The sheet's own editor rails may retain profile-driven dimensions without restyling Foundry controls.");
+assert.match(designSystem, /\.nexus-appearance-rail[\s\S]*?var\(--nexus-ui-border\)/,
+  "The in-sheet editor rail must use the same semantic theme tokens as the rest of the interface.");
 assert.match(designSystem, /#navigation \.scene:is\(\.active, \.view\)/,
   "Scene navigation must distinguish the viewed and active scene states.");
 assert.match(designSystem, /#navigation #scene-list[\s\S]*?overflow-x:\s*auto/,
   "Long scene lists must remain horizontally navigable instead of forcing clipped controls.");
-assert.match(designSystem, /\.nexus-floating-ui :is\(\.nexus-floating-left, \.nexus-floating-right\)[\s\S]*?overflow-y:\s*auto/,
-  "Floating sheet rails must remain independently scrollable within the viewport.");
-assert.match(designSystem, /\.nexus-floating-tabs \.nexus-layout-tab[\s\S]*?var\(--nexus-ui-control-size\)/,
-  "Floating page controls must follow the same profile-driven dimensions as Foundry controls.");
+assert.match(designSystem, /\.nexus-sheet \.nexus-sidebar-right[\s\S]*?overflow:\s*auto/,
+  "Layout navigation must remain scrollable inside the character sheet.");
+assert.match(designSystem, /\.nexus-sheet \.nexus-appearance-drawer[\s\S]*?background:\s*var\(--nexus-panel-bg/,
+  "Appearance tools must use the inline drawer instead of detached floating windows.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");

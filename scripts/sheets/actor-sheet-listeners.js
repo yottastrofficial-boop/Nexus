@@ -198,7 +198,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           : input.closest(".nexus-property-value-field")?.nextElementSibling;
       if (preview) renderInteractionMediaPreview(preview, input.value);
     });
-    const isSheetOwnedControl = input => currentRoot?.contains(input) || [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.contains(input));
+    const isSheetOwnedControl = input => currentRoot?.contains(input);
     // Remove detached property-option portals left by a previous ApplicationV2 render.
     document.querySelectorAll(`[data-nexus-property-owner="${sheet.id}"]`).forEach(list => {
       if (!list._nexusOwnerInspector?.isConnected) list.remove();
@@ -310,10 +310,8 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     html.find("[data-layout-select]").on("change", event => sheet._switchLayout(event.currentTarget.value));
     html.find("[data-layout-name]").on("change", event => sheet._updateLayoutName(event.currentTarget.value));
     html.find("[data-appearance-panel]").on("click", event => {
-      const key = event.currentTarget.dataset.appearancePanel;
-      html.find("[data-appearance-panel]").removeClass("active"); html.find("[data-tool-panel]").prop("hidden", true).removeClass("active");
-      event.currentTarget.classList.add("active"); html.find(`[data-tool-panel="${key}"]`).prop("hidden", false).addClass("active");
-
+      event.preventDefault();
+      sheet._openInlineEditorPanel?.(event.currentTarget.dataset.appearancePanel);
     });
     html.find("[data-open-nexus-library]").on("click", event => {
       event.preventDefault();
@@ -459,7 +457,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const row=event.currentTarget, groupId=row.dataset.layerGroup;
       if(groupId){const group=(sheet._currentLayout?.groups??[]).find(item=>item.id===groupId);sheet._selectedGroupId=groupId;sheet._setSelection(html,sheet._groupHierarchy?.descendants.get(String(groupId))??group?.componentIds??[]);}
       else sheet._setSelection(html,[row.dataset.layerSelect]);
-      const portal=document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);portal?.querySelector('[data-floating-panel="component"]')?.click();
+      sheet._openInlineEditorPanel?.("component");
     });
     // A árvore usa seleção e comandos explícitos; não habilitar HTML drag-and-drop.
     html.find("[data-layer-select], [data-layer-group]").removeAttr("draggable");
@@ -467,7 +465,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const componentId = control.dataset.componentId || control.closest("[data-interaction-editor], [data-property-presentation-editor]")?.dataset.componentId;
       const interactionId = control.dataset.interactionId || "";
       if (!componentId) return;
-      const editor = control.closest("[data-interaction-editor]") || sheet._nexusPanelWindows?.get("behavior")?.panel?.querySelector("[data-interaction-editor]");
+      const editor = control.closest("[data-interaction-editor]") || sheet.element?.querySelector('[data-tool-panel="behavior"] [data-interaction-editor]');
       let activeInteractionId = editor?.dataset.activeInteractionId || interactionId;
       const layouts = await sheet._readLayouts(), active = sheet._activeLayoutId(), component = layouts[active]?.components?.find(item => item.id === componentId);
       if (!component) return;
@@ -698,35 +696,22 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const input=event.currentTarget, key=input.dataset.componentSetting, id=input.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
       const shouldRestoreInputFocus = document.activeElement === input;
       if(!id) return;
-      const panelWindowElement = input.closest(".nexus-panel-window");
-      const panelInstance = sheet._nexusPanelWindows?.get("component");
-      const panelLeft = panelWindowElement?.style.left ?? "";
-      const panelTop = panelWindowElement?.style.top ?? "";
-      const panelTransform = panelWindowElement?.style.transform ?? "";
-      const scrollSnapshot = [".window-content", ".application-content", ".nexus-native-panel-content", ".nexus-tool-panel", ".nexus-component-inspector", ".nexus-behavior-editor"]
-        .map(selector => ({ selector, top: panelWindowElement?.querySelector(selector)?.scrollTop ?? 0, left: panelWindowElement?.querySelector(selector)?.scrollLeft ?? 0 }));
+      const drawer = sheet.element?.querySelector(".nexus-appearance-drawer");
+      const drawerScroll = { top: drawer?.scrollTop ?? 0, left: drawer?.scrollLeft ?? 0 };
       const restoreEditorViewport = ({ focus = false, target: focusTarget = null } = {}) => {
-        const restore = () => {
-          const currentWindow = sheet._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
-          if (!currentWindow) return;
-          if (panelLeft) currentWindow.style.setProperty("left", panelLeft, "important");
-          if (panelTop) currentWindow.style.setProperty("top", panelTop, "important");
-          if (panelTransform) currentWindow.style.setProperty("transform", panelTransform, "important");
-          for (const state of scrollSnapshot) {
-            const target = currentWindow.querySelector(state.selector);
-            if (target) { target.scrollTop = state.top; target.scrollLeft = state.left; }
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const currentRoot = sheet.element ?? html[0];
+          const currentDrawer = currentRoot?.querySelector?.(".nexus-appearance-drawer");
+          if (currentDrawer) {
+            currentDrawer.scrollTop = drawerScroll.top;
+            currentDrawer.scrollLeft = drawerScroll.left;
           }
           if (focus && sheet._componentEditorTargetId === id) {
-            const currentInput = focusTarget?.isConnected ? focusTarget : (currentWindow.querySelector(`[data-component-setting="${CSS.escape(key)}"][data-component-target-id="${CSS.escape(id)}"]`) ?? currentWindow.querySelector(`[data-component-setting="${CSS.escape(key)}"]`));
+            const currentInput = focusTarget?.isConnected ? focusTarget
+              : currentRoot?.querySelector?.(`[data-component-setting="${CSS.escape(key)}"][data-component-target-id="${CSS.escape(id)}"]`)
+                ?? currentRoot?.querySelector?.(`[data-component-setting="${CSS.escape(key)}"]`);
             currentInput?.focus({ preventScroll: true });
           }
-        };
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          const currentWindow = sheet._nexusPanelWindows?.get("component")?.element ?? panelInstance?.element ?? panelWindowElement;
-          const activeNow = document.activeElement;
-          const target = currentWindow?.querySelector(`[data-component-setting="${CSS.escape(key)}"][data-component-target-id="${CSS.escape(id)}"]`);
-          const mayRestoreFocus = shouldRestoreInputFocus && (!activeNow || activeNow === document.body || activeNow === document.documentElement || activeNow === input || !currentWindow?.contains(activeNow));
-          restoreEditorViewport({ focus: mayRestoreFocus, target });
         }));
       };
       // O alvo de edição é persistente e independente do foco/seleção momentânea.
@@ -860,7 +845,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
           if (node) { const small=node.querySelector("small"), strong=node.querySelector("strong"); if(small)small.textContent=String(component.text??"Atributo"); if(strong)strong.textContent=String(value); }
         }
         if (component.type === "token") {
-          const editorPanel = sheet._nexusPanelWindows?.get("component")?.panel ?? html[0];
+          const editorPanel = sheet.element?.querySelector('[data-tool-panel="component"]') ?? html[0];
           const tokenRoots = [node?.querySelector(".nexus-token-subcanvas"), editorPanel?.querySelector("[data-token-preview]")].filter(Boolean);
           for (const tokenRoot of tokenRoots) {
             let image = tokenRoot.querySelector(".nexus-token-portrait");
@@ -996,7 +981,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         componentNode.dataset.labelPosition = "top-left";
         sheet._applyComponentTextStyles(componentNode, component);
       } else if (componentNode) sheet.render({ force: true });
-      const inspector = [...(sheet._nexusPanelWindows?.values?.() ?? [])].map(instance => instance.element).find(node => node?.querySelector(".nexus-component-inspector"))?.querySelector(".nexus-component-inspector");
+      const inspector = sheet.element?.querySelector('[data-tool-panel="component"] .nexus-component-inspector');
       if (inspector && kind === "typography") sheet._syncTextToolbar(inspector, component);
     });
     html.find("[data-group-reset]").on("click", async () => {
@@ -1008,5 +993,5 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     const appWindow = html[0].closest(".application, .window-app");
     if (appWindow) { appWindow.classList.add("nexus-window"); applyScopedTheme(appWindow, sheet._currentLayout ?? {}, { base: false, windowTokens: true }); }
     sheet._activateCanvas(html);
-    sheet._mountFloatingUI(html);
+    sheet._mountInlineEditorPanels(html);
 }

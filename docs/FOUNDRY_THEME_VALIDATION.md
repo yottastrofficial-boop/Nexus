@@ -93,9 +93,9 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Redimensionar Biblioteca para largura estreita e confirmar que filtros não ficam cortados nem comprimidos.
 - [ ] Clicar na ficha depois de abrir um painel flutuante; confirmar que os trilhos laterais voltam à frente e recebem interação.
 - [ ] Clicar no painel flutuante; confirmar que ele próprio fica à frente e os trilhos não roubam o foco.
-- [ ] Abrir duas fichas e vários painéis; alternar foco e confirmar que cada conjunto de trilhos acompanha sua ficha.
-- [ ] Conferir controles do Canvas, navegação, Hotbar e Players em estados normal, hover, ativo e foco.
-- [ ] Enviar mensagens curtas e longas no Chat; conferir cabeçalho e corpo como um único cartão visual.
+- [ ] Abrir duas fichas; confirmar que as ferramentas de aparência e a navegação de layouts permanecem dentro das barras laterais de cada ficha, sem trilhos flutuantes externos.
+- [ ] Conferir controles do Canvas, navegação, Hotbar e Players em estados normal, hover, ativo e foco; confirmar que fontes e controles nativos usam os tokens globais, preservando fontes de ícones.
+- [ ] Enviar mensagens curtas e longas no Chat; conferir que a área de rolagem, o cabeçalho e o corpo usam a mesma família de tema, com cartões internos elevados e sem áreas brancas residuais.
 - [ ] Conferir imagens, GIFs, vídeos, áudio, links e embeds enriquecidos nativos no Chat; validar contenção, tamanho e rolagem.
 - [ ] Confirmar que URLs comuns não são convertidas em conteúdo executável e que o NEXUS não injeta scripts de mídia.
 

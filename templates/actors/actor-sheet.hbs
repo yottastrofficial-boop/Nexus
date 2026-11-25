@@ -3,11 +3,13 @@
   <section class="nexus-workspace">
     <aside class="nexus-sidebar nexus-sidebar-left">
       {{#if (eq nexus.mode "appearance")}}
-        <nav class="nexus-appearance-rail" aria-label="Ferramentas de aparência">
-          <button type="button" data-appearance-panel="style" class="active" aria-label="Aparência"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
-          
-          <button type="button" data-appearance-panel="layers" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
-          <button type="button" data-appearance-panel="aliases" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
+        <nav class="nexus-appearance-rail" aria-label="Ferramentas de aparência" role="toolbar">
+          <button type="button" data-appearance-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="style" class="active" title="Aparência global" aria-label="Aparência global"><i class="fa-solid fa-palette" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="layers" title="Organização" aria-label="Organização"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></button>
+          <button type="button" data-appearance-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt" aria-hidden="true"></i></button>
         </nav>
         <div class="nexus-appearance-drawer">
           <section class="nexus-tool-panel nexus-settings-panel" data-tool-panel="settings" hidden>

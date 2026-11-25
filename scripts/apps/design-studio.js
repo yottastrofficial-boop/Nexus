@@ -131,6 +131,7 @@ export function createDesignStudioApplicationClass({
         const tab = event.target?.closest?.("[data-design-section]");
         if (!tab || !root.contains(tab)) return;
         event.preventDefault();
+        event.stopPropagation();
         const selected = tab.dataset.designSection;
         root.querySelectorAll("[data-design-section]").forEach(item => {
           const active = item === tab;

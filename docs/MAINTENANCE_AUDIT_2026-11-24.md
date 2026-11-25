@@ -164,3 +164,13 @@ Após a auditoria, a main recebeu uma rodada integrada de refinamento visual e s
 - O texto selecionado na interface passa a usar o acento do tema, em vez do destaque padrão inconsistente do navegador.
 
 A alteração é visual e de navegação; não altera schemas mecânicos de Actors/Items nem dados de campanha. A validação automatizada foi concluída com sucesso: 35/35 arquivos de teste passaram, a validação do pacote passou e o CI gerou `nexus-1.0.0.97.zip` como artefato de build (não é uma release estável publicada). O teste funcional real no Foundry VTT 14 build 360 continua pendente. O link de referência visual do usuário não pôde ser carregado nesta sessão; uma captura anexada diretamente é necessária para comparar detalhes pixel a pixel.
+
+
+## Continuação — interface minimalista e integração visual
+
+- A navegação do editor da ficha voltou a permanecer dentro das barras laterais da própria ficha; o portal externo de trilhos flutuantes e sua montagem foram removidos.
+- Os seis painéis de edição voltaram a ser apresentados no drawer interno, preservando os mesmos painéis e seus controles.
+- A navegação de layouts e o acesso à Biblioteca Universal permanecem dentro da ficha.
+- O Design Studio mantém a troca de seções no próprio aplicativo e a prévia reúne painéis, containers, botões, tipografia, inputs, seletores, área de texto e rolagem.
+- O Design System amplia a aplicação da fonte global nas superfícies centrais do Foundry e uniformiza as superfícies internas do Chat.
+- A validação visual e funcional real continua dependente de uma sessão no Foundry V14 build 360; testes automatizados não substituem esse gate.

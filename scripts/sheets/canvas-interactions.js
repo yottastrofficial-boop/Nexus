@@ -201,8 +201,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     renderGroups();
     updateConnectedCorners();
     const sizeReadout = document.createElement("div"); sizeReadout.className = "nexus-resize-readout"; sizeReadout.hidden = true; canvas.append(sizeReadout);
-    const inspectorWindow = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
-    listen(inspectorWindow,"pointerdown", event => { if (event.target.closest(".nexus-panel-window")) { sheet._nexusInteractionActive = false; event.stopPropagation(); } }, true);
     const contextMenu = document.createElement("div"); contextMenu.className = "nexus-context-menu"; contextMenu.hidden = true;
     contextMenu.innerHTML = `<button type="button" data-context-action="add-card">Adicionar card</button><hr><button type="button" data-context-action="edit">Propriedades</button><hr><button type="button" data-context-action="group">Agrupar seleção</button><button type="button" data-context-action="link">Criar vínculo</button><button type="button" data-context-action="ungroup">Desagrupar</button><hr><button type="button" data-context-action="duplicate">Duplicar</button><button type="button" data-context-action="front">Trazer para frente</button><button type="button" data-context-action="back">Enviar para trás</button><hr><button type="button" data-context-action="delete" class="danger">Excluir</button>`;
     root.append(contextMenu);
@@ -254,30 +252,11 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     let lastComponentPointerDown = { id: null, at: 0 };
     let suppressNativeDoubleClickUntil = 0;
     const openComponentInspector = () => {
-      sheet._openAppearancePanels ??= new Set();
-      sheet._openAppearancePanels.add("component");
-      const portal = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
-      const button = portal?.querySelector('[data-floating-panel="component"]');
-      const sync = () => {
-        const current = sheet._nexusPanelWindows?.get("component");
-        if (!current?.rendered) return false;
-        current.bringToFront?.();
-        current.element?.setAttribute?.("tabindex", "-1");
-        if (current.element) current.element.focus({ preventScroll: true });
-        const selected = sheet._componentEditorTargetId ? [sheet._componentEditorTargetId] : [...(sheet._selectedIds ?? [])];
-        sheet._setSelection?.($(sheet.element), selected);
-        return true;
-      };
-      if (sync()) return;
-      button?.click();
-      // Panel creation is asynchronous in ApplicationV2; retry on the next frames
-      // instead of trying to populate a detached template before it is mounted.
-      let attempts = 0;
-      const waitForPanel = () => {
-        if (sync() || ++attempts >= 30) return;
-        requestAnimationFrame(waitForPanel);
-      };
-      requestAnimationFrame(waitForPanel);
+      sheet._openInlineEditorPanel?.("component");
+      const selected = sheet._componentEditorTargetId ? [sheet._componentEditorTargetId] : [...(sheet._selectedIds ?? [])];
+      sheet._setSelection?.($(sheet.element), selected);
+      const inspector = sheet.element?.querySelector('[data-tool-panel="component"] .nexus-component-inspector');
+      if (inspector) inspector.hidden = false;
     };
     listen(root,"dblclick", event => {
       if (performance.now() < suppressNativeDoubleClickUntil) return;
@@ -569,16 +548,14 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     const keyboardMoveBlur = () => { void flushKeyboardMove(); };
         const keyHandler=async event=>{
       const isTypingTarget = event.target?.matches?.("input,textarea,select,[contenteditable=true]") || event.target?.isContentEditable;
-      const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
-      const panelWindows = [...(sheet._nexusPanelWindows?.values?.() ?? [])];
-      const focusedInPanel = !!(floating?.contains(event.target) || panelWindows.some(instance => instance?.element?.contains(event.target)));
+      const inlinePanel = sheet.element?.querySelector(".nexus-appearance-drawer");
+      const focusedInPanel = !!inlinePanel?.contains(event.target);
       const liveCanvas = sheet.element?.querySelector?.(".nexus-canvas") ?? canvas;
       const activeElement = document.activeElement;
       const focusedInCanvas = !!liveCanvas && (activeElement === liveCanvas || liveCanvas.contains(activeElement)
         || (sheet._nexusCanvasKeyboardFocus && (activeElement === document.body || activeElement === document.documentElement)));
       if (sheet._mode !== "appearance") return;
-      const editorPanelsOpen = panelWindows.some(instance => instance?.element?.isConnected)
-        || !!floating?.querySelector('[data-floating-panel="component"].active, [data-floating-panel="behavior"].active');
+      const editorPanelsOpen = !!sheet.element?.querySelector('[data-tool-panel="component"].active, [data-tool-panel="behavior"].active');
       const controlledTokens = globalThis.canvas?.tokens?.controlled ?? [];
       const hasDirectlyActiveToken = controlledTokens.length > 0;
       // Em campos de texto, a tecla continua editando o texto, mas nunca
@@ -635,7 +612,6 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     listen(window,"blur", keyboardMoveBlur);
     const activateInteraction = () => { sheet._nexusInteractionActive = true; };
     const deactivateInteraction = event => {
-      const floating = document.querySelector(`[data-nexus-floating-for="${sheet.id}"]`);
       const pickerId = "nexus-property-picker-" + String(sheet.id).replace(/[^a-zA-Z0-9_-]/g, "");
       const propertyPicker = document.getElementById(pickerId);
       const pickerInput = propertyPicker?._nexusOwnerInput;
@@ -647,10 +623,10 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
         propertyPicker._nexusOwnerInput = null;
         propertyPicker._nexusOwnerInspector = null;
       }
-      const insidePanel = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance.element?.contains(event.target));
+      const insidePanel = sheet.element?.querySelector(".nexus-appearance-drawer")?.contains(event.target) === true;
       const insideCanvas = canvas.contains(event.target);
       sheet._nexusCanvasKeyboardFocus = insideCanvas;
-      if (root.contains(event.target) || floating?.contains(event.target) || insidePanel || insidePropertyPicker || insidePickerInput) sheet._nexusInteractionActive = true;
+      if (root.contains(event.target) || insidePanel || insidePropertyPicker || insidePickerInput) sheet._nexusInteractionActive = true;
       else {
         sheet._nexusInteractionActive = false;
         // Cliques fora de toda a interface encerram a seleção e o alvo de edição.
@@ -662,8 +638,7 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     listen(document,"pointerdown",deactivateInteraction,true);
     const tokenDeletionGuardId = Hooks.on("preDeleteToken", tokenDocument => {
       if (sheet._mode !== "appearance") return;
-      const panelsOpen = [...(sheet._nexusPanelWindows?.values?.() ?? [])].some(instance => instance?.element?.isConnected)
-        || !!document.querySelector(`[data-nexus-floating-for="${sheet.id}"] [data-floating-panel="component"].active, [data-nexus-floating-for="${sheet.id}"] [data-floating-panel="behavior"].active`);
+      const panelsOpen = !!sheet.element?.querySelector('[data-tool-panel="component"].active, [data-tool-panel="behavior"].active');
       if (!panelsOpen) return;
       const controlled = globalThis.canvas?.tokens?.controlled ?? [];
       const directlyActive = controlled.some(token => token?.document?.id === tokenDocument?.id || token?.id === tokenDocument?.id);

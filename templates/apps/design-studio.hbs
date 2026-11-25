@@ -14,11 +14,11 @@
   </header>
 
   <div class="nexus-design-studio-body">
-    <nav class="nexus-design-studio-nav" aria-label="Seções do editor">
-      <button type="button" class="is-active" data-design-section="palette" aria-pressed="true">Paleta</button>
-      <button type="button" data-design-section="typography" aria-pressed="false">Tipografia</button>
-      <button type="button" data-design-section="layout" aria-pressed="false">Layout</button>
-      <button type="button" data-design-section="accessibility" aria-pressed="false">Acessibilidade</button>
+    <nav class="nexus-design-studio-nav" aria-label="Seções do editor" role="tablist">
+      <button type="button" class="is-active" data-design-section="palette" role="tab" aria-controls="nexus-design-palette" aria-pressed="true">Paleta</button>
+      <button type="button" data-design-section="typography" role="tab" aria-controls="nexus-design-typography" aria-pressed="false">Tipografia</button>
+      <button type="button" data-design-section="layout" role="tab" aria-controls="nexus-design-layout" aria-pressed="false">Layout</button>
+      <button type="button" data-design-section="accessibility" role="tab" aria-controls="nexus-design-accessibility" aria-pressed="false">Acessibilidade</button>
     </nav>
 
     <main class="nexus-design-studio-editor">
@@ -98,7 +98,13 @@
           </section>
           <section class="nexus-design-preview-sample">
             <small class="nexus-design-preview-label">TIPOGRAFIA E INPUTS</small>
-            <div class="nexus-design-sample-type"><strong>Título de seção</strong><span>Texto auxiliar e descrição de exemplo</span><input type="text" value="Campo de texto demonstrativo" readonly aria-label="Prévia de campo de texto"></div>
+            <div class="nexus-design-sample-type">
+              <strong>Título de seção</strong>
+              <span>Texto auxiliar e descrição de exemplo</span>
+              <input type="text" value="Campo de texto demonstrativo" readonly aria-label="Prévia de campo de texto">
+              <select aria-label="Prévia de seleção" tabindex="-1"><option>Opção selecionada</option></select>
+              <textarea rows="2" readonly aria-label="Prévia de área de texto">Texto em uma área de edição</textarea>
+            </div>
           </section>
           <section class="nexus-design-preview-sample">
             <small class="nexus-design-preview-label">BARRA DE ROLAGEM</small>
