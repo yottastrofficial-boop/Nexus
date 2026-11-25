@@ -1,5 +1,7 @@
 ## 1.0.0.108 — Consolidação do sidebar Foundry V14 e pacote para teste
 
+- Publicação estável autorizada pelo mantenedor antes da validação manual; o pacote será disponibilizado para teste e poderá ser substituído se necessário.
+
 - A publicação estável foi autorizada pelo mantenedor antes da validação manual; a confirmação visual/funcional no Foundry permanece pendente.
 
 - Inclui a reconstrução completa do layout da sidebar integrada na PR #95, com navegação horizontal, painéis dimensionados de forma isolada e preservação do controlador nativo do Foundry.
