@@ -6,7 +6,8 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Base de versão declarada na main: `1.0.0.99`, preparada para distribuição após CI e confirmação do pacote.
+- Versão estável atualmente na main: `1.0.0.99`.
+- Candidata `1.0.0.100`: PR #81 em revisão, ainda sem merge ou publicação.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.99 restaura o editor flutuante, preserva a tipografia dos ícones nativos e refina o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
@@ -39,7 +40,9 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na base 1.0.0.99 (validação funcional pendente)
+## Implementação presente na base estável 1.0.0.99 (validação funcional pendente)
+
+A candidata 1.0.0.100 adiciona tema Foundry nativo, estilos por categoria, tipografia de dados e atalho da Biblioteca; suas alterações permanecem em revisão até CI e validação real.
 
 A árvore atual contém, entre outros:
 
