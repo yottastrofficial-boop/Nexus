@@ -162,3 +162,14 @@ console.log("NEXUS sheet theme scope: OK");
     }
   }
 }
+
+// Contrato: estados de seleção/foco do Canvas e da Biblioteca usam o token de destaque com fallback.
+{
+  const { readFileSync } = await import("node:fs");
+  const css = readFileSync(new URL("../styles/nexus-v1.0.0.css", import.meta.url), "utf8");
+  for (const needle of [
+    ".nexus-library-asset:focus-visible { outline:2px solid var(--nexus-accent-color,#a9c9ef)",
+    ".nexus-component.is-selected { outline:1px solid var(--nexus-accent-color,#a9c9ef)",
+    "88%,var(--nexus-accent-color,#a9c9ef) 12%"
+  ]) assert.ok(css.includes(needle), `Token de seleção ausente: ${needle}`);
+}
