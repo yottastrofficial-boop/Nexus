@@ -23,7 +23,9 @@ test("character-sheet editing stays in the native sheet sidebars", () => {
   assert.match(template, /class="nexus-sidebar nexus-sidebar-right"/);
   assert.match(template, /data-open-nexus-library/);
   assert.doesNotMatch(designSystem, /nexus-floating/);
-  assert.doesNotMatch(legacyStyles, /nexus-floating/);
+  assert.doesNotMatch(legacyStyles, /v0\.5 — barras flutuantes externas/);
+  assert.match(legacyStyles, /\.nexus-group-surface \{ min-width:0; min-height:0;/,
+    "The legacy stylesheet must preserve the existing group-surface sizing contract.");
 });
 
 test("native Foundry chrome receives global typography and unified Chat surfaces", () => {
