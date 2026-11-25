@@ -15,14 +15,14 @@
 
   <div class="nexus-design-studio-body">
     <nav class="nexus-design-studio-nav" aria-label="Seções do editor">
-      <a href="#nexus-design-palette">Paleta</a>
-      <a href="#nexus-design-typography">Tipografia</a>
-      <a href="#nexus-design-layout">Layout</a>
-      <a href="#nexus-design-accessibility">Acessibilidade</a>
+      <button type="button" class="is-active" data-design-section="palette" aria-pressed="true">Paleta</button>
+      <button type="button" data-design-section="typography" aria-pressed="false">Tipografia</button>
+      <button type="button" data-design-section="layout" aria-pressed="false">Layout</button>
+      <button type="button" data-design-section="accessibility" aria-pressed="false">Acessibilidade</button>
     </nav>
 
     <main class="nexus-design-studio-editor">
-      <section class="nexus-design-studio-section" id="nexus-design-palette">
+      <section class="nexus-design-studio-section" id="nexus-design-palette" data-design-section-panel="palette">
         <div class="nexus-design-section-heading"><div><h3>Paleta de cores</h3><p>Escolha um preset como ponto de partida e ajuste cada superfície individualmente.</p></div></div>
         <label class="nexus-design-field"><span>Nome do perfil</span><input type="text" maxlength="64" value="{{profile.name}}" data-design-path="name"></label>
         <label class="nexus-design-field nexus-design-preset">
@@ -42,7 +42,7 @@
         </div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-typography">
+      <section class="nexus-design-studio-section" id="nexus-design-typography" data-design-section-panel="typography" hidden>
         <div class="nexus-design-section-heading"><div><h3>Tipografia</h3><p>Controle a família tipográfica e a hierarquia de leitura.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Família tipográfica</span><select data-design-path="typography.family">{{#each fontChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
@@ -54,7 +54,7 @@
         <div class="nexus-design-type-preview"><strong>O destino de NEXUS</strong><p>Uma interface clara ajuda a organizar informações, reconhecer prioridades e acompanhar a sessão sem competir com o conteúdo da ficha.</p><span>Texto auxiliar · Exemplo de hierarquia visual</span></div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-layout">
+      <section class="nexus-design-studio-section" id="nexus-design-layout" data-design-section-panel="layout" hidden>
         <div class="nexus-design-section-heading"><div><h3>Layout e densidade</h3><p>Ajuste o ritmo visual e o tamanho dos controles.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Densidade</span><select data-design-path="layout.density">{{#each densityChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
@@ -64,7 +64,7 @@
         </div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-accessibility">
+      <section class="nexus-design-studio-section" id="nexus-design-accessibility" data-design-section-panel="accessibility" hidden>
         <div class="nexus-design-section-heading"><div><h3>Acessibilidade</h3><p>Verificações de contraste são recomendações; o perfil continua editável.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Nível de contraste</span><select data-design-path="accessibility.contrast">{{#each contrastChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
@@ -85,7 +85,25 @@
           <small>PERSONAGEM</small><h3>Guardião do Limiar</h3><p>Explorador · Nível 4</p>
           <div class="nexus-design-preview-stats"><div><small>PV</small><strong>24 / 30</strong></div><div><small>PM</small><strong>12 / 16</strong></div></div>
           <div class="nexus-design-preview-progress"><span></span></div>
-          <div class="nexus-design-preview-actions"><button type="button">Ação</button><button type="button">Detalhes</button></div>
+          <div class="nexus-design-preview-actions"><button type="button">Ação principal</button><button type="button">Detalhes</button></div>
+        </div>
+        <div class="nexus-design-preview-components" aria-label="Prévia dos componentes do tema">
+          <section class="nexus-design-preview-sample">
+            <small class="nexus-design-preview-label">PAINEL E CONTAINER</small>
+            <div class="nexus-design-sample-panel"><strong>Resumo do personagem</strong><div class="nexus-design-sample-container"><span>Experiência</span><b>1.250 XP</b></div></div>
+          </section>
+          <section class="nexus-design-preview-sample">
+            <small class="nexus-design-preview-label">BOTÕES</small>
+            <div class="nexus-design-sample-buttons"><button type="button">Ação</button><button type="button" class="is-secondary">Cancelar</button></div>
+          </section>
+          <section class="nexus-design-preview-sample">
+            <small class="nexus-design-preview-label">TIPOGRAFIA E INPUTS</small>
+            <div class="nexus-design-sample-type"><strong>Título de seção</strong><span>Texto auxiliar e descrição de exemplo</span><input type="text" value="Campo de texto demonstrativo" readonly aria-label="Prévia de campo de texto"></div>
+          </section>
+          <section class="nexus-design-preview-sample">
+            <small class="nexus-design-preview-label">BARRA DE ROLAGEM</small>
+            <div class="nexus-design-sample-scroll"><span>Inventário</span><span>Equipamentos</span><span>Habilidades</span><span>Condições</span><span>Histórico</span></div>
+          </section>
         </div>
       </div>
       <p class="nexus-design-preview-note">A prévia não salva alterações. Fechar o estúdio descarta um rascunho não salvo.</p>
