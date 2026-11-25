@@ -43,7 +43,16 @@ assert.ok(sidebarBlock.includes(".sidebar-tabs"), "A navegação real do Sidebar
 assert.ok(sidebarBlock.includes(".tab.sidebar-tab"), "Os controles nativos V14 precisam ser selecionados pela classe real");
 assert.ok(sidebarBlock.includes("#sidebar-tabs > .item"), "Os controles nativos devem receber dimensões uniformes sem selecionar painéis");
 assert.ok(sidebarBlock.includes("#sidebar .sidebar-tabs > .item"), "A navegação nativa dentro do Sidebar deve receber dimensões uniformes");
-assert.doesNotMatch(sidebarBlock, /\.tab\.sidebar-tab[^{}]*\{[^}]*width:\s*34px/i, "Painéis de conteúdo nunca devem receber dimensões de botão");
+const navControlsStart = sidebarBlock.indexOf("/* Only navigation controls receive button sizing.");
+const navControlsEnd = sidebarBlock.indexOf("/* Preserve Font Awesome", navControlsStart);
+const navControlsStyle = sidebarBlock.slice(navControlsStart, navControlsEnd);
+assert.ok(navControlsStart >= 0 && navControlsEnd > navControlsStart, "A seção de dimensionamento dos controles nativos deve existir");
+assert.doesNotMatch(navControlsStyle, /\.tab\.sidebar-tab/, "Painéis de conteúdo nunca devem ser selecionados como botões");
+const panelLayoutStart = sidebarBlock.indexOf("html.nexus-design-system #sidebar > .tab.sidebar-tab,");
+const panelLayoutEnd = sidebarBlock.indexOf("/* Keep panel internals fluid", panelLayoutStart);
+const panelLayoutStyle = sidebarBlock.slice(panelLayoutStart, panelLayoutEnd);
+assert.ok(panelLayoutStart >= 0 && panelLayoutEnd > panelLayoutStart, "O painel nativo deve ter uma regra de layout própria");
+assert.doesNotMatch(panelLayoutStyle, /width:\s*34px|height:\s*34px/, "Painéis de conteúdo devem ocupar a área disponível, não dimensões de botão");
 assert.ok(sidebarBlock.includes("flex-direction: row !important"), "As abas nativas devem ser horizontais");
 assert.ok(sidebarBlock.includes("flex-wrap: wrap"), "Abas extras de módulos devem continuar acessíveis em múltiplas linhas");
 assert.ok(sidebarBlock.includes('nav.tabs[data-group="primary"]'), "A navegação ApplicationV2 deve ser contemplada");
