@@ -1,3 +1,14 @@
+## 1.0.0.112 — Chat lateral com densidade adaptativa
+
+- Adapta o espaçamento interno do chat à largura real disponível, por meio de CSS Container Queries, sem modificar a largura padrão da sidebar.
+- Em áreas estreitas, reduz margens e padding dos cartões sem diminuir o tamanho da fonte.
+- Em áreas mais largas, aplica espaçamento moderadamente mais confortável.
+- Mantém imagens, vídeos e iframes dentro da largura da mensagem; tabelas extensas podem rolar dentro do próprio conteúdo.
+- Preserva a estrutura DOM, os handlers, o controlador de abas e os dados de mensagens nativos do Foundry.
+- Inclui contratos de regressão para os breakpoints do contêiner e para o comportamento de mídia/tabelas.
+- **Teste manual pendente:** conferir no Foundry VTT 14 build 360 o chat em larguras diferentes, mensagens com mídia/tabelas, compositor e rolagem.
+- Sem alterações em regras de RPG, schemas ou dados persistidos.
+
 ## 1.0.0.111 — Chat lateral de largura completa e visual compacto
 
 - Corrige os seletores para o DOM real do Foundry VTT 14: o histórico é OL.chat-log, sem o ID #chat-log usado por regras antigas.
