@@ -51,7 +51,7 @@ test("exporta perfis NEXUS-DESIGN/3 e continua importando NEXUS-DESIGN/1", async
   } });
   const legacyImported = await b.import(legacy);
   assert.equal(legacyImported.profile.name, "Legado");
-  assert.equal(legacyImported.profile.schemaVersion, 2);
+  assert.equal(legacyImported.profile.schemaVersion, 3);
 });
 test("serializa gravações concorrentes e preserva todos os perfis", async () => {
   const user = makeUser(); let sequence = 0;
