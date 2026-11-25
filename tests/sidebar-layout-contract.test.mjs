@@ -3,6 +3,13 @@ import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
+const globalControlFontRule = css.slice(
+  css.indexOf("/* Global Foundry presentation: shared theme tokens, native behavior preserved. */"),
+  css.indexOf("/* Do not assign font-family to native sidebar controls:")
+);
+assert.match(globalControlFontRule, /:not\(\[class\*="fa-"\]\)/,
+  "Global control typography must not override Font Awesome classes applied directly to Foundry buttons.");
+
 const start = css.indexOf("/* Sidebar navigation and panels — Foundry V14 ApplicationV2.");
 const end = css.indexOf("/* Advanced CSS editor */", start);
 
