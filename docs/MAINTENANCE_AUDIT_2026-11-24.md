@@ -5,6 +5,7 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch oficial: `main`
 - Commit de referência da auditoria: `2573c82845473f389fa150044c55458d4dec54d1`
+- Commit atual da main após os refinamentos de interface: `a4e31e3ba3e5aefc7b79f2ad9eb474058f3a2fa8`
 - Primeiro commit de consolidação: `91c54660e4a5c210e65ed988dbdbec91aff3b5af`
 - Commit de alinhamento de versão: `e6409eb8c6b872c675773a8771e62c305614726a`
 - Commit de validação final: `356d237504b0303ccce235b86c8a4bcc01bebdc3`
@@ -178,8 +179,8 @@ A alteração é visual e de navegação; não altera schemas mecânicos de Acto
 
 ### Validação automatizada da interface minimalista
 
-- Commit validado: `2f81133847ad7d45c7e7243f9d86cd11ccd0d71b`.
+- Commit validado: `a4e31e3ba3e5aefc7b79f2ad9eb474058f3a2fa8`.
 - CI: 37/37 arquivos de teste passaram.
 - Validação do pacote e geração do ZIP: aprovadas.
-- Artefato `nexus-1.0.0.97.zip` foi gerado no CI; é artefato de build, não release estável publicada.
+- Artefato `nexus-1.0.0.97.zip` foi gerado no CI (416.502 bytes; Artifact ID `14982485439`); é artefato de build, não release estável publicada.
 - A validação visual/funcional dentro do Foundry VTT 14 build 360 permanece pendente.

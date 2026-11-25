@@ -4,6 +4,7 @@
 - Aplica a tipografia do perfil globalmente às superfícies do Foundry, preservando fontes de ícones e código; unifica as superfícies do Chat e arredonda os controles de janela.
 - Remove os trilhos flutuantes externos da ficha e restaura a navegação minimalista pelos painéis internos, sem alterar os controles nativos de navegação do Foundry.
 - Conecta a ficha à Biblioteca Universal e remove a antiga visualização embutida da Biblioteca.
+- Mantém estados acessíveis nas abas do Estúdio e limpa a seleção do Canvas ao fechar os painéis Propriedades/Comportamento.
 - A validação visual e funcional no Foundry VTT 14 build 360 continua pendente.
 - Recupera a inserção segura de imagens da coleção de mídia na Biblioteca da ficha.
 - Protege a atualização de definições reutilizáveis contra versões desatualizadas e alterações concorrentes da instância.

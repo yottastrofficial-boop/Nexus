@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão atual do Design System. O CI no commit `2f811338` passou com 37/37 arquivos de teste e gerou o pacote de build; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão atual do Design System. O CI no commit `a4e31e3b` passou com 37/37 arquivos de teste e gerou `nexus-1.0.0.97.zip` (416.502 bytes); isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 
