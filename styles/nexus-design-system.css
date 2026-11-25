@@ -1422,7 +1422,8 @@ html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab.nexus-them
 
 html.nexus-design-system #sidebar > .tab.sidebar-tab.nexus-themed-application.active,
 html.nexus-design-system #sidebar-content > .tab.sidebar-tab.nexus-themed-application.active,
-html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab.nexus-themed-application.active {
+html.nexus-design-system #sidebar .sidebar-content > .tab.sidebar-tab.nexus-themed-application.active,
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
   color: var(--nexus-foundry-sidebar-text, var(--nexus-ui-text));
   background: var(--nexus-foundry-application-bg, var(--nexus-ui-surface));
   border-color: var(--nexus-foundry-application-border, var(--nexus-ui-border));
