@@ -20,7 +20,7 @@ assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPT
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
 const sidebarBlock = designCss.slice(
-  designCss.indexOf("/* Foundry V14 Sidebar — one canonical layout layer."),
+  designCss.indexOf("/* Foundry V14 Sidebar — native horizontal tab strip."),
   designCss.indexOf("/* Advanced CSS editor */")
 );
 assert.ok(sidebarBlock.length > 0, "O bloco canônico do sidebar deve existir");
