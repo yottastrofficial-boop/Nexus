@@ -64,7 +64,14 @@ jobs:
             channel = "stable";
           }
           if (eventName === "push" && ref === "refs/heads/main" && candidateMarker.test(commitMessage)) {
-            version = `${system.version}-rc.1`;
+            const { execFileSync } = require("node:child_process");
+            const tagPrefix = `v${system.version}-rc.`;
+            const remoteTags = execFileSync("git", ["ls-remote", "--tags", "origin", `refs/tags/${tagPrefix}*`], { encoding: "utf8" });
+            const existingNumbers = [...remoteTags.matchAll(/refs\/tags\/v\d+\.\d+\.\d+\.\d+-rc\.(\d+)(?:\\^\\{\\})?$/gm)]
+              .map(match => Number(match[1]))
+              .filter(Number.isSafeInteger);
+            const nextCandidate = Math.max(0, ...existingNumbers) + 1;
+            version = `${system.version}-rc.${nextCandidate}`;
             channel = "candidate";
           }
 
