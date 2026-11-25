@@ -1273,10 +1273,11 @@ assert.notEqual(templateClone.actions[0].id,editorDraft.interactions[0].actions[
 assert.ok(!interactions.includes("add-skill-roll"), "O editor não deve oferecer um fluxo especial de rolagem de perícia");
 assert.ok(!interactions.includes("＋ Rolagem de perícia"), "O editor deve manter apenas a criação de fluxos comuns");
 assert.ok(!interactions.includes("data-interaction-view"), "O editor não deve duplicar a navegação com modos Cartões/Lista");
-assert.ok(sheetCode.includes("behavior: [900, 600]"), "Comportamento deve compartilhar as dimensões da Biblioteca");
-assert.ok(sheetCode.includes("component: [400, 600]"), "Propriedades deve seguir a geometria compacta dos painéis");
-assert.ok(sheetCode.includes("style: [400, 600]") && sheetCode.includes("layers: [400, 600]") && sheetCode.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
-assert.ok(sheetCode.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
+for (const panel of ["settings", "style", "component", "layers", "aliases", "behavior"]) {
+  assert.ok(template.includes(`data-appearance-panel="${panel}"`), `The inline rail must expose the ${panel} panel`);
+  assert.ok(template.includes(`data-tool-panel="${panel}"`), `The inline drawer must contain the ${panel} panel`);
+}
+assert.ok(sheetCode.includes("this._openInlineEditorPanel"), "Painéis devem alternar dentro do drawer interno");
 assert.match(libraryApplication, /position: \{ width: 1180, height: 760 \}/, "A Biblioteca Universal deve manter uma janela independente dimensionada para o Explorer");
 assert.ok(template.includes('data-appearance-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
 assert.ok(template.includes('data-appearance-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
