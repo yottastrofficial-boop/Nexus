@@ -6,10 +6,10 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão de código integrada à main: `1.0.0.101`, ainda não publicada como estável.
-- Manifesto público permanece em `1.0.0.99` até a validação funcional no cliente e a publicação confirmada.
+- Versão de código integrada à main: `1.0.0.102`, correção de ícones nativos.
+- Manifesto público permanece em `1.0.0.100` até a publicação autorizada da versão .102.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A base 1.0.0.99 restaura o editor flutuante, preserva a tipografia dos ícones nativos e refina o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
+- A base 1.0.0.102 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -40,9 +40,9 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Atualização integrada à main em 1.0.0.101 (validação funcional pendente)
+## Atualização integrada à main em 1.0.0.102 (validação funcional pendente)
 
-A atualização adiciona tema Foundry nativo, estilos por categoria, tipografia de dados e atalho da Biblioteca. O CI foi aprovado; a publicação estável aguarda validação real no cliente Foundry 14 build 360.
+A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI e o empacotamento serão verificados antes da publicação autorizada; a validação visual no cliente Foundry 14 build 360 continua pendente.
 
 A árvore atual contém, entre outros:
 

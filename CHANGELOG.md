@@ -1,3 +1,12 @@
+## 1.0.0.102 — Restauração dos ícones nativos do Foundry
+
+- Remove a regra global que forçava todos os ícones Font Awesome para a mesma família e peso, causando glifos ausentes em controles nativos do Foundry VTT 14.
+- Devolve ao Foundry o controle da família, peso e mapeamento dos ícones solid, regular, light e demais estilos.
+- Mantém a tipografia personalizada do NEXUS isolada dos elementos de ícone.
+- Preserva as correções de layout dos diretórios e do Estúdio de Aparência integradas na versão anterior.
+- Adiciona teste de regressão para impedir que uma regra global volte a sobrescrever a fonte dos ícones.
+- Publicação autorizada pelo mantenedor após CI e empacotamento; a validação visual no cliente Foundry VTT 14 build 360 continua necessária. A publicação não promove o checkpoint funcional.
+
 ## 1.0.0.101 — Refinamento do Estúdio e correções da interface Foundry
 
 - Reorganiza o Estúdio de Aparência com melhor distribuição de espaço: navegação compacta, filtro de categoria no editor central e catálogo de elementos com prévias individuais à direita.
