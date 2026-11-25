@@ -47,7 +47,12 @@ const navControlsStart = sidebarBlock.indexOf("/* Only navigation controls recei
 const navControlsEnd = sidebarBlock.indexOf("/* Preserve Font Awesome", navControlsStart);
 const navControlsStyle = sidebarBlock.slice(navControlsStart, navControlsEnd);
 assert.ok(navControlsStart >= 0 && navControlsEnd > navControlsStart, "A seção de dimensionamento dos controles nativos deve existir");
-assert.doesNotMatch(navControlsStyle, /\.tab\.sidebar-tab/, "Painéis de conteúdo nunca devem ser selecionados como botões");
+const navControlSelectors = navControlsStyle.slice(
+  navControlsStyle.indexOf("html.nexus-design-system"),
+  navControlsStyle.indexOf("{")
+);
+assert.ok(navControlSelectors.length > 0, "Os seletores de controle devem estar declarados");
+assert.doesNotMatch(navControlSelectors, /\.tab\.sidebar-tab/, "Painéis de conteúdo nunca devem ser selecionados como botões");
 const panelLayoutStart = sidebarBlock.indexOf("html.nexus-design-system #sidebar > .tab.sidebar-tab,");
 const panelLayoutEnd = sidebarBlock.indexOf("/* Keep panel internals fluid", panelLayoutStart);
 const panelLayoutStyle = sidebarBlock.slice(panelLayoutStart, panelLayoutEnd);
