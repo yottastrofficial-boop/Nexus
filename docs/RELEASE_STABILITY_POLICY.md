@@ -25,12 +25,12 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 ## Estado de referência — 2026-11-24
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
-- **Última release estável publicada:** `1.0.0.96`, com `nexus.zip` publicado e asset confirmado após CI; continua sem validação funcional completa no Foundry VTT 14 build 360.
-- **Estado da main:** base de versão declarada `1.0.0.98`; a branch está em desenvolvimento pós-release e pode conter alterações ainda não distribuídas.
+- **Última release estável publicada:** `1.0.0.98`, com `nexus.zip` publicado e asset confirmado após CI; continua sem validação funcional completa no Foundry VTT 14 build 360.
+- **Estado da main:** base de versão declarada `1.0.0.98`; o código corresponde à release estável publicada. Novas alterações de código exigem nova versão e novo pacote.
 - **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
 - **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
-- **Próxima candidata prevista:** `1.0.0.98-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.
-- **Manifesto estável:** aponta para a `1.0.0.96`, cujo ZIP foi anexado e verificado. A release publicada antes desta sincronização ainda contém o campo `download` legado em seu `system.json`; o manifesto canônico continua apontando corretamente para a .96. A sincronização de `system.json` passa a fazer parte do fluxo das próximas releases.
+- **Próxima candidata prevista:** `1.0.0.99-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.
+- **Manifesto estável:** aponta para a `1.0.0.98`, cujo ZIP foi anexado e verificado. `system.json.download` e `manifest.json.download` usam a mesma URL do asset publicado.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 - **Rotação após release estável:** depois que o workflow atualizar `manifest.json` e `system.json.download`, incremente `system.version` para a próxima base de desenvolvimento e atualize README, CHANGELOG, roadmap e visão do projeto antes do próximo commit funcional. `system.json.download` deve continuar igual à versão estável em `manifest.json`.
 
@@ -58,7 +58,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 
 ### 2. Release candidata
 
-- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.98-rc.1`.
+- Executar manualmente o workflow na branch `main`, escolhendo `candidate` e informando uma versão no formato `MAJOR.MINOR.PATCH.BUILD-rc.N`, por exemplo `1.0.0.99-rc.1`.
 - A versão candidata precisa avançar o núcleo numérico da versão atualmente declarada em `system.json`.
 - Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
@@ -88,4 +88,4 @@ Candidata ou release estável não equivale a checkpoint funcional. A promoção
 A próxima versão funcional candidata deve partir da main atual e passar por uma rodada de validação funcional documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
 
 
-A versão 1.0.0.96 tem finalidade explícita de validação da integração da aparência nativa do Foundry, da geometria responsiva dos controles e dos trilhos flutuantes vinculados à janela nativa. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.
+A versão 1.0.0.98 inclui a correção dos tokens semânticos de seleção e inspeção de grupos, além da integração visual do Design System. A publicação do ZIP e a aprovação do CI não promovem o checkpoint funcional: a promoção depende do roteiro de `docs/FOUNDRY_THEME_VALIDATION.md` ser executado e documentado no Foundry real.

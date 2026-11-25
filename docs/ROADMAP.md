@@ -7,10 +7,10 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch: `main`
 - Commit de referência: `HEAD da main`
-- Última release estável publicada: `1.0.0.96` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.98`; a main segue em desenvolvimento pós-release e pode conter alterações ainda não distribuídas.
+- Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
+- Base de versão declarada na main: `1.0.0.98`; o código da main corresponde à release estável publicada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A publicação da 1.0.0.96 já concluiu CI e geração do pacote; a validação funcional no Foundry real permanece pendente.
+- A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 

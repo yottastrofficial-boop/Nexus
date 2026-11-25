@@ -3,7 +3,7 @@
 - Unifica a cor de destaque dos grupos selecionados e em inspeção com o token semântico `--nexus-highlight-color`, evitando que regras legadas substituam a paleta ativa.
 - Alinha os contornos de seleção compartilhados entre componentes e grupos ao mesmo token de destaque.
 - Adiciona contratos de regressão para impedir o retorno de cores fixas ou divergentes nos estados de seleção e inspeção de grupos.
-- A publicação estável depende da aprovação da validação automatizada do pacote; a validação visual e funcional dentro do Foundry VTT 14 build 360 continua pendente.
+- Publicada como release estável 1.0.0.98 após aprovação da validação automatizada e confirmação do asset `nexus.zip`; a validação visual e funcional dentro do Foundry VTT 14 build 360 continua pendente.
 
 ## 1.0.0.97 — Em desenvolvimento
 

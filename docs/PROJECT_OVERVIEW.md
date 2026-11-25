@@ -5,10 +5,10 @@
 - Repositório: `yottastrofficial-boop/Nexus`
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
-- Última release estável publicada: `1.0.0.96` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.98`; a branch segue em desenvolvimento pós-release e pode conter alterações ainda não distribuídas.
+- Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
+- Base de versão declarada na main: `1.0.0.98`; o código da branch corresponde à release estável publicada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A release 1.0.0.96 destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
+- A release 1.0.0.98 destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
@@ -39,7 +39,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na base de desenvolvimento 1.0.0.98 (release estável 1.0.0.96; validação funcional pendente)
+## Implementação presente na versão 1.0.0.98 (release estável; validação funcional pendente)
 
 A árvore atual contém, entre outros:
 
