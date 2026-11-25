@@ -65,6 +65,17 @@ Os relatórios ficam em `playwright-report/`; traces, screenshots e vídeos de f
 3. Remove o Actor temporário em um bloco `finally`, inclusive quando uma asserção falha.
 4. Captura erros de página; falhas atribuídas ao NEXUS reprovam o smoke test. Erros de outros módulos são anexados ao relatório para diagnóstico, sem reprovar automaticamente o NEXUS.
 
+## Diagnóstico do sidebar V14
+
+O teste `sidebar-diagnostic.spec.js` registra, sem modificar a interface:
+- DOM real de `#sidebar`, navegação, conteúdo e controles de abas;
+- dimensões e estilos calculados dos elementos relevantes;
+- classes, atributos, posição e hierarquia dos controles;
+- classes e fontes calculadas dos ícones, incluindo pseudo-elementos;
+- disponibilidade das famílias Font Awesome e screenshot do sidebar.
+
+Execute junto com a suíte usando `npm test`. O relatório HTML inclui os anexos `foundry-v14-sidebar-dom-diagnostic.json` e `foundry-v14-sidebar-screenshot.png`. Não compartilhe `.auth/storage-state.json`, pois contém dados de sessão.
+
 ## Segurança e limites
 
 - Execute exclusivamente em um mundo descartável, nunca na campanha principal.
