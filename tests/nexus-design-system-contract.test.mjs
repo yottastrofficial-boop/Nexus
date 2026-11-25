@@ -30,6 +30,8 @@ assert.match(sheet, /_mountFloatingUI/,
   "The sheet must mount floating editor rails outside its content layout.");
 assert.match(sheet, /data-nexus-floating-for/,
   "Floating editor portals must be scoped to their owning sheet.");
+assert.match(legacyStyles, /\.nexus-sheet-resource-values,[\s\S]*?font-family:var\(--nexus-font-data/,
+  "Sheet resource values must use the monospaced data font.");
 assert.match(sheet, /normalizeNexusComponentDimension/,
   "Saved component dimensions must follow the 10px grid.");
 
