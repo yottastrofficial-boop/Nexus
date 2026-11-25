@@ -15,8 +15,13 @@ assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\]
   "Stable publication must require the exact [release] marker.");
 assert.ok(workflow.includes(String.raw`const candidateMarker = /(?:^|\s)\[candidate\](?=$|\s)/m;`),
   "A [candidate] push to main must create a testable pre-release without requiring manual Actions access.");
-assert.ok(workflow.includes("version = `${system.version}-rc.1`;"),
-  "A candidate push must use the current development version with an rc suffix.");
+assert.ok(workflow.includes("git ls-remote") && workflow.includes("nextCandidate")
+  && workflow.includes("version = `${system.version}-rc.${nextCandidate}`;"),
+  "A candidate push must increment the RC suffix without reusing an existing immutable tag.");
+assert.ok(workflow.includes("system.manifest = manifestUrl;")
+  && workflow.includes("system.download = downloadUrl;")
+  && workflow.includes("manifest-preview.json"),
+  "The candidate ZIP must carry its own preview manifest URL and matching release download URL.");
 assert.ok(workflow.includes("Publish candidate Foundry manifest after the package is available")
   && workflow.includes("manifest-preview.json"),
   "A verified candidate must expose a separate Foundry test manifest.");
