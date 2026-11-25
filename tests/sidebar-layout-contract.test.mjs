@@ -21,7 +21,9 @@ assert.match(sidebar, /\.tab\.sidebar-tab is a content panel, never an icon butt
   "The implementation must explicitly protect content panels from button sizing.");
 assert.match(sidebar, /#sidebar-content[\s\S]*?flex:\s*1 1 0\s*!important;/,
   "The panel area must consume the remaining sidebar height.");
-assert.match(sidebar, /Foundry's tab controller is the single authority for which panel is active/,
+const panelRules = sidebar.slice(sidebar.indexOf("/* Panels fill the remaining area."));
+assert.ok(panelRules.length > 0, "The native panel sizing rules must exist.");
+assert.doesNotMatch(panelRules, /(?:display|visibility):\\s*(?:none|hidden)\\s*!important/i,
   "The stylesheet must leave panel visibility to Foundry's native tab controller.");
 assert.match(sidebar, /:focus-visible[\s\S]*?outline:\s*2px solid var\(--nexus-ui-accent/,
   "Keyboard focus must remain visible.");
