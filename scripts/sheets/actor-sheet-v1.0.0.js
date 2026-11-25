@@ -3549,11 +3549,6 @@ if (!hasPath) propertyValueInput.value = "";
     sheetRoot?.querySelector?.(".nexus-canvas")?.dispatchEvent(new Event("nexus:selectionchange"));
   }
   _selectAll(html) { this._setSelection(html, [...html[0].querySelectorAll(".nexus-component:not([hidden])")].map(el => el.dataset.id)); }
-  async _mountLibrary(panel) {
-    const { mountLibraryView } = await import("./library-view.js");
-    return mountLibraryView(this, panel, { createSheetResourcePreview, fitSheetResourcePreview });
-  }
-
   _mountFloatingUI(html) {
     const root = html[0];
     this._nexusFloatingCleanup?.({ preserveWindows: true });
