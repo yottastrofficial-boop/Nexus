@@ -1,3 +1,13 @@
+## 1.0.0.100 — Estabilização da interface e estilos por categoria
+
+- Adiciona o preset **Foundry VTT**, preservando a aparência nativa das janelas, diretórios, navegação e superfícies do Foundry; aplicações próprias do NEXUS continuam usando os tokens do sistema.
+- Restringe a tipografia global às superfícies temáticas do NEXUS e preserva a renderização nativa dos ícones; valores numéricos usam tipografia monoespaçada com algarismos tabulares para manter alinhamento.
+- Expande o Estúdio de Aparência com categorias recolhíveis para botões, painéis, containers, destaques e campos, incluindo cores, bordas, espessura e arredondamento.
+- Evolui os perfis para NEXUS-DESIGN/2, mantendo a importação de perfis NEXUS-DESIGN/1 e a normalização segura dos novos estilos.
+- Adiciona acesso à Biblioteca Universal pelo menu de configurações do sistema, reutilizando a mesma instância e o mesmo contexto já usados pela ficha.
+- Inclui contratos de regressão para estilos por categoria, tema nativo do Foundry, tipografia de dados e abertura da Biblioteca.
+- Mantém a compatibilidade declarada com Foundry VTT 14 build 360. A validação visual e funcional no cliente real continua necessária antes de considerar a interface confirmada.
+
 ## 1.0.0.99 — Editor flutuante, tipografia nativa e refinamento visual
 
 - Restaura os trilhos flutuantes do editor da ficha e a abertura das ferramentas em janelas ApplicationV2 independentes, removendo o menu lateral permanente da área útil da ficha.

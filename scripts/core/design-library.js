@@ -1,5 +1,5 @@
 import { getLegacyNexusLibraryFlags, readNexusLibraryStore, updateNexusLibraryCollection } from "./library-store.js";
-import { normalizeDesignProfile, exportDesignProfile, importDesignProfile } from "./design-profile.js";
+import { DESIGN_PROFILE_SCHEMA_VERSION, normalizeDesignProfile, exportDesignProfile, importDesignProfile } from "./design-profile.js";
 
 const MAX_PROFILES = 100;
 const cleanName = value => String(value ?? "").trim().slice(0, 64);
@@ -14,7 +14,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     return readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store.collections.themes
-      .filter(entry => entry?.kind === "design-profile" && entry.profile && Number(entry.profile.schemaVersion ?? 1) <= 1)
+      .filter(entry => entry?.kind === "design-profile" && entry.profile && Number(entry.profile.schemaVersion ?? 1) <= DESIGN_PROFILE_SCHEMA_VERSION)
       .map(entry => ({ ...clone(entry), profile: normalizeDesignProfile(entry.profile) }));
   };
   const get = id => { const entry = readEntries().find(item => item.id === String(id ?? "")); return entry ? clone(entry) : null; };
@@ -27,7 +27,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryCollection(user, "themes", entries => {
       const index = requestedId ? entries.findIndex(entry => String(entry.id) === requestedId && entry.kind === "design-profile") : -1;
       if (requestedId && index < 0) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
-      if (index >= 0 && Number(entries[index].profile?.schemaVersion ?? 1) > 1) {
+      if (index >= 0 && Number(entries[index].profile?.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {
         throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser sobrescrito.");
       }
       if (index < 0 && entries.length >= MAX_PROFILES) throw new Error("A coleção de temas da Biblioteca atingiu o limite de 100 itens.");
@@ -63,7 +63,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryCollection(user, "themes", entries => {
       const entry = entries.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
-      if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS.");
+      if (Number(entry.profile?.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS.");
       entry.name = nextName; entry.profile = normalizeDesignProfile({ ...entry.profile, id: entry.id, name: nextName });
       entry.palette = clone(entry.profile.palette); entry.updatedAt = new Date().toISOString(); renamed = clone(entry); return entries;
     });
@@ -75,7 +75,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     await updateNexusLibraryCollection(user, "themes", (entries, store) => {
       const entry = entries.find(item => String(item.id) === String(id) && item.kind === "design-profile");
       if (!entry) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
-      if (Number(entry.profile?.schemaVersion ?? 1) > 1) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser excluído.");
+      if (Number(entry.profile?.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) throw new Error("O perfil foi criado por uma versão mais recente do NEXUS e não pode ser excluído.");
       const dependents = Object.values(store.collections).flatMap(entries => entries.filter(item => item !== entry &&
         Array.isArray(item.dependencies) &&
         item.dependencies.some(value => String(typeof value === "string" ? value : value?.id ?? "") === String(id))));

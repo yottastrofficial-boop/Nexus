@@ -1,8 +1,18 @@
 import { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES } from "./design-constants.js";
 import { THEME_TOKENS } from "./theme.js";
 
-export const DESIGN_PROFILE_SCHEMA_VERSION = 1;
-export const DESIGN_PROFILE_FORMAT = "NEXUS-DESIGN/1";
+export const DESIGN_PROFILE_SCHEMA_VERSION = 2;
+export const DESIGN_PROFILE_FORMAT = "NEXUS-DESIGN/2";
+export const DESIGN_COMPONENT_CATEGORIES = Object.freeze({
+  buttons: { label: "Botões e controles", description: "Ações, comandos e controles interativos." },
+  panels: { label: "Painéis", description: "Painéis laterais, janelas e áreas de ferramentas." },
+  containers: { label: "Containers e cartões", description: "Superfícies que agrupam informações e componentes." },
+  highlights: { label: "Destaques e estados", description: "Seleção, foco, estados ativos e realces." },
+  fields: { label: "Campos e entradas", description: "Campos de texto, seletores e áreas de edição." }
+});
+export const DESIGN_BORDER_STYLE_CHOICES = Object.freeze({
+  solid: "Sólida", dashed: "Tracejada", dotted: "Pontilhada", none: "Sem borda"
+});
 
 export const DESIGN_PROFILE_PALETTE_KEYS = Object.freeze([
   "panel", "surface", "input", "border", "text", "muted", "hover",
@@ -50,6 +60,15 @@ const normalizeColor = (value, fallback) => {
   return color.length === 4 ? "#" + [...color.slice(1)].map(channel => channel + channel).join("") : color;
 };
 
+function createDefaultComponentStyles(theme) {
+  return {
+    buttons: { background: theme.button, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    panels: { background: theme.surface, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 8 },
+    containers: { background: theme.card, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    highlights: { background: theme.highlight, text: theme.panel, border: theme.highlight, borderStyle: "solid", borderWidth: 1, radius: 6 },
+    fields: { background: theme.input, text: theme.text, border: theme.border, borderStyle: "solid", borderWidth: 1, radius: 6 }
+  };
+}
 export function createDefaultDesignProfile(themeId = DEFAULT_DESIGN_THEME) {
   const theme = THEME_TOKENS[themeId] ?? THEME_TOKENS[DEFAULT_DESIGN_THEME];
   const safeThemeId = Object.hasOwn(DESIGN_THEME_CHOICES, themeId) ? themeId : DEFAULT_DESIGN_THEME;
@@ -59,6 +78,7 @@ export function createDefaultDesignProfile(themeId = DEFAULT_DESIGN_THEME) {
     name: DESIGN_THEME_CHOICES[safeThemeId],
     preset: safeThemeId,
     palette: Object.fromEntries(DESIGN_PROFILE_PALETTE_KEYS.map(key => [key, theme[key]])),
+    components: createDefaultComponentStyles(theme),
     typography: {
       family: theme.fontFamily ?? (safeThemeId === "steam" ? "Arial" : safeThemeId === "pixel-art" ? "monospace" : "Inter"),
       baseSize: 13,
@@ -87,12 +107,22 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
   const typographySource = isRecord(source.typography) ? source.typography : {};
   const layoutSource = isRecord(source.layout) ? source.layout : {};
   const accessibilitySource = isRecord(source.accessibility) ? source.accessibility : {};
-
+  const componentsSource = isRecord(source.components) ? source.components : {};
   const palette = Object.fromEntries(DESIGN_PROFILE_PALETTE_KEYS.map(key => [
-    key,
-    normalizeColor(paletteSource[key], defaults.palette[key])
+    key, normalizeColor(paletteSource[key], defaults.palette[key])
   ]));
-
+  const components = Object.fromEntries(Object.entries(DESIGN_COMPONENT_CATEGORIES).map(([key]) => {
+    const fallback = defaults.components[key];
+    const current = isRecord(componentsSource[key]) ? componentsSource[key] : {};
+    return [key, {
+      background: normalizeColor(current.background, fallback.background),
+      text: normalizeColor(current.text, fallback.text),
+      border: normalizeColor(current.border, fallback.border),
+      borderStyle: Object.hasOwn(DESIGN_BORDER_STYLE_CHOICES, current.borderStyle) ? current.borderStyle : fallback.borderStyle,
+      borderWidth: clamp(current.borderWidth, 0, 4, fallback.borderWidth),
+      radius: clamp(current.radius, 0, 18, fallback.radius)
+    }];
+  }));
   const family = Object.hasOwn(DESIGN_FONT_CHOICES, typographySource.family)
     ? typographySource.family
     : defaults.typography.family;
@@ -105,6 +135,7 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
       : defaults.name,
     preset,
     palette,
+    components,
     typography: {
       family,
       baseSize: clamp(typographySource.baseSize, 11, 18, defaults.typography.baseSize),
@@ -172,7 +203,7 @@ export function importDesignProfile(payload) {
   let parsed;
   try { parsed = JSON.parse(source); }
   catch { throw new TypeError("O arquivo não contém JSON válido."); }
-  if (!isRecord(parsed) || parsed.format !== DESIGN_PROFILE_FORMAT || !isRecord(parsed.profile)) {
+  if (!isRecord(parsed) || !["NEXUS-DESIGN/1", DESIGN_PROFILE_FORMAT].includes(parsed.format) || !isRecord(parsed.profile)) {
     throw new TypeError("Formato de perfil NEXUS inválido ou incompatível.");
   }
   if (Number(parsed.profile.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {
@@ -207,6 +238,7 @@ export function profileToThemeLayout(raw) {
     controlHeight: layout.controlHeight,
     contrast: accessibility.contrast,
     reducedMotion: accessibility.reducedMotion,
-    palette
+    palette,
+    components: profile.components
   };
 }

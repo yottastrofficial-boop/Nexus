@@ -1,4 +1,5 @@
 import { THEME_PALETTES } from "./theme.js";
+import { DESIGN_PROFILE_SCHEMA_VERSION } from "./design-profile.js";
 import {
   NEXUS_LIBRARY_COLLECTIONS,
   getLegacyNexusLibraryFlags,
@@ -33,6 +34,7 @@ const COLLECTION_TYPES = Object.freeze({
 });
 const THEME_LABELS = Object.freeze({
   "nexus-dark": "NEXUS Escuro",
+  foundry: "Foundry VTT",
   midnight: "Meia-noite",
   light: "Claro",
   steam: "Steam",
@@ -427,7 +429,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     if (collection === "themes") {
       const canonical = getUser()?.getFlag?.("nexus", "libraryStore");
       const entry = canonical?.collections?.themes?.find(item => String(item.id) === id);
-      if (entry?.kind === "design-profile" && Number(entry.profile?.schemaVersion ?? 1) > 1) return [];
+      if (entry?.kind === "design-profile" && Number(entry.profile?.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) return [];
     }
     return [
       { id: "edit-metadata", label: "Editar metadados" },
@@ -447,7 +449,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     const current = readNexusLibraryStore(user, getLegacyNexusLibraryFlags(user)).store;
     const original = current.collections[collection].find(entry => String(entry.id) === id);
     if (!original) throw new Error("O recurso não existe mais na Biblioteca.");
-    if (collection === "themes" && original.kind === "design-profile" && Number(original.profile?.schemaVersion ?? 1) > 1) {
+    if (collection === "themes" && original.kind === "design-profile" && Number(original.profile?.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {
       throw new Error("Este perfil foi criado por uma versão mais recente do NEXUS e não pode ser alterado nesta versão.");
     }
     const logicCollections = new Set(["properties", "rules", "behaviors", "flows", "functions"]);
@@ -481,7 +483,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         if ("name" in entry || !("label" in entry)) entry.name = name;
         else entry.label = name;
         if (collection === "themes" && entry.kind === "design-profile" && entry.profile &&
-            Number(entry.profile.schemaVersion ?? 1) <= 1) {
+            Number(entry.profile.schemaVersion ?? 1) <= DESIGN_PROFILE_SCHEMA_VERSION) {
           entry.profile.id = entry.id;
           entry.profile.name = name;
         }
@@ -503,7 +505,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       if ("name" in copy || !("label" in copy)) copy.name = String(original.name ?? original.label ?? "Item") + " (cópia)";
       else copy.label = String(original.label) + " (cópia)";
       if (collection === "themes" && copy.kind === "design-profile" && copy.profile &&
-          Number(copy.profile.schemaVersion ?? 1) <= 1) {
+          Number(copy.profile.schemaVersion ?? 1) <= DESIGN_PROFILE_SCHEMA_VERSION) {
         copy.profile.id = copy.id;
         copy.profile.name = String(copy.name ?? copy.label ?? "Aparência").slice(0, 64);
         copy.palette = structuredClone(copy.profile.palette ?? copy.palette);

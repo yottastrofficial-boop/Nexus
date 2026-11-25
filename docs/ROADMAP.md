@@ -8,11 +8,16 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Base de versão declarada na main: `1.0.0.99`, preparada para distribuição após CI e confirmação do pacote.
+- Versão estável atualmente na main: `1.0.0.99`.
+- Candidata `1.0.0.100`: branch de estabilização em revisão pela PR #81; ainda não mesclada nem publicada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
+
+## Atualização candidata 1.0.0.100
+
+A PR #81 concentra a estabilização visual, o tema Foundry VTT, as categorias de estilo, a tipografia de dados e o acesso à Biblioteca. O estado desta candidata depende da aprovação integral do CI e de validação visual/funcional no Foundry 14 build 360; não representa checkpoint funcional confirmado.
 
 ## Estado atual por domínio
 
@@ -82,7 +87,7 @@ A integração está na `main` e o CI está aprovado; ainda não está pronta pa
 
 - Perfis visuais completos reutilizam a coleção `themes` do `libraryStore`, identificados por `kind: "design-profile"`.
 - O Estúdio oferece salvar rascunho, carregar, aplicar ao escopo atual, duplicar, renomear, excluir e exportar perfis salvos.
-- A importação de perfil utiliza o envelope versionado `NEXUS-DESIGN/1`; o backup universal preserva o objeto completo do perfil e mantém compatibilidade com temas legados que armazenam somente paletas.
+- A importação/exportação utiliza o envelope `NEXUS-DESIGN/2`, com leitura compatível de `NEXUS-DESIGN/1`; o backup universal preserva o objeto completo e mantém compatibilidade com temas legados que armazenam somente paletas.
 - A coleção continua pessoal; o perfil ativo da campanha continua em configuração `world`. Aplicar um perfil ao mundo compartilha a aparência efetiva, não a biblioteca privada do usuário.
 - Próximas evoluções: integração de preview e ação contextual no Inspector da Biblioteca, coleções compartilhadas de campanha somente após definir ownership/permissões e teste real de sincronização entre clientes.
 

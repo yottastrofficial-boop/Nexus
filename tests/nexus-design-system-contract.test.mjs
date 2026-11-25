@@ -30,6 +30,8 @@ assert.match(sheet, /_mountFloatingUI/,
   "The sheet must mount floating editor rails outside its content layout.");
 assert.match(sheet, /data-nexus-floating-for/,
   "Floating editor portals must be scoped to their owning sheet.");
+assert.match(legacyStyles, /\.nexus-sheet-resource-values,[\s\S]*?font-family:var\(--nexus-font-data/,
+  "Sheet resource values must use the monospaced data font.");
 assert.match(sheet, /normalizeNexusComponentDimension/,
   "Saved component dimensions must follow the 10px grid.");
 
@@ -71,6 +73,14 @@ assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*5
   "The Design Studio toolbar must remain compact.");
 assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-solid[^{}]*font-family/i,
   "The Design System must leave Font Awesome font selection to Foundry's native styles.");
+assert.match(designSystem, /Native icon glyphs remain owned by Foundry\/Font Awesome/);
+assert.match(designSystem, /nexus-component-buttons-background/);
+assert.match(designSystem, /nexus-component-highlights-border-style/);
+assert.match(designSystem, /data-nexus-theme="foundry"/);
+assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-workspace"),
+  "NEXUS sheet layout must remain styled in the Foundry VTT preset.");
+assert.ok(!designSystem.includes('html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet'),
+  "The native Foundry exception must not disable NEXUS-owned sheet styling.");
 assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/,
   "Profile typography must exclude native icon elements and Font Awesome classes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,

@@ -126,8 +126,9 @@ test("backup round-trips complete custom design profiles without flattening them
     name: "Bosque Antigo",
     palette: { panel: "#123456" },
     profile: {
-      schemaVersion: 1, id: "design-forest", name: "Bosque Antigo", preset: "medieval",
+      schemaVersion: 2, id: "design-forest", name: "Bosque Antigo", preset: "medieval",
       palette: { panel: "#123456" },
+      components: { buttons: { background: "#abcdef", text: "#ffffff", border: "#123456", borderStyle: "dashed", borderWidth: 2, radius: 10 } },
       typography: { family: "Georgia", baseSize: 16 },
       layout: { density: "spacious" },
       accessibility: { reducedMotion: true }

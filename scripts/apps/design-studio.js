@@ -9,6 +9,8 @@ import {
   DESIGN_DENSITY_CHOICES,
   DESIGN_RADIUS_CHOICES,
   DESIGN_CONTRAST_CHOICES,
+  DESIGN_COMPONENT_CATEGORIES,
+  DESIGN_BORDER_STYLE_CHOICES,
 } from "../core/design-profile.js";
 import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";
 
@@ -19,10 +21,19 @@ const clone = value => globalThis.foundry?.utils?.deepClone
 function setPath(target, path, value) {
   const parts = String(path).split(".");
   if (parts.length === 1 && parts[0] === "name") { target.name = String(value).slice(0, 64); return true; }
-  if (parts.length !== 2 || !["palette", "typography", "layout", "accessibility"].includes(parts[0])) return false;
-  target[parts[0]] ??= {};
-  target[parts[0]][parts[1]] = value;
-  return true;
+  if (parts.length === 2 && ["palette", "typography", "layout", "accessibility"].includes(parts[0])) {
+    target[parts[0]] ??= {};
+    target[parts[0]][parts[1]] = value;
+    return true;
+  }
+  if (parts.length === 3 && parts[0] === "components" && Object.hasOwn(DESIGN_COMPONENT_CATEGORIES, parts[1])
+    && ["background", "text", "border", "borderStyle", "borderWidth", "radius"].includes(parts[2])) {
+    target.components ??= {};
+    target.components[parts[1]] ??= {};
+    target.components[parts[1]][parts[2]] = value;
+    return true;
+  }
+  return false;
 }
 
 export function createDesignStudioApplicationClass({
@@ -109,6 +120,22 @@ export function createDesignStudioApplicationClass({
           canvas: "Fundo do Canvas", card: "Cartões", accent: "Cor de destaque",
           highlight: "Destaque forte", button: "Botões"
         })[key] ?? key })),
+        componentStyleCategories: Object.entries(DESIGN_COMPONENT_CATEGORIES).map(([key, category]) => {
+          const style = this._draft.components[key];
+          const path = property => `components.${key}.${property}`;
+          return {
+            key, label: category.label, description: category.description,
+            colors: [
+              { path: path("background"), label: "Cor de fundo", value: style.background },
+              { path: path("text"), label: "Cor do texto", value: style.text },
+              { path: path("border"), label: "Cor da borda", value: style.border }
+            ],
+            borderStylePath: path("borderStyle"),
+            borderStyles: Object.entries(DESIGN_BORDER_STYLE_CHOICES).map(([value, label]) => ({ value, label, selected: value === style.borderStyle })),
+            borderWidthPath: path("borderWidth"), borderWidth: style.borderWidth,
+            radiusPath: path("radius"), radius: style.radius
+          };
+        }),
         fontChoices: Object.entries(DESIGN_FONT_CHOICES).map(([value, label]) => ({ value, label, selected: value === this._draft.typography.family })),
         densityChoices: Object.entries(DESIGN_DENSITY_CHOICES).map(([value, label]) => ({ value, label, selected: value === this._draft.layout.density })),
         radiusChoices: Object.entries(DESIGN_RADIUS_CHOICES).map(([value, label]) => ({ value, label, selected: value === this._draft.layout.radius })),
