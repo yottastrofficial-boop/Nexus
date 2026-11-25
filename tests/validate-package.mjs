@@ -1027,7 +1027,7 @@ assert.match(template, /data-settings-section="organization"/, "Configurações 
 assert.match(template, /data-appearance-panel="behavior"/, "A navegação interna deve abrir o painel Comportamento");
 assert.match(template, /data-appearance-panel="settings"/, "A navegação interna deve abrir o painel Configurações");
 assert.match(sheetCode, /this\._openInlineEditorPanel/, "A ficha deve alternar os painéis pelo drawer interno");
-assert.match(css, /grid-template-columns:\s*minmax\(250px, 286px\) minmax\(0, 1fr\) 72px/, "O drawer interno deve manter a largura de trabalho sem janelas destacadas");
+assert.match(css, /\.nexus-sheet\[data-mode="appearance"\] \.nexus-workspace\s*\{[^}]*grid-template-columns:\s*286px/, "O drawer interno deve manter a largura de trabalho dentro da ficha");
 assert.match(sheetCode, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheetCode, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
