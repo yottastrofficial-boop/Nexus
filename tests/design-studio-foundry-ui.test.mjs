@@ -9,9 +9,11 @@ assert.doesNotMatch(css, /font-family:\s*["\x27]Font Awesome 6 (?:Free|Pro|Brand
 assert.match(designCss, /Foundry owns icon font selection and glyph rendering/);
 assert.match(designCss, /not\(\[class\*="fa-"\]\)/, "A tipografia global deve excluir elementos com classes Font Awesome");
 assert.match(css, /\.sidebar-tab\.nexus-themed-directory/);
-const nativeSidebarStyle = css.match(/html\\.nexus-design-system #sidebar,\\s*html\\.nexus-design-system #sidebar \\.sidebar-tab,\\s*html\\.nexus-design-system #sidebar \\.sidebar-tabs \\{([^}]*)\\}/s)?.[1] ?? "";
-assert.ok(nativeSidebarStyle, "O bloco visual do sidebar nativo deve existir");
-assert.doesNotMatch(nativeSidebarStyle, /font-family\\s*:/i, "A tipografia dos ícones nativos deve permanecer sob controle do Foundry/Font Awesome");
+const nativeSidebarStart = css.indexOf("html.nexus-design-system #sidebar,");
+const nativeSidebarEnd = css.indexOf("html.nexus-design-system #sidebar .sidebar-tabs > .item", nativeSidebarStart);
+const nativeSidebarStyle = css.slice(nativeSidebarStart, nativeSidebarEnd);
+assert.ok(nativeSidebarStart >= 0 && nativeSidebarEnd > nativeSidebarStart, "O bloco visual do sidebar nativo deve existir");
+assert.doesNotMatch(nativeSidebarStyle, /font-family\s*:/i, "A tipografia dos ícones nativos deve permanecer sob controle do Foundry/Font Awesome");
 assert.match(css, /\.directory-list \.directory-item/);
 assert.match(css, /grid-template-columns:\s*158px minmax\(0, 1\.12fr\) minmax\(260px, \.88fr\)/);
 assert.match(template, /data-design-category-filter/);
