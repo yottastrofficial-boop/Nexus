@@ -1289,7 +1289,6 @@ html.nexus-design-system #sidebar nav.tabs[data-group="primary"],
 html.nexus-design-system #sidebar .tabs[data-group="primary"],
 html.nexus-design-system #sidebar > .sidebar-tabs,
 html.nexus-design-system #sidebar .sidebar-tabs {
-  order: 0 !important;
   position: relative !important;
   z-index: 1;
   display: flex !important;
@@ -1385,7 +1384,6 @@ html.nexus-design-system #sidebar .sidebar-tabs > :is(.item, button, [role="tab"
 html.nexus-design-system #sidebar-content,
 html.nexus-design-system #sidebar > .tab.sidebar-tab,
 html.nexus-design-system #sidebar > .sidebar-tab.tab {
-  order: 1 !important;
   flex: 1 1 0 !important;
   min-width: 0 !important;
   min-height: 0 !important;
