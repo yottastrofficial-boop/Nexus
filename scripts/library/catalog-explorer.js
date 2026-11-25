@@ -280,12 +280,31 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     };
   }
   if (resource.kind === "composition" || collection === "groups") {
+    const rawMembers = Array.isArray(data.components) ? data.components : Array.isArray(data.members) ? data.members : [];
+    const members = rawMembers.slice(0, 64).map(item => {
+      const source = item && typeof item === "object" ? item : {};
+      const color = value => typeof value === "string" && /^#[0-9a-f]{3,8}$/i.test(value) ? value : "";
+      return {
+        type: String(source.type ?? "component").slice(0, 64),
+        label: String(source.customLabel ?? source.text ?? source.sheetContent1 ?? source.resourceLabel ?? source.label ?? "Componente").trim().slice(0, 12),
+        value: String(source.text ?? source.sheetCode ?? "").trim().slice(0, 14),
+        x: safeDimension(source.x) ?? 0,
+        y: safeDimension(source.y) ?? 0,
+        w: safeDimension(source.w) ?? 100,
+        h: safeDimension(source.h) ?? 60,
+        current: Number.isFinite(Number(source.previewCurrent)) ? Number(source.previewCurrent) : 32,
+        max: Number.isFinite(Number(source.previewMax)) && Number(source.previewMax) > 0 ? Number(source.previewMax) : 40,
+        color: color(source.sheetColor),
+        borderColor: color(source.borderColor)
+      };
+    });
     const components = safeCount(data.components ?? data.members);
     const groups = safeCount(data.groups);
     return {
       kind: "composition",
       title: "Composição",
       summary: `${countLabel(components, "componente")} · ${countLabel(groups, "subgrupo")}`,
+      members,
       details: [
         ["Componentes", String(components)],
         ["Subgrupos", String(groups)],
@@ -391,6 +410,53 @@ function renderLibraryResourcePreview(resource, resolved) {
   section.dataset.previewKind = model.kind;
   section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
   section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
+    const members = model.members;
+    const bounds = {
+      left: Math.min(...members.map(item => item.x)),
+      top: Math.min(...members.map(item => item.y)),
+      right: Math.max(...members.map(item => item.x + Math.max(20, item.w))),
+      bottom: Math.max(...members.map(item => item.y + Math.max(20, item.h)))
+    };
+    const scale = Math.min(82 / Math.max(1, bounds.right - bounds.left), 82 / Math.max(1, bounds.bottom - bounds.top));
+    const gridMode = members.length > 8 || scale < 0.12;
+    const visible = gridMode ? members.slice(0, 8) : members;
+    const stage = makeElement("div", "nexus-library-saved-group-preview");
+    stage.setAttribute("aria-hidden", "true");
+    stage.classList.toggle("is-grid", gridMode);
+    for (const member of visible) {
+      const type = member.type.toLowerCase();
+      const resource = ["pv", "pm", "pe", "pv-bar", "pm-bar", "pe-bar", "pv-ring", "sheet-resource", "resource-meter", "asset-meter"].includes(type);
+      const card = makeElement("span", "nexus-library-saved-group-card");
+      card.dataset.previewType = member.type;
+      card.classList.toggle("is-resource", resource);
+      card.append(makeElement("strong", "", member.label || "Componente"));
+      if (resource) {
+        const track = makeElement("span", "nexus-library-saved-group-track");
+        const fill = makeElement("i", "");
+        fill.style.width = Math.max(0, Math.min(100, member.current / member.max * 100)) + "%";
+        fill.style.background = member.color || "var(--nexus-highlight-color, #78b7e8)";
+        track.append(fill);
+        card.append(track);
+      } else if (member.value) {
+        card.append(makeElement("small", "", member.value));
+      }
+      card.style.borderColor = member.borderColor || member.color || "var(--nexus-panel-border, #3c5067)";
+      if (gridMode) stage.append(card);
+      else {
+        card.style.left = (9 + (member.x - bounds.left) * scale) + "px";
+        card.style.top = (9 + (member.y - bounds.top) * scale) + "px";
+        card.style.width = Math.max(10, member.w * scale) + "px";
+        card.style.height = Math.max(10, member.h * scale) + "px";
+        card.style.background = "var(--nexus-panel-surface, #202e3e)";
+        stage.append(card);
+      }
+    }
+    if (members.length > visible.length) {
+      stage.append(makeElement("span", "nexus-library-saved-group-overflow", "+" + (members.length - visible.length)));
+    }
+    section.append(stage);
+  }
   if (model.kind === "component" && model.preview) {
     const preview = model.preview;
     const type = String(preview.type ?? "").toLowerCase();
