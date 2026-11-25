@@ -1269,3 +1269,15 @@ html.nexus-design-system .nexus-design-sample-scroll {
 html.nexus-design-system .nexus-design-sample-scroll span {
   padding: 5px 7px; border-radius: 4px; background: var(--nexus-ui-surface-raised); font-size: 10px;
 }
+
+
+/* Persistent entry point for the shared Universal Library. */
+html.nexus-design-system .nexus-open-library {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; min-height: 34px; margin: 0 0 8px; padding: 7px 10px;
+  border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
+  color: var(--nexus-ui-text); background: var(--nexus-ui-surface); font: inherit;
+}
+html.nexus-design-system .nexus-open-library:hover {
+  border-color: var(--nexus-ui-accent); background: var(--nexus-ui-surface-hover);
+}
