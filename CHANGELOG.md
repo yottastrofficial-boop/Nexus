@@ -1,3 +1,13 @@
+## 1.0.0.105 — Correção estrutural do sidebar Minimal UI
+
+- Corrige os seletores do sidebar para alcançar a navegação e o painel de conteúdo dentro da estrutura ApplicationV2 do Foundry VTT 14.
+- Reorganiza a faixa de abas horizontalmente, com rolagem horizontal para conjuntos de abas extensos.
+- Ajusta dimensões, alinhamento, espaçamento e estados visuais dos botões de navegação.
+- Preserva a ordem DOM, os elementos, os handlers e a seleção nativos do Foundry; não recria nem reordena abas.
+- Mantém a família e o mapeamento dos ícones sob responsabilidade do Foundry/Font Awesome, sem impor uma fonte substituta pelo NEXUS.
+- Atualiza testes de contrato para a estrutura ApplicationV2, orientação horizontal, rolagem e preservação da fonte dos ícones.
+- CI e empacotamento automatizados serão confirmados pelo workflow desta publicação. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente; esta versão é destinada à rodada de testes do mantenedor.
+
 ## 1.0.0.104 — CSS avançado no Estúdio de Aparência
 
 - Adiciona modo CSS avançado com edição independente por categoria visual.
