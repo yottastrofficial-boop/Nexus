@@ -1023,8 +1023,13 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) body :is(button, inpu
   font-family: inherit;
 }
 html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #sidebar .tab, #hotbar, #navigation, #controls, #ui-left, #ui-top, #players, #chat) { color: var(--nexus-ui-text) !important; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #sidebar .tab, #hotbar, #navigation) :is(button, input, select, textarea) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#hotbar, #navigation) :is(button, input, select, textarea) {
   font-family: inherit; color: var(--nexus-ui-text);
+}
+/* Do not assign font-family to native sidebar controls: Font Awesome may be
+   applied directly to the tab button rather than to a nested <i> element. */
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar :is(button, input, select, textarea) {
+  color: var(--nexus-ui-text);
 }
 html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#chat, .chat-sidebar, #chat-log, .chat-log, .chat-scroll, #chat-form, .chat-form, #chat-controls, .chat-controls) {
   color: var(--nexus-ui-text) !important;
@@ -1186,7 +1191,12 @@ html.nexus-design-system #chat-log .message-content { background: var(--nexus-ui
 /* The selected profile supplies the default text color and font throughout Foundry. */
 html.nexus-design-system:not([data-nexus-theme="foundry"]) body { color: var(--nexus-ui-text); }
 /* Use the selected profile font throughout Foundry, while preserving icon and code fonts. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) body
+  :not(#sidebar):not(#sidebar *)
+  :not(i):not(svg):not(code):not(pre)
+  :not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"])
+  :not([class~="fab"]):not([class~="fal"]):not([class~="fad"])
+  :not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
   font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
 }
 html.nexus-design-system .nexus-design-sample-type :is(select, textarea) {
@@ -1254,13 +1264,7 @@ html.nexus-design-system .nexus-design-surface :is(input:not([type="checkbox"]):
 }
 
 
-/* Do not apply the UI typeface to Font Awesome legacy aliases. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(i):not(svg):not(code):not(pre)
-  :not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"])
-  :not([class~="fab"]):not([class~="fal"]):not([class~="fad"])
-  :not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
-  font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
-}
+/* Sidebar descendants are intentionally excluded from the global typeface rule above. */
 
 /* Foundry V14 Sidebar — native horizontal tab strip.
    The V14 Sidebar renders its primary navigation as .sidebar-tabs and its
