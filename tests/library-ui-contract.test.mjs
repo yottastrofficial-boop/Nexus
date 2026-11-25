@@ -15,8 +15,10 @@ assert.match(styles, /\.nexus-library-application \.nexus-library-details[\s\S]*
   "O Inspector deve ter rolagem independente e não ser recortado.");
 assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.nexus-library-details/,
   "Em telas estreitas, o Inspector deve continuar acessível em painel responsivo.");
-assert.match(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/,
+assert.match(designSystem, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/,
   "Abas especializadas do Foundry devem receber estado ativo explícito.");
+assert.doesNotMatch(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application/,
+  "A Biblioteca Universal não deve estilizar o sidebar do Foundry.");
 assert.doesNotMatch(styles, /#ui-left|#ui-top|#controls/,
   "A camada da Biblioteca não deve impor botões flutuantes aos controles nativos do Foundry.");
 assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
