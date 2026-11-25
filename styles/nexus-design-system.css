@@ -1553,6 +1553,59 @@ html.nexus-design-system #sidebar #chat :is(#chat-form, .chat-form) {
   padding-inline: 4px !important;
 }
 
+/* Adaptive chat density: respond to the chat's actual inline size, not viewport
+   width or a forced sidebar size. Container queries only adjust spacing; native
+   message structure, font sizing, scroll behavior and Foundry handlers remain. */
+html.nexus-design-system #sidebar #chat {
+  container-name: nexus-chat-sidebar;
+  container-type: inline-size;
+}
+
+html.nexus-design-system #sidebar #chat .chat-log :is(.chat-message, .message) {
+  overflow-wrap: anywhere;
+}
+
+html.nexus-design-system #sidebar #chat .chat-log .message-content :is(img, video, iframe, table) {
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+html.nexus-design-system #sidebar #chat .chat-log .message-content :is(img, video) {
+  block-size: auto;
+}
+
+html.nexus-design-system #sidebar #chat .chat-log .message-content table {
+  display: block;
+  overflow-x: auto;
+}
+
+/* Narrow sidebar: save space through padding, not by shrinking text. */
+@container nexus-chat-sidebar (max-width: 360px) {
+  html.nexus-design-system #sidebar #chat .chat-log :is(.message-header, .message-sender, .message-metadata) {
+    padding: 4px 7px !important;
+  }
+
+  html.nexus-design-system #sidebar #chat .chat-log .message-content {
+    padding: 6px 8px !important;
+  }
+
+  html.nexus-design-system #sidebar #chat .chat-log :is(.chat-message, .message) {
+    margin: 4px 1px !important;
+  }
+}
+
+/* Wider available chat: restore a little breathing room without changing
+   the host sidebar's default width. */
+@container nexus-chat-sidebar (min-width: 440px) {
+  html.nexus-design-system #sidebar #chat .chat-log :is(.message-header, .message-sender, .message-metadata) {
+    padding: 6px 10px !important;
+  }
+
+  html.nexus-design-system #sidebar #chat .chat-log .message-content {
+    padding: 9px 11px !important;
+  }
+}
+
 /* Advanced CSS editor */
 html.nexus-design-system .nexus-design-css-guidance { padding:12px 14px; border:1px solid var(--nexus-ui-border); border-radius:var(--nexus-ui-radius); background:var(--nexus-ui-surface); }
 html.nexus-design-system .nexus-design-css-guidance p { margin:7px 0; color:var(--nexus-ui-text); }

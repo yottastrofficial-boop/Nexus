@@ -38,6 +38,16 @@ assert.match(sidebar, /#sidebar #chat :is\(#chat-controls, \.chat-controls, #cha
   "The actual chat controls and composer must span the sidebar width.");
 assert.match(sidebar, /#sidebar #chat \.chat-log :is\(\.chat-message, \.message\)[\s\S]*?max-width:\s*none\s*!important;[\s\S]*?margin:\s*5px 2px\s*!important;/,
   "Chat cards should use compact spacing and avoid fixed narrow widths.");
+assert.match(sidebar, /#sidebar #chat\s*\{[\s\S]*?container-name:\s*nexus-chat-sidebar;[\s\S]*?container-type:\s*inline-size;/,
+  "Chat density must respond to the chat container's own width, not the viewport or a forced sidebar size.");
+assert.match(sidebar, /@container nexus-chat-sidebar \(max-width:\s*360px\)/,
+  "Narrow chat should reduce padding through a scoped container query.");
+assert.match(sidebar, /@container nexus-chat-sidebar \(min-width:\s*440px\)/,
+  "Wider chat should use slightly more comfortable spacing.");
+assert.match(sidebar, /message-content :is\(img, video, iframe, table\)[\s\S]*?max-inline-size:\s*100%;/,
+  "Embedded chat media and tables must stay within the message width.");
+assert.match(sidebar, /message-content table\s*\{[\s\S]*?overflow-x:\s*auto;/,
+  "Wide message tables should scroll within their own content instead of widening the sidebar.");
 assert.match(sidebar, /#sidebar-content[\s\S]*?flex:\s*1 1 0\s*!important;/,
   "The panel area must consume the remaining sidebar height.");
 const panelRules = sidebar.slice(sidebar.indexOf("/* Panels fill the remaining area."));
