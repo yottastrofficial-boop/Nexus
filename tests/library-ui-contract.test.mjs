@@ -16,8 +16,8 @@ assert.match(styles, /@media \(max-width: 720px\)[\s\S]*?\.nexus-library-details
   "Em telas estreitas, o Inspector deve continuar acessível em painel responsivo.");
 assert.match(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/,
   "Abas especializadas do Foundry devem receber estado ativo explícito.");
-assert.match(styles, /#ui-left, #ui-top\) \.ui-control/,
-  "Controles nativos de UI devem compartilhar a superfície visual flutuante do NEXUS.");
+assert.doesNotMatch(styles, /#ui-left|#ui-top|#controls/,
+  "A camada da Biblioteca não deve impor botões flutuantes aos controles nativos do Foundry.");
 assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
   "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
 assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
