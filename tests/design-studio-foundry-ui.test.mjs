@@ -34,17 +34,17 @@ assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPT
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
 const sidebarBlock = designCss.slice(
-  designCss.indexOf("/* Foundry V14 Sidebar — horizontal navigation with native ApplicationV2 panels."),
+  designCss.indexOf("/* Sidebar navigation and panels — Foundry V14 ApplicationV2."),
   designCss.indexOf("/* Advanced CSS editor */")
 );
 assert.ok(sidebarBlock.length > 0, "O bloco canônico do sidebar deve existir");
 assert.ok(sidebarBlock.includes("#sidebar-tabs"), "O seletor nativo de navegação deve ser contemplado");
 assert.ok(sidebarBlock.includes(".sidebar-tabs"), "A navegação real do Sidebar V14 deve ser contemplada");
 assert.ok(sidebarBlock.includes(".tab.sidebar-tab"), "Os controles nativos V14 precisam ser selecionados pela classe real");
-assert.ok(sidebarBlock.includes("#sidebar-tabs > .item"), "Os controles nativos devem receber dimensões uniformes sem selecionar painéis");
-assert.ok(sidebarBlock.includes("#sidebar .sidebar-tabs > .item"), "A navegação nativa dentro do Sidebar deve receber dimensões uniformes");
-const navControlsStart = sidebarBlock.indexOf("/* Only navigation controls receive button sizing.");
-const navControlsEnd = sidebarBlock.indexOf("/* Preserve Font Awesome", navControlsStart);
+assert.ok(sidebarBlock.includes("#sidebar-tabs > :is(.item"), "Os controles nativos devem receber dimensões uniformes sem selecionar painéis");
+assert.ok(sidebarBlock.includes("#sidebar .sidebar-tabs > :is(.item"), "A navegação nativa dentro do Sidebar deve receber dimensões uniformes");
+const navControlsStart = sidebarBlock.indexOf("/* Size only native navigation controls.");
+const navControlsEnd = sidebarBlock.indexOf("/* Native icon fonts/SVGs", navControlsStart);
 const navControlsStyle = sidebarBlock.slice(navControlsStart, navControlsEnd);
 assert.ok(navControlsStart >= 0 && navControlsEnd > navControlsStart, "A seção de dimensionamento dos controles nativos deve existir");
 const navControlSelectors = navControlsStyle.slice(
@@ -54,7 +54,7 @@ const navControlSelectors = navControlsStyle.slice(
 assert.ok(navControlSelectors.length > 0, "Os seletores de controle devem estar declarados");
 assert.doesNotMatch(navControlSelectors, /\.tab\.sidebar-tab/, "Painéis de conteúdo nunca devem ser selecionados como botões");
 const panelLayoutStart = sidebarBlock.indexOf("html.nexus-design-system #sidebar > .tab.sidebar-tab,");
-const panelLayoutEnd = sidebarBlock.indexOf("/* Keep panel internals fluid", panelLayoutStart);
+const panelLayoutEnd = sidebarBlock.indexOf("/* The content host is the scroll boundary.", panelLayoutStart);
 const panelLayoutStyle = sidebarBlock.slice(panelLayoutStart, panelLayoutEnd);
 assert.ok(panelLayoutStart >= 0 && panelLayoutEnd > panelLayoutStart, "O painel nativo deve ter uma regra de layout própria");
 assert.doesNotMatch(panelLayoutStyle, /width:\s*34px|height:\s*34px/, "Painéis de conteúdo devem ocupar a área disponível, não dimensões de botão");

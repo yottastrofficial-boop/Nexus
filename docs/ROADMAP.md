@@ -48,3 +48,13 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - A release distribuída continua sendo `1.0.0.107`; a execução de release após a PR foi ignorada, portanto não houve nova versão publicada.
 - Próximo passo funcional: corrigir o sidebar com evidência do DOM do Foundry VTT 14 build 360. Sem a captura real, não alterar seletores por suposição. Não usar Playwright.
 - Fichas, Canvas, Biblioteca e auditoria ampla de ícones continuam como etapas de trabalho, não como concluídas; a validação visual/funcional no Foundry permanece pendente.
+
+
+## Correção completa do layout da sidebar V14 — PR #95
+
+- Reescrito o bloco de sidebar em `styles/nexus-design-system.css`: contêiner em coluna, navegação horizontal com quebra de linha, botões de tamanho consistente, estados hover/selecionado/foco e área de painel flexível.
+- A geometria dos painéis foi limitada aos contêineres e filhos de abas nativos; abas internas de aplicações não recebem indiscriminadamente dimensões de painel.
+- A visibilidade e a troca de abas continuam sob controle do controlador nativo do Foundry. Não foram recriados handlers nem glifos; Font Awesome e SVG permanecem nativos.
+- Atualizados os contratos de regressão que ainda apontavam para os seletores antigos e adicionado `tests/sidebar-layout-contract.test.mjs`, incluindo equilíbrio estrutural das chaves CSS.
+- CI da validação de pacote passou: sintaxe 64/64, suite de testes 41/41 e pacote gerado com sucesso. Não houve release.
+- **Validação manual pendente:** conferir no Foundry VTT 14 build 360 a posição real da barra, todos os ícones, troca de abas, altura/rolagem dos painéis e compatibilidade com abas de módulos. Não declarar concluído visualmente nem publicar `1.0.0.108` antes dessa conferência.
