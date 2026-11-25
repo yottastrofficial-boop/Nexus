@@ -8,14 +8,19 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão distribuída: `1.0.0.107` (release, ZIP e manifesto confirmados).
-- Teste manual: `1.0.0.107` foi publicada após CI, empacotamento, verificação do asset `nexus.zip` e sincronização do manifesto. O layout visual e a troca de abas ainda aguardam conferência do mantenedor no Foundry VTT 14 build 360.
+- Versão candidata na main: `1.0.0.113` (dock compacto do sidebar; validação automatizada e manual pendentes até CI).
+- Última versão estável publicada no manifesto: `1.0.0.112`.
+- Teste manual: a candidata `1.0.0.113` precisa confirmar a faixa única, a densidade dos ícones, as abas de módulos e a troca de painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
 - A revisão CSS está distribuída na `1.0.0.107` para validação manual. Não declarar o sidebar funcionalmente concluído até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
+
+## Candidata 1.0.0.113 — dock compacto de navegação
+
+A main distribui as abas nativas em uma única faixa flexível, sem wrap ou rolagem horizontal. A mudança preserva a ordem DOM, os handlers, os ícones e o controlador nativo; a largura da sidebar não é alterada. O CI deve confirmar os contratos e o empacotamento, mas a precisão dos cliques e a compatibilidade com abas adicionadas por módulos dependem de inspeção no Foundry real.
 
 ## Próxima etapa — correção orientada pelo diagnóstico do sidebar V14
 

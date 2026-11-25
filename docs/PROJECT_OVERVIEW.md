@@ -6,9 +6,11 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão candidata na `main`: `1.0.0.112` (densidade adaptativa do chat lateral para teste).
+- Versão candidata na `main`: `1.0.0.113` (dock compacto do sidebar em linha única; validação visual pendente).
+- Última versão estável publicada no manifesto: `1.0.0.112`.
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
+- A candidata .113 mantém a navegação em linha única com slots flexíveis; a captura no Foundry real ainda é necessária para confirmar densidade e precisão dos cliques.
 - A captura da .106 confirmou navegação vertical, sobreposição e glifos incorretos. A revisão de CSS e os contratos de regressão foram distribuídos na .107; a validação visual e funcional no Foundry real ainda aguarda o teste manual.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.

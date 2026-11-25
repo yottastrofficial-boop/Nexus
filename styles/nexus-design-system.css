@@ -1274,6 +1274,19 @@ html.nexus-design-system .nexus-design-surface :is(input:not([type="checkbox"]):
    Layout is deliberately scoped to the native sidebar. Foundry owns tab
    registration, active-state changes, panel visibility and icon markup. */
 
+/* Keep Foundry's native sidebar shell; only its internal tab rail is restyled. */
+html.nexus-design-system #sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
 /* Compact native navigation dock — one line, no horizontal scrolling.
    Keep Foundry's original tab elements, order, icons, handlers and controller.
    Equal flexible slots allow the complete native tab set to remain visible
@@ -1355,7 +1368,7 @@ html.nexus-design-system #sidebar-tabs > menu.flexcol > li > button[data-action=
   padding: 0 1px !important;
 }
 
-/* Compatibility markup: size only direct native controls, never panel nodes.
+/* Size only native navigation controls. Compatibility markup is handled without selecting panels.
    .tab.sidebar-tab is a content panel, not an icon button. */
 html.nexus-design-system #sidebar-tabs > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
 html.nexus-design-system #sidebar nav.tabs[data-group="primary"] > :is(.item, button, [role="tab"], .sidebar-tab:not(.tab)),
