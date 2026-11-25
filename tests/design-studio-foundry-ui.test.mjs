@@ -21,6 +21,6 @@ assert.match(app, /const mutableOptions = \\{/);
 assert.match(app, /position: \\{ \\.\\.\\.options\\.position \\}/);
 assert.match(designCss, /#sidebar > \\.sidebar-tabs[\\s\\S]*?flex-direction: row/);
 assert.match(designCss, /#sidebar > \\.tab\\.sidebar-tab[\\s\\S]*?flex: 1 1 auto/);
-assert.match(designCss, /left-to-right/);
-assert.match(designCss, /class~="fas"/);
+assert.ok(designCss.includes("left-to-right"));
+assert.ok(designCss.includes('[class~="fas"]'));
 console.log("Foundry UI + Design Studio layout contracts passed.");
