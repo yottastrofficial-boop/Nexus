@@ -100,3 +100,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - PR #98 integrada: o menu real agora é faixa horizontal com quebra de linha; `li` e botões recebem dimensões consistentes sem alterar a estrutura ou os handlers nativos.
 - A correção dos glifos Font Awesome da 1.0.0.109 permanece incluída.
 - CI e testes de contrato aprovados na PR; validação visual manual no Foundry VTT 14 ainda pendente.
+
+
+## Diagnóstico e correção do chat lateral — DOM V14
+
+- O diagnóstico mediu sidebar/área de chat com 540 px, mas o `OL.chat-log` ativo e o `FORM.chat-form` tinham apenas 300 px. O seletor `#chat-log` não encontra o histórico real: o DOM expõe `OL.chat-log` sem esse ID.
+- Correção: aplicar largura total e remover `max-width` dos elementos reais `.chat-log`, `.chat-controls` e `.chat-form`; ajustar cartões com espaçamento mais compacto e sem sombra excessiva.
+- Não alterar o controlador de abas, mensagens, handlers nem a margem nativa do contêiner até confirmar sua origem por estilo computado.
+- Testes de contrato cobrem a estrutura real; validação visual final ainda depende do usuário no Foundry VTT 14.
