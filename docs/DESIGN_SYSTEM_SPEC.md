@@ -90,3 +90,8 @@ A camada final de interface consome `--nexus-control-height` e os tokens de espa
 A navegação de cenas mantém a estrutura e os eventos nativos do Foundry. A lista pode rolar horizontalmente quando não couber na viewport; cenas visualizadas e ativas recebem um estado visual próprio, sem substituir as classes ou os indicadores de permissão do Foundry. Os trilhos flutuantes das fichas permanecem portais externos ao conteúdo da ficha, mas ancorados à janela nativa NEXUS. Cada ferramenta abre sua própria janela ApplicationV2; a ficha não incorpora uma barra lateral permanente de configuração. Os trilhos rolam independentemente quando sua altura excede a área disponível.
 
 Esta camada é estritamente de apresentação: não reordena controles, não cria botões nativos substitutos, não intercepta eventos e não altera permissões ou estado de cenas. O suporte a `prefers-reduced-motion` complementa a opção de acessibilidade do perfil.
+
+
+## Tipografia e ícones nativos
+
+A tipografia escolhida no Estúdio de Aparência aplica-se ao texto das superfícies compatíveis, mas exclui elementos de ícone, classes Font Awesome, SVG e fontes monoespaçadas. A seleção da família tipográfica, do peso e do glifo dos ícones permanece sob responsabilidade dos estilos nativos do Foundry. O Design System não força uma família Font Awesome alternativa nem reescreve a fonte dos pseudo-elementos de glifo.

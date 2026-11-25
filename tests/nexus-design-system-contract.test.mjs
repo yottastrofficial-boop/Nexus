@@ -69,8 +69,10 @@ assert.match(legacyStyles, /\.nexus-panel-window/,
   "Appearance tools must retain independent native panel windows.");
 assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*58px/,
   "The Design Studio toolbar must remain compact.");
-assert.match(designSystem, /fa-style-family/,
-  "Foundry Font Awesome icons must retain their icon font when profile typography changes.");
+assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-solid[^{}]*font-family/i,
+  "The Design System must leave Font Awesome font selection to Foundry's native styles.");
+assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/,
+  "Profile typography must exclude native icon elements and Font Awesome classes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");
 

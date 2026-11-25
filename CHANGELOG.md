@@ -1,3 +1,10 @@
+## 1.0.0.101 — Preservação da tipografia nativa dos ícones
+
+- Remove a sobrescrita global da família Font Awesome; o Foundry volta a controlar família, peso e glifos dos ícones.
+- Mantém a tipografia do perfil nas superfícies de texto sem substituir a fonte dos controles nativos.
+- Acrescenta contrato de regressão para impedir que o Design System volte a forçar uma fonte de ícones.
+- Mantém a restauração dos trilhos flutuantes e o refinamento do Estúdio de Aparência introduzidos na base anterior.
+
 ## 1.0.0.100 — Restauração do editor flutuante e refinamento visual
 
 - Restaura os trilhos flutuantes do editor da ficha e a abertura de ferramentas em janelas ApplicationV2 independentes, removendo o menu lateral permanente da área útil da ficha.

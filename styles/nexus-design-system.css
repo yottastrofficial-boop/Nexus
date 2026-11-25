@@ -1236,10 +1236,5 @@ html.nexus-design-system .nexus-design-sample-type :is(select, textarea) {
 }
 html.nexus-design-system .nexus-design-sample-type textarea { resize: none; }
 
-/* Preserve Foundry's Font Awesome glyph family when global typography is applied. */
-html.nexus-design-system :is(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands, [class^="fa-"], [class*=" fa-"]) {
-  font-family: var(--fa-style-family, "Font Awesome 6 Free") !important;
-}
-html.nexus-design-system :is(.fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-light, .fa-duotone, .fa-brands, [class^="fa-"], [class*=" fa-"])::before {
-  font-family: inherit !important;
-}
+/* Foundry owns icon font selection and glyph rendering. The profile font rule above
+   explicitly excludes icon elements/classes, so do not override Font Awesome here. */
