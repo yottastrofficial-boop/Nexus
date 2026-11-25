@@ -1,3 +1,11 @@
+## 1.0.0.110 — Correção da estrutura real da navegação lateral
+
+- Corrige a navegação da sidebar no DOM real do Foundry VTT 14: transforma `#sidebar-tabs > menu.flexcol` em faixa horizontal com quebra de linha.
+- Dimensiona os controles na hierarquia observada `NAV > MENU > LI > BUTTON`, sem substituir elementos, handlers, ordem ou controlador nativo de abas.
+- Mantém a correção tipográfica Font Awesome da 1.0.0.109 e acrescenta testes de regressão para o DOM real.
+- **Teste manual pendente:** confirmar no Foundry VTT 14 a disposição horizontal, os ícones, o recolhimento e a troca de abas.
+- Sem alterações em regras, dados persistidos ou schemas.
+
 ## 1.0.0.109 — Correção da fonte dos ícones nativos da sidebar
 
 - Pacote preparado e validado automaticamente no GitHub Actions; disponibilizado para teste no Foundry VTT 14.
