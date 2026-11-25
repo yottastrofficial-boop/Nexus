@@ -126,3 +126,12 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Não altera a estrutura DOM do Foundry, handlers, controlador de abas, mensagens ou dados.
 - Contratos de regressão ampliados para verificar os breakpoints de contêiner e o limite de mídia.
 - Esta mudança é uma proposta em branch/PR. A validação visual no Foundry VTT 14 build 360 permanece necessária; não declarar concluída nem publicar release antes do teste manual.
+
+
+## Atualização 1.0.0.112 — chat com densidade adaptativa
+
+- PR #100 prepara o chat para ajustar espaçamentos conforme a largura real do contêiner, sem alterar a largura padrão da sidebar.
+- Em áreas estreitas, reduz apenas padding e margens; em áreas mais largas, devolve espaçamento moderado.
+- Mídia respeita a largura disponível e tabelas extensas rolam dentro da mensagem.
+- CI e empacotamento automatizados devem ser confirmados na publicação desta versão.
+- **Validação manual pendente:** chat estreito/largo, mídia, tabelas, compositor e rolagem no Foundry VTT 14 build 360. Não declarar estabilidade funcional antes do teste no cliente real.
