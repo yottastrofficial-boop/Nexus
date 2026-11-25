@@ -21,7 +21,9 @@ test("character sheet opens the shared Universal Library", () => {
   assert.match(sheetListeners, /getLibraryMediaInsertionSource/);
   assert.match(libraryApplication, /id: "nexus-library"/);
   assert.match(systemEntry, /registerMenu\("nexus", "universalLibrary"/);
-  assert.match(systemEntry, /type: LibraryApplication/);
+  assert.match(systemEntry, /class extends LibraryApplication/);
+  assert.match(systemEntry, /game\.nexus\.library\.application/);
+  assert.match(systemEntry, /type: LibraryMenuApplication/);
 });
 
 test("character sheet no longer mounts the legacy embedded library", () => {

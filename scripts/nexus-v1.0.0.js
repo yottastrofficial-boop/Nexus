@@ -106,6 +106,19 @@ Hooks.once("init", () => {
     }
   });
   game.nexus.library.Application = LibraryApplication;
+  const LibraryMenuApplication = class extends LibraryApplication {
+    constructor(options = {}) {
+      const current = game.nexus.library.application;
+      if (current) {
+        current.setContext({});
+        return current;
+      }
+      super(options);
+      this.setContext({});
+      game.nexus.library.application = this;
+    }
+  };
+  game.nexus.library.MenuApplication = LibraryMenuApplication;
   game.nexus.library.open = (context = {}) => {
     const current = game.nexus.library.application;
     if (current?.rendered) {
@@ -124,7 +137,7 @@ Hooks.once("init", () => {
       label: "Abrir Biblioteca",
       hint: "Consulte, organize e reutilize os recursos disponíveis no NEXUS.",
       icon: "fa-solid fa-book-open",
-      type: LibraryApplication,
+      type: LibraryMenuApplication,
       restricted: false
     });
   }

@@ -9898,3 +9898,15 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
 .nexus-design-surface :is(code,pre,.nexus-code-editor) {
   font-family:var(--nexus-font-code,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace);
 }
+
+
+.nexus-design-sample-state {
+  display:flex;
+  align-items:center;
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid var(--nexus-panel-border,#3c5067);
+  border-radius:var(--nexus-ui-radius,7px);
+  font-size:11px;
+  font-weight:650;
+}

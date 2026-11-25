@@ -1230,7 +1230,8 @@ html.nexus-design-system .nexus-design-sample-type textarea { resize: none; }
 
 
 /* Native icon glyphs remain owned by Foundry/Font Awesome; normalize only their layout box. */
-html.nexus-design-system :is(i[class*="fa-"],span[class*="fa-"],[class^="fa-"],[class*=" fa-"]) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(i[class*="fa-"],span[class*="fa-"],[class^="fa-"],[class*=" fa-"]),
+html.nexus-design-system .nexus-design-surface :is(i[class*="fa-"],span[class*="fa-"],[class^="fa-"],[class*=" fa-"]) {
   display:inline-block;
   line-height:1;
   vertical-align:middle;
@@ -1248,7 +1249,7 @@ html.nexus-design-system .nexus-design-surface :is(button,.button,.ui-control,.c
   border-radius:var(--nexus-component-buttons-radius,var(--nexus-ui-radius));
 }
 html.nexus-design-system .nexus-design-surface :is(button,.button,.ui-control,.control-tool):hover { filter:brightness(1.08); }
-html.nexus-design-system .nexus-design-surface :is(.nexus-panel-window,.nexus-tool-panel,.nexus-sidebar,.nexus-sidebar-right,.nexus-side-section,.nexus-library-panel) {
+html.nexus-design-system .nexus-design-surface :is(.nexus-panel-window,.nexus-tool-panel,.nexus-sidebar,.nexus-sidebar-right,.nexus-side-section,.nexus-library-panel,.nexus-design-sample-panel) {
   color:var(--nexus-component-panels-text,var(--nexus-ui-text));
   background-color:var(--nexus-component-panels-background,var(--nexus-ui-surface));
   border-color:var(--nexus-component-panels-border,var(--nexus-ui-border));
@@ -1256,7 +1257,7 @@ html.nexus-design-system .nexus-design-surface :is(.nexus-panel-window,.nexus-to
   border-width:var(--nexus-component-panels-border-width,1px);
   border-radius:var(--nexus-component-panels-radius,var(--nexus-ui-radius));
 }
-html.nexus-design-system .nexus-design-surface :is(.nexus-component:not(.is-group-member),.nexus-sheet-element,.nexus-library-card,.nexus-design-preview-card,.nexus-design-sample-panel) {
+html.nexus-design-system .nexus-design-surface :is(.nexus-component:not(.is-group-member),.nexus-sheet-element,.nexus-library-card,.nexus-design-sample-container) {
   color:var(--nexus-component-containers-text,var(--nexus-ui-text));
   background-color:var(--nexus-component-containers-background,var(--nexus-ui-surface-raised));
   border-color:var(--nexus-component-containers-border,var(--nexus-ui-border));
