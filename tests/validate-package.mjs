@@ -1286,7 +1286,7 @@ assert.ok(template.includes('data-appearance-panel="component" title="Propriedad
 assert.ok(template.includes('data-appearance-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
 assert.ok(template.includes('data-appearance-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
 assert.ok(sheetCode.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
-assert.ok(sheetCode.includes("if (editorWasOpen && !nextIsEditor && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
+assert.ok(sheetCode.includes('if (["component", "behavior"].includes(key))') && sheetCode.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando a última janela de edição for fechada");
 assert.ok(sheetCode.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
 assert.ok(css.includes("min-height:38px"), "Os controles do editor devem ter dimensões legíveis");
 assert.ok(css.includes("grid-template-columns:minmax(150px,1.4fr) minmax(120px,1fr) minmax(110px,1fr) auto"), "As condições devem reservar espaço para cada campo e para Remover");
