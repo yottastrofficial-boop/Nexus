@@ -8,12 +8,16 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão publicada: `1.0.0.104` (CI, empacotamento, release e manifesto sincronizados).
-- Manifesto estável: `1.0.0.104`; validação visual/funcional no Foundry 14 build 360 ainda pendente.
+- Versão de código na main: `1.0.0.105` (correção estrutural do sidebar integrada; validação automatizada e publicação em andamento).
+- Manifesto estável: `1.0.0.104` até a confirmação do pacote `v1.0.0.105`; validação visual/funcional no Foundry 14 build 360 ainda pendente.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
+
+## Atualização 1.0.0.105 — correção estrutural do sidebar
+
+Corrige a aplicação das regras do Minimal UI à estrutura ApplicationV2 do Foundry V14. A navegação alcança `.sidebar-tabs` e `.tab.sidebar-tab` dentro do contêiner real, organiza os botões em faixa horizontal e mantém os elementos, handlers, ordem DOM e fontes de ícones nativas. A validação visual no Foundry VTT 14 build 360 permanece pendente.
 
 ## Atualização 1.0.0.104
 
