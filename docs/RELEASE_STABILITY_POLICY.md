@@ -24,8 +24,9 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 
 ## Estado de referência — 2026-11-25
 
-- **Versão de código integrada à main:** `1.0.0.100`, ainda não publicada como estável.
-- **Manifesto estável:** `1.0.0.99` até a validação funcional no Foundry 14 build 360 e a confirmação da publicação.
+- **Versão de distribuição autorizada:** `1.0.0.100`; a publicação foi solicitada pelo mantenedor após CI e empacotamento aprovados.
+- **Manifesto estável:** avançará para `1.0.0.100` após o workflow confirmar a release e o asset `nexus.zip`.
+- **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente; a release de distribuição não promove o checkpoint funcional, que permanece em `1.0.0.70`.
 - **Distribuição:** `manifest.json` é o único endereço de instalação/atualização e aponta para a última release estável com pacote confirmado.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.

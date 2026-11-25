@@ -6,7 +6,7 @@
 - Evolui os perfis para NEXUS-DESIGN/2, mantendo a importação de perfis NEXUS-DESIGN/1 e a normalização segura dos novos estilos.
 - Adiciona acesso à Biblioteca Universal pelo menu de configurações do sistema, reutilizando a mesma instância e o mesmo contexto já usados pela ficha.
 - Inclui contratos de regressão para estilos por categoria, tema nativo do Foundry, tipografia de dados e abertura da Biblioteca.
-- Mantém a compatibilidade declarada com Foundry VTT 14 build 360. A validação visual e funcional no cliente real continua necessária antes de considerar a interface confirmada.
+- Mantém a compatibilidade declarada com Foundry VTT 14 build 360. A publicação de distribuição 1.0.0.100 foi autorizada pelo mantenedor após CI e empacotamento aprovados; a validação visual e funcional no cliente real permanece pendente, e o checkpoint funcional confirmado continua sendo 1.0.0.70. A validação visual e funcional no cliente real continua necessária antes de considerar a interface confirmada.
 
 ## 1.0.0.99 — Editor flutuante, tipografia nativa e refinamento visual
 
