@@ -1,6 +1,8 @@
 import { validateGroupParent } from "../core/group-hierarchy.js";
 import { serializeActorPropertyWrite } from "../core/actor-property-writes.js";
-import { writeNexusLibraryCollection } from "../core/library-store.js";
+import { writeNexusLibraryCollection, updateNexusLibraryCollection } from "../core/library-store.js";
+import { createLibraryDefinition, createLibraryComponentInstance, planLibraryDefinitionUpdate } from "../core/library-models.js";
+import { getLibraryMediaInsertionSource } from "../library/catalog-explorer.js";
 import { applyScopedTheme } from "../core/theme.js";
 
 import { activateActorPropertyValueListeners } from "./actor-property-value-listeners.js";
@@ -8,6 +10,162 @@ import { activateActorPropertyPickerListeners } from "./actor-property-picker-li
 import { activateActorAliasListeners } from "./actor-alias-listeners.js";
 import { activateActorSheetSkillListeners } from "./actor-sheet-skill-listeners.js";
 import { activateActorSheetResourceListeners } from "./actor-sheet-resource-listeners.js";
+
+function createActorSheetLibraryContext(sheet) {
+  sheet._getLibraryBackupService?.();
+  const canApplyResource = (resource, resolved) => {
+    const reference = resource?.reference ?? {};
+    if (sheet.rendered !== true || reference.providerId !== "nexus-library") return false;
+    if (["components", "groups", "layouts", "themes", "assets"].includes(reference.collection) || ["asset", "theme"].includes(reference.builtin)) return true;
+    return reference.collection === "media" && Boolean(getLibraryMediaInsertionSource(resource, resolved));
+  };
+  const applyResource = async (resource, resolved) => {
+    if (sheet.rendered !== true) {
+      ui.notifications?.warn?.("Abra a ficha de destino para inserir este recurso.");
+      return false;
+    }
+    const reference = resource?.reference ?? {};
+    if (reference.providerId !== "nexus-library") return false;
+    if (reference.collection === "components") return sheet._addSavedLibraryComponent?.(reference.id) ?? false;
+    if (reference.collection === "groups") return sheet._addSavedGroupToCanvas?.(reference.id) ?? false;
+    if (reference.collection === "layouts") return sheet._addSavedLayoutToActor?.(reference.id) ?? false;
+    if (reference.collection === "themes") return sheet._applyLibraryCustomTheme?.(reference.id) ?? false;
+    if (reference.builtin === "theme") return sheet._applyThemePreset?.(resolved?.id) ?? false;
+    if (reference.collection === "media") {
+      const source = getLibraryMediaInsertionSource(resource, resolved);
+      if (!source || typeof sheet._addComponent !== "function") return false;
+      return sheet._addComponent("asset-image", { template: { dataPath: source } });
+    }
+    if (reference.collection === "assets" || reference.builtin === "asset") {
+      const componentType = String(resolved?.type ?? resolved?.componentType ?? "");
+      if (!componentType || typeof sheet._addComponent !== "function") return false;
+      return sheet._addComponent(componentType, { format: resolved?.format, template: resolved?.template ?? resolved?.settings ?? {} });
+    }
+    return false;
+  };
+  return {
+    source: "actor-sheet",
+    actorUuid: sheet.actor?.uuid,
+    canApplyResource,
+    applyResource,
+    applyLabel: "Inserir na ficha",
+    getUpdateInfo: async (resource, definition) => {
+      if (sheet.rendered !== true || resource?.reference?.collection !== "components") return null;
+      return planLibraryDefinitionUpdate(definition, await sheet._readLayouts());
+    },
+    canUpdateDefinition: (resource, definition) => {
+      if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+      const selectedIds = [...(sheet._selectedIds ?? [])];
+      if (selectedIds.length !== 1) return false;
+      const component = sheet._currentLayout?.components?.find(item => item.id === selectedIds[0]);
+      return component?.libraryDefinitionId === resource.reference.id && component.type === definition?.type;
+    },
+    updateDefinition: async (resource, definition) => {
+      if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+      const selectedIds = [...(sheet._selectedIds ?? [])];
+      if (selectedIds.length !== 1 || String(definition?.id) !== String(resource.reference.id)) return false;
+      const layouts = await sheet._readLayouts();
+      const active = sheet._activeLayoutId();
+      const layout = layouts[active];
+      const componentIndex = layout?.components?.findIndex(item => item.id === selectedIds[0]) ?? -1;
+      if (componentIndex < 0) return false;
+      const component = layout.components[componentIndex];
+      if (component.libraryDefinitionId !== resource.reference.id || component.type !== definition.type) return false;
+      const selectedComponentSnapshot = foundry.utils.deepClone(component);
+      let updatedDefinition = null;
+      await updateNexusLibraryCollection(game.user, "components", entries => {
+        const definitionIndex = entries.findIndex(entry => String(entry.id) === String(definition.id));
+        if (definitionIndex < 0) throw new Error("A definição original não foi encontrada na Biblioteca.");
+        const currentDefinition = entries[definitionIndex];
+        const currentVersion = Math.max(1, Number(currentDefinition.version) || 1);
+        if (currentVersion !== Math.max(1, Number(definition.version) || 1)) {
+          throw new Error("A definição foi alterada desde que o Inspector foi aberto. Reabra o recurso e revise a versão atual.");
+        }
+        updatedDefinition = createLibraryDefinition({
+          id: currentDefinition.id,
+          type: currentDefinition.type,
+          label: currentDefinition.label,
+          version: currentVersion + 1,
+          settings: { ...selectedComponentSnapshot },
+          metadata: currentDefinition.metadata ?? {},
+          history: [
+            ...(currentDefinition.history ?? []).filter(entry => Number(entry.version) !== currentVersion),
+            { version: currentVersion, settings: currentDefinition.settings ?? {} }
+          ]
+        });
+        const nextEntries = [...entries];
+        nextEntries[definitionIndex] = updatedDefinition;
+        return nextEntries;
+      });
+      let latestLayouts;
+      try {
+        latestLayouts = await sheet._readLayouts();
+      } catch (error) {
+        ui.notifications?.warn?.("A definição foi salva na Biblioteca, mas a ficha não pôde ser relida. A instância foi preservada: " + error.message);
+        return true;
+      }
+      const latestLayout = latestLayouts[active];
+      const latestIndex = latestLayout?.components?.findIndex(item => item.id === selectedIds[0]) ?? -1;
+      const latestComponent = latestIndex >= 0 ? latestLayout.components[latestIndex] : null;
+      if (!latestComponent || JSON.stringify(latestComponent) !== JSON.stringify(selectedComponentSnapshot)) {
+        ui.notifications?.warn?.("A definição foi salva, mas a instância selecionada mudou durante a operação e foi preservada.");
+        return true;
+      }
+      const updatedInstance = createLibraryComponentInstance(updatedDefinition, {
+        id: latestComponent.id,
+        position: { x: latestComponent.x, y: latestComponent.y }
+      });
+      for (const key of ["z", "stackOrder"]) if (latestComponent[key] !== undefined) updatedInstance[key] = latestComponent[key];
+      sheet._captureHistory?.();
+      latestLayout.components[latestIndex] = updatedInstance;
+      try {
+        await sheet._writeLayouts(latestLayouts, active);
+      } catch (error) {
+        ui.notifications?.warn?.("A definição foi salva, mas a instância não pôde ser atualizada e foi preservada: " + error.message);
+        return true;
+      }
+      sheet._currentLayout = latestLayout;
+      await sheet.render({ force: true });
+      ui.notifications?.info?.("Definição atualizada para a versão " + updatedDefinition.version + ".");
+      return true;
+    },
+    updateInstances: async (resource, definition) => {
+      if (sheet.rendered !== true || resource?.reference?.collection !== "components") return false;
+      const layouts = await sheet._readLayouts();
+      const preview = planLibraryDefinitionUpdate(definition, layouts);
+      if (!preview.available.length) {
+        if (preview.requiresReview.length) ui.notifications?.warn?.("Há instâncias antigas sem snapshot de origem; elas precisam de revisão manual.");
+        return false;
+      }
+      const confirm = foundry.applications.api.DialogV2.confirm;
+      const accepted = await confirm({
+        window: { title: "Atualizar instâncias deste Actor" },
+        content: "<p>" + preview.available.length + " instância(s) vinculadas a esta definição podem receber os novos padrões.</p>" +
+          (preview.requiresReview.length ? "<p>" + preview.requiresReview.length + " instância(s) antigas serão preservadas para revisão manual.</p>" : "") +
+          "<p>Os valores sobrescritos manualmente e a posição das instâncias serão preservados.</p>",
+        yes: { label: "Atualizar instâncias" },
+        no: { label: "Cancelar" },
+        rejectClose: false
+      });
+      if (!accepted) return false;
+      const plan = planLibraryDefinitionUpdate(definition, layouts, {
+        selectedInstanceKeys: preview.available.map(item => item.key)
+      });
+      if (!plan.updatedCount) return false;
+      sheet._captureHistory?.();
+      for (const [layoutId, updatedLayout] of Object.entries(plan.layouts)) {
+        if (layouts[layoutId] && Array.isArray(updatedLayout?.components)) layouts[layoutId].components = updatedLayout.components;
+      }
+      await sheet._writeLayouts(layouts, sheet._activeLayoutId());
+      sheet._currentLayout = layouts[sheet._activeLayoutId()];
+      await sheet.render({ force: true });
+      ui.notifications?.info?.(plan.updatedCount + " instância(s) atualizada(s) neste Actor.");
+      if (plan.requiresReview.length) ui.notifications?.warn?.(plan.requiresReview.length + " instância(s) antiga(s) precisam de revisão manual.");
+      return true;
+    }
+  };
+}
+
 /**
  * Event bindings for the NEXUS Actor Sheet.
  * Kept separate from the sheet class so the lifecycle facade stays focused.
@@ -164,7 +322,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
         ui.notifications?.warn?.("A Biblioteca Universal ainda não está disponível.");
         return;
       }
-      void open({ source: "actor-sheet", actorUuid: sheet.actor?.uuid }).catch(error => {
+      void open(createActorSheetLibraryContext(sheet)).catch(error => {
         console.error("NEXUS | Falha ao abrir a Biblioteca Universal.", error);
         ui.notifications?.error?.("Não foi possível abrir a Biblioteca Universal.");
       });
