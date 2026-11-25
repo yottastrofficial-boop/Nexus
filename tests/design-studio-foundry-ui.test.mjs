@@ -25,6 +25,8 @@ assert.ok(designCss.includes("#sidebar > .window-content"), "O wrapper Applicati
 assert.ok(designCss.includes("display: grid"), "Os botões de aba devem centralizar os ícones sem substituir handlers nativos");
 assert.ok(designCss.includes("#sidebar .tab.sidebar-tab"), "A aba ativa deve ocupar a área restante do painel");
 assert.ok(designCss.includes("flex: 1 1 auto"));
-assert.ok(designCss.includes("left-to-right"));
+assert.ok(designCss.includes("order: 0"), "A faixa de navegação mantém a posição superior sem reordenar os itens nativos");
+assert.ok(designCss.includes("overflow-x: auto"), "Abas adicionais devem permanecer acessíveis por rolagem horizontal");
+assert.doesNotMatch(designCss, /#sidebar[^{}]*\{[^}]*font-family\s*:/s, "O NEXUS não deve substituir a fonte dos ícones nativos do sidebar");
 assert.ok(designCss.includes('[class~="fas"]'));
 console.log("Foundry UI + Design Studio layout contracts passed.");
