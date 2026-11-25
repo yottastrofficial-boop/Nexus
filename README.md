@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Distribuição:** a versão 1.0.0.109 foi autorizada e está sendo preparada para teste no GitHub. A versão estável anterior, Versão 1.0.0.107, permanece no manifesto até a confirmação do novo pacote. A navegação horizontal, os ícones, a troca de abas e a apresentação dos painéis ainda precisam ser conferidos no Foundry VTT 14 build 360. A publicação não equivale à confirmação funcional; o último checkpoint funcional confirmado continua em 1.0.0.70.
+**Distribuição:** a versão candidata 1.0.0.110 foi autorizada para teste no GitHub. A versão estável atualmente publicada no manifesto é a Versão 1.0.0.108. A correção da hierarquia de navegação, os ícones, a troca de abas e a apresentação dos painéis ainda precisam ser conferidos no Foundry VTT 14 build 360. A publicação não equivale à confirmação funcional; o último checkpoint funcional confirmado continua em 1.0.0.70.
 
 ## Visão geral
 
@@ -28,9 +28,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual na main — 1.0.0.109
+## Implementação atual na main — 1.0.0.110
 
-A base 1.0.0.109 mantém a implementação consolidada, preserva a tipografia nativa dos ícones do Foundry e aplica a revisão do layout do sidebar com navegação horizontal, controles separados dos painéis e estado ativo das aplicações nativas. A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base 1.0.0.110 mantém a implementação consolidada, preserva a tipografia nativa dos ícones do Foundry e corrige a estrutura real da navegação do sidebar (`NAV > MENU.flexcol > LI > BUTTON`), convertendo o menu interno em faixa horizontal e dimensionando os controles na hierarquia correta. A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
