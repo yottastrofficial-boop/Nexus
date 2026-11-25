@@ -60,13 +60,13 @@
 .nexus-canvas { background-position:0 0; }
 .nexus-component { z-index:2; }
 .nexus-component.is-group-member { background:transparent; border-color:transparent; box-shadow:none; }
-.nexus-component.is-group-member.is-selected { border-color:#a9c9ef; background:#273443; }
+.nexus-component.is-group-member.is-selected { border-color:var(--nexus-highlight-color,#78b7e8); background:var(--nexus-panel-card,#273443); }
 .nexus-group-surface { position:absolute; z-index:1; border:1px solid #53677f; border-radius:9px; background:#2a394a; box-shadow:0 2px 8px #0002; pointer-events:auto; cursor:grab; }
-.nexus-group-surface.is-selected { outline:1px solid #a9c9ef; outline-offset:2px; border-color:#9dbbe0; }
+.nexus-group-surface.is-selected { outline:1px solid var(--nexus-highlight-color,#78b7e8); outline-offset:2px; border-color:var(--nexus-highlight-color,#78b7e8); }
 .nexus-component.is-selected { z-index:var(--nexus-layer,1); }
 .nexus-resize { display:none !important; }
-.nexus-guides i.v { border-left:1px dashed #a9c9ef; border-top:0; }
-.nexus-guides i.h { border-top:1px dashed #a9c9ef; border-left:0; }
+.nexus-guides i.v { border-left:1px dashed var(--nexus-highlight-color,#78b7e8); border-top:0; }
+.nexus-guides i.h { border-top:1px dashed var(--nexus-highlight-color,#78b7e8); border-left:0; }
 .nexus-side-section [data-action="group-selection"],
 .nexus-side-section [data-action="ungroup-selection"] { width:100%; margin:4px 0; }
 .nexus-component { font-size:var(--nexus-component-font,var(--nexus-font-size,13px)); }
@@ -118,7 +118,7 @@
 .nexus-component:has(.nexus-token-image) .nexus-component-content { padding:4px; }
 
 
-.nexus-component.is-group-inspecting { border-color:#9fc1e8 !important; box-shadow:inset 0 0 0 1px #9fc1e866,0 0 0 1px #9fc1e855 !important; background:color-mix(in srgb,var(--nexus-card-color,#273443) 88%,#a9c9ef 12%) !important; }
+.nexus-component.is-group-inspecting { border-color:var(--nexus-highlight-color,#78b7e8) !important; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 40%,transparent),0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 35%,transparent) !important; background:color-mix(in srgb,var(--nexus-card-color,#273443) 88%,var(--nexus-highlight-color,#78b7e8) 12%) !important; }
 .nexus-group-surface { box-sizing:border-box; }
 .nexus-group-surface.is-selected { outline:2px solid #b2cbed; outline-offset:3px; }
 .nexus-sheet[data-mode="appearance"] .nexus-canvas-stage { width:100%; }
@@ -667,7 +667,7 @@
   border-radius: 8px !important; background: color-mix(in srgb, var(--nexus-card-color, #273443) 72%, transparent) !important;
   box-shadow: inset 0 0 0 1px #ffffff08 !important;
 }
-.nexus-component.is-group-member.is-selected { border-color: #a9c9ef !important; box-shadow: inset 0 0 0 1px #a9c9ef55 !important; }
+.nexus-component.is-group-member.is-selected { border-color:var(--nexus-highlight-color,#78b7e8) !important; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--nexus-highlight-color,#78b7e8) 35%,transparent) !important; }
 
 
 
@@ -1549,10 +1549,10 @@
   flex:0 0 auto !important;
   min-height:27px !important;
   padding:4px 8px !important;
-  border:1px solid #405a74 !important;
+  border:1px solid var(--nexus-button-secondary-border,var(--nexus-panel-border,#405a74)) !important;
   border-radius:5px !important;
-  color:#c5d7e9 !important;
-  background:#1a2b3d !important;
+  color:var(--nexus-button-secondary-text,var(--nexus-panel-text,#c5d7e9)) !important;
+  background:var(--nexus-button-secondary-bg,var(--nexus-panel-surface,#1a2b3d)) !important;
   font:600 9px/1.2 system-ui,sans-serif !important;
 }
 .nexus-panel-window .nexus-library-details {
@@ -5642,7 +5642,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 .nexus-property-representation-image { display:inline-block; width:1.35em; height:1.35em; object-fit:contain; vertical-align:middle; }
 .nexus-property-representation > i { display:inline-block; font-size:1.15em; line-height:1; }
 .nexus-component.is-group-member,.nexus-component.is-group-member:hover { border:0 !important; border-radius:0 !important; box-shadow:none !important; background:transparent !important; }
-.nexus-component.is-group-member.is-selected { outline:1px solid #a9c9ef !important; outline-offset:-1px; border:0 !important; }
+.nexus-component.is-group-member.is-selected { outline:1px solid var(--nexus-highlight-color,#78b7e8) !important; outline-offset:-1px; border:0 !important; }
 
 /* A superfície dos componentes não pode depender do modo de edição para desenhar a borda. */
 .nexus-sheet[data-mode="play"] .nexus-component:not(.is-group-member),

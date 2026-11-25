@@ -67,6 +67,9 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
   assert.equal(values.get("--nexus-line-height"), "1.6");
   assert.equal(values.get("--nexus-contrast-border-width"), "2px");
   assert.equal(values.get("--nexus-motion-duration"), "0ms");
+  assert.equal(values.get("--nexus-button-secondary-bg"), "#ffffff", "Secondary buttons use the active semantic surface.");
+  assert.equal(values.get("--nexus-button-secondary-border"), "#aaaaaa", "Secondary buttons use the active semantic border.");
+  assert.equal(values.get("--nexus-button-secondary-text"), "#fefefe", "Secondary buttons use the active semantic text.");
 
   applyThemeTokens(element, {
     theme: "medieval",
