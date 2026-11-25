@@ -1,3 +1,12 @@
+## 1.0.0.106 — Correção dos seletores nativos do sidebar V14
+
+- Revisa o CSS da navegação lateral após a correção anterior não produzir alteração visual no cliente.
+- Passa a dimensionar explicitamente os controles nativos `.tab.sidebar-tab` dentro de `.sidebar-tabs`, além dos seletores de compatibilidade.
+- Mantém a faixa de navegação horizontal com quebra de linha para abas adicionais, sem reordenar elementos nem substituir handlers.
+- Preserva a fonte, o peso e os glifos Font Awesome fornecidos pelo Foundry.
+- Atualiza os testes de contrato para exigir os seletores específicos dos controles V14.
+- A validação automatizada e o empacotamento são executados pelo workflow. A confirmação visual/funcional no Foundry VTT 14 build 360 permanece pendente; esta publicação não altera o último checkpoint funcional.
+
 ## 1.0.0.105 — Correção estrutural do sidebar Minimal UI
 
 - Corrige os seletores do sidebar para alcançar a navegação e o painel de conteúdo dentro da estrutura ApplicationV2 do Foundry VTT 14.

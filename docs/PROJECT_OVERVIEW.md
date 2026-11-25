@@ -6,8 +6,8 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão de código integrada à main: `1.0.0.105`, correção estrutural do sidebar Minimal UI.
-- Manifesto público permanece em `1.0.0.104` até a publicação e confirmação do pacote `1.0.0.105`.
+- Versão de código: `1.0.0.106`, correção dos seletores dos controles nativos do sidebar V14.
+- Manifesto de distribuição será sincronizado pelo workflow somente após validação automatizada, empacotamento e confirmação do asset `v1.0.0.106`.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
@@ -40,7 +40,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Atualização integrada à main em 1.0.0.105 (validação funcional pendente)
+## Atualização 1.0.0.106 — seletores nativos do sidebar V14 (validação funcional pendente)
 
 A atualização .105 corrige os seletores e o layout do sidebar na estrutura ApplicationV2, preservando os elementos e handlers nativos. A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI, o empacotamento, a release e a sincronização do manifesto foram concluídos; a validação visual no cliente Foundry 14 build 360 continua pendente.
 

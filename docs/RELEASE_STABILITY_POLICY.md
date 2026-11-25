@@ -22,12 +22,12 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25
+## Estado de referência — 2026-11-25 (atualização 1.0.0.106)
 
-- **Versão de código na main:** `1.0.0.105`; correção estrutural do sidebar integrada, destinada à validação no Foundry.
-- **Manifesto estável:** `1.0.0.104` até que o workflow publique e confirme o pacote `v1.0.0.105`.
+- **Versão de código:** `1.0.0.106`; correção dos seletores nativos `.tab.sidebar-tab` do sidebar V14, destinada à validação no Foundry.
+- **Manifesto de distribuição:** será sincronizado para `1.0.0.106` somente após aprovação do CI, geração do ZIP e confirmação do asset.
 - **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente; a release de distribuição não promove o checkpoint funcional, que permanece em `1.0.0.70`.
-- **Distribuição:** `manifest.json` é o único endereço de instalação/atualização e aponta para `1.0.0.104`, cujo asset `nexus.zip` foi confirmado.
+- **Distribuição:** `manifest.json` é o único endereço de instalação/atualização e só será sincronizado com `1.0.0.106` após a confirmação do pacote correspondente.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.
 - **Ambiente-alvo:** Foundry VTT 14, build 360.
