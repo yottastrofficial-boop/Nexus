@@ -1,5 +1,5 @@
 import { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES } from "./design-constants.js";
-import { THEME_TOKENS } from "./theme.js";
+import { THEME_TOKENS } from "./theme.js";\nimport { validateDesignCss } from "./design-custom-css.js";
 
 export const DESIGN_PROFILE_SCHEMA_VERSION = 2;
 export const DESIGN_PROFILE_FORMAT = "NEXUS-DESIGN/2";
@@ -78,7 +78,7 @@ export function createDefaultDesignProfile(themeId = DEFAULT_DESIGN_THEME) {
     name: DESIGN_THEME_CHOICES[safeThemeId],
     preset: safeThemeId,
     palette: Object.fromEntries(DESIGN_PROFILE_PALETTE_KEYS.map(key => [key, theme[key]])),
-    components: createDefaultComponentStyles(theme),
+    components: createDefaultComponentStyles(theme),\n    customCss: Object.fromEntries(Object.keys(DESIGN_COMPONENT_CATEGORIES).map(key => [key, ""])),
     typography: {
       family: theme.fontFamily ?? (safeThemeId === "steam" ? "Arial" : safeThemeId === "pixel-art" ? "monospace" : "Inter"),
       baseSize: 13,
@@ -123,7 +123,7 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
       radius: clamp(current.radius, 0, 18, fallback.radius)
     }];
   }));
-  const family = Object.hasOwn(DESIGN_FONT_CHOICES, typographySource.family)
+  const cssSource = isRecord(source.customCss) ? source.customCss : {};\n  const customCss = Object.fromEntries(Object.keys(DESIGN_COMPONENT_CATEGORIES).map(key => { const v = validateDesignCss(typeof cssSource[key] === "string" ? cssSource[key] : ""); return [key, v.valid ? v.css : ""]; }));\n  const family = Object.hasOwn(DESIGN_FONT_CHOICES, typographySource.family)
     ? typographySource.family
     : defaults.typography.family;
 
@@ -203,7 +203,7 @@ export function importDesignProfile(payload) {
   let parsed;
   try { parsed = JSON.parse(source); }
   catch { throw new TypeError("O arquivo não contém JSON válido."); }
-  if (!isRecord(parsed) || !["NEXUS-DESIGN/1", DESIGN_PROFILE_FORMAT].includes(parsed.format) || !isRecord(parsed.profile)) {
+  if (!isRecord(parsed) || !["NEXUS-DESIGN/1", "NEXUS-DESIGN/2", DESIGN_PROFILE_FORMAT].includes(parsed.format) || !isRecord(parsed.profile)) {
     throw new TypeError("Formato de perfil NEXUS inválido ou incompatível.");
   }
   if (Number(parsed.profile.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {

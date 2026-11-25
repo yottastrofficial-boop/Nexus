@@ -12,7 +12,7 @@ import {
   DESIGN_COMPONENT_CATEGORIES,
   DESIGN_BORDER_STYLE_CHOICES,
 } from "../core/design-profile.js";
-import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";
+import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";\nimport { validateDesignCss } from "../core/design-custom-css.js";
 
 const clone = value => globalThis.foundry?.utils?.deepClone
   ? globalThis.foundry.utils.deepClone(value)
@@ -133,7 +133,7 @@ export function createDesignStudioApplicationClass({
           const style = this._draft.components[key];
           const path = property => `components.${key}.${property}`;
           return {
-            key, label: category.label, description: category.description,
+            key, label: category.label, description: category.description, customCss: this._draft.customCss?.[key] ?? "",
             colors: [
               { path: path("background"), label: "Cor de fundo", value: style.background },
               { path: path("text"), label: "Cor do texto", value: style.text },
