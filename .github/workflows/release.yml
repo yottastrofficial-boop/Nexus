@@ -111,7 +111,14 @@ jobs:
           const previous = process.env.PREVIOUS_VERSION;
           const system = JSON.parse(fs.readFileSync("system.json", "utf8"));
           if (system.version !== previous) throw new Error("A versão base mudou durante o empacotamento.");
+          const manifestUrl = "https://raw.githubusercontent.com/yottastrofficial-boop/Nexus/main/manifest-preview.json";
+          const downloadUrl = `https://github.com/yottastrofficial-boop/Nexus/releases/download/v${version}/nexus.zip`;
           system.version = version;
+          system.manifest = manifestUrl;
+          system.download = downloadUrl;
+          if (system.manifest !== manifestUrl || system.download !== downloadUrl) {
+            throw new Error("Os endereços do manifesto candidato não foram sincronizados.");
+          }
           fs.writeFileSync("system.json", JSON.stringify(system, null, 2) + "\n");
 
           const readme = fs.readFileSync("README.md", "utf8");
