@@ -1,3 +1,11 @@
+## 1.0.0.107 — Pacote de teste do sidebar Foundry V14
+
+- Publica na branch `main` a revisão consolidada do CSS do sidebar, com navegação horizontal e separação entre controles de abas e painéis de conteúdo.
+- Mantém os elementos, a ordem DOM, os handlers de navegação e os glifos nativos do Foundry.
+- Destina-se à validação manual no Foundry VTT 14 build 360: orientação das abas, ícones, troca de abas e apresentação dos painéis.
+- Não altera regras de mesa, dados de Actors/Items ou schemas persistidos.
+- A validação funcional no cliente real permanece pendente até o teste do mantenedor. A publicação e o empacotamento automatizados não equivalem à confirmação visual/funcional.
+
 ## 1.0.0.106 — Correção dos seletores nativos do sidebar V14
 
 - Revisa o CSS da navegação lateral após a correção anterior não produzir alteração visual no cliente.
