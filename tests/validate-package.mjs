@@ -1371,8 +1371,9 @@ assert.ok(actorSheetRendering.includes("allowPlainUrls ?") && actorSheetRenderin
 assert.match(sheet,/const directMediaSource = isMediaSource\(wrappedDataMedia\?\.\[1\] \?\? genericRaw\)/,"Componentes de imagem e token devem aceitar uma origem de mídia direta");
 assert.match(sheetListeners, /const directMediaSource=\["asset-image","token"\]\.includes\(component\.type\)/, "O Inspector deve aceitar mídia direta em caminhos de imagem e token");
 
-assert.match(sheetCode,/data-library-save-component/,"Biblioteca deve permitir salvar o componente selecionado");
-assert.match(sheetCode,/data-library-flow-id/,"Biblioteca deve listar fluxos salvos");
+assert.match(sheetListeners, /save-library-component/, "A ficha deve manter a ação de salvar um componente na coleção compartilhada");
+assert.match(sheet, /async _saveSelectedLibraryComponent/, "A persistência de componentes deve continuar no serviço da ficha");
+assert.match(libraryCatalogExplorer, /data-library-resource/, "O Explorer deve apresentar recursos registrados, incluindo fluxos");
 assert.match(sheetCode,/_deleteSavedLibraryGroup/,"Grupos pessoais devem poder ser excluídos");
 assert.match(css,/nexus-library-tree-heading/,"A navegação deve ter hierarquia visual de pastas");
 assert.match(css,/nexus-library-metadata-editor/,"O inspector deve compartilhar estilo de edição");
