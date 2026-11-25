@@ -113,6 +113,9 @@ test("Design Studio uses ApplicationV2, exposes allowed scopes and blocks unauth
   assert.equal(context.profile.preset, "midnight");
   assert.equal(context.targetOptions.length, 1);
   assert.equal(context.targetOptions[0].value, "user");
+  assert.equal(context.componentStyleCategories.length, 5);
+  assert.equal(context.componentStyleCategories[0].colors[0].path, "components.buttons.background");
+  assert.ok(context.presetChoices.some(choice => choice.value === "foundry"));
   assert.equal(app._canRender({}), true);
 
   const denied = createDesignStudioApplicationClass({

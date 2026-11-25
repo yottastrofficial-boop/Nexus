@@ -51,7 +51,7 @@
             <summary><span><strong>{{label}}</strong><small>{{description}}</small></span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary>
             <div class="nexus-design-settings-grid">
               {{#each colors}}
-              <label class="nexus-design-color-field"><span>{{label}}</span><input type="color" data-design-path="{{path}}" value="{{value}}" aria-label="{{label}}"><code>{{value}}</code></label>
+              <label class="nexus-design-color-field"><span>{{label}}</span><input type="color" data-design-path="{{path}}" value="{{value}}" aria-label="{{label}}"><code data-design-output="{{path}}">{{value}}</code></label>
               {{/each}}
               <label class="nexus-design-field"><span>Estilo da borda</span><select data-design-path="{{borderStylePath}}">{{#each borderStyles}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
               <label class="nexus-design-field"><span>Espessura da borda <output data-design-output="{{borderWidthPath}}">{{borderWidth}}</output> px</span><input type="range" min="0" max="4" step="1" value="{{borderWidth}}" data-design-path="{{borderWidthPath}}"></label>
