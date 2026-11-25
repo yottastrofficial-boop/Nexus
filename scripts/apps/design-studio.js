@@ -50,27 +50,36 @@ export function createDesignStudioApplicationClass({
   }
 
   const BaseApplication = HandlebarsApplicationMixin(ApplicationV2);
-  const defaultOptions = globalThis.foundry?.utils?.mergeObject
-    ? globalThis.foundry.utils.mergeObject(ApplicationV2.DEFAULT_OPTIONS ?? {}, {
-        id: "nexus-design-studio",
-        classes: ["nexus", "nexus-design-studio"],
-        position: { width: 1180, height: 800, minWidth: 980, minHeight: 640 },
-        window: { title: "Estúdio de Aparência NEXUS", icon: "fa-solid fa-palette", frame: true, positioned: true, resizable: true }
-      }, { inplace: false })
-    : {
-        ...(ApplicationV2.DEFAULT_OPTIONS ?? {}),
-        id: "nexus-design-studio",
-        classes: ["nexus", "nexus-design-studio"],
-        position: { width: 1180, height: 800, minWidth: 980, minHeight: 640 },
-        window: { title: "Estúdio de Aparência NEXUS", icon: "fa-solid fa-palette", frame: true, positioned: true, resizable: true }
-      };
+  // ApplicationV2 mutates nested position options during construction. Foundry's
+  // submenu can pass frozen option objects, so clone inherited defaults first.
+  const inheritedOptions = clone(ApplicationV2.DEFAULT_OPTIONS ?? {});
+  const defaultOptions = {
+    ...inheritedOptions,
+    id: "nexus-design-studio",
+    classes: [...new Set([...(Array.isArray(inheritedOptions.classes) ? inheritedOptions.classes : []), "nexus", "nexus-design-studio"])],
+    position: { ...(inheritedOptions.position ?? {}), width: 1180, height: 800, minWidth: 980, minHeight: 640 },
+    window: {
+      ...(inheritedOptions.window ?? {}),
+      title: "Estúdio de Aparência NEXUS",
+      icon: "fa-solid fa-palette",
+      frame: true,
+      positioned: true,
+      resizable: true
+    }
+  };
 
   return class NexusDesignStudio extends BaseApplication {
     static DEFAULT_OPTIONS = defaultOptions;
     static PARTS = { main: { template: "systems/nexus/templates/apps/design-studio.hbs" } };
 
     constructor(options = {}) {
-      super(options);
+      // The settings submenu may supply frozen options; ApplicationV2 normalizes
+      // nested position fields, so give it a mutable copy.
+      const mutableOptions = {
+        ...options,
+        ...(options?.position && typeof options.position === "object" ? { position: { ...options.position } } : {})
+      };
+      super(mutableOptions);
       this._target = globalThis.game?.user?.isGM ? "world" : "user";
       this._library = library;
       this._draft = null;

@@ -1,3 +1,12 @@
+## 1.0.0.103 — Estúdio, navegação Minimal UI e ícones
+
+- Corrige a construção do Estúdio de Aparência: opções herdadas e opções recebidas pelo menu do Foundry são copiadas para estruturas mutáveis antes de chegar ao ApplicationV2.
+- Adiciona regressão para opções de janela congeladas e para o contrato de construção do Estúdio.
+- Reorganiza a navegação nativa do sidebar em uma faixa horizontal superior, preservando a ordem DOM original: a sequência vertical passa a ser lida da esquerda para a direita.
+- Mantém os handlers e a seleção de abas do Foundry; nenhuma aba é recriada ou reordenada pelo NEXUS.
+- Amplia as exclusões de tipografia global para aliases Font Awesome legados.
+- A validação visual final depende de execução no Foundry VTT 14 build 360.
+
 ## 1.0.0.102 — Restauração dos ícones nativos do Foundry
 
 - Remove a regra global que forçava todos os ícones Font Awesome para a mesma família e peso, causando glifos ausentes em controles nativos do Foundry VTT 14.
