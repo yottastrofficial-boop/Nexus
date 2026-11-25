@@ -6,7 +6,7 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão candidata na `main`: `1.0.0.111` (correção do chat lateral para teste).
+- Versão candidata na `main`: `1.0.0.112` (densidade adaptativa do chat lateral para teste).
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
 - A captura da .106 confirmou navegação vertical, sobreposição e glifos incorretos. A revisão de CSS e os contratos de regressão foram distribuídos na .107; a validação visual e funcional no Foundry real ainda aguarda o teste manual.
@@ -42,9 +42,9 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Estado da 1.0.0.111 — chat lateral de largura completa
+## Estado da 1.0.0.112 — chat lateral adaptativo
 
-A atualização .111 corrige o chat lateral a partir do DOM enviado: a sidebar tem 540 px, mas o histórico e o formulário estavam limitados a 300 px. O histórico real é OL.chat-log, sem o ID #chat-log visado por regras antigas; a PR #99 ajusta os seletores reais, expande o histórico/controles/compositor e compacta os cartões. CI e contratos passaram; a validação visual no Foundry VTT 14 build 360 continua pendente. A correção .110 da navegação e a preservação dos ícones nativos permanecem incluídas. A atualização .105 corrige os seletores e o layout do sidebar na estrutura ApplicationV2, preservando os elementos e handlers nativos. A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI, o empacotamento, a release e a sincronização do manifesto foram concluídos; a validação visual no cliente Foundry 14 build 360 continua pendente.
+A atualização .112 complementa a correção de largura da .111 com espaçamento adaptativo baseado na largura real do contêiner, mídia limitada à área da mensagem e rolagem interna de tabelas extensas. A atualização .111 corrige o chat lateral a partir do DOM enviado: a sidebar tem 540 px, mas o histórico e o formulário estavam limitados a 300 px. O histórico real é OL.chat-log, sem o ID #chat-log visado por regras antigas; a PR #99 ajusta os seletores reais, expande o histórico/controles/compositor e compacta os cartões. CI e contratos passaram; a validação visual no Foundry VTT 14 build 360 continua pendente. A correção .110 da navegação e a preservação dos ícones nativos permanecem incluídas. A atualização .105 corrige os seletores e o layout do sidebar na estrutura ApplicationV2, preservando os elementos e handlers nativos. A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI, o empacotamento, a release e a sincronização do manifesto foram concluídos; a validação visual no cliente Foundry 14 build 360 continua pendente.
 
 A árvore atual contém, entre outros:
 
