@@ -64,7 +64,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 - A candidata pode usar o mesmo núcleo numérico da versão de desenvolvimento atual com sufixo `-rc.N`, ou avançar para um núcleo superior.
 - Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
-- Após confirmar o ZIP, o workflow publica `manifest.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O manifesto estável não é atualizado; instalações normais continuam recebendo a última release estável.
+- Após confirmar o ZIP, o workflow publica `manifest.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O `manifest.json` original passa a apontar para a candidata, de modo que instalações pelo endereço normal recebem a atualização candidata.
 
 ### 3. Release estável
 
