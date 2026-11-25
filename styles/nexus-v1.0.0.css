@@ -9912,16 +9912,7 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   font-weight:650;
 }
 
-/* NEXUS 1.0.0.101 — restauração de ícones e correções do chrome Foundry. */
-html.nexus-design-system :is(.fa, .fas, .fa-solid, .fa-regular, .far, .fa-brands, .fab, .fa-light, .fal, .fa-duotone, .fad, [class^="fa-"], [class*=" fa-"]) {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free" !important;
-  font-style: normal;
-  font-weight: 900;
-}
-html.nexus-design-system :is(.fa-brands, .fab) {
-  font-family: "Font Awesome 6 Brands", "Font Awesome 5 Brands" !important;
-  font-weight: 400;
-}
+/* Foundry 14 owns Font Awesome family, weight and glyph mapping. */
 /* O tema minimalista reduz molduras nos wrappers, sem eliminar divisores internos. */
 html.nexus-design-system #sidebar,
 html.nexus-design-system #navigation,
