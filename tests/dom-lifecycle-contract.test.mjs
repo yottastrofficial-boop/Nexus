@@ -11,10 +11,10 @@ assert.match(sheetListeners, /const escapeHtml = value => String\(value \?\? ""\
   "Dynamic HTML values must pass through a dedicated escaping utility.");
 assert.doesNotMatch(sheetListeners, /detail\.innerHTML\s*=\s*`[^\n]*\$\{asset\.label\}/,
   "Catalog labels must be inserted as text, not interpolated into HTML.");
-assert.equal((sheetListeners.match(/picker\.addEventListener\("cancel"/g) ?? []).length, 2,
-  "Both sheet file pickers must clean up when the user cancels.");
-assert.equal((sheetListeners.match(/const cleanupPicker = \(\) => picker\.remove\(\)/g) ?? []).length, 2,
-  "Both sheet file pickers must share an idempotent cleanup path.");
+assert.doesNotMatch(sheetListeners, /picker\.addEventListener\("cancel"/,
+  "The character sheet must not retain file pickers from the removed embedded library.");
+assert.match(libraryApplication, /data-library-backup-import-file/,
+  "File import belongs to the shared Universal Library application.");
 assert.match(sheet, /list\.dataset\.nexusPropertyOwner === String\(this\.id\)\) list\.remove\(\)/,
   "The property picker portal must be removed when its owning sheet closes.");
 assert.match(sheet, /finally\s*\{\s*field\.remove\(\)/,
