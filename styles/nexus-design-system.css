@@ -1354,7 +1354,7 @@ html.nexus-design-system #sidebar :is(
   box-shadow: inset 0 -2px var(--nexus-ui-accent);
 }
 
-/* Do not assign font-family, content, pseudo-glyphs or replacement icons here.
+/* No font or glyph declarations belong here.
    Foundry's Font Awesome stylesheet remains the sole source of icon glyphs. */
 html.nexus-design-system #sidebar :is(
   #sidebar-tabs,
