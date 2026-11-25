@@ -29,8 +29,8 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - **Estado da main:** base de versão declarada `1.0.0.101` (desenvolvimento pós-release); a última versão estável publicada permanece `1.0.0.98`.
 - **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
 - **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
-- **Próxima candidata prevista:** `1.0.0.101-rc.1`, gerada a partir da main para validação visual e funcional no Foundry.
-- **Manifesto estável:** aponta para a `1.0.0.98`, cujo ZIP foi anexado e verificado. `system.json.download` e `manifest.json.download` usam a mesma URL do asset publicado.
+- **Próxima candidata prevista:** `1.0.0.101-rc.3`, gerada a partir da main para validação visual e funcional no Foundry.
+- **Manifesto original:** `manifest.json` é o único endereço de instalação/atualização. Ele pode apontar para uma candidata em teste ou para uma release estável, sempre com ZIP publicado e verificado. A última release estável anterior a esta rodada é `1.0.0.98`.
 - **Interpretação correta:** aprovação do CI e publicação de um ZIP demonstram que o artefato foi validado automaticamente e disponibilizado; não demonstram, por si só, que ficha, Biblioteca, Lógica, Mídia e persistência funcionam corretamente no cliente.
 - **Rotação após release estável:** depois que o workflow atualizar `manifest.json` e `system.json.download`, incremente `system.version` para a próxima base de desenvolvimento e atualize README, CHANGELOG, roadmap e visão do projeto antes do próximo commit funcional. `system.json.download` deve continuar igual à versão estável em `manifest.json`.
 
