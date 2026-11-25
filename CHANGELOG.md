@@ -5,7 +5,7 @@
 - Aplica o CSS em tempo real na prévia e salva no perfil NEXUS-DESIGN/3.
 - Mantém importação compatível com perfis NEXUS-DESIGN/1 e /2.
 - Valida propriedades e seletores permitidos; bloqueia URLs, imports, código executável e seletores globais.
-- A versão 1.0.0.103 permanece como última distribuição estável até a aprovação do CI e publicação do pacote 1.0.0.104.
+- A versão 1.0.0.104 foi publicada após aprovação do CI, empacotamento e confirmação do asset.
 
 ## 1.0.0.103 — Estúdio, navegação Minimal UI e ícones
 

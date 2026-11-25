@@ -7,7 +7,7 @@
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
 - Versão de código integrada à main: `1.0.0.104`, editor CSS avançado por categoria.
-- Manifesto público estável em `1.0.0.103`; a versão 1.0.0.104 está em validação.
+- Manifesto público sincronizado em `1.0.0.104` após a publicação autorizada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
