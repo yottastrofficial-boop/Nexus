@@ -763,8 +763,10 @@ assert.match(sheet, /this\.actor\.update\(updates, \{ render: false \}\)/, "A in
 assert.match(sheet, /_scheduleNexusRefresh\(\)[\s\S]*?if \(this\._nexusRefreshScheduled\) return/, "As atualizações posteriores à migração devem ser coalescidas");
 assert.match(sheet, /if \(this\.rendered\) void this\.render\(\{ force: true \}\)/, "O refresh agendado deve respeitar o estado de renderização da ApplicationV2");
 assert.match(sheet, /_nexusRefreshGeneration = \(this\._nexusRefreshGeneration \?\? 0\) \+ 1/, "O fechamento deve invalidar refreshes pendentes");
-assert.match(sheet, /floatingGeneration !== this\._nexusFloatingGeneration/, "Painéis assíncronos antigos não devem abrir após uma nova renderização ou fechamento");
-assert.match(sheet, /if \(pendingLayoutClick\) clearTimeout\(pendingLayoutClick\)/, "O timer de troca de página deve ser limpo ao desmontar o Floating UI");
+assert.match(sheet, /this\._nexusInlineUiController\?\.abort\(\)/, "A renderização seguinte deve invalidar os listeners inline anteriores");
+assert.match(sheet, /const controller = new AbortController\(\)/, "Os listeners de navegação devem pertencer ao ciclo de vida da renderização");
+assert.match(sheet, /this\._nexusInlineUiController = null/, "O fechamento deve invalidar o controlador da interface inline");
+assert.match(sheet, /tabs\?\.addEventListener\("click"[\s\S]*?\{ signal \}/, "A navegação de layouts deve ser desmontada junto com a ficha");
 assert.match(migrationManager, /actor\.update\(updates, \{ render: false \}\)/, "A migração deve evitar renderização automática durante a gravação");
 assert.match(migrationManager, /pendingActorMigrations = new WeakMap\(\)/, "Migrações concorrentes do mesmo Actor devem compartilhar uma única operação");
 
