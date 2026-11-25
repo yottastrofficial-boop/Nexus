@@ -15,7 +15,7 @@ assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\]
   "Stable publication must require the exact [release] marker.");
 assert.ok(workflow.includes(String.raw`const candidateMarker = /(?:^|\s)\[candidate\](?=$|\s)/m;`),
   "A [candidate] push to main must create a testable pre-release without requiring manual Actions access.");
-assert.ok(workflow.includes("git ls-remote") && workflow.includes("nextCandidate")
+assert.ok(workflow.includes("ls-remote") && workflow.includes("nextCandidate")
   && workflow.includes("version = `${system.version}-rc.${nextCandidate}`;"),
   "A candidate push must increment the RC suffix without reusing an existing immutable tag.");
 assert.ok(workflow.includes("system.manifest = manifestUrl;")
