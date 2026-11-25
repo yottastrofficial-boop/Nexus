@@ -49,7 +49,7 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
   const element = { style: { setProperty(key, value) { values.set(key, value); } }, dataset: {} };
   applyThemeTokens(element, {
     theme: "nexus-dark",
-    palette: { panel: "#101010", text: "#fefefe", border: "#aaaaaa", accent: "#334455" },
+    palette: { panel: "#101010", surface: "#bbbbbb", text: "#fefefe", border: "#aaaaaa", accent: "#334455" },
     density: "compact",
     spacing: 1.25,
     radius: "sharp",
@@ -67,7 +67,7 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
   assert.equal(values.get("--nexus-line-height"), "1.6");
   assert.equal(values.get("--nexus-contrast-border-width"), "2px");
   assert.equal(values.get("--nexus-motion-duration"), "0ms");
-  assert.equal(values.get("--nexus-button-secondary-bg"), "#ffffff", "Secondary buttons use the active semantic surface.");
+  assert.equal(values.get("--nexus-button-secondary-bg"), "#bbbbbb", "Secondary buttons use the active semantic surface.");
   assert.equal(values.get("--nexus-button-secondary-border"), "#aaaaaa", "Secondary buttons use the active semantic border.");
   assert.equal(values.get("--nexus-button-secondary-text"), "#fefefe", "Secondary buttons use the active semantic text.");
 
