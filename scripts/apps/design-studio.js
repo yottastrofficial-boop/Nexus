@@ -61,7 +61,7 @@ export function createDesignStudioApplicationClass({
         ...(ApplicationV2.DEFAULT_OPTIONS ?? {}),
         id: "nexus-design-studio",
         classes: ["nexus", "nexus-design-studio"],
-        position: { width: 920, height: 760 },
+        position: { width: 1180, height: 800, minWidth: 980, minHeight: 640 },
         window: { title: "Estúdio de Aparência NEXUS", icon: "fa-solid fa-palette", frame: true, positioned: true, resizable: true }
       };
 
@@ -154,6 +154,17 @@ export function createDesignStudioApplicationClass({
       const listenerOptions = { signal: this._listeners.signal };
       root?.addEventListener("input", event => this._onProfileInput(event), listenerOptions);
       root?.addEventListener("change", event => this._onProfileChange(event), listenerOptions);
+      root?.addEventListener("change", event => {
+        const filter = event.target?.closest?.("[data-design-category-filter]");
+        if (!filter || !root.contains(filter)) return;
+        const selected = filter.value;
+        root.querySelectorAll("[data-design-category]").forEach(section => {
+          section.hidden = selected !== "all" && section.dataset.designCategory !== selected;
+        });
+        root.querySelectorAll("[data-design-preview-category]").forEach(item => {
+          item.hidden = selected !== "all" && item.dataset.designPreviewCategory !== selected;
+        });
+      }, listenerOptions);
       root?.addEventListener("click", event => {
         const tab = event.target?.closest?.("[data-design-section]");
         if (!tab || !root.contains(tab)) return;
