@@ -13,8 +13,8 @@ assert.match(designSystem, /backdrop-filter:\s*none\s*!important/,
   "Floating controls must not use the glass effect.");
 assert.match(designSystem, /text-shadow:\s*none\s*!important/,
   "The default NEXUS surfaces must not add text shadows.");
-assert.match(designSystem, /#controls[\s\S]*?\.control-tool/,
-  "Foundry scene controls must inherit the NEXUS control surface.");
+assert.doesNotMatch(designSystem, /:is\(#controls, #ui-left, #ui-top\)\s*:is\(\.ui-control, \.control-tool\)/,
+  "Native Foundry tool buttons must retain the minimal Foundry appearance.");
 assert.match(designSystem, /#sidebar[\s\S]*?sidebar-tabs/,
   "Foundry sidebar tabs must inherit the NEXUS design system.");
 assert.match(designSystem, /\.application\.nexus-themed-application/,
@@ -64,8 +64,8 @@ assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-sh
 
 assert.match(designSystem, /--nexus-ui-control-size:\s*clamp\(30px,\s*var\(--nexus-control-height/,
   "Native control geometry must consume the active Design Studio control-height token.");
-assert.match(designSystem, /:is\(#controls, #ui-left, #ui-top\)[\s\S]*?overflow:\s*visible/,
-  "Foundry control rails must not clip their own icon surfaces.");
+assert.match(designSystem, /\.nexus-floating-ui[\s\S]*?var\(--nexus-ui-control-size\)/,
+  "The sheet's own editor rails may retain profile-driven dimensions without restyling Foundry controls.");
 assert.match(designSystem, /#navigation \.scene:is\(\.active, \.view\)/,
   "Scene navigation must distinguish the viewed and active scene states.");
 assert.match(designSystem, /#navigation #scene-list[\s\S]*?overflow-x:\s*auto/,
