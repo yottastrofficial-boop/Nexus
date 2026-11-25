@@ -1,3 +1,12 @@
+## 1.0.0.101 — Refinamento do Estúdio e correções da interface Foundry
+
+- Reorganiza o Estúdio de Aparência com melhor distribuição de espaço: navegação compacta, filtro de categoria no editor central e catálogo de elementos com prévias individuais à direita.
+- Aumenta a largura inicial da janela e melhora o comportamento responsivo para reduzir cortes e compressão dos controles.
+- Reforça a preservação da fonte dos ícones Font Awesome do Foundry ao aplicar tipografia de tema.
+- Corrige molduras e bordas redundantes nos wrappers de diretórios nativos (Actors, Items, Scenes e demais abas), mantendo separadores discretos nos itens e estados de hover/foco.
+- Adiciona contratos automatizados para a estrutura do Estúdio e o escopo das correções do chrome.
+- CI e empacotamento automatizados aprovados nesta PR. A inspeção visual no cliente Foundry VTT 14 build 360 continua necessária; não é declarada validação manual.
+
 ## 1.0.0.100 — Estabilização da interface e estilos por categoria
 
 - Adiciona o preset **Foundry VTT**, preservando a aparência nativa das janelas, diretórios, navegação e superfícies do Foundry; aplicações próprias do NEXUS continuam usando os tokens do sistema.
