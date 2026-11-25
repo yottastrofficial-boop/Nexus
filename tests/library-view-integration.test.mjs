@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const sheetTemplate = await readFile(new URL("../templates/actors/actor-sheet.hbs", import.meta.url), "utf8");
+const systemEntry = await readFile(new URL("../scripts/nexus-v1.0.0.js", import.meta.url), "utf8");
 const sheetListeners = await readFile(new URL("../scripts/sheets/actor-sheet-listeners.js", import.meta.url), "utf8");
 const sheetController = await readFile(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
 const libraryApplication = await readFile(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
@@ -19,6 +20,8 @@ test("character sheet opens the shared Universal Library", () => {
   assert.match(sheetListeners, /updateInstances/);
   assert.match(sheetListeners, /getLibraryMediaInsertionSource/);
   assert.match(libraryApplication, /id: "nexus-library"/);
+  assert.match(systemEntry, /registerMenu\("nexus", "universalLibrary"/);
+  assert.match(systemEntry, /type: LibraryApplication/);
 });
 
 test("character sheet no longer mounts the legacy embedded library", () => {

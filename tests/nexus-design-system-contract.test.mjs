@@ -71,6 +71,10 @@ assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*5
   "The Design Studio toolbar must remain compact.");
 assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-solid[^{}]*font-family/i,
   "The Design System must leave Font Awesome font selection to Foundry's native styles.");
+assert.match(designSystem, /Native icon glyphs remain owned by Foundry\/Font Awesome/);
+assert.match(designSystem, /nexus-component-buttons-background/);
+assert.match(designSystem, /nexus-component-highlights-border-style/);
+assert.match(designSystem, /data-nexus-theme="foundry"/);
 assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/,
   "Profile typography must exclude native icon elements and Font Awesome classes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,

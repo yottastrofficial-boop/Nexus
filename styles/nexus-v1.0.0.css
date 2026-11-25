@@ -9868,3 +9868,33 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
     justify-content:flex-start;
   }
 }
+
+
+/* Appearance Studio — compact category accordions. */
+.nexus-design-style-categories { display:grid; gap:8px; min-width:0; }
+.nexus-design-style-category { min-width:0; overflow:hidden; border:1px solid var(--nexus-panel-border,#3c5067); border-radius:8px; background:var(--nexus-panel-surface,#202e3e); }
+.nexus-design-style-category > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:46px; padding:9px 12px; color:var(--nexus-panel-text,#e7edf5); cursor:pointer; list-style:none; }
+.nexus-design-style-category > summary::-webkit-details-marker { display:none; }
+.nexus-design-style-category > summary > span { display:grid; gap:3px; min-width:0; }
+.nexus-design-style-category > summary small { color:var(--nexus-panel-muted,#9aadc2); font-size:11px; }
+.nexus-design-style-category > summary > i { color:var(--nexus-panel-muted,#9aadc2); transition:transform .14s ease; }
+.nexus-design-style-category[open] > summary { border-bottom:1px solid var(--nexus-panel-border,#3c5067); }
+.nexus-design-style-category[open] > summary > i { transform:rotate(180deg); }
+.nexus-design-style-category > .nexus-design-settings-grid { padding:12px; }
+@media (prefers-reduced-motion: reduce) { .nexus-design-style-category > summary > i { transition:none; } }
+
+/* Data values use a monospace baseline with tabular numerals; prose remains proportional. */
+.nexus-sheet .nexus-resource-values,
+.nexus-sheet .nexus-resource-bar-values,
+.nexus-sheet .nexus-resource-ring-values,
+.nexus-sheet .nexus-sheet-resource-value,
+.nexus-design-surface .nexus-resource-values,
+.nexus-design-surface .nexus-resource-bar-values,
+.nexus-design-surface .nexus-resource-ring-values,
+.nexus-design-surface .nexus-sheet-resource-value {
+  font-family:var(--nexus-font-data,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace);
+  font-variant-numeric:tabular-nums;
+}
+.nexus-design-surface :is(code,pre,.nexus-code-editor) {
+  font-family:var(--nexus-font-code,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace);
+}

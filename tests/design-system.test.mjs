@@ -28,6 +28,7 @@ test("theme typography uses its preset font unless a layout explicitly overrides
   applyThemeTokens(element, { theme: "medieval" });
   assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
   assert.equal(values.get("--nexus-font-ui"), '"Georgia", sans-serif');
+  assert.equal(values.get("--nexus-font-data"), "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
 
   applyThemeTokens(element, { theme: "pixel-art" });
   assert.equal(values.get("--nexus-font-family"), "monospace, sans-serif");
@@ -59,6 +60,9 @@ test("theme renderer applies custom palette, density, spacing and accessibility 
     reducedMotion: true
   });
   assert.equal(values.get("--nexus-panel-bg"), "#101010");
+  assert.equal(values.get("--nexus-component-buttons-background"), THEME_TOKENS["nexus-dark"].button);
+  assert.equal(values.get("--nexus-component-buttons-border-style"), "solid");
+  assert.equal(values.get("--nexus-component-buttons-border-width"), "1px");
   assert.equal(values.get("--nexus-panel-text"), "#fefefe");
   assert.equal(values.get("--nexus-panel-border"), "#aaaaaa");
   assert.equal(values.get("--nexus-density-scale"), "0.88");
@@ -142,6 +146,13 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
   assert.equal(profile.layout.controlHeight, 44);
   assert.equal(profile.accessibility.contrast, "high");
   assert.equal(profile.accessibility.reducedMotion, true);
+  assert.equal(profile.components.buttons.background, THEME_TOKENS.medieval.button);
+  assert.equal(profile.components.buttons.borderStyle, "solid");
+  const customized = normalizeDesignProfile({ preset: "medieval", components: { buttons: { background: "#abc", borderStyle: "invalid", borderWidth: 99, radius: -5 } } });
+  assert.equal(customized.components.buttons.background, "#aabbcc");
+  assert.equal(customized.components.buttons.borderStyle, "solid");
+  assert.equal(customized.components.buttons.borderWidth, 4);
+  assert.equal(customized.components.buttons.radius, 0);
 });
 
 test("design profile diagnostics calculate text contrast and imports use a versioned safe envelope", () => {
@@ -172,6 +183,7 @@ test("profile-to-layout maps custom tokens to the existing theme renderer contra
   assert.equal(layout.density, "spacious");
   assert.equal(layout.controlHeight, 40);
   assert.equal(layout.reducedMotion, true);
+  assert.deepEqual(layout.components, profile.components);
 });
 
 
@@ -355,6 +367,27 @@ test("installer registers authoritative world settings and per-user preferences"
   assert.equal(root.classList.values.has("nexus-design-system"), false);
 });
 
+
+test("Foundry VTT preset preserves native Foundry applications while keeping NEXUS surfaces themed", () => {
+  const handlers = new Map();
+  const gameRef = { user: { isGM: false }, settings: {
+    settings: new Map(),
+    register(namespace, key, config) { this.settings.set(`${namespace}.${key}`, config); },
+    get(namespace, key) { return this.settings.get(`${namespace}.${key}`)?.default; }
+  } };
+  const root = { style: { setProperty() {}, getPropertyValue() { return ""; }, getPropertyPriority() { return ""; }, removeProperty() {} }, dataset: {}, classList: { add() {}, remove() {} } };
+  const hooks = { once() {}, on(name, callback) { handlers.set(name, callback); return name; }, off() {} };
+  const design = installNexusDesignSystem({ gameRef, documentRef: { documentElement: root }, hooks, themeTokens: THEME_TOKENS, applyThemeTokens });
+  design.preview(createDefaultDesignProfile("foundry"));
+  const render = handlers.get("renderApplicationV2");
+  const nativeClasses = new Set();
+  render({ constructor: { name: "ActorDirectory" } }, { classList: { add: value => nativeClasses.add(value) } });
+  assert.equal(nativeClasses.size, 0, "Native directories retain Foundry styling in the Foundry VTT preset.");
+  const nexusClasses = new Set();
+  render({ constructor: { name: "NexusDesignStudio" } }, { classList: { add: value => nexusClasses.add(value) } });
+  assert.ok(nexusClasses.has("nexus-themed-application"), "NEXUS applications keep their own design surface.");
+  design.uninstall();
+});
 
 test("Design System themes native Foundry UI configuration without touching third-party applications", () => {
   const handlers = new Map();

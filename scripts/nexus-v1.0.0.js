@@ -118,6 +118,16 @@ Hooks.once("init", () => {
     game.nexus.library.application = application;
     return Promise.resolve(application.render({ force: true })).then(() => application);
   };
+  if (typeof game.settings?.registerMenu === "function" && !game.settings.menus?.has?.("nexus.universalLibrary")) {
+    game.settings.registerMenu("nexus", "universalLibrary", {
+      name: "Biblioteca Universal",
+      label: "Abrir Biblioteca",
+      hint: "Consulte, organize e reutilize os recursos disponíveis no NEXUS.",
+      icon: "fa-solid fa-book-open",
+      type: LibraryApplication,
+      restricted: false
+    });
+  }
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
