@@ -34,7 +34,9 @@ test("theme preview demonstrates the real visual primitives controlled by the pr
   assert.match(template, /<select/);
   assert.match(template, /<textarea/);
   assert.match(styles + legacyStyles, /nexus-design-sample-scroll[\s\S]*?overflow-y:\s*auto/);
-  assert.match(legacyStyles, /nexus-design-studio-toolbar[\s\S]*?min-height:\s*58px/);
-  assert.match(legacyStyles, /nexus-design-studio-preview[\s\S]*?overflow:auto/);
+  assert.match(legacyStyles, /nexus-design-studio-shell > \.nexus-design-studio-toolbar[\s\S]*?max-height:\s*64px/);
+  assert.match(legacyStyles, /nexus-design-studio-toolbar \.nexus-design-studio-target[\s\S]*?min-width:\s*230px/);
+  assert.match(legacyStyles, /nexus-design-studio-preview[\s\S]*?overflow-y:auto/);
+  assert.match(legacyStyles, /nexus-design-sample-scroll[\s\S]*?scrollbar-gutter:stable/);
   assert.match(legacyStyles, /nexus-design-sample-buttons button\.is-secondary/);
 });
