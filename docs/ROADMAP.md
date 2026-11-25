@@ -116,3 +116,13 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - As regras antigas de cartões usavam #chat-log, elemento que não existe na estrutura observada; o histórico real usa .chat-log.
 - PR #99 ajusta o CSS para os elementos reais, expande histórico/controles/compositor e reduz espaçamentos dos cartões.
 - CI e contratos de regressão aprovados. Teste visual manual no Foundry VTT 14 build 360 ainda pendente.
+
+## Atualização — chat com densidade adaptativa (branch de revisão)
+
+- Acrescenta densidade responsiva baseada na largura real do contêiner do chat, via CSS Container Queries, sem alterar a largura padrão da sidebar.
+- Em áreas estreitas, reduz somente padding e margens dos cartões; não diminui a fonte do texto.
+- Em áreas mais largas, devolve espaçamento moderado para leitura.
+- Imagens, vídeos, iframes e tabelas passam a respeitar a largura do conteúdo; tabelas largas podem rolar dentro da mensagem.
+- Não altera a estrutura DOM do Foundry, handlers, controlador de abas, mensagens ou dados.
+- Contratos de regressão ampliados para verificar os breakpoints de contêiner e o limite de mídia.
+- Esta mudança é uma proposta em branch/PR. A validação visual no Foundry VTT 14 build 360 permanece necessária; não declarar concluída nem publicar release antes do teste manual.
