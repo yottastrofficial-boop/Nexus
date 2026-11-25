@@ -24,10 +24,10 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 
 ## Estado de referência — 2026-11-25 (pós-release 1.0.0.106)
 
-- **Versão de código:** `1.0.0.106`; correção dos seletores nativos `.tab.sidebar-tab` do sidebar V14, destinada à validação no Foundry.
-- **Manifesto de distribuição:** será sincronizado para `1.0.0.106` somente após aprovação do CI, geração do ZIP e confirmação do asset.
-- **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente; a release de distribuição não promove o checkpoint funcional, que permanece em `1.0.0.70`.
-- **Distribuição:** `manifest.json` aponta para `1.0.0.106`; nenhuma nova versão deve ser publicada antes de corrigir e validar o sidebar no Foundry real.
+- **Versão distribuída:** `1.0.0.106`; manifesto e asset permanecem inalterados.
+- **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
+- **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente. A captura anterior mostrou abas verticais, conteúdo sobreposto e ícones incorretos; a correção de CSS ainda não foi verificada no cliente real. O checkpoint funcional permanece em `1.0.0.70`.
+- **Distribuição:** `manifest.json` aponta para `1.0.0.106`; nenhuma nova versão deve ser publicada antes de validar o sidebar no Foundry real.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.
 - **Ambiente-alvo:** Foundry VTT 14, build 360.

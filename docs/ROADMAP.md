@@ -9,8 +9,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
 - Versão distribuída: `1.0.0.106` (release, ZIP e manifesto confirmados).
-- Commit posterior à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright do sidebar e preservação da tipografia nativa).
-- Sidebar ainda defeituoso no cliente real: abas verticais, conteúdo sobreposto e ícones renderizados como quadrados. Não iniciar nova release antes de analisar o DOM/estilos reais.
+- Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
+- A correção de CSS foi integrada e passou CI/empacotamento, mas o layout horizontal ainda não foi validado no cliente real. Não iniciar nova release antes de executar o diagnóstico e confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
@@ -18,7 +18,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 ## Próxima etapa — correção orientada pelo diagnóstico do sidebar V14
 
-A PR #89 foi integrada à main. O teste `tools/foundry-testing/tests/sidebar-diagnostic.spec.js` coleta DOM real, geometrias, estilos calculados, fontes de ícones e screenshot no Foundry 14. A etapa seguinte é executar esse teste no mundo descartável e usar os dados para implementar o layout horizontal e corrigir os glifos. A remoção do override de família tipográfica foi integrada, mas ainda não validada visualmente. Não considerar o sidebar concluído.
+As PRs #89 e #91 foram integradas à main. O teste `tools/foundry-testing/tests/sidebar-diagnostic.spec.js` coleta a árvore DOM de `game.sidebar.element`, ancestrais, geometrias, estilos calculados, fontes de ícones e screenshot no Foundry 14. A PR #91 isolou o sidebar das regras globais de tipografia, removeu a atribuição de `font-family: inherit` aos controles nativos e centralizou os estilos das abas em `nexus-design-system.css`. CI e empacotamento passaram. A etapa seguinte é executar o diagnóstico no mundo descartável e validar o layout horizontal, os ícones e a troca de abas no cliente real. Não considerar o sidebar concluído nem publicar nova release antes dessa validação.
 
 ## Atualização 1.0.0.105 — correção estrutural do sidebar
 

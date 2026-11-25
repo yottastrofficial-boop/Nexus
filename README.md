@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Distribuição atual:** a versão 1.0.0.106 está publicada e o manifesto aponta para ela. A captura no Foundry VTT 14 build 360 demonstrou que o sidebar continua com abas verticais, conteúdo sobreposto e ícones incorretos. A correção permanece em investigação; o último checkpoint funcional confirmado continua em 1.0.0.70.
+**Distribuição atual:** a versão 1.0.0.106 está publicada e o manifesto aponta para ela. A captura no Foundry VTT 14 build 360 demonstrou que o sidebar continua com abas verticais, conteúdo sobreposto e ícones incorretos. A revisão de CSS foi integrada à `main` e passou CI/empacotamento, mas ainda precisa ser validada visualmente no Foundry real. Não há nova release; o último checkpoint funcional confirmado continua em 1.0.0.70.
 
 ## Visão geral
 

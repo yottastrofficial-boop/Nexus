@@ -7,8 +7,8 @@
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
 - Versão distribuída: `1.0.0.106` (release e manifesto confirmados).
-- Commit de manutenção posterior à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico real do sidebar V14 e remoção de override tipográfico das abas nativas).
-- O layout horizontal do sidebar ainda não está corrigido; a captura da .106 confirmou navegação vertical, sobreposição do conteúdo e glifos incorretos.
+- Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
+- A captura da .106 confirmou navegação vertical, sobreposição e glifos incorretos. A revisão de CSS removeu uma interferência global de tipografia e centralizou os estilos das abas, mas o layout horizontal ainda aguarda validação no Foundry real.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
