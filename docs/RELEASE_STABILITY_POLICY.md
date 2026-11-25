@@ -43,14 +43,14 @@ A ausência de confirmação funcional posterior não é prova de que versões i
 - Migrações preservam propriedades desconhecidas, layouts, componentes, grupos, aliases e dados personalizados que não estejam diretamente envolvidos na mudança.
 - Um sistema antigo nunca deve rebaixar um Actor com versão de schema superior.
 - Mudanças distribuídas ao Foundry exigem nova versão e novo pacote; não reutilizar a mesma versão para forçar atualização do cliente.
-- O manifesto de instalação só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível.
-- O ZIP de uma candidata deve carregar em seu próprio `system.json` a URL de `manifest-preview.json` e o download da mesma tag candidata; não basta atualizar apenas o manifesto remoto.
-- Uma release candidata nunca deve redirecionar seu próprio pacote para o manifesto ou ZIP estável.
+- O `manifest.json` original só deve apontar para uma release depois de confirmar que o ZIP correspondente está anexado e acessível. Isso vale tanto para candidatas quanto para versões estáveis.
+- O ZIP de uma candidata deve carregar em seu próprio `system.json` a URL do `manifest.json` original da `main` e o download da mesma tag candidata; o mesmo manifesto original é atualizado somente depois que o ZIP for publicado e verificado.
+- Uma release candidata usa o mesmo `manifest.json` da `main` que a instalação normal; a URL de download aponta para o ZIP da candidata publicada.
 - Uma release só é declarada funcionalmente estável após validação no Foundry real.
 
 ## Canais de publicação no GitHub Actions
 
-O workflow `.github/workflows/release.yml` separa validação, candidata e release estável:
+O workflow `.github/workflows/release.yml` separa validação, candidata e release estável, mas ambas as publicações utilizam o manifesto original `manifest.json` da `main`:
 
 ### 1. Validação comum
 
@@ -64,7 +64,7 @@ O workflow `.github/workflows/release.yml` separa validação, candidata e relea
 - A candidata pode usar o mesmo núcleo numérico da versão de desenvolvimento atual com sufixo `-rc.N`, ou avançar para um núcleo superior.
 - Depois que a suíte passa, o workflow ajusta `system.json`, README e changelog somente no ambiente temporário de CI usado para gerar o ZIP; nenhum arquivo da `main` é modificado.
 - A release é publicada como *pre-release*, com tag própria e sem se tornar a versão mais recente.
-- Após confirmar o ZIP, o workflow publica `manifest-preview.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O manifesto estável não é atualizado; instalações normais continuam recebendo a última release estável.
+- Após confirmar o ZIP, o workflow publica `manifest.json`, apontando exclusivamente para o asset da candidata. Use essa URL no Foundry para instalar/testar a prévia. O manifesto estável não é atualizado; instalações normais continuam recebendo a última release estável.
 
 ### 3. Release estável
 
