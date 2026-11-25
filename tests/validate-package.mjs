@@ -624,7 +624,7 @@ assert.ok(NEXUS_RULEBOOK_PROPERTY_DEFINITIONS.some(definition => definition.path
 assert.match(sheet, /normalizeNexusProficientLevel/);
 assert.match(sheet, /synchronizedSettings/);
 assert.match(sheet, /this\._updateLayoutSetting\(\{/);
-assert.match(libraryCatalogExplorer, /createLibraryThemeApplicationAdapter/);
+assert.match(libraryApplication, /createLibraryThemeApplicationAdapter/);
 assert.match(template, /type="number"[^>]*data-skill-proficient-level/);
 assert.doesNotMatch(template, /type="checkbox"[^>]*data-skill-proficient-level/);
 assert.doesNotMatch(template, /skill\.opposed/);
