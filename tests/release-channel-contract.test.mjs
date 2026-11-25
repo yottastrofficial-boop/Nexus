@@ -61,7 +61,7 @@ assert.match(policy, /## Canais de publicação no GitHub Actions/);
 assert.match(policy, /Release candidata/);
 assert.match(policy, /Release estável/);
 
-assert.match(policy, /manifest-preview\.json/);
+assert.match(policy, /manifest\.json/);
 assert.ok(policy.includes("[candidate]"));
 
 assert.match(workflow, /\npermissions:\n  contents: read\n\njobs:/,
