@@ -1276,8 +1276,8 @@ html.nexus-design-system .nexus-design-sample-scroll span {
 
 /* Persistent entry point for the shared Universal Library. */
 html.nexus-design-system .nexus-open-library {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  width: 100%; min-height: 34px; margin: 0 0 8px; padding: 7px 10px;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; min-width: 34px; min-height: 34px; margin: 0 auto 8px; padding: 0;
   border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
   color: var(--nexus-ui-text); background: var(--nexus-ui-surface); font: inherit;
 }
