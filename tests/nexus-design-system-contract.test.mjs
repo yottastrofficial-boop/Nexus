@@ -75,6 +75,8 @@ assert.match(designSystem, /Native icon glyphs remain owned by Foundry\/Font Awe
 assert.match(designSystem, /nexus-component-buttons-background/);
 assert.match(designSystem, /nexus-component-highlights-border-style/);
 assert.match(designSystem, /data-nexus-theme="foundry"/);
+assert.match(designSystem, /html\\.nexus-design-system \\.nexus-sheet \\.nexus-workspace/);
+assert.doesNotMatch(designSystem, /html\\.nexus-design-system:not\\(\\[data-nexus-theme="foundry"\\]\\) \\.nexus-sheet/);
 assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\):not\(pre\):not\(\[class\*="fa-"\]\)/,
   "Profile typography must exclude native icon elements and Font Awesome classes.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,

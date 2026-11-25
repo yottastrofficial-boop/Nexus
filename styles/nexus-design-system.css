@@ -326,8 +326,8 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar .tab.sidebar
 /* Native Foundry control rails retain their minimal Foundry appearance. */
 
 /* The rails are children of their ApplicationV2 sheet, so Foundry's own z-stack wins. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .application.nexus-window,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .window-app.nexus-window {
+html.nexus-design-system .application.nexus-window,
+html.nexus-design-system .window-app.nexus-window {
   overflow: visible !important;
   isolation: isolate;
 }
@@ -985,13 +985,13 @@ html.nexus-design-system .nexus-library-search-clear[hidden] {
   display: none !important;
 }
 
-html.nexus-design-system #navigation {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation {
   box-sizing: border-box;
   max-inline-size: calc(100vw - 12px);
   min-inline-size: 0;
   overflow: visible;
 }
-html.nexus-design-system #navigation #scene-list {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation #scene-list {
   display: flex;
   align-items: center;
   gap: var(--nexus-ui-control-gap);
@@ -1002,7 +1002,7 @@ html.nexus-design-system #navigation #scene-list {
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
 }
-html.nexus-design-system #navigation .scene {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene {
   box-sizing: border-box;
   flex: 0 0 auto;
   min-inline-size: 0;
@@ -1016,13 +1016,13 @@ html.nexus-design-system #navigation .scene {
   white-space: nowrap;
   transition: color .14s ease, background-color .14s ease, border-color .14s ease;
 }
-html.nexus-design-system #navigation .scene:is(.active, .view) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene:is(.active, .view) {
   border-color: var(--nexus-ui-accent);
   color: var(--nexus-ui-text);
   background: var(--nexus-ui-surface-hover);
   box-shadow: inset 0 -2px var(--nexus-ui-accent);
 }
-html.nexus-design-system #navigation .scene:focus-visible {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene:focus-visible {
   outline: 2px solid var(--nexus-ui-accent);
   outline-offset: 2px;
 }
@@ -1031,12 +1031,12 @@ html.nexus-design-system #navigation .scene:focus-visible {
     --nexus-ui-control-size: clamp(30px, var(--nexus-control-height, 34px), 36px);
     --nexus-ui-control-gap: 5px;
   }
-  html.nexus-design-system #navigation .scene {
+  html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene {
     max-inline-size: min(180px, 42vw);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  html.nexus-design-system :is(#navigation .scene) {
+  html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#navigation .scene) {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
@@ -1077,138 +1077,140 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) ::selection {
   color: var(--nexus-ui-text); background: color-mix(in srgb, var(--nexus-ui-accent) 38%, transparent);
 }
 /* Window actions remain icon controls rather than square tiles. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(.application, .window-app, .nexus-panel-window) .window-header :is(.header-control, .window-control, button) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(.application, .window-app) .window-header :is(.header-control, .window-control, button),
+html.nexus-design-system .nexus-panel-window .window-header :is(.header-control, .window-control, button) {
   appearance: none; inline-size: 28px !important; min-inline-size: 28px !important;
   block-size: 28px !important; min-block-size: 28px !important;
   padding: 0 !important; border: 0 !important; border-radius: 50% !important; background: transparent !important;
   box-shadow: none !important; aspect-ratio: auto;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(.application, .window-app, .nexus-panel-window) .window-header :is(.header-control, .window-control, button):hover {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(.application, .window-app) .window-header :is(.header-control, .window-control, button):hover,
+html.nexus-design-system .nexus-panel-window .window-header :is(.header-control, .window-control, button):hover {
   color: var(--nexus-ui-text); background: var(--nexus-ui-surface-hover) !important;
 }
 /* Theme studio component gallery. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-preview-components {
+html.nexus-design-system .nexus-design-preview-components {
   display: grid; gap: 10px; padding: 12px; border-top: 1px solid var(--nexus-ui-border); background: var(--nexus-ui-surface);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-preview-sample { display: grid; gap: 6px; min-width: 0; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-preview-label {
+html.nexus-design-system .nexus-design-preview-sample { display: grid; gap: 6px; min-width: 0; }
+html.nexus-design-system .nexus-design-preview-label {
   color: var(--nexus-ui-muted); font-size: 9px; font-weight: 750; letter-spacing: .09em;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-panel {
+html.nexus-design-system .nexus-design-sample-panel {
   display: grid; gap: 8px; padding: 10px; border: 1px solid var(--nexus-ui-border);
   border-radius: var(--nexus-radius-panel, 9px); background: var(--nexus-ui-surface-raised);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-container {
+html.nexus-design-system .nexus-design-sample-container {
   display: flex; justify-content: space-between; gap: 8px; padding: 9px;
   border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
   background: var(--nexus-ui-surface); font-size: 11px;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-container span,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-type span { color: var(--nexus-ui-muted); }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-buttons { display: flex; flex-wrap: wrap; gap: 7px; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-buttons button {
+html.nexus-design-system .nexus-design-sample-container span,
+html.nexus-design-system .nexus-design-sample-type span { color: var(--nexus-ui-muted); }
+html.nexus-design-system .nexus-design-sample-buttons { display: flex; flex-wrap: wrap; gap: 7px; }
+html.nexus-design-system .nexus-design-sample-buttons button {
   min-height: var(--nexus-ui-control-height); padding: 6px 12px; border: 1px solid var(--nexus-ui-accent);
   border-radius: var(--nexus-ui-radius); color: var(--nexus-ui-text); background: var(--nexus-ui-surface-hover); font: inherit;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-buttons button.is-secondary { border-color: var(--nexus-ui-border); background: transparent; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-type {
+html.nexus-design-system .nexus-design-sample-buttons button.is-secondary { border-color: var(--nexus-ui-border); background: transparent; }
+html.nexus-design-system .nexus-design-sample-type {
   display: grid; gap: 5px; padding: 10px; border: 1px solid var(--nexus-ui-border);
   border-radius: var(--nexus-ui-radius); background: var(--nexus-ui-surface-raised);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-type input {
+html.nexus-design-system .nexus-design-sample-type input {
   width: 100%; min-height: var(--nexus-ui-control-height); padding: 7px 9px;
   border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
   color: var(--nexus-ui-text); background: var(--nexus-ui-field); font: inherit;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-scroll {
+html.nexus-design-system .nexus-design-sample-scroll {
   display: grid; gap: 5px; max-height: 82px; padding: 7px; overflow-y: auto;
   border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
   background: var(--nexus-ui-field); scrollbar-color: var(--nexus-scroll-thumb, var(--nexus-ui-accent)) var(--nexus-scroll-bg, var(--nexus-ui-field));
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-sample-scroll span {
+html.nexus-design-system .nexus-design-sample-scroll span {
   padding: 5px 7px; border-radius: 4px; background: var(--nexus-ui-surface-raised); font-size: 10px;
 }
 
 
 /* Persistent entry point for the shared Universal Library. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-open-library {
+html.nexus-design-system .nexus-open-library {
   display: flex; align-items: center; justify-content: center;
   width: 34px; min-width: 34px; min-height: 34px; margin: 0 auto 8px; padding: 0;
   border: 1px solid var(--nexus-ui-border); border-radius: var(--nexus-ui-radius);
   color: var(--nexus-ui-text); background: var(--nexus-ui-surface); font: inherit;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-open-library:hover {
+html.nexus-design-system .nexus-open-library:hover {
   border-color: var(--nexus-ui-accent); background: var(--nexus-ui-surface-hover);
 }
 
 
 /* The Design Studio uses in-app section switching, never hash navigation. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-studio-nav [data-design-section] {
+html.nexus-design-system .nexus-design-studio-nav [data-design-section] {
   display: block; width: 100%; padding: 9px; border: 1px solid transparent;
   border-radius: var(--nexus-ui-radius); color: var(--nexus-ui-muted);
   background: transparent; font: inherit; font-size: 11px; text-align: left;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-studio-nav [data-design-section]:hover,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-studio-nav [data-design-section].is-active {
+html.nexus-design-system .nexus-design-studio-nav [data-design-section]:hover,
+html.nexus-design-system .nexus-design-studio-nav [data-design-section].is-active {
   color: var(--nexus-ui-text); border-color: var(--nexus-ui-border); background: var(--nexus-ui-surface-hover);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-design-studio-section[hidden] { display: none !important; }
+html.nexus-design-system .nexus-design-studio-section[hidden] { display: none !important; }
 
 /* Minimal in-sheet editor layout: navigation and inspectors stay inside the sheet. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet .nexus-workspace {
+html.nexus-design-system .nexus-sheet .nexus-workspace {
   display: grid !important;
   position: relative !important;
   grid-template-columns: minmax(0, 1fr) 72px !important;
   min-width: 0;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
   grid-template-columns: minmax(0, 1fr) !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="appearance"] .nexus-sidebar-left,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="appearance"] .nexus-sidebar-right {
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-sidebar-left,
+html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-sidebar-right {
   display: none !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet .nexus-sidebar-right {
+html.nexus-design-system .nexus-sheet .nexus-sidebar-right {
   display: flex; flex-direction: column; align-items: stretch; gap: 7px;
   min-width: 0; padding: 9px 6px; overflow: auto;
   border-left: 1px solid var(--nexus-ui-border); background: var(--nexus-panel-bg, #182330);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet .nexus-layout-tabs {
+html.nexus-design-system .nexus-sheet .nexus-layout-tabs {
   display: flex; flex-direction: column; align-items: stretch; gap: 5px; width: 100%;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet .nexus-layout-tab {
+html.nexus-design-system .nexus-sheet .nexus-layout-tab {
   inline-size: 100%; min-block-size: 34px; padding: 5px; border: 1px solid transparent;
   border-radius: 6px; color: var(--nexus-ui-muted); background: transparent; box-shadow: none;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet .nexus-layout-tab:is(:hover, :focus-visible, .active) {
+html.nexus-design-system .nexus-sheet .nexus-layout-tab:is(:hover, :focus-visible, .active) {
   border-color: var(--nexus-ui-border); color: var(--nexus-ui-text); background: var(--nexus-ui-surface-hover);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="play"] .nexus-sidebar-left,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="config"] .nexus-sidebar-left { display: none !important; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="play"] .nexus-workspace,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet[data-mode="config"] .nexus-workspace {
+html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-sidebar-left,
+html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-sidebar-left { display: none !important; }
+html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-workspace,
+html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-workspace {
   grid-template-columns: minmax(0, 1fr) 72px !important;
 }
 
 /* Chat scroll, composer and controls share the active panel surface. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#chat, .chat-sidebar, #chat-log, .chat-log, .chat-scroll, #chat-form, .chat-form, #chat-controls, .chat-controls) {
+html.nexus-design-system :is(#chat, .chat-sidebar, #chat-log, .chat-log, .chat-scroll, #chat-form, .chat-form, #chat-controls, .chat-controls) {
   color: var(--nexus-ui-text) !important;
   background-color: var(--nexus-panel-bg, #182330) !important;
   border-color: var(--nexus-ui-border) !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#chat-log, .chat-log, .chat-scroll) {
+html.nexus-design-system :is(#chat-log, .chat-log, .chat-scroll) {
   background-color: var(--nexus-panel-bg, #182330) !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #chat-log :is(.chat-message, .message) {
+html.nexus-design-system #chat-log :is(.chat-message, .message) {
   color: var(--nexus-ui-text) !important;
   background-color: var(--nexus-ui-surface-raised) !important;
   border-color: var(--nexus-ui-border) !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #chat-log :is(.message-header, .message-content) {
+html.nexus-design-system #chat-log :is(.message-header, .message-content) {
   color: var(--nexus-ui-text) !important; border-color: var(--nexus-ui-border) !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #chat-log .message-header { background: var(--nexus-ui-surface) !important; }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #chat-log .message-content { background: var(--nexus-ui-surface-raised) !important; }
+html.nexus-design-system #chat-log .message-header { background: var(--nexus-ui-surface) !important; }
+html.nexus-design-system #chat-log .message-content { background: var(--nexus-ui-surface-raised) !important; }
 
 /* The selected profile supplies the default text color and font throughout Foundry. */
 html.nexus-design-system:not([data-nexus-theme="foundry"]) body { color: var(--nexus-ui-text); }
