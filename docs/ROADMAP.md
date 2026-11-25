@@ -57,4 +57,12 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - A visibilidade e a troca de abas continuam sob controle do controlador nativo do Foundry. Não foram recriados handlers nem glifos; Font Awesome e SVG permanecem nativos.
 - Atualizados os contratos de regressão que ainda apontavam para os seletores antigos e adicionado `tests/sidebar-layout-contract.test.mjs`, incluindo equilíbrio estrutural das chaves CSS.
 - CI da validação de pacote passou: sintaxe 64/64, suite de testes 41/41 e pacote gerado com sucesso. Não houve release.
-- **Validação manual pendente:** conferir no Foundry VTT 14 build 360 a posição real da barra, todos os ícones, troca de abas, altura/rolagem dos painéis e compatibilidade com abas de módulos. Não declarar concluído visualmente nem publicar `1.0.0.108` antes dessa conferência.
+- **Validação manual pendente:** conferir no Foundry VTT 14 build 360 a posição real da barra, todos os ícones, troca de abas, altura/rolagem dos painéis e compatibilidade com abas de módulos. Não declarar concluído visualmente antes dessa conferência. A disponibilização da `1.0.0.108` foi autorizada pelo mantenedor como pacote antecipado para teste.
+
+
+## Atualização 1.0.0.108 — pacote publicado para teste
+
+- A versão `1.0.0.108` foi autorizada pelo mantenedor para disponibilização no GitHub antes da validação manual, com possibilidade de remoção/substituição posterior caso o teste identifique problemas.
+- Inclui a reconstrução da sidebar da PR #95 e os contratos de regressão integrados à `main`.
+- A publicação não muda o estado de validação: no Foundry VTT 14 build 360 ainda é necessário conferir navegação, ícones, troca de abas, rolagem/altura dos painéis e compatibilidade com módulos.
+- Não marcar a sidebar como funcionalmente concluída até a confirmação manual.
