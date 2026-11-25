@@ -19,16 +19,20 @@ assert.match(app, /minWidth: 980/);
 assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPTIONS"));
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
-assert.ok(designCss.includes("#sidebar .sidebar-tabs"), "A navegação deve alcançar o contêiner real do sidebar ApplicationV2");
-assert.ok(designCss.includes("flex-direction: row !important"), "As abas devem formar uma faixa horizontal mesmo com o layout-base do Foundry");
-assert.ok(designCss.includes("#sidebar > .window-content"), "O wrapper ApplicationV2 deve organizar a navegação em coluna");
-assert.ok(designCss.includes("display: grid"), "Os botões de aba devem centralizar os ícones sem substituir handlers nativos");
-assert.ok(designCss.includes("#sidebar .tab.sidebar-tab"), "A aba ativa deve ocupar a área restante do painel");
-assert.ok(designCss.includes("flex: 1 1 auto"));
-assert.ok(designCss.includes("order: 0"), "A faixa de navegação mantém a posição superior sem reordenar os itens nativos");
-assert.ok(designCss.includes("overflow-x: auto"), "Abas adicionais devem permanecer acessíveis por rolagem horizontal");
-const sidebarIconRule = designCss.match(/html\.nexus-design-system #sidebar \.sidebar-tabs > \.item :is\(i, svg\) \{([^}]*)\}/);
-assert.ok(sidebarIconRule, "A regra de ícones do sidebar deve existir");
-assert.doesNotMatch(sidebarIconRule[1], /font-family\s*:/i, "O NEXUS não deve substituir a fonte dos ícones nativos do sidebar");
+const sidebarBlock = designCss.slice(
+  designCss.indexOf("/* Foundry V14 Sidebar — one canonical layout layer."),
+  designCss.indexOf("/* Advanced CSS editor */")
+);
+assert.ok(sidebarBlock.length > 0, "O bloco canônico do sidebar deve existir");
+assert.ok(sidebarBlock.includes("#sidebar-tabs"), "O seletor nativo de navegação deve ser contemplado");
+assert.ok(sidebarBlock.includes('nav.tabs[data-group="primary"]'), "A navegação ApplicationV2 deve ser contemplada");
+assert.ok(sidebarBlock.includes("flex-direction: row !important"), "As abas nativas devem ser horizontais");
+assert.ok(sidebarBlock.includes("flex-wrap: wrap"), "Abas extras de módulos devem continuar acessíveis em múltiplas linhas");
+assert.ok(sidebarBlock.includes("inline-flex"), "Os controles devem manter dimensões e alinhamento consistentes");
+assert.ok(sidebarBlock.includes("#sidebar-content"), "A área de conteúdo do sidebar deve ser contemplada");
+assert.doesNotMatch(sidebarBlock, /window-content|application-content/, "O layout não deve presumir um wrapper de janela comum");
+assert.doesNotMatch(sidebarBlock, /font-family|content\s*:/i, "O layout não deve substituir fontes ou glifos nativos");
+assert.doesNotMatch(sidebarBlock, /order\s*:/i, "A ordem DOM original do Foundry deve ser preservada");
+assert.ok(!designCss.includes("Minimal UI — Foundry V14 ApplicationV2 sidebar"), "O bloco estrutural anterior deve ser removido");
 assert.ok(designCss.includes('[class~="fas"]'));
 console.log("Foundry UI + Design Studio layout contracts passed.");
