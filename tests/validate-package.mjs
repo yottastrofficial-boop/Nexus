@@ -1024,9 +1024,10 @@ assert.match(template, /data-tool-panel="behavior"/, "Comportamento deve possuir
 assert.match(template, /data-tool-panel="settings"/, "Configurações deve possuir um painel independente");
 assert.doesNotMatch(template, /data-inspector-tab-panel="behavior"/, "Comportamento não deve permanecer dentro do Inspector");
 assert.match(template, /data-settings-section="organization"/, "Configurações deve possuir navegação lateral por seção");
-assert.match(sheetCode, /data-floating-panel="behavior"/, "A navegação deve abrir o painel Comportamento");
-assert.match(sheetCode, /data-floating-panel="settings"/, "A navegação deve abrir o painel Configurações");
-assert.match(sheetCode, /behavior: \[900, 600\]/, "O painel Comportamento deve ter as dimensões da Biblioteca");
+assert.match(template, /data-appearance-panel="behavior"/, "A navegação interna deve abrir o painel Comportamento");
+assert.match(template, /data-appearance-panel="settings"/, "A navegação interna deve abrir o painel Configurações");
+assert.match(sheetCode, /this\._openInlineEditorPanel/, "A ficha deve alternar os painéis pelo drawer interno");
+assert.match(css, /grid-template-columns:\s*minmax\(250px, 286px\) minmax\(0, 1fr\) 72px/, "O drawer interno deve manter a largura de trabalho sem janelas destacadas");
 assert.match(sheetCode, /nexus-behavior-editor \[data-interaction-action\]/, "As ações do editor devem funcionar fora do Inspector");
 assert.match(sheetCode, /rememberedTab\) \? "card" : rememberedTab/, "O Inspector deve restaurar somente abas existentes");
 assert.match(css, /nexus-settings-rail/, "Configurações deve reutilizar a navegação lateral");
@@ -1277,10 +1278,10 @@ assert.ok(sheetCode.includes("component: [400, 600]"), "Propriedades deve seguir
 assert.ok(sheetCode.includes("style: [400, 600]") && sheetCode.includes("layers: [400, 600]") && sheetCode.includes("settings: [400, 600]"), "Painéis compactos devem compartilhar dimensões");
 assert.ok(sheetCode.includes("aliases: [400, 600]"), "Estrutura de dados deve seguir as dimensões compactas");
 assert.match(libraryApplication, /position: \{ width: 1180, height: 760 \}/, "A Biblioteca Universal deve manter uma janela independente dimensionada para o Explorer");
-assert.ok(sheetCode.includes('data-floating-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
-assert.ok(sheetCode.includes('data-floating-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
-assert.ok(sheetCode.includes('data-floating-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
-assert.ok(sheetCode.includes('data-floating-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
+assert.ok(template.includes('data-appearance-panel="settings" title="Configurações do editor" aria-label="Configurações do editor"><i class="fa-solid fa-gear"'), "Configurações deve ter ícone próprio");
+assert.ok(template.includes('data-appearance-panel="component" title="Propriedades" aria-label="Propriedades"><i class="fa-solid fa-sliders"'), "Propriedades deve usar o ícone de controles");
+assert.ok(template.includes('data-appearance-panel="aliases" title="Estrutura de dados" aria-label="Estrutura de dados"><i class="fa-solid fa-diagram-project"'), "Estrutura de dados deve ter ícone semântico");
+assert.ok(template.includes('data-appearance-panel="behavior" title="Comportamento" aria-label="Comportamento"><i class="fa-solid fa-bolt"'), "Comportamento deve ter ícone semântico");
 assert.ok(sheetCode.includes("if(!component){gesture={type:\"marquee\""), "Clique no espaço vazio não deve limpar a seleção");
 assert.ok(sheetCode.includes("if (!editorPanelsOpen && this.element?.isConnected)"), "A seleção deve ser limpa quando os painéis de edição forem fechados");
 assert.ok(sheetCode.includes("nextControl?.focus({ preventScroll: true })"), "O editor deve preservar o foco após atualizar um campo");
