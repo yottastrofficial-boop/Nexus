@@ -1,3 +1,11 @@
+## 1.0.0.108 — Consolidação do sidebar Foundry V14 e pacote para teste
+
+- Inclui a reconstrução completa do layout da sidebar integrada na PR #95, com navegação horizontal, painéis dimensionados de forma isolada e preservação do controlador nativo do Foundry.
+- Atualiza os contratos de regressão do layout e mantém a cobertura automatizada da estrutura CSS.
+- Não altera regras mecânicas, dados persistidos de Actors/Items ou schemas de campanha.
+- Pacote disponibilizado para teste do mantenedor no Foundry VTT 14 build 360.
+- **Validação manual pendente:** posição da navegação, ícones, troca de abas, rolagem/altura dos painéis e compatibilidade com abas de módulos. CI e empacotamento não substituem esse teste no cliente real.
+
 ## 1.0.0.107 — Pacote de teste do sidebar Foundry V14
 
 - Publica na branch `main` a revisão consolidada do CSS do sidebar, com navegação horizontal e separação entre controles de abas e painéis de conteúdo.
