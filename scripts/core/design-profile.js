@@ -140,6 +140,7 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
     preset,
     palette,
     components,
+    customCss,
     typography: {
       family,
       baseSize: clamp(typographySource.baseSize, 11, 18, defaults.typography.baseSize),

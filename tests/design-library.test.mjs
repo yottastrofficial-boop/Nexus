@@ -36,7 +36,7 @@ test("duplica, renomeia, aplica e exclui sem alterar o perfil ativo implicitamen
   assert.equal((await library.remove(copy.id)).removed, true);
   assert.equal(library.get(copy.id), null); assert.equal(library.get(saved.id).name, saved.name);
 });
-test("exporta perfis NEXUS-DESIGN/2 e continua importando NEXUS-DESIGN/1", async () => {
+test("exporta perfis NEXUS-DESIGN/3 e continua importando NEXUS-DESIGN/1", async () => {
   const source = makeUser(), target = makeUser(), design = makeDesign();
   const a = createDesignLibraryService({ getUser: () => source, design, createId: () => "source-theme" });
   const b = createDesignLibraryService({ getUser: () => target, design, createId: () => "target-theme" });
@@ -44,7 +44,7 @@ test("exporta perfis NEXUS-DESIGN/2 e continua importando NEXUS-DESIGN/1", async
   await a.save(profile); const imported = await b.import(a.export("source-theme"));
   assert.equal(imported.profile.preset, "pixel-art"); assert.equal(imported.profile.palette.accent, "#abcdef");
   assert.equal(imported.profile.typography.family, "monospace");
-  assert.ok(a.export("source-theme").includes('"format": "NEXUS-DESIGN/2"'));
+  assert.ok(a.export("source-theme").includes('"format": "NEXUS-DESIGN/3"'));
   const legacy = JSON.stringify({ format: "NEXUS-DESIGN/1", profile: {
     schemaVersion: 1, preset: "nexus-dark", name: "Legado", palette: { panel: "#123456" },
     typography: { family: "Inter" }, layout: {}, accessibility: {}
