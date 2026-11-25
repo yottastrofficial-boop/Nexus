@@ -11,6 +11,13 @@ test("character sheet opens the shared Universal Library", () => {
   assert.match(sheetTemplate, /data-open-nexus-library/);
   assert.match(sheetListeners, /game\.nexus\?\.library\?\.open/);
   assert.match(sheetListeners, /source: "actor-sheet"/);
+  assert.match(sheetListeners, /createActorSheetLibraryContext/);
+  assert.match(sheetListeners, /canApplyResource/);
+  assert.match(sheetListeners, /applyResource/);
+  assert.match(sheetListeners, /getUpdateInfo/);
+  assert.match(sheetListeners, /updateDefinition/);
+  assert.match(sheetListeners, /updateInstances/);
+  assert.match(sheetListeners, /getLibraryMediaInsertionSource/);
   assert.match(libraryApplication, /id: "nexus-library"/);
 });
 
