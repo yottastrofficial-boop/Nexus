@@ -37,7 +37,8 @@ test("character-sheet tools open detached ApplicationV2 panels from floating rai
 
 test("native Foundry chrome receives global typography without replacing icon fonts", () => {
   assert.match(designSystem, /body :not\(i\):not\(svg\):not\(code\)/);
-  assert.match(designSystem, /html\.nexus-design-system body \{ color: var\(--nexus-ui-text\); \}/);
+  assert.match(designSystem, /html\.nexus-design-system:not\(\[data-nexus-theme="foundry"\]\) body \{ color: var\(--nexus-ui-text\); \}/);
+  assert.match(designSystem, /data-nexus-theme="foundry"/);
   assert.match(designSystem, /--nexus-font-family/);
   assert.match(designSystem, /#chat-log, \.chat-log, \.chat-scroll/);
   assert.match(designSystem, /#chat-log \.message-content[\s\S]*?background: var\(--nexus-ui-surface-raised\)/);

@@ -1,3 +1,5 @@
+import { DESIGN_PROFILE_SCHEMA_VERSION } from "./design-profile.js";
+
 const MAX_SHARE_CODE_LENGTH = 262144;
 const MAX_COMPONENTS = 50;
 
@@ -454,7 +456,7 @@ export function createNexusLibraryBackup(snapshot = {}, componentTypes = []) {
       typeof theme.name !== "string" || !theme.profile || typeof theme.profile !== "object" ||
       Array.isArray(theme.profile) || !theme.profile.palette || typeof theme.profile.palette !== "object"
     )) throw new Error("Um perfil visual da Biblioteca possui estrutura inválida.");
-    if (isDesignProfile && Number(theme.profile.schemaVersion ?? 1) > 1) {
+    if (isDesignProfile && Number(theme.profile.schemaVersion ?? 1) > DESIGN_PROFILE_SCHEMA_VERSION) {
       throw new Error("O backup contém um perfil visual criado por uma versão mais recente do NEXUS.");
     }
     for (const [key, value] of Object.entries(palette ?? {})) {

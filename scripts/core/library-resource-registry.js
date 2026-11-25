@@ -33,6 +33,7 @@ const COLLECTION_TYPES = Object.freeze({
 });
 const THEME_LABELS = Object.freeze({
   "nexus-dark": "NEXUS Escuro",
+  foundry: "Foundry VTT",
   midnight: "Meia-noite",
   light: "Claro",
   steam: "Steam",
