@@ -7,7 +7,7 @@
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
 - Versão de código integrada à main: `1.0.0.102`, correção de ícones nativos.
-- Manifesto público permanece em `1.0.0.100` até a publicação autorizada da versão .102.
+- Manifesto público sincronizado em `1.0.0.102` após a publicação autorizada.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.102 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
@@ -42,7 +42,7 @@ A arquitetura é modular por contrato, não apenas por aparência. Um grupo prec
 
 ## Atualização integrada à main em 1.0.0.102 (validação funcional pendente)
 
-A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI e o empacotamento serão verificados antes da publicação autorizada; a validação visual no cliente Foundry 14 build 360 continua pendente.
+A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI, o empacotamento, a release e a sincronização do manifesto foram concluídos; a validação visual no cliente Foundry 14 build 360 continua pendente.
 
 A árvore atual contém, entre outros:
 

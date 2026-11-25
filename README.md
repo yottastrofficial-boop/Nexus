@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.102 · Manifesto estável 1.0.0.100 até publicação · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.102 publicada · Manifesto estável 1.0.0.102 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Distribuição atual:** a versão 1.0.0.102 corrige a tipografia dos ícones nativos do Foundry. O manifesto estável permanece em 1.0.0.100 até a publicação autorizada do pacote .102; a validação visual/funcional no Foundry 14 build 360 ainda está pendente e o checkpoint funcional permanece em 1.0.0.70.
+**Distribuição atual:** a versão 1.0.0.102 corrige a tipografia dos ícones nativos do Foundry e já está publicada no manifesto estável. A validação visual/funcional no Foundry 14 build 360 ainda está pendente; o checkpoint funcional permanece em 1.0.0.70.
 
 ## Visão geral
 

@@ -8,8 +8,8 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão de desenvolvimento: `1.0.0.102` (correção de ícones; aguardando CI/publicação).
-- Manifesto estável permanece em `1.0.0.100` até validação visual/funcional no Foundry 14 build 360 e publicação confirmada.
+- Versão publicada: `1.0.0.102` (CI, empacotamento, release e manifesto sincronizados).
+- Manifesto estável: `1.0.0.102`; validação visual/funcional no Foundry 14 build 360 ainda pendente.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
@@ -17,7 +17,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 
 ## Atualização 1.0.0.102
 
-Remove o override global de Font Awesome que forçava a família/peso incorretos e devolve ao Foundry o controle dos glifos nativos. Teste de regressão impede a reintrodução dessa regra. A publicação foi autorizada pelo mantenedor; a validação visual no Foundry 14 build 360 continua pendente.
+Remove o override global de Font Awesome que forçava a família/peso incorretos e devolve ao Foundry o controle dos glifos nativos. Teste de regressão impede a reintrodução dessa regra. A publicação foi autorizada pelo mantenedor e o manifesto está sincronizado; a validação visual no Foundry 14 build 360 continua pendente.
 
 ## Atualização integrada 1.0.0.101
 
