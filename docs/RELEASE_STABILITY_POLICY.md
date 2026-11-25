@@ -26,7 +26,7 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`, conforme o histórico de validação registrado neste documento.
 - **Última release estável publicada:** `1.0.0.98`, com `nexus.zip` publicado e asset confirmado após CI; continua sem validação funcional completa no Foundry VTT 14 build 360.
-- **Estado da main:** base de versão declarada `1.0.0.98`; o código corresponde à release estável publicada. Novas alterações de código exigem nova versão e novo pacote.
+- **Estado da main:** base de versão declarada `1.0.0.99` (desenvolvimento pós-release); a última versão estável publicada permanece `1.0.0.98`.
 - **Último checkpoint funcional confirmado:** `1.0.0.70`, dentro do Foundry. A publicação da .96 não substitui esse checkpoint.
 - **Metadados de distribuição:** `manifest.json` e `system.json.download` devem apontar para a mesma release estável. O workflow sincroniza os dois somente após confirmar o asset `nexus.zip`.
 - **Próxima candidata prevista:** `1.0.0.99-rc.1` ou superior, gerada manualmente a partir da main quando a rodada de testes estiver pronta e a versão base for confirmada.

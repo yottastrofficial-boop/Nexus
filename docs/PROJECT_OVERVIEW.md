@@ -6,7 +6,7 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.98`; o código da branch corresponde à release estável publicada.
+- Base de versão declarada na main: `1.0.0.99` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A release 1.0.0.98 destina-se à validação no Foundry VTT 14 build 360; o CI valida automaticamente o pacote, mas não substitui os testes funcionais no cliente real.
 - Compatibilidade declarada: Foundry VTT 14, build 360
@@ -39,7 +39,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Implementação presente na versão 1.0.0.98 (release estável; validação funcional pendente)
+## Implementação presente na base de desenvolvimento 1.0.0.99 (release estável 1.0.0.98; validação funcional pendente)
 
 A árvore atual contém, entre outros:
 

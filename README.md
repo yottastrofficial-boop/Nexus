@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.98 (release estável) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.99 (desenvolvimento; última release estável 1.0.0.98) · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.98-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.99-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -26,9 +26,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual na main — 1.0.0.98
+## Implementação atual na main — 1.0.0.99
 
-A release estável 1.0.0.98 consolida a integração nativa do Design System, a geometria responsiva dos controles e a correção dos tokens semânticos de seleção e inspeção de grupos. O código da `main` corresponde ao pacote publicado; novas alterações de código exigirão uma nova versão antes de serem distribuídas. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A release estável 1.0.0.98 consolida a integração nativa do Design System, a geometria responsiva dos controles e a correção dos tokens semânticos de seleção e inspeção de grupos. A `main` foi rotacionada para a base de desenvolvimento 1.0.0.99; o manifesto permanece na release estável 1.0.0.98 até a próxima publicação. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -46,10 +46,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Build atual da main | 1.0.0.98 (release estável) |
+| Build atual da main | 1.0.0.99 (desenvolvimento) |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A release estável 1.0.0.98 inclui os refinamentos de integração visual e de tokens semânticos do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A release estável 1.0.0.98 inclui os refinamentos de integração visual e de tokens semânticos do Design System; a `main` está na base de desenvolvimento 1.0.0.99. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -137,7 +137,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A última release estável publicada e a versão atual da `main` são **1.0.0.98**. A validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A última release estável publicada é **1.0.0.98**; a base de desenvolvimento atual da `main` é **1.0.0.99**. A validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 

@@ -1,3 +1,8 @@
+## 1.0.0.99 — Em desenvolvimento
+
+- Base de desenvolvimento aberta após a publicação estável 1.0.0.98; ainda não publicada.
+- O manifesto do Foundry permanece apontando para o pacote estável 1.0.0.98 até a próxima release aprovada.
+
 ## 1.0.0.98 — Consistência de seleção e temas
 
 - Unifica a cor de destaque dos grupos selecionados e em inspeção com o token semântico `--nexus-highlight-color`, evitando que regras legadas substituam a paleta ativa.

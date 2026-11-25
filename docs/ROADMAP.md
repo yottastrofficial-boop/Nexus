@@ -8,7 +8,7 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Última release estável publicada: `1.0.0.98` (pacote `nexus.zip` publicado e asset confirmado após CI; validação funcional pendente)
-- Base de versão declarada na main: `1.0.0.98`; o código da main corresponde à release estável publicada.
+- Base de versão declarada na main: `1.0.0.99` (desenvolvimento pós-release); o manifesto continua na versão estável `1.0.0.98`.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
