@@ -20,6 +20,7 @@
       <button type="button" id="nexus-design-tab-typography" data-design-section="typography" role="tab" aria-controls="nexus-design-typography" aria-selected="false" aria-pressed="false">Tipografia</button>
       <button type="button" id="nexus-design-tab-layout" data-design-section="layout" role="tab" aria-controls="nexus-design-layout" aria-selected="false" aria-pressed="false">Layout</button>
       <button type="button" id="nexus-design-tab-accessibility" data-design-section="accessibility" role="tab" aria-controls="nexus-design-accessibility" aria-selected="false" aria-pressed="false">Acessibilidade</button>
+      <button type="button" id="nexus-design-tab-advanced" data-design-section="advanced" role="tab" aria-controls="nexus-design-advanced" aria-selected="false" aria-pressed="false">CSS avançado</button>
     </nav>
 
     <main class="nexus-design-studio-editor">
@@ -85,7 +86,19 @@
         </div>
       </section>
 
-      <section class="nexus-design-studio-section" id="nexus-design-accessibility" data-design-section-panel="accessibility" role="tabpanel" aria-labelledby="nexus-design-tab-accessibility" hidden>
+      <section class="nexus-design-studio-section" id="nexus-design-advanced" data-design-section-panel="advanced" role="tabpanel" aria-labelledby="nexus-design-tab-advanced" hidden>
+<div class="nexus-design-section-heading"><div><h3>Personalização avançada por CSS</h3><p>Edite cada categoria com regras escopadas. A prévia atualiza ao digitar; salvar o perfil persiste as alterações.</p></div></div>
+<div class="nexus-design-css-guidance"><strong>Como funciona</strong><p>Use <code>:scope</code>, <code>:scope:hover</code> e <code>:scope:focus-visible</code>. Há suporte a sombras, transformações, transições e animações NEXUS.</p><small>Seletores globais, URLs externas, imports e código executável são bloqueados. O CSS fica limitado à categoria escolhida.</small></div>
+<div class="nexus-design-css-editors">{{#each componentStyleCategories}}<details class="nexus-design-css-editor"><summary><strong>{{label}}</strong><span>CSS personalizado</span></summary><label><span>Regras CSS para {{label}}</span><textarea rows="9" spellcheck="false" autocomplete="off" data-design-css-path="{{key}}" aria-label="CSS avançado para {{label}}">{{customCss}}</textarea></label><p class="nexus-design-css-error" data-design-css-error="{{key}}" aria-live="polite">Use :scope { ... } para definir o estilo base.</p></details>{{/each}}</div>
+<pre class="nexus-design-css-example"><code>:scope {
+  box-shadow: 0 4px 16px #0005;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+:scope:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px #0007;
+}</code></pre></section>
+<section class="nexus-design-studio-section" id="nexus-design-accessibility" data-design-section-panel="accessibility" role="tabpanel" aria-labelledby="nexus-design-tab-accessibility" hidden>
         <div class="nexus-design-section-heading"><div><h3>Acessibilidade</h3><p>Verificações de contraste são recomendações; o perfil continua editável.</p></div></div>
         <div class="nexus-design-settings-grid">
           <label class="nexus-design-field"><span>Nível de contraste</span><select data-design-path="accessibility.contrast">{{#each contrastChoices}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>

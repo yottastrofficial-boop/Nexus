@@ -1,3 +1,12 @@
+## 1.0.0.104 — CSS avançado no Estúdio de Aparência
+
+- Adiciona modo CSS avançado com edição independente por categoria visual.
+- Permite personalizar estados base, hover, foco e ativo, incluindo sombras, transformações, transições e animações predefinidas.
+- Aplica o CSS em tempo real na prévia e salva no perfil NEXUS-DESIGN/3.
+- Mantém importação compatível com perfis NEXUS-DESIGN/1 e /2.
+- Valida propriedades e seletores permitidos; bloqueia URLs, imports, código executável e seletores globais.
+- A versão 1.0.0.103 permanece como última distribuição estável até a aprovação do CI e publicação do pacote 1.0.0.104.
+
 ## 1.0.0.103 — Estúdio, navegação Minimal UI e ícones
 
 - Corrige a construção do Estúdio de Aparência: opções herdadas e opções recebidas pelo menu do Foundry são copiadas para estruturas mutáveis antes de chegar ao ApplicationV2.

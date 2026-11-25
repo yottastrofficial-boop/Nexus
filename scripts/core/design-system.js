@@ -1,5 +1,6 @@
 import { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES, DESIGN_MODE_CHOICES } from "./design-constants.js";
 import { normalizeDesignProfile, createDefaultDesignProfile, profileToThemeLayout } from "./design-profile.js";
+import { buildDesignCustomCss } from "./design-custom-css.js";
 export { DEFAULT_DESIGN_THEME, DESIGN_THEME_CHOICES, DESIGN_MODE_CHOICES } from "./design-constants.js";
 
 const SYSTEM_ID = "nexus";
@@ -141,6 +142,9 @@ export function installNexusDesignSystem({
         });
       }
     });
+    const customCss = buildDesignCustomCss(resolved.profile.customCss);
+    let style = documentRef?.getElementById?.("nexus-design-custom-css");
+    if (customCss) { if (!style) { style = documentRef?.createElement?.("style"); if (style) { style.id = "nexus-design-custom-css"; (documentRef?.head ?? root).append?.(style); } } if (style) style.textContent = customCss; } else style?.remove?.();
     root.classList?.add("nexus-design-system");
     if (root.dataset) {
       root.dataset.nexusDesignSystem = "true";
