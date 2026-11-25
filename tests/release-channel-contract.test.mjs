@@ -5,70 +5,33 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const workflow = read("../.github/workflows/release.yml");
 const policy = read("../docs/RELEASE_STABILITY_POLICY.md");
 
-assert.match(workflow, /workflow_dispatch:\n\s+inputs:/,
-  "The release workflow must expose an explicit manual action.");
-assert.match(workflow, /release_channel:[\s\S]*?options:[\s\S]*?- validate[\s\S]*?- candidate/,
-  "Manual dispatch must distinguish validation from candidate publication.");
-assert.match(workflow, /candidate_version:[\s\S]*?required: false/,
-  "Candidate version must be an explicit input validated at runtime.");
 assert.ok(workflow.includes(String.raw`const stableMarker = /(?:^|\s)\[release\](?=$|\s)/m;`),
-  "Stable publication must require the exact [release] marker.");
-assert.ok(workflow.includes(String.raw`const candidateMarker = /(?:^|\s)\[candidate\](?=$|\s)/m;`),
-  "A [candidate] push to main must create a testable pre-release without requiring manual Actions access.");
-assert.ok(workflow.includes("ls-remote") && workflow.includes("nextCandidate")
-  && workflow.includes("version = `${system.version}-rc.${nextCandidate}`;"),
-  "A candidate push must increment the RC suffix without reusing an existing immutable tag.");
-assert.ok(workflow.includes("system.manifest = manifestUrl;")
-  && workflow.includes("system.download = downloadUrl;")
-  && workflow.includes("main/manifest.json"),
-  "The candidate ZIP must carry the original main manifest URL and matching release download URL.");
-assert.ok(workflow.includes("Publish Foundry manifest.json for candidate after the package is available")
-  && workflow.includes('path: "manifest.json"'),
-  "A verified candidate must publish through the original main manifest.");
-assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(candidate))`),
-  "Candidate versions must use MAJOR.MINOR.PATCH.BUILD-rc.N.");
-assert.match(workflow, /Versões candidatas só podem ser geradas a partir da main/);
-
-const validationIndex = workflow.indexOf("node tests/run-all.mjs");
-const candidateMetadataIndex = workflow.indexOf("Apply candidate version to package metadata");
-const packageBuildIndex = workflow.indexOf("Build Foundry package");
-assert.ok(validationIndex >= 0 && validationIndex < candidateMetadataIndex && candidateMetadataIndex < packageBuildIndex,
-  "Candidate metadata must be applied only after the unmodified source passes validation.");
-const resolveStep = workflow.slice(workflow.indexOf("Resolve release channel and package version"), validationIndex);
-assert.doesNotMatch(resolveStep, /writeFileSync|system\.version\s*=/,
-  "Resolving a candidate must not mutate the source package before validation.");
-assert.match(workflow, /channel: \$\{\{ steps\.version\.outputs\.channel \}\}/,
-  "The resolved channel must be exposed to the release job.");
-assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable' \|\| needs\.validate\.outputs\.channel == 'candidate'/,
-  "Only explicit stable/candidate channels may publish.");
-assert.match(workflow, /prerelease: \$\{\{ needs\.validate\.outputs\.channel == 'candidate' \}\}/,
-  "Candidate releases must be GitHub pre-releases.");
-assert.match(workflow, /make_latest: \$\{\{ needs\.validate\.outputs\.channel == 'stable' && 'true' \|\| 'false' \}\}/,
-  "Candidate releases must never become the latest stable release.");
+  "A publicação estável deve exigir o marcador exato [release].");
+assert.ok(workflow.includes('channel = "stable";'),
+  "Somente o marcador [release] na main deve habilitar publicação.");
+assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable'/,
+  "Somente o canal estável pode publicar uma release.");
 assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable'\n\s+uses: actions\/github-script@v7/,
-  "Only stable releases may update Foundry's installation manifest.");
-assert.ok(workflow.includes("if: needs.validate.outputs.channel == 'candidate'")
-  && workflow.includes('path: "manifest.json"'),
-  "Candidate releases must publish through manifest.json on main.");
+  "Somente releases estáveis podem atualizar o manifesto do Foundry.");
+assert.match(workflow, /make_latest: \$\{\{ needs\.validate\.outputs\.channel == 'stable' && 'true' \|\| 'false' \}\}/,
+  "A publicação deve marcar a versão estável como latest.");
 assert.match(workflow, /Check existing release[\s\S]*?TARGET_SHA.*GITHUB_SHA[\s\S]*?ASSET_STATE[\s\S]*?uploaded/,
-  "An existing release may be reused only when its tag points to this commit and its ZIP is uploaded.");
+  "Uma release existente só pode ser reutilizada se a tag apontar para o commit e o ZIP estiver enviado.");
 assert.match(workflow, /Publish GitHub Release\n\s+if: steps\.release_state\.outputs\.exists != 'true'/,
-  "A verified existing release must be skipped on a safe workflow rerun.");
+  "Uma release verificada deve ser ignorada em reexecução segura.");
 assert.match(workflow, /overwrite_files: false/,
-  "Published release assets must be immutable.");
-
-assert.match(policy, /## Canais de publicação no GitHub Actions/);
-assert.match(policy, /Release candidata/);
-assert.match(policy, /Release estável/);
-
+  "Os assets publicados devem permanecer imutáveis.");
+assert.doesNotMatch(workflow, /candidate|prerelease|-rc\./i,
+  "O workflow não deve conter canal de candidata ou pré-release.");
+assert.match(policy, /Não há canal de candidata, pré-release/,
+  "A política deve documentar a publicação exclusivamente estável.");
 assert.match(policy, /manifest\.json/);
-assert.ok(policy.includes("[candidate]"));
-
 assert.match(workflow, /\npermissions:\n  contents: read\n\njobs:/,
-  "The workflow default must be read-only.");
+  "As permissões padrão do workflow devem ser somente leitura.");
 assert.match(workflow, /needs: validate\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write/,
-  "Only the publishing job may write repository contents.");
+  "Somente o job de publicação pode gravar no repositório.");
 const validateJob = workflow.slice(workflow.indexOf("  validate:"), workflow.indexOf("  release:"));
-assert.doesNotMatch(validateJob, /contents: write/, "The validation job must not receive write access.");
+assert.doesNotMatch(validateJob, /contents: write/,
+  "O job de validação não deve receber permissão de escrita.");
 
-console.log("NEXUS release channel contract: OK");
+console.log("NEXUS stable-only release contract: OK");
