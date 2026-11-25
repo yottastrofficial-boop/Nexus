@@ -2,7 +2,7 @@ import { NEXUS_LIBRARY_CATALOG } from "../../assets/library/catalog.js";
 import { NEXUS_COMPONENTS as COMPONENTS, normalizeNexusComponentDimension } from "../core/component-types.js";
 import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLayoutOverrides } from "../core/library-models.js";
 import { writeNexusLibraryCollection } from "../core/library-store.js";
-import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyThemeTokens, applyScopedTheme } from "../core/theme.js";
+import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
@@ -3567,7 +3567,7 @@ if (!hasPath) propertyValueInput.value = "";
     portal.style.setProperty("--nexus-accent-color", this._currentLayout?.accentColor ?? "#52647b");
     portal.style.setProperty("--nexus-highlight-color",this._currentLayout?.highlightColor??"#78b7e8");
     portal.style.setProperty("--nexus-button-color",this._currentLayout?.buttonColor??"#315b7d");
-    applyThemeTokens(portal, this._currentLayout ?? DEFAULT_LAYOUT);
+    applyScopedTheme(portal, this._currentLayout ?? DEFAULT_LAYOUT);
     portal.innerHTML = `
       <div class="nexus-floating-left" aria-label="Ferramentas da ficha">
         <div class="nexus-floating-left-rail">
@@ -3739,18 +3739,6 @@ if (!hasPath) propertyValueInput.value = "";
     const openPanel = async (key, { focus = true } = {}) => {
       const panel = panels.get(key);
       if (!panel) return;
-      // A Biblioteca só carrega seu módulo e constrói cartões/prévias quando solicitada.
-      if (key === "library") {
-        try {
-          await this._mountLibrary(panel);
-        } catch (error) {
-          console.error("NEXUS | Falha ao carregar a Biblioteca", error);
-          return;
-        }
-        if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) return;
-        this._libraryApplyFilter?.();
-        this._libraryRestoreSelection?.();
-      }
       const current = this._nexusPanelWindows.get(key);
       if (current) {
         current.setPanel(panel);
@@ -3778,10 +3766,10 @@ if (!hasPath) propertyValueInput.value = "";
         }
         if (floatingGeneration !== this._nexusFloatingGeneration || !portal.isConnected) {
           // A newer sheet render now owns this still-open panel; preserve it.
-          applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+          applyScopedTheme(instance.element, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
           return;
         }
-        applyThemeTokens(instance.element, this._currentLayout ?? DEFAULT_LAYOUT);
+        applyScopedTheme(instance.element, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
         focusPanelWindow(instance);
         syncRailFocus(false);
       }).catch(error => {

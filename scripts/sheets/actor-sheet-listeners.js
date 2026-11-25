@@ -453,7 +453,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       const row=event.currentTarget, groupId=row.dataset.layerGroup;
       if(groupId){const group=(sheet._currentLayout?.groups??[]).find(item=>item.id===groupId);sheet._selectedGroupId=groupId;sheet._setSelection(html,sheet._groupHierarchy?.descendants.get(String(groupId))??group?.componentIds??[]);}
       else sheet._setSelection(html,[row.dataset.layerSelect]);
-      sheet._openInlineEditorPanel?.("component");
+      sheet._openFloatingPanel?.("component");
     });
     // A árvore usa seleção e comandos explícitos; não habilitar HTML drag-and-drop.
     html.find("[data-layer-select], [data-layer-group]").removeAttr("draggable");

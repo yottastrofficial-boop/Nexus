@@ -18,7 +18,7 @@ test("character-sheet tools open detached ApplicationV2 panels from floating rai
   assert.match(sheet, /data-nexus-floating-for/);
   assert.match(sheet, /data-floating-panel/);
   assert.match(listeners, /sheet\._mountFloatingUI\(html\)/);
-  assert.doesNotMatch(listeners, /_openInlineEditorPanel/);
+    assert.doesNotMatch(listeners, /_openInlineEditorPanel/);
   assert.doesNotMatch(canvas, /data-nexus-floating-for|data-floating-panel|nexus-floating/);
   for (const panel of ["settings", "style", "component", "layers", "aliases", "behavior"]) {
     assert.match(template, new RegExp(`data-appearance-panel="${panel}"`));

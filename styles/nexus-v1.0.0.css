@@ -9684,3 +9684,8 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   .nexus-design-studio .nexus-design-studio-target { flex:1 1 auto; justify-content:flex-start; }
   .nexus-design-studio .nexus-design-studio-target label { text-align:left; }
 }
+
+/* The editor portal removes both in-sheet sidebars; the canvas then owns the full workspace. */
+.nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
