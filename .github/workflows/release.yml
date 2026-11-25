@@ -135,7 +135,7 @@ jobs:
 
           const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
           if (!changelog.startsWith(`## ${previous}`)) throw new Error("O CHANGELOG não começa pela versão base esperada.");
-          const notes = `## ${version} — Release candidata\n\n- Build candidata gerada a partir da main para validação no Foundry VTT 14 build 360.\n- Inclui as alterações integradas após a última release estável.\n- Esta candidata não altera o manifesto estável do Foundry.\n\n`;
+          const notes = `## ${version} — Release candidata\n\n- Build candidata gerada a partir da main para validação no Foundry VTT 14 build 360.\n- Inclui as alterações integradas após a última release estável.\n- O pacote candidato utiliza o manifesto original da main e aponta para seu próprio ZIP publicado.\n\n`;
           fs.writeFileSync("CHANGELOG.md", notes + changelog);
           NODE
 
@@ -263,7 +263,7 @@ jobs:
             await github.rest.repos.createOrUpdateFileContents({
               owner: context.repo.owner, repo: context.repo.repo,
               path: "manifest.json",
-              message: `[manifest] Atualiza manifest.json para NEXUS ${version} [candidate]`,
+              message: `[manifest] Atualiza manifest.json para NEXUS ${version}`,
               content: Buffer.from(content, "utf8").toString("base64"),
               ...(sha ? { sha } : {}),
               branch: "main"
