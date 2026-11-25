@@ -1283,27 +1283,41 @@ html.nexus-design-system .nexus-design-surface :is(input:not([type="checkbox"]):
 }
 
 
-/* Minimal UI: Foundry's native vertical tab order becomes left-to-right.
-   Keep the DOM order and native click/selection handlers unchanged. */
+/* Minimal UI — Foundry V14 ApplicationV2 sidebar.
+   The sidebar tabs live inside the ApplicationV2 content wrapper, not as direct
+   children of #sidebar. Keep native tab elements and handlers; only restyle layout. */
 html.nexus-design-system #sidebar {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
 }
-html.nexus-design-system #sidebar > .sidebar-tabs {
+html.nexus-design-system #sidebar > .window-content,
+html.nexus-design-system #sidebar > .application-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html.nexus-design-system #sidebar .sidebar-tabs {
   position: relative;
   inset: auto;
   order: 0;
-  display: flex;
+  display: flex !important;
   flex: 0 0 auto;
-  flex-direction: row;
+  flex-direction: row !important;
   align-items: stretch;
   justify-content: flex-start;
+  gap: 4px;
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  min-height: 36px;
-  height: auto;
+  min-height: 42px;
+  height: 42px;
+  margin: 0;
+  padding: 4px 6px;
   overflow-x: auto;
   overflow-y: hidden;
   border: 0;
@@ -1311,36 +1325,70 @@ html.nexus-design-system #sidebar > .sidebar-tabs {
   background: var(--nexus-foundry-sidebar-bg, var(--nexus-ui-surface));
   scrollbar-width: thin;
 }
-html.nexus-design-system #sidebar > .sidebar-tabs > .item {
+html.nexus-design-system #sidebar .sidebar-tabs > .item {
   position: relative;
   inset: auto;
-  flex: 0 0 36px;
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  height: 36px;
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  box-sizing: border-box;
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  height: 34px;
   margin: 0;
-  border: 0;
-  border-radius: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--nexus-ui-muted);
+  background: transparent;
+  box-shadow: none;
+  text-shadow: none !important;
 }
-html.nexus-design-system #sidebar > .tab.sidebar-tab {
+html.nexus-design-system #sidebar .sidebar-tabs > .item:hover,
+html.nexus-design-system #sidebar .sidebar-tabs > .item:focus-visible {
+  border-color: var(--nexus-ui-border);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item.active {
+  border-color: var(--nexus-ui-accent);
+  color: var(--nexus-ui-text);
+  background: var(--nexus-ui-surface-hover);
+  box-shadow: inset 0 2px var(--nexus-foundry-sidebar-active, var(--nexus-ui-accent));
+}
+html.nexus-design-system #sidebar .sidebar-tabs > .item :is(i, svg) {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  /* Font Awesome / Foundry icon font remains owned by Foundry's own stylesheets. */
+}
+html.nexus-design-system #sidebar .tab.sidebar-tab {
+  position: relative;
+  inset: auto;
   order: 1;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   width: 100%;
   overflow: auto;
-}
-html.nexus-design-system #sidebar > .sidebar-tabs > .item.active {
-  box-shadow: inset 0 2px var(--nexus-foundry-sidebar-active, var(--nexus-ui-accent));
+  color: var(--nexus-ui-text);
+  background: var(--nexus-panel-bg, #172332);
 }
 @media (max-width: 520px) {
-  html.nexus-design-system #sidebar > .sidebar-tabs > .item {
-    flex-basis: 34px;
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
-    min-height: 34px;
+  html.nexus-design-system #sidebar .sidebar-tabs {
+    min-height: 38px;
+    height: 38px;
+  }
+  html.nexus-design-system #sidebar .sidebar-tabs > .item {
+    flex-basis: 32px;
+    width: 32px;
+    min-width: 32px;
+    min-height: 30px;
+    height: 30px;
   }
 }
 
