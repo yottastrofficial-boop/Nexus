@@ -20,11 +20,11 @@ assert.ok(workflow.includes("ls-remote") && workflow.includes("nextCandidate")
   "A candidate push must increment the RC suffix without reusing an existing immutable tag.");
 assert.ok(workflow.includes("system.manifest = manifestUrl;")
   && workflow.includes("system.download = downloadUrl;")
-  && workflow.includes("manifest-preview.json"),
-  "The candidate ZIP must carry its own preview manifest URL and matching release download URL.");
-assert.ok(workflow.includes("Publish candidate Foundry manifest after the package is available")
-  && workflow.includes("manifest-preview.json"),
-  "A verified candidate must expose a separate Foundry test manifest.");
+  && workflow.includes("main/manifest.json"),
+  "The candidate ZIP must carry the original main manifest URL and matching release download URL.");
+assert.ok(workflow.includes("Publish Foundry manifest.json for candidate after the package is available")
+  && workflow.includes('path: "manifest.json"'),
+  "A verified candidate must publish through the original main manifest.");
 assert.ok(workflow.includes(String.raw`if (!/^\d+\.\d+\.\d+\.\d+-rc\.[1-9]\d*$/.test(candidate))`),
   "Candidate versions must use MAJOR.MINOR.PATCH.BUILD-rc.N.");
 assert.match(workflow, /Versões candidatas só podem ser geradas a partir da main/);
@@ -48,8 +48,8 @@ assert.match(workflow, /make_latest: \$\{\{ needs\.validate\.outputs\.channel ==
 assert.match(workflow, /if: needs\.validate\.outputs\.channel == 'stable'\n\s+uses: actions\/github-script@v7/,
   "Only stable releases may update Foundry's installation manifest.");
 assert.ok(workflow.includes("if: needs.validate.outputs.channel == 'candidate'")
-  && workflow.includes("manifest-preview.json"),
-  "Candidate releases must publish a separate test manifest and leave the stable manifest untouched.");
+  && workflow.includes('path: "manifest.json"'),
+  "Candidate releases must publish through manifest.json on main.");
 assert.match(workflow, /Check existing release[\s\S]*?TARGET_SHA.*GITHUB_SHA[\s\S]*?ASSET_STATE[\s\S]*?uploaded/,
   "An existing release may be reused only when its tag points to this commit and its ZIP is uploaded.");
 assert.match(workflow, /Publish GitHub Release\n\s+if: steps\.release_state\.outputs\.exists != 'true'/,
