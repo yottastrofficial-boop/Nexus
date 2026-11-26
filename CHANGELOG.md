@@ -1,3 +1,12 @@
+## 1.0.0.118 — sidebar nativa, foco inteligente e Canvas
+
+- Preserva a estrutura e a geometria nativas da sidebar do Foundry, apresentando os tab buttons como controles individuais no rail, sem convertê-los em conteúdo do painel.
+- Centraliza normalização da seleção e resolução do alvo do Inspector; IDs inválidos e referências obsoletas não alimentam mais os editores.
+- Faz o Estúdio de Aparência usar a mesma classe ApplicationV2 no menu de Configurações e na abertura direta, com referência singleton limpa no fechamento.
+- Corrige a composição de colunas do modo padrão/play para que o Canvas ocupe o workspace, sem colunas editoriais ocultas.
+- Aumenta a altura inicial da ficha de 850 para 900 px e normaliza o dimensionamento interno para reduzir cortes.
+- Adiciona contratos de regressão para foco, sidebar, modo play e abertura do Estúdio.
+
 ## 1.0.0.117 — rails independentes e seleção contextual do inspetor
 
 - Corrige a especificidade do CSS legado que reaplicava superfície de painel ao rail direito; o contêiner agora é explicitamente transparente e somente os botões individuais recebem fundo, borda e sombra.

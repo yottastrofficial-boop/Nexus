@@ -1,3 +1,7 @@
+## 1.0.0.118 — correções estruturais em validação
+
+A versão 1.0.0.118 consolida a navegação da sidebar nativa, normalização e resolução do foco do Inspector, abertura singleton do Estúdio, layout do Canvas no modo play e ajuste da altura padrão da ficha. CI automatizado deve ser concluído antes da distribuição; a validação funcional e visual no Foundry VTT 14 build 360 permanece pendente até o teste manual.
+
 # Visão do projeto NEXUS
 
 ## Estado de referência
@@ -6,7 +10,7 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão estável publicada na `main` e no manifesto: `1.0.0.117` (rails flutuantes e alvo do inspetor corrigidos; validação funcional no Foundry pendente).
+- Versão estável publicada na `main` e no manifesto: `1.0.0.118` (rails flutuantes e alvo do inspetor corrigidos; validação funcional no Foundry pendente).
 - Última versão estável anterior: `1.0.0.115`.
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
@@ -15,7 +19,7 @@
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
-- Estado: projeto em desenvolvimento; a 1.0.0.117 está publicada, mas a validação funcional completa no Foundry ainda precisa ser confirmada.
+- Estado: projeto em desenvolvimento; a 1.0.0.118 está publicada, mas a validação funcional completa no Foundry ainda precisa ser confirmada.
 
 Este documento descreve a implementação observada no repositório e separa recursos presentes, infraestrutura parcial e objetivos futuros. Não substitui os livros oficiais do NEXUS RPG.
 

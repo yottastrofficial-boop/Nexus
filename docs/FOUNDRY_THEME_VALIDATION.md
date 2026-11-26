@@ -1,6 +1,19 @@
+## Regressão 1.0.0.118 — sidebar, foco, Canvas e Estúdio
+
+- [ ] Confirmar que as abas nativas do Foundry continuam fora do conteúdo do painel, em rail vertical próprio, com controles individuais NEXUS.
+- [ ] Confirmar que a largura padrão do painel/sidebar do Foundry não foi alterada além do rail nativo.
+- [ ] Selecionar componentes distintos e confirmar que Propriedades e Comportamento acompanham sempre o alvo atual.
+- [ ] Seleção múltipla e IDs obsoletos não deixam campos apontando para um componente anterior.
+- [ ] Abrir/fechar/reabrir os painéis, trocar layout e re-renderizar sem perda de foco.
+- [ ] Modo padrão/play usa uma única coluna de Canvas; não há colunas vazias nem grid deslocado.
+- [ ] Ficha abre com altura 900 px e o conteúdo inferior permanece acessível; testar redimensionamento.
+- [ ] Estúdio abre pelo menu de Configurações e pelo atalho direto, reutilizando a mesma instância.
+- [ ] Biblioteca de layouts continua acessível nos rails da ficha.
+- [ ] Console sem erros; conferir padding, bordas, rolagem e clipping em conteúdo longo.
+
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão 1.0.0.117. CI (64/64 scripts e 43/43 testes), pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão 1.0.0.118. CI (64/64 scripts e 43/43 testes), pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 
@@ -86,7 +99,7 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - [ ] Verificar console dos dois clientes e ausência de erros novos relacionados ao Design System.
 - [ ] Repetir a troca de tema após fechar e reabrir diretórios e janelas.
 
-## Regressão 1.0.0.117 — rails e inspetor de componentes
+## Regressão 1.0.0.118 — rails e inspetor de componentes
 
 - [ ] Abrir a ficha em modo Aparência e confirmar que o rail esquerdo e o rail direito são irmãos do conteúdo da ficha no DOM, ambos portados para o portal em `document.body`.
 - [ ] Confirmar que o rail direito fica fora da borda da ficha e não se torna uma coluna/sidebar interna ao redimensionar ou mover a janela.

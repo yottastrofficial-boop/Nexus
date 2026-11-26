@@ -1,3 +1,12 @@
+## 1.0.0.118 — correções estruturais
+
+- Restaurar o rail de abas nativo do Foundry com controles individuais, sem alterar a geometria do painel.
+- Centralizar foco e alvo do Inspector com validação de IDs e atualização de Propriedades/Comportamento.
+- Unificar a classe e a instância do Estúdio de Aparência entre Settings e abertura direta.
+- Corrigir grid e dimensões do Canvas no modo play e evitar cortes de conteúdo.
+- CI, pacote, release e manifesto: aguardando execução após commit.
+- Validação visual/funcional no Foundry VTT 14 build 360: necessária após instalação.
+
 # Roadmap NEXUS
 
 Este documento registra prioridades e decisões. Um item só deve ser marcado como concluído quando existir implementação verificável e testes adequados. Testes estáticos não substituem validação funcional no Foundry.
@@ -8,17 +17,17 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão estável publicada na `main` e no manifesto: `1.0.0.117` (correções dos rails flutuantes e do alvo do inspetor).
+- Versão estável publicada na `main` e no manifesto: `1.0.0.118` (correções dos rails flutuantes e do alvo do inspetor).
 - Última versão estável anterior: `1.0.0.115`.
-- Teste manual: a versão `1.0.0.117` precisa confirmar rail direito sem painel, botões individuais, troca/edição de layouts, Biblioteca, seleção e alvo do inspetor, foco, edição de grupos, re-renderização, ícones, fontes, Hotbar/Players e painéis no Foundry VTT 14 build 360.
+- Teste manual: a versão `1.0.0.118` precisa confirmar rail direito sem painel, botões individuais, troca/edição de layouts, Biblioteca, seleção e alvo do inspetor, foco, edição de grupos, re-renderização, ícones, fontes, Hotbar/Players e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
 - A versão .116 mantém a sidebar nativa, destaca os botões de layout em controles flutuantes e remove molduras externas redundantes; não declarar a restauração visual concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A publicação da 1.0.0.117 concluiu CI (64/64 scripts e 43/43 arquivos de teste), geração/validação do ZIP, release e sincronização do manifesto. A validação funcional no Foundry real permanece pendente.
+- A publicação da 1.0.0.118 concluiu CI (64/64 scripts e 43/43 arquivos de teste), geração/validação do ZIP, release e sincronização do manifesto. A validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
-## Versão 1.0.0.117 — correção dos rails e do inspetor
+## Versão 1.0.0.118 — correção dos rails e do inspetor
 
 - Corrigir a especificidade de estilos legados que reaplicavam superfície ao rail direito; manter o contêiner transparente e cada botão com superfície individual.
 - Unificar o alvo do inspetor com a seleção atual e limpar referências de componentes obsoletas.
