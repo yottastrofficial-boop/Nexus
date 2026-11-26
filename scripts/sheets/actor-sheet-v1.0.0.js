@@ -3265,7 +3265,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const normalizedSelection = normalizeSheetSelection(ids, components);
     this._selectedIds = new Set(normalizedSelection);
     if (normalizedSelection.length === 1) this._componentEditorTargetId = normalizedSelection[0];
-    else if (normalizedSelection.length > 1) this._componentEditorTargetId = null;
+    else this._componentEditorTargetId = null;
     const sheetRoot = this.element?.querySelector?.(".nexus-sheet") ?? html?.[0] ?? this.element;
     const componentNodes = sheetRoot?.querySelectorAll?.(".nexus-component") ?? [];
     const groups = this._currentLayout?.groups ?? [];

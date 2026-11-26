@@ -64,12 +64,19 @@ test("floating right rail is a body portal with independent controls and no lega
 });
 
 test("component inspector follows current selection and uses the floating ApplicationV2 panel", () => {
-  assert.match(sheet, /normalizeSheetSelection\(ids, components\)/);
-  assert.match(sheet, /resolveSheetFocusTarget\(/);
+  assert.match(sheet, /else this\._componentEditorTargetId = null/);
   assert.match(sheet, /this\._componentEditorTargetId = one\?\.id \?\? null/);
   assert.match(sheet, /else delete field\.dataset\.componentTargetId/);
   assert.match(listeners, /const getInspectorComponentId = \(\) =>/);
   assert.doesNotMatch(listeners, /dataset\.componentTargetId \|\| sheet\._componentEditorTargetId \|\|/);
   assert.match(canvas, /sheet\._openFloatingPanel\?\.\("component"\)/);
   assert.doesNotMatch(canvas, /_openInlineEditorPanel/);
+});
+
+test("V14 tab rail uses native nested controls without replacing Foundry geometry", () => {
+  assert.match(designSystem, /#sidebar-tabs menu > li > button\[role="tab"\]/);
+  assert.doesNotMatch(designSystem, /#sidebar-tabs > \.sidebar-tab/);
+  assert.doesNotMatch(designSystem, /#sidebar-tabs\s*\{[^}]*width:\s*40px/s);
+  assert.doesNotMatch(designSystem, /#sidebar\s*\{[^}]*display:\s*flex/s);
+  assert.match(designSystem, /nexus-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) !important/);
 });
