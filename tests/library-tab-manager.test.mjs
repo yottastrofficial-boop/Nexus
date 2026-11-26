@@ -61,3 +61,16 @@ test("tab snapshots can be reconciled after folder deletion", () => {
   manager.activate(first.id);
   assert.equal(manager.getActiveState().folder, "");
 });
+
+test("deleting a folder prunes stale history without moving the active entry", () => {
+  const manager = createLibraryTabManager({ folder: "" });
+  manager.recordNavigation({ folder: "actors" });
+  manager.recordNavigation({ folder: "actors/npcs" });
+  manager.recordNavigation({ folder: "items" });
+  manager.back();
+  manager.clearFolderReferences(["actors", "actors/npcs"]);
+  assert.deepEqual(manager.getActiveState().folder, "");
+  assert.deepEqual(manager.back(), { smartView: "all", folder: "", collectionId: "" });
+  assert.equal(manager.canForward(), true);
+  assert.deepEqual(manager.forward(), { smartView: "all", folder: "items", collectionId: "" });
+});
