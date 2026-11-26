@@ -188,3 +188,11 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Mídia respeita a largura disponível e tabelas extensas rolam dentro da mensagem.
 - CI e empacotamento automatizados devem ser confirmados na publicação desta versão.
 - **Validação manual pendente:** chat estreito/largo, mídia, tabelas, compositor e rolagem no Foundry VTT 14 build 360. Não declarar estabilidade funcional antes do teste no cliente real.
+
+
+## 1.0.0.120 — interação e isolamento do tema
+
+- Estado canônico de seleção, grupo, Inspector e painel ativo com testes unitários.
+- Configurações nativas isoladas dos estilos genéricos de aplicação.
+- Ficha 800 × 800 e Canvas padrão em coluna única preservados.
+- Validação manual no Foundry VTT 14 pendente.

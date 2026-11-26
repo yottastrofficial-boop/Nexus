@@ -206,9 +206,13 @@ export function installNexusDesignSystem({
     const isCoreConfiguration = CORE_CONFIGURATION_NAMES.has(name);
     const preserveNativeFoundry = getEffectiveTheme().theme === "foundry";
     if (preserveNativeFoundry && !isNexusApplication) return;
-    if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName) && !isCoreConfiguration) return;
+    if (isCoreConfiguration) {
+      element?.classList?.add("nexus-themed-application");
+      element?.classList?.add("nexus-themed-configuration");
+      return;
+    }
+    if (!isNexusApplication && !CORE_DIRECTORY_NAMES.has(name) && !CORE_TAB_NAMES.has(tabName)) return;
     element?.classList?.add("nexus-themed-application");
-    if (isCoreConfiguration) element?.classList?.add("nexus-themed-configuration");
     if (CORE_DIRECTORY_NAMES.has(name) || ["actors", "cards", "items", "journal", "macros", "playlists", "rolltables", "scenes", "compendium"].includes(tabName)) {
       element?.classList?.add("nexus-themed-directory");
     }

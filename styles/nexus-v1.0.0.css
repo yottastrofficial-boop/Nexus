@@ -109,8 +109,6 @@
 .nexus-canvas { background-color:var(--nexus-canvas-color,#171f2a); }
 .nexus-component { background:var(--nexus-card-color,#273443); border-color:var(--nexus-accent-color,#52647b); }
 .nexus-component.is-selected { outline-color:var(--nexus-accent-color,#a9c9ef); }
-.nexus-sheet[data-mode="play"] .nexus-workspace,.nexus-sheet[data-mode="config"] .nexus-workspace { grid-template-columns:minmax(0,1fr) 78px; }
-.nexus-sheet[data-mode="play"] .nexus-sidebar-right,.nexus-sheet[data-mode="config"] .nexus-sidebar-right { display:flex; }
 .nexus-sheet[data-mode="play"] .nexus-nav-tools,.nexus-sheet[data-mode="config"] .nexus-nav-tools { display:none; }
 @media (max-width:1100px) { .nexus-sheet[data-mode="appearance"] .nexus-workspace { grid-template-columns:260px minmax(0,1fr) 68px; }.nexus-appearance-rail { flex-basis:40px; } }
 
@@ -8752,9 +8750,13 @@ html.nexus-design-system[data-nexus-theme-appearance="light"] .nexus-themed-appl
   color-scheme: light;
 }
 
-html.nexus-design-system #sidebar,
-html.nexus-design-system #sidebar .sidebar-tab,
-html.nexus-design-system #sidebar .sidebar-tabs {
+/* The #sidebar container (which also holds the floating tab column) stays unpainted:
+   only the content panes receive the themed surface. */
+html.nexus-design-system #sidebar {
+  color: var(--nexus-foundry-sidebar-text);
+  font-size: var(--nexus-font-size, 13px);
+}
+html.nexus-design-system #sidebar .sidebar-tab {
   color: var(--nexus-foundry-sidebar-text);
   background: var(--nexus-foundry-sidebar-bg);
   border-color: var(--nexus-foundry-sidebar-border);
@@ -9901,7 +9903,6 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
 
 /* Foundry 14 owns Font Awesome family, weight and glyph mapping. */
 /* O tema minimalista reduz molduras nos wrappers, sem eliminar divisores internos. */
-html.nexus-design-system #sidebar,
 html.nexus-design-system #navigation,
 html.nexus-design-system #hotbar,
 html.nexus-design-system #players,

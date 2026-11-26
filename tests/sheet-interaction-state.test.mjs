@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import { createSheetInteractionState } from "../scripts/sheets/sheet-interaction-state.js";
+const components=[{id:"a"},{id:"b"}],groups=[{id:"g"}];
+const state=createSheetInteractionState({getComponents:()=>components,getGroups:()=>groups});
+state.setSelection(["a"]);assert.deepEqual(state.snapshot().selectedIds,["a"]);assert.equal(state.snapshot().inspectorTargetId,"a");
+state.setSelection(["a","b"]);assert.equal(state.snapshot().inspectorTargetId,null);
+state.setSelection(["a"],{groupId:"g"});assert.equal(state.snapshot().selectedGroupId,"g");
+state.setActivePanel("component");assert.equal(state.snapshot().activePanelKey,"component");
+components.splice(0,1);state.reconcile();assert.deepEqual(state.snapshot().selectedIds,[]);assert.equal(state.snapshot().inspectorTargetId,null);
+state.clear();assert.equal(state.snapshot().activePanelKey,null);
+console.log("Sheet interaction state contracts passed");

@@ -144,3 +144,8 @@ Commit de correção na `main`: `417acb4f663ba328e30f28db70ab976af0f18669`. A im
 ## Pacote 1.0.0.107 — validação manual do sidebar
 
 A versão `1.0.0.107` foi publicada com CI e empacotamento aprovados, asset `nexus.zip` confirmado e manifesto sincronizado. O pacote destina-se ao teste manual no Foundry VTT 14 build 360: navegação horizontal, preservação dos ícones nativos, troca de abas e exibição dos painéis de conteúdo. A publicação não comprova funcionamento no cliente real; o último checkpoint funcional confirmado permanece `1.0.0.70` até o retorno do teste.
+
+
+## Estado de interação centralizado — 1.0.0.120
+
+A ficha delega seleção, grupo, alvo do Inspector e painel ativo a `sheet-interaction-state.js`. Accessors de compatibilidade mantêm fluxos legados conectados à mesma fonte. Janelas nativas de Configurações recebem escopo visual próprio e não herdam resets genéricos das aplicações NEXUS.

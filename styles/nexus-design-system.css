@@ -1028,7 +1028,7 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene:fo
 
 /* Global Foundry presentation: shared theme tokens, native behavior preserved. */
 html.nexus-design-system:not([data-nexus-theme="foundry"]) body,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, .application, .window-app, .application .window-content, .window-app .window-content) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls) {
   font-family: var(--nexus-font-family, system-ui, sans-serif);
 }
 /* Keep the selected profile font on ordinary controls, but never inherit it
@@ -1155,7 +1155,7 @@ html.nexus-design-system .nexus-design-studio-section[hidden] { display: none !i
 html.nexus-design-system .nexus-sheet .nexus-workspace {
   display: grid !important;
   position: relative !important;
-  grid-template-columns: minmax(0, 1fr) 72px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   min-width: 0;
 }
 html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
@@ -1182,10 +1182,6 @@ html.nexus-design-system .nexus-sheet .nexus-layout-tab:is(:hover, :focus-visibl
 }
 html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-sidebar-left,
 html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-sidebar-left { display: none !important; }
-html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-workspace,
-html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-workspace {
-  grid-template-columns: minmax(0, 1fr) 72px !important;
-}
 
 /* Chat scroll, composer and controls share the active panel surface. */
 html.nexus-design-system :is(#chat, .chat-sidebar, #chat-log, .chat-log, .chat-scroll, #chat-form, .chat-form, #chat-controls, .chat-controls) {
@@ -1456,3 +1452,14 @@ html.nexus-design-system .nexus-sheet .nexus-canvas-scroll {
   min-height: 0;
   box-sizing: border-box;
 }
+/* Standard and configuration modes fit the fixed-size Canvas into the window (see canvas-fit.js). */
+html.nexus-design-system .nexus-sheet:is([data-mode="play"], [data-mode="config"]) .nexus-canvas {
+  transform: scale(var(--nexus-fit-scale, 1)) translateZ(0);
+  transform-origin: center center;
+}
+
+/* Core configuration windows receive palette tokens without inheriting NEXUS app resets. */
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration { color:var(--nexus-ui-text); font-family:var(--nexus-font-family,system-ui,sans-serif); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(.window-header,.window-content,.application-content) { color:var(--nexus-ui-text); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { color:var(--nexus-ui-text); background:var(--nexus-ui-field); border-color:var(--nexus-ui-border); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(button,.button) { color:var(--nexus-ui-text); background:var(--nexus-ui-surface); border-color:var(--nexus-ui-border); }
