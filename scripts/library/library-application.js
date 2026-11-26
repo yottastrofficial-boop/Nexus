@@ -363,12 +363,12 @@ export function createLibraryApplicationClass({
         const isInspector = type === "inspector";
         const min = isInspector ? 210 : 150;
         const max = isInspector ? 480 : 420;
-        handle.setAttribute("role", "slider");
+        handle.setAttribute("role", "separator");
         handle.setAttribute("tabindex", "0");
         handle.setAttribute("aria-valuemin", String(isInspector ? 180 : min));
         handle.setAttribute("aria-valuemax", String(isInspector ? 620 : max));
         handle.setAttribute("aria-orientation", isInspector && isNarrowViewport() ? "horizontal" : "vertical");
-        handle.setAttribute("aria-valuenow", String(isInspector ? this._panelSizes.inspector : this._panelSizes.navigation));
+        handle.setAttribute("aria-valuenow", String(isInspector ? (isNarrowViewport() ? this._panelSizes.inspectorHeight : this._panelSizes.inspector) : this._panelSizes.navigation));
         const start = event => {
           const isVertical = isInspector && isNarrowViewport();
           const dimension = isVertical ? "y" : "x";
@@ -404,7 +404,6 @@ export function createLibraryApplicationClass({
           const step = event.shiftKey ? 32 : 12;
           if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
           const isVertical = isInspector && isNarrowViewport();
-          const dimension = isVertical ? "y" : "x";
           const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
           const minimum = sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180;
           const maximum = sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620;
@@ -578,8 +577,8 @@ export function createLibraryApplicationClass({
         const selectedName = selectedButton?.querySelector("strong")?.textContent?.trim() || "";
         const selectedResource = Boolean(selectedCard && detail.dataset.selectedResource);
         const selectedFolder = !selectedResource && Boolean(this._state.folder);
-        const canRenameResource = Boolean(detail.querySelector('[data-library-action="edit-metadata"]'));
-        const canDeleteResource = Boolean(detail.querySelector('[data-library-action="delete"]'));
+        const canRenameResource = selectedResource;
+        const canDeleteResource = selectedResource;
         const selected = selectedResource || selectedFolder;
         const labels = {
           cut: selected,
@@ -1167,7 +1166,9 @@ export function createLibraryApplicationClass({
             refreshFolders(); refreshBreadcrumbsAfterRename();
             await render();
           } else {
-            detail.querySelector('[data-library-action="edit-metadata"]')?.click();
+            const action = detail.querySelector('[data-library-action="edit-metadata"]');
+            if (!action) { notify("warn", "Este recurso não oferece edição de metadados."); return; }
+            action.click();
           }
         } catch (error) { notify("warn", error.message); }
       });
@@ -1194,13 +1195,15 @@ export function createLibraryApplicationClass({
               const active = this._tabManager.getActive();
               if (tab.id === active.id) continue;
               // Inactive tab snapshots are updated below through the manager API.
-              const snapshot = this._tabManager.getTabState?.(tab.id);
+              const snapshot = this._tabManager.getTabState(tab.id);
               if (snapshot && descendants.has(snapshot.folder)) snapshot.folder = "";
             }
             refreshFolders(); refreshBreadcrumbsAfterRename();
             await render();
           } else {
-            detail.querySelector('[data-library-action="delete"]')?.click();
+            const action = detail.querySelector('[data-library-action="delete"]');
+            if (!action) { notify("warn", "Este recurso não oferece exclusão pela Biblioteca."); return; }
+            action.click();
           }
         } catch (error) { notify("warn", error.message); }
       });
