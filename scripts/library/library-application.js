@@ -437,6 +437,7 @@ export function createLibraryApplicationClass({
         return "Biblioteca";
       };
       const updateTabTitle = () => this._tabManager.renameActive(getTabTitle(this._state));
+      const refreshBreadcrumbsAfterRename = () => renderBreadcrumbs();
       const renderBreadcrumbs = () => {
         if (!breadcrumbs) return;
         breadcrumbs.replaceChildren();
@@ -570,17 +571,47 @@ export function createLibraryApplicationClass({
         const currentFolder = normalizeLibraryPreferences(this._getPreferences()).folders.find(folder => folder.id === this._state.folder);
         if (up) up.disabled = !currentFolder;
       };
+      const updateCommandbar = () => {
+        const status = root.querySelector("[data-library-commandbar-status]");
+        const selectedButton = container.querySelector(".nexus-library-generic-item.is-selected");
+        const selectedCard = selectedButton?.closest("[data-library-resource-key]");
+        const selectedName = selectedButton?.querySelector("strong")?.textContent?.trim() || "";
+        const selectedResource = Boolean(selectedCard && detail.dataset.selectedResource);
+        const selectedFolder = !selectedResource && Boolean(this._state.folder);
+        const canRenameResource = Boolean(detail.querySelector('[data-library-action="edit-metadata"]'));
+        const canDeleteResource = Boolean(detail.querySelector('[data-library-action="delete"]'));
+        const selected = selectedResource || selectedFolder;
+        const labels = {
+          cut: selected,
+          copy: selected,
+          paste: Boolean(this._libraryClipboard),
+          rename: selectedFolder || (selectedResource && canRenameResource),
+          delete: selectedFolder || (selectedResource && canDeleteResource)
+        };
+        for (const [command, enabled] of Object.entries(labels)) {
+          const button = root.querySelector('[data-library-command="' + command + '"]');
+          if (button) button.disabled = !enabled;
+        }
+        if (status) {
+          status.textContent = selectedResource ? "Selecionado: " + (selectedName || "Recurso")
+            : selectedFolder ? "Pasta: " + (normalizeLibraryPreferences(this._getPreferences()).folders.find(item => item.id === this._state.folder)?.name ?? "Pasta")
+              : this._libraryClipboard ? "Item pronto para colar" : "Nenhum item selecionado";
+        }
+      };
       const renderChrome = () => {
         updateTabTitle();
         renderTabs();
         renderBreadcrumbs();
         syncNavigationButtons();
+        updateCommandbar();
       };
       const render = async () => {
         this._tabManager.setActiveState(this._state);
         this._tabManager.recordNavigation(currentLocation());
         renderChrome();
-        return this._explorer?.render({ ...this._state });
+        const result = await this._explorer?.render({ ...this._state });
+        updateCommandbar();
+        return result;
       };
       const applyHistoryLocation = async location => {
         if (!location) return;
@@ -1055,6 +1086,123 @@ export function createLibraryApplicationClass({
             await render();
           }}
         ]);
+      });
+
+      resourceContainer?.addEventListener("click", () => updateCommandbar());
+      folderNav?.addEventListener("click", () => queueMicrotask(updateCommandbar));
+
+      const selectedResourceCard = () => {
+        const selected = resourceContainer?.querySelector(".nexus-library-generic-item.is-selected");
+        return selected?.closest("[data-library-resource-key]") ?? null;
+      };
+      const setClipboard = mode => {
+        const card = selectedResourceCard();
+        if (card) {
+          const resourceKey = card.dataset.libraryResourceKey;
+          let reference = {};
+          try { reference = JSON.parse(card.dataset.libraryReference || "{}"); } catch {}
+          const name = card.querySelector(".nexus-library-generic-item strong")?.textContent?.trim() || "Recurso";
+          this._libraryClipboard = {
+            type: "resource", resourceKey,
+            reference: getLibraryCatalogPreferenceReference(resourceKey),
+            name, mode
+          };
+        } else if (this._state.folder) {
+          this._libraryClipboard = { type: "folder", folderId: this._state.folder, mode };
+        } else return;
+        notify("info", mode === "copy" ? "Item copiado para a Biblioteca." : "Item recortado. Escolha uma pasta e use Colar.");
+        updateCommandbar();
+      };
+      const pasteClipboard = async () => {
+        const clipboard = this._libraryClipboard;
+        if (!clipboard) return;
+        const targetFolderId = this._state.folder || "";
+        let preferences = normalizeLibraryPreferences(this._getPreferences());
+        if (clipboard.type === "folder") {
+          if (clipboard.mode === "copy") {
+            preferences = duplicateLibraryFolderTree(preferences, clipboard.folderId, {
+              parentId: targetFolderId,
+              idPrefix: "copy-" + (globalThis.foundry?.utils?.randomID?.(5) ?? "nexus")
+            }).preferences;
+          } else {
+            preferences = moveLibraryFolder(preferences, clipboard.folderId, targetFolderId);
+            this._libraryClipboard = null;
+          }
+        } else if (clipboard.type === "resource") {
+          if (clipboard.mode === "copy") {
+            preferences = createLibraryShortcut(preferences, {
+              name: clipboard.name + " (atalho)",
+              resourceKey: clipboard.resourceKey,
+              reference: clipboard.reference,
+              folderId: targetFolderId
+            }).preferences;
+          } else {
+            const separator = clipboard.resourceKey.indexOf(":");
+            if (separator <= 0) throw new Error("Referência copiada inválida.");
+            preferences = assignLibraryEntryFolder(preferences, clipboard.resourceKey.slice(0, separator), clipboard.resourceKey.slice(separator + 1), targetFolderId);
+            this._libraryClipboard = null;
+          }
+        }
+        await this._savePreferences(preferences);
+        refreshFolders(); refreshShortcuts();
+        await render();
+        updateCommandbar();
+      };
+      root.querySelector('[data-library-command="cut"]')?.addEventListener("click", () => setClipboard("move"));
+      root.querySelector('[data-library-command="copy"]')?.addEventListener("click", () => setClipboard("copy"));
+      root.querySelector('[data-library-command="paste"]')?.addEventListener("click", async () => {
+        try { await pasteClipboard(); }
+        catch (error) { notify("warn", error.message); }
+      });
+      root.querySelector('[data-library-command="rename"]')?.addEventListener("click", async () => {
+        try {
+          if (this._state.folder && !selectedResourceCard()) {
+            const current = normalizeLibraryPreferences(this._getPreferences());
+            const folder = current.folders.find(item => item.id === this._state.folder);
+            if (!folder) return;
+            const result = await promptLibraryValue("Renomear pasta", [{ name: "name", label: "Novo nome", value: folder.name, maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            await this._savePreferences(renameLibraryFolder(current, folder.id, name));
+            refreshFolders(); refreshBreadcrumbsAfterRename();
+            await render();
+          } else {
+            detail.querySelector('[data-library-action="edit-metadata"]')?.click();
+          }
+        } catch (error) { notify("warn", error.message); }
+      });
+      root.querySelector('[data-library-command="delete"]')?.addEventListener("click", async () => {
+        try {
+          if (this._state.folder && !selectedResourceCard()) {
+            const folderId = this._state.folder;
+            const current = normalizeLibraryPreferences(this._getPreferences());
+            const descendants = new Set([folderId]);
+            let changed = true;
+            while (changed) {
+              changed = false;
+              for (const item of current.folders) {
+                if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) {
+                  descendants.add(item.id); changed = true;
+                }
+              }
+            }
+            const accepted = await confirmLibraryAction("Excluir pasta", "<p>A pasta e suas subpastas serão removidas da organização. Os recursos continuarão na Biblioteca.</p>");
+            if (!accepted) return;
+            await this._savePreferences(removeLibraryFolder(current, folderId));
+            if (descendants.has(this._state.folder)) this._state.folder = "";
+            for (const tab of this._tabManager.getTabs()) {
+              const active = this._tabManager.getActive();
+              if (tab.id === active.id) continue;
+              // Inactive tab snapshots are updated below through the manager API.
+              const snapshot = this._tabManager.getTabState?.(tab.id);
+              if (snapshot && descendants.has(snapshot.folder)) snapshot.folder = "";
+            }
+            refreshFolders(); refreshBreadcrumbsAfterRename();
+            await render();
+          } else {
+            detail.querySelector('[data-library-action="delete"]')?.click();
+          }
+        } catch (error) { notify("warn", error.message); }
       });
 
       root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
