@@ -457,7 +457,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     ];
   };
 
-  const executeAction = async (actionId, reference, params = {}) => {
+  const executeAction = async (actionId, reference, resourceOrParams = {}, explicitParams = undefined) => {\n    const params = explicitParams ?? resourceOrParams ?? {};
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     const collection = String(reference?.collection ?? "");
