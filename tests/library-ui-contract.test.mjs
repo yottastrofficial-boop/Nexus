@@ -6,6 +6,7 @@ const styles = readFileSync(new URL("../styles/nexus-universal-library.css", imp
 const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
+const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
 
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
@@ -53,3 +54,16 @@ assert.ok(libraryApplication.includes('root.querySelector(".nexus-library-action
   "The backup menu must close after an action, with Escape and when focus leaves it.");
 
 console.log("NEXUS universal library UI contract: OK");
+
+assert.ok(libraryApplication.includes("await DialogV2.input("),
+  "DialogV2 input helpers must be invoked through their class to preserve the static receiver.");
+assert.ok(libraryApplication.includes("await DialogV2.confirm("),
+  "DialogV2 confirmation helpers must preserve their static receiver.");
+assert.ok(!libraryApplication.includes("const input = globalThis.foundry?.applications?.api?.DialogV2?.input") &&
+  !libraryApplication.includes("const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input") &&
+  !libraryApplication.includes("const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm"),
+  "DialogV2 static helpers must not be detached from their class.");
+assert.ok(catalogExplorer.includes("thumbnailInput"),
+  "Saved Library resources must expose a custom thumbnail metadata field.");
+assert.ok(styles.includes(".nexus-library-search-wrap > .nexus-library-search"),
+  "The search input must not render a second nested surface.");

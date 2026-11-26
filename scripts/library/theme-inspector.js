@@ -70,8 +70,8 @@ export function getLibraryDesignProfilePreviewModel(raw) {
 export function createLibraryThemeApplicationAdapter({
   getDesign = () => globalThis.game?.nexus?.design,
   confirm = options => {
-    const handler = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
-    return typeof handler === "function" ? handler(options) : null;
+    const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+    return typeof DialogV2?.confirm === "function" ? DialogV2.confirm(options) : null;
   }
 } = {}) {
   const canApplyTheme = (resource, resolved, scope) => {

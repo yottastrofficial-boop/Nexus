@@ -18,11 +18,11 @@ As visões Todos os itens, Favoritos e Recentes agregam conteúdo salvo. Os elem
 
 ## Cartões e Inspector
 
-Os cartões seguem uma estrutura comum de prévia, título, metadado e estado de favorito. A prévia usa dados inertes e não executa HTML, CSS, JavaScript ou expressões importadas.
+Os cartões seguem uma estrutura comum de prévia, título, metadado e estado de favorito. A área de prévia possui altura uniforme; temas mostram amostras de paleta e recursos pessoais podem usar uma imagem personalizada. A prévia usa dados inertes e não executa HTML, CSS, JavaScript ou expressões importadas.
 
 O Inspector genérico permite:
 - consultar prévias contextuais seguras;
-- editar nome, descrição e etiquetas;
+- editar nome, descrição, etiquetas e miniatura personalizada segura (URL HTTP(S) ou caminho relativo);
 - atribuir ou remover pasta;
 - duplicar uma definição com identidade nova;
 - excluir uma definição, removendo também seus metadados de favorito/recente/pasta.
@@ -150,3 +150,8 @@ Ações de aplicação são separadas por ownership:
 - A Biblioteca continua pessoal; a ação copia o perfil validado para as configurações Foundry existentes e não compartilha a coleção do usuário.
 
 O adaptador é compartilhado pela janela independente e pela visão embutida na ficha. A prévia não é uma captura pixel-perfect de todas as aplicações Foundry; é uma amostra comparativa dos tokens e componentes semânticos do perfil.
+
+
+## Fontes estruturadas e criação assistida de personagens
+
+A futura criação assistida deverá ser construída sobre adaptadores de transferência, com registros JSON tipados, versão de schema, validação, prévia e confirmação. A origem não poderá executar código nem gravar diretamente no Actor. O destino da ficha será responsável por mapear os campos aceitos, mostrar conflitos e aplicar somente após confirmação. Os schemas e adaptadores concretos ainda não fazem parte da implementação atual.

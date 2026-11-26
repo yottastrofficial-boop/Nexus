@@ -81,3 +81,7 @@ test("V14 native tab controls are styled without rebuilding the Foundry sidebar"
   assert.doesNotMatch(designSystem, /#sidebar\s*\{[^}]*display:\s*flex/s);
   assert.match(designSystem, /grid-template-columns: minmax\(0, 1fr\) !important/);
 });
+
+test("default actor sheet uses the requested additional 36px of vertical room", () => {
+  assert.match(sheet, /position: \{ width: 800, height: 836 \}/);
+});

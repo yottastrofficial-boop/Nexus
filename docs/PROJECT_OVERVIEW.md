@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.121
+
+A revisão atual corrige fluxos de diálogo e apresentação da Biblioteca, adiciona miniaturas personalizadas seguras e aumenta a altura inicial da ficha para 836 px. CI e pacote precisam passar; a validação funcional/visual no Foundry VTT 14 build 360 permanece pendente.
+
 ## Estado candidato 1.0.0.119
 A revisão sobre a .118 restaura a geometria da sidebar nativa do Foundry V14, corrige os seletores dos botões de navegação, elimina a coluna fantasma do Canvas e limpa o alvo do Inspector ao remover a seleção. CI e avaliação manual no Foundry 14 build 360 são gates; a publicação não substitui o teste funcional.
 

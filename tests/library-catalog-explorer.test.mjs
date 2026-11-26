@@ -118,7 +118,9 @@ test("GM can select visible supported compendiums without a player permission ch
 
 assert.equal(getLibraryResourceIcon({ kind: "document", type: "actors" }), "fa-solid fa-user");
 assert.equal(getLibraryResourceIcon({ kind: "logic", type: "rule" }), "fa-solid fa-scale-balanced");
+
 assert.equal(getLibraryResourceIcon({ kind: "media" }), "fa-solid fa-photo-film");
+
 
 const imageResource = { kind: "media", reference: { collection: "media" }, thumbnail: "maps/region.webp", name: "Mapa" };
 const imagePreview = getLibraryResourcePreviewModel(imageResource, { path: "maps/region.webp", mimeType: "image/webp" });

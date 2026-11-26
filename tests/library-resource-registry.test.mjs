@@ -91,7 +91,30 @@ const metadataResult = await nexusProvider.executeAction("edit-metadata", compon
   description: "Metadados atualizados",
   tags: ["ficha", "vitalidade"]
 });
+
 assert.equal(metadataResult.entry.name, "Indicador de vitalidade");
+const thumbnailResult = await nexusProvider.executeAction("edit-metadata", componentReference, metadataResult.entry, {
+  name: metadataResult.entry.name,
+  description: metadataResult.entry.description,
+  tags: metadataResult.entry.tags,
+  thumbnail: "assets/library/custom-preview.webp"
+});
+assert.equal(thumbnailResult.entry.thumbnail, "assets/library/custom-preview.webp");
+await assert.rejects(
+  nexusProvider.executeAction("edit-metadata", componentReference, thumbnailResult.entry, {
+    name: thumbnailResult.entry.name, thumbnail: "javascript:alert(1)"
+  }),
+  /URL HTTP\(S\) válida ou um caminho relativo seguro/
+);
+const themePreviewProvider = createNexusLibraryProvider({
+  getUser: () => user,
+  catalog: { assets: [], themes: [{ id: "preview-theme", name: "Tema de teste", palette: { panel: "#123456", accent: "#abcdef", unsafe: "red" } }] }
+});
+const themePreview = (await themePreviewProvider.list({ kind: "theme" })).items.find(item => item.reference?.key === "preview-theme");
+assert.deepEqual(themePreview.previewColors, [
+  { label: "panel", value: "#123456" }, { label: "accent", value: "#abcdef" }
+]);
+
 const duplicateResult = await nexusProvider.executeAction("duplicate", componentReference);
 assert.equal(duplicateResult.duplicated, true);
 assert.notEqual(duplicateResult.entry.id, "component-health");

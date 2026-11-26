@@ -259,9 +259,9 @@ export function createLibraryApplicationClass({
           : "<p>Nenhum item novo será adicionado.</p>") +
           (skipped ? "<p>" + skipped + " item(ns) em conflito serão preservados sem sobrescrita.</p>" : "<p>Nenhum conflito foi encontrado.</p>") +
           "<p>O conteúdo será validado e não será executado durante a importação.</p>";
-        const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
-        if (typeof confirm !== "function") throw new Error("O diálogo de confirmação do Foundry não está disponível.");
-        const accepted = await confirm({
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.confirm !== "function") throw new Error("O diálogo de confirmação do Foundry não está disponível.");
+        const accepted = await DialogV2.confirm({
           window: { title: "Prévia da importação da Biblioteca" },
           content,
           yes: { label: "Importar" },
@@ -323,10 +323,10 @@ export function createLibraryApplicationClass({
       });
 
       root.querySelector("[data-library-backup-import-code]")?.addEventListener("click", async () => {
-        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
-        if (typeof input !== "function") return;
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.input !== "function") return;
         try {
-          const result = await input({
+          const result = await DialogV2.input({
             window: { title: "Importar backup da Biblioteca" },
             content: '<label>Código JSON<textarea name="code" rows="10" spellcheck="false"></textarea></label>',
             ok: { label: "Validar backup" },
@@ -509,10 +509,10 @@ export function createLibraryApplicationClass({
         const current = normalizeLibraryPreferences(this._getPreferences());
         const folder = current.folders.find(item => item.id === folderId);
         if (!folder) return;
-        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
-        if (typeof input !== "function") return;
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.input !== "function") return;
         try {
-          const result = await input({
+          const result = await DialogV2.input({
             window: { title: "Gerenciar pasta" },
             content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
             ok: { label: "Renomear" },
@@ -533,7 +533,7 @@ export function createLibraryApplicationClass({
             rejectClose: false
           });
           if (result?.action === "create-subfolder") {
-            const child = await input({
+            const child = await DialogV2.input({
               window: { title: "Nova subpasta" },
               content: '<label>Nome da subpasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
               ok: { label: "Criar subpasta" },
@@ -549,8 +549,8 @@ export function createLibraryApplicationClass({
             }).preferences);
             this._collapsedLibraryFolders.delete(folderId);
           } else if (result?.action === "delete-folder") {
-            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
-            const accepted = typeof confirm === "function" && await confirm({
+            const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+            const accepted = typeof DialogV2?.confirm === "function" && await DialogV2.confirm({
               window: { title: "Excluir pasta" },
               content: "<p>Os recursos serão mantidos sem pasta. As subpastas também serão removidas.</p>",
               yes: { label: "Excluir" },
@@ -592,9 +592,9 @@ export function createLibraryApplicationClass({
         await render();
       });
       root.querySelector("[data-library-create-collection]")?.addEventListener("click", async () => {
-        const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input;
-        if (typeof prompt !== "function") return;
-        const result = await prompt({
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.input !== "function") return;
+        const result = await DialogV2.input({
           window: { title: "Nova coleção universal" },
           content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
           ok: { label: "Criar coleção" },
@@ -626,10 +626,10 @@ export function createLibraryApplicationClass({
         const current = normalizeLibraryPreferences(this._getPreferences());
         const collection = current.collections.find(item => item.id === collectionId);
         if (!collection) return;
-        const input = globalThis.foundry?.applications?.api?.DialogV2?.input;
-        if (typeof input !== "function") return;
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.input !== "function") return;
         try {
-          const result = await input({
+          const result = await DialogV2.input({
             window: { title: "Gerenciar coleção" },
             content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
             ok: { label: "Renomear" },
@@ -642,8 +642,8 @@ export function createLibraryApplicationClass({
             rejectClose: false
           });
           if (result?.action === "delete-collection") {
-            const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
-            const accepted = typeof confirm === "function" && await confirm({
+            const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+            const accepted = typeof DialogV2?.confirm === "function" && await DialogV2.confirm({
               window: { title: "Excluir coleção" },
               content: "<p>Os recursos não serão apagados; apenas a coleção será removida.</p>",
               yes: { label: "Excluir" },
@@ -664,9 +664,9 @@ export function createLibraryApplicationClass({
         } catch (error) { notify("warn", error.message); }
       });
       root.querySelector("[data-library-create-folder]")?.addEventListener("click", async () => {
-        const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input;
-        if (typeof prompt !== "function") return;
-        const result = await prompt({
+        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+        if (typeof DialogV2?.input !== "function") return;
+        const result = await DialogV2.input({
           window: { title: "Nova pasta da Biblioteca" },
           content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
           ok: { label: "Criar pasta" },
