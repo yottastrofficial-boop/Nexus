@@ -55,7 +55,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Base publicada | 1.0.0.123; revisão estrutural .124 em preparação |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.123 inclui navegação flutuante de layouts, remoção de molduras redundantes da Hotbar e lista de jogadores e correção de compatibilidade entre ícones nativos e tipografia personalizável, além dos refinamentos anteriores do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base publicada 1.0.0.123 inclui a estrutura hierárquica da Biblioteca, menus contextuais, criação universal de recursos e previews padronizados. A candidata 1.0.0.124 acrescenta contratos de serviços e módulos. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
