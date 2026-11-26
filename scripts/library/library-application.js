@@ -1020,6 +1020,8 @@ export function createLibraryApplicationClass({
             }
             await this._savePreferences(removeLibraryFolder(current, folderId));
             if (descendants.has(this._state.folder)) this._state.folder = "";
+            this._tabManager.setActiveState(this._state);
+            this._tabManager.clearFolderReferences(descendants);
             for (const id of descendants) this._collapsedLibraryFolders.delete(id);
             refreshFolders(); await render();
           }}
@@ -1191,13 +1193,8 @@ export function createLibraryApplicationClass({
             if (!accepted) return;
             await this._savePreferences(removeLibraryFolder(current, folderId));
             if (descendants.has(this._state.folder)) this._state.folder = "";
-            for (const tab of this._tabManager.getTabs()) {
-              const active = this._tabManager.getActive();
-              if (tab.id === active.id) continue;
-              // Inactive tab snapshots are updated below through the manager API.
-              const snapshot = this._tabManager.getTabState(tab.id);
-              if (snapshot && descendants.has(snapshot.folder)) snapshot.folder = "";
-            }
+            this._tabManager.setActiveState(this._state);
+            this._tabManager.clearFolderReferences(descendants);
             refreshFolders(); refreshBreadcrumbsAfterRename();
             await render();
           } else {
