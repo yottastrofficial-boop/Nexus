@@ -1,3 +1,11 @@
+## 1.0.0.126 — Biblioteca em janela com abas
+
+- Integra a janela de navegação com abas independentes e estado próprio.
+- Inclui breadcrumb, histórico Voltar/Avançar, pesquisa ao lado do caminho e navegação para o nível superior.
+- Inclui barra de comandos para Novo, Atualizar, Recortar, Copiar, Colar, Renomear e Excluir.
+- Permite redimensionar árvore e Inspector com persistência.
+- Testes automatizados e pacote em validação; teste funcional no Foundry VTT 14 build 360 ainda necessário.
+
 ## 1.0.0.125 — bootstrap por dependências
 
 - Migração de serviços centrais para factories do registro de serviços.
