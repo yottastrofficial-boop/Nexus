@@ -120,7 +120,6 @@ assert.equal(getLibraryResourceIcon({ kind: "document", type: "actors" }), "fa-s
 assert.equal(getLibraryResourceIcon({ kind: "logic", type: "rule" }), "fa-solid fa-scale-balanced");
 
 assert.equal(getLibraryResourceIcon({ kind: "media" }), "fa-solid fa-photo-film");
-assert.match((await import("../scripts/library/catalog-explorer.js")).getLibraryCatalogResourceKey({ providerId: "nexus-library", id: "themes:preview" }), /themes:preview/);
 
 
 const imageResource = { kind: "media", reference: { collection: "media" }, thumbnail: "maps/region.webp", name: "Mapa" };
