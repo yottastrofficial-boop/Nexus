@@ -592,6 +592,8 @@ export function createLibraryCatalogExplorer({
   const renderResourceCard = (resource, preferences) => {
     const key = resourceKey(resource);
     const card = makeElement("article", "nexus-library-generic-card");
+    card.dataset.libraryResourceKey = key;
+    card.dataset.libraryReference = JSON.stringify(resource.reference ?? {});
     const select = makeElement("button", "nexus-library-generic-item");
     select.type = "button";
     select.dataset.libraryResource = resource.id;
@@ -983,9 +985,11 @@ export function createLibraryCatalogExplorer({
         ? preferences.recent
         : currentSmartView === "collection"
           ? preferences.collections.find(collection => collection.id === currentCollectionId)?.resources ?? []
-          : currentFolder
-            ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
-            : null;
+          : currentSmartView === "shortcut"
+            ? [preferences.shortcuts.find(shortcut => shortcut.id === currentCollectionId)?.resourceKey].filter(Boolean)
+            : currentFolder
+              ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
+              : null;
     let page;
     if (smartKeys) {
       const keyPage = smartKeys.slice(smartOffset, smartOffset + PAGE_SIZE);

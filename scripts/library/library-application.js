@@ -1,13 +1,74 @@
-import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect, getLibraryCatalogPreferenceReference } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
-import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
+import { createLibraryFolder, normalizeLibraryPreferences, ensureLibraryDefaultFolders, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, duplicateLibraryFolderTree, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection, createLibraryShortcut, removeLibraryShortcut } from "../core/library-preferences.js";
+import { updateNexusLibraryCollection } from "../core/library-store.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
  * by the sheet adapter. It owns window lifecycle and navigation, not providers
  * or persisted definitions.
  */
+const showLibraryContextMenu = (event, items) => {
+  event.preventDefault();
+  document.querySelectorAll(".nexus-library-context-menu").forEach(menu => menu.remove());
+  const menu = document.createElement("div");
+  menu.className = "nexus-library-context-menu";
+  menu.setAttribute("role", "menu");
+  menu.style.position = "fixed";
+  menu.style.zIndex = "100000";
+  menu.style.left = Math.max(8, Math.min(event.clientX, window.innerWidth - 250)) + "px";
+  menu.style.top = Math.max(8, Math.min(event.clientY, window.innerHeight - 360)) + "px";
+  for (const item of items) {
+    if (item.separator) {
+      const separator = document.createElement("div");
+      separator.className = "nexus-library-context-separator";
+      separator.setAttribute("role", "separator");
+      menu.append(separator);
+      continue;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.textContent = item.label;
+    button.disabled = item.disabled === true;
+    if (item.danger) button.classList.add("is-danger");
+    button.addEventListener("click", async () => {
+      cleanup();
+      try { await item.action?.(); }
+      catch (error) { globalThis.ui?.notifications?.warn?.(String(error?.message ?? error)); }
+    });
+    menu.append(button);
+  }
+  document.body.append(menu);
+  const cleanup = () => {
+    menu.remove();
+    document.removeEventListener("pointerdown", onPointerDown, true);
+    document.removeEventListener("keydown", onKeyDown, true);
+  };
+  const onPointerDown = nextEvent => { if (!menu.contains(nextEvent.target)) cleanup(); };
+  const onKeyDown = nextEvent => { if (nextEvent.key === "Escape") { nextEvent.preventDefault(); cleanup(); } };
+  document.addEventListener("pointerdown", onPointerDown, true);
+  document.addEventListener("keydown", onKeyDown, true);
+  menu.querySelector("button:not(:disabled)")?.focus();
+  return cleanup;
+};
+
+const promptLibraryValue = async (title, fields) => {
+  const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+  if (typeof DialogV2?.input !== "function") throw new Error("O diálogo de entrada do Foundry não está disponível.");
+  const content = fields.map(field => '<label class="nexus-library-dialog-field">' + field.label +
+    '<input type="text" name="' + field.name + '" maxlength="' + (field.maxLength ?? 160) +
+    '" autocomplete="off" value="' + String(field.value ?? "").replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;") + '"></label>').join("");
+  return DialogV2.input({ window: { title }, content, ok: { label: "Confirmar" }, rejectClose: false });
+};
+
+const confirmLibraryAction = async (title, content) => {
+  const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+  if (typeof DialogV2?.confirm !== "function") throw new Error("O diálogo de confirmação do Foundry não está disponível.");
+  return DialogV2.confirm({ window: { title }, content, yes: { label: "Confirmar" }, no: { label: "Cancelar" }, rejectClose: false });
+};
+
 export function createLibraryApplicationClass({
   ApplicationV2,
   HandlebarsApplicationMixin,
@@ -69,6 +130,8 @@ export function createLibraryApplicationClass({
       this._explorer = null;
       this._context = {};
       this._searchTimer = 0;
+      this._libraryClipboard = null;
+      this._closeLibraryContextMenu = null;
     }
 
     setContext(context = {}) {
@@ -83,16 +146,21 @@ export function createLibraryApplicationClass({
 
     async _onRender(context, options) {
       await super._onRender(context, options);
-      this._mountExplorer();
+      await this._mountExplorer();
     }
 
-    _mountExplorer() {
+    async _mountExplorer() {
       const root = this.element;
       const container = root?.querySelector("[data-library-generic-items]");
       const detail = root?.querySelector("[data-library-generic-details]");
       if (!container || !detail) return;
 
-      const preferences = normalizeLibraryPreferences(this._getPreferences());
+      let preferences = normalizeLibraryPreferences(this._getPreferences());
+      if (!preferences.baseFoldersInitialized) {
+        preferences = ensureLibraryDefaultFolders(preferences);
+        try { await this._savePreferences(preferences); }
+        catch (error) { globalThis.ui?.notifications?.warn?.("Não foi possível inicializar a estrutura da Biblioteca: " + error.message); }
+      }
       this._state.viewMode = this._state.viewMode === "list" ? "list" : "grid";
       this._explorer = createLibraryCatalogExplorer({
         registry: this._registry,
@@ -157,7 +225,7 @@ export function createLibraryApplicationClass({
         button.setAttribute("aria-pressed", String(active));
       });
 
-      this._collapsedLibraryFolders ??= new Set();
+      this._collapsedLibraryFolders ??= new Set(preferences.folders.filter(folder => folder.isDefault && folder.parentId && preferences.folders.some(child => child.parentId === folder.id)).map(folder => folder.id));
       const refreshFolders = () => {
         const nav = root.querySelector("[data-library-app-folders]");
         if (!nav) return;
@@ -187,7 +255,7 @@ export function createLibraryApplicationClass({
           row.className = "nexus-library-folder-row";
           row.dataset.libraryFolderDrop = folder.id;
           row.dataset.depth = String(Math.min(depth, 8));
-          row.style.paddingLeft = `${Math.min(depth, 8) * 13}px`;
+          row.style.setProperty("--nexus-library-folder-depth", String(Math.min(depth, 12)));
           row.draggable = true;
           const toggle = document.createElement("button");
           toggle.type = "button";
@@ -231,7 +299,22 @@ export function createLibraryApplicationClass({
           nav.append(button);
         }
       };
-      refreshCollections();
+      const refreshShortcuts = () => {
+        const nav = root.querySelector("[data-library-app-shortcuts]");
+        if (!nav) return;
+        nav.replaceChildren();
+        for (const shortcut of normalizeLibraryPreferences(this._getPreferences()).shortcuts) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "nexus-library-custom-folder nexus-library-shortcut";
+          button.dataset.libraryShortcut = shortcut.id;
+          button.innerHTML = '<i class="fa-solid fa-link" aria-hidden="true"></i><span></span>';
+          button.querySelector("span").textContent = shortcut.name;
+          button.classList.toggle("active", this._state.smartView === "shortcut" && this._state.collectionId === shortcut.id);
+          nav.append(button);
+        }
+      };
+      refreshShortcuts();
 
       const render = () => this._explorer?.render({ ...this._state });
       const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
@@ -500,85 +583,158 @@ export function createLibraryApplicationClass({
           await render();
         } catch (error) { notify("warn", error.message); }
       });
-      root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", async event => {
+      root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         const button = target?.closest("[data-library-folder]");
         if (!button) return;
-        event.preventDefault();
         const folderId = button.dataset.libraryFolder;
-        const current = normalizeLibraryPreferences(this._getPreferences());
-        const folder = current.folders.find(item => item.id === folderId);
+        const folder = normalizeLibraryPreferences(this._getPreferences()).folders.find(item => item.id === folderId);
         if (!folder) return;
-        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
-        if (typeof DialogV2?.input !== "function") return;
-        try {
-          const result = await DialogV2.input({
-            window: { title: "Gerenciar pasta" },
-            content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
-            ok: { label: "Renomear" },
-            buttons: [
-              {
-                action: "create-subfolder",
-                label: "Nova subpasta",
-                class: "nexus-library-create-subfolder",
-                callback: () => ({ action: "create-subfolder" })
-              },
-              {
-                action: "delete-folder",
-                label: "Excluir pasta",
-                class: "nexus-library-delete-folder",
-                callback: () => ({ action: "delete-folder" })
-              }
-            ],
-            rejectClose: false
-          });
-          if (result?.action === "create-subfolder") {
-            const child = await DialogV2.input({
-              window: { title: "Nova subpasta" },
-              content: '<label>Nome da subpasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
-              ok: { label: "Criar subpasta" },
-              rejectClose: false
+        const pasteInto = async targetFolderId => {
+          const clipboard = this._libraryClipboard;
+          if (!clipboard) return;
+          let preferences = normalizeLibraryPreferences(this._getPreferences());
+          if (clipboard.type === "folder") {
+            if (clipboard.mode === "copy") {
+              preferences = duplicateLibraryFolderTree(preferences, clipboard.folderId, {
+                parentId: targetFolderId,
+                idPrefix: "copy-" + (globalThis.foundry?.utils?.randomID?.(5) ?? "nexus")
+              }).preferences;
+            } else {
+              preferences = moveLibraryFolder(preferences, clipboard.folderId, targetFolderId);
+              this._libraryClipboard = null;
+            }
+          } else if (clipboard.type === "resource") {
+            if (clipboard.mode === "copy") {
+              preferences = createLibraryShortcut(preferences, {
+                name: clipboard.name + " (atalho)",
+                resourceKey: clipboard.resourceKey,
+                reference: clipboard.reference,
+                folderId: targetFolderId
+              }).preferences;
+            } else {
+              const separator = clipboard.resourceKey.indexOf(":");
+              if (separator <= 0) throw new Error("Referência copiada inválida.");
+              preferences = assignLibraryEntryFolder(preferences, clipboard.resourceKey.slice(0, separator), clipboard.resourceKey.slice(separator + 1), targetFolderId);
+              this._libraryClipboard = null;
+            }
+          }
+          await this._savePreferences(preferences);
+          refreshFolders(); refreshShortcuts(); await render();
+        };
+        this._closeLibraryContextMenu?.();
+        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+          { label: "Nova subpasta", action: async () => {
+            const result = await promptLibraryValue("Nova subpasta", [{ name: "name", label: "Nome da pasta", maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            const created = createLibraryFolder(this._getPreferences(), {
+              id: globalThis.foundry?.utils?.randomID?.(10), name, collection: folder.collection, parentId: folderId
             });
-            const childName = String(child?.name ?? "").trim();
-            if (!childName) return;
-            await this._savePreferences(createLibraryFolder(this._getPreferences(), {
-              id: globalThis.foundry?.utils?.randomID?.(10),
-              name: childName,
-              collection: folder.collection,
-              parentId: folderId
-            }).preferences);
+            await this._savePreferences(created.preferences);
             this._collapsedLibraryFolders.delete(folderId);
-          } else if (result?.action === "delete-folder") {
-            const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
-            const accepted = typeof DialogV2?.confirm === "function" && await DialogV2.confirm({
-              window: { title: "Excluir pasta" },
-              content: "<p>Os recursos serão mantidos sem pasta. As subpastas também serão removidas.</p>",
-              yes: { label: "Excluir" },
-              no: { label: "Cancelar" },
-              rejectClose: false
-            });
+            refreshFolders(); await render();
+          }},
+          { label: "Renomear", action: async () => {
+            const result = await promptLibraryValue("Renomear pasta", [{ name: "name", label: "Novo nome", value: folder.name, maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            await this._savePreferences(renameLibraryFolder(this._getPreferences(), folderId, name));
+            refreshFolders(); await render();
+          }},
+          { label: "Recortar", action: async () => {
+            this._libraryClipboard = { type: "folder", folderId, mode: "move" };
+            notify("info", "Pasta recortada. Use Colar em uma pasta de destino.");
+          }},
+          { label: "Copiar", action: async () => {
+            this._libraryClipboard = { type: "folder", folderId, mode: "copy" };
+            notify("info", "Estrutura da pasta copiada. Os documentos originais não serão duplicados.");
+          }},
+          { label: "Colar dentro", disabled: !this._libraryClipboard, action: () => pasteInto(folderId) },
+          { separator: true },
+          { label: "Mover para raiz", action: async () => {
+            await this._savePreferences(moveLibraryFolder(this._getPreferences(), folderId, ""));
+            refreshFolders(); await render();
+          }},
+          { label: "Excluir pasta", danger: true, action: async () => {
+            const accepted = await confirmLibraryAction("Excluir pasta", "<p>A pasta e suas subpastas serão removidas da organização. Os recursos continuarão na Biblioteca, sem serem apagados.</p>");
             if (!accepted) return;
-            const before = normalizeLibraryPreferences(this._getPreferences());
+            const current = normalizeLibraryPreferences(this._getPreferences());
             const descendants = new Set([folderId]);
             let changed = true;
             while (changed) {
               changed = false;
-              for (const item of before.folders) if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) { descendants.add(item.id); changed = true; }
+              for (const item of current.folders) if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) { descendants.add(item.id); changed = true; }
             }
-            await this._savePreferences(removeLibraryFolder(before, folderId));
+            await this._savePreferences(removeLibraryFolder(current, folderId));
             if (descendants.has(this._state.folder)) this._state.folder = "";
             for (const id of descendants) this._collapsedLibraryFolders.delete(id);
-          } else {
-            const name = String(result?.name ?? "").trim();
-            if (!name) return;
-            await this._savePreferences(renameLibraryFolder(this._getPreferences(), folderId, name));
-          }
-          refreshFolders();
-          await render();
-        } catch (error) {
-          notify("warn", error.message);
-        }
+            refreshFolders(); await render();
+          }}
+        ]);
       });
+
+      const resourceContainer = root.querySelector("[data-library-generic-items]");
+      resourceContainer?.addEventListener("contextmenu", event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const card = target?.closest("[data-library-resource-key]");
+        if (!card) {
+          this._closeLibraryContextMenu?.();
+          this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+            { label: "Nova pasta", action: async () => root.querySelector("[data-library-create-folder]")?.click() },
+            { label: "Colar na raiz", disabled: !this._libraryClipboard, action: async () => {
+              const clipboard = this._libraryClipboard;
+              if (!clipboard) return;
+              let preferences = normalizeLibraryPreferences(this._getPreferences());
+              if (clipboard.type === "folder") {
+                preferences = clipboard.mode === "copy"
+                  ? duplicateLibraryFolderTree(preferences, clipboard.folderId, { parentId: "", idPrefix: "copy-" + (globalThis.foundry?.utils?.randomID?.(5) ?? "nexus") }).preferences
+                  : moveLibraryFolder(preferences, clipboard.folderId, "");
+              } else if (clipboard.type === "resource") {
+                if (clipboard.mode === "copy") preferences = createLibraryShortcut(preferences, { name: clipboard.name + " (atalho)", resourceKey: clipboard.resourceKey, reference: clipboard.reference }).preferences;
+                else {
+                  const separator = clipboard.resourceKey.indexOf(":");
+                  if (separator > 0) preferences = assignLibraryEntryFolder(preferences, clipboard.resourceKey.slice(0, separator), clipboard.resourceKey.slice(separator + 1), "");
+                }
+              }
+              await this._savePreferences(preferences);
+              if (clipboard.mode === "move") this._libraryClipboard = null;
+              refreshFolders(); refreshShortcuts(); await render();
+            }}
+          ]);
+          return;
+        }
+        const resourceKey = card.dataset.libraryResourceKey;
+        let reference = {};
+        try { reference = JSON.parse(card.dataset.libraryReference || "{}"); } catch {}
+        const resourceName = card.querySelector(".nexus-library-generic-item strong")?.textContent || "Recurso";
+        this._closeLibraryContextMenu?.();
+        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+          { label: "Copiar referência", action: async () => {
+            this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "copy" };
+            notify("info", "Referência copiada para a Biblioteca.");
+          }},
+          { label: "Recortar referência", action: async () => {
+            this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "move" };
+            notify("info", "Referência recortada. Use Colar em uma pasta.");
+          }},
+          { label: "Criar atalho", action: async () => {
+            const result = await promptLibraryValue("Criar atalho", [{ name: "name", label: "Nome do atalho", value: resourceName, maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            const targetReference = getLibraryCatalogPreferenceReference(resourceKey);
+            if (!name || !targetReference) return;
+            await this._savePreferences(createLibraryShortcut(this._getPreferences(), { name, resourceKey, reference: targetReference, folderId: this._state.folder }).preferences);
+            refreshShortcuts(); notify("info", "Atalho criado.");
+          }},
+          { label: "Adicionar aos favoritos", action: async () => {
+            const current = normalizeLibraryPreferences(this._getPreferences());
+            const favorites = current.favorites.includes(resourceKey) ? current.favorites.filter(key => key !== resourceKey) : [resourceKey, ...current.favorites].slice(0, 500);
+            await this._savePreferences({ ...current, favorites });
+            await render();
+          }}
+        ]);
+      });
+
       root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         const button = target?.closest("[data-library-collection]");
@@ -663,7 +819,98 @@ export function createLibraryApplicationClass({
           await render();
         } catch (error) { notify("warn", error.message); }
       });
+      const createMenu = root.querySelector("[data-library-create-new-menu]");
+      const createToggle = root.querySelector("[data-library-create-new-toggle]");
+      createToggle?.addEventListener("click", event => {
+        event.preventDefault();
+        if (!createMenu) return;
+        createMenu.hidden = !createMenu.hidden;
+        createToggle.setAttribute("aria-expanded", String(!createMenu.hidden));
+      });
+      root.querySelectorAll("[data-library-new-action]:not([data-library-new-action='folder'])").forEach(button => {
+        button.addEventListener("click", async event => {
+          event.preventDefault();
+          if (createMenu) createMenu.hidden = true;
+          createToggle?.setAttribute("aria-expanded", "false");
+          const action = button.dataset.libraryNewAction;
+          try {
+            if (action === "asset") {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/png,image/jpeg,image/webp,image/gif,audio/*,video/*";
+              input.hidden = true;
+              root.append(input);
+              input.addEventListener("change", async () => {
+                const file = input.files?.[0];
+                input.remove();
+                if (!file) return;
+                if (file.size > 100 * 1024 * 1024) { notify("warn", "O arquivo excede o limite de 100 MB."); return; }
+                const FilePicker = globalThis.FilePicker;
+                if (typeof FilePicker?.upload !== "function") { notify("warn", "O upload nativo do Foundry não está disponível."); return; }
+                try {
+                  const uploaded = await FilePicker.upload("data", "nexus/library", file, {});
+                  const path = String(uploaded?.path ?? uploaded ?? "");
+                  if (!path || /^(?:javascript|data):/i.test(path)) throw new Error("O Foundry não retornou um caminho de asset válido.");
+                  const id = globalThis.foundry?.utils?.randomID?.(10) ?? "media-" + Date.now();
+                  const entry = {
+                    id, name: file.name.replace(/\.[^.]+$/, "") || file.name, description: "", tags: ["asset"],
+                    path, mimeType: file.type || "", thumbnail: file.type.startsWith("image/") ? path : ""
+                  };
+                  await updateNexusLibraryCollection(globalThis.game?.user, "media", entries => [...entries, entry]);
+                  if (this._state.folder) {
+                    await this._savePreferences(assignLibraryEntryFolder(this._getPreferences(), "media", id, this._state.folder));
+                  }
+                  refreshFolders(); await render();
+                  notify("info", "Asset importado para a Biblioteca.");
+                } catch (error) { notify("warn", "Não foi possível importar o asset: " + error.message); }
+              }, { once: true });
+              input.click();
+              return;
+            }
+            if (action === "shortcut") {
+              const result = await promptLibraryValue("Criar atalho", [
+                { name: "name", label: "Nome", maxLength: 80 },
+                { name: "reference", label: "UUID do Foundry ou chave de recurso", maxLength: 160 }
+              ]);
+              const name = String(result?.name ?? "").trim();
+              const rawReference = String(result?.reference ?? "").trim();
+              if (!name || !rawReference) return;
+              let resourceKey = rawReference;
+              let reference = getLibraryCatalogPreferenceReference(rawReference);
+              if (/^(Actor|Item|Scene|JournalEntry|Macro|Playlist|RollTable|Cards|Compendium)\./.test(rawReference)) {
+                resourceKey = "foundry-documents:" + rawReference;
+                reference = { providerId: "foundry-documents", id: rawReference };
+              }
+              if (!reference) throw new Error("A referência deve ser um UUID do Foundry ou uma chave de recurso válida.");
+              await this._savePreferences(createLibraryShortcut(this._getPreferences(), {
+                name, resourceKey, reference, folderId: this._state.folder
+              }).preferences);
+              refreshShortcuts(); notify("info", "Atalho criado na Biblioteca.");
+              return;
+            }
+            if (action === "layout" || action === "component") {
+              const result = await promptLibraryValue(action === "layout" ? "Novo layout" : "Novo componente", [
+                { name: "name", label: "Nome", maxLength: 80 }
+              ]);
+              const name = String(result?.name ?? "").trim();
+              if (!name) return;
+              const collection = action === "layout" ? "layouts" : "components";
+              const id = globalThis.foundry?.utils?.randomID?.(10) ?? collection + "-" + Date.now();
+              const entry = action === "layout"
+                ? { id, name, description: "", tags: ["layout"], width: 800, height: 800, components: [], groups: [] }
+                : { id, name, description: "", tags: ["component"], type: "text", settings: { label: name, text: "", w: 160, h: 48 } };
+              await updateNexusLibraryCollection(globalThis.game?.user, collection, entries => [...entries, entry]);
+              if (this._state.folder) await this._savePreferences(assignLibraryEntryFolder(this._getPreferences(), collection, id, this._state.folder));
+              refreshFolders(); await render();
+              notify("info", action === "layout" ? "Layout criado." : "Componente criado.");
+            }
+          } catch (error) { notify("warn", error.message); }
+        });
+      });
+
       root.querySelector("[data-library-create-folder]")?.addEventListener("click", async () => {
+        if (createMenu) createMenu.hidden = true;
+        createToggle?.setAttribute("aria-expanded", "false");
         const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
         if (typeof DialogV2?.input !== "function") return;
         const result = await DialogV2.input({
@@ -700,6 +947,8 @@ export function createLibraryApplicationClass({
     }
 
     async close(options = {}) {
+      this._closeLibraryContextMenu?.();
+      this._closeLibraryContextMenu = null;
       if (this._searchTimer) clearTimeout(this._searchTimer);
       this._searchTimer = 0;
       this._explorer = null;

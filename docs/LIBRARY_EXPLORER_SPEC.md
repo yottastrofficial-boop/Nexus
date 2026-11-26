@@ -155,3 +155,19 @@ O adaptador é compartilhado pela janela independente e pela visão embutida na 
 ## Fontes estruturadas e criação assistida de personagens
 
 A futura criação assistida deverá ser construída sobre adaptadores de transferência, com registros JSON tipados, versão de schema, validação, prévia e confirmação. A origem não poderá executar código nem gravar diretamente no Actor. O destino da ficha será responsável por mapear os campos aceitos, mostrar conflitos e aplicar somente após confirmação. Os schemas e adaptadores concretos ainda não fazem parte da implementação atual.
+
+
+## Taxonomia inicial e operações de organização — 1.0.0.123
+
+A Biblioteca pode inicializar uma árvore base por domínio uma única vez. A árvore é metadado de organização do usuário, não uma validação de tipo: qualquer recurso pode ser movido para qualquer pasta pessoal. A migração preserva pastas existentes e não reclassifica automaticamente os recursos já atribuídos.
+
+- **Atores:** atores e recursos associados; Player, NPC e criatura são tags, não subpastas obrigatórias. Assets, layouts, modelos de ficha e recursos relacionados ficam no domínio de Atores.
+- **Itens:** Classes, Origens, Legados, Ações e Itens. Itens pode conter Equipamentos, Armas, Armaduras, Consumíveis, Contêineres e Outros equipamentos; também há Assets, Layouts, Modelos de item e recursos relacionados. Não há pasta-base de itens mágicos.
+- **Cenas:** Cenas, Mapas, Elementos de mapa e Elementos de cena. A subárvore de elementos usa rótulos em português para Tokens, Tiles, Desenhos, Paredes, Luzes ambientes, Sons ambientes, Notas, Modelos medidos, Regiões e Comportamentos de região.
+- **Documentos, Baralhos, Tabelas de rolagem, Áudio, Compêndios, Macros, Assets globais e NEXUS** mantêm áreas próprias, incluindo seus recursos relacionados.
+
+A árvore oferece disclosure expandir/recolher e preserva a hierarquia. O menu contextual permite criar subpasta, renomear, recortar, copiar, colar, mover para raiz e excluir a organização. Excluir uma pasta remove apenas a estrutura e desassocia recursos; documentos do Foundry não são apagados. Copiar uma pasta duplica somente a estrutura, nunca documentos ou arquivos.
+
+O botão **Novo** reúne ações de criação. Importar asset usa o FilePicker/upload nativo do Foundry e registra mídia pessoal. Atalhos armazenam uma referência ao recurso original. Layouts e componentes novos são entradas pessoais editáveis; sua estrutura não substitui schemas mecânicos do NEXUS.
+
+Os cards usam preview quadrado, sem moldura/painel interno, com imagens em object-fit: contain. A seleção é indicada somente por borda de destaque. Previews são representações inertes e não executam conteúdo importado.

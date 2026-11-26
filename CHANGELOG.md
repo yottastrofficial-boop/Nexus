@@ -1,3 +1,16 @@
+## 1.0.0.123 — Biblioteca: taxonomia, hierarquia e criação universal
+
+- Inicializa uma estrutura de pastas por domínio (Atores, Itens, Cenas, Documentos, Baralhos, Tabelas de rolagem, Áudio, Compêndios, Macros, Assets globais e NEXUS) apenas uma vez, preservando pastas existentes.
+- A estrutura de Atores usa tags para classificar Player/NPC/criatura; não cria subpastas rígidas por tipo de ator.
+- Organiza Itens em Classes, Origens, Legados, Ações e Itens, com subpastas de equipamentos, armas, armaduras, consumíveis e contêineres; não adiciona categoria de itens mágicos.
+- Localiza os tipos de elementos de cena e mantém a taxonomia livre e reorganizável.
+- Adiciona árvore hierárquica com expandir/recolher, recorte, cópia organizacional, colagem, movimentação, renomeação e exclusão segura por menu contextual.
+- Adiciona ação universal Novo: pasta, importação de asset por FilePicker do Foundry, atalho por UUID/referência, layout e componente.
+- Importação de mídia cria metadados na Biblioteca pessoal; os arquivos são enviados para a pasta de dados NEXUS pelo serviço nativo do Foundry.
+- Padroniza previews quadrados e sem moldura interna; seleção de recurso destaca apenas a borda, sem painel preenchido.
+- Adiciona testes de migração, taxonomia, atalhos, duplicação de árvore e contratos visuais/contextuais.
+- A validação visual/funcional no Foundry VTT 14 build 360 permanece necessária.
+
 ## 1.0.0.122 — Biblioteca: pesquisa estruturada e transferência nativa
 
 - Adiciona consulta avançada com termos combinados, frases entre aspas, qualificadores type:, source:, folder:, tag:, name: e exclusão por -termo.
