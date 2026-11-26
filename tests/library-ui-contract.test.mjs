@@ -132,7 +132,7 @@ console.log("NEXUS browser-style Library shell contract: OK");
 
 assert.match(libraryApplication, /aria-valuemin/);
 assert.match(libraryApplication, /aria-valuemax/);
-assert.match(libraryApplication, /setAttribute\("role", "slider"\)/,
+assert.match(libraryApplication, /setAttribute\("role", "separator"\)/,
   "Resizable panes must expose an accessible slider control.");
 assert.match(libraryApplication, /event.key === "Home"/,
   "Resizable panes must support keyboard range boundaries.");
@@ -143,3 +143,15 @@ assert.match(styles, /folder-row > \.nexus-library-custom-folder::before[\s\S]*?
 assert.match(styles, /folder-row > \.nexus-library-custom-folder[\s\S]*?min-height: 23px !important/,
   "Folder rows must use the compact density requested for parent and child folders.");
 console.log("NEXUS Library accessibility and folder density contracts: OK");
+
+assert.ok(libraryTemplate.includes('data-library-command="cut"') &&
+  libraryTemplate.includes('data-library-command="copy"') &&
+  libraryTemplate.includes('data-library-command="paste"') &&
+  libraryTemplate.includes('data-library-command="rename"') &&
+  libraryTemplate.includes('data-library-command="delete"'),
+  "The editing toolbar must expose the requested common file operations.");
+assert.ok(libraryApplication.includes('data-library-command="paste"') &&
+  libraryApplication.includes("pasteClipboard") &&
+  libraryApplication.includes("setClipboard"),
+  "Cut, copy and paste controls must execute Library operations rather than remain decorative.");
+console.log("NEXUS Library command bar contracts: OK");
