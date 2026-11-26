@@ -457,7 +457,7 @@ assert.ok(sheet.length < 300000, "A ficha principal deve permanecer como fachada
 assert.doesNotMatch(sheetCode, /data-property-list-expand|propertyListExpand/, "O controle antigo de expandir/reduzir deve ser removido");
 assert.match(canvasInteractions, /export function activateCanvasInteractions/);
 assert.match(canvasInteractions, /deactivateInteraction/);
-assert.match(sheetCode, /selectedComponentId \?\? \(this\._selectedIds\.size === 0 \? this\._componentEditorTargetId : null\)/, "O alvo de edição deve sobreviver à limpeza da seleção visual");
+assert.match(sheetCode, /resolveSheetFocusTarget\(\{ selectedIds: this\._selectedIds, focusTargetId: this\._componentEditorTargetId, components \}\)/, "O foco deve ser resolvido pelo controlador compartilhado e validar o alvo atual");
 assert.match(canvasInteractions, /insidePropertyPicker/, "Cliques no portal do seletor não podem limpar o alvo de edição");
 assert.match(actorPropertyPickerListeners, /data-property-category/);
 assert.match(propertyCatalog, /NEXUS_SKILLS/);

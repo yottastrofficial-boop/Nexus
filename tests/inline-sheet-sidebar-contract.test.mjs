@@ -64,7 +64,8 @@ test("floating right rail is a body portal with independent controls and no lega
 });
 
 test("component inspector follows current selection and uses the floating ApplicationV2 panel", () => {
-  assert.match(sheet, /else if \(this\._selectedIds\.size > 1\) this\._componentEditorTargetId = null/);
+  assert.match(sheet, /normalizeSheetSelection\(ids, components\)/);
+  assert.match(sheet, /resolveSheetFocusTarget\(/);
   assert.match(sheet, /this\._componentEditorTargetId = one\?\.id \?\? null/);
   assert.match(sheet, /else delete field\.dataset\.componentTargetId/);
   assert.match(listeners, /const getInspectorComponentId = \(\) =>/);

@@ -18,8 +18,10 @@ assert.doesNotMatch(designSystem, /:is\(#controls, #ui-left, #ui-top\)\s*:is\(\.
   "Native Foundry tool buttons must retain the minimal Foundry appearance.");
 assert.match(designSystem, /Foundry V14 owns the native sidebar layout, vertical orientation and tab controller/,
   "The Foundry sidebar must retain its native vertical navigation.");
-assert.doesNotMatch(designSystem, /#sidebar-tabs|#sidebar-content|\.sidebar-tabs\s*\{/,
-  "The Design System must not replace native sidebar geometry.");
+assert.match(designSystem, /#sidebar-tabs > \.sidebar-tab[\s\S]*?flex:0 0 32px/,
+  "Native tabs are individually styled while Foundry retains its controller.");
+assert.match(designSystem, /#sidebar-content[\s\S]*?flex:1 1 auto/,
+  "The native panel remains the flexible content region.");
 assert.match(designSystem, /\.application\.nexus-themed-application/,
   "NEXUS and explicitly supported Foundry applications must receive the shared styles.");
 assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.application,\s*\.window-app\)/,

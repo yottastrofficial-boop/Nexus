@@ -36,7 +36,7 @@ assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPT
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
 assert.match(css, /\.nexus-design-studio \{ min-width: min\(96vw, 720px\) !important; max-width: 96vw !important; \}/);
-assert.match(bootstrap, /DesignStudioMenuApplication/);
+assert.match(bootstrap, /DesignStudioMenuApplication = DesignStudioApplication/);
 assert.match(bootstrap, /registerStudio\(DesignStudioMenuApplication\)/);
 assert.match(bootstrap, /game\.nexus\.design\.openStudio = \(\) =>/);
 assert.match(bootstrap, /application\.render\(\{ force: true \}\)/);

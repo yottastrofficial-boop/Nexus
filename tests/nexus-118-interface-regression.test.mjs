@@ -12,7 +12,7 @@ assert.match(sheet,/resolveSheetFocusTarget\(/);
 assert.match(sheet,/componentPanel\?\.isConnected \? componentPanel/);
 assert.match(studio,/design\.application = this/);
 assert.match(studio,/if \(design\.application === this\) design\.application = null/);
-assert.match(init,/registerStudio\(DesignStudioApplication\)/);
+assert.match(init,/registerStudio\(DesignStudioMenuApplication\)/);
 assert.doesNotMatch(init,/const DesignStudioMenuApplication = class/);
 assert.match(dsCss,/#sidebar-tabs > \.sidebar-tab/);
 assert.match(dsCss,/#sidebar-content/);

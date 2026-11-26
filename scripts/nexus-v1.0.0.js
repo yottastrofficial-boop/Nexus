@@ -42,9 +42,10 @@ Hooks.once("init", () => {
     library: game.nexus.design.library
   });
   // Settings and direct launch use the same ApplicationV2 class and singleton reference.
+  const DesignStudioMenuApplication = DesignStudioApplication;
   game.nexus.design.Studio = DesignStudioApplication;
-  game.nexus.design.StudioMenu = DesignStudioApplication;
-  game.nexus.design.registerStudio(DesignStudioApplication);
+  game.nexus.design.StudioMenu = DesignStudioMenuApplication;
+  game.nexus.design.registerStudio(DesignStudioMenuApplication);
   game.nexus.design.openStudio = () => {
     let application = game.nexus.design.application;
     if (!application || application.state === foundry.applications.api.ApplicationV2.RENDER_STATES.CLOSED) {

@@ -9,10 +9,12 @@ assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet.");
 assert.match(designCss, /Foundry V14 owns the native sidebar layout, vertical orientation and tab controller/,
   "The native Foundry sidebar must own its original vertical navigation.");
-assert.doesNotMatch(designCss, /#sidebar-tabs|#sidebar-content|\.sidebar-tabs\s*\{/,
-  "NEXUS must not impose custom geometry on native sidebar navigation or panels.");
-assert.doesNotMatch(designCss, /#sidebar\s*\{[^}]*flex-direction\s*:\s*row/i,
-  "The sidebar shell must not be converted into a horizontal layout.");
+assert.match(designCss, /#sidebar-tabs[\s\S]*?flex-direction:column/,
+  "The native tab rail remains vertical.");
+assert.match(designCss, /#sidebar-tabs > \.sidebar-tab[\s\S]*?flex:0 0 32px/,
+  "Native tabs use individual controls within the rail.");
+assert.match(designCss, /#sidebar\s*\{[^}]*flex-direction\s*:\s*row/i,
+  "The shell separates the vertical rail from its adjacent content pane.");
 assert.doesNotMatch(legacyCss, /#sidebar-tabs|#sidebar-content|#sidebar\s*>\s*\.sidebar-tabs/,
   "Legacy styles must not reintroduce a custom sidebar navigation layout.");
 assert.match(legacyCss, /#sidebar \.sidebar-tab\.directory/,
