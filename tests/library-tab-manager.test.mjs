@@ -51,3 +51,13 @@ test("tabs preserve independent filter state and nested arrays", () => {
   manager.activate(second.id);
   assert.deepEqual(manager.getActiveState().compendiumIds, ["world.items"]);
 });
+
+test("tab snapshots can be reconciled after folder deletion", () => {
+  const manager = createLibraryTabManager({ folder: "actors" });
+  const first = manager.getActive();
+  manager.create({ folder: "items" }, "Itens");
+  assert.equal(manager.getTabState(first.id).folder, "actors");
+  manager.getTabState(first.id).folder = "";
+  manager.activate(first.id);
+  assert.equal(manager.getActiveState().folder, "");
+});
