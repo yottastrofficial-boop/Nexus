@@ -338,10 +338,20 @@ export function createLibraryApplicationClass({
       if (navigationSearch && searchWrap && !navigationSearch.contains(searchWrap)) navigationSearch.append(searchWrap);
       const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
       const applyPanelSizes = () => {
-        appRoot.style.setProperty("--nexus-library-navigation-width", clamp(Number(this._panelSizes.navigation) || 224, 150, 420) + "px");
-        appRoot.style.setProperty("--nexus-library-inspector-width", clamp(Number(this._panelSizes.inspector) || 292, 210, 480) + "px");
-        appRoot.style.setProperty("--nexus-library-inspector-height", clamp(Number(this._panelSizes.inspectorHeight) || 300, 180, 620) + "px");
+        const values = {
+          navigation: clamp(Number(this._panelSizes.navigation) || 224, 150, 420),
+          inspector: clamp(Number(this._panelSizes.inspector) || 292, 210, 480),
+          inspectorHeight: clamp(Number(this._panelSizes.inspectorHeight) || 300, 180, 620)
+        };
+        this._panelSizes = { ...this._panelSizes, ...values };
+        appRoot.style.setProperty("--nexus-library-navigation-width", values.navigation + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-width", values.inspector + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-height", values.inspectorHeight + "px");
+        root.querySelector("[data-library-resize-sidebar]")?.setAttribute("aria-valuenow", String(values.navigation));
+        const inspectorHandle = root.querySelector("[data-library-resize-inspector]");
+        inspectorHandle?.setAttribute("aria-valuenow", String(isNarrowViewport() ? values.inspectorHeight : values.inspector));
       };
+      const isNarrowViewport = () => globalThis.matchMedia?.("(max-width: 720px)")?.matches === true;
       applyPanelSizes();
       const savePanelSizes = async () => {
         try { await globalThis.game?.user?.setFlag?.("nexus", "libraryWindowPreferences", this._panelSizes); }
@@ -351,10 +361,19 @@ export function createLibraryApplicationClass({
         if (!handle || handle.dataset.bound === "true") return;
         handle.dataset.bound = "true";
         const isInspector = type === "inspector";
-        const isVertical = isInspector && globalThis.matchMedia?.("(max-width: 720px)")?.matches;
-        const dimension = isVertical ? "y" : "x";
-        const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
+        const min = isInspector ? 210 : 150;
+        const max = isInspector ? 480 : 420;
+        handle.setAttribute("role", "slider");
+        handle.setAttribute("tabindex", "0");
+        handle.setAttribute("aria-valuemin", String(isInspector ? 180 : min));
+        handle.setAttribute("aria-valuemax", String(isInspector ? 620 : max));
+        handle.setAttribute("aria-orientation", isInspector && isNarrowViewport() ? "horizontal" : "vertical");
+        handle.setAttribute("aria-valuenow", String(isInspector ? this._panelSizes.inspector : this._panelSizes.navigation));
         const start = event => {
+          const isVertical = isInspector && isNarrowViewport();
+          const dimension = isVertical ? "y" : "x";
+          const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
+          handle.setAttribute("aria-orientation", isVertical ? "horizontal" : "vertical");
           if (event.button !== 0) return;
           event.preventDefault();
           const startPoint = dimension === "y" ? event.clientY : event.clientX;
@@ -383,12 +402,19 @@ export function createLibraryApplicationClass({
         handle.addEventListener("pointerdown", start);
         handle.addEventListener("keydown", async event => {
           const step = event.shiftKey ? 32 : 12;
-          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+          const isVertical = isInspector && isNarrowViewport();
+          const dimension = isVertical ? "y" : "x";
+          const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
+          const minimum = sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180;
+          const maximum = sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620;
+          const increaseKey = isVertical ? "ArrowUp" : isInspector ? "ArrowLeft" : "ArrowRight";
+          const decreaseKey = isVertical ? "ArrowDown" : isInspector ? "ArrowRight" : "ArrowLeft";
+          if (![increaseKey, decreaseKey, "Home", "End"].includes(event.key)) return;
           event.preventDefault();
-          const increase = isVertical ? event.key === "ArrowUp" : isInspector ? event.key === "ArrowLeft" : event.key === "ArrowRight";
-          if (!increase && !(isVertical ? event.key === "ArrowDown" : isInspector ? event.key === "ArrowRight" : event.key === "ArrowLeft")) return;
-          const delta = increase ? step : -step;
-          this._panelSizes[sizeKey] = clamp((Number(this._panelSizes[sizeKey]) || 292) + delta, sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180, sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620);
+          const current = Number(this._panelSizes[sizeKey]) || (sizeKey === "navigation" ? 224 : sizeKey === "inspector" ? 292 : 300);
+          const next = event.key === "Home" ? minimum : event.key === "End" ? maximum : current + (event.key === increaseKey ? step : -step);
+          this._panelSizes[sizeKey] = clamp(next, minimum, maximum);
           applyPanelSizes();
           await savePanelSizes();
         });
