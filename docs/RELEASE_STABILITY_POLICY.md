@@ -1,3 +1,7 @@
+## Revisão atual 1.0.0.123 — Biblioteca hierárquica
+
+A PR #107 prepara a 1.0.0.123 com a nova taxonomia da Biblioteca, pastas hierárquicas, menus contextuais, criação de assets/atalhos/layouts/componentes e previews sem painel interno. A publicação estável depende da validação automatizada e da integração com o marcador [release]. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente; não declarar novo checkpoint funcional antes do retorno do usuário.
+
 ## Estado da revisão 1.0.0.122 — Biblioteca e transferência
 
 A versão 1.0.0.122 está em revisão na PR #106. Ela acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes pessoais no Canvas; também fixa a janela da ficha em 800 × 836 px. CI e testes automatizados ainda precisam concluir nesta revisão. A validação visual no Foundry VTT 14 build 360 permanece pendente, portanto esta em revisão não é um novo checkpoint funcional.
