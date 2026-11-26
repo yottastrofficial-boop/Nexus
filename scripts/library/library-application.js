@@ -947,6 +947,8 @@ export function createLibraryApplicationClass({
     }
 
     async close(options = {}) {
+      this._closeLibraryContextMenu?.();
+      this._closeLibraryContextMenu = null;
       if (this._searchTimer) clearTimeout(this._searchTimer);
       this._searchTimer = 0;
       this._explorer = null;
