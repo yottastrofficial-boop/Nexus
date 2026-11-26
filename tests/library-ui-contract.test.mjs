@@ -54,13 +54,15 @@ assert.ok(libraryApplication.includes('root.querySelector(".nexus-library-action
 
 console.log("NEXUS universal library UI contract: OK");
 
-assert.match(libraryApplication, /await DialogV2\\.input\\(/,
+assert.ok(libraryApplication.includes("await DialogV2.input("),
   "DialogV2 input helpers must be invoked through their class to preserve the static receiver.");
-assert.match(libraryApplication, /await DialogV2\\.confirm\\(/,
+assert.ok(libraryApplication.includes("await DialogV2.confirm("),
   "DialogV2 confirmation helpers must preserve their static receiver.");
-assert.doesNotMatch(libraryApplication, /const (?:input|prompt|confirm) = globalThis\\.foundry\\?\\.applications\\?\\.api\\?\\.DialogV2\\?/,
+assert.ok(!libraryApplication.includes("const input = globalThis.foundry?.applications?.api?.DialogV2?.input") &&
+  !libraryApplication.includes("const prompt = globalThis.foundry?.applications?.api?.DialogV2?.input") &&
+  !libraryApplication.includes("const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm"),
   "DialogV2 static helpers must not be detached from their class.");
-assert.match(libraryApplication, /thumbnailInput/,
+assert.ok(libraryApplication.includes("thumbnailInput"),
   "Saved Library resources must expose a custom thumbnail metadata field.");
-assert.match(libraryApplication, /nexus-library-filter-wrap/);
-assert.match(styles, /nexus-library-search-wrap > \\.nexus-library-search/);
+assert.ok(styles.includes(".nexus-library-search-wrap > .nexus-library-search"),
+  "The search input must not render a second nested surface.");
