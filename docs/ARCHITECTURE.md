@@ -1,3 +1,12 @@
+## Atualização arquitetural — Biblioteca 1.0.0.122
+
+- library-search-query.js define um parser puro de consultas com termos AND, frases, qualificadores e exclusões.
+- foundry-document-bridge.js indexa metadados leves de documentos do mundo e de compêndios, pede campos adicionais por getIndex({ fields }) e mantém a resolução completa sob demanda.
+- O payload de arraste de documentos usa o contrato nativo { type, uuid }; o NEXUS não substitui handlers de diretório, Canvas ou ActorSheetV2.
+- O Canvas aceita arraste de componentes pessoais salvos; coordenadas de tela são convertidas para o espaço lógico e submetidas ao snap/limites da grade.
+- A janela ApplicationV2 da ficha é fixa em 800 × 836 px. Dimensões do Canvas continuam persistidas no layout e independentes da janela.
+- A busca/indexação não equivale a um adaptador de conteúdo externo. Fontes web, conversão de schemas e destinos especializados exigem adaptadores explícitos, prévia e confirmação.
+- Nenhuma mecânica de personagem é inferida pelo importador: o mapeamento depende dos schemas oficiais do NEXUS RPG.
 # NEXUS — Arquitetura técnica e plano de estabilização
 
 ## Estado deste documento

@@ -106,3 +106,29 @@ test("reutiliza metadados e invalida somente o documento atualizado", async () =
     else globalThis.Hooks = previousHooks;
   }
 });
+
+
+test("pesquisa estruturada encontra campos indexados de documentos e compêndios", async () => {
+  const pack = {
+    documentName: "Item",
+    collection: "nexus.core",
+    metadata: { label: "Compêndio NEXUS" },
+    getIndex: async () => [
+      { _id: "spell-1", name: "Bola de Fogo", type: "spell", system: { description: { value: "Uma esfera flamejante" }, school: "evocation" } },
+      { _id: "item-2", name: "Capa de Viagem", type: "equipment", system: { description: { value: "Tecido resistente" } } }
+    ]
+  };
+  const bridge = createFoundryDocumentBridge({
+    gameRef: { user: { isGM: true }, packs: new Map([["nexus.core", pack]]) },
+    fromUuidRef: async uuid => ({ uuid, name: "Documento carregado" })
+  });
+  const result = await bridge.list({
+    type: "items",
+    query: 'type:spell source:"compêndio nexus"',
+    compendiumIds: ["nexus.core"]
+  });
+  assert.equal(result.total, 1);
+  assert.equal(result.items[0].name, "Bola de Fogo");
+  assert.equal(result.items[0].documentType, "spell");
+  assert.match(result.items[0].searchText, /flamejante/i);
+});

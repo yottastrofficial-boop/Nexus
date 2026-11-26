@@ -538,7 +538,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
     position: { width: 800, height: 836 },
-    window: { resizable: true }
+    window: { resizable: false }
   }, { inplace: false });
 
   static PARTS = {
@@ -1977,7 +1977,15 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const verticalResource = type === "sheet-resource" && options.template?.sheetOrientation === "vertical";
     const baseW = clamp(Number(options.template?.w) || (verticalResource ? 100 : Number(d.w)) || 160, 80, Math.min(600, layout.width));
     const baseH = clamp(Number(options.template?.h) || (verticalResource ? 190 : Number(d.h)) || 90, 48, Math.min(500, layout.height));
-    const pos = this._findFreePosition(layout, baseW, baseH);
+    const requestedPosition = options.position && typeof options.position === "object" ? options.position : null;
+    const snapStep = layout.snapEnabled ? Math.max(1, Number(layout.gridSize) || 10) : 1;
+    const snapCoordinate = value => Math.round((Number.isFinite(Number(value)) ? Number(value) : 0) / snapStep) * snapStep;
+    const pos = requestedPosition
+      ? {
+          x: clamp(snapCoordinate(requestedPosition.x), 0, Math.max(0, layout.width - baseW)),
+          y: clamp(snapCoordinate(requestedPosition.y), 0, Math.max(0, layout.height - baseH))
+        }
+      : this._findFreePosition(layout, baseW, baseH);
     const id = `cmp-${foundry.utils.randomID(8)}`;
     const component = { id, type, ...pos, w: baseW, h: baseH, z: 0, stackOrder: Math.max(-1, ...layout.components.map(c => Number(c.stackOrder) || 0)) + 1 };
     if (type === "token") Object.assign(component, { dataPath: options.template?.dataPath ?? "identity.token.img", tokenFrameMode: "solid", tokenFrameSource: "", tokenFrameColor: "#78b7e8", tokenFrameWidth: 3, tokenShape: "circle", tokenOverlay: "", tokenBackgroundColor: "#202e3e" });
@@ -2074,13 +2082,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
     return true;
   }
 
-  async _addSavedLibraryComponent(id, overrides = {}) {
+  async _addSavedLibraryComponent(id, overrides = {}, position = null) {
     const saved = game.user?.getFlag?.("nexus", "libraryComponents") ?? [];
     const item = saved.find(entry => entry.id === id);
     if (!item || !COMPONENTS[item.type]) return false;
     const layouts = await this._readLayouts(), active = this._activeLayoutId(), layout = layouts[active];
     if (!layout) return false;
-    const componentId = await this._addComponent(item.type, { format: item.settings?.format, template: item.settings });
+    const componentId = await this._addComponent(item.type, { format: item.settings?.format, template: item.settings, position });
     if (!componentId) return false;
     const currentLayouts = await this._readLayouts(), currentLayout = currentLayouts[active];
     const component = currentLayout?.components?.find(entry => entry.id === componentId);
@@ -2376,11 +2384,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
     }
     this._syncScopedThemeSurfaces(layout);
-    if (["width", "height"].includes(key)) {
-      const appWidth = clamp(layout.width + 40, 800, Math.max(800, window.innerWidth - 24));
-      const appHeight = clamp(Math.min(layout.height + 100, window.innerHeight - 24), 500, Math.max(500, window.innerHeight - 24));
-      this.setPosition({ width: appWidth, height: appHeight });
-    }
+    // The application window has fixed chrome dimensions (800 × 836).
+    // Canvas dimensions remain independent and are handled by its own viewport.
     const canvas = this.element?.querySelector(".nexus-canvas");
     if (canvas) {
       canvas.dataset.layoutWidth = String(layout.width); canvas.dataset.layoutHeight = String(layout.height);

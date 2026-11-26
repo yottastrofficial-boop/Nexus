@@ -1,16 +1,16 @@
-## Atualização 1.0.0.121
+## Atualização 1.0.0.122
 
-A atualização corrige os diálogos da Biblioteca, compacta o filtro, elimina a borda duplicada da pesquisa, padroniza as miniaturas, adiciona miniaturas personalizadas seguras e apresenta prévias de paleta nos temas. A ficha passa a abrir em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A atualização acrescenta pesquisa estruturada à Biblioteca, amplia a indexação de metadados dos compêndios, habilita arraste nativo de documentos Foundry por UUID e permite inserir componentes pessoais diretamente no Canvas. A janela da ficha permanece fixa em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.121 · Manifesto 1.0.0.121 (estável) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.122 · Manifesto 1.0.0.122 (estável) · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.121-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.122-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -20,7 +20,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-****Build candidata:** a 1.0.0.121 corrige interações e apresentação da Biblioteca e acrescenta 36 px à altura inicial da ficha. CI e pacote serão confirmados pelo workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
+****Build candidata:** a 1.0.0.122 acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes no Canvas. A janela da ficha é fixa em 800 × 836 px. CI e pacote serão confirmados pelo workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 
 ## Visão geral
 
@@ -32,9 +32,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual na main — 1.0.0.121
+## Implementação atual na main — 1.0.0.122
 
-A base 1.0.0.121 preserva a geometria nativa da sidebar V14, estiliza os controles na estrutura real, corrige o workspace para não reservar coluna vazia e limpa o alvo do Inspector ao remover seleção. CI/release e validação manual devem ser confirmados. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base 1.0.0.122 preserva a geometria nativa da sidebar V14, estiliza os controles na estrutura real, corrige o workspace para não reservar coluna vazia e limpa o alvo do Inspector ao remover seleção. CI/release e validação manual devem ser confirmados. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -52,10 +52,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Build da main | 1.0.0.121 (teste visual pendente) |
+| Build da main | 1.0.0.122 (teste visual pendente) |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.121 inclui navegação flutuante de layouts, remoção de molduras redundantes da Hotbar e lista de jogadores e correção de compatibilidade entre ícones nativos e tipografia personalizável, além dos refinamentos anteriores do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.122 inclui navegação flutuante de layouts, remoção de molduras redundantes da Hotbar e lista de jogadores e correção de compatibilidade entre ícones nativos e tipografia personalizável, além dos refinamentos anteriores do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -124,6 +124,12 @@ Use o endereço do `manifest.json` acima como manifesto de instalação e atuali
 - [Histórico de alterações](CHANGELOG.md)
 - [Documentação da biblioteca](assets/library/README.md)
 
+## Pesquisa avançada da Biblioteca
+
+A busca aceita texto livre, frases entre aspas e qualificadores combináveis: type:, source:, folder:, tag: e name:. Use -termo para excluir um termo. Exemplo genérico: type:... source:"nome da fonte" -termo. A consulta usa os metadados indexados pelo Foundry e os campos adicionais solicitados ao índice do compêndio; os documentos completos continuam sendo resolvidos somente quando necessário.
+
+Cards de documentos Foundry usam o payload nativo por UUID. O destino (diretório, Canvas ou ficha) mantém a responsabilidade pelo próprio fluxo de importação. Componentes pessoais salvos podem ser arrastados para o Canvas NEXUS, com posicionamento respeitando a grade ativa.
+
 ## Interações de componentes
 
 O painel Comportamento oferece um editor de fluxos Trigger → Conditions → Actions. Um componente pode ter vários fluxos independentes; cada fluxo aceita múltiplos Triggers, condições AND/OR e Actions configuráveis e reordenáveis. A execução é sequencial e oferece política de erro. Ações antigas de rolagem e alternância continuam legíveis. Consulte [o contrato de propriedades e interações](docs/PROPERTY_AND_INTERACTION_SYSTEM.md).
@@ -143,7 +149,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão publicada da `main` e o manifesto estável são **1.0.0.121**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão publicada da `main` e o manifesto estável são **1.0.0.122**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 

@@ -624,7 +624,7 @@ export function createLibraryCatalogExplorer({
     }
 
     const title = makeElement("strong", "", resource.name);
-    const meta = makeElement("small", "", `${resource.type} · ${resource.origin}`);
+    const meta = makeElement("small", "", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
     select.append(preview, title, meta);
 
     const isFavorite = preferences.favorites.includes(key);
@@ -641,11 +641,24 @@ export function createLibraryCatalogExplorer({
     card.addEventListener("dragstart", event => {
       const separator = key.indexOf(":");
       if (separator <= 0 || !event.dataTransfer) return;
-      event.dataTransfer.setData("application/x-nexus-library-resource", JSON.stringify({
+      const payload = {
+        providerId: resource.providerId,
         collection: key.slice(0, separator),
-        entryId: key.slice(separator + 1)
-      }));
-      event.dataTransfer.effectAllowed = "move";
+        entryId: key.slice(separator + 1),
+        reference: resource.reference,
+        kind: resource.kind,
+        type: resource.type,
+        name: resource.name
+      };
+      event.dataTransfer.setData("application/x-nexus-library-resource", JSON.stringify(payload));
+      // Native Foundry drag contract: documents remain UUID references and are
+      // resolved by the destination's own drop handler.
+      if (resource.kind === "document" && resource.reference?.uuid && resource.reference?.documentName) {
+        const nativeData = JSON.stringify({ type: resource.reference.documentName, uuid: resource.reference.uuid });
+        event.dataTransfer.setData("text/plain", nativeData);
+        event.dataTransfer.setData("application/json", nativeData);
+      }
+      event.dataTransfer.effectAllowed = "copyMove";
     });
     card.append(select, favorite);
     return card;

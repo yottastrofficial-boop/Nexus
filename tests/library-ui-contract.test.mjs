@@ -8,6 +8,11 @@ const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs",
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
 
+const actorSheet = readFileSync(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
+const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-listeners.js", import.meta.url), "utf8");
+const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-bridge.js", import.meta.url), "utf8");
+
+
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
 assert.match(styles, /\.nexus-library-application \.nexus-library-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) var\(--nexus-library-inspector-width\)/,
@@ -67,3 +72,24 @@ assert.ok(catalogExplorer.includes("thumbnailInput"),
   "Saved Library resources must expose a custom thumbnail metadata field.");
 assert.ok(styles.includes(".nexus-library-search-wrap > .nexus-library-search"),
   "The search input must not render a second nested surface.");
+
+
+assert.match(libraryTemplate, /aria-describedby="nexus-library-search-help"/,
+  "The advanced search syntax must be discoverable to assistive technology.");
+assert.match(catalogExplorer, /application\/x-nexus-library-resource/,
+  "Library cards must preserve the NEXUS transfer payload.");
+assert.match(catalogExplorer, /setData\("text\/plain", nativeData\)/,
+  "Native Foundry documents must use the standard UUID drag contract.");
+assert.match(actorListeners, /_addSavedLibraryComponent\(payload\.entryId, \{\}, position\)/,
+  "Saved components must be insertable by dropping directly onto the Canvas.");
+assert.match(actorListeners, /nexusLibraryCanvasDropBound/,
+  "Canvas drop listeners must be bound once per rendered sheet root.");
+assert.match(actorSheet, /position: \{ width: 800, height: 836 \}/,
+  "The initial sheet window must preserve the canvas-plus-header geometry.");
+assert.match(actorSheet, /window: \{ resizable: false \}/,
+  "The character sheet window must retain the requested fixed dimensions.");
+assert.match(documentBridge, /matchesLibrarySearchQuery/,
+  "The Foundry bridge must use the structured search query engine.");
+assert.match(documentBridge, /documentType: String\(entry\.type \?\? ""\)/,
+  "Compendium index subtype must be retained for precise filtering.");
+console.log("NEXUS library import/search contracts: OK");

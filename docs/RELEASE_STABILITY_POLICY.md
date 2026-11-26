@@ -1,3 +1,11 @@
+## Estado da revisão 1.0.0.122 — Biblioteca e transferência
+
+A versão 1.0.0.122 está em revisão na PR #106. Ela acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes pessoais no Canvas; também fixa a janela da ficha em 800 × 836 px. CI e testes automatizados ainda precisam concluir nesta revisão. A validação visual no Foundry VTT 14 build 360 permanece pendente, portanto esta em revisão não é um novo checkpoint funcional.
+
+## Estado publicado mais recente na main — 1.0.0.121
+
+A 1.0.0.121 é a versão publicada mais recente na main antes da integração da PR #106. A publicação e o manifesto confirmam a disponibilidade do pacote, mas não substituem a avaliação manual no Foundry. O último checkpoint funcional confirmado permanece 1.0.0.70.
+
 ## Registro de código 1.0.0.121
 
 A revisão corrige os fluxos de diálogo da Biblioteca, a apresentação dos filtros/pesquisa, miniaturas e altura inicial da ficha. A aprovação de CI e publicação do pacote não equivale a validação funcional no Foundry. O último checkpoint funcional confirmado permanece 1.0.0.70 até avaliação manual.

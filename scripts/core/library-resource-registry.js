@@ -124,6 +124,8 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     description: cleanText(raw.description, 1000),
     tags: Object.freeze(tags),
     thumbnail: normalizeThumbnailSource(raw.thumbnail),
+    documentType: cleanText(raw.documentType, 64),
+    packLabel: cleanText(raw.packLabel, 120),
     previewColors: Object.freeze((Array.isArray(raw.previewColors) ? raw.previewColors : []).slice(0, 8).map(item => ({ label: cleanText(item?.label, 32), value: typeof item?.value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.value) ? item.value : "" })).filter(item => item.label && item.value)),
     folder: cleanText(raw.folder, 160),
     origin: cleanText(raw.origin, 48) || defaultOrigin,
@@ -135,7 +137,7 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
 }
 
 function matchesText(resource, query) {
-  if (!query) return true;
+  if (!query || resource.providerId === "foundry-documents") return true;
   const haystack = [resource.name, resource.description, resource.type, resource.folder, ...resource.tags]
     .join(" ").toLocaleLowerCase();
   return haystack.includes(query);
@@ -605,13 +607,21 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     id: record.uuid,
     kind: "document",
     type: record.type,
+    documentType: record.documentType ?? "",
+    packLabel: record.packLabel ?? "",
     name: record.name,
     description: "",
     tags: [record.type, record.isCompendium ? "compendium" : "world"],
     thumbnail: record.img,
     folder: record.folder,
     origin: record.isCompendium ? "compendium" : "world",
-    reference: { providerId: "foundry-documents", uuid: record.uuid },
+    reference: {
+      providerId: "foundry-documents",
+      uuid: record.uuid,
+      ...(record.documentName ? { documentName: record.documentName } : {}),
+      ...(record.documentType ? { documentType: record.documentType } : {}),
+      ...(record.pack ? { pack: record.pack } : {})
+    },
     capabilities: ["resolve"],
     isExternal: false,
     isCompendium: record.isCompendium
@@ -648,7 +658,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
           return null;
         }
       }));
-      const items = records.filter(record => record && (requestedType === "all" || record.type === requestedType))
+      const items = records.filter(record => record && !(record.documentName === "Item" && String(record.documentType ?? "").toLocaleLowerCase() === "weapon") && (requestedType === "all" || record.type === requestedType))
         .map(toResource).filter(resource => (!requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag))) && (origin === "all" || resource.origin === origin));
       return { items, total: items.length, hasMore: false, nextCursor: null, errors: [] };
     }

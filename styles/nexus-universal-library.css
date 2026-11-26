@@ -281,12 +281,12 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   right: 8px;
   z-index: 20;
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px !important;
-  width: min(620px, calc(100vw - 40px)) !important;
-  max-height: min(44vh, 360px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  width: min(500px, calc(100vw - 32px)) !important;
+  max-height: min(42vh, 320px);
   overflow: auto;
-  padding: 12px !important;
+  padding: 10px !important;
   border: 1px solid var(--nexus-panel-border, #40546b) !important;
   border-radius: 9px !important;
   background: var(--nexus-panel-surface, #202d3d) !important;
@@ -303,7 +303,7 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   margin: 0;
 }
 html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-compendium-filter {
-  grid-column: span 2;
+  grid-column: 1 / -1;
 }
 html.nexus-design-system .nexus-library-generic-preview {
   display: grid !important;
@@ -348,4 +348,11 @@ html.nexus-design-system .nexus-library-generic-theme-swatch {
     right: 0;
     width: min(460px, calc(100vw - 28px)) !important;
   }
+}
+
+
+html.nexus-design-system .nexus-library-drop-target {
+  outline: 2px dashed var(--nexus-accent-color, #78b7e8);
+  outline-offset: -4px;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--nexus-accent-color, #78b7e8) 18%, transparent) 1px, transparent 1px);
 }

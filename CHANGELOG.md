@@ -1,3 +1,13 @@
+## 1.0.0.122 — Biblioteca: pesquisa estruturada e transferência nativa
+
+- Adiciona consulta avançada com termos combinados, frases entre aspas, qualificadores type:, source:, folder:, tag:, name: e exclusão por -termo.
+- Amplia o índice de compêndios com campos de metadados e descrição, usando CompendiumCollection.getIndex({ fields }) sem carregar documentos completos em massa.
+- A pesquisa considera nome, subtipo, pasta, descrição, identificador e metadados indexados; mantém carregamento paginado e verificação de permissões.
+- Cards de documentos Foundry emitem o formato nativo de arraste por UUID, permitindo que diretórios, Canvas e fichas compatíveis executem seus próprios fluxos de drop.
+- Componentes pessoais salvos podem ser arrastados diretamente para o Canvas da ficha; a posição respeita escala, limites e snap da grade ativa.
+- A janela da ficha passa a permanecer fixa em 800 × 836 px; as dimensões internas do Canvas continuam independentes.
+- Adiciona testes de consulta, metadados indexados, contratos de arraste, inserção no Canvas e geometria fixa.
+- A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 ## 1.0.0.121 — Biblioteca NEXUS e refinamento da ficha
 
 - Corrige a chamada dos métodos estáticos de DialogV2 na Biblioteca e no adaptador de temas, preservando o contexto da classe; isso corrige o caminho que podia causar o erro de leitura de `prompt` ao gerenciar pastas e coleções.
