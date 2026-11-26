@@ -600,13 +600,23 @@ export function createLibraryCatalogExplorer({
 
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
-    if (thumbnail && /^(https?:\/\/|\/|(?:\.\.?\/)?[a-z0-9_.-]+(?:\/[a-z0-9_.-]+)*)/i.test(thumbnail)) {
+    if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
       preview.append(image);
+    } else if (resource.kind === "theme" && resource.previewColors?.length) {
+      preview.dataset.previewKind = "theme";
+      const palette = makeElement("span", "nexus-library-generic-theme-swatches");
+      for (const color of resource.previewColors.slice(0, 6)) {
+        const swatch = makeElement("i", "nexus-library-generic-theme-swatch");
+        swatch.style.backgroundColor = color.value;
+        swatch.title = color.label;
+        palette.append(swatch);
+      }
+      preview.append(palette);
     } else {
       const icon = makeElement("i", getLibraryResourceIcon(resource));
       icon.setAttribute("aria-hidden", "true");
@@ -824,6 +834,13 @@ export function createLibraryCatalogExplorer({
           tagsInput.maxLength = 240;
           tagsInput.value = resource.tags.join(", ");
           tagsLabel.append(tagsInput);
+          const thumbnailLabel = makeElement("label", "", "Miniatura (URL ou caminho seguro)");
+          const thumbnailInput = makeElement("input");
+          thumbnailInput.type = "text";
+          thumbnailInput.maxLength = 2048;
+          thumbnailInput.value = resource.thumbnail ?? "";
+          thumbnailInput.placeholder = "icons/meu-asset.webp ou https://…";
+          thumbnailLabel.append(thumbnailInput);
           const save = makeElement("button", "", "Salvar metadados");
           save.type = "button";
           save.addEventListener("click", async () => {
@@ -831,14 +848,15 @@ export function createLibraryCatalogExplorer({
               await registry.executeAction(action.id, resource.reference, resource, {
                 name: nameInput.value,
                 description: descriptionInput.value,
-                tags: tagsInput.value.split(",").map(tag => tag.trim()).filter(Boolean)
+                tags: tagsInput.value.split(",").map(tag => tag.trim()).filter(Boolean),
+                thumbnail: thumbnailInput.value
               });
               await render();
             } catch (error) {
               editor.append(makeElement("p", "nexus-library-empty", "Não foi possível salvar: " + error.message));
             }
           });
-          editor.append(nameLabel, descriptionLabel, tagsLabel, save);
+          editor.append(nameLabel, descriptionLabel, tagsLabel, thumbnailLabel, save);
           detail.replaceChildren(heading, meta, description, themePreview, ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
