@@ -1,13 +1,74 @@
-import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect } from "./catalog-explorer.js";
+import { createLibraryCatalogExplorer, populateLibraryCompendiumSelect, getLibraryCatalogPreferenceReference } from "./catalog-explorer.js";
 import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
-import { createLibraryFolder, normalizeLibraryPreferences, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection } from "../core/library-preferences.js";
+import { createLibraryFolder, normalizeLibraryPreferences, ensureLibraryDefaultFolders, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, duplicateLibraryFolderTree, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection, createLibraryShortcut, removeLibraryShortcut } from "../core/library-preferences.js";
+import { updateNexusLibraryCollection } from "../core/library-store.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
  * by the sheet adapter. It owns window lifecycle and navigation, not providers
  * or persisted definitions.
  */
+const showLibraryContextMenu = (event, items) => {
+  event.preventDefault();
+  document.querySelectorAll(".nexus-library-context-menu").forEach(menu => menu.remove());
+  const menu = document.createElement("div");
+  menu.className = "nexus-library-context-menu";
+  menu.setAttribute("role", "menu");
+  menu.style.position = "fixed";
+  menu.style.zIndex = "100000";
+  menu.style.left = Math.max(8, Math.min(event.clientX, window.innerWidth - 250)) + "px";
+  menu.style.top = Math.max(8, Math.min(event.clientY, window.innerHeight - 360)) + "px";
+  for (const item of items) {
+    if (item.separator) {
+      const separator = document.createElement("div");
+      separator.className = "nexus-library-context-separator";
+      separator.setAttribute("role", "separator");
+      menu.append(separator);
+      continue;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.textContent = item.label;
+    button.disabled = item.disabled === true;
+    if (item.danger) button.classList.add("is-danger");
+    button.addEventListener("click", async () => {
+      cleanup();
+      try { await item.action?.(); }
+      catch (error) { globalThis.ui?.notifications?.warn?.(String(error?.message ?? error)); }
+    });
+    menu.append(button);
+  }
+  document.body.append(menu);
+  const cleanup = () => {
+    menu.remove();
+    document.removeEventListener("pointerdown", onPointerDown, true);
+    document.removeEventListener("keydown", onKeyDown, true);
+  };
+  const onPointerDown = nextEvent => { if (!menu.contains(nextEvent.target)) cleanup(); };
+  const onKeyDown = nextEvent => { if (nextEvent.key === "Escape") { nextEvent.preventDefault(); cleanup(); } };
+  document.addEventListener("pointerdown", onPointerDown, true);
+  document.addEventListener("keydown", onKeyDown, true);
+  menu.querySelector("button:not(:disabled)")?.focus();
+  return cleanup;
+};
+
+const promptLibraryValue = async (title, fields) => {
+  const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+  if (typeof DialogV2?.input !== "function") throw new Error("O diálogo de entrada do Foundry não está disponível.");
+  const content = fields.map(field => '<label class="nexus-library-dialog-field">' + field.label +
+    '<input type="text" name="' + field.name + '" maxlength="' + (field.maxLength ?? 160) +
+    '" autocomplete="off" value="' + String(field.value ?? "").replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;") + '"></label>').join("");
+  return DialogV2.input({ window: { title }, content, ok: { label: "Confirmar" }, rejectClose: false });
+};
+
+const confirmLibraryAction = async (title, content) => {
+  const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+  if (typeof DialogV2?.confirm !== "function") throw new Error("O diálogo de confirmação do Foundry não está disponível.");
+  return DialogV2.confirm({ window: { title }, content, yes: { label: "Confirmar" }, no: { label: "Cancelar" }, rejectClose: false });
+};
+
 export function createLibraryApplicationClass({
   ApplicationV2,
   HandlebarsApplicationMixin,
@@ -69,6 +130,8 @@ export function createLibraryApplicationClass({
       this._explorer = null;
       this._context = {};
       this._searchTimer = 0;
+      this._libraryClipboard = null;
+      this._closeLibraryContextMenu = null;
     }
 
     setContext(context = {}) {
@@ -83,16 +146,21 @@ export function createLibraryApplicationClass({
 
     async _onRender(context, options) {
       await super._onRender(context, options);
-      this._mountExplorer();
+      await this._mountExplorer();
     }
 
-    _mountExplorer() {
+    async _mountExplorer() {
       const root = this.element;
       const container = root?.querySelector("[data-library-generic-items]");
       const detail = root?.querySelector("[data-library-generic-details]");
       if (!container || !detail) return;
 
-      const preferences = normalizeLibraryPreferences(this._getPreferences());
+      let preferences = normalizeLibraryPreferences(this._getPreferences());
+      if (!preferences.baseFoldersInitialized) {
+        preferences = ensureLibraryDefaultFolders(preferences);
+        try { await this._savePreferences(preferences); }
+        catch (error) { globalThis.ui?.notifications?.warn?.("Não foi possível inicializar a estrutura da Biblioteca: " + error.message); }
+      }
       this._state.viewMode = this._state.viewMode === "list" ? "list" : "grid";
       this._explorer = createLibraryCatalogExplorer({
         registry: this._registry,
