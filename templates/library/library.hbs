@@ -1,4 +1,19 @@
 <section class="nexus-tool-panel nexus-library-panel nexus-library-standalone" data-tool-panel="library">
+  <div class="nexus-library-tabs" data-library-tabs role="tablist" aria-label="Abas da Biblioteca"></div>
+  <div class="nexus-library-navigation-bar">
+    <div class="nexus-library-navigation-controls" role="group" aria-label="Navegação da Biblioteca">
+      <button type="button" data-library-history-back aria-label="Voltar" title="Voltar" disabled><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+      <button type="button" data-library-history-forward aria-label="Avançar" title="Avançar" disabled><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+      <button type="button" data-library-history-up aria-label="Subir um nível" title="Subir um nível" disabled><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+    </div>
+    <nav class="nexus-library-breadcrumbs" data-library-breadcrumbs aria-label="Caminho atual"></nav>
+    <div class="nexus-library-navigation-search" data-library-navigation-search></div>
+  </div>
+  <div class="nexus-library-commandbar" role="toolbar" aria-label="Editar conteúdo da Biblioteca">
+    <button type="button" data-library-create-new-proxy title="Criar ou importar recurso"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Novo</span></button>
+    <button type="button" data-library-refresh title="Atualizar conteúdo"><i class="fa-solid fa-rotate" aria-hidden="true"></i><span>Atualizar</span></button>
+    <span class="nexus-library-commandbar-status" data-library-commandbar-status>Selecione um recurso para ver ações</span>
+  </div>
   <div class="nexus-library-toolbar nexus-library-toolbar-unified">
     <div class="nexus-library-toolbar-main">
       <div class="nexus-library-search-wrap">
@@ -91,6 +106,7 @@
       <div class="nexus-library-custom-folders" data-library-app-collections></div>
       <button type="button" data-library-create-collection class="nexus-library-create-folder"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Nova coleção</span></button>
     </nav>
+    <button type="button" class="nexus-library-panel-resizer nexus-library-sidebar-resizer" data-library-resize-sidebar aria-label="Redimensionar painel de pastas" title="Arraste para redimensionar; use as setas do teclado"></button>
     <section class="nexus-library-section-panel nexus-library-generic-panel" data-library-section-panel="collection">
       <div class="nexus-library-workspace">
         <main class="nexus-library-main">
@@ -100,6 +116,7 @@
           </div>
           <div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items data-library-list-heading="Todos os recursos"></div>
         </main>
+        <button type="button" class="nexus-library-panel-resizer nexus-library-inspector-resizer" data-library-resize-inspector aria-label="Redimensionar painel de pré-visualização" title="Arraste para redimensionar; use as setas do teclado"></button>
         <aside class="nexus-library-details nexus-library-generic-details" data-library-generic-details>
           <div class="nexus-library-detail-placeholder">
             <strong>Inspector</strong>
