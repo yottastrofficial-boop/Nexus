@@ -1,3 +1,14 @@
+## 1.0.0.124 — revisão arquitetural e contratos de serviço
+
+- Adiciona registro de serviços NEXUS com factories, dependências explícitas, resolução sob demanda, compartilhamento de instâncias, detecção de dependências circulares, diagnóstico e encerramento reverso.
+- Publica os serviços centrais existentes em `game.nexus.services`, mantendo as APIs `game.nexus.*` para compatibilidade.
+- Extrai os contratos de eventos de interação e Foundry para `scripts/core/logic-events.js`; schemas deixam de depender dos módulos de engine/integração.
+- Adiciona testes do registro de serviços e do grafo de imports para caminhos locais quebrados e ciclos estáticos.
+- Adiciona revisão arquitetural de ponta a ponta e plano incremental, com hotspots, ownership, riscos e etapas de modernização.
+- Corrige o estado e a formatação do README.
+- CI validou 70/70 scripts/assets por sintaxe e 50/50 arquivos de teste; validação do pacote aprovada.
+- A migração completa do bootstrap para DI, extração da ficha/CSS/templates e teste visual no Foundry VTT 14 permanecem etapas futuras.
+
 ## 1.0.0.123 — Biblioteca: taxonomia, hierarquia e criação universal
 
 - Inicializa uma estrutura de pastas por domínio (Atores, Itens, Cenas, Documentos, Baralhos, Tabelas de rolagem, Áudio, Compêndios, Macros, Assets globais e NEXUS) apenas uma vez, preservando pastas existentes.
