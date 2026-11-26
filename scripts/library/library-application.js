@@ -328,7 +328,7 @@ export function createLibraryApplicationClass({
       refreshShortcuts();
 
       const appRoot = root.closest(".nexus-library-application") ?? root;
-      const nativeHeader = appRoot.querySelector(".window-header");
+      const nativeHeader = this.window?.header ?? appRoot.querySelector(".window-header");
       const tabStrip = root.querySelector("[data-library-tabs]");
       if (nativeHeader && tabStrip && !nativeHeader.contains(tabStrip)) {
         nativeHeader.classList.add("nexus-library-native-header");
