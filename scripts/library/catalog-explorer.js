@@ -844,9 +844,9 @@ export function createLibraryCatalogExplorer({
         }
 
         if (action.requiresConfirmation) {
-          const confirm = globalThis.foundry?.applications?.api?.DialogV2?.confirm;
-          if (typeof confirm !== "function") return;
-          const accepted = await confirm({
+          const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+          if (typeof DialogV2?.confirm !== "function") return;
+          const accepted = await DialogV2.confirm({
             window: { title: action.label },
             content: "<p>Deseja realmente executar esta operação?</p>",
             rejectClose: false
