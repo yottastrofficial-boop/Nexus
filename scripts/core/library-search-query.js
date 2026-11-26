@@ -7,16 +7,16 @@ const normalize = value => String(value ?? "").normalize("NFKD").replace(/[\u030
 
 export function parseLibrarySearchQuery(input = "") {
   const source = String(input ?? "").slice(0, 240);
-  const tokens = source.match(/(?:^|\\s)(-?)([a-z][a-z0-9_-]*:)?("[^"]*"|'[^']*'|[^\\s]+)/giu) ?? [];
+  const tokens = source.match(/(?:^|\s)(-?)([a-z][a-z0-9_-]*:)?("[^"]*"|'[^']*'|[^\s]+)/giu) ?? [];
   const terms = [];
   for (const raw of tokens) {
     const token = raw.trim();
     const negative = token.startsWith("-");
     const body = negative ? token.slice(1) : token;
-    const match = body.match(/^([a-z][a-z0-9_-]*:)?("[^"]*"|'[^']*'|[^\\s]+)$/iu);
+    const match = body.match(/^([a-z][a-z0-9_-]*:)?("[^"]*"|'[^']*'|[^\s]+)$/iu);
     if (!match) continue;
     const field = String(match[1] ?? "").slice(0, -1).toLocaleLowerCase();
-    const value = normalize(match[2].replace(/^("|' )|("|' )$/g, "").replace(/^['"]|['"]$/g, ""));
+    const value = normalize(match[2].replace(/^["']|["']$/g, ""));
     if (!value) continue;
     if (field && !["type", "source", "folder", "tag", "name"].includes(field)) {
       terms.push({ field: "text", value: normalize(body), negative });
