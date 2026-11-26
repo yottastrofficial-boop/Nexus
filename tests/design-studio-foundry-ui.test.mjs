@@ -43,11 +43,11 @@ assert.match(bootstrap, /application\.render\(\{ force: true \}\)/);
 
 const sharedButtonMarker = "/* Shared button styling without taking ownership of icon fonts. */";
 const sharedButtonStart = designCss.indexOf(sharedButtonMarker);
-const sharedButtonEnd = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */", sharedButtonStart);
+const sharedButtonEnd = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls.", sharedButtonStart);
 assert.ok(sharedButtonStart >= 0 && sharedButtonEnd > sharedButtonStart);
 const sharedButtonRule = designCss.slice(sharedButtonStart, sharedButtonEnd);
 assert.doesNotMatch(sharedButtonRule, /font\s*:/);
-const textButtonStart = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */");
+const textButtonStart = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls.");
 const textButtonEnd = designCss.indexOf("}", textButtonStart);
 const textButtonRule = designCss.slice(textButtonStart, textButtonEnd + 1);
 assert.match(textButtonRule, /:is\(button, \.button, \.ui-control, \.control-tool\):not\(\[class\*="fa-"\]\)/,

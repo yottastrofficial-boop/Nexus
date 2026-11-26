@@ -77,13 +77,13 @@ assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-soli
   "The Design System must leave Font Awesome font selection to Foundry's native styles.");
 assert.match(designSystem, /Native icon glyphs remain owned by Foundry\/Font Awesome/);
 const sharedButtonStart = designSystem.indexOf("/* Shared button styling without taking ownership of icon fonts. */");
-const textButtonStart = designSystem.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */");
+const textButtonStart = designSystem.indexOf("/* NEXUS button typography excludes direct Font Awesome controls.");
 assert.ok(sharedButtonStart >= 0 && textButtonStart > sharedButtonStart,
   "Shared button styles and text-button typography must be separate.");
-assert.doesNotMatch(designSystem.slice(sharedButtonStart, textButtonStart), /font\\s*:/,
+assert.doesNotMatch(designSystem.slice(sharedButtonStart, textButtonStart), /font\s*:/,
   "Shared button styling must not reset Font Awesome family or weight.");
 const textButtonEnd = designSystem.indexOf("}", textButtonStart);
-assert.match(designSystem.slice(textButtonStart, textButtonEnd), /:not\\(\\[class\\*="fa-"\\]\\)/,
+assert.ok(designSystem.slice(textButtonStart, textButtonEnd).includes(':not([class*="fa-"])'),
   "Only ordinary text buttons may inherit the profile font.");
 
 assert.match(designSystem, /nexus-component-buttons-background/);

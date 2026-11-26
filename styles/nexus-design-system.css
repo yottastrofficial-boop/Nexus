@@ -1285,6 +1285,13 @@ html.nexus-design-system .nexus-design-surface :is(input:not([type="checkbox"]):
 /* Foundry V14 owns the native sidebar layout, vertical orientation and tab controller.
    NEXUS does not resize, reorder or replace native navigation or content hosts. */
 
+/* Theme active NEXUS-owned directory applications without changing native sidebar geometry. */
+html.nexus-design-system #sidebar .tab.sidebar-tab.nexus-themed-application.active {
+  color: var(--nexus-foundry-sidebar-text, var(--nexus-ui-text));
+  background: var(--nexus-foundry-application-bg, var(--nexus-ui-surface));
+  border-color: var(--nexus-foundry-application-border, var(--nexus-ui-border));
+}
+
 /* Compact, full-width Foundry V14 chat sidebar.
    The live DOM uses OL.chat-log and FORM.chat-form (not #chat-log).
    Foundry's native tab/controller behavior stays untouched. */
