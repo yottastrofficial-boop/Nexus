@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.123
+
+A atualização da Biblioteca em preparação para a main adiciona taxonomia inicial por domínio, tags para classificação de atores, árvore hierárquica expandível, operações contextuais, criação universal (pastas, assets, atalhos, layouts e componentes) e previews quadrados com seleção por borda. Pastas-base são metadados do usuário, inicializados uma única vez; não limitam tipos de recurso e não apagam documentos nativos. A estrutura de Itens não inclui itens mágicos; os elementos de cena usam nomes em português. A validação automatizada deve ser concluída pelo workflow e a validação visual/funcional continua pendente no Foundry VTT 14 build 360.
+
 ## Estado do código — 1.0.0.122
 
 A revisão atual acrescenta pesquisa estruturada à Biblioteca, indexa metadados adicionais de compêndios sob demanda, emite arraste nativo Foundry por UUID, permite inserir componentes pessoais no Canvas por arraste e mantém a janela da ficha fixa em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
