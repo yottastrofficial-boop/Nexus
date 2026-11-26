@@ -5,6 +5,7 @@ import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { normalizeSheetSelection, resolveSheetFocusTarget } from "./sheet-focus-controller.js";
+import { installCanvasFit } from "./canvas-fit.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
@@ -1114,6 +1115,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const appWindow = form.closest(".application, .window-app");
     appWindow?.classList.add("nexus-window");
     this.activateListeners($(form));
+    this._nexusViewportCleanup?.();
+    this._nexusViewportCleanup = installCanvasFit(form);
     if (!this._nexusDesignHookId) {
       // The Design System announces profile/policy changes; re-scope this sheet's theme live.
       this._nexusDesignHookId = Hooks.on("nexusDesignApplied", () => {

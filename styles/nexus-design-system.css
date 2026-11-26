@@ -1155,7 +1155,7 @@ html.nexus-design-system .nexus-design-studio-section[hidden] { display: none !i
 html.nexus-design-system .nexus-sheet .nexus-workspace {
   display: grid !important;
   position: relative !important;
-  grid-template-columns: minmax(0, 1fr) 72px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   min-width: 0;
 }
 html.nexus-design-system .nexus-sheet[data-mode="appearance"] .nexus-workspace.nexus-workspace-clean {
@@ -1182,10 +1182,6 @@ html.nexus-design-system .nexus-sheet .nexus-layout-tab:is(:hover, :focus-visibl
 }
 html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-sidebar-left,
 html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-sidebar-left { display: none !important; }
-html.nexus-design-system .nexus-sheet[data-mode="play"] .nexus-workspace,
-html.nexus-design-system .nexus-sheet[data-mode="config"] .nexus-workspace {
-  grid-template-columns: minmax(0, 1fr) 72px !important;
-}
 
 /* Chat scroll, composer and controls share the active panel surface. */
 html.nexus-design-system :is(#chat, .chat-sidebar, #chat-log, .chat-log, .chat-scroll, #chat-form, .chat-form, #chat-controls, .chat-controls) {
@@ -1455,4 +1451,9 @@ html.nexus-design-system .nexus-sheet .nexus-canvas-scroll {
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
+}
+/* Standard and configuration modes fit the fixed-size Canvas into the window (see canvas-fit.js). */
+html.nexus-design-system .nexus-sheet:is([data-mode="play"], [data-mode="config"]) .nexus-canvas {
+  transform: scale(var(--nexus-fit-scale, 1)) translateZ(0);
+  transform-origin: center center;
 }
