@@ -1,6 +1,6 @@
 ## Registro de código 1.0.0.121
 
-A candidata corrige os fluxos de diálogo da Biblioteca, a apresentação dos filtros/pesquisa, miniaturas e altura inicial da ficha. A aprovação de CI e publicação do pacote não equivale a validação funcional no Foundry. O último checkpoint funcional confirmado permanece 1.0.0.70 até avaliação manual.
+A revisão corrige os fluxos de diálogo da Biblioteca, a apresentação dos filtros/pesquisa, miniaturas e altura inicial da ficha. A aprovação de CI e publicação do pacote não equivale a validação funcional no Foundry. O último checkpoint funcional confirmado permanece 1.0.0.70 até avaliação manual.
 
 ## Atualização 1.0.0.119
 A versão 1.0.0.119 em validação preserva a geometria nativa da sidebar V14, corrige a estrutura de seletores dos controles, remove a coluna fantasma do Canvas e limpa o alvo do Inspector ao limpar seleção. A release depende do CI; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no Foundry real.
