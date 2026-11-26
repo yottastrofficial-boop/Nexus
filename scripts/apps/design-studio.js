@@ -81,6 +81,7 @@ export function createDesignStudioApplicationClass({
         ...(options?.position && typeof options.position === "object" ? { position: { ...options.position } } : {})
       };
       super(mutableOptions);
+      design.application = this;
       this._target = globalThis.game?.user?.isGM ? "world" : "user";
       this._library = library;
       this._draft = null;
@@ -433,6 +434,7 @@ export function createDesignStudioApplicationClass({
       this._listeners = null;
       if (this._previewing) design.clearPreview();
       this._previewing = false;
+      if (design.application === this) design.application = null;
       await super._onClose(options);
     }
   };

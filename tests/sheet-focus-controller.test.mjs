@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import { normalizeSheetSelection, resolveSheetFocusTarget } from "../scripts/sheets/sheet-focus-controller.js";
+const components = [{ id: "a", type: "text" }, { id: "b", type: "resource" }];
+assert.deepEqual(normalizeSheetSelection(["a","a","missing","","b"],components),["a","b"]);
+assert.deepEqual(normalizeSheetSelection(new Set(["b","a"]),components),["b","a"]);
+assert.deepEqual(normalizeSheetSelection(["old"],components),[]);
+assert.equal(resolveSheetFocusTarget({selectedIds:["b"],focusTargetId:"a",components}),components[1]);
+assert.equal(resolveSheetFocusTarget({selectedIds:["a","b"],focusTargetId:"a",components}),null);
+assert.equal(resolveSheetFocusTarget({selectedIds:[],focusTargetId:"a",components}),components[0]);
+assert.equal(resolveSheetFocusTarget({selectedIds:[],focusTargetId:"deleted",components}),null);
+console.log("sheet-focus-controller: selection and target resolution passed");

@@ -10101,3 +10101,21 @@ html.nexus-design-system #hotbar #action-bar { padding:0 !important; }
 html.nexus-design-system #hotbar .macro { border-color:var(--nexus-panel-border,#40546b); }
 html.nexus-design-system #hotbar .macro:hover { background:var(--nexus-panel-hover,#30445a) !important; }
 html.nexus-design-system #players .player { border-color:var(--nexus-panel-border,#40546b); }
+
+
+/* NEXUS 1.0.0.118 — standard/play mode uses the Canvas as its sole workspace column. */
+.nexus-sheet[data-mode="play"] .nexus-workspace {
+  display:grid !important; grid-template-columns:minmax(0,1fr) !important;
+  min-width:0 !important; min-height:0 !important; overflow:hidden !important;
+}
+.nexus-sheet[data-mode="play"] .nexus-workspace > .nexus-sidebar-left,
+.nexus-sheet[data-mode="play"] .nexus-workspace > .nexus-sidebar-right { display:none !important; }
+.nexus-sheet[data-mode="play"] .nexus-workspace > .nexus-canvas-stage {
+  grid-column:1 / -1 !important; min-width:0 !important; min-height:0 !important;
+}
+.nexus-sheet { height:100% !important; min-height:0 !important; max-height:100% !important; overflow:hidden !important; }
+.nexus-sheet .nexus-workspace,
+.nexus-sheet .nexus-canvas-stage,
+.nexus-sheet .nexus-canvas-scroll { min-height:0 !important; box-sizing:border-box !important; }
+.nexus-sheet .nexus-canvas-scroll { padding:12px !important; max-width:100% !important; max-height:100% !important; }
+.nexus-sheet[data-mode="play"] .nexus-canvas-scroll { padding:10px !important; }

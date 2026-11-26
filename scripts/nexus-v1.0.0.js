@@ -41,21 +41,13 @@ Hooks.once("init", () => {
     design: game.nexus.design,
     library: game.nexus.design.library
   });
-  // Settings menu and direct launch share one ApplicationV2 instance.
-  const DesignStudioMenuApplication = class extends DesignStudioApplication {
-    constructor(options = {}) {
-      const current = game.nexus.design.application;
-      if (current) return current;
-      super(options);
-      game.nexus.design.application = this;
-    }
-  };
+  // Settings and direct launch use the same ApplicationV2 class and singleton reference.
   game.nexus.design.Studio = DesignStudioApplication;
-  game.nexus.design.StudioMenu = DesignStudioMenuApplication;
-  game.nexus.design.registerStudio(DesignStudioMenuApplication);
+  game.nexus.design.StudioMenu = DesignStudioApplication;
+  game.nexus.design.registerStudio(DesignStudioApplication);
   game.nexus.design.openStudio = () => {
     let application = game.nexus.design.application;
-    if (!application) {
+    if (!application || application.state === foundry.applications.api.ApplicationV2.RENDER_STATES.CLOSED) {
       application = new DesignStudioApplication();
       game.nexus.design.application = application;
     }

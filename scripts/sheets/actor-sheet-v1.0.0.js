@@ -4,6 +4,7 @@ import { createLibraryDefinition, createLibraryComponentInstance, applyLibraryLa
 import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
+import { normalizeSheetSelection, resolveSheetFocusTarget } from "./sheet-focus-controller.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
 import { activateActorSheetListeners } from "./actor-sheet-listeners.js";
@@ -518,7 +519,7 @@ if (!customElements.get("nexus-color-picker")) {
 export class NexusActorSheet extends NexusActorSheetBase {
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
-    position: { width: 800, height: 850 },
+    position: { width: 800, height: 900 },
     window: { resizable: true }
   }, { inplace: false });
 
@@ -3260,22 +3261,23 @@ export class NexusActorSheet extends NexusActorSheetBase {
   }
 
   _setSelection(html, ids) {
-    this._selectedIds = new Set((ids ?? []).filter(Boolean));
-    if (this._selectedIds.size === 1) this._componentEditorTargetId = [...this._selectedIds][0];
-    else if (this._selectedIds.size > 1) this._componentEditorTargetId = null;
+    const components = this._currentLayout?.components ?? [];
+    const normalizedSelection = normalizeSheetSelection(ids, components);
+    this._selectedIds = new Set(normalizedSelection);
+    if (normalizedSelection.length === 1) this._componentEditorTargetId = normalizedSelection[0];
+    else if (normalizedSelection.length > 1) this._componentEditorTargetId = null;
     const sheetRoot = this.element?.querySelector?.(".nexus-sheet") ?? html?.[0] ?? this.element;
     const componentNodes = sheetRoot?.querySelectorAll?.(".nexus-component") ?? [];
     const groups = this._currentLayout?.groups ?? [];
-    const components = this._currentLayout?.components ?? [];
-    const groupsById = new Map(groups.map(group => [group.id, group]));
-    const componentsById = new Map(components.map(component => [component.id, component]));
+    const groupsById = new Map(groups.map(group => [String(group.id), group]));
+    const componentsById = new Map(components.map(component => [String(component.id), component]));
     const hierarchy = this._groupHierarchy ?? buildGroupHierarchy(groups, components);
-    const requestedGroup = groupsById.get(this._selectedGroupId);
+    const requestedGroup = groupsById.get(String(this._selectedGroupId));
     const requestedIds = requestedGroup ? (hierarchy.descendants.get(String(requestedGroup.id)) ?? []) : [];
     const resolvedGroup = requestedGroup && requestedIds.length === this._selectedIds.size && requestedIds.every(id => this._selectedIds.has(id))
       ? requestedGroup
       : groups.find(group => { const ids = hierarchy.descendants.get(String(group.id)) ?? []; return ids.length === this._selectedIds.size && ids.every(id => this._selectedIds.has(id)); }) ?? null;
-    const selectedComponentId = this._selectedIds.size === 1 ? [...this._selectedIds][0] : null;
+    const selectedComponentId = this._selectedIds.size === 1 ? String([...this._selectedIds][0]) : null;
     // Ao selecionar um membro, revela discretamente os limites dos irmãos do mesmo grupo.
     const ownerGroupId = selectedComponentId ? hierarchy.componentOwner.get(String(selectedComponentId)) : null;
     const relatedGroup = ownerGroupId ? groupsById.get(ownerGroupId) : null;
@@ -3306,12 +3308,13 @@ export class NexusActorSheet extends NexusActorSheetBase {
       });
     }
     for (const root of [this._nexusPanelWindows?.get("layers")?.panel, this.element]) root?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
-    const activeComponentId = selectedComponentId ?? (this._selectedIds.size === 0 ? this._componentEditorTargetId : null);
-    const one = activeComponentId ? componentsById.get(activeComponentId) ?? null : null;
+    const one = resolveSheetFocusTarget({ selectedIds: this._selectedIds, focusTargetId: this._componentEditorTargetId, components });
     this._componentEditorTargetId = one?.id ?? null;
     const selectedGroup = groupsById.get(this._selectedGroupId);
-    const componentRoot=this._nexusPanelWindows?.get("component")?.panel ?? html[0];
-    const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
+    const componentPanel = this._nexusPanelWindows?.get("component")?.panel;
+    const componentRoot = componentPanel?.isConnected ? componentPanel : (html?.[0] ?? this.element);
+    const inspector = componentRoot?.querySelector?.(".nexus-component-inspector") ?? this.element?.querySelector?.(".nexus-component-inspector");
+    const empty = componentRoot?.querySelector?.(".nexus-inspector-empty") ?? this.element?.querySelector?.(".nexus-inspector-empty");
     if (inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => {
       if (one) field.dataset.componentTargetId = one.id;
       else delete field.dataset.componentTargetId;
