@@ -113,3 +113,45 @@ assert.match(styles, /nexus-library-generic-card:has\(\.nexus-library-generic-it
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 console.log("NEXUS Library taxonomy and context actions contracts: OK");
+
+assert.match(libraryTemplate, /data-library-tabs/,
+  "The independent Library window should provide a browser-like tab strip.");
+assert.match(libraryTemplate, /data-library-breadcrumbs/,
+  "The Library should show a navigable Windows-style path.");
+assert.ok(["data-library-history-back", "data-library-history-forward", "data-library-history-up"].every(attribute => libraryTemplate.includes(attribute)),
+  "The path bar should expose back, forward and parent navigation.");
+assert.ok(libraryTemplate.includes("data-library-resize-sidebar") && libraryTemplate.includes("data-library-resize-inspector"),
+  "Both the folder tree and Inspector should have independent resize handles.");
+assert.match(libraryApplication, /createLibraryTabManager/,
+  "The application should use a dedicated, testable tab/history manager.");
+assert.match(styles, /--nexus-library-navigation-width/,
+  "The folder navigation width should be controlled by a user-adjustable CSS variable.");
+assert.match(styles, /--nexus-library-inspector-width/,
+  "The Inspector width should be controlled by a user-adjustable CSS variable.");
+console.log("NEXUS browser-style Library shell contract: OK");
+
+assert.match(libraryApplication, /aria-valuemin/);
+assert.match(libraryApplication, /aria-valuemax/);
+assert.match(libraryApplication, /setAttribute\("role", "separator"\)/,
+  "Resizable panes must expose an accessible separator control.");
+assert.match(libraryApplication, /event.key === "Home"/,
+  "Resizable panes must support keyboard range boundaries.");
+assert.match(libraryApplication, /setAttribute\("aria-controls", childrenId\)/,
+  "Folder disclosure buttons must identify the nested tree region they control.");
+assert.match(styles, /folder-row > \.nexus-library-custom-folder::before[\s\S]*?content: none !important/,
+  "Folder labels must not show a second decorative arrow beside the functional disclosure control.");
+assert.match(styles, /folder-row > \.nexus-library-custom-folder[\s\S]*?min-height: 23px !important/,
+  "Folder rows must use the compact density requested for parent and child folders.");
+console.log("NEXUS Library accessibility and folder density contracts: OK");
+
+assert.ok(libraryTemplate.includes('data-library-command="cut"') &&
+  libraryTemplate.includes('data-library-command="copy"') &&
+  libraryTemplate.includes('data-library-command="paste"') &&
+  libraryTemplate.includes('data-library-command="rename"') &&
+  libraryTemplate.includes('data-library-command="delete"'),
+  "The editing toolbar must expose the requested common file operations.");
+assert.ok(libraryApplication.includes('data-library-command="paste"') &&
+  libraryApplication.includes("pasteClipboard") &&
+  libraryApplication.includes("setClipboard"),
+  "Cut, copy and paste controls must execute Library operations rather than remain decorative.");
+console.log("NEXUS Library command bar contracts: OK");
