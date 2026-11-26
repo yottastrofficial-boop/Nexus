@@ -25,3 +25,9 @@ console.log("NEXUS 1.0.0.119 interface regression contracts passed");
 
 // Painel Propriedades/Comportamento/Camadas ressincroniza a seleção ao terminar de abrir.
 assert.match(sheet,/\["component", "behavior", "layers"\]\.includes\(key\)\) this\._setSelection\(\$\(this\.element\), \[\.\.\.\(this\._selectedIds \?\? \[\]\)\]\);\s*focusPanelWindow\(instance\)/);
+
+assert.match(sheet,/createSheetInteractionState/);
+assert.match(sheet,/get _selectedIds\(\)/);
+assert.match(sheet,/get _componentEditorTargetId\(\)/);
+assert.match(dsCss,/\.nexus-themed-configuration/);
+assert.doesNotMatch(dsCss,/body :not\(#sidebar\)/);
