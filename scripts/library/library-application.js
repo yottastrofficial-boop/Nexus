@@ -275,6 +275,8 @@ export function createLibraryApplicationClass({
           toggle.hidden = children.length === 0;
           toggle.setAttribute("aria-label", expanded ? "Recolher subpastas" : "Expandir subpastas");
           toggle.setAttribute("aria-expanded", String(expanded));
+          const childrenId = "nexus-library-folder-children-" + String(folder.id).replace(/[^a-zA-Z0-9_-]/g, "-");
+          if (children.length) toggle.setAttribute("aria-controls", childrenId);
           toggle.innerHTML = '<i class="fa-solid ' + (expanded ? "fa-chevron-down" : "fa-chevron-right") + '" aria-hidden="true"></i>';
           const button = document.createElement("button");
           button.type = "button";
@@ -288,6 +290,7 @@ export function createLibraryApplicationClass({
           if (children.length && expanded) {
             const nested = document.createElement("div");
             nested.className = "nexus-library-folder-children";
+            nested.id = childrenId;
             nested.dataset.parentFolder = folder.id;
             for (const child of children) appendTree(child, nested, depth + 1);
             parent.append(nested);
