@@ -19,6 +19,12 @@ const DOCUMENT_TYPES = Object.freeze({
 });
 
 const safeLimit = value => Math.min(100, Math.max(1, Math.floor(Number(value) || 50)));
+const DEFAULT_COMPENDIUM_INDEX_FIELDS = Object.freeze([
+  "system.description.value", "system.description", "system.details",
+  "system.identifier", "system.source", "system.school", "system.level",
+  "system.traits", "system.requirements", "identifier", "slug"
+]);
+
 const searchableText = (value, maxLength = 6000) => {
   const parts = [], seen = new WeakSet();
   const visit = (entry, depth = 0) => {
@@ -165,7 +171,9 @@ export function createFoundryDocumentBridge({
         const typeKey = requestedTypes.find(key => DOCUMENT_TYPES[key].documentName === pack.documentName);
         if (!typeKey || typeof pack.getIndex !== "function") continue;
         try {
-          const index = await pack.getIndex();
+          const configuredFields = Array.from(pack.indexFields ?? []);
+          const fields = [...new Set([...configuredFields, ...DEFAULT_COMPENDIUM_INDEX_FIELDS])].slice(0, 40);
+          const index = await pack.getIndex({ fields });
           for (const entry of index ?? []) {
             const uuid = String(entry.uuid ?? `Compendium.${pack.collection}.${entry._id}`);
             append(Object.freeze({
