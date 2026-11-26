@@ -1,3 +1,7 @@
+## Bootstrap orientado a serviços — 1.0.0.125
+
+A inicialização dos serviços centrais passou a usar factories e dependências explícitas no `game.nexus.services`. Os serviços de Design, Biblioteca, Mídia, Recursos, Documentos e Lógica são resolvidos em ordem sem inicialização assíncrona durante o hook `init`; as APIs públicas existentes foram preservadas. Esta é uma migração real do bootstrap para DI, mas não representa ainda a extração completa da ficha, listeners, CSS e templates.
+
 ## Revisão arquitetural — 1.0.0.124 em preparação
 
 A revisão estática de ponta a ponta da base 1.0.0.123 identificou concentração de responsabilidades na ficha principal (≈260 KB), CSS legado (≈601 KB), listeners, Explorer da Biblioteca e validador de pacote. A base já possui registries, stores, schemas e adapters, por isso a refatoração está sendo feita por contratos, preservando IDs e dados.
