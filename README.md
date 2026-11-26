@@ -16,6 +16,8 @@ A revisão de ponta a ponta introduz um registro de serviços compartilhados, co
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
+**Versão estável publicada:** 1.0.0.125. **Versão candidata em preparação:** 1.0.0.126 (Biblioteca com abas e janela de navegação). O manifesto de instalação permanece na última release estável até o pacote 1.0.0.126 ser validado e publicado.
+
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
