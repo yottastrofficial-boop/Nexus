@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão 1.0.0.115. CI, pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão 1.0.0.116. CI, pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 
@@ -56,7 +56,10 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - [ ] Diretórios de Items, Journals, Playlists, Compêndios, RollTables e Scenes.
 - [ ] Navegação de cenas.
 - [ ] Controles de canvas.
-- [ ] Hotbar.
+- [ ] Hotbar: confirmar transparência do fundo externo/action bar, mantendo os 10 slots, páginas, controles e ações de macros.
+- [ ] Lista de jogadores: confirmar que a moldura externa está transparente e que todos os jogadores/controles permanecem visíveis e utilizáveis.
+- [ ] Ficha NEXUS: confirmar que os botões de layout são controles flutuantes independentes, sem painel lateral atrás deles, e que o botão da Biblioteca continua acessível.
+- [ ] Ícones: testar classes nativas do Foundry/Font Awesome com diferentes fontes personalizadas do perfil; confirmar que glifos não viram quadrados nem são substituídos pela fonte de texto.
 - [ ] Lista de jogadores.
 - [ ] Chat: conferir fundo geral, área de rolagem, cabeçalho e cartões internos sem áreas brancas residuais.
 - [ ] Controles de janela: conferir que minimizar, fechar e opções mantêm formato circular e ícones centralizados.

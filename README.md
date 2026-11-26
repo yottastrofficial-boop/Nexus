@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.115 · Manifesto 1.0.0.115 (estável) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.116 · Manifesto 1.0.0.116 (estável) · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.115-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.116-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Build publicada:** a 1.0.0.115 restaura a navegação vertical nativa do Foundry, torna o Estúdio de Aparência responsivo e amplia a proteção de fontes Font Awesome em controles de ApplicationV2, componentes, trilhos flutuantes, Hotbar e navegação. CI, empacotamento, release e manifesto foram confirmados. A validação visual e funcional no Foundry real ainda está pendente; o último checkpoint funcional confirmado continua em 1.0.0.70.
+**Build publicada:** a 1.0.0.116 separa os botões de layout da ficha em uma navegação flutuante sem painel lateral, remove os fundos externos redundantes da Hotbar e da lista de jogadores, e corrige o seletor global de tipografia para preservar ícones nativos do Foundry/Font Awesome junto das fontes de perfil. CI passou com 43/43 testes e o pacote foi validado. A inspeção visual no Foundry real ainda está pendente; o último checkpoint funcional confirmado continua em 1.0.0.70.
 
 ## Visão geral
 
@@ -28,9 +28,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação atual na main — 1.0.0.115
+## Implementação atual na main — 1.0.0.116
 
-A base 1.0.0.115 remove a navegação horizontal customizada, devolve ao Foundry o controle da sidebar vertical nativa e amplia a proteção de ícones contra resets tipográficos genéricos em controles e componentes. Também ajusta os limites mínimos e a instância do Estúdio de Aparência. CI e pacote foram aprovados; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base 1.0.0.116 mantém a sidebar vertical nativa, coloca os botões de layout da ficha em controles flutuantes independentes, remove o painel de fundo atrás dos 10 slots da Hotbar e a moldura externa da lista de jogadores. A tipografia personalizada agora exclui corretamente os elementos de ícone no mesmo seletor, permitindo que Foundry/Font Awesome mantenha sua família de fonte nativa. CI e pacote foram aprovados; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -48,10 +48,10 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Build candidata da main | 1.0.0.115 (teste visual pendente) |
+| Build da main | 1.0.0.116 (teste visual pendente) |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.115 inclui a restauração da sidebar vertical nativa, a revisão de ícones e o ajuste de abertura responsiva do Estúdio de Aparência, além dos refinamentos anteriores do Design System e do chat lateral. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.116 inclui navegação flutuante de layouts, remoção de molduras redundantes da Hotbar e lista de jogadores e correção de compatibilidade entre ícones nativos e tipografia personalizável, além dos refinamentos anteriores do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -139,7 +139,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão candidata de código da `main` é **1.0.0.114**; o manifesto estável permanece em **1.0.0.112** até a publicação do pacote. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry VTT 14 build 360. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão publicada da `main` e o manifesto estável são **1.0.0.116**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 

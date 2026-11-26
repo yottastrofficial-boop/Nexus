@@ -6,8 +6,8 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão estável publicada na `main` e no manifesto: `1.0.0.115` (sidebar vertical nativa, Estúdio responsivo e preservação ampliada de ícones; validação visual pendente).
-- Última versão estável anterior: `1.0.0.114`.
+- Versão estável publicada na `main` e no manifesto: `1.0.0.116` (navegação flutuante de layouts, superfícies externas simplificadas e preservação de ícones nativos; validação visual pendente).
+- Última versão estável anterior: `1.0.0.115`.
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
 - A candidata .114 remove a navegação horizontal customizada e devolve a orientação vertical ao Foundry. A versão .113 foi instalada e o usuário relatou que os slots flexíveis continuavam visualmente comprimidos; a opção horizontal foi descartada.
@@ -19,9 +19,9 @@
 
 Este documento descreve a implementação observada no repositório e separa recursos presentes, infraestrutura parcial e objetivos futuros. Não substitui os livros oficiais do NEXUS RPG.
 
-## Estado da 1.0.0.115 — sidebar nativa e preservação de ícones
+## Estado da 1.0.0.116 — navegação flutuante e compatibilidade de ícones
 
-A versão .115 mantém a navegação vertical original do Foundry e amplia a auditoria de fontes de ícones. Além da regra compartilhada de botões, os estilos legados de ApplicationV2, conteúdo de componentes, trilhos flutuantes, Hotbar e navegação agora excluem controles com classes Font Awesome. O Estúdio de Aparência segue responsivo e compartilha uma única instância entre o menu de Configurações e a abertura direta. CI, empacotamento, release e manifesto foram confirmados; a validação visual no Foundry VTT 14 build 360 permanece pendente.
+A versão .116 mantém a sidebar vertical nativa e move os botões de layout da ficha para um grupo flutuante independente do painel lateral, preservando o acesso à Biblioteca. Os fundos externos redundantes atrás da action bar/10 slots da Hotbar e da lista de jogadores são transparentes; os slots e as entradas de jogadores permanecem. O seletor de tipografia foi corrigido para que todas as exclusões de ícones sejam aplicadas ao próprio elemento, evitando que a fonte personalizável substitua a família nativa do Foundry/Font Awesome. CI, pacote e release foram confirmados com 43/43 testes; a validação visual no Foundry VTT 14 build 360 permanece pendente.
 
 ## O que é o NEXUS
 

@@ -8,17 +8,26 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão estável publicada na main e no manifesto: `1.0.0.115` (sidebar vertical nativa, Estúdio responsivo e preservação ampliada de ícones).
-- Última versão estável anterior: `1.0.0.114`.
-- Teste manual: a versão `1.0.0.115` precisa confirmar sidebar vertical nativa, abertura/redimensionamento do Estúdio, ícones gerais, controles de janela e painéis no Foundry VTT 14 build 360.
+- Versão estável publicada na main e no manifesto: `1.0.0.116` (navegação flutuante, chrome externo simplificado e compatibilidade de ícones).
+- Última versão estável anterior: `1.0.0.115`.
+- Teste manual: a versão `1.0.0.116` precisa confirmar botões flutuantes de layout, renderização dos ícones nativos e customizáveis, transparência dos fundos da Hotbar/Players, Estúdio, controles de janela e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
-- A versão .115 mantém a sidebar nativa e amplia a correção das fontes de ícones; não declarar a restauração concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
+- A versão .116 mantém a sidebar nativa, destaca os botões de layout em controles flutuantes e remove molduras externas redundantes; não declarar a restauração visual concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A publicação da 1.0.0.115 concluiu CI (42/42 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
+- A publicação da 1.0.0.116 concluiu CI (43/43 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
-## Versão 1.0.0.115 — auditoria ampliada de fontes de ícones
+## Versão 1.0.0.116 — navegação flutuante e superfícies nativas
+
+- Retirar os botões de layout da ficha do contêiner lateral e apresentá-los como controles flutuantes independentes, mantendo a troca de layout e o acesso à Biblioteca.
+- Remover o painel de fundo externo atrás da action bar/10 slots da Hotbar e atrás da lista de jogadores; preservar os 10 slots, seus estados e os jogadores conectados.
+- Corrigir o seletor de tipografia global para aplicar exclusões de ícones como condições compostas no mesmo elemento.
+- Manter as fontes nativas do Foundry/Font Awesome e permitir que a fonte de perfil seja aplicada ao texto normal sem quebrar glifos.
+- Adicionar testes de regressão para navegação flutuante, fundos transparentes e preservação de slots/entradas.
+- CI aprovado: 64/64 scripts e 43/43 arquivos de teste. Validação manual no Foundry VTT 14 build 360 permanece pendente.
+
+## Histórico da versão 1.0.0.115 — auditoria ampliada de fontes de ícones
 
 - Corrigir seletores legados que aplicavam `font-family: inherit` genericamente a botões e spans de componentes.
 - Preservar classes Font Awesome em controles de ApplicationV2, trilhos flutuantes, recursos de ficha, Hotbar e navegação.

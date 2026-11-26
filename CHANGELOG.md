@@ -1,3 +1,13 @@
+## 1.0.0.116 — navegação flutuante, chrome limpo e compatibilidade de ícones
+
+- Remove o contêiner de sidebar direita da ficha; os botões de layout e o acesso à Biblioteca são portados para controles flutuantes independentes.
+- Mantém os botões de layout com superfícies individuais, sem painel compartilhado atrás deles.
+- Remove o fundo/borda/sombra externos da action bar atrás dos 10 slots da Hotbar e da moldura da lista de jogadores, preservando slots, macros, controles e entradas de jogadores.
+- Corrige o seletor global de tipografia: as exclusões de ícones passam a ser condições compostas do mesmo elemento, evitando que fontes de perfil substituam a família nativa do Foundry/Font Awesome.
+- Atualiza contratos de regressão para a nova navegação e para as superfícies nativas.
+- CI: 64/64 scripts e 43/43 arquivos de teste; pacote ZIP validado.
+- **Validação manual pendente:** conferir visualmente botões flutuantes, ícones, fontes, Hotbar e lista de jogadores no Foundry VTT 14 build 360.
+
 ## 1.0.0.115 — preservação ampliada de ícones
 
 - Amplia a auditoria de Font Awesome para regras legadas de controles de ApplicationV2, conteúdo de componentes, trilhos flutuantes, Hotbar e navegação.
