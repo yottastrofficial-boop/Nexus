@@ -123,6 +123,7 @@ export function createFoundryDocumentBridge({
     tags = [],
     origin = "all"
   } = {}) => {
+    const search = String(query ?? "").slice(0, 240);
     const requestedTypes = type === "all" ? Object.keys(DOCUMENT_TYPES) : [String(type)];
     const unknown = requestedTypes.filter(key => !DOCUMENT_TYPES[key]);
     if (unknown.length) throw new Error("Tipo de documento Foundry desconhecido: " + unknown.join(", "));
