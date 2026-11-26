@@ -1,3 +1,11 @@
+## Revisão arquitetural 1.0.0.124 — 2026-11-26
+
+- Auditoria de arquitetura estática e inventário da base 1.0.0.123 concluídos.
+- Registro de serviços compartilhados e contratos de eventos da Lógica implementados na branch de revisão.
+- Guardrails de imports locais e ciclos adicionados; CI desta etapa já validou a sintaxe e a suíte.
+- Próximos passos: modularizar bootstrap, extrair resolução de propriedades e listeners por domínio, reduzir concentração do Explorer, consolidar CSS/template por domínio e dividir o validador.
+- A refatoração integral ainda não está concluída; manter compatibilidade de dados e aguardar validação do Foundry VTT 14 para os fluxos de interface.
+
 ## 1.0.0.123 — estrutura e organização da Biblioteca
 
 - Estrutura inicial por domínios, aplicada uma única vez e sem sobrescrever pastas pessoais.
