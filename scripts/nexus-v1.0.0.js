@@ -1,3 +1,4 @@
+import { createNexusServiceRegistry } from "./core/service-registry.js";
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 import { createMediaFormatRegistry } from "./core/media-format-registry.js";
@@ -26,6 +27,13 @@ import { NEXUS_LIBRARY_CATALOG } from "../assets/library/catalog.js";
 Hooks.once("init", () => {
   // Registro próprio do NEXUS; adaptadores pesados serão carregados sob demanda.
   game.nexus ??= {};
+  // Registro público de serviços: dependências compartilhadas por subsistemas,
+  // módulos e futuras integrações, sem acoplamento à classe da ficha.
+  game.nexus.services ??= createNexusServiceRegistry({ context: { systemId: "nexus", version: game.system.version } });
+  const publishService = (name, value) => {
+    if (!game.nexus.services.has(name)) game.nexus.services.publish(name, value);
+    return value;
+  };
   // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
   game.nexus.design ??= installNexusDesignSystem({
     gameRef: game,
@@ -34,7 +42,9 @@ Hooks.once("init", () => {
     themeTokens: THEME_TOKENS,
     applyThemeTokens
   });
+  publishService("design", game.nexus.design);
   game.nexus.design.library ??= createDesignLibraryService({ getUser: () => game.user, design: game.nexus.design });
+  publishService("design.library", game.nexus.design.library);
   const DesignStudioApplication = createDesignStudioApplicationClass({
     ApplicationV2: foundry.applications.api.ApplicationV2,
     HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
@@ -60,8 +70,10 @@ Hooks.once("init", () => {
   };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
   game.nexus.resources ??= createResourceLifecycleManager();
+  publishService("resources", game.nexus.resources);
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
   game.nexus.documents ??= createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid });
+  publishService("documents", game.nexus.documents);
   // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
   // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
   game.nexus.library ??= {};
@@ -75,6 +87,7 @@ Hooks.once("init", () => {
     documentBridge: game.nexus.documents,
     catalog: NEXUS_LIBRARY_CATALOG
   });
+  publishService("library.registry", game.nexus.library.registry);
   game.nexus.library.list = options => game.nexus.library.registry.list(options);
   game.nexus.library.resolve = (reference, resource) => game.nexus.library.registry.resolve(reference, resource);
   game.nexus.library.getActions = (reference, resource) => game.nexus.library.registry.getActions(reference, resource);
@@ -83,6 +96,7 @@ Hooks.once("init", () => {
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
   game.nexus.library.transfers ??= createLibraryTransferRegistry();
+  publishService("library.transfers", game.nexus.library.transfers);
   game.nexus.library.registerSourceAdapter = adapter => game.nexus.library.transfers.registerSource(adapter);
   game.nexus.library.registerDestinationAdapter = adapter => game.nexus.library.transfers.registerDestination(adapter);
   game.nexus.library.prepareTransfer = options => game.nexus.library.transfers.prepare(options);
@@ -100,6 +114,7 @@ Hooks.once("init", () => {
     setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
     getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
   });
+  publishService("library.backup", game.nexus.library.backup);
   const LibraryApplication = createLibraryApplicationClass({
     ApplicationV2: foundry.applications.api.ApplicationV2,
     HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
@@ -148,18 +163,22 @@ Hooks.once("init", () => {
   }
   game.nexus.media ??= {};
   game.nexus.media.formats = createMediaFormatRegistry();
+  publishService("media.formats", game.nexus.media.formats);
   game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
+  publishService("media.capabilities", game.nexus.media.capabilities);
   game.nexus.media.pipeline = createMediaProcessingPipeline({
     capabilityService: game.nexus.media.capabilities,
     resourceManager: game.nexus.resources,
     adapters: [createBrowserMediaAdapter(game.nexus.media.capabilities)]
   });
+  publishService("media.pipeline", game.nexus.media.pipeline);
   game.nexus.media.storage = createMediaStorageRouter([
     createFoundryMediaStorageAdapter({
       FilePicker: foundry.applications.apps.FilePicker,
       extensions: CONST.UPLOADABLE_FILE_EXTENSIONS
     })
   ]);
+  publishService("media.storage", game.nexus.media.storage);
   game.nexus.media.createWorkerAdapter = createWorkerMediaAdapter;
   game.nexus.media.installWorkerRuntime = installNexusMediaWorkerRuntime;
   game.nexus.media.createCacheKey = createMediaCacheKey;
@@ -170,7 +189,9 @@ Hooks.once("init", () => {
 
   game.nexus.logic = {};
   game.nexus.logic.registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
+  publishService("logic.registry", game.nexus.logic.registry);
   game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
+  publishService("logic.runtime", game.nexus.logic.runtime);
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
   game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
@@ -228,6 +249,7 @@ Hooks.once("ready", () => {
       gameRef: game,
       constRef: CONST
     });
+    publishService("logic.foundryIntegration", game.nexus.logic.foundryIntegration);
     console.info("NEXUS | Eventos do Foundry conectados à Lógica:", game.nexus.logic.foundryIntegration.bridge.hookCount);
   } catch (error) {
     console.error("NEXUS | Falha ao conectar eventos do Foundry à Lógica.", error);
