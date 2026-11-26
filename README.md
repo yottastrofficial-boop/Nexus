@@ -1,12 +1,12 @@
-## Atualização 1.0.0.123
+## Revisão arquitetural 1.0.0.124 em preparação
 
-A atualização acrescenta pesquisa estruturada à Biblioteca, amplia a indexação de metadados dos compêndios, habilita arraste nativo de documentos Foundry por UUID e permite inserir componentes pessoais diretamente no Canvas. A janela da ficha permanece fixa em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A revisão de ponta a ponta introduz um registro de serviços compartilhados, contratos de eventos desacoplados e testes de integridade do grafo de módulos. O trabalho continua por etapas para preservar dados, IDs e integração com Foundry V14. A auditoria e o plano estão em [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.123 · Manifesto 1.0.0.123 (estável) · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.124 em preparação · base publicada 1.0.0.123 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -32,9 +32,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Implementação preparada para a main — 1.0.0.123
+## Base publicada e revisão estrutural — 1.0.0.124
 
-A base anterior 1.0.0.119 preserva a geometria nativa da sidebar V14, estiliza os controles na estrutura real, corrige o workspace para não reservar coluna vazia e limpa o alvo do Inspector ao remover seleção. CI/release e validação manual devem ser confirmados. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base publicada 1.0.0.123 preserva a geometria nativa da sidebar V14, estiliza os controles na estrutura real, corrige o workspace para não reservar coluna vazia e limpa o alvo do Inspector ao remover seleção. CI/release e validação manual devem ser confirmados. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
@@ -52,7 +52,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Build preparada | 1.0.0.123 (teste visual pendente) |
+| Base publicada | 1.0.0.123; revisão estrutural .124 em preparação |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base 1.0.0.123 inclui navegação flutuante de layouts, remoção de molduras redundantes da Hotbar e lista de jogadores e correção de compatibilidade entre ícones nativos e tipografia personalizável, além dos refinamentos anteriores do Design System. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
