@@ -115,7 +115,6 @@ export function createLibraryFolder(raw, { id, name, collection = "", parentId =
 
 const LIBRARY_BASE_TREE = [
   ["atores", "Atores", [
-    ["atores-conteudo", "Atores", []],
     ["atores-assets", "Assets", [["atores-retratos", "Retratos", []], ["atores-tokens", "Tokens", []], ["atores-icones", "Ícones", []], ["atores-assets-outros", "Outros assets", []]]],
     ["atores-layouts", "Layouts", []],
     ["atores-modelos-ficha", "Modelos de ficha", []],
@@ -123,9 +122,11 @@ const LIBRARY_BASE_TREE = [
   ]],
   ["itens", "Itens", [
     ["itens-classes", "Classes", []], ["itens-origens", "Origens", []], ["itens-legados", "Legados", []], ["itens-acoes", "Ações", []],
-    ["itens-equipamentos", "Equipamentos", [
+    ["itens-conteudo", "Itens", [
+      ["itens-equipamentos", "Equipamentos", [
       ["itens-armas", "Armas", []], ["itens-armaduras", "Armaduras", []], ["itens-consumiveis", "Consumíveis", []],
       ["itens-conteineres", "Contêineres", []], ["itens-equipamentos-outros", "Outros equipamentos", []]
+      ]]
     ]],
     ["itens-assets", "Assets", []], ["itens-layouts", "Layouts", []], ["itens-modelos", "Modelos de item", []], ["itens-relacionados", "Recursos relacionados", []]
   ]],
