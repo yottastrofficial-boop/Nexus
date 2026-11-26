@@ -63,4 +63,4 @@ assert.doesNotMatch(libraryApplication, /const (?:input|prompt|confirm) = global
 assert.match(libraryApplication, /thumbnailInput/,
   "Saved Library resources must expose a custom thumbnail metadata field.");
 assert.match(libraryApplication, /nexus-library-filter-wrap/);
-assert.match(legacyStyles, /nexus-library-search-wrap > \\.nexus-library-search/);
+assert.match(styles, /nexus-library-search-wrap > \\.nexus-library-search/);
