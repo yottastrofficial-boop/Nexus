@@ -2,11 +2,9 @@
  * Interaction Engine do NEXUS: fluxos com múltiplos Triggers, condições e Actions.
  * O motor não avalia JavaScript arbitrário.
  */
-export const INTERACTION_EVENTS = Object.freeze(["click","doubleClick","rightClick","middleClick","pointerDown","pointerUp","hold","hover","change","submit","focus","blur","keyDown","keyUp","interact"]);
-export const INTERACTION_MODIFIERS = Object.freeze(["ctrl","shift","alt","meta"]);
+import { INTERACTION_EVENTS, INTERACTION_MODIFIERS, INTERACTION_ACTIONS, INTERACTION_OPERATORS } from "./logic-events.js";
+export { INTERACTION_EVENTS, INTERACTION_MODIFIERS, INTERACTION_ACTIONS, INTERACTION_OPERATORS } from "./logic-events.js";
 const normalizeModifiers = raw => [...new Set((Array.isArray(raw) ? raw : String(raw ?? "").split("+")).map(value => String(value).trim().toLowerCase()).filter(value => INTERACTION_MODIFIERS.includes(value)))].sort((a,b) => INTERACTION_MODIFIERS.indexOf(a) - INTERACTION_MODIFIERS.indexOf(b));
-export const INTERACTION_ACTIONS = Object.freeze(["roll","calculate","update","open","toggle","interact","execute"]);
-export const INTERACTION_OPERATORS = Object.freeze(["equals","notEquals","greaterThan","greaterOrEqual","lessThan","lessOrEqual","contains","isEmpty","isNotEmpty"]);
 import { NEXUS_SKILLS } from "./skills.js";
 import { normalizeNexusPropertyPath } from "./property-paths.js";
 import { evaluateNexusFormula, evaluateNexusCondition, evaluateNexusExpression } from "./formula-engine.js";
