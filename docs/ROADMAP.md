@@ -1,3 +1,8 @@
+## Correção 1.0.0.119 — preservação da sidebar nativa
+- A versão .118 ainda forçava `#sidebar` para flex-row e aplicava dimensões ao seletor `#sidebar-tabs > .sidebar-tab`; isso não corresponde à árvore documentada do Foundry V14, cujo controle de navegação está aninhado em menu/li/button.
+- A .119 remove a geometria customizada e estiliza apenas os controles nativos reais. Também remove a coluna fantasma do workspace e limpa o alvo do Inspector ao limpar seleção.
+- Release depende de CI; validação visual no Foundry continua pendente.
+
 ## 1.0.0.118 — correções estruturais
 
 - Restaurar o rail de abas nativo do Foundry com controles individuais, sem alterar a geometria do painel.

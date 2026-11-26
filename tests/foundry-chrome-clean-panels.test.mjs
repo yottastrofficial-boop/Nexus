@@ -5,6 +5,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const legacy = read("../styles/nexus-v1.0.0.css");
 const template = read("../templates/actors/actor-sheet.hbs");
 const sheet = read("../scripts/sheets/actor-sheet-v1.0.0.js");
+const designSystem = read("../styles/nexus-design-system.css");
 
 assert.match(template, /class="nexus-layout-tabs-source" hidden/,
   "The tab source must not render as an attached sidebar panel.");
@@ -31,3 +32,8 @@ assert.match(legacy, /html\.nexus-design-system #players \.player \{/,
   "Player entries are preserved rather than hidden or removed.");
 
 console.log("NEXUS floating tabs and clean Foundry chrome contract: OK");
+
+assert.match(designSystem, /NEXUS 1\.0\.0\.119 — preserve native V14 sidebar structure/);
+assert.match(designSystem, /#sidebar-tabs menu > li > button\[role="tab"\]/);
+assert.doesNotMatch(designSystem, /#sidebar-tabs > \.sidebar-tab/);
+assert.match(designSystem, /grid-template-columns: minmax\(0, 1fr\) !important/);

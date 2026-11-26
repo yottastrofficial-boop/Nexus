@@ -1,3 +1,12 @@
+## 1.0.0.119 — sidebar nativa e workspace sem colunas fantasmas
+
+- Remove o override que reconstruía a geometria da sidebar do Foundry e aplicava dimensões aos painéis em vez dos controles de navegação.
+- Estiliza os botões V14 pela estrutura real documentada no projeto: #sidebar-tabs > menu > li > button[role=tab], preservando a geometria e o controlador nativos.
+- Corrige o workspace para ocupar uma única coluna útil; os rails flutuantes não deixam 72 px reservados no Canvas.
+- Ao limpar a seleção, invalida o alvo retido do Inspector; seleção singular continua sendo autoritativa e a seleção múltipla não aponta para um componente arbitrário.
+- Adiciona contratos de regressão para a estrutura de sidebar, geometria do workspace e limpeza de foco.
+- CI, pacote e release devem ser confirmados pelo workflow; teste visual/funcional no Foundry VTT 14 build 360 permanece necessário.
+
 ## 1.0.0.118 — sidebar nativa, foco inteligente e Canvas
 
 - Preserva a estrutura e a geometria nativas da sidebar do Foundry, apresentando os tab buttons como controles individuais no rail, sem convertê-los em conteúdo do painel.

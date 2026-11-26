@@ -1,4 +1,4 @@
-## Regressão 1.0.0.118 — sidebar, foco, Canvas e Estúdio
+## Regressão 1.0.0.119 — sidebar nativa e Canvas\n- [ ] Confirmar que NEXUS não altera display, flex-direction, largura ou posicionamento de #sidebar/#sidebar-tabs; Foundry mantém o rail padrão.\n- [ ] Verificar controles reais V14 dentro de menu > li > button[role=tab], com estados hover/ativo sem fundo contínuo do painel.\n- [ ] Confirmar que Canvas ocupa todo o workspace, sem coluna vazia de 72 px.\n- [ ] Limpar seleção e confirmar que o Inspector não continua editando o alvo anterior.\n\n## Regressão 1.0.0.118 — sidebar, foco, Canvas e Estúdio
 
 - [ ] Confirmar que as abas nativas do Foundry continuam fora do conteúdo do painel, em rail vertical próprio, com controles individuais NEXUS.
 - [ ] Confirmar que a largura padrão do painel/sidebar do Foundry não foi alterada além do rail nativo.
@@ -13,7 +13,7 @@
 
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão 1.0.0.118. CI (64/64 scripts e 43/43 testes), pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão 1.0.0.119. CI, pacote ZIP, release e manifesto serão confirmados pelo workflow; isso não substitui a validação manual no Foundry VTT 14 build 360. CI (64/64 scripts e 43/43 testes), pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 

@@ -16,12 +16,16 @@ assert.match(designSystem, /text-shadow:\s*none\s*!important/,
   "The default NEXUS surfaces must not add text shadows.");
 assert.doesNotMatch(designSystem, /:is\(#controls, #ui-left, #ui-top\)\s*:is\(\.ui-control, \.control-tool\)/,
   "Native Foundry tool buttons must retain the minimal Foundry appearance.");
-assert.match(designSystem, /Foundry V14 owns the native sidebar layout, vertical orientation and tab controller/,
-  "The Foundry sidebar must retain its native vertical navigation.");
-assert.match(designSystem, /#sidebar-tabs > \.sidebar-tab[\s\S]*?flex:0 0 32px/,
-  "Native tabs are individually styled while Foundry retains its controller.");
-assert.match(designSystem, /#sidebar-content[\s\S]*?flex:1 1 auto/,
-  "The native panel remains the flexible content region.");
+assert.ok(designSystem.includes("Foundry V14 owns the native sidebar layout, vertical orientation and tab controller"),
+  "Foundry owns native sidebar behavior and geometry.");
+assert.ok(designSystem.includes('#sidebar-tabs menu > li > button[role="tab"]'),
+  "Native V14 tab controls use the nested menu/list/button structure.");
+assert.ok(!designSystem.includes("#sidebar-tabs > .sidebar-tab"),
+  "The .sidebar-tab content pane must not be treated as a navigation button.");
+assert.ok(!designSystem.includes("#sidebar {\n  display:flex"),
+  "NEXUS must not replace Foundry's sidebar geometry.");
+assert.ok(designSystem.includes("grid-template-columns: minmax(0, 1fr) !important"),
+  "Floating rails must not reserve a hidden workspace column.");
 assert.match(designSystem, /\.application\.nexus-themed-application/,
   "NEXUS and explicitly supported Foundry applications must receive the shared styles.");
 assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.application,\s*\.window-app\)/,

@@ -1414,27 +1414,45 @@ html.nexus-design-system .nexus-design-css-error.is-error { color:var(--nexus-st
 html.nexus-design-system .nexus-design-css-example { min-height:0; margin-top:12px; overflow:auto; }
 
 
-/* NEXUS 1.0.0.118 — native Foundry sidebar tabs remain a separate rail. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar {
-  display:flex !important; flex-direction:row !important; align-items:stretch !important; min-width:0 !important;
+/* NEXUS 1.0.0.119 — preserve native V14 sidebar structure.
+   Foundry's tab controls are nested under NAV#sidebar-tabs > MENU > LI >
+   BUTTON[role=tab]. Do not style the content pane as a tab button and do not
+   replace Foundry's layout, sizing, flex direction, or tab controller. */
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs,
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > menu,
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > menu > li {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs {
-  display:flex !important; flex:0 0 40px !important; flex-direction:column !important; align-items:center !important;
-  gap:6px !important; width:40px !important; min-width:40px !important; max-width:40px !important;
-  padding:6px 4px !important; border:0 !important; background:transparent !important; box-shadow:none !important; overflow:visible !important;
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button[role="tab"],
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button.item {
+  color: var(--nexus-foundry-sidebar-text, var(--nexus-ui-text));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--nexus-radius-small, 6px);
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > .sidebar-tab {
-  display:grid !important; flex:0 0 32px !important; place-items:center !important;
-  width:32px !important; min-width:32px !important; height:32px !important; min-height:32px !important;
-  margin:0 !important; padding:0 !important; border:1px solid var(--nexus-ui-border,#3c5067) !important;
-  border-radius:7px !important; color:var(--nexus-ui-text,#e7edf5) !important;
-  background:var(--nexus-ui-surface,#202e3e) !important; box-shadow:0 2px 7px #0004 !important;
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button[role="tab"]:hover,
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button[role="tab"]:focus-visible,
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button.item:hover,
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button.item:focus-visible {
+  background: var(--nexus-foundry-sidebar-hover, var(--nexus-ui-surface-hover));
+  border-color: var(--nexus-foundry-sidebar-border, var(--nexus-ui-border));
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > .sidebar-tab.active,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > .sidebar-tab:hover,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs > .sidebar-tab:focus-visible {
-  border-color:var(--nexus-ui-accent,#78b7e8) !important; background:var(--nexus-ui-surface-hover,#2a3d52) !important;
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button[role="tab"][aria-selected="true"],
+html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-tabs menu > li > button.item.active {
+  background: var(--nexus-foundry-sidebar-active-bg, var(--nexus-ui-surface));
+  border-color: var(--nexus-foundry-sidebar-active, var(--nexus-ui-border));
 }
-html.nexus-design-system:not([data-nexus-theme="foundry"]) #sidebar-content {
-  flex:1 1 auto !important; min-width:0 !important; max-width:none !important;
+
+/* Floating sheet rails are portals; no hidden sidebar column belongs to the Canvas. */
+html.nexus-design-system .nexus-sheet .nexus-workspace {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+html.nexus-design-system .nexus-sheet .nexus-canvas-stage,
+html.nexus-design-system .nexus-sheet .nexus-canvas-scroll {
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
 }
