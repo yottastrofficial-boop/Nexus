@@ -878,7 +878,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-panel-resizer
   }
   html.nexus-design-system .nexus-library-application .nexus-library-workspace {
     grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: minmax(180px, 1fr) 5px minmax(180px, .8fr) !important;
+    grid-template-rows: minmax(180px, 1fr) 5px var(--nexus-library-inspector-height, 300px) !important;
   }
   html.nexus-design-system .nexus-library-application .nexus-library-main {
     grid-column: 1;
