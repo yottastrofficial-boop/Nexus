@@ -1,3 +1,14 @@
+## 1.0.0.121 — Biblioteca e espaço inicial da ficha
+
+- Corrigir o contexto dos métodos estáticos DialogV2 nos fluxos de pastas, coleções, importação e confirmação de ações.
+- Tornar o filtro um popover compacto que não altera a altura útil do catálogo.
+- Manter uma única superfície para a pesquisa.
+- Padronizar miniaturas e apresentar prévias de paletas nos cards de temas.
+- Permitir miniaturas personalizadas seguras nos metadados de recursos pessoais.
+- Ajustar a altura inicial da ficha para 836 px.
+- Adaptadores concretos para fontes externas e destinos de ficha/compêndio continuam como etapa posterior; a base de transferência valida dados inertes, gera prévia e exige confirmação explícita.
+- CI automatizado não substitui a validação visual e funcional no Foundry VTT 14 build 360.
+
 ## Correção 1.0.0.119 — preservação da sidebar nativa
 - A versão .118 ainda forçava `#sidebar` para flex-row e aplicava dimensões ao seletor `#sidebar-tabs > .sidebar-tab`; isso não corresponde à árvore documentada do Foundry V14, cujo controle de navegação está aninhado em menu/li/button.
 - A .119 remove a geometria customizada e estiliza apenas os controles nativos reais. Também remove a coluna fantasma do workspace e limpa o alvo do Inspector ao limpar seleção.
