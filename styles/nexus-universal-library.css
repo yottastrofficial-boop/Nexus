@@ -351,7 +351,7 @@ html.nexus-design-system .nexus-library-generic-theme-swatch {
 }
 
 
-html.nexus-design-system .nexus-library-canvas-drop-target {
+html.nexus-design-system .nexus-library-drop-target {
   outline: 2px dashed var(--nexus-accent-color, #78b7e8);
   outline-offset: -4px;
   background-image: radial-gradient(circle, color-mix(in srgb, var(--nexus-accent-color, #78b7e8) 18%, transparent) 1px, transparent 1px);
