@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão atual do Design System. O CI no commit `a4e31e3b` passou com 37/37 arquivos de teste e gerou `nexus-1.0.0.97.zip` (416.502 bytes); isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da candidata 1.0.0.114. O pacote e o CI ainda precisam ser confirmados nesta versão; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 
@@ -29,7 +29,9 @@ Este roteiro é o gate funcional da versão atual do Design System. O CI no comm
 
 ## Estúdio de Aparência
 
-- [ ] Abrir o Estúdio pelo menu de Configurações do Jogo.
+- [ ] Abrir o Estúdio pelo menu de Configurações do Jogo e confirmar que a janela realmente aparece.
+- [ ] Abrir o Estúdio novamente pelo atalho direto; confirmar que a mesma instância é reutilizada, sem duplicar janelas.
+- [ ] Redimensionar a janela para larguras estreitas e confirmar que o editor continua acessível, sem ficar fora da tela.
 - [ ] Clicar em Paleta, Tipografia, Layout e Acessibilidade; confirmar que as seções alternam dentro da mesma janela, sem abrir guias ou janelas do navegador.
 - [ ] Confirmar que cada aba expõe corretamente o estado selecionado e que a prévia mostra painel, container, botão com texto, tipografia, input, select, textarea e barra de rolagem.
 - [ ] Confirmar que GM pode editar campanha e que jogador pode editar apenas o próprio perfil quando permitido.
@@ -48,7 +50,7 @@ Este roteiro é o gate funcional da versão atual do Design System. O CI no comm
 
 Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e conteúdo longo quando aplicável.
 
-- [ ] Sidebar e navegação entre abas.
+- [ ] Sidebar vertical nativa do Foundry: confirmar orientação, todas as abas nativas e adicionadas por módulos, seleção e rolagem dos painéis.
 - [ ] Diretório de Actors, incluindo pastas, entradas, busca e controles.
 - [ ] Diretório de Cards.
 - [ ] Diretórios de Items, Journals, Playlists, Compêndios, RollTables e Scenes.
@@ -58,6 +60,7 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - [ ] Lista de jogadores.
 - [ ] Chat: conferir fundo geral, área de rolagem, cabeçalho e cartões internos sem áreas brancas residuais.
 - [ ] Controles de janela: conferir que minimizar, fechar e opções mantêm formato circular e ícones centralizados.
+- [ ] Auditoria geral de ícones: verificar sidebar, controles do Canvas, Hotbar, cabeçalhos ApplicationV2, ficha, Biblioteca, Estúdio e painéis; nenhum glifo pode aparecer como quadrado, caractere ausente ou fonte de texto.
 - [ ] Janelas ApplicationV2 nativas identificadas pelo sistema.
 - [ ] Campos, menus, botões, ícones, bordas, rolagem e textos em cada superfície.
 
@@ -115,7 +118,7 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Repetir os testes nos perfis escuro, claro e alto contraste, em cliente GM e jogador.
 
 
-## Dock compacto do sidebar — candidata 1.0.0.113
+## Histórico: dock compacto do sidebar — candidata 1.0.0.113
 
 - [ ] Conferir a faixa nativa de abas em uma única linha, sem quebra e sem barra de rolagem horizontal.
 - [ ] Confirmar que todas as abas nativas e de módulos continuam acessíveis.

@@ -41,16 +41,28 @@ Hooks.once("init", () => {
     design: game.nexus.design,
     library: game.nexus.design.library
   });
-  game.nexus.design.Studio = DesignStudioApplication;
-  game.nexus.design.registerStudio(DesignStudioApplication);
-  game.nexus.design.openStudio = () => {
-    const current = game.nexus.design.application;
-    if (current?.rendered) {
-      current.bringToFront?.();
-      return Promise.resolve(current);
+  // Settings menu and direct launch share one ApplicationV2 instance.
+  const DesignStudioMenuApplication = class extends DesignStudioApplication {
+    constructor(options = {}) {
+      const current = game.nexus.design.application;
+      if (current) return current;
+      super(options);
+      game.nexus.design.application = this;
     }
-    const application = new DesignStudioApplication();
-    game.nexus.design.application = application;
+  };
+  game.nexus.design.Studio = DesignStudioApplication;
+  game.nexus.design.StudioMenu = DesignStudioMenuApplication;
+  game.nexus.design.registerStudio(DesignStudioMenuApplication);
+  game.nexus.design.openStudio = () => {
+    let application = game.nexus.design.application;
+    if (!application) {
+      application = new DesignStudioApplication();
+      game.nexus.design.application = application;
+    }
+    if (application.rendered) {
+      application.bringToFront?.();
+      return Promise.resolve(application);
+    }
     return Promise.resolve(application.render({ force: true })).then(() => application);
   };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.

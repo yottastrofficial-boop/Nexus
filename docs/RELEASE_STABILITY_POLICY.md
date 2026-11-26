@@ -22,14 +22,14 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (preparação da 1.0.0.113 para teste)
+## Estado de referência — 2026-11-25 (preparação da 1.0.0.114 para teste)
 
-- **Versão de desenvolvimento preparada na main:** `1.0.0.113`; dock compacto do sidebar, com publicação para teste condicionada à aprovação do CI.
-- **Última versão estável anterior:** `1.0.0.112`; manifesto e pacote confirmados.
+- **Versão de desenvolvimento preparada na main:** `1.0.0.114`; restauração da sidebar vertical nativa, ajuste do Estúdio e correção de fontes de ícones, com publicação condicionada à aprovação do CI.
+- **Última versão estável publicada:** `1.0.0.113`; release, ZIP e manifesto confirmados.
 - **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
-- **Teste manual pendente:** a versão `1.0.0.113` substitui as abas fixas e multilinha por slots flexíveis em uma faixa única. Confirmar densidade, foco, cliques, módulos que acrescentam abas, recolhimento e expansão no Foundry VTT 14 build 360. A validação manual no Foundry VTT 14 build 360 ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
+- **Teste manual pendente:** a versão `1.0.0.114` remove a navegação horizontal e devolve a orientação vertical ao Foundry. Confirmar todas as abas nativas e de módulos, abertura do Estúdio, dimensões responsivas, ícones, controles e painéis no Foundry VTT 14 build 360. A validação manual ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
-- **Limitação explícita:** a validação visual/funcional no Foundry 14 build 360 continua pendente. A captura enviada mostrou abas verticais, conteúdo sobreposto e ícones incorretos. A correção tipográfica dos ícones foi identificada e integrada na PR #97, mas ainda não foi verificada no cliente real; o layout horizontal segue pendente. O checkpoint funcional permanece em `1.0.0.70`.
+- **Limitação explícita:** o usuário instalou a candidata .113 e relatou que a navegação horizontal continuava comprimida; por isso, a abordagem foi abandonada. A .114 remove os overrides estruturais e corrige o reset tipográfico de botões com classes Font Awesome. A confirmação visual/funcional de sidebar, ícones e Estúdio no cliente real ainda está pendente. O checkpoint funcional permanece em `1.0.0.70`.
 - **Distribuição:** a `1.0.0.111` foi autorizada para publicação antecipada. O manifesto estável só será sincronizado após CI, empacotamento e confirmação do asset; o checkpoint funcional permanece em `1.0.0.70` até validação no Foundry real.
 - **Sincronização:** o workflow só atualiza o manifesto original depois de aprovar os testes, gerar o ZIP e confirmar o asset `nexus.zip`.
 - **Último checkpoint funcional confirmado no Foundry:** `1.0.0.70`.

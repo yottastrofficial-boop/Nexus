@@ -6,18 +6,22 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão candidata na `main`: `1.0.0.113` (dock compacto do sidebar em linha única; validação visual pendente).
-- Última versão estável publicada no manifesto: `1.0.0.112`.
+- Versão candidata na `main`: `1.0.0.114` (restauração da sidebar vertical nativa, Estúdio responsivo e correção de fontes de ícones; validação visual pendente).
+- Última versão estável publicada no manifesto: `1.0.0.113`.
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
-- A candidata .113 mantém a navegação em linha única com slots flexíveis; a captura no Foundry real ainda é necessária para confirmar densidade e precisão dos cliques.
-- A captura da .106 confirmou navegação vertical, sobreposição e glifos incorretos. A revisão de CSS e os contratos de regressão foram distribuídos na .107; a validação visual e funcional no Foundry real ainda aguarda o teste manual.
+- A candidata .114 remove a navegação horizontal customizada e devolve a orientação vertical ao Foundry. A versão .113 foi instalada e o usuário relatou que os slots flexíveis continuavam visualmente comprimidos; a opção horizontal foi descartada.
+- O histórico das versões .106–.113 registra tentativas de correção e compactação da sidebar. A candidata .114 remove os overrides de geometria, em vez de continuar acumulando regras para imitar a navegação nativa.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A base 1.0.0.104 remove o override global de Font Awesome que quebrava ícones nativos; a versão .101 refinou o Estúdio de Aparência; a validação funcional no Foundry VTT 14 build 360 continua pendente.
 - Compatibilidade declarada: Foundry VTT 14, build 360
 - Estado: projeto em desenvolvimento; a publicação do pacote não equivale à validação funcional completa no Foundry.
 
 Este documento descreve a implementação observada no repositório e separa recursos presentes, infraestrutura parcial e objetivos futuros. Não substitui os livros oficiais do NEXUS RPG.
+
+## Estado da 1.0.0.114 — retorno à sidebar nativa
+
+A candidata .114 restaura a navegação vertical original do Foundry removendo o bloco estrutural horizontal do Design System. Os estilos de diretórios e o ajuste adaptativo do Chat são preservados, mas a geometria, orientação, registro e troca das abas voltam a ser responsabilidade do Foundry. O Estúdio de Aparência passa a aceitar janelas menores e compartilha uma única instância entre o menu de Configurações e a abertura direta. A regra compartilhada de botões deixa de aplicar o shorthand `font: inherit` indiscriminadamente a controles com classes Font Awesome próprias. CI e pacote ainda precisam ser confirmados; a validação visual no Foundry VTT 14 build 360 permanece pendente.
 
 ## O que é o NEXUS
 
@@ -44,7 +48,7 @@ A implementação deve manter separadas estas responsabilidades:
 
 A arquitetura é modular por contrato, não apenas por aparência. Um grupo precisa representar uma relação estrutural real; uma definição salva não pode ser alterada acidentalmente por uma instância; e mudanças visuais não devem modificar os dados mecânicos.
 
-## Estado da 1.0.0.112 — chat lateral adaptativo
+## Histórico da 1.0.0.112 — chat lateral adaptativo
 
 A atualização .112 complementa a correção de largura da .111 com espaçamento adaptativo baseado na largura real do contêiner, mídia limitada à área da mensagem e rolagem interna de tabelas extensas. A atualização .111 corrige o chat lateral a partir do DOM enviado: a sidebar tem 540 px, mas o histórico e o formulário estavam limitados a 300 px. O histórico real é OL.chat-log, sem o ID #chat-log visado por regras antigas; a PR #99 ajusta os seletores reais, expande o histórico/controles/compositor e compacta os cartões. CI e contratos passaram; a validação visual no Foundry VTT 14 build 360 continua pendente. A correção .110 da navegação e a preservação dos ícones nativos permanecem incluídas. A atualização .105 corrige os seletores e o layout do sidebar na estrutura ApplicationV2, preservando os elementos e handlers nativos. A atualização .102 remove a regra que forçava a família e o peso de todos os ícones Font Awesome, devolvendo ao Foundry a escolha correta dos glifos. O CI, o empacotamento, a release e a sincronização do manifesto foram concluídos; a validação visual no cliente Foundry 14 build 360 continua pendente.
 

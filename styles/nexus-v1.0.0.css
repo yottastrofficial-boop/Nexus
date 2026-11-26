@@ -9944,7 +9944,7 @@ html.nexus-design-system #sidebar .sidebar-tab.nexus-themed-directory .directory
   box-shadow: none !important;
 }
 /* Estúdio: navegação compacta, editor central e catálogo de preview à direita. */
-.nexus-design-studio { min-width: min(96vw, 980px) !important; }
+.nexus-design-studio { min-width: min(96vw, 720px) !important; max-width: 96vw !important; }
 .nexus-design-studio-body {
   grid-template-columns: 158px minmax(0, 1.12fr) minmax(260px, .88fr) !important;
   gap: 0 !important;

@@ -1,3 +1,14 @@
+## 1.0.0.114 — Sidebar nativa, Estúdio responsivo e correção de ícones
+
+- Restaura a navegação vertical original do Foundry VTT, removendo o bloco de CSS que convertia a navegação e os painéis da sidebar para uma faixa horizontal.
+- Mantém a largura padrão do Foundry e preserva todas as abas nativas e adicionadas por módulos; o NEXUS continua aplicando apenas o tema das superfícies e diretórios.
+- Preserva os ajustes independentes de largura e espaçamento do Chat, sem interferir na orientação da navegação.
+- Corrige a tipografia compartilhada dos botões para que controles com classes Font Awesome próprias não recebam um reset de fonte/peso que possa quebrar seus glifos.
+- Torna o Estúdio de Aparência mais responsivo, reduzindo os limites mínimos da janela e permitindo reutilizar a mesma instância pelo menu de Configurações e pela abertura direta.
+- Acrescenta contratos de regressão para a sidebar vertical, o dimensionamento responsivo do Estúdio e a preservação das fontes de ícones.
+- **Teste manual pendente:** abrir o Estúdio no Foundry VTT 14 build 360; conferir os ícones gerais, controles de janela, barra de ferramentas, painéis, sidebar vertical e compatibilidade com módulos.
+- Sem alterações em regras mecânicas, schemas de Actors/Items ou dados persistidos.
+
 ## 1.0.0.113 — Dock compacto de navegação do sidebar
 
 - Reorganiza as abas nativas do Foundry VTT 14 em uma única faixa horizontal contínua.

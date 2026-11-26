@@ -8,21 +8,30 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão candidata na main: `1.0.0.113` (dock compacto do sidebar; validação automatizada e manual pendentes até CI).
-- Última versão estável publicada no manifesto: `1.0.0.112`.
-- Teste manual: a candidata `1.0.0.113` precisa confirmar a faixa única, a densidade dos ícones, as abas de módulos e a troca de painéis no Foundry VTT 14 build 360.
+- Versão candidata na main: `1.0.0.114` (retorno à sidebar vertical nativa, correção do Estúdio e ícones; validação automatizada e manual pendentes até CI).
+- Última versão estável publicada no manifesto: `1.0.0.113`.
+- Teste manual: a candidata `1.0.0.114` precisa confirmar sidebar vertical nativa, abertura/redimensionamento do Estúdio, ícones gerais, controles de janela e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
-- A revisão CSS está distribuída na `1.0.0.107` para validação manual. Não declarar o sidebar funcionalmente concluído até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
+- A candidata .114 remove os overrides de geometria da sidebar; não declarar a restauração concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
-## Candidata 1.0.0.113 — dock compacto de navegação
+## Candidata 1.0.0.114 — sidebar nativa, Estúdio e ícones
+
+- Remover o CSS estrutural que transformava a navegação nativa em uma faixa horizontal.
+- Manter o tema das superfícies e diretórios sem controlar geometria, orientação, ordem ou visibilidade das abas.
+- Preservar os ajustes independentes do Chat.
+- Tornar o Estúdio de Aparência mais responsivo e unificar sua instância no menu de Configurações e no atalho direto.
+- Evitar que a tipografia genérica dos botões substitua a fonte/peso de controles Font Awesome.
+- Executar os contratos automatizados e, depois da instalação, validar no Foundry VTT 14 build 360. CI não substitui a verificação real.
+
+## Histórico da candidata 1.0.0.113 — dock compacto de navegação
 
 A main distribui as abas nativas em uma única faixa flexível, sem wrap ou rolagem horizontal. A mudança preserva a ordem DOM, os handlers, os ícones e o controlador nativo; a largura da sidebar não é alterada. O CI deve confirmar os contratos e o empacotamento, mas a precisão dos cliques e a compatibilidade com abas adicionadas por módulos dependem de inspeção no Foundry real.
 
-## Próxima etapa — correção orientada pelo diagnóstico do sidebar V14
+## Histórico — diagnóstico do sidebar V14 (superado pela candidata .114)
 
 As PRs #89 e #91 foram integradas à main. O teste `tools/foundry-testing/tests/sidebar-diagnostic.spec.js` coleta a árvore DOM de `game.sidebar.element`, ancestrais, geometrias, estilos calculados, fontes de ícones e screenshot no Foundry 14. A PR #91 isolou o sidebar das regras globais de tipografia, removeu a atribuição de `font-family: inherit` aos controles nativos e centralizou os estilos das abas em `nexus-design-system.css`. CI e empacotamento passaram. A etapa seguinte é executar o diagnóstico no mundo descartável e validar o layout horizontal, os ícones e a troca de abas no cliente real. Não considerar o sidebar concluído nem publicar nova release antes dessa validação.
 

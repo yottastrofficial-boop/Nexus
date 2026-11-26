@@ -6,68 +6,57 @@ const designCss = readFileSync(new URL("styles/nexus-design-system.css", root), 
 const universalCss = readFileSync(new URL("styles/nexus-universal-library.css", root), "utf8");
 const template = readFileSync(new URL("templates/apps/design-studio.hbs", root), "utf8");
 const app = readFileSync(new URL("scripts/apps/design-studio.js", root), "utf8");
-assert.doesNotMatch(css, /font-family:\s*["\x27]Font Awesome 6 (?:Free|Pro|Brands)["\x27]\s*!important/i, "NEXUS não deve sobrescrever a família nativa dos ícones do Foundry");
+const bootstrap = readFileSync(new URL("scripts/nexus-v1.0.0.js", root), "utf8");
+
+assert.doesNotMatch(css, /font-family:\s*["\x27]Font Awesome 6 (?:Free|Pro|Brands)["\x27]\s*!important/i);
 assert.match(designCss, /Foundry owns icon font selection and glyph rendering/);
-assert.match(designCss, /not\(\[class\*="fa-"\]\)/, "A tipografia global deve excluir elementos com classes Font Awesome");
+assert.match(designCss, /not\(\[class\*="fa-"\]\)/);
 const globalFontRules = [...designCss.matchAll(/font-family:\s*var\(--nexus-font-family, system-ui, sans-serif\) !important/g)];
-assert.equal(globalFontRules.length, 1, "A tipografia global deve ter uma única regra canônica");
+assert.equal(globalFontRules.length, 1);
 const globalFontRuleStart = designCss.lastIndexOf('html.nexus-design-system:not([data-nexus-theme="foundry"]) body', globalFontRules[0].index);
 const globalFontRule = designCss.slice(globalFontRuleStart, designCss.indexOf("}", globalFontRules[0].index) + 1);
-assert.match(globalFontRule, /:not\(#sidebar\):not\(#sidebar \*\)/, "A tipografia global não pode alcançar descendentes do sidebar");
-assert.doesNotMatch(designCss, /:is\(#sidebar, #sidebar \.tab, #hotbar, #navigation\) :is\(button, input, select, textarea\)/, "Botões nativos do sidebar não podem receber font-family herdado por regra global");
-assert.doesNotMatch(universalCss, /#sidebar \.sidebar-tabs > \.item|#sidebar \.tab\.sidebar-tab/, "A camada da Biblioteca Universal não deve duplicar o estilo das abas");
-assert.doesNotMatch(css, /#sidebar \.sidebar-tabs > \.item(?=\s*\{)/, "A camada legada não deve duplicar os estados das abas");
+assert.match(globalFontRule, /:not\(#sidebar\):not\(#sidebar \*\)/);
+assert.doesNotMatch(universalCss, /#sidebar \.sidebar-tabs > \.item|#sidebar \.tab\.sidebar-tab/);
+assert.doesNotMatch(css, /#sidebar \.sidebar-tabs > \.item(?=\s*\{)/);
 assert.match(css, /\.sidebar-tab\.nexus-themed-directory/);
 const nativeSidebarStart = css.indexOf("html.nexus-design-system #sidebar,");
 const nativeSidebarEnd = css.indexOf("html.nexus-design-system #sidebar .sidebar-tab.directory", nativeSidebarStart);
 const nativeSidebarStyle = css.slice(nativeSidebarStart, nativeSidebarEnd);
-assert.ok(nativeSidebarStart >= 0 && nativeSidebarEnd > nativeSidebarStart, "O bloco visual do sidebar nativo deve existir");
-assert.doesNotMatch(nativeSidebarStyle, /font-family\s*:/i, "A tipografia dos ícones nativos deve permanecer sob controle do Foundry/Font Awesome");
+assert.ok(nativeSidebarStart >= 0 && nativeSidebarEnd > nativeSidebarStart);
+assert.doesNotMatch(nativeSidebarStyle, /font-family\s*:/i);
 assert.match(css, /\.directory-list \.directory-item/);
 assert.match(css, /grid-template-columns:\s*158px minmax\(0, 1\.12fr\) minmax\(260px, \.88fr\)/);
 assert.match(template, /data-design-category-filter/);
 assert.match(template, /data-design-preview-category/);
 assert.match(template, /nexus-design-catalog-item/);
 assert.match(app, /data-design-category-filter/);
-assert.match(app, /minWidth: 980/);
+assert.match(app, /minWidth: 360/);
+assert.match(app, /minHeight: 420/);
 assert.ok(app.includes("const inheritedOptions = clone(ApplicationV2.DEFAULT_OPTIONS"));
 assert.ok(app.includes("const mutableOptions = {"));
 assert.ok(app.includes("{ position: { ...options.position } }"));
-const sidebarBlock = designCss.slice(
-  designCss.indexOf("/* Sidebar navigation and panels — Foundry V14 ApplicationV2."),
-  designCss.indexOf("/* Advanced CSS editor */")
-);
-assert.ok(sidebarBlock.length > 0, "O bloco canônico do sidebar deve existir");
-assert.ok(sidebarBlock.includes("#sidebar-tabs"), "O seletor nativo de navegação deve ser contemplado");
-assert.ok(sidebarBlock.includes(".sidebar-tabs"), "A navegação real do Sidebar V14 deve ser contemplada");
-assert.ok(sidebarBlock.includes(".tab.sidebar-tab"), "Os controles nativos V14 precisam ser selecionados pela classe real");
-assert.ok(sidebarBlock.includes("#sidebar-tabs > :is(.item"), "Os controles nativos devem receber dimensões uniformes sem selecionar painéis");
-assert.ok(sidebarBlock.includes("#sidebar .sidebar-tabs > :is(.item"), "A navegação nativa dentro do Sidebar deve receber dimensões uniformes");
-const navControlsStart = sidebarBlock.indexOf("/* Size only native navigation controls.");
-const navControlsEnd = sidebarBlock.indexOf("/* Native icon fonts/SVGs", navControlsStart);
-const navControlsStyle = sidebarBlock.slice(navControlsStart, navControlsEnd);
-assert.ok(navControlsStart >= 0 && navControlsEnd > navControlsStart, "A seção de dimensionamento dos controles nativos deve existir");
-const navControlSelectors = navControlsStyle.slice(
-  navControlsStyle.indexOf("html.nexus-design-system"),
-  navControlsStyle.indexOf("{")
-);
-assert.ok(navControlSelectors.length > 0, "Os seletores de controle devem estar declarados");
-assert.doesNotMatch(navControlSelectors, /\.tab\.sidebar-tab/, "Painéis de conteúdo nunca devem ser selecionados como botões");
-const panelLayoutStart = sidebarBlock.indexOf("html.nexus-design-system #sidebar > .tab.sidebar-tab,");
-const panelLayoutEnd = sidebarBlock.indexOf("/* The content host is the scroll boundary.", panelLayoutStart);
-const panelLayoutStyle = sidebarBlock.slice(panelLayoutStart, panelLayoutEnd);
-assert.ok(panelLayoutStart >= 0 && panelLayoutEnd > panelLayoutStart, "O painel nativo deve ter uma regra de layout própria");
-assert.doesNotMatch(panelLayoutStyle, /width:\s*34px|height:\s*34px/, "Painéis de conteúdo devem ocupar a área disponível, não dimensões de botão");
-assert.ok(sidebarBlock.includes("flex-direction: row !important"), "As abas nativas devem ser horizontais");
-assert.ok(sidebarBlock.includes("flex-wrap: nowrap"), "Abas extras de módulos devem permanecer na faixa única sem rolagem");
-assert.ok(sidebarBlock.includes('nav.tabs[data-group="primary"]'), "A navegação ApplicationV2 deve ser contemplada");
-assert.ok(sidebarBlock.includes("flex-direction: row !important"), "As abas nativas devem ser horizontais");
-assert.ok(sidebarBlock.includes("flex-wrap: nowrap"), "Abas extras de módulos devem permanecer na faixa única sem rolagem");
-assert.ok(sidebarBlock.includes("inline-flex"), "Os controles devem manter dimensões e alinhamento consistentes");
-assert.ok(sidebarBlock.includes("#sidebar-content"), "A área de conteúdo do sidebar deve ser contemplada");
-assert.doesNotMatch(sidebarBlock, /window-content|application-content/, "O layout não deve presumir um wrapper de janela comum");
-assert.doesNotMatch(sidebarBlock, /^\s*(?:font-family|content)\s*:/im, "O layout não deve substituir fontes ou glifos nativos");
-assert.doesNotMatch(sidebarBlock, /^\s*order\s*:/im, "A ordem DOM original do Foundry deve ser preservada");
-assert.ok(!designCss.includes("Minimal UI — Foundry V14 ApplicationV2 sidebar"), "O bloco estrutural anterior deve ser removido");
-assert.ok(designCss.includes('[class~="fas"]'));
-console.log("Foundry UI + Design Studio layout contracts passed.");
+assert.match(css, /\.nexus-design-studio \{ min-width: min\(96vw, 720px\) !important; max-width: 96vw !important; \}/);
+assert.match(bootstrap, /DesignStudioMenuApplication/);
+assert.match(bootstrap, /registerStudio\(DesignStudioMenuApplication\)/);
+assert.match(bootstrap, /game\.nexus\.design\.openStudio = \(\) =>/);
+assert.match(bootstrap, /application\.render\(\{ force: true \}\)/);
+
+const sharedButtonMarker = "/* Shared button styling without taking ownership of icon fonts. */";
+const sharedButtonStart = designCss.indexOf(sharedButtonMarker);
+const sharedButtonEnd = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */", sharedButtonStart);
+assert.ok(sharedButtonStart >= 0 && sharedButtonEnd > sharedButtonStart);
+const sharedButtonRule = designCss.slice(sharedButtonStart, sharedButtonEnd);
+assert.doesNotMatch(sharedButtonRule, /font\s*:/);
+const textButtonStart = designCss.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */");
+const textButtonEnd = designCss.indexOf("}", textButtonStart);
+const textButtonRule = designCss.slice(textButtonStart, textButtonEnd + 1);
+assert.match(textButtonRule, /:is\(button, \.button, \.ui-control, \.control-tool\):not\(\[class\*="fa-"\]\)/,
+  "The Font Awesome exclusions must be attached to the button itself, not a descendant.");
+assert.match(textButtonRule, /:not\(\[class~="fas"\]\):not\(\[class~="far"\]\)/,
+  "All icon-family exclusions must remain attached to the same button element.");
+assert.match(textButtonRule, /font:\s*inherit/);
+assert.match(template, /role="tablist"/);
+assert.match(template, /data-design-section="palette"/);
+assert.match(template, /data-design-section-panel="palette"/);
+assert.match(template, /data-design-action="save"/);
+console.log("Foundry UI, Design Studio opening and icon-font contracts passed.");

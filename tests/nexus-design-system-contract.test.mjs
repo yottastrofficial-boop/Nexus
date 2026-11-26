@@ -16,8 +16,10 @@ assert.match(designSystem, /text-shadow:\s*none\s*!important/,
   "The default NEXUS surfaces must not add text shadows.");
 assert.doesNotMatch(designSystem, /:is\(#controls, #ui-left, #ui-top\)\s*:is\(\.ui-control, \.control-tool\)/,
   "Native Foundry tool buttons must retain the minimal Foundry appearance.");
-assert.match(designSystem, /#sidebar[\s\S]*?sidebar-tabs/,
-  "Foundry sidebar tabs must inherit the NEXUS design system.");
+assert.match(designSystem, /Foundry V14 owns the native sidebar layout, vertical orientation and tab controller/,
+  "The Foundry sidebar must retain its native vertical navigation.");
+assert.doesNotMatch(designSystem, /#sidebar-tabs|#sidebar-content|\.sidebar-tabs\s*\{/,
+  "The Design System must not replace native sidebar geometry.");
 assert.match(designSystem, /\.application\.nexus-themed-application/,
   "NEXUS and explicitly supported Foundry applications must receive the shared styles.");
 assert.doesNotMatch(designSystem, /html\.nexus-design-system\s+:is\(\.application,\s*\.window-app\)/,
@@ -74,6 +76,16 @@ assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*5
 assert.doesNotMatch(designSystem, /fa-style-family|Font Awesome 6 Free|\.fa-solid[^{}]*font-family/i,
   "The Design System must leave Font Awesome font selection to Foundry's native styles.");
 assert.match(designSystem, /Native icon glyphs remain owned by Foundry\/Font Awesome/);
+const sharedButtonStart = designSystem.indexOf("/* Shared button styling without taking ownership of icon fonts. */");
+const textButtonStart = designSystem.indexOf("/* NEXUS button typography excludes direct Font Awesome controls. */");
+assert.ok(sharedButtonStart >= 0 && textButtonStart > sharedButtonStart,
+  "Shared button styles and text-button typography must be separate.");
+assert.doesNotMatch(designSystem.slice(sharedButtonStart, textButtonStart), /font\\s*:/,
+  "Shared button styling must not reset Font Awesome family or weight.");
+const textButtonEnd = designSystem.indexOf("}", textButtonStart);
+assert.match(designSystem.slice(textButtonStart, textButtonEnd), /:not\\(\\[class\\*="fa-"\\]\\)/,
+  "Only ordinary text buttons may inherit the profile font.");
+
 assert.match(designSystem, /nexus-component-buttons-background/);
 assert.match(designSystem, /nexus-component-highlights-border-style/);
 assert.match(designSystem, /data-nexus-theme="foundry"/);

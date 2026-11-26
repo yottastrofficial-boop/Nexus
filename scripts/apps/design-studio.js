@@ -58,7 +58,7 @@ export function createDesignStudioApplicationClass({
     ...inheritedOptions,
     id: "nexus-design-studio",
     classes: [...new Set([...(Array.isArray(inheritedOptions.classes) ? inheritedOptions.classes : []), "nexus", "nexus-design-studio"])],
-    position: { ...(inheritedOptions.position ?? {}), width: 1180, height: 800, minWidth: 980, minHeight: 640 },
+    position: { ...(inheritedOptions.position ?? {}), width: 1100, height: 760, minWidth: 360, minHeight: 420 },
     window: {
       ...(inheritedOptions.window ?? {}),
       title: "Estúdio de Aparência NEXUS",
