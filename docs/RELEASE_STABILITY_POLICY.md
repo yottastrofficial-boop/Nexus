@@ -1,3 +1,7 @@
+## Estado atual da main
+
+A versão publicada em preparação para validação é **1.0.0.118**. CI e pacote ainda precisam concluir a execução desta revisão; a confirmação visual/funcional no Foundry VTT 14 build 360 permanece pendente. O último checkpoint funcional confirmado continua sendo **1.0.0.70**.
+
 # Política de versões e checkpoints estáveis
 
 ## Objetivo
