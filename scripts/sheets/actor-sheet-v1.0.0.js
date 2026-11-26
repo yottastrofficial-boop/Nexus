@@ -2384,11 +2384,8 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
     }
     this._syncScopedThemeSurfaces(layout);
-    if (["width", "height"].includes(key)) {
-      const appWidth = clamp(layout.width + 40, 800, Math.max(800, window.innerWidth - 24));
-      const appHeight = clamp(Math.min(layout.height + 100, window.innerHeight - 24), 500, Math.max(500, window.innerHeight - 24));
-      this.setPosition({ width: appWidth, height: appHeight });
-    }
+    // The application window has fixed chrome dimensions (800 × 836).
+    // Canvas dimensions remain independent and are handled by its own viewport.
     const canvas = this.element?.querySelector(".nexus-canvas");
     if (canvas) {
       canvas.dataset.layoutWidth = String(layout.width); canvas.dataset.layoutHeight = String(layout.height);
