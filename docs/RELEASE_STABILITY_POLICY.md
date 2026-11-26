@@ -1,4 +1,4 @@
-## Candidata 1.0.0.121
+## Registro de código 1.0.0.121
 
 A candidata corrige os fluxos de diálogo da Biblioteca, a apresentação dos filtros/pesquisa, miniaturas e altura inicial da ficha. A aprovação de CI e publicação do pacote não equivale a validação funcional no Foundry. O último checkpoint funcional confirmado permanece 1.0.0.70 até avaliação manual.
 
