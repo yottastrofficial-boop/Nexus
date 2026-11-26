@@ -1,4 +1,8 @@
-## Estado do código — 1.0.0.121
+## Estado do código — 1.0.0.122
+
+A revisão atual acrescenta pesquisa estruturada à Biblioteca, indexa metadados adicionais de compêndios sob demanda, emite arraste nativo Foundry por UUID, permite inserir componentes pessoais no Canvas por arraste e mantém a janela da ficha fixa em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+
+## Estado do código — 1.0.0.122
 
 A revisão atual corrige fluxos de diálogo e apresentação da Biblioteca, adiciona miniaturas personalizadas seguras e aumenta a altura inicial da ficha para 836 px. CI e pacote precisam passar; a validação funcional/visual no Foundry VTT 14 build 360 permanece pendente.
 
@@ -153,3 +157,14 @@ A versão `1.0.0.107` foi publicada com CI e empacotamento aprovados, asset `nex
 ## Estado de interação centralizado — 1.0.0.120
 
 A ficha delega seleção, grupo, alvo do Inspector e painel ativo a `sheet-interaction-state.js`. Accessors de compatibilidade mantêm fluxos legados conectados à mesma fonte. Janelas nativas de Configurações recebem escopo visual próprio e não herdam resets genéricos das aplicações NEXUS.
+
+
+## Biblioteca e transferência nativa — 1.0.0.122
+
+- A pesquisa aceita texto livre, frases, qualificadores e exclusões; consulta nome, subtipo, pasta, descrição e metadados indexados.
+- O bridge pede campos adicionais por getIndex({ fields }), mantendo resultados leves e paginação. Documentos completos são resolvidos somente ao abrir/transferir.
+- A lista respeita visibilidade e permissão OBSERVER; não consulta compêndios não selecionados.
+- Cards Foundry emitem { type, uuid } no formato de arraste nativo. A criação/importação final permanece sob controle do handler do destino.
+- Componentes pessoais salvos são inseridos no Canvas com posição convertida para coordenadas internas e snap opcional.
+- A janela da ficha permanece fixa em 800 × 836 px; o Canvas mantém dimensões próprias.
+- Ainda não existe adaptador de importação de fontes externas web nem mapeamento automático de conteúdos para propriedades mecânicas do NEXUS. Esse mapeamento depende dos schemas/regras oficiais e de confirmação do usuário.
