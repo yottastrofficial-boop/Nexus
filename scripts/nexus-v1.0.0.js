@@ -184,6 +184,7 @@ Hooks.once("init", () => {
   game.nexus.logic ??= {};
   game.nexus.logic.registry = registerService("logic.registry", () => createLogicRegistry({ schemas: createNexusLogicSchemas() }));
   game.nexus.logic.runtime = registerService("logic.runtime", ({ "logic.registry": registry }) => createLogicRuntime({ registry }), { dependencies: ["logic.registry"] });
+  if (!game.nexus.services.has("logic.foundryIntegration")) game.nexus.services.register("logic.foundryIntegration", ({ "logic.runtime": runtime }) => installFoundryLogicIntegration({ hooks: Hooks, runtime, gameRef: game, constRef: CONST }), { dependencies: ["logic.runtime"] });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
   game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
@@ -234,14 +235,7 @@ Hooks.once("ready", () => {
     console.error("NEXUS | Falha ao carregar a Biblioteca de Lógica.", error);
   }
   try {
-    game.nexus.logic.foundryIntegration?.uninstall?.();
-    game.nexus.logic.foundryIntegration = installFoundryLogicIntegration({
-      hooks: Hooks,
-      runtime: game.nexus.logic.runtime,
-      gameRef: game,
-      constRef: CONST
-    });
-    publishService("logic.foundryIntegration", game.nexus.logic.foundryIntegration);
+    game.nexus.logic.foundryIntegration = game.nexus.services.resolveSync("logic.foundryIntegration");
     console.info("NEXUS | Eventos do Foundry conectados à Lógica:", game.nexus.logic.foundryIntegration.bridge.hookCount);
   } catch (error) {
     console.error("NEXUS | Falha ao conectar eventos do Foundry à Lógica.", error);
