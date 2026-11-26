@@ -22,12 +22,12 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (correções 1.0.0.117 em preparação; validação funcional pendente)
+## Estado de referência — 2026-11-25 (release 1.0.0.117 publicada; validação funcional pendente)
 
-- **Versão estável anterior:** `1.0.0.116`; CI, pacote ZIP, release e manifesto confirmados. A 1.0.0.117 corrige os problemas relatados no rail flutuante e no inspetor; aguarda CI/publicação e teste manual no Foundry.
+- **Versão estável publicada na main e no manifesto:** `1.0.0.117`; CI (64/64 scripts, 43/43 arquivos de teste), ZIP (443.848 bytes), release, asset e manifesto confirmados. A validação manual no Foundry ainda está pendente.
 - **Última versão estável anterior:** `1.0.0.115`; release, ZIP e manifesto confirmados.
 - **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
-- **Teste manual pendente:** a versão `1.0.0.116` mantém a sidebar vertical nativa, move os botões de layout para controles flutuantes e remove os fundos externos redundantes da Hotbar e da lista de jogadores. Confirmar os 10 slots, a lista de jogadores, os ícones nativos e personalizados, as fontes de perfil, a Biblioteca, o Estúdio e os painéis no Foundry VTT 14 build 360. A validação manual ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
+- **Teste manual pendente:** a versão `1.0.0.117` corrige o rail direito, a seleção/alvo do inspetor e a abertura de Propriedades pelo Canvas. Confirmar rails e botões individuais, troca/edição de layouts, Biblioteca, seleção simples/múltipla, edição de grupos, foco, re-renderização e console no Foundry VTT 14 build 360. Revalidar também os 10 slots da Hotbar, Players, ícones e fontes. A publicação não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.
 - **Limitação explícita:** o usuário instalou a versão .113 e relatou que a navegação horizontal continuava comprimida; por isso, a abordagem foi abandonada. A .114 removeu os overrides estruturais da sidebar; a .115 corrigiu regras tipográficas legadas; a .116 separou os botões de layout em controles flutuantes e simplificou as molduras externas da Hotbar e da lista de jogadores. A confirmação visual/funcional de sidebar, ícones e Estúdio no cliente real ainda está pendente. O checkpoint funcional permanece em `1.0.0.70`.
 - **Distribuição:** a `1.0.0.111` foi autorizada para publicação antecipada. O manifesto estável só será sincronizado após CI, empacotamento e confirmação do asset; o checkpoint funcional permanece em `1.0.0.70` até validação no Foundry real.

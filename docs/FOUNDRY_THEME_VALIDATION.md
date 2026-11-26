@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da versão 1.0.0.116. CI, pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão 1.0.0.117. CI (64/64 scripts e 43/43 testes), pacote ZIP, release e manifesto foram confirmados; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 

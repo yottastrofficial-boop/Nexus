@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Build em preparação:** a 1.0.0.117 corrige os estilos legados do rail direito, unifica os botões flutuantes de layout/Biblioteca e corrige a referência do componente editado no inspetor. A validação automatizada e a publicação estão em andamento; a confirmação visual e funcional no Foundry VTT 14 build 360 permanece necessária.
+**Build publicada:** a 1.0.0.117 corrige a especificidade do CSS legado no rail direito, padroniza os botões de layout e Biblioteca como controles flutuantes individuais e sincroniza o alvo do inspetor com a seleção atual. CI aprovou 64/64 scripts e 43/43 arquivos de teste; o ZIP foi validado e a release/manifesto foram publicados. A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 
 ## Visão geral
 
@@ -30,7 +30,7 @@ Essa separação orienta o planejamento do projeto. Nem todos esses recursos est
 
 ## Implementação atual na main — 1.0.0.117
 
-A base 1.0.0.117 mantém a sidebar vertical nativa, coloca os botões de layout da ficha em controles flutuantes independentes, remove o painel de fundo atrás dos 10 slots da Hotbar e a moldura externa da lista de jogadores. A tipografia personalizada agora exclui corretamente os elementos de ícone no mesmo seletor, permitindo que Foundry/Font Awesome mantenha sua família de fonte nativa. CI e pacote foram aprovados; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base 1.0.0.117 mantém a sidebar vertical nativa e os rails de ficha independentes, remove os fundos externos redundantes da Hotbar/Players, preserva ícones nativos e corrige o fluxo do inspetor de componentes. CI e release foram aprovados; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 
