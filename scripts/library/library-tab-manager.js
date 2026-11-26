@@ -50,6 +50,7 @@ export function createLibraryTabManager(initialState = {}, { createId } = {}) {
     getActive: active,
     getTabs: list,
     getActiveState: () => active()?.state ?? {},
+    getTabState: id => tabs.find(tab => tab.id === id)?.state ?? null,
     setActiveState: state => { active().state = state; },
     activate(id) {
       if (!tabs.some(tab => tab.id === id)) return null;
