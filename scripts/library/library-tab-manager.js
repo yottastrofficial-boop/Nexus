@@ -113,14 +113,17 @@ export function createLibraryTabManager(initialState = {}, { createId } = {}) {
           tab.state = { ...tab.state, folder: "", smartView: "all", collectionId: "" };
         }
         const history = [];
-        for (const entry of tab.history) {
+        let nextIndex = 0;
+        for (let index = 0; index < tab.history.length; index += 1) {
+          const entry = tab.history[index];
           const next = removed.has(String(entry.folder ?? ""))
             ? { smartView: "all", folder: "", collectionId: "" }
             : normalizeLocation(entry);
           if (!history.length || locationKey(history[history.length - 1]) !== locationKey(next)) history.push(next);
+          if (index === tab.historyIndex) nextIndex = history.length - 1;
         }
         tab.history = history.length ? history : [normalizeLocation(tab.state)];
-        tab.historyIndex = Math.min(tab.historyIndex, tab.history.length - 1);
+        tab.historyIndex = Math.min(nextIndex, tab.history.length - 1);
       }
     },
     resetHistory(location) {
