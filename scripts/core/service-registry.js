@@ -29,8 +29,8 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     assertActive();
     const key = assertName(name);
     if (typeof factory !== "function") throw new TypeError("A fábrica do serviço deve ser uma função.");
+    if (instances.has(key)) throw new Error("Não é permitido substituir um serviço já inicializado: " + key);
     if (definitions.has(key) && !replace) throw new Error("Serviço já registrado: " + key);
-    if (instances.has(key) && !replace) throw new Error("Serviço já inicializado: " + key);
     const deps = [...new Set(dependencies.map(assertName))];
     definitions.set(key, { key, factory, dependencies: deps, dispose });
     if (replace) instances.delete(key);
@@ -40,9 +40,9 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
   const publish = (name, value, { replace = false, dispose = null } = {}) => {
     assertActive();
     const key = assertName(name);
-    if (instances.has(key) && !replace) {
+    if (instances.has(key)) {
       if (instances.get(key).value === value) return value;
-      throw new Error("Serviço já publicado: " + key);
+      throw new Error("Não é permitido substituir um serviço já publicado: " + key);
     }
     if (definitions.has(key) && !replace) throw new Error("Serviço já registrado: " + key);
     definitions.set(key, { key, factory: () => value, dependencies: [], dispose });
@@ -65,11 +65,14 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
   const resolve = async (name, ancestry = []) => {
     assertActive();
     const key = assertName(name);
+    if (ancestry.includes(key)) {
+      throw new Error("Dependência circular de serviços: " + [...ancestry, key].join(" → "));
+    }
     const existing = instances.get(key);
     if (existing) return existing.promise;
     const definition = definitions.get(key);
     if (!definition) throw new Error("Serviço não registrado: " + key);
-    if (resolving.has(key) || ancestry.includes(key)) {
+    if (resolving.has(key)) {
       throw new Error("Dependência circular de serviços: " + [...ancestry, key].join(" → "));
     }
 
