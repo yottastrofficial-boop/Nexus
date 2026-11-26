@@ -129,3 +129,17 @@ assert.match(styles, /--nexus-library-navigation-width/,
 assert.match(styles, /--nexus-library-inspector-width/,
   "The Inspector width should be controlled by a user-adjustable CSS variable.");
 console.log("NEXUS browser-style Library shell contract: OK");
+
+assert.match(libraryApplication, /aria-valuemin/);
+assert.match(libraryApplication, /aria-valuemax/);
+assert.match(libraryApplication, /setAttribute\("role", "slider"\)/,
+  "Resizable panes must expose an accessible slider control.");
+assert.match(libraryApplication, /event.key === "Home"/,
+  "Resizable panes must support keyboard range boundaries.");
+assert.match(libraryApplication, /setAttribute\("aria-controls", childrenId\)/,
+  "Folder disclosure buttons must identify the nested tree region they control.");
+assert.match(styles, /folder-row > \.nexus-library-custom-folder::before[\s\S]*?content: none !important/,
+  "Folder labels must not show a second decorative arrow beside the functional disclosure control.");
+assert.match(styles, /folder-row > \.nexus-library-custom-folder[\s\S]*?min-height: 23px !important/,
+  "Folder rows must use the compact density requested for parent and child folders.");
+console.log("NEXUS Library accessibility and folder density contracts: OK");
