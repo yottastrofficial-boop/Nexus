@@ -70,7 +70,7 @@ test("deleting a folder prunes stale history without moving the active entry", (
   manager.back();
   manager.clearFolderReferences(["actors", "actors/npcs"]);
   assert.deepEqual(manager.getActiveState().folder, "");
-  assert.deepEqual(manager.back(), { smartView: "all", folder: "", collectionId: "" });
+  assert.equal(manager.canBack(), false);
   assert.equal(manager.canForward(), true);
   assert.deepEqual(manager.forward(), { smartView: "all", folder: "items", collectionId: "" });
 });
