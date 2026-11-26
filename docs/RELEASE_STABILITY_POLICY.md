@@ -1,6 +1,6 @@
-## Revisão arquitetural 1.0.0.124 em desenvolvimento (2026-11-26)
+## Revisão arquitetural 1.0.0.125 — bootstrap por dependências (2026-11-26)
 
-A base publicada 1.0.0.123 é a referência desta etapa. A branch de refatoração 1.0.0.124 introduz o registro de serviços compartilhados, contratos de eventos da Lógica desacoplados e guardrails de integridade do grafo de módulos. CI e pacote devem passar antes da integração; a validação funcional/visual no Foundry VTT 14 build 360 permanece pendente. A modernização do bootstrap, ficha, listeners, Biblioteca, CSS e templates continuará em etapas posteriores; esta alteração não deve ser descrita como refatoração integral concluída.
+A versão 1.0.0.124 foi publicada com o registro de serviços e contratos de eventos. A 1.0.0.125 migra os serviços centrais para factories e dependências explícitas, mantendo a API pública `game.nexus.*`. CI, pacote, release e manifesto serão confirmados pelo workflow. A validação funcional/visual no Foundry VTT 14 build 360 permanece pendente. A modernização da ficha, listeners, Biblioteca, CSS e templates continuará por etapas; esta atualização não representa a refatoração integral concluída.
 
 ## Revisão atual 1.0.0.123 — Biblioteca hierárquica
 
