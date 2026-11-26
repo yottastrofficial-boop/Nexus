@@ -1,3 +1,12 @@
+## 1.0.0.125 — bootstrap orientado a dependências
+
+- Adiciona `resolveSync` e `initializeSync` ao registro de serviços para construção síncrona e ordenada durante o hook `init` do Foundry.
+- Migra Design System, biblioteca de perfis, Estúdio, recursos, bridge de documentos, Registry/Transfer/Backup/Aplicação da Biblioteca, serviços de Mídia e Registry/Runtime/integração da Lógica para factories com dependências explícitas.
+- Mantém as fachadas públicas `game.nexus.*` e a ordem de inicialização compatível com o Foundry.
+- Adiciona testes de resolução síncrona, dependências, lazy creation e rejeição explícita de factories assíncronas no caminho síncrono.
+- CI: sintaxe, grafo de módulos e regressões passaram; validação do pacote aprovada.
+- A extração da ficha, listeners, CSS, templates e validador segue planejada por domínio; teste visual/funcional no Foundry VTT 14 continua pendente.
+
 ## 1.0.0.124 — revisão arquitetural e contratos de serviço
 
 - Adiciona registro de serviços NEXUS com factories, dependências explícitas, resolução sob demanda, compartilhamento de instâncias, detecção de dependências circulares, diagnóstico e encerramento reverso.
