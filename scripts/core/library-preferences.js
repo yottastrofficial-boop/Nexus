@@ -364,5 +364,6 @@ export function removeLibraryFolder(raw, folderId) {
   }
   preferences.folders = preferences.folders.filter(folder => !descendants.has(folder.id));
   for (const [key, value] of Object.entries(preferences.assignments)) if (descendants.has(value)) delete preferences.assignments[key];
+  preferences.shortcuts = preferences.shortcuts.map(shortcut => descendants.has(shortcut.folderId) ? { ...shortcut, folderId: "" } : shortcut);
   return preferences;
 }
