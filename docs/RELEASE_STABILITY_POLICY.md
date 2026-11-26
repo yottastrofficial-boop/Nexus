@@ -1,6 +1,9 @@
+## Atualização 1.0.0.119
+A candidata 1.0.0.119 preserva a geometria nativa da sidebar V14, corrige a estrutura de seletores dos controles, remove a coluna fantasma do Canvas e limpa o alvo do Inspector ao limpar seleção. A release depende do CI; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no Foundry real.
+
 ## Estado atual da main
 
-A versão publicada em preparação para validação é **1.0.0.118**. CI e pacote ainda precisam concluir a execução desta revisão; a confirmação visual/funcional no Foundry VTT 14 build 360 permanece pendente. O último checkpoint funcional confirmado continua sendo **1.0.0.70**.
+A versão publicada em preparação para validação é **1.0.0.119**. CI e pacote ainda precisam concluir a execução desta revisão; a confirmação visual/funcional no Foundry VTT 14 build 360 permanece pendente. O último checkpoint funcional confirmado continua sendo **1.0.0.70**.
 
 # Política de versões e checkpoints estáveis
 

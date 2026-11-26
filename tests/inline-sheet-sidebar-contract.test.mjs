@@ -69,7 +69,15 @@ test("component inspector follows current selection and uses the floating Applic
   assert.match(sheet, /this\._componentEditorTargetId = one\?\.id \?\? null/);
   assert.match(sheet, /else delete field\.dataset\.componentTargetId/);
   assert.match(listeners, /const getInspectorComponentId = \(\) =>/);
+  assert.match(sheet, /normalizeSheetSelection\(ids, components\)/);
   assert.doesNotMatch(listeners, /dataset\.componentTargetId \|\| sheet\._componentEditorTargetId \|\|/);
   assert.match(canvas, /sheet\._openFloatingPanel\?\.\("component"\)/);
   assert.doesNotMatch(canvas, /_openInlineEditorPanel/);
+});
+
+test("V14 native tab controls are styled without rebuilding the Foundry sidebar", () => {
+  assert.match(designSystem, /#sidebar-tabs menu > li > button\[role="tab"\]/);
+  assert.doesNotMatch(designSystem, /#sidebar-tabs > \.sidebar-tab/);
+  assert.doesNotMatch(designSystem, /#sidebar\s*\{[^}]*display:\s*flex/s);
+  assert.match(designSystem, /grid-template-columns: minmax\(0, 1fr\) !important/);
 });
