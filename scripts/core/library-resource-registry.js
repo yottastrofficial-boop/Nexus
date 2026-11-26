@@ -618,9 +618,9 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     reference: {
       providerId: "foundry-documents",
       uuid: record.uuid,
-      documentName: record.documentName,
-      documentType: record.documentType ?? "",
-      pack: record.pack ?? ""
+      ...(record.documentName ? { documentName: record.documentName } : {}),
+      ...(record.documentType ? { documentType: record.documentType } : {}),
+      ...(record.pack ? { pack: record.pack } : {})
     },
     capabilities: ["resolve"],
     isExternal: false,
