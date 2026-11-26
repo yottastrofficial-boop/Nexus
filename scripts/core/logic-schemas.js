@@ -1,6 +1,6 @@
 import { evaluateNexusExpression } from "./formula-engine.js";
-import { INTERACTION_EVENTS } from "./interactions.js";
-import { FOUNDRY_LOGIC_EVENTS } from "./foundry-logic-integration.js";
+import { INTERACTION_EVENTS, FOUNDRY_LOGIC_EVENTS } from "./logic-events.js";
+
 
 const SAFE_PATH = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
 const SAFE_ACTOR_UPDATE_PATH = /^system\.[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)*$/;
