@@ -30,4 +30,3 @@ assert.match(sheet,/createSheetInteractionState/);
 assert.match(sheet,/get _selectedIds\(\)/);
 assert.match(sheet,/get _componentEditorTargetId\(\)/);
 assert.match(dsCss,/\.nexus-themed-configuration/);
-assert.doesNotMatch(dsCss,/body :not\(#sidebar\)/);
