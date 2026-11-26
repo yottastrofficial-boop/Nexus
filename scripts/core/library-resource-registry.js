@@ -611,7 +611,13 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     thumbnail: record.img,
     folder: record.folder,
     origin: record.isCompendium ? "compendium" : "world",
-    reference: { providerId: "foundry-documents", uuid: record.uuid },
+    reference: {
+      providerId: "foundry-documents",
+      uuid: record.uuid,
+      documentName: record.documentName,
+      documentType: record.documentType ?? "",
+      pack: record.pack ?? ""
+    },
     capabilities: ["resolve"],
     isExternal: false,
     isCompendium: record.isCompendium
