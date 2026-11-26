@@ -1,3 +1,16 @@
+## 1.0.0.127 — Biblioteca: janela nativa e interface compacta
+
+- Move as abas para o cabeçalho nativo da janela ApplicationV2, removendo o título duplicado e a sensação de uma janela interna.
+- Remove a moldura externa de painel da Biblioteca e elimina os divisores/botões aparentes de redimensionamento; mantém a organização em navegação, conteúdo e Inspector sem caixas redundantes.
+- Reorganiza a navegação em uma única barra plana com voltar, avançar, subir nível, breadcrumb e um único campo de pesquisa.
+- Consolida Novo, Recortar, Copiar, Colar, Renomear, Excluir, Atualizar, Classificar, Visualizar, Filtros e opções adicionais em uma única barra de comandos.
+- Converte os comandos principais em ícones com rótulos acessíveis e tooltips, sem texto repetido nos botões.
+- Move o menu Novo para junto do botão na barra de comandos, abrindo o menu ancorado ao botão em vez de exibi-lo no rodapé da árvore.
+- Reduz densidade visual e dimensões da navegação, das visões inteligentes, pastas e cartões; remove bordas, fundos e superfícies internas redundantes.
+- Adiciona classificação por nome crescente/decrescente, tipo e origem, preservando o estado independente por aba.
+- Preserva catálogo universal, preferências, IDs, referências e operações de recursos já existentes.
+- Testes automatizados e pacote Foundry aprovados; validação visual/funcional no Foundry VTT 14 build 360 ainda necessária.
+
 ## 1.0.0.126 — Biblioteca em janela com abas e comandos
 
 - Converte a experiência da Biblioteca em uma janela de navegação com abas independentes e estado próprio por aba.
