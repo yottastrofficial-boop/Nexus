@@ -5,6 +5,7 @@ import { writeNexusLibraryCollection } from "../core/library-store.js";
 import { DEFAULT_LAYOUT, THEME_TOKENS, THEME_PALETTES, applyScopedTheme } from "../core/theme.js";
 import { NexusPanelWindow } from "./panel-window.js";
 import { normalizeSheetSelection, resolveSheetFocusTarget } from "./sheet-focus-controller.js";
+import { createSheetInteractionState } from "./sheet-interaction-state.js";
 import { installCanvasFit } from "./canvas-fit.js";
 import { buildPropertyPickerCatalog } from "../core/property-catalog.js";
 import { renderPropertyPicker } from "./property-picker-view.js";
@@ -518,6 +519,22 @@ if (!customElements.get("nexus-color-picker")) {
 }
 
 export class NexusActorSheet extends NexusActorSheetBase {
+  constructor(...args) {
+    super(...args);
+    this._interactionState = createSheetInteractionState({
+      getComponents: () => this._currentLayout?.components ?? [],
+      getGroups: () => this._currentLayout?.groups ?? []
+    });
+  }
+  get _selectedIds() { return this._interactionState?.selectedIds ?? new Set(); }
+  set _selectedIds(value) { if (this._interactionState) this._interactionState.selectedIds = value; }
+  get _selectedGroupId() { return this._interactionState?.selectedGroupId ?? null; }
+  set _selectedGroupId(value) { if (this._interactionState) this._interactionState.selectedGroupId = value; }
+  get _componentEditorTargetId() { return this._interactionState?.inspectorTargetId ?? null; }
+  set _componentEditorTargetId(value) { if (this._interactionState) this._interactionState.inspectorTargetId = value; }
+  get _activePanelWindowKey() { return this._interactionState?.activePanelKey ?? null; }
+  set _activePanelWindowKey(value) { if (this._interactionState) this._interactionState.activePanelKey = value; }
+
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
     position: { width: 800, height: 800 },
@@ -3266,6 +3283,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   _setSelection(html, ids) {
     const components = this._currentLayout?.components ?? [];
     const normalizedSelection = normalizeSheetSelection(ids, components);
+    this._interactionState?.setSelection(normalizedSelection, { groupId: this._selectedGroupId });
     this._selectedIds = new Set(normalizedSelection);
     if (normalizedSelection.length === 1) this._componentEditorTargetId = normalizedSelection[0];
     else this._componentEditorTargetId = null;
@@ -3313,6 +3331,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const root of [this._nexusPanelWindows?.get("layers")?.panel, this.element]) root?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
     const one = resolveSheetFocusTarget({ selectedIds: this._selectedIds, focusTargetId: this._componentEditorTargetId, components });
     this._componentEditorTargetId = one?.id ?? null;
+    this._interactionState?.reconcile();
     const selectedGroup = groupsById.get(this._selectedGroupId);
     const componentPanel = this._nexusPanelWindows?.get("component")?.panel;
     const componentRoot = componentPanel?.isConnected ? componentPanel : (html?.[0] ?? this.element);
@@ -3648,6 +3667,7 @@ if (!hasPath) propertyValueInput.value = "";
     const setActivePanel = key => {
       const activeKey = key && this._nexusPanelWindows.has(key) ? key : null;
       this._activePanelWindowKey = activeKey;
+      this._interactionState?.setActivePanel(activeKey);
       this._openFloatingPanel = requestPanel;
     portal.querySelectorAll("[data-floating-panel]").forEach(button => {
         button.classList.toggle("active", button.dataset.floatingPanel === activeKey);
@@ -3874,7 +3894,7 @@ if (!hasPath) propertyValueInput.value = "";
   _onPanelWindowClosed(key, instance) {
     if (this._nexusPanelWindows?.get(key) === instance) this._nexusPanelWindows.delete(key);
     this._openAppearancePanels?.delete(key);
-    if (this._activePanelWindowKey === key) this._activePanelWindowKey = null;
+    if (this._activePanelWindowKey === key) { this._activePanelWindowKey = null; this._interactionState?.setActivePanel(null); }
     document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="${key}"]`)?.classList.remove("active");
     if (["component", "behavior"].includes(key)) {
       const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.has(panelKey));
