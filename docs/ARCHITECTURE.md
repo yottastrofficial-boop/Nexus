@@ -1,3 +1,9 @@
+## Atualização arquitetural — revisão 1.0.0.124
+
+A revisão de ponta a ponta de 2026-11-26 está documentada em [ARCHITECTURE_REVIEW_2026-11-26.md](ARCHITECTURE_REVIEW_2026-11-26.md). A base 1.0.0.123 já possui módulos especializados, mas ainda concentra responsabilidades na ficha, listeners, CSS e validador de pacote. A nova camada `scripts/core/service-registry.js` publica serviços compartilhados em `game.nexus.services`, com dependências explícitas, resolução lazy, detecção de ciclos, diagnóstico e disposal. A primeira migração removeu a dependência dos schemas de Lógica em módulos de engine/Foundry ao centralizar contratos em `logic-events.js`.
+
+O registro de serviços é uma fundação incremental, não uma declaração de que todo o bootstrap já usa DI. A sequência aprovada é modularizar o bootstrap, extrair serviços puros da ficha, normalizar lifecycle de listeners, separar Explorer/Inspector, consolidar CSS por domínio e dividir validadores. Manter dados, IDs, schemas e comportamento compatíveis; não remover legado sem mapear consumidores e migração.
+
 ## Atualização arquitetural — Biblioteca 1.0.0.122
 
 - library-search-query.js define um parser puro de consultas com termos AND, frases, qualificadores e exclusões.

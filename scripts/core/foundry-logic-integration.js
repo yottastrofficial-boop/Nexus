@@ -1,12 +1,7 @@
 import { evaluateNexusExpression } from "./formula-engine.js";
 
-export const FOUNDRY_LOGIC_EVENTS = Object.freeze([
-  "actor.created", "actor.updated", "actor.deleted",
-  "item.created", "item.updated", "item.deleted",
-  "token.created", "token.updated", "token.deleted",
-  "combat.created", "combat.updated", "combat.deleted",
-  "combat.started", "combat.round", "combat.turn"
-]);
+import { FOUNDRY_LOGIC_EVENTS } from "./logic-events.js";
+export { FOUNDRY_LOGIC_EVENTS } from "./logic-events.js";
 
 const HOOK_BINDINGS = Object.freeze([
   ["createActor", "actor.created"],
