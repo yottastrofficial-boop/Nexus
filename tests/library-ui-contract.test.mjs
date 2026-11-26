@@ -93,3 +93,23 @@ assert.match(documentBridge, /matchesLibrarySearchQuery/,
 assert.match(documentBridge, /documentType: String\(entry\.type \?\? ""\)/,
   "Compendium index subtype must be retained for precise filtering.");
 console.log("NEXUS library import/search contracts: OK");
+
+assert.match(libraryApplication, /ensureLibraryDefaultFolders/,
+  "The Library should initialize the user-editable base folder taxonomy once.");
+assert.match(libraryTemplate, /data-library-create-new-toggle/,
+  "The Library should expose a universal New action instead of a folder-only button.");
+assert.match(libraryTemplate, /data-library-new-action="asset"/,
+  "The New menu should provide asset import.");
+assert.match(libraryTemplate, /data-library-new-action="shortcut"/,
+  "The New menu should provide shortcuts.");
+assert.match(libraryApplication, /FilePicker\.upload\("data", "nexus\/library"/,
+  "Asset creation must use the Foundry upload service rather than a dead UI action.");
+assert.match(libraryApplication, /showLibraryContextMenu/,
+  "Folder and resource context menus should use an actual compact context menu.");
+assert.match(libraryApplication, /duplicateLibraryFolderTree/,
+  "Copying a folder should duplicate only its organization tree.");
+assert.match(styles, /nexus-library-generic-card:has\(\.nexus-library-generic-item\.is-selected\)[\s\S]*?border-color:[\s\S]*?background: transparent !important/,
+  "Selected resources should receive only a highlight border, without a filled card panel.");
+assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
+  "Resource previews should use a consistent square aspect ratio.");
+console.log("NEXUS Library taxonomy and context actions contracts: OK");
