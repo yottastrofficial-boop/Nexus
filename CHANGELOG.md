@@ -1,3 +1,12 @@
+## 1.0.0.120 — estado centralizado e isolamento visual
+
+- Adiciona fonte canônica para seleção, grupo, alvo do Inspector e painel ativo, mantendo accessors de compatibilidade.
+- Reconcilia IDs selecionados com o layout ativo e invalida alvos removidos.
+- Isola janelas nativas de Configurações dos resets genéricos de aplicações NEXUS.
+- Limita estilos globais de tipografia e cor às superfícies Foundry explicitamente suportadas.
+- Mantém ficha inicial em 800 × 800 e Canvas do modo padrão em uma única coluna.
+- Acrescenta testes unitários e contratos de regressão. Validação manual no Foundry permanece pendente.
+
 ## 1.0.0.119 — sidebar nativa e workspace sem colunas fantasmas
 
 - Remove o override que reconstruía a geometria da sidebar do Foundry e aplicava dimensões aos painéis em vez dos controles de navegação.
