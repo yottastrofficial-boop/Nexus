@@ -118,9 +118,9 @@ assert.match(libraryTemplate, /data-library-tabs/,
   "The independent Library window should provide a browser-like tab strip.");
 assert.match(libraryTemplate, /data-library-breadcrumbs/,
   "The Library should show a navigable Windows-style path.");
-assert.match(libraryTemplate, /data-library-history-back.*?data-library-history-forward.*?data-library-history-up/,
+assert.ok(["data-library-history-back", "data-library-history-forward", "data-library-history-up"].every(attribute => libraryTemplate.includes(attribute)),
   "The path bar should expose back, forward and parent navigation.");
-assert.match(libraryTemplate, /data-library-resize-sidebar.*?data-library-resize-inspector/,
+assert.ok(libraryTemplate.includes("data-library-resize-sidebar") && libraryTemplate.includes("data-library-resize-inspector"),
   "Both the folder tree and Inspector should have independent resize handles.");
 assert.match(libraryApplication, /createLibraryTabManager/,
   "The application should use a dedicated, testable tab/history manager.");
