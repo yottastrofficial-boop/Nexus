@@ -113,3 +113,19 @@ assert.match(styles, /nexus-library-generic-card:has\(\.nexus-library-generic-it
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 console.log("NEXUS Library taxonomy and context actions contracts: OK");
+
+assert.match(libraryTemplate, /data-library-tabs/,
+  "The independent Library window should provide a browser-like tab strip.");
+assert.match(libraryTemplate, /data-library-breadcrumbs/,
+  "The Library should show a navigable Windows-style path.");
+assert.match(libraryTemplate, /data-library-history-back[\\s\\S]*?data-library-history-forward[\\s\\S]*?data-library-history-up/,
+  "The path bar should expose back, forward and parent navigation.");
+assert.match(libraryTemplate, /data-library-resize-sidebar[\\s\\S]*?data-library-resize-inspector/,
+  "Both the folder tree and Inspector should have independent resize handles.");
+assert.match(libraryApplication, /createLibraryTabManager/,
+  "The application should use a dedicated, testable tab/history manager.");
+assert.match(styles, /--nexus-library-navigation-width/,
+  "The folder navigation width should be controlled by a user-adjustable CSS variable.");
+assert.match(styles, /--nexus-library-inspector-width/,
+  "The Inspector width should be controlled by a user-adjustable CSS variable.");
+console.log("NEXUS browser-style Library shell contract: OK");
