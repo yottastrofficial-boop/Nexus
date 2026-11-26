@@ -1,3 +1,12 @@
+## 1.0.0.117 — rails independentes e seleção contextual do inspetor
+
+- Corrige a especificidade do CSS legado que reaplicava superfície de painel ao rail direito; o contêiner agora é explicitamente transparente e somente os botões individuais recebem fundo, borda e sombra.
+- Unifica a apresentação de Biblioteca, layouts e adicionar página no mesmo padrão de botões independentes do rail esquerdo.
+- Invalida o alvo do inspetor ao mudar para seleção múltipla e sincroniza/limpa os atributos de destino dos campos, impedindo que propriedades antigas continuem apontando para outro componente.
+- Faz o duplo clique no Canvas abrir a janela flutuante ApplicationV2 de Propriedades, eliminando o caminho legado de edição inline.
+- Testes de contrato adicionados para portal flutuante, estilos independentes, seleção e abertura do inspetor.
+- **Validação no Foundry VTT 14 build 360 pendente:** testar visualmente o rail direito e o fluxo completo de seleção/edição após instalar o pacote.
+
 ## 1.0.0.116 — navegação flutuante, chrome limpo e compatibilidade de ícones
 
 - Remove o contêiner de sidebar direita da ficha; os botões de layout e o acesso à Biblioteca são portados para controles flutuantes independentes.

@@ -252,11 +252,15 @@ export function activateCanvasInteractions(sheet, html, dependencies) {
     let lastComponentPointerDown = { id: null, at: 0 };
     let suppressNativeDoubleClickUntil = 0;
     const openComponentInspector = () => {
-      sheet._openInlineEditorPanel?.("component");
-      const selected = sheet._componentEditorTargetId ? [sheet._componentEditorTargetId] : [...(sheet._selectedIds ?? [])];
-      sheet._setSelection?.($(sheet.element), selected);
-      const inspector = sheet.element?.querySelector('[data-tool-panel="component"] .nexus-component-inspector');
-      if (inspector) inspector.hidden = false;
+      const selected = [...(sheet._selectedIds ?? [])];
+      const componentId = selected.length === 1 ? selected[0] : sheet._componentEditorTargetId;
+      if (componentId) {
+        sheet._componentEditorTargetId = componentId;
+        sheet._setSelection?.($(sheet.element), [componentId]);
+      } else if (!sheet._selectedGroupId) return;
+      // ApplicationV2 inspector is opened through the same rail action
+      // used by the floating toolbar; group selection remains supported.
+      void sheet._openFloatingPanel?.("component");
     };
     listen(root,"dblclick", event => {
       if (performance.now() < suppressNativeDoubleClickUntil) return;

@@ -3262,6 +3262,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
   _setSelection(html, ids) {
     this._selectedIds = new Set((ids ?? []).filter(Boolean));
     if (this._selectedIds.size === 1) this._componentEditorTargetId = [...this._selectedIds][0];
+    else if (this._selectedIds.size > 1) this._componentEditorTargetId = null;
     const sheetRoot = this.element?.querySelector?.(".nexus-sheet") ?? html?.[0] ?? this.element;
     const componentNodes = sheetRoot?.querySelectorAll?.(".nexus-component") ?? [];
     const groups = this._currentLayout?.groups ?? [];
@@ -3307,11 +3308,14 @@ export class NexusActorSheet extends NexusActorSheetBase {
     for (const root of [this._nexusPanelWindows?.get("layers")?.panel, this.element]) root?.querySelector?.(".nexus-layer-commands")?._refreshDestinations?.();
     const activeComponentId = selectedComponentId ?? (this._selectedIds.size === 0 ? this._componentEditorTargetId : null);
     const one = activeComponentId ? componentsById.get(activeComponentId) ?? null : null;
-    if (!one && this._selectedIds.size === 0) this._componentEditorTargetId = null;
+    this._componentEditorTargetId = one?.id ?? null;
     const selectedGroup = groupsById.get(this._selectedGroupId);
     const componentRoot=this._nexusPanelWindows?.get("component")?.panel ?? html[0];
     const inspector = componentRoot?.querySelector(".nexus-component-inspector"), empty = componentRoot?.querySelector(".nexus-inspector-empty");
-    if (one && inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => { field.dataset.componentTargetId = one.id; });
+    if (inspector) inspector.querySelectorAll("[data-component-setting],[data-sync-token-portrait]").forEach(field => {
+      if (one) field.dataset.componentTargetId = one.id;
+      else delete field.dataset.componentTargetId;
+    });
     if (inspector) {
       const interactionEditor = inspector.querySelector("[data-interaction-editor]");
       if (interactionEditor) {
@@ -3866,7 +3870,10 @@ if (!hasPath) propertyValueInput.value = "";
     document.querySelector(`[data-nexus-floating-for="${this.id}"] [data-floating-panel="${key}"]`)?.classList.remove("active");
     if (["component", "behavior"].includes(key)) {
       const editorPanelsOpen = ["component", "behavior"].some(panelKey => this._nexusPanelWindows?.has(panelKey));
-      if (!editorPanelsOpen && this.element?.isConnected) this._setSelection?.($(this.element), []);
+      if (!editorPanelsOpen && this.element?.isConnected) {
+        this._componentEditorTargetId = null;
+        this._setSelection?.($(this.element), []);
+      }
     }
   }
 

@@ -22,9 +22,9 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (publicação da 1.0.0.116; validação funcional pendente)
+## Estado de referência — 2026-11-25 (correções 1.0.0.117 em preparação; validação funcional pendente)
 
-- **Versão estável publicada na main:** `1.0.0.116`; CI, pacote ZIP, release e manifesto confirmados.
+- **Versão estável anterior:** `1.0.0.116`; CI, pacote ZIP, release e manifesto confirmados. A 1.0.0.117 corrige os problemas relatados no rail flutuante e no inspetor; aguarda CI/publicação e teste manual no Foundry.
 - **Última versão estável anterior:** `1.0.0.115`; release, ZIP e manifesto confirmados.
 - **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
 - **Teste manual pendente:** a versão `1.0.0.116` mantém a sidebar vertical nativa, move os botões de layout para controles flutuantes e remove os fundos externos redundantes da Hotbar e da lista de jogadores. Confirmar os 10 slots, a lista de jogadores, os ícones nativos e personalizados, as fontes de perfil, a Biblioteca, o Estúdio e os painéis no Foundry VTT 14 build 360. A validação manual ainda é necessária e não promove automaticamente a versão a checkpoint funcional.

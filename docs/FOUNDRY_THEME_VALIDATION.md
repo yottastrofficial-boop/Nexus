@@ -86,6 +86,20 @@ Inspecionar visualmente estados normal, hover, foco, selecionado, desabilitado e
 - [ ] Verificar console dos dois clientes e ausência de erros novos relacionados ao Design System.
 - [ ] Repetir a troca de tema após fechar e reabrir diretórios e janelas.
 
+## Regressão 1.0.0.117 — rails e inspetor de componentes
+
+- [ ] Abrir a ficha em modo Aparência e confirmar que o rail esquerdo e o rail direito são irmãos do conteúdo da ficha no DOM, ambos portados para o portal em `document.body`.
+- [ ] Confirmar que o rail direito fica fora da borda da ficha e não se torna uma coluna/sidebar interna ao redimensionar ou mover a janela.
+- [ ] Confirmar que o rail direito não possui fundo, borda, sombra ou blur de contêiner; Biblioteca, cada layout e Adicionar página têm superfície individual igual aos botões do rail esquerdo.
+- [ ] Clicar em cada layout uma vez; confirmar troca de layout e estado ativo. Dar duplo clique; confirmar que o editor de layout abre sem trocar indevidamente de página.
+- [ ] Abrir Biblioteca pelo botão flutuante e confirmar que o comando continua funcional.
+- [ ] Abrir Propriedades; selecionar componente A e depois B no Canvas. Confirmar que todos os campos e comandos do inspetor passam a editar B.
+- [ ] Selecionar múltiplos componentes; confirmar que o alvo individual é invalidado e que campos antigos não alteram A ou B inadvertidamente.
+- [ ] Fechar Propriedades e Comportamento; confirmar que o alvo de edição e os atributos de destino obsoletos são limpos.
+- [ ] Com Propriedades aberta, clicar em campos, menus e controles do inspetor; confirmar que o foco não muda o componente editado.
+- [ ] Re-renderizar a ficha por atualização do Actor; confirmar que a janela flutuante permanece associada à ficha e que a seleção/alvo válidos são preservados.
+- [ ] Confirmar ausência de erros no console e testar com mais de uma ficha aberta.
+
 ## Resultado
 
 - **Aprovado:** todos os itens aplicáveis foram verificados nos dois clientes, sem regressões.

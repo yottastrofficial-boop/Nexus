@@ -53,3 +53,22 @@ test("native Foundry chrome receives global typography without replacing icon fo
   assert.match(designSystem, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/);
   assert.doesNotMatch(universalStyles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-application\.active/);
 });
+
+test("floating right rail is a body portal with independent controls and no legacy panel chrome", () => {
+  assert.match(sheet, /document\.body\.appendChild\(portal\)/);
+  assert.match(sheet, /floatingTabs\?\.append\(tabs\)/);
+  assert.match(sheet, /floatingLibrary\?\.append\(libraryButton\)/);
+  const canonicalRail = legacyStyles.slice(legacyStyles.indexOf("NEXUS 1.0.0.117 — rails independentes"));
+  assert.match(canonicalRail, /\.nexus-floating-ui \.nexus-floating-right[\s\S]*?background:transparent !important; box-shadow:none !important; backdrop-filter:none !important;/);
+  assert.match(canonicalRail, /\.nexus-floating-ui \.nexus-floating-tabs \.nexus-layout-tab[\s\S]*?height:34px !important/);
+});
+
+test("component inspector follows current selection and uses the floating ApplicationV2 panel", () => {
+  assert.match(sheet, /else if \(this\._selectedIds\.size > 1\) this\._componentEditorTargetId = null/);
+  assert.match(sheet, /this\._componentEditorTargetId = one\?\.id \?\? null/);
+  assert.match(sheet, /else delete field\.dataset\.componentTargetId/);
+  assert.match(listeners, /const getInspectorComponentId = \(\) =>/);
+  assert.doesNotMatch(listeners, /dataset\.componentTargetId \|\| sheet\._componentEditorTargetId \|\|/);
+  assert.match(canvas, /sheet\._openFloatingPanel\?\.\("component"\)/);
+  assert.doesNotMatch(canvas, /_openInlineEditorPanel/);
+});

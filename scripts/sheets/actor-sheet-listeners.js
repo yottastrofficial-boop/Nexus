@@ -633,9 +633,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
       if (isPresentationField) delete control.dataset.nexusPresentationHistoryCaptured;
     });
     const getTextStyleTarget = () => sheet._textStyleTarget === "heading" ? "heading" : "content";
+    const getInspectorComponentId = () => {
+      const selected = [...(sheet._selectedIds ?? [])];
+      if (selected.length === 1) return selected[0];
+      if (selected.length > 1) return null;
+      return sheet._componentEditorTargetId ?? null;
+    };
     const getInspectorComponent = element => {
-      const inspector = element?.closest?.(".nexus-component-inspector");
-      const id = inspector?.querySelector("[data-component-setting]")?.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      if (!element?.closest?.(".nexus-component-inspector")) return null;
+      const id = getInspectorComponentId();
       return (sheet._currentLayout?.components ?? []).find(component => component.id === id) ?? null;
     };
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-text-style-target]", event => {
@@ -666,15 +672,15 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-actor-portrait]", event => sheet._updateSystemValue(event.currentTarget));
     $(document).on(`click${inspectorNamespace}`, ".nexus-component-inspector [data-sync-token-portrait]", async event => {
       event.preventDefault();
-      const id = event.currentTarget.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
-      await sheet._syncActorPortraitFromToken(id);
+      const id = getInspectorComponent(event.currentTarget)?.id;
+      if (id) await sheet._syncActorPortraitFromToken(id);
     });
     activateActorPropertyPickerListeners(sheet, inspectorNamespace, { collectPropertyPaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker });
     $(document).on(`input${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", event => {
       const input = event.currentTarget;
       const panelWindow = input.closest(".nexus-panel-window");
       if (panelWindow && panelWindow.id !== `nexus-${sheet.id}-component`) return;
-      const id = input.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      const id = getInspectorComponent(input)?.id;
       const node = id ? sheet.element?.querySelector(`.nexus-component[data-id="${CSS.escape(id)}"]`) : null;
       if (!node) return;
       const key = input.dataset.componentSetting, value = input.value;
@@ -689,7 +695,7 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
     $(document).on(`change${inspectorNamespace}`, ".nexus-component-inspector [data-component-setting]", async event => {
       const panelWindow = event.currentTarget.closest(".nexus-panel-window");
       if (panelWindow && panelWindow.id !== `nexus-${sheet.id}-component`) return;
-      const input=event.currentTarget, key=input.dataset.componentSetting, id=input.dataset.componentTargetId || sheet._componentEditorTargetId || [...(sheet._selectedIds ?? [])][0];
+      const input=event.currentTarget, key=input.dataset.componentSetting, id=getInspectorComponent(input)?.id;
       const shouldRestoreInputFocus = document.activeElement === input;
       if(!id) return;
       const drawer = sheet.element?.querySelector(".nexus-appearance-drawer");
