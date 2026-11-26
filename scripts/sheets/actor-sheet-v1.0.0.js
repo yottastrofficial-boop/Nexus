@@ -3040,7 +3040,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const layouts=await this._readLayouts(),active=this._activeLayoutId(),layout=layouts[active];if(!layout)return;
     const target=kind==="group"?(layout.groups??[]).find(item=>item.id===id):layout.components.find(item=>item.id===id);if(!target)return;
     this._captureHistory();target[property]=!target[property];
-    if(property==="hidden" && target.hidden){ if(kind==="group") this._selectedIds=new Set(); else this._selectedIds.delete(id); this._selectedGroupId=null; this._componentEditorTargetId=null; }
+    if(property==="hidden" && target.hidden){ if(kind==="group") this._selectedIds=new Set(); else this._selectedIds = new Set([...this._selectedIds].filter(selectedId => selectedId !== id)); this._selectedGroupId=null; this._componentEditorTargetId=null; }
     await this._writeLayouts(layouts,active);this._currentLayout=layout;this.render({force:true});
   }
   async _updateGlobalTypography(input) {
