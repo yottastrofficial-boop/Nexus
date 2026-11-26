@@ -1,3 +1,5 @@
+import { matchesLibrarySearchQuery } from "./library-search-query.js";
+
 /**
  * NEXUS Foundry Document Bridge — referências leves a documentos nativos.
  *
@@ -16,8 +18,36 @@ const DOCUMENT_TYPES = Object.freeze({
   cards: { label: "Cartas", documentName: "Cards", collection: "cards" }
 });
 
-const cleanQuery = value => String(value ?? "").trim().toLocaleLowerCase();
 const safeLimit = value => Math.min(100, Math.max(1, Math.floor(Number(value) || 50)));
+const searchableText = (value, maxLength = 6000) => {
+  const parts = [], seen = new WeakSet();
+  const visit = (entry, depth = 0) => {
+    if (parts.join(" ").length >= maxLength || depth > 4 || entry == null) return;
+    if (typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean") {
+      const text = String(entry).replace(/<[^>]*>/g, " ").trim();
+      if (text) parts.push(text.slice(0, 500));
+      return;
+    }
+    if (typeof entry !== "object" || seen.has(entry)) return;
+    seen.add(entry);
+    let entries = [];
+    try { entries = Object.entries(entry).slice(0, 80); } catch { return; }
+    for (const [key, child] of entries) {
+      if (/^(img|image|texture|thumbnail|icon|_id|id|uuid|sort|ownership|permission)$/i.test(key)) continue;
+      parts.push(key);
+      visit(child, depth + 1);
+      if (parts.join(" ").length >= maxLength) break;
+    }
+  };
+  visit(value);
+  return parts.join(" ").slice(0, maxLength);
+};
+const makeSearchText = (document, packLabel = "") => searchableText({
+  name: document?.name, type: document?.type, identifier: document?.identifier,
+  slug: document?.slug, folder: document?.folder?.name ?? document?.folder,
+  description: document?.description, system: document?.system, pack: document?.pack, packLabel
+});
+
 
 export function createFoundryDocumentBridge({
   gameRef = globalThis.game,
@@ -60,10 +90,13 @@ export function createFoundryDocumentBridge({
       type,
       documentName: definition.documentName,
       collection: definition.collection,
+      documentType: String(document.type ?? ""),
       name: String(document.name ?? "Sem nome"),
       img: String(document.img ?? document.thumbnail ?? ""),
       folder: String(document.folder?.name ?? ""),
       pack: String(document.pack ?? ""),
+      packLabel: String(gameRef.packs?.get?.(String(document.pack ?? ""))?.metadata?.label ?? ""),
+      searchText: makeSearchText(document, gameRef.packs?.get?.(String(document.pack ?? ""))?.metadata?.label ?? ""),
       sort: Number(document.sort) || 0,
       isCompendium: Boolean(document.pack)
     });
@@ -74,13 +107,10 @@ export function createFoundryDocumentBridge({
   };
 
   const matches = (record, query, tags = [], origin = "all") => {
-    const textMatch = !query ||
-      record.name.toLocaleLowerCase().includes(query) ||
-      record.folder.toLocaleLowerCase().includes(query);
-    if (!textMatch) return false;
+    if (!matchesLibrarySearchQuery(record, query)) return false;
     const recordOrigin = record.isCompendium ? "compendium" : "world";
     if (origin !== "all" && recordOrigin !== origin) return false;
-    const recordTags = [record.type, record.isCompendium ? "compendium" : "world"].map(value => String(value).toLocaleLowerCase());
+    const recordTags = [record.type, record.documentType, record.isCompendium ? "compendium" : "world"].map(value => String(value).toLocaleLowerCase());
     return !tags.length || tags.every(tag => recordTags.includes(String(tag).toLocaleLowerCase()));
   };
 
@@ -138,9 +168,12 @@ export function createFoundryDocumentBridge({
               id: String(entry._id ?? ""), uuid, type: typeKey,
               documentName: DOCUMENT_TYPES[typeKey].documentName,
               collection: DOCUMENT_TYPES[typeKey].collection,
+              documentType: String(entry.type ?? ""),
               name: String(entry.name ?? "Sem nome"),
               img: String(entry.img ?? ""), folder: String(entry.folder?.name ?? ""),
-              pack: packId, sort: Number(entry.sort) || 0,
+              pack: packId, packLabel: String(pack.metadata?.label ?? packId),
+              searchText: makeSearchText(entry, pack.metadata?.label ?? packId),
+              sort: Number(entry.sort) || 0,
               isCompendium: true
             }));
           }
