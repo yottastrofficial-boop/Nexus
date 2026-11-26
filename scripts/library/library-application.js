@@ -225,7 +225,7 @@ export function createLibraryApplicationClass({
         button.setAttribute("aria-pressed", String(active));
       });
 
-      this._collapsedLibraryFolders ??= new Set();
+      this._collapsedLibraryFolders ??= new Set(preferences.folders.filter(folder => folder.isDefault && folder.parentId && preferences.folders.some(child => child.parentId === folder.id)).map(folder => folder.id));
       const refreshFolders = () => {
         const nav = root.querySelector("[data-library-app-folders]");
         if (!nav) return;
