@@ -1,6 +1,6 @@
 ## Atualização 1.0.0.122
 
-A atualização corrige os diálogos da Biblioteca, compacta o filtro, elimina a borda duplicada da pesquisa, padroniza as miniaturas, adiciona miniaturas personalizadas seguras e apresenta prévias de paleta nos temas. A ficha passa a abrir em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A atualização acrescenta pesquisa estruturada à Biblioteca, amplia a indexação de metadados dos compêndios, habilita arraste nativo de documentos Foundry por UUID e permite inserir componentes pessoais diretamente no Canvas. A janela da ficha permanece fixa em 800 × 836 px. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
 
 # NEXUS RPG
 
@@ -20,7 +20,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-****Build candidata:** a 1.0.0.122 corrige interações e apresentação da Biblioteca e acrescenta 36 px à altura inicial da ficha. CI e pacote serão confirmados pelo workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
+****Build candidata:** a 1.0.0.122 acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes no Canvas. A janela da ficha é fixa em 800 × 836 px. CI e pacote serão confirmados pelo workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 
 ## Visão geral
 
