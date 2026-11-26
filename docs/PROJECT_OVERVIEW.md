@@ -1,3 +1,9 @@
+## Revisão arquitetural — 1.0.0.124 em preparação
+
+A revisão estática de ponta a ponta da base 1.0.0.123 identificou concentração de responsabilidades na ficha principal (≈260 KB), CSS legado (≈601 KB), listeners, Explorer da Biblioteca e validador de pacote. A base já possui registries, stores, schemas e adapters, por isso a refatoração está sendo feita por contratos, preservando IDs e dados.
+
+Nesta etapa foram adicionados `game.nexus.services` (registro de serviços com dependências, resolução sob demanda, detecção de ciclos e encerramento), contratos compartilhados de eventos da Lógica e testes de integridade do grafo de imports. Isso é a fundação, não uma migração completa de todos os subsistemas para DI. A sequência e os riscos estão em [Revisão arquitetural](ARCHITECTURE_REVIEW_2026-11-26.md).
+
 ## Estado do código — 1.0.0.123
 
 A atualização da Biblioteca em preparação para a main adiciona taxonomia inicial por domínio, tags para classificação de atores, árvore hierárquica expandível, operações contextuais, criação universal (pastas, assets, atalhos, layouts e componentes) e previews quadrados com seleção por borda. Pastas-base são metadados do usuário, inicializados uma única vez; não limitam tipos de recurso e não apagam documentos nativos. A estrutura de Itens não inclui itens mágicos; os elementos de cena usam nomes em português. A validação automatizada deve ser concluída pelo workflow e a validação visual/funcional continua pendente no Foundry VTT 14 build 360.
