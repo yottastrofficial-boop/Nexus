@@ -624,7 +624,7 @@ export function createLibraryCatalogExplorer({
     }
 
     const title = makeElement("strong", "", resource.name);
-    const meta = makeElement("small", "", `${resource.type} · ${resource.origin}`);
+    const meta = makeElement("small", "", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
     select.append(preview, title, meta);
 
     const isFavorite = preferences.favorites.includes(key);
