@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.115 candidata · Manifesto estável 1.0.0.114 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão estável 1.0.0.115 · Manifesto 1.0.0.115 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Build candidata:** a 1.0.0.115 restaura a navegação vertical nativa do Foundry, torna o Estúdio de Aparência responsivo e corrige uma regra compartilhada que podia quebrar fontes de ícones Font Awesome aplicadas diretamente aos controles. O manifesto estável permanece na 1.0.0.114 até que CI, empacotamento, publicação e confirmação do asset sejam concluídos. A mudança não é um checkpoint funcional: o último checkpoint confirmado dentro do Foundry continua em 1.0.0.70.
+**Build publicada:** a 1.0.0.115 restaura a navegação vertical nativa do Foundry, torna o Estúdio de Aparência responsivo e amplia a proteção de fontes Font Awesome em controles de ApplicationV2, componentes, trilhos flutuantes, Hotbar e navegação. CI, empacotamento, release e manifesto foram confirmados. A validação visual e funcional no Foundry real ainda está pendente; o último checkpoint funcional confirmado continua em 1.0.0.70.
 
 ## Visão geral
 
@@ -30,7 +30,7 @@ Essa separação orienta o planejamento do projeto. Nem todos esses recursos est
 
 ## Implementação atual na main — 1.0.0.115
 
-A base 1.0.0.115 remove a navegação horizontal customizada e devolve ao Foundry o controle da sidebar vertical nativa. Também ajusta os limites mínimos do Estúdio de Aparência e protege os controles com classes Font Awesome contra resets tipográficos genéricos. A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base 1.0.0.115 remove a navegação horizontal customizada, devolve ao Foundry o controle da sidebar vertical nativa e amplia a proteção de ícones contra resets tipográficos genéricos em controles e componentes. Também ajusta os limites mínimos e a instância do Estúdio de Aparência. CI e pacote foram aprovados; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
 Recursos presentes no código incluem:
 

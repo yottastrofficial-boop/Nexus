@@ -6,8 +6,8 @@
 - Branch de referência: `main`
 - Commit de referência: `HEAD da main`
 - Manifesto original: fonte única de instalação/atualização; o workflow só o sincroniza depois de validar e publicar o ZIP correspondente.
-- Versão candidata na `main`: `1.0.0.115` (restauração da sidebar vertical nativa, Estúdio responsivo e correção de fontes de ícones; validação visual pendente).
-- Última versão estável publicada no manifesto: `1.0.0.114`.
+- Versão estável publicada na `main` e no manifesto: `1.0.0.115` (sidebar vertical nativa, Estúdio responsivo e preservação ampliada de ícones; validação visual pendente).
+- Última versão estável anterior: `1.0.0.114`.
 - Última versão estável anterior: `1.0.0.107` (release, ZIP e manifesto confirmados antes da publicação da .108).
 - Commits de manutenção posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico do sidebar e remoção de regras duplicadas).
 - A candidata .114 remove a navegação horizontal customizada e devolve a orientação vertical ao Foundry. A versão .113 foi instalada e o usuário relatou que os slots flexíveis continuavam visualmente comprimidos; a opção horizontal foi descartada.
@@ -21,7 +21,7 @@ Este documento descreve a implementação observada no repositório e separa rec
 
 ## Estado da 1.0.0.115 — sidebar nativa e preservação de ícones
 
-A versão .115 mantém a navegação vertical original do Foundry e amplia a auditoria de fontes de ícones. Além da regra compartilhada de botões, os estilos legados de ApplicationV2, conteúdo de componentes, trilhos flutuantes, Hotbar e navegação agora excluem controles com classes Font Awesome. O Estúdio de Aparência segue responsivo e compartilha uma única instância entre o menu de Configurações e a abertura direta. CI e pacote precisam ser confirmados; a validação visual no Foundry VTT 14 build 360 permanece pendente.
+A versão .115 mantém a navegação vertical original do Foundry e amplia a auditoria de fontes de ícones. Além da regra compartilhada de botões, os estilos legados de ApplicationV2, conteúdo de componentes, trilhos flutuantes, Hotbar e navegação agora excluem controles com classes Font Awesome. O Estúdio de Aparência segue responsivo e compartilha uma única instância entre o menu de Configurações e a abertura direta. CI, empacotamento, release e manifesto foram confirmados; a validação visual no Foundry VTT 14 build 360 permanece pendente.
 
 ## O que é o NEXUS
 

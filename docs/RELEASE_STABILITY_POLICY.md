@@ -22,10 +22,10 @@ Manter a branch `main` utilizável e auditável, sem confundir publicação de p
 - Changelog registra mudanças, limitações e testes pendentes.
 - A versão é adequada como base para uma etapa futura sem depender de correções urgentes conhecidas.
 
-## Estado de referência — 2026-11-25 (preparação da 1.0.0.115 para teste)
+## Estado de referência — 2026-11-25 (publicação da 1.0.0.115; validação funcional pendente)
 
-- **Versão de desenvolvimento preparada na main:** `1.0.0.115`; sidebar vertical nativa, Estúdio responsivo e auditoria ampliada de fontes de ícones, com publicação condicionada à aprovação do CI.
-- **Última versão estável publicada:** `1.0.0.114`; release, ZIP e manifesto confirmados.
+- **Versão estável publicada na main:** `1.0.0.115`; CI, pacote ZIP, release e manifesto confirmados.
+- **Última versão estável anterior:** `1.0.0.114`; release, ZIP e manifesto confirmados.
 - **Última versão estável anterior:** `1.0.0.107`; release, ZIP e manifesto confirmados antes da sincronização da .108.
 - **Teste manual pendente:** a versão `1.0.0.115` mantém a navegação vertical e amplia a proteção das fontes de ícones em botões e spans. Confirmar todas as abas nativas e de módulos, abertura do Estúdio, dimensões responsivas, ícones, controles e painéis no Foundry VTT 14 build 360. A validação manual ainda é necessária e não promove automaticamente a versão a checkpoint funcional.
 - **Manutenção em main:** commit `34c114539e04e67151dbcf806283503e91c3cdf0` isola o sidebar das regras globais de tipografia, consolida estilos e amplia os testes de regressão; CI e empacotamento aprovados.

@@ -8,13 +8,13 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão candidata na main: `1.0.0.115` (retorno à sidebar vertical nativa, correção do Estúdio e ícones; validação automatizada e manual pendentes até CI).
-- Última versão estável publicada no manifesto: `1.0.0.114`.
+- Versão estável publicada na main e no manifesto: `1.0.0.115` (sidebar vertical nativa, Estúdio responsivo e preservação ampliada de ícones).
+- Última versão estável anterior: `1.0.0.114`.
 - Teste manual: a versão `1.0.0.115` precisa confirmar sidebar vertical nativa, abertura/redimensionamento do Estúdio, ícones gerais, controles de janela e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
 - A versão .115 mantém a sidebar nativa e amplia a correção das fontes de ícones; não declarar a restauração concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
+- A publicação da 1.0.0.115 concluiu CI (42/42 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
