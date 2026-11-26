@@ -1,6 +1,6 @@
 ## Estado de distribuição — 1.0.0.126 (2026-11-26)
 
-A preparação da 1.0.0.126 atualizou também README, roadmap e visão do projeto para distinguir a candidata da versão estável do manifesto.
+A preparação da 1.0.0.126 atualizou também README, roadmap e visão do projeto para distinguir a versão em preparação da versão estável do manifesto.
 
 A PR #110 foi integrada à branch `main` no commit `01199132eb06a14a5e6b6dc663d3e5f99a62e4de`. A release `v1.0.0.125` foi criada antes dessa integração e, portanto, não contém a janela da Biblioteca com abas. A versão em preparação para distribuir essas alterações é `1.0.0.126`.
 
@@ -112,4 +112,4 @@ A próxima versão funcionalmente estável deve passar por uma rodada de valida�
 
 ## Atualização de código 1.0.0.120
 
-O pacote candidato adiciona estado canônico para seleção e Inspector e isola as Configurações nativas dos estilos genéricos. Essas alterações passaram por CI automatizado, mas não alteram o último checkpoint funcional confirmado: 1.0.0.70, até avaliação manual no Foundry VTT 14.
+O pacote versão em preparação adiciona estado canônico para seleção e Inspector e isola as Configurações nativas dos estilos genéricos. Essas alterações passaram por CI automatizado, mas não alteram o último checkpoint funcional confirmado: 1.0.0.70, até avaliação manual no Foundry VTT 14.
