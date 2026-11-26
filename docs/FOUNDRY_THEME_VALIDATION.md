@@ -157,3 +157,11 @@ Registrar versão/build do NEXUS, versão do Foundry, navegador, módulos ativos
 - [ ] Confirmar que a largura padrão da sidebar e o tamanho do painel de conteúdo permanecem inalterados.
 - [ ] Avaliar a precisão dos cliques com a quantidade real de abas e módulos ativos.
 - [ ] Registrar captura do Foundry VTT 14 build 360; o teste de contrato CSS não substitui essa validação.
+
+
+## 1.0.0.120 — itens de validação
+
+- Confirmar seleção única, múltipla e por grupo e a atualização do Inspector.
+- Confirmar que Configurações Gerais mantêm contraste legível no tema selecionado.
+- Confirmar o Canvas 800 × 800 sem cortes em janelas menores e maiores.
+- Confirmar a coluna vertical nativa da sidebar e os controles flutuantes da ficha.
