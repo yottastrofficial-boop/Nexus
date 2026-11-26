@@ -1,5 +1,7 @@
 ## Estado de distribuição — 1.0.0.126 (2026-11-26)
 
+A preparação da 1.0.0.126 atualizou também README, roadmap e visão do projeto para distinguir a candidata da versão estável do manifesto.
+
 A PR #110 foi integrada à branch `main` no commit `01199132eb06a14a5e6b6dc663d3e5f99a62e4de`. A release `v1.0.0.125` foi criada antes dessa integração e, portanto, não contém a janela da Biblioteca com abas. A versão candidata para distribuir essas alterações é `1.0.0.126`.
 
 - `system.json` declara a versão candidata 1.0.0.126 e o endereço de download correspondente.
