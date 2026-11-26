@@ -819,7 +819,98 @@ export function createLibraryApplicationClass({
           await render();
         } catch (error) { notify("warn", error.message); }
       });
+      const createMenu = root.querySelector("[data-library-create-new-menu]");
+      const createToggle = root.querySelector("[data-library-create-new-toggle]");
+      createToggle?.addEventListener("click", event => {
+        event.preventDefault();
+        if (!createMenu) return;
+        createMenu.hidden = !createMenu.hidden;
+        createToggle.setAttribute("aria-expanded", String(!createMenu.hidden));
+      });
+      root.querySelectorAll("[data-library-new-action]:not([data-library-new-action='folder'])").forEach(button => {
+        button.addEventListener("click", async event => {
+          event.preventDefault();
+          if (createMenu) createMenu.hidden = true;
+          createToggle?.setAttribute("aria-expanded", "false");
+          const action = button.dataset.libraryNewAction;
+          try {
+            if (action === "asset") {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/png,image/jpeg,image/webp,image/gif,audio/*,video/*";
+              input.hidden = true;
+              root.append(input);
+              input.addEventListener("change", async () => {
+                const file = input.files?.[0];
+                input.remove();
+                if (!file) return;
+                if (file.size > 100 * 1024 * 1024) { notify("warn", "O arquivo excede o limite de 100 MB."); return; }
+                const FilePicker = globalThis.FilePicker;
+                if (typeof FilePicker?.upload !== "function") { notify("warn", "O upload nativo do Foundry não está disponível."); return; }
+                try {
+                  const uploaded = await FilePicker.upload("data", "nexus/library", file, {});
+                  const path = String(uploaded?.path ?? uploaded ?? "");
+                  if (!path || /^(?:javascript|data):/i.test(path)) throw new Error("O Foundry não retornou um caminho de asset válido.");
+                  const id = globalThis.foundry?.utils?.randomID?.(10) ?? "media-" + Date.now();
+                  const entry = {
+                    id, name: file.name.replace(/\.[^.]+$/, "") || file.name, description: "", tags: ["asset"],
+                    path, mimeType: file.type || "", thumbnail: file.type.startsWith("image/") ? path : ""
+                  };
+                  await updateNexusLibraryCollection(globalThis.game?.user, "media", entries => [...entries, entry]);
+                  if (this._state.folder) {
+                    await this._savePreferences(assignLibraryEntryFolder(this._getPreferences(), "media", id, this._state.folder));
+                  }
+                  refreshFolders(); await render();
+                  notify("info", "Asset importado para a Biblioteca.");
+                } catch (error) { notify("warn", "Não foi possível importar o asset: " + error.message); }
+              }, { once: true });
+              input.click();
+              return;
+            }
+            if (action === "shortcut") {
+              const result = await promptLibraryValue("Criar atalho", [
+                { name: "name", label: "Nome", maxLength: 80 },
+                { name: "reference", label: "UUID do Foundry ou chave de recurso", maxLength: 160 }
+              ]);
+              const name = String(result?.name ?? "").trim();
+              const rawReference = String(result?.reference ?? "").trim();
+              if (!name || !rawReference) return;
+              let resourceKey = rawReference;
+              let reference = getLibraryCatalogPreferenceReference(rawReference);
+              if (/^(Actor|Item|Scene|JournalEntry|Macro|Playlist|RollTable|Cards|Compendium)\./.test(rawReference)) {
+                resourceKey = "foundry-documents:" + rawReference;
+                reference = { providerId: "foundry-documents", id: rawReference };
+              }
+              if (!reference) throw new Error("A referência deve ser um UUID do Foundry ou uma chave de recurso válida.");
+              await this._savePreferences(createLibraryShortcut(this._getPreferences(), {
+                name, resourceKey, reference, folderId: this._state.folder
+              }).preferences);
+              refreshShortcuts(); notify("info", "Atalho criado na Biblioteca.");
+              return;
+            }
+            if (action === "layout" || action === "component") {
+              const result = await promptLibraryValue(action === "layout" ? "Novo layout" : "Novo componente", [
+                { name: "name", label: "Nome", maxLength: 80 }
+              ]);
+              const name = String(result?.name ?? "").trim();
+              if (!name) return;
+              const collection = action === "layout" ? "layouts" : "components";
+              const id = globalThis.foundry?.utils?.randomID?.(10) ?? collection + "-" + Date.now();
+              const entry = action === "layout"
+                ? { id, name, description: "", tags: ["layout"], width: 800, height: 800, components: [], groups: [] }
+                : { id, name, description: "", tags: ["component"], type: "text", settings: { label: name, text: "", w: 160, h: 48 } };
+              await updateNexusLibraryCollection(globalThis.game?.user, collection, entries => [...entries, entry]);
+              if (this._state.folder) await this._savePreferences(assignLibraryEntryFolder(this._getPreferences(), collection, id, this._state.folder));
+              refreshFolders(); await render();
+              notify("info", action === "layout" ? "Layout criado." : "Componente criado.");
+            }
+          } catch (error) { notify("warn", error.message); }
+        });
+      });
+
       root.querySelector("[data-library-create-folder]")?.addEventListener("click", async () => {
+        if (createMenu) createMenu.hidden = true;
+        createToggle?.setAttribute("aria-expanded", "false");
         const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
         if (typeof DialogV2?.input !== "function") return;
         const result = await DialogV2.input({
