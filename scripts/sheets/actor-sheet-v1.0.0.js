@@ -519,7 +519,7 @@ if (!customElements.get("nexus-color-picker")) {
 export class NexusActorSheet extends NexusActorSheetBase {
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
-    position: { width: 800, height: 900 },
+    position: { width: 800, height: 800 },
     window: { resizable: true }
   }, { inplace: false });
 
@@ -3779,6 +3779,8 @@ if (!hasPath) propertyValueInput.value = "";
           return;
         }
         applyScopedTheme(instance.element, this._currentLayout ?? DEFAULT_LAYOUT, { colors: true, windowTokens: true });
+        // A janela só passa a existir agora: reaplica a seleção atual para que o painel nunca abra vazio.
+        if (["component", "behavior", "layers"].includes(key)) this._setSelection($(this.element), [...(this._selectedIds ?? [])]);
         focusPanelWindow(instance);
         syncRailFocus(false);
       }).catch(error => {
