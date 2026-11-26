@@ -15,8 +15,10 @@ assert.match(sheet, /floatingLibrary\?\.append\(libraryButton\)/,
   "The Library entry remains accessible in the detached floating control group.");
 assert.match(sheet, /floatingTabs\?\.append\(tabs\)/,
   "Layout buttons are moved into the floating portal outside the sheet's layout.");
-assert.ok(legacy.includes(".nexus-floating-right {\n  width:34px !important; max-width:34px !important; gap:9px !important;\n  padding:0 !important; border:0 !important; border-radius:0 !important;\n  background:transparent !important; box-shadow:none !important; overflow:visible !important;"),
-  "The floating buttons must not share a backdrop panel.");
+const floatingRightRule = legacy.slice(legacy.indexOf("NEXUS 1.0.0.117 — rails independentes"));
+assert.ok(floatingRightRule.includes(".nexus-floating-ui .nexus-floating-right {") &&
+  floatingRightRule.includes("background:transparent !important; box-shadow:none !important; backdrop-filter:none !important;"),
+  "The right rail container must be transparent while each button keeps its own surface.");
 assert.match(legacy, /\.nexus-floating-tabs \.nexus-layout-tab,[\s\S]*?box-shadow:0 3px 10px #0005 !important;/,
   "Each layout button must retain its own floating surface.");
 assert.match(legacy, /html\.nexus-design-system #hotbar #action-bar,[\s\S]*?background:transparent !important/,

@@ -8,15 +8,23 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão estável publicada na main e no manifesto: `1.0.0.116` (navegação flutuante, chrome externo simplificado e compatibilidade de ícones).
+- Build atual da main: `1.0.0.117` (correção dos rails flutuantes e alvo do inspetor); manifesto estável anterior: `1.0.0.116` até confirmação do pacote da nova release.
 - Última versão estável anterior: `1.0.0.115`.
 - Teste manual: a versão `1.0.0.116` precisa confirmar botões flutuantes de layout, renderização dos ícones nativos e customizáveis, transparência dos fundos da Hotbar/Players, Estúdio, controles de janela e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
 - A versão .116 mantém a sidebar nativa, destaca os botões de layout em controles flutuantes e remove molduras externas redundantes; não declarar a restauração visual concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
-- A publicação da 1.0.0.116 concluiu CI (43/43 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
+- A publicação da 1.0.0.116 concluiu CI (43/43 arquivos de teste), geração do pacote e confirmação do asset. A build 1.0.0.117 está em correção de regressões e aguarda validação funcional no Foundry real.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
+
+## Versão 1.0.0.117 — correção dos rails e do inspetor
+
+- Corrigir a especificidade de estilos legados que reaplicavam superfície ao rail direito; manter o contêiner transparente e cada botão com superfície individual.
+- Unificar o alvo do inspetor com a seleção atual e limpar referências de componentes obsoletas.
+- Direcionar a edição por duplo clique do Canvas para a janela flutuante ApplicationV2 e preservar edição de grupos.
+- Adicionar contratos de regressão para rail, seleção e abertura do inspetor.
+- Aguardar CI, publicação/manifesto e validação manual no Foundry VTT 14 build 360.
 
 ## Versão 1.0.0.116 — navegação flutuante e superfícies nativas
 
