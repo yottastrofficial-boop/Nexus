@@ -1,3 +1,14 @@
+## Regressão 1.0.0.122 — Biblioteca e ficha
+
+- [ ] Testar consultas com frases, qualificadores combinados e exclusões.
+- [ ] Confirmar que os subtipos e campos de descrição disponíveis no índice do compêndio são pesquisáveis.
+- [ ] Confirmar que compêndios não selecionados ou sem permissão não são consultados.
+- [ ] Arrastar Actor de um card da Biblioteca para o diretório de Actors e para o Canvas; confirmar que o destino executa o fluxo nativo.
+- [ ] Arrastar Item compatível para a ficha e confirmar que o fluxo nativo da ActorSheetV2 é preservado.
+- [ ] Arrastar componente pessoal salvo para o Canvas; confirmar posição, snap da grade e limites.
+- [ ] Confirmar que a janela da ficha permanece 800 × 836 px e não redimensiona ao alterar dimensões internas do Canvas.
+- [ ] Confirmar que o Canvas maior que a área visível continua acessível por sua viewport.
+- [ ] Console sem erros novos.
 ## Regressão 1.0.0.119 — sidebar nativa e Canvas\n- [ ] Confirmar que NEXUS não altera display, flex-direction, largura ou posicionamento de #sidebar/#sidebar-tabs; Foundry mantém o rail padrão.\n- [ ] Verificar controles reais V14 dentro de menu > li > button[role=tab], com estados hover/ativo sem fundo contínuo do painel.\n- [ ] Confirmar que Canvas ocupa todo o workspace, sem coluna vazia de 72 px.\n- [ ] Limpar seleção e confirmar que o Inspector não continua editando o alvo anterior.\n\n## Regressão 1.0.0.118 — sidebar, foco, Canvas e Estúdio
 
 - [ ] Confirmar que as abas nativas do Foundry continuam fora do conteúdo do painel, em rail vertical próprio, com controles individuais NEXUS.
