@@ -83,5 +83,5 @@ test("V14 native tab controls are styled without rebuilding the Foundry sidebar"
 });
 
 test("default actor sheet uses the requested additional 36px of vertical room", () => {
-  assert.match(sheet, /position: \\{ width: 800, height: 836 \\}/);
+  assert.match(sheet, /position: \{ width: 800, height: 836 \}/);
 });
