@@ -33,3 +33,21 @@ test("closing the last tab creates a fresh usable tab", () => {
   assert.equal(manager.getTabs().length, 1);
   assert.equal(manager.getActiveState().folder, "old");
 });
+
+test("tabs preserve independent filter state and nested arrays", () => {
+  const manager = createLibraryTabManager({
+    folder: "actors",
+    query: "dragon",
+    compendiumIds: ["world.actors"]
+  });
+  const first = manager.getActive();
+  manager.create({ folder: "items", query: "sword", compendiumIds: ["world.items"] }, "Itens");
+  const second = manager.getActive();
+  assert.deepEqual(second.state.compendiumIds, ["world.items"]);
+  manager.activate(first.id);
+  assert.equal(manager.getActiveState().query, "dragon");
+  assert.deepEqual(manager.getActiveState().compendiumIds, ["world.actors"]);
+  manager.getActiveState().compendiumIds.push("world.npcs");
+  manager.activate(second.id);
+  assert.deepEqual(manager.getActiveState().compendiumIds, ["world.items"]);
+});
