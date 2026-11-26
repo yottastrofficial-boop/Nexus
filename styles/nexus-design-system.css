@@ -1028,7 +1028,7 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation .scene:fo
 
 /* Global Foundry presentation: shared theme tokens, native behavior preserved. */
 html.nexus-design-system:not([data-nexus-theme="foundry"]) body,
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, .application, .window-app, .application .window-content, .window-app .window-content) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls) {
   font-family: var(--nexus-font-family, system-ui, sans-serif);
 }
 /* Keep the selected profile font on ordinary controls, but never inherit it
@@ -1204,9 +1204,9 @@ html.nexus-design-system #chat-log .message-header { background: var(--nexus-ui-
 html.nexus-design-system #chat-log .message-content { background: var(--nexus-ui-surface-raised) !important; }
 
 /* The selected profile supplies the default text color and font throughout Foundry. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) body { color: var(--nexus-ui-text); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, #players, #chat) { color: var(--nexus-ui-text); }
 /* Use the selected profile font throughout Foundry, while preserving icon and code fonts. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(#sidebar):not(#sidebar *):not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, #players, #chat) :not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
   font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
 }
 html.nexus-design-system .nexus-design-sample-type :is(select, textarea) {
@@ -1457,3 +1457,9 @@ html.nexus-design-system .nexus-sheet:is([data-mode="play"], [data-mode="config"
   transform: scale(var(--nexus-fit-scale, 1)) translateZ(0);
   transform-origin: center center;
 }
+
+/* Core configuration windows receive palette tokens without inheriting NEXUS app resets. */
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration { color:var(--nexus-ui-text); font-family:var(--nexus-font-family,system-ui,sans-serif); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(.window-header,.window-content,.application-content) { color:var(--nexus-ui-text); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { color:var(--nexus-ui-text); background:var(--nexus-ui-field); border-color:var(--nexus-ui-border); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-themed-configuration :is(button,.button) { color:var(--nexus-ui-text); background:var(--nexus-ui-surface); border-color:var(--nexus-ui-border); }
