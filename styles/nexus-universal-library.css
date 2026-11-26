@@ -616,7 +616,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-tab {
   background: transparent;
   white-space: nowrap;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-tab[aria-selected="true"] {
+html.nexus-design-system .nexus-library-application .nexus-library-tab:has(.nexus-library-tab-label[aria-selected="true"]) {
   color: var(--nexus-panel-text, #edf0f6);
   background: var(--nexus-panel-surface, #202d3d);
   border-color: var(--nexus-panel-border, #40546b);
