@@ -2,7 +2,7 @@
  * User-local organization metadata for the NEXUS Library.
  * Kept separate from reusable definitions so folders/favorites never mutate assets.
  */
-const MAX_FOLDERS = 100;
+const MAX_FOLDERS = 250;
 const MAX_RECENT = 30;
 const MAX_FAVORITES = 500;
 const MAX_COLLECTIONS = 100;
@@ -11,24 +11,26 @@ const cleanText = (value, limit = 80) => String(value ?? "").trim().slice(0, lim
 const referenceKey = (collection, entryId) => `${String(collection ?? "")}:${String(entryId ?? "")}`;
 
 export function createEmptyLibraryPreferences() {
-  return { schemaVersion: 3, folders: [], assignments: {}, favorites: [], recent: [], collections: [] };
+  return { schemaVersion: 4, baseFoldersInitialized: false, folders: [], assignments: {}, favorites: [], recent: [], collections: [], shortcuts: [] };
 }
 
 export function normalizeLibraryPreferences(raw = {}) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return createEmptyLibraryPreferences();
-  const source = [1, 2, 3].includes(raw.schemaVersion) ? raw : {};
+  const source = [1, 2, 3, 4].includes(raw.schemaVersion) ? raw : {};
   const rawFolders = Array.isArray(source.folders) ? source.folders : [];
   const assignments = source.assignments && typeof source.assignments === "object" && !Array.isArray(source.assignments) ? source.assignments : {};
   const favorites = Array.isArray(source.favorites) ? source.favorites : [];
   const recent = Array.isArray(source.recent) ? source.recent : [];
   const collections = Array.isArray(source.collections) ? source.collections : [];
+  const shortcuts = Array.isArray(source.shortcuts) ? source.shortcuts : [];
   const folders = [...new Map(rawFolders.map(folder => {
     const id = cleanText(folder?.id, 64);
     return [id, id ? {
       id,
       name: cleanText(folder?.name) || "Pasta sem nome",
       collection: cleanText(folder?.collection, 32),
-      parentId: cleanText(folder?.parentId, 64)
+      parentId: cleanText(folder?.parentId, 64),
+      isDefault: folder?.isDefault === true
     } : null];
   }).filter(([id, value]) => id && value)).values()].slice(0, MAX_FOLDERS);
   const folderById = new Map(folders.map(folder => [folder.id, folder]));
@@ -51,7 +53,8 @@ export function normalizeLibraryPreferences(raw = {}) {
   }
   const validFolderIds = new Set(folders.map(folder => folder.id));
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
+    baseFoldersInitialized: source.baseFoldersInitialized === true,
     folders,
     assignments: Object.fromEntries(Object.entries(assignments)
       .filter(([key, value]) => key.length <= 160 && typeof value === "string" && validFolderIds.has(value))
@@ -70,7 +73,21 @@ export function normalizeLibraryPreferences(raw = {}) {
         description: cleanText(collection?.description, 240),
         resources
       }];
-    }).filter(([id, value]) => id && value)).values()].slice(0, MAX_COLLECTIONS)
+    }).filter(([id, value]) => id && value)).values()].slice(0, MAX_COLLECTIONS),
+    shortcuts: [...new Map(shortcuts.map(shortcut => {
+      const id = cleanText(shortcut?.id, 64);
+      const resourceKey = cleanText(shortcut?.resourceKey, 160);
+      const providerId = cleanText(shortcut?.reference?.providerId, 64);
+      const referenceId = cleanText(shortcut?.reference?.id ?? shortcut?.reference?.uuid, 160);
+      if (!id || !resourceKey || !providerId || !referenceId) return [null, null];
+      return [id, {
+        id,
+        name: cleanText(shortcut?.name) || "Atalho sem nome",
+        resourceKey,
+        reference: { providerId, id: referenceId },
+        folderId: validFolderIds.has(cleanText(shortcut?.folderId, 64)) ? cleanText(shortcut?.folderId, 64) : ""
+      }];
+    }).filter(([id, value]) => id && value)).values()].slice(0, 100)
   };
 }
 
@@ -93,6 +110,117 @@ export function createLibraryFolder(raw, { id, name, collection = "", parentId =
   if (preferences.folders.some(folder => folder.id === folderId)) throw new Error("Já existe uma pasta com este identificador.");
   const folder = { id: folderId, name: cleanName, collection: cleanCollection, parentId: cleanParentId };
   preferences.folders.push(folder);
+  return { preferences, folder };
+}
+
+const LIBRARY_BASE_TREE = [
+  ["atores", "Atores", [
+    ["atores-conteudo", "Atores", []],
+    ["atores-assets", "Assets", [["atores-retratos", "Retratos", []], ["atores-tokens", "Tokens", []], ["atores-icones", "Ícones", []], ["atores-assets-outros", "Outros assets", []]]],
+    ["atores-layouts", "Layouts", []],
+    ["atores-modelos-ficha", "Modelos de ficha", []],
+    ["atores-relacionados", "Recursos relacionados", []]
+  ]],
+  ["itens", "Itens", [
+    ["itens-classes", "Classes", []], ["itens-origens", "Origens", []], ["itens-legados", "Legados", []], ["itens-acoes", "Ações", []],
+    ["itens-equipamentos", "Equipamentos", [
+      ["itens-armas", "Armas", []], ["itens-armaduras", "Armaduras", []], ["itens-consumiveis", "Consumíveis", []],
+      ["itens-conteineres", "Contêineres", []], ["itens-equipamentos-outros", "Outros equipamentos", []]
+    ]],
+    ["itens-assets", "Assets", []], ["itens-layouts", "Layouts", []], ["itens-modelos", "Modelos de item", []], ["itens-relacionados", "Recursos relacionados", []]
+  ]],
+  ["cenas", "Cenas", [
+    ["cenas-conteudo", "Cenas", []], ["cenas-mapas", "Mapas", []], ["cenas-elementos", "Elementos de mapa", []],
+    ["cenas-placeables", "Elementos de cena", [
+      ["cenas-tokens", "Tokens", []], ["cenas-tiles", "Tiles", []], ["cenas-desenhos", "Desenhos", []],
+      ["cenas-paredes", "Paredes", []], ["cenas-luzes", "Luzes ambientes", []], ["cenas-sons", "Sons ambientes", []],
+      ["cenas-notas", "Notas", []], ["cenas-modelos-medidos", "Modelos medidos", []], ["cenas-regioes", "Regiões", []],
+      ["cenas-comportamentos-regiao", "Comportamentos de região", []]
+    ]],
+    ["cenas-assets", "Assets", []], ["cenas-modelos", "Modelos de cena", []]
+  ]],
+  ["documentos", "Documentos", [
+    ["documentos-regras", "Regras", []], ["documentos-lore", "Lore", []], ["documentos-aventuras", "Aventuras", []],
+    ["documentos-missoes", "Missões", []], ["documentos-personagens", "Personagens e NPCs", []],
+    ["documentos-locais", "Locais", []], ["documentos-referencias", "Referências", []]
+  ]],
+  ["baralhos", "Baralhos", [["baralhos-cartas", "Cartas", []], ["baralhos-assets", "Assets", []], ["baralhos-modelos", "Modelos", []]]],
+  ["tabelas-rolagem", "Tabelas de rolagem", [["tabelas-conteudo", "Tabelas", []], ["tabelas-modelos", "Modelos", []]]],
+  ["audio", "Áudio", [["audio-playlists", "Playlists", []], ["audio-musica", "Música", []], ["audio-ambientes", "Ambientes", []], ["audio-efeitos", "Efeitos sonoros", []], ["audio-assets", "Assets de áudio", []]]],
+  ["compendios", "Compêndios", [["compendios-nexus", "Compêndios NEXUS", []], ["compendios-mundo", "Compêndios do mundo", []], ["compendios-referencias", "Referências externas", []]]],
+  ["macros", "Macros", []],
+  ["assets-globais", "Assets globais", [["assets-imagens", "Imagens", []], ["assets-icones", "Ícones", []], ["assets-texturas", "Texturas", []], ["assets-fontes", "Fontes", []], ["assets-outros", "Outros arquivos", []]]],
+  ["nexus", "NEXUS", [["nexus-layouts", "Layouts", []], ["nexus-componentes", "Componentes", []], ["nexus-temas", "Temas", []], ["nexus-templates", "Templates", []], ["nexus-regras", "Regras", []], ["nexus-comportamentos", "Comportamentos", []], ["nexus-extensoes", "Extensões", []]]]
+];
+
+/** Adds the initial domain-based tree once, without overwriting or reclassifying user folders. */
+export function ensureLibraryDefaultFolders(raw) {
+  const preferences = normalizeLibraryPreferences(raw);
+  if (preferences.baseFoldersInitialized) return preferences;
+  const ensureNodes = (nodes, parentId = "") => {
+    for (const [key, name, children] of nodes) {
+      const id = "nexus-base-" + key;
+      let folder = preferences.folders.find(item => item.id === id);
+      if (!folder) folder = preferences.folders.find(item =>
+        item.parentId === parentId && item.collection === "" &&
+        item.name.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR")
+      );
+      if (!folder) {
+        const created = createLibraryFolder(preferences, { id, name, collection: "", parentId });
+        Object.assign(preferences, created.preferences);
+        folder = created.folder;
+      }
+      folder.isDefault = true;
+      ensureNodes(children, folder.id);
+    }
+  };
+  ensureNodes(LIBRARY_BASE_TREE);
+  preferences.baseFoldersInitialized = true;
+  return normalizeLibraryPreferences(preferences);
+}
+
+/** Creates a personal shortcut to a catalog resource; it never clones the source document. */
+export function createLibraryShortcut(raw, { id, name, resourceKey, reference, folderId = "" } = {}) {
+  const preferences = normalizeLibraryPreferences(raw);
+  const key = cleanText(resourceKey, 160);
+  const providerId = cleanText(reference?.providerId, 64);
+  const referenceId = cleanText(reference?.id ?? reference?.uuid, 160);
+  const cleanNameValue = cleanText(name);
+  if (!key || !providerId || !referenceId || !cleanNameValue) throw new Error("Informe um nome e uma referência válida para o atalho.");
+  if (folderId && !preferences.folders.some(folder => folder.id === folderId)) throw new Error("A pasta do atalho não existe.");
+  const shortcutId = cleanText(id, 64) || "shortcut-" + (globalThis.foundry?.utils?.randomID?.(8) ?? Math.random().toString(36).slice(2, 10));
+  if (preferences.shortcuts.some(item => item.id === shortcutId)) throw new Error("Já existe um atalho com este identificador.");
+  preferences.shortcuts.push({ id: shortcutId, name: cleanNameValue, resourceKey: key, reference: { providerId, id: referenceId }, folderId });
+  preferences.shortcuts = preferences.shortcuts.slice(-100);
+  return { preferences, shortcut: preferences.shortcuts.at(-1) };
+}
+
+export function removeLibraryShortcut(raw, shortcutId) {
+  const preferences = normalizeLibraryPreferences(raw);
+  preferences.shortcuts = preferences.shortcuts.filter(item => item.id !== shortcutId);
+  return preferences;
+}
+
+/** Duplicates a folder tree as organization metadata only; resource documents are never copied. */
+export function duplicateLibraryFolderTree(raw, folderId, { parentId = "", idPrefix = "copy" } = {}) {
+  const preferences = normalizeLibraryPreferences(raw);
+  const source = preferences.folders.find(folder => folder.id === folderId);
+  if (!source) throw new Error("A pasta selecionada não existe.");
+  const childrenOf = parent => preferences.folders.filter(folder => folder.parentId === parent);
+  const makeId = original => (idPrefix + "-" + original + "-" + (globalThis.foundry?.utils?.randomID?.(5) ?? Math.random().toString(36).slice(2, 7))).slice(0, 64);
+  const copyNode = (node, destinationParent, root = false) => {
+    const baseName = root ? node.name + " (cópia)" : node.name;
+    let name = baseName;
+    let suffix = 2;
+    while (preferences.folders.some(folder => folder.collection === node.collection && folder.parentId === destinationParent && folder.name.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) {
+      name = (root ? node.name + " (cópia " : node.name + " (") + suffix++ + ")";
+    }
+    const created = createLibraryFolder(preferences, { id: makeId(node.id), name, collection: node.collection, parentId: destinationParent });
+    Object.assign(preferences, created.preferences);
+    for (const child of childrenOf(node.id)) copyNode(child, created.folder.id, false);
+    return created.folder;
+  };
+  const folder = copyNode(source, parentId, true);
   return { preferences, folder };
 }
 
