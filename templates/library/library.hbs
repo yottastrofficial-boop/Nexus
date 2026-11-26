@@ -9,10 +9,17 @@
     <nav class="nexus-library-breadcrumbs" data-library-breadcrumbs aria-label="Caminho atual"></nav>
     <div class="nexus-library-navigation-search" data-library-navigation-search></div>
   </div>
-  <div class="nexus-library-commandbar" role="toolbar" aria-label="Editar conteúdo da Biblioteca">
+  <div class="nexus-library-commandbar" role="toolbar" aria-label="Ações do conteúdo da Biblioteca">
     <button type="button" data-library-create-new-proxy title="Criar ou importar recurso"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Novo</span></button>
+    <span class="nexus-library-commandbar-separator" aria-hidden="true"></span>
+    <button type="button" data-library-command="cut" title="Recortar pasta ou referência selecionada" disabled><i class="fa-solid fa-scissors" aria-hidden="true"></i><span>Recortar</span></button>
+    <button type="button" data-library-command="copy" title="Copiar pasta ou referência selecionada" disabled><i class="fa-regular fa-copy" aria-hidden="true"></i><span>Copiar</span></button>
+    <button type="button" data-library-command="paste" title="Colar na pasta atual" disabled><i class="fa-solid fa-paste" aria-hidden="true"></i><span>Colar</span></button>
+    <span class="nexus-library-commandbar-separator" aria-hidden="true"></span>
+    <button type="button" data-library-command="rename" title="Renomear seleção" disabled><i class="fa-solid fa-i-cursor" aria-hidden="true"></i><span>Renomear</span></button>
+    <button type="button" data-library-command="delete" title="Excluir seleção" disabled><i class="fa-regular fa-trash-can" aria-hidden="true"></i><span>Excluir</span></button>
     <button type="button" data-library-refresh title="Atualizar conteúdo"><i class="fa-solid fa-rotate" aria-hidden="true"></i><span>Atualizar</span></button>
-    <span class="nexus-library-commandbar-status" data-library-commandbar-status>Selecione um recurso para ver ações</span>
+    <span class="nexus-library-commandbar-status" data-library-commandbar-status aria-live="polite">Nenhum item selecionado</span>
   </div>
   <div class="nexus-library-toolbar nexus-library-toolbar-unified">
     <div class="nexus-library-toolbar-main">
