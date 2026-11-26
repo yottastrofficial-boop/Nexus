@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.126
+
+A branch main integra a nova experiência da Biblioteca em janela: abas independentes, histórico, breadcrumb, pesquisa junto ao caminho, barra de comandos e painéis redimensionáveis. A versão está sendo preparada como pacote Foundry 1.0.0.126; a versão estável do manifesto permanece 1.0.0.125 até a validação do pacote e a publicação da release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+
 ## Bootstrap orientado a serviços — 1.0.0.125
 
 A inicialização dos serviços centrais passou a usar factories e dependências explícitas no `game.nexus.services`. Os serviços de Design, Biblioteca, Mídia, Recursos, Documentos e Lógica são resolvidos em ordem sem inicialização assíncrona durante o hook `init`; as APIs públicas existentes foram preservadas. Esta é uma migração real do bootstrap para DI, mas não representa ainda a extração completa da ficha, listeners, CSS e templates.
