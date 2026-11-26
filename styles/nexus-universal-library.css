@@ -984,3 +984,38 @@ html.nexus-design-system .nexus-library-application .nexus-library-panel-resizer
   user-select: none;
   -webkit-user-select: none;
 }
+
+html.nexus-design-system .nexus-library-application .nexus-library-commandbar {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-commandbar button {
+  flex: 0 0 auto;
+  min-width: 28px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-commandbar button:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-commandbar-separator {
+  flex: 0 0 1px;
+  width: 1px;
+  height: 19px;
+  margin: 0 2px;
+  background: var(--nexus-panel-border, #40546b);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-commandbar-status {
+  min-width: 90px;
+  max-width: min(28vw, 260px);
+}
+@media (max-width: 720px) {
+  html.nexus-design-system .nexus-library-application .nexus-library-commandbar button span {
+    display: none;
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-commandbar button {
+    justify-content: center;
+    width: 30px;
+    padding: 4px !important;
+  }
+}
