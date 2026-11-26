@@ -59,6 +59,22 @@ const COLLECTION_KINDS = Object.freeze({
 });
 
 const cleanText = (value, max = 240) => String(value ?? "").trim().slice(0, max);
+function normalizeThumbnailSource(value) {
+  const source = cleanText(value, 2048);
+  if (!source || source.includes(String.fromCharCode(92)) || /[\u0000-\u001f]/.test(source)) return "";
+  if (/^https?:\/\//i.test(source)) {
+    try {
+      const url = new URL(source);
+      return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password ? url.href : "";
+    } catch { return ""; }
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(source) || source.startsWith("//")) return "";
+  let segments;
+  try { segments = source.split(/[?#]/, 1)[0].split("/").map(part => decodeURIComponent(part)); }
+  catch { return ""; }
+  if (segments.some(part => part === "." || part === ".." || part.includes("/"))) return "";
+  return /^\/?[a-z0-9_.-]+(?:\/[a-z0-9_.-]+)*(?:[?#][^\s]*)?$/i.test(source) ? source : "";
+}
 const safeLimit = value => Math.min(MAX_PAGE_SIZE, Math.max(1, Math.floor(Number(value) || 30)));
 const safeOffset = value => Math.max(0, Math.floor(Number(value) || 0));
 const isPlainObject = value => Boolean(value && typeof value === "object" && !Array.isArray(value) &&
@@ -107,7 +123,8 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     version: Math.max(1, Number(raw.version) || 1),
     description: cleanText(raw.description, 1000),
     tags: Object.freeze(tags),
-    thumbnail: cleanText(raw.thumbnail, 2048),
+    thumbnail: normalizeThumbnailSource(raw.thumbnail),
+    previewColors: Object.freeze((Array.isArray(raw.previewColors) ? raw.previewColors : []).slice(0, 8).map(item => ({ label: cleanText(item?.label, 32), value: typeof item?.value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.value) ? item.value : "" })).filter(item => item.label && item.value)),
     folder: cleanText(raw.folder, 160),
     origin: cleanText(raw.origin, 48) || defaultOrigin,
     reference: Object.freeze(cloneReference(raw.reference ?? {})),
@@ -317,6 +334,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
           description: entry.description ?? "",
           tags: entry.tags ?? [],
           thumbnail: entry.thumbnail ?? entry.img ?? entry.icon ?? "",
+          previewColors: Object.entries(entry.profile?.palette ?? entry.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 8).map(([label, value]) => ({ label, value })),
           folder: entry.folder ?? "",
           origin: entry.origin ?? "personal",
           reference: { providerId: "nexus-library", collection, id: String(entry.id) },
@@ -367,6 +385,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         name: theme.name ?? theme.label ?? THEME_LABELS[theme.id] ?? theme.id,
         description: theme.description ?? "",
         tags: theme.tags ?? [],
+        previewColors: Object.entries(theme.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 8).map(([label, value]) => ({ label, value })),
         origin: "core",
         reference: { providerId: "nexus-library", builtin: "theme", key: String(theme.id ?? theme.key) },
         capabilities: ["resolve"]
@@ -477,6 +496,10 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       const description = String(params.description ?? "").trim().slice(0, 1000);
       const tags = [...new Set((Array.isArray(params.tags) ? params.tags : String(params.tags ?? "").split(","))
         .map(tag => String(tag).trim().slice(0, 48)).filter(Boolean))].slice(0, 20);
+      const requestedThumbnail = params.thumbnail === undefined ? undefined : normalizeThumbnailSource(params.thumbnail);
+      if (params.thumbnail !== undefined && String(params.thumbnail ?? "").trim() && !requestedThumbnail) {
+        throw new Error("A miniatura precisa ser uma URL HTTP(S) válida ou um caminho relativo seguro.");
+      }
       const saved = await updateNexusLibraryStore(user, store => {
         const entry = store.collections[collection].find(item => String(item.id) === id);
         if (!entry) throw new Error("O recurso não existe mais na Biblioteca.");
@@ -489,6 +512,10 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         }
         if ("description" in entry || description) entry.description = description;
         entry.tags = tags;
+        if (requestedThumbnail !== undefined) {
+          if (requestedThumbnail) entry.thumbnail = requestedThumbnail;
+          else delete entry.thumbnail;
+        }
         return store;
       });
       await mirrorLegacy(saved);
