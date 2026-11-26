@@ -299,7 +299,22 @@ export function createLibraryApplicationClass({
           nav.append(button);
         }
       };
-      refreshCollections();
+      const refreshShortcuts = () => {
+        const nav = root.querySelector("[data-library-app-shortcuts]");
+        if (!nav) return;
+        nav.replaceChildren();
+        for (const shortcut of normalizeLibraryPreferences(this._getPreferences()).shortcuts) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "nexus-library-custom-folder nexus-library-shortcut";
+          button.dataset.libraryShortcut = shortcut.id;
+          button.innerHTML = '<i class="fa-solid fa-link" aria-hidden="true"></i><span></span>';
+          button.querySelector("span").textContent = shortcut.name;
+          button.classList.toggle("active", this._state.smartView === "shortcut" && this._state.collectionId === shortcut.id);
+          nav.append(button);
+        }
+      };
+      refreshShortcuts();
 
       const render = () => this._explorer?.render({ ...this._state });
       const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
@@ -647,7 +662,34 @@ export function createLibraryApplicationClass({
           notify("warn", error.message);
         }
       });
-      root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
+      root.querySelector("[data-library-app-shortcuts]")?.addEventListener("click", async event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const button = target?.closest("[data-library-shortcut]");
+        if (!button) return;
+        this._state.smartView = "shortcut";
+        this._state.collectionId = button.dataset.libraryShortcut;
+        this._state.folder = "";
+        root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.remove("active"));
+        refreshShortcuts();
+        await render();
+      });
+      root.querySelector("[data-library-app-shortcuts]")?.addEventListener("contextmenu", event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const button = target?.closest("[data-library-shortcut]");
+        if (!button) return;
+        const shortcutId = button.dataset.libraryShortcut;
+        this._closeLibraryContextMenu?.();
+        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+          { label: "Excluir atalho", danger: true, action: async () => {
+            await this._savePreferences(removeLibraryShortcut(this._getPreferences(), shortcutId));
+            if (this._state.collectionId === shortcutId && this._state.smartView === "shortcut") {
+              this._state.smartView = "all"; this._state.collectionId = "";
+            }
+            refreshShortcuts(); await render();
+          } }
+        ]);
+      });
+            root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         const button = target?.closest("[data-library-collection]");
         if (!button) return;
