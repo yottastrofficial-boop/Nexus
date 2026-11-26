@@ -209,6 +209,9 @@ export function createFoundryDocumentBridge({
     const document = await fromUuidRef(String(uuid));
     if (!document) throw new Error("O documento referenciado não está mais disponível: " + uuid);
     assertCanResolve(document);
+    if (document.documentName === "Item" && String(document.type ?? "").toLocaleLowerCase() === "weapon") {
+      throw new Error("Este tipo de documento não está disponível na Biblioteca NEXUS.");
+    }
     return document;
   };
 
