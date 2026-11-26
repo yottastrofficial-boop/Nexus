@@ -207,6 +207,7 @@ export function installNexusDesignSystem({
     const preserveNativeFoundry = getEffectiveTheme().theme === "foundry";
     if (preserveNativeFoundry && !isNexusApplication) return;
     if (isCoreConfiguration) {
+      element?.classList?.add("nexus-themed-application");
       element?.classList?.add("nexus-themed-configuration");
       return;
     }
