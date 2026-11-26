@@ -175,6 +175,55 @@ export function activateActorSheetListeners(sheet, html, dependencies) {
   const { NEXUS_LIBRARY_CATALOG, THEME_PALETTES, NEXUS_SKILLS, collectPropertyPaths, getNexusRollAliasEntries, buildPropertyPickerCatalog, renderPropertyPicker, getTriggeredActions, renderInteractionEditor, applyInteractionEditorChange, applyInteractionEditorCommand, getInteractionLibrary, saveInteractionToLibrary, deleteInteractionFromLibrary, getComponentInteractions, renderPropertyPresentationEditor, renderInteractionMediaPreview, COMPONENTS, resolveNexusBinding, normalizeNexusPropertyPath, clone, getPath, getResourceValuePaths, getNativePropertyDefinitions, getAliasDefinitions, safeAliasKey, clamp, isMediaSource, isVideoSource, isImageSource, getTokenImageSource, createSheetResourcePreview, fitSheetResourcePreview, updateSheetResourcePreview } = dependencies;
 
     const currentRoot = html?.[0];
+    if (currentRoot && !currentRoot.dataset.nexusLibraryCanvasDropBound) {
+      currentRoot.dataset.nexusLibraryCanvasDropBound = "true";
+      const getCanvasTarget = event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        return target?.closest?.(".nexus-canvas") ?? null;
+      };
+      currentRoot.addEventListener("dragover", event => {
+        const canvas = getCanvasTarget(event);
+        const types = Array.from(event.dataTransfer?.types ?? []);
+        if (!canvas || !types.includes("application/x-nexus-library-resource")) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+        canvas.classList.add("nexus-library-drop-target");
+      });
+      currentRoot.addEventListener("dragleave", event => {
+        const canvas = getCanvasTarget(event);
+        if (canvas && !canvas.contains(event.relatedTarget)) canvas.classList.remove("nexus-library-drop-target");
+      });
+      currentRoot.addEventListener("drop", async event => {
+        const canvas = getCanvasTarget(event);
+        if (!canvas || !event.dataTransfer?.types || !Array.from(event.dataTransfer.types).includes("application/x-nexus-library-resource")) return;
+        const raw = event.dataTransfer.getData("application/x-nexus-library-resource");
+        if (!raw) return;
+        let payload;
+        try { payload = JSON.parse(raw); } catch { return; }
+        // Only personal component definitions are inserted into the Canvas in
+        // this first adapter. Native Foundry Documents keep their native drop
+        // workflow and all other Library resource types remain non-destructive.
+        if (payload?.providerId !== "nexus-library" || payload.collection !== "components" || !payload.entryId) return;
+        event.preventDefault();
+        event.stopPropagation();
+        canvas.classList.remove("nexus-library-drop-target");
+        try {
+          const rect = canvas.getBoundingClientRect();
+          const layout = sheet._currentLayout ?? {};
+          const scaleX = rect.width > 0 ? Number(layout.width || 800) / rect.width : 1;
+          const scaleY = rect.height > 0 ? Number(layout.height || 800) / rect.height : 1;
+          const position = {
+            x: Math.max(0, (event.clientX - rect.left) * scaleX),
+            y: Math.max(0, (event.clientY - rect.top) * scaleY)
+          };
+          const inserted = await sheet._addSavedLibraryComponent(payload.entryId, {}, position);
+          if (!inserted) globalThis.ui?.notifications?.warn?.("Este componente não está mais disponível na sua Biblioteca.");
+        } catch (error) {
+          console.error("NEXUS | Falha ao inserir recurso da Biblioteca no Canvas.", error);
+          globalThis.ui?.notifications?.error?.("Não foi possível inserir este componente no Canvas.");
+        }
+      });
+    }
     const inspectorNamespace = `.nexusInspector${String(sheet.id).replace(/[^a-zA-Z0-9]/g, "")}`;
     sheet._nexusInspectorNamespace = inspectorNamespace;
     // Remove listeners from the previous render before registering the new delegated handlers.
