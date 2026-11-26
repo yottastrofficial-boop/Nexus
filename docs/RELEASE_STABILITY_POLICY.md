@@ -1,3 +1,13 @@
+## Estado de distribuição — 1.0.0.126 (2026-11-26)
+
+A PR #110 foi integrada à branch `main` no commit `01199132eb06a14a5e6b6dc663d3e5f99a62e4de`. A release `v1.0.0.125` foi criada antes dessa integração e, portanto, não contém a janela da Biblioteca com abas. A versão candidata para distribuir essas alterações é `1.0.0.126`.
+
+- `system.json` declara a versão candidata 1.0.0.126 e o endereço de download correspondente.
+- O workflow `.github/workflows/release.yml` valida testes, gera `nexus.zip`, publica a tag/release e só então sincroniza `manifest.json` e os metadados de download.
+- O manifesto estável deve permanecer na última release publicada até o workflow confirmar o asset `nexus.zip` da 1.0.0.126.
+- A nova janela da Biblioteca requer validação visual/funcional no Foundry VTT 14 build 360: abas, histórico, breadcrumb, comandos, exclusão/renomeação, redimensionamento e persistência.
+- A publicação e a CI não promovem automaticamente o checkpoint funcional. O último checkpoint confirmado no cliente Foundry permanece 1.0.0.70 até validação documentada.
+
 ## Revisão arquitetural 1.0.0.125 — bootstrap por dependências (2026-11-26)
 
 A versão 1.0.0.124 foi publicada com o registro de serviços e contratos de eventos. A 1.0.0.125 migra os serviços centrais para factories e dependências explícitas, mantendo a API pública `game.nexus.*`. CI, pacote, release e manifesto serão confirmados pelo workflow. A validação funcional/visual no Foundry VTT 14 build 360 permanece pendente. A modernização da ficha, listeners, Biblioteca, CSS e templates continuará por etapas; esta atualização não representa a refatoração integral concluída.
