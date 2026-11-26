@@ -102,6 +102,47 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     return entry.promise;
   };
 
+  const resolveSync = (name, ancestry = []) => {
+    assertActive();
+    const key = assertName(name);
+    if (ancestry.includes(key)) {
+      throw new Error("Dependência circular de serviços: " + [...ancestry, key].join(" → "));
+    }
+    const existing = instances.get(key);
+    if (existing) {
+      if (existing.state !== "ready") throw new Error("Serviço ainda está inicializando de forma assíncrona: " + key);
+      return existing.value;
+    }
+    const definition = definitions.get(key);
+    if (!definition) throw new Error("Serviço não registrado: " + key);
+    if (resolving.has(key)) throw new Error("Dependência circular de serviços: " + [...ancestry, key].concat(key).join(" → "));
+    resolving.add(key);
+    try {
+      const nextAncestry = [...ancestry, key];
+      const values = definition.dependencies.map(dep => resolveSync(dep, nextAncestry));
+      const deps = Object.freeze(Object.fromEntries(definition.dependencies.map((dep, index) => [dep, values[index]])));
+      const value = definition.factory(deps, Object.freeze({ registry: api, context, name: key }));
+      if (value && typeof value.then === "function") throw new Error("A fábrica do serviço " + key + " é assíncrona; use resolve().");
+      if (value === undefined) throw new Error("A fábrica retornou undefined para o serviço: " + key);
+      instances.set(key, { value, promise: Promise.resolve(value), state: "ready", error: null });
+      if (!creationOrder.includes(key)) creationOrder.push(key);
+      return value;
+    } catch (error) {
+      instances.delete(key);
+      throw error;
+    } finally {
+      resolving.delete(key);
+    }
+  };
+
+  const initializeSync = names => {
+    assertActive();
+    const requested = names == null ? [...definitions.keys()] : [...names].map(assertName);
+    const results = {};
+    for (const name of requested) results[name] = resolveSync(name);
+    return Object.freeze(results);
+  };
+
   const initialize = async names => {
     assertActive();
     const requested = names == null ? [...definitions.keys()] : [...names].map(assertName);
@@ -145,6 +186,6 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     return { disposed: true, errors };
   };
 
-  const api = Object.freeze({ register, publish, has, get, resolve, initialize, list, dispose, get disposed() { return disposed; } });
+  const api = Object.freeze({ register, publish, has, get, resolve, resolveSync, initialize, initializeSync, list, dispose, get disposed() { return disposed; } });
   return api;
 }
