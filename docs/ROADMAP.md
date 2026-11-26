@@ -1,4 +1,13 @@
-## 1.0.0.121 — Biblioteca e espaço inicial da ficha
+## 1.0.0.122 — pesquisa e transferência da Biblioteca
+
+- Implementar consulta estruturada e indexação ampliada de metadados de compêndios.
+- Preservar paginação, permissões e resolução sob demanda.
+- Usar arraste nativo por UUID para documentos Foundry.
+- Permitir arrastar componentes pessoais salvos diretamente para o Canvas, respeitando a grade.
+- Fixar a janela da ficha em 800 × 836 px, mantendo dimensões internas independentes.
+- Próximas etapas: adaptadores de fontes externas com prévia/validação, importação em lote, destinos especializados e mapeamento de conteúdo para propriedades somente quando os schemas mecânicos oficiais estiverem definidos.
+- Validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+## 1.0.0.122 — Biblioteca e espaço inicial da ficha
 
 - Corrigir o contexto dos métodos estáticos DialogV2 nos fluxos de pastas, coleções, importação e confirmação de ações.
 - Tornar o filtro um popover compacto que não altera a altura útil do catálogo.
