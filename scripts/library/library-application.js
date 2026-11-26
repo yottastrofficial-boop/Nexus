@@ -997,10 +997,12 @@ export function createLibraryApplicationClass({
           { label: "Recortar", action: async () => {
             this._libraryClipboard = { type: "folder", folderId, mode: "move" };
             notify("info", "Pasta recortada. Use Colar em uma pasta de destino.");
+            updateCommandbar();
           }},
           { label: "Copiar", action: async () => {
             this._libraryClipboard = { type: "folder", folderId, mode: "copy" };
             notify("info", "Estrutura da pasta copiada. Os documentos originais não serão duplicados.");
+            updateCommandbar();
           }},
           { label: "Colar dentro", disabled: !this._libraryClipboard, action: () => pasteInto(folderId) },
           { separator: true },
@@ -1067,10 +1069,12 @@ export function createLibraryApplicationClass({
           { label: "Copiar referência", action: async () => {
             this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "copy" };
             notify("info", "Referência copiada para a Biblioteca.");
+            updateCommandbar();
           }},
           { label: "Recortar referência", action: async () => {
             this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "move" };
             notify("info", "Referência recortada. Use Colar em uma pasta.");
+            updateCommandbar();
           }},
           { label: "Criar atalho", action: async () => {
             const result = await promptLibraryValue("Criar atalho", [{ name: "name", label: "Nome do atalho", value: resourceName, maxLength: 80 }]);
