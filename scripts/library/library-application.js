@@ -576,6 +576,39 @@ export function createLibraryApplicationClass({
       });
       root.querySelector("[data-library-create-new-proxy]")?.addEventListener("click", () => root.querySelector("[data-library-create-new-toggle]")?.click());
       root.querySelector("[data-library-refresh]")?.addEventListener("click", () => render());
+      tabStrip?.addEventListener("keydown", async event => {
+        if (!event.ctrlKey || !["Tab", "t", "T", "w", "W"].includes(event.key)) return;
+        event.preventDefault();
+        const tabs = this._tabManager.getTabs();
+        const activeIndex = Math.max(0, tabs.findIndex(tab => tab.active));
+        if (event.key === "Tab") {
+          const offset = event.shiftKey ? -1 : 1;
+          const next = tabs[(activeIndex + offset + tabs.length) % tabs.length];
+          if (!next) return;
+          this._tabManager.setActiveState(this._state);
+          this._state = this._tabManager.activate(next.id).state;
+          syncControlsFromState();
+          refreshFolders(); refreshCollections(); refreshShortcuts();
+          await render();
+          tabStrip.querySelector('[aria-selected="true"]')?.focus();
+        } else if (event.key.toLowerCase() === "t") {
+          this._tabManager.setActiveState(this._state);
+          const next = this._tabManager.create(this._state, getTabTitle(this._state));
+          this._state = next.state;
+          syncControlsFromState();
+          refreshFolders(); refreshCollections(); refreshShortcuts();
+          await render();
+          tabStrip.querySelector('[aria-selected="true"]')?.focus();
+        } else if (event.key.toLowerCase() === "w") {
+          if (tabs.length <= 1) return;
+          this._tabManager.setActiveState(this._state);
+          this._state = this._tabManager.close().state;
+          syncControlsFromState();
+          refreshFolders(); refreshCollections(); refreshShortcuts();
+          await render();
+          tabStrip.querySelector('[aria-selected="true"]')?.focus();
+        }
+      });
       renderChrome();
       const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
       const backupService = () => globalThis.game?.nexus?.library?.backup;
