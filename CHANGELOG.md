@@ -1,3 +1,15 @@
+## 1.0.0.126 — Biblioteca em janela com abas e comandos
+
+- Converte a experiência da Biblioteca em uma janela de navegação com abas independentes e estado próprio por aba.
+- Adiciona histórico Voltar/Avançar, navegação por breadcrumb, retorno ao nível superior e pesquisa posicionada junto ao caminho.
+- Adiciona barra de comandos para Novo, Atualizar, Recortar, Copiar, Colar, Renomear e Excluir, conectada às operações existentes.
+- Permite redimensionar a árvore de navegação e o Inspector, com persistência das dimensões e controles acessíveis.
+- Compacta os controles e recuos da árvore hierárquica e elimina indicadores de expansão duplicados.
+- Reconcilia o estado e o histórico das abas quando pastas são excluídas.
+- Reutiliza o catálogo, as preferências e os serviços existentes da Biblioteca; não cria um armazenamento paralelo.
+- Inclui contratos automatizados para abas, histórico, comandos, separadores e hierarquia.
+- Validação visual e funcional no Foundry VTT 14 build 360 necessária após instalação; CI e empacotamento não substituem o teste no cliente real.
+
 ## 1.0.0.125 — bootstrap orientado a dependências
 
 - Adiciona `resolveSync` e `initializeSync` ao registro de serviços para construção síncrona e ordenada durante o hook `init` do Foundry.
