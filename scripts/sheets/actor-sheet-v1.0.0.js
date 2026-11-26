@@ -537,7 +537,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
-    position: { width: 800, height: 800 },
+    position: { width: 800, height: 836 },
     window: { resizable: true }
   }, { inplace: false });
 
