@@ -255,7 +255,7 @@ export function createLibraryApplicationClass({
           row.className = "nexus-library-folder-row";
           row.dataset.libraryFolderDrop = folder.id;
           row.dataset.depth = String(Math.min(depth, 8));
-          row.style.paddingLeft = `${Math.min(depth, 8) * 13}px`;
+          row.style.setProperty("--nexus-library-folder-depth", String(Math.min(depth, 12)));
           row.draggable = true;
           const toggle = document.createElement("button");
           toggle.type = "button";
