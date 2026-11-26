@@ -1,3 +1,13 @@
+## Estado de distribuição — 1.0.0.127
+
+A versão 1.0.0.127 prepara a reconstrução estrutural da janela da Biblioteca. As abas passam para o cabeçalho nativo ApplicationV2; comandos e navegação são reorganizados em barras planas e compactas; superfícies internas redundantes e alças visíveis de redimensionamento são removidas. A classificação e o modo de visualização passam a fazer parte da barra principal. O manifesto estável permanece na 1.0.0.126 até a release 1.0.0.127 e seu asset ZIP serem confirmados pelo workflow.
+
+- A versão `system.json` em preparação é 1.0.0.127 e o download declarado aponta para `v1.0.0.127/nexus.zip`.
+- `manifest.json` permanece na versão estável 1.0.0.126 durante a validação e só avança após confirmação do pacote.
+- CI e empacotamento automatizados aprovados na branch de correção.
+- Validação visual/funcional pendente no Foundry VTT 14 build 360: tabs no cabeçalho real, controles nativos de janela, menu Novo, comandos, classificação, pesquisa, navegação e layout em diferentes larguras.
+- O último checkpoint funcional confirmado permanece 1.0.0.70 até validação documentada no cliente real.
+
 ## Estado de distribuição — 1.0.0.126 (2026-11-26)
 
 A preparação da 1.0.0.126 atualizou também README, roadmap e visão do projeto para distinguir a versão em preparação da versão estável do manifesto.

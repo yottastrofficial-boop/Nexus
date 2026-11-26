@@ -1,3 +1,12 @@
+## 1.0.0.127 — reconstrução estrutural da Biblioteca
+
+- Abas integradas ao cabeçalho nativo ApplicationV2.
+- Barra de navegação única com histórico, breadcrumb e pesquisa de superfície única.
+- Barra de comandos compacta por ícones, incluindo Novo contextual, operações de edição, classificação e visualização.
+- Layout plano sem painéis externos decorativos nem alças visíveis de redimensionamento.
+- Navegação, cartões e Inspector com dimensões e densidade compactas.
+- CI e empacotamento automatizados; teste visual/funcional no Foundry VTT 14 build 360 pendente.
+
 ## 1.0.0.126 — Biblioteca em janela com abas
 
 - Integra a janela de navegação com abas independentes e estado próprio.

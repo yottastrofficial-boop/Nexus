@@ -120,8 +120,22 @@ assert.match(libraryTemplate, /data-library-breadcrumbs/,
   "The Library should show a navigable Windows-style path.");
 assert.ok(["data-library-history-back", "data-library-history-forward", "data-library-history-up"].every(attribute => libraryTemplate.includes(attribute)),
   "The path bar should expose back, forward and parent navigation.");
-assert.ok(libraryTemplate.includes("data-library-resize-sidebar") && libraryTemplate.includes("data-library-resize-inspector"),
-  "Both the folder tree and Inspector should have independent resize handles.");
+assert.doesNotMatch(libraryTemplate, /data-library-resize-sidebar|data-library-resize-inspector/,
+  "The redesigned Explorer must not expose visible pane-resizer controls.");
+assert.doesNotMatch(libraryTemplate, /nexus-tool-panel/,
+  "The standalone Library must not be wrapped in an additional nested tool panel.");
+assert.match(libraryApplication, /this\.window\?\.header[\s\S]*?nativeHeader\.prepend\(tabStrip\)/,
+  "Browser tabs must be mounted in the native Foundry window header.");
+assert.match(libraryApplication, /title: ""/,
+  "The native window header must not repeat the Library title beside its tabs.");
+assert.match(libraryTemplate, /data-library-sort/,
+  "The command row must expose functional sorting.");
+assert.match(catalogExplorer, /currentSortMode === "name-desc"/,
+  "The catalog must apply the selected sorting mode.");
+assert.match(libraryTemplate, /data-library-create-new-toggle[\s\S]*?data-library-create-new-menu/,
+  "The New menu must be anchored in the command bar.");
+assert.doesNotMatch(libraryTemplate, /<span>(Recortar|Copiar|Colar|Renomear|Excluir|Atualizar)<\/span>/,
+  "Primary file commands must use compact icon-only controls.");
 assert.match(libraryApplication, /createLibraryTabManager/,
   "The application should use a dedicated, testable tab/history manager.");
 assert.match(styles, /--nexus-library-navigation-width/,
@@ -130,12 +144,8 @@ assert.match(styles, /--nexus-library-inspector-width/,
   "The Inspector width should be controlled by a user-adjustable CSS variable.");
 console.log("NEXUS browser-style Library shell contract: OK");
 
-assert.match(libraryApplication, /aria-valuemin/);
-assert.match(libraryApplication, /aria-valuemax/);
-assert.match(libraryApplication, /setAttribute\("role", "separator"\)/,
-  "Resizable panes must expose an accessible separator control.");
-assert.match(libraryApplication, /event.key === "Home"/,
-  "Resizable panes must support keyboard range boundaries.");
+assert.doesNotMatch(libraryApplication, /bindPanelResizer|_panelSizes/,
+  "The redesigned Library must not retain unused resize-handle logic.");
 assert.match(libraryApplication, /setAttribute\("aria-controls", childrenId\)/,
   "Folder disclosure buttons must identify the nested tree region they control.");
 assert.match(styles, /folder-row > \.nexus-library-custom-folder::before[\s\S]*?content: none !important/,

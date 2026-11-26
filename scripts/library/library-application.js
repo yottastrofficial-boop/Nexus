@@ -91,8 +91,8 @@ export function createLibraryApplicationClass({
     classes: ["nexus", "nexus-library-application"],
     position: { width: 1180, height: 760 },
     window: {
-      title: "Biblioteca NEXUS",
-      icon: "fa-solid fa-book-open",
+      title: "",
+      icon: "",
       frame: true,
       positioned: true,
       resizable: true,
@@ -126,18 +126,13 @@ export function createLibraryApplicationClass({
         type: "all",
         compendiumIds: [],
         viewMode: "grid",
-        cardSize: "medium"
+        cardSize: "medium",
+        sortMode: "name-asc"
       };
       this._tabManager = createLibraryTabManager(this._state, {
         createId: () => globalThis.foundry?.utils?.randomID?.(8) ?? "library-tab-" + Date.now()
       });
       this._state = this._tabManager.getActiveState();
-      this._panelSizes = {
-        navigation: 224,
-        inspector: 292,
-        inspectorHeight: 300,
-        ...(globalThis.game?.user?.getFlag?.("nexus", "libraryWindowPreferences") ?? {})
-      };
       this._explorer = null;
       this._context = {};
       this._searchTimer = 0;
@@ -218,6 +213,7 @@ export function createLibraryApplicationClass({
       const compendiums = root.querySelector("[data-library-compendiums]");
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
+      const sortControl = root.querySelector("[data-library-sort]");
       if (search) search.value = this._state.query;
       const syncSearchClear = () => {
         const hasQuery = Boolean(search?.value?.trim());
@@ -230,6 +226,7 @@ export function createLibraryApplicationClass({
       if (type) type.value = this._state.type;
       if (compendiums) populateLibraryCompendiumSelect(compendiums, this._state.compendiumIds);
       if (cardSize) cardSize.value = this._state.cardSize;
+      if (sortControl) sortControl.value = this._state.sortMode || "name-asc";
       viewControls.forEach(button => {
         const active = button.dataset.libraryCollectionViewMode === this._state.viewMode;
         button.classList.toggle("active", active);
@@ -331,97 +328,15 @@ export function createLibraryApplicationClass({
       refreshShortcuts();
 
       const appRoot = root.closest(".nexus-library-application") ?? root;
+      const nativeHeader = this.window?.header ?? appRoot.querySelector(".window-header");
       const tabStrip = root.querySelector("[data-library-tabs]");
+      if (nativeHeader && tabStrip && !nativeHeader.contains(tabStrip)) {
+        nativeHeader.classList.add("nexus-library-native-header");
+        tabStrip.classList.add("nexus-library-native-tabs");
+        nativeHeader.prepend(tabStrip);
+      }
+      appRoot.classList.add("nexus-library-native-window");
       const breadcrumbs = root.querySelector("[data-library-breadcrumbs]");
-      const navigationSearch = root.querySelector("[data-library-navigation-search]");
-      const searchWrap = root.querySelector(".nexus-library-search-wrap");
-      if (navigationSearch && searchWrap && !navigationSearch.contains(searchWrap)) navigationSearch.append(searchWrap);
-      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-      const applyPanelSizes = () => {
-        const values = {
-          navigation: clamp(Number(this._panelSizes.navigation) || 224, 150, 420),
-          inspector: clamp(Number(this._panelSizes.inspector) || 292, 210, 480),
-          inspectorHeight: clamp(Number(this._panelSizes.inspectorHeight) || 300, 180, 620)
-        };
-        this._panelSizes = { ...this._panelSizes, ...values };
-        appRoot.style.setProperty("--nexus-library-navigation-width", values.navigation + "px");
-        appRoot.style.setProperty("--nexus-library-inspector-width", values.inspector + "px");
-        appRoot.style.setProperty("--nexus-library-inspector-height", values.inspectorHeight + "px");
-        root.querySelector("[data-library-resize-sidebar]")?.setAttribute("aria-valuenow", String(values.navigation));
-        const inspectorHandle = root.querySelector("[data-library-resize-inspector]");
-        inspectorHandle?.setAttribute("aria-valuenow", String(isNarrowViewport() ? values.inspectorHeight : values.inspector));
-      };
-      const isNarrowViewport = () => globalThis.matchMedia?.("(max-width: 720px)")?.matches === true;
-      applyPanelSizes();
-      const savePanelSizes = async () => {
-        try { await globalThis.game?.user?.setFlag?.("nexus", "libraryWindowPreferences", this._panelSizes); }
-        catch (error) { notify("warn", "Não foi possível salvar o tamanho dos painéis: " + error.message); }
-      };
-      const bindPanelResizer = (handle, type) => {
-        if (!handle || handle.dataset.bound === "true") return;
-        handle.dataset.bound = "true";
-        const isInspector = type === "inspector";
-        const isNarrow = isInspector && isNarrowViewport();
-        handle.setAttribute("role", "separator");
-        handle.setAttribute("tabindex", "0");
-        handle.setAttribute("aria-valuemin", String(isNarrow ? 180 : isInspector ? 210 : 150));
-        handle.setAttribute("aria-valuemax", String(isNarrow ? 620 : isInspector ? 480 : 420));
-        handle.setAttribute("aria-orientation", isNarrow ? "horizontal" : "vertical");
-        handle.setAttribute("aria-valuenow", String(isInspector ? (isNarrow ? this._panelSizes.inspectorHeight : this._panelSizes.inspector) : this._panelSizes.navigation));
-        const start = event => {
-          const isVertical = isInspector && isNarrowViewport();
-          const dimension = isVertical ? "y" : "x";
-          const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
-          handle.setAttribute("aria-orientation", isVertical ? "horizontal" : "vertical");
-          handle.setAttribute("aria-valuemin", String(isVertical ? 180 : isInspector ? 210 : 150));
-          handle.setAttribute("aria-valuemax", String(isVertical ? 620 : isInspector ? 480 : 420));
-          if (event.button !== 0) return;
-          event.preventDefault();
-          const startPoint = dimension === "y" ? event.clientY : event.clientX;
-          const startSize = Number(this._panelSizes[sizeKey]) || (sizeKey === "navigation" ? 224 : sizeKey === "inspector" ? 292 : 300);
-          handle.classList.add("is-resizing");
-          handle.setPointerCapture?.(event.pointerId);
-          const move = next => {
-            const point = dimension === "y" ? next.clientY : next.clientX;
-            const delta = point - startPoint;
-            const nextSize = isInspector ? startSize - delta : startSize + delta;
-            this._panelSizes[sizeKey] = clamp(nextSize, sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180, sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620);
-            applyPanelSizes();
-          };
-          const finish = async next => {
-            move(next);
-            handle.classList.remove("is-resizing");
-            handle.removeEventListener("pointermove", move);
-            handle.removeEventListener("pointerup", finish);
-            handle.removeEventListener("pointercancel", finish);
-            await savePanelSizes();
-          };
-          handle.addEventListener("pointermove", move);
-          handle.addEventListener("pointerup", finish, { once: true });
-          handle.addEventListener("pointercancel", finish, { once: true });
-        };
-        handle.addEventListener("pointerdown", start);
-        handle.addEventListener("keydown", async event => {
-          const step = event.shiftKey ? 32 : 12;
-          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-          const isVertical = isInspector && isNarrowViewport();
-          const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
-          const minimum = sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180;
-          const maximum = sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620;
-          const increaseKey = isVertical ? "ArrowUp" : isInspector ? "ArrowLeft" : "ArrowRight";
-          const decreaseKey = isVertical ? "ArrowDown" : isInspector ? "ArrowRight" : "ArrowLeft";
-          if (![increaseKey, decreaseKey, "Home", "End"].includes(event.key)) return;
-          event.preventDefault();
-          const current = Number(this._panelSizes[sizeKey]) || (sizeKey === "navigation" ? 224 : sizeKey === "inspector" ? 292 : 300);
-          const next = event.key === "Home" ? minimum : event.key === "End" ? maximum : current + (event.key === increaseKey ? step : -step);
-          this._panelSizes[sizeKey] = clamp(next, minimum, maximum);
-          applyPanelSizes();
-          await savePanelSizes();
-        });
-      };
-      bindPanelResizer(root.querySelector("[data-library-resize-sidebar]"), "navigation");
-      bindPanelResizer(root.querySelector("[data-library-resize-inspector]"), "inspector");
-
       const currentLocation = () => ({
         smartView: this._state.smartView,
         folder: this._state.folder,
@@ -545,7 +460,8 @@ export function createLibraryApplicationClass({
           ["[data-library-origin]", this._state.origin],
           ["[data-library-kind]", this._state.kind],
           ["[data-library-type]", this._state.type],
-          ["[data-library-card-size]", this._state.cardSize]
+          ["[data-library-card-size]", this._state.cardSize],
+          ["[data-library-sort]", this._state.sortMode || "name-asc"]
         ];
         for (const [selector, value] of values) {
           const control = root.querySelector(selector);
@@ -634,7 +550,6 @@ export function createLibraryApplicationClass({
         refreshFolders(); refreshCollections(); refreshShortcuts();
         await render();
       });
-      root.querySelector("[data-library-create-new-proxy]")?.addEventListener("click", () => root.querySelector("[data-library-create-new-toggle]")?.click());
       root.querySelector("[data-library-refresh]")?.addEventListener("click", () => render());
       tabStrip?.addEventListener("keydown", async event => {
         if (!event.ctrlKey || !["Tab", "t", "T", "w", "W"].includes(event.key)) return;
@@ -856,6 +771,10 @@ export function createLibraryApplicationClass({
       });
       cardSize?.addEventListener("change", () => {
         this._state.cardSize = ["small", "medium", "large"].includes(cardSize.value) ? cardSize.value : "medium";
+        void render();
+      });
+      sortControl?.addEventListener("change", () => {
+        this._state.sortMode = ["name-asc", "name-desc", "type-asc", "source-asc"].includes(sortControl.value) ? sortControl.value : "name-asc";
         void render();
       });
       viewControls.forEach(button => button.addEventListener("click", () => {

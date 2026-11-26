@@ -583,6 +583,7 @@ export function createLibraryCatalogExplorer({
   let currentCompendiumIds = [];
   let currentViewMode = "grid";
   let currentCardSize = "medium";
+  let currentSortMode = "name-asc";
   let smartOffset = 0;
 
   const renderEmpty = message => {
@@ -956,7 +957,7 @@ export function createLibraryCatalogExplorer({
     }
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, sortMode = currentSortMode, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
@@ -968,6 +969,7 @@ export function createLibraryCatalogExplorer({
     currentCompendiumIds = Array.isArray(compendiumIds) ? [...new Set(compendiumIds.map(String).filter(Boolean))].slice(0, 32) : [];
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
+    currentSortMode = ["name-asc", "name-desc", "type-asc", "source-asc"].includes(sortMode) ? sortMode : "name-asc";
     const version = ++renderRequestVersion;
     if (!append) {
       detailRequestVersion++;
@@ -1041,6 +1043,13 @@ export function createLibraryCatalogExplorer({
       if (currentSmartView === "recent" && !preferences.recent.includes(key)) return false;
       if (smartKeys && !smartKeys.includes(key)) return false;
       return true;
+    });
+    const compareText = (left, right) => String(left ?? "").localeCompare(String(right ?? ""), "pt-BR", { sensitivity: "base", numeric: true });
+    visible.sort((left, right) => {
+      if (currentSortMode === "name-desc") return compareText(right.name ?? right.title ?? right.label, left.name ?? left.title ?? left.label);
+      if (currentSortMode === "type-asc") return compareText(left.kind ?? left.type, right.kind ?? right.type) || compareText(left.name ?? left.title, right.name ?? right.title);
+      if (currentSortMode === "source-asc") return compareText(left.origin ?? left.source ?? left.providerId, right.origin ?? right.source ?? right.providerId) || compareText(left.name ?? left.title, right.name ?? right.title);
+      return compareText(left.name ?? left.title ?? left.label, right.name ?? right.title ?? right.label);
     });
 
     container.replaceChildren();
