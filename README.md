@@ -10,7 +10,7 @@ A revisão de ponta a ponta introduz um registro de serviços compartilhados, co
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.123-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.124-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -20,7 +20,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-****Atualização:** a 1.0.0.123 acrescenta estrutura hierárquica da Biblioteca, criação universal de recursos, atalhos e previews quadrados. A validação automatizada será confirmada pelo workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
+**Revisão estrutural:** a 1.0.0.124 introduz um registro de serviços compartilhados, contratos de eventos desacoplados e guardrails de integridade do grafo de módulos. A migração do restante do sistema continuará por etapas para preservar dados e compatibilidade.
 
 ## Visão geral
 
@@ -34,7 +34,7 @@ Essa separação orienta o planejamento do projeto. Nem todos esses recursos est
 
 ## Base publicada e revisão estrutural — 1.0.0.124
 
-A base publicada 1.0.0.123 preserva a geometria nativa da sidebar V14, estiliza os controles na estrutura real, corrige o workspace para não reservar coluna vazia e limpa o alvo do Inspector ao remover seleção. CI/release e validação manual devem ser confirmados. A implementação atual na `main` inclui ficha Canvas, componentes configuráveis, grupos hierárquicos, Biblioteca Universal com Explorer e Inspector, armazenamento unificado, infraestrutura inicial de Lógica e Mídia e o Design System global com Estúdio de Aparência. As melhorias consolidadas nesta build também incluem a organização hierárquica das pastas da Biblioteca e a normalização das dimensões de componentes em uma grade de 10 px. O estado exato e as limitações estão descritos em [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
+A base publicada 1.0.0.123 adiciona a estrutura hierárquica da Biblioteca, ações contextuais, criação universal e previews padronizados. A candidata 1.0.0.124 acrescenta o registro de serviços e contratos compartilhados, sem alterar schemas mecânicos ou dados persistidos. A arquitetura completa ainda será migrada por etapas; consulte [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
 
 Recursos presentes no código incluem:
 
@@ -149,7 +149,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão preparada para publicação e sincronização do manifesto é **1.0.0.123**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão preparada para publicação e sincronização do manifesto é **1.0.0.124**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
