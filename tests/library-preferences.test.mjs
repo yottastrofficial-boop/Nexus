@@ -93,8 +93,10 @@ test("pastas suportam hierarquia, movimentação e remoção recursiva sem ciclo
   const moved = moveLibraryFolder(grandchild.preferences, "folder-grandchild", "");
   assert.equal(moved.folders.find(folder => folder.id === "folder-grandchild").parentId, "");
   const assigned = assignLibraryEntryFolder(moved, "foundry-documents", "Actor.abc", "folder-child");
-  const removed = removeLibraryFolder(assigned, "folder-root");
+  const withShortcut = createLibraryShortcut(assigned, { id: "folder-shortcut", name: "Atalho", resourceKey: "foundry-documents:Actor.abc", reference: { providerId: "foundry-documents", id: "Actor.abc" }, folderId: "folder-child" });
+  const removed = removeLibraryFolder(withShortcut.preferences, "folder-root");
   assert.deepEqual(removed.folders.map(folder => folder.id), ["folder-grandchild"]);
+  assert.equal(removed.shortcuts[0].folderId, "");
   assert.equal(removed.assignments["foundry-documents:Actor.abc"], undefined);
 });
 
