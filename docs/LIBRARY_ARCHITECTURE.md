@@ -65,7 +65,7 @@ Macros continuam documentos Foundry. Propriedades, Regras, Comportamentos, Fluxo
 
 O Inspector resolve o recurso selecionado sob demanda e apresenta uma prévia específica quando existe um formato seguro e verificável:
 
-- Perfis de aparência usam a prévia isolada do Design System; não aplicam o tema à interface.
+- Perfis de aparência usam a prévia isolada do Design System; não aplicam o tema à interface. Os cards exibem uma paleta compacta derivada apenas de cores hexadecimais reconhecidas.
 - Componentes e assets usam prévias visuais tipadas quando o formato é reconhecido (por exemplo, barras de recurso, campos, tabelas e imagens). As prévias são demonstrativas e não executam HTML, CSS, JavaScript ou payloads importados.
 - Composições, layouts/modelos, estilos e definições de Lógica apresentam metadados estruturais. Payloads de Lógica continuam inertes e nunca são executados pela prévia.
 - Paletas de tema exibem somente cores hexadecimais reconhecidas; a prévia não aplica o tema à interface.
@@ -83,7 +83,7 @@ Os identificadores de tipo do filtro devem corresponder às chaves de `FoundryDo
 - Pastas globais podem organizar recursos de provedores diferentes; pastas vinculadas a uma coleção respeitam seu escopo.
 - Preferências usam `schemaVersion: 3`. Pastas têm `parentId`, suportam subpastas e podem ser movidas por arrastar e soltar; a migração preserva pastas antigas como raiz e repara ciclos/referências inválidas.
 - Excluir uma pasta remove também suas subpastas e limpa apenas as atribuições de pasta; os recursos originais permanecem intactos.
-- A barra de pesquisa usa uma única superfície; filtros secundários ficam recolhidos. Favoritos usam controle de ícone sem painel decorativo.
+- A barra de pesquisa usa uma única superfície; filtros secundários ficam recolhidos em popover compacto. Cards compartilham uma área de miniatura de dimensões uniformes; recursos pessoais podem guardar miniatura por URL HTTP(S) ou caminho relativo seguro. Favoritos usam controle de ícone sem painel decorativo.
 - Coleções universais são agrupamentos curados independentes de pastas; podem conter referências de qualquer provedor e tipo, sem duplicar os recursos.
 - Documentos Foundry não são duplicados. O UUID é resolvido pelo bridge e as permissões nativas continuam válidas.
 - A importação de backup preserva escopos: fluxos pessoais permanecem pessoais e fluxos do mundo permanecem no setting do mundo.
@@ -137,3 +137,8 @@ Ainda não estão concluídos:
 - testes funcionais em uma instalação real do Foundry VTT 14 build 360.
 
 A separação de responsabilidades não elimina a necessidade de validar UI, persistência, permissões, ciclo de vida e compatibilidade no Foundry real.
+
+
+## Preparação para fontes estruturadas externas
+
+A integração futura de catálogos de conteúdo e assistentes de criação de personagem deve usar `library-transfer-registry.js`, sem acoplar a janela da Biblioteca a um provedor específico. Cada origem deverá converter os dados para registros JSON tipados e versionados; o Core valida limites e schemas; o destino declara compatibilidade e produz uma prévia antes da confirmação explícita. A interface de criação de personagem deverá permanecer um fluxo próprio, consumindo dados da Biblioteca por adaptadores, em vez de misturar fichas de personagem, assets visuais e documentos Foundry em uma única coleção. Adaptadores concretos e schemas de personagem ainda não estão implementados.
