@@ -1,3 +1,12 @@
+## 1.0.0.115 — preservação ampliada de ícones
+
+- Amplia a auditoria de Font Awesome para regras legadas de controles de ApplicationV2, conteúdo de componentes, trilhos flutuantes, Hotbar e navegação.
+- Corrige seletores genéricos de `font-family: inherit` que podiam sobrescrever a família de fonte de botões ou spans com classes Font Awesome.
+- Corrige o seletor global de tipografia: as exclusões de classes de ícone passam a ser aplicadas ao próprio controle, não a seus descendentes.
+- Adiciona teste automatizado dedicado à preservação das fontes de ícones em controles nativos e superfícies NEXUS.
+- Mantém a sidebar vertical nativa, o Estúdio responsivo e o restante das correções da 1.0.0.114.
+- **Teste manual pendente:** conferir glifos na sidebar, Canvas, Hotbar, ficha, Biblioteca, Estúdio, controles de janela e painéis no Foundry VTT 14 build 360.
+
 ## 1.0.0.114 — Sidebar nativa, Estúdio responsivo e correção de ícones
 
 - Restaura a navegação vertical original do Foundry VTT, removendo o bloco de CSS que convertia a navegação e os painéis da sidebar para uma faixa horizontal.

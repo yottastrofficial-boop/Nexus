@@ -2052,10 +2052,10 @@
 .nexus-group-surface.nexus-group-corner-square-br { border-bottom-right-radius:0 !important; }
 .nexus-group-surface.nexus-group-corner-square-bl { border-bottom-left-radius:0 !important; }
 .nexus-canvas { font-family:var(--nexus-font-family,"Inter",sans-serif); }
-.nexus-floating-ui .nexus-floating-left button,
-.nexus-floating-ui .nexus-floating-right button,
-.nexus-appearance-rail button,
-.nexus-component .nexus-resource-actions button { font-family:inherit; }
+.nexus-floating-ui .nexus-floating-left button:not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]),
+.nexus-floating-ui .nexus-floating-right button:not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]),
+.nexus-appearance-rail button:not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]),
+.nexus-component .nexus-resource-actions button:not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) { font-family:inherit; }
 .nexus-floating-ui .nexus-floating-left button:hover,
 .nexus-floating-ui .nexus-floating-right button:hover,
 .nexus-appearance-rail button:hover { border-color:var(--nexus-highlight-color,#78b7e8) !important; }
@@ -3076,7 +3076,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* NEXUS 1.28.15 — dimensões compactas e tipografia por componente. */
 .nexus-component { min-width:20px !important; min-height:20px !important; container-type:size; font-family:var(--nexus-component-font-family,inherit) !important; font-size:var(--nexus-component-font-size,13px) !important; box-sizing:border-box; }
 .nexus-component-content { flex:1 1 auto; min-width:0 !important; min-height:0 !important; width:100%; height:auto; overflow:hidden; font-family:var(--nexus-component-font-family,inherit) !important; gap:clamp(1px,.25em,4px) !important; }
-.nexus-component-content :is(strong,b,small,span,label,input,textarea,button) { min-width:0; max-width:100%; font-family:inherit; }
+.nexus-component-content :is(strong,b,small,span,label,input,textarea,button):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) { min-width:0; max-width:100%; font-family:inherit; }
 .nexus-component .nexus-component-content input[type=number] { font-size:inherit !important; }
 .nexus-component-content :is(strong,b) { font-size:1em; line-height:1.12; overflow-wrap:anywhere; }
 .nexus-component-content small { font-size:.78em; line-height:1.1; }
@@ -9270,7 +9270,7 @@ html.nexus-design-system :is(.application.nexus, .application.nexus-themed-appli
 html.nexus-design-system :is(.application.nexus, .application.nexus-themed-application, .window-app.nexus-window, .window-app.nexus-panel-window) :is(.window-content, .application-content) {
   background: var(--nexus-window-content-bg, var(--nexus-window-content, #121c28)) !important;
 }
-html.nexus-design-system :is(.application.nexus, .application.nexus-themed-application, .window-app.nexus-window, .window-app.nexus-panel-window) :is(button, input, select, textarea) {
+html.nexus-design-system :is(.application.nexus, .application.nexus-themed-application, .window-app.nexus-window, .window-app.nexus-panel-window) :is(button, input, select, textarea):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) {
   font-family: inherit;
 }
 html.nexus-design-system :is(.application.nexus, .application.nexus-themed-application, .window-app.nexus-window, .window-app.nexus-panel-window) :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {

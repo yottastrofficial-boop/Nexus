@@ -8,17 +8,25 @@ Este documento registra prioridades e decisões. Um item só deve ser marcado co
 - Branch: `main`
 - Commit de referência: `HEAD da main`
 - Distribuição: o manifesto original é a fonte única de instalação/atualização e só avança após CI, publicação e confirmação do asset.
-- Versão candidata na main: `1.0.0.114` (retorno à sidebar vertical nativa, correção do Estúdio e ícones; validação automatizada e manual pendentes até CI).
-- Última versão estável publicada no manifesto: `1.0.0.113`.
-- Teste manual: a candidata `1.0.0.114` precisa confirmar sidebar vertical nativa, abertura/redimensionamento do Estúdio, ícones gerais, controles de janela e painéis no Foundry VTT 14 build 360.
+- Versão candidata na main: `1.0.0.115` (retorno à sidebar vertical nativa, correção do Estúdio e ícones; validação automatizada e manual pendentes até CI).
+- Última versão estável publicada no manifesto: `1.0.0.114`.
+- Teste manual: a versão `1.0.0.115` precisa confirmar sidebar vertical nativa, abertura/redimensionamento do Estúdio, ícones gerais, controles de janela e painéis no Foundry VTT 14 build 360.
 - Commits posteriores à release: `08f521ca03a998f6fcc623e9e0193cc1ba7da247` (diagnóstico Playwright) e `34c114539e04e67151dbcf806283503e91c3cdf0` (isolamento tipográfico e consolidação dos estilos).
-- A candidata .114 remove os overrides de geometria da sidebar; não declarar a restauração concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
+- A versão .115 mantém a sidebar nativa e amplia a correção das fontes de ícones; não declarar a restauração concluída até confirmar navegação, ícones e conteúdo no Foundry VTT 14 build 360.
 - Último checkpoint funcional confirmado dentro do Foundry: `1.0.0.70`.
 - A publicação da 1.0.0.98 concluiu CI (37/37 arquivos de teste), geração do pacote e confirmação do asset; a validação funcional no Foundry real permanece pendente.
 - Alvo: Foundry VTT 14, build 360.
 - Estado: projeto em desenvolvimento pós-release; CI automatizado por commit; a validação funcional/visual no Foundry real permanece pendente.
 
-## Candidata 1.0.0.114 — sidebar nativa, Estúdio e ícones
+## Versão 1.0.0.115 — auditoria ampliada de fontes de ícones
+
+- Corrigir seletores legados que aplicavam `font-family: inherit` genericamente a botões e spans de componentes.
+- Preservar classes Font Awesome em controles de ApplicationV2, trilhos flutuantes, recursos de ficha, Hotbar e navegação.
+- Corrigir o seletor global de tipografia que tinha um espaço indevido antes de `:not()`, transformando a exclusão de ícones em seletor descendente.
+- Adicionar teste de regressão dedicado para garantir que as regras tipográficas não alcancem elementos com classes de ícones.
+- Revalidar a suíte automatizada e, depois da instalação, conferir os glifos no Foundry VTT 14 build 360.
+
+## Histórico da versão 1.0.0.114 — sidebar nativa e primeira correção de ícones
 
 - Remover o CSS estrutural que transformava a navegação nativa em uma faixa horizontal.
 - Manter o tema das superfícies e diretórios sem controlar geometria, orientação, ordem ou visibilidade das abas.

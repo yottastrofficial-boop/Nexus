@@ -1,6 +1,6 @@
 # Validação manual — Design System Foundry V14
 
-Este roteiro é o gate funcional da candidata 1.0.0.114. O pacote e o CI ainda precisam ser confirmados nesta versão; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
+Este roteiro é o gate funcional da versão 1.0.0.115. O pacote e o CI ainda precisam ser confirmados nesta versão; isso não substitui a validação em uma instalação real do Foundry VTT 14 build 360, com pelo menos um usuário GM e um usuário jogador conectados simultaneamente.
 
 ## Preparação
 

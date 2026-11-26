@@ -1035,14 +1035,15 @@ html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar
    onto Foundry buttons that carry Font Awesome classes directly. Their ::before
    glyph inherits the button font, so overriding the button turns icons into boxes. */
 html.nexus-design-system:not([data-nexus-theme="foundry"]) body
-  :is(button, input, select, textarea)
-  :not([class*="fa-"]):not([class~="fa"]):not([class~="fas"])
-  :not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) {
+  :is(button, input, select, textarea):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) {
   font-family: inherit;
 }
 html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #sidebar .tab, #hotbar, #navigation, #controls, #ui-left, #ui-top, #players, #chat) { color: var(--nexus-ui-text) !important; }
 html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#hotbar, #navigation) :is(button, input, select, textarea) {
-  font-family: inherit; color: var(--nexus-ui-text);
+  color: var(--nexus-ui-text);
+}
+html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#hotbar, #navigation) :is(button, input, select, textarea):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]) {
+  font-family: inherit;
 }
 /* Do not assign font-family to native sidebar controls: Font Awesome may be
    applied directly to the tab button rather than to a nested <i> element. */
