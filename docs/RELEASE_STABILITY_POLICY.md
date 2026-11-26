@@ -1,6 +1,6 @@
-## Candidata 1.0.0.122 — Biblioteca e transferência
+## Estado da revisão 1.0.0.122 — Biblioteca e transferência
 
-A versão 1.0.0.122 está em revisão na PR #106. Ela acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes pessoais no Canvas; também fixa a janela da ficha em 800 × 836 px. CI e testes automatizados ainda precisam concluir nesta revisão. A validação visual no Foundry VTT 14 build 360 permanece pendente, portanto esta candidata não é um novo checkpoint funcional.
+A versão 1.0.0.122 está em revisão na PR #106. Ela acrescenta pesquisa estruturada, indexação ampliada de compêndios, arraste nativo por UUID e inserção de componentes pessoais no Canvas; também fixa a janela da ficha em 800 × 836 px. CI e testes automatizados ainda precisam concluir nesta revisão. A validação visual no Foundry VTT 14 build 360 permanece pendente, portanto esta em revisão não é um novo checkpoint funcional.
 
 ## Estado publicado mais recente na main — 1.0.0.121
 
