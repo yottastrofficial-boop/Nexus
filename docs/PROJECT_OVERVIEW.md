@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.127
+
+A versão em preparação reconstrói a Biblioteca como uma janela ApplicationV2 com abas integradas ao cabeçalho nativo, sem título duplicado ou janela interna. A área de trabalho usa uma única barra de navegação e uma barra de comandos compacta com ícones, menu Novo ancorado, classificação e modos de visualização. A estrutura remove molduras externas e divisores visíveis de redimensionamento, preservando a hierarquia, catálogo, preferências, histórico por aba e Inspector. A versão estável do manifesto permanece 1.0.0.126 até a release 1.0.0.127 ser publicada.
+
 ## Estado do código — 1.0.0.126
 
 A branch main integra a nova experiência da Biblioteca em janela: abas independentes, histórico, breadcrumb, pesquisa junto ao caminho, barra de comandos e painéis redimensionáveis. A versão está sendo preparada como pacote Foundry 1.0.0.126; a versão estável do manifesto permanece 1.0.0.125 até a validação do pacote e a publicação da release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
