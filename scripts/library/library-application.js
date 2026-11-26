@@ -361,19 +361,20 @@ export function createLibraryApplicationClass({
         if (!handle || handle.dataset.bound === "true") return;
         handle.dataset.bound = "true";
         const isInspector = type === "inspector";
-        const min = isInspector ? 210 : 150;
-        const max = isInspector ? 480 : 420;
+        const isNarrow = isInspector && isNarrowViewport();
         handle.setAttribute("role", "separator");
         handle.setAttribute("tabindex", "0");
-        handle.setAttribute("aria-valuemin", String(isInspector ? 180 : min));
-        handle.setAttribute("aria-valuemax", String(isInspector ? 620 : max));
-        handle.setAttribute("aria-orientation", isInspector && isNarrowViewport() ? "horizontal" : "vertical");
-        handle.setAttribute("aria-valuenow", String(isInspector ? (isNarrowViewport() ? this._panelSizes.inspectorHeight : this._panelSizes.inspector) : this._panelSizes.navigation));
+        handle.setAttribute("aria-valuemin", String(isNarrow ? 180 : isInspector ? 210 : 150));
+        handle.setAttribute("aria-valuemax", String(isNarrow ? 620 : isInspector ? 480 : 420));
+        handle.setAttribute("aria-orientation", isNarrow ? "horizontal" : "vertical");
+        handle.setAttribute("aria-valuenow", String(isInspector ? (isNarrow ? this._panelSizes.inspectorHeight : this._panelSizes.inspector) : this._panelSizes.navigation));
         const start = event => {
           const isVertical = isInspector && isNarrowViewport();
           const dimension = isVertical ? "y" : "x";
           const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
           handle.setAttribute("aria-orientation", isVertical ? "horizontal" : "vertical");
+          handle.setAttribute("aria-valuemin", String(isVertical ? 180 : isInspector ? 210 : 150));
+          handle.setAttribute("aria-valuemax", String(isVertical ? 620 : isInspector ? 480 : 420));
           if (event.button !== 0) return;
           event.preventDefault();
           const startPoint = dimension === "y" ? event.clientY : event.clientX;
