@@ -919,3 +919,68 @@ html.nexus-design-system .nexus-library-application .nexus-library-tab:focus-wit
   outline: 1px solid var(--nexus-accent, #79b8d8);
   outline-offset: -2px;
 }
+
+/* Compact, unambiguous folder tree controls. The disclosure icon is the only
+   expansion indicator; folder labels never receive decorative arrow glyphs. */
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row {
+  gap: 0 !important;
+  min-height: 23px;
+  padding-left: calc(var(--nexus-library-folder-depth, 0) * 10px) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row > .nexus-library-custom-folder::before,
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row > .nexus-library-custom-folder::after {
+  content: none !important;
+  display: none !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-toggle {
+  flex: 0 0 17px !important;
+  width: 17px !important;
+  min-width: 17px !important;
+  min-height: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 9px !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-toggle i {
+  font-size: 9px !important;
+  line-height: 1;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row > .nexus-library-custom-folder {
+  display: flex !important;
+  align-items: center;
+  gap: 6px !important;
+  min-width: 0;
+  min-height: 23px !important;
+  height: 23px !important;
+  margin: 0 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row > .nexus-library-custom-folder > i {
+  flex: 0 0 12px;
+  width: 12px;
+  font-size: 11px !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row > .nexus-library-custom-folder > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-children {
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-row:focus-within {
+  outline: 1px solid var(--nexus-accent, #79b8d8);
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-panel-resizer {
+  user-select: none;
+  -webkit-user-select: none;
+}
