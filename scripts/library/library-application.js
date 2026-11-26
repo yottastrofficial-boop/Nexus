@@ -583,113 +583,159 @@ export function createLibraryApplicationClass({
           await render();
         } catch (error) { notify("warn", error.message); }
       });
-      root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", async event => {
+      root.querySelector("[data-library-app-folders]")?.addEventListener("contextmenu", event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         const button = target?.closest("[data-library-folder]");
         if (!button) return;
-        event.preventDefault();
         const folderId = button.dataset.libraryFolder;
-        const current = normalizeLibraryPreferences(this._getPreferences());
-        const folder = current.folders.find(item => item.id === folderId);
+        const folder = normalizeLibraryPreferences(this._getPreferences()).folders.find(item => item.id === folderId);
         if (!folder) return;
-        const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
-        if (typeof DialogV2?.input !== "function") return;
-        try {
-          const result = await DialogV2.input({
-            window: { title: "Gerenciar pasta" },
-            content: '<label>Nome da pasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
-            ok: { label: "Renomear" },
-            buttons: [
-              {
-                action: "create-subfolder",
-                label: "Nova subpasta",
-                class: "nexus-library-create-subfolder",
-                callback: () => ({ action: "create-subfolder" })
-              },
-              {
-                action: "delete-folder",
-                label: "Excluir pasta",
-                class: "nexus-library-delete-folder",
-                callback: () => ({ action: "delete-folder" })
-              }
-            ],
-            rejectClose: false
-          });
-          if (result?.action === "create-subfolder") {
-            const child = await DialogV2.input({
-              window: { title: "Nova subpasta" },
-              content: '<label>Nome da subpasta<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
-              ok: { label: "Criar subpasta" },
-              rejectClose: false
+        const pasteInto = async targetFolderId => {
+          const clipboard = this._libraryClipboard;
+          if (!clipboard) return;
+          let preferences = normalizeLibraryPreferences(this._getPreferences());
+          if (clipboard.type === "folder") {
+            if (clipboard.mode === "copy") {
+              preferences = duplicateLibraryFolderTree(preferences, clipboard.folderId, {
+                parentId: targetFolderId,
+                idPrefix: "copy-" + (globalThis.foundry?.utils?.randomID?.(5) ?? "nexus")
+              }).preferences;
+            } else {
+              preferences = moveLibraryFolder(preferences, clipboard.folderId, targetFolderId);
+              this._libraryClipboard = null;
+            }
+          } else if (clipboard.type === "resource") {
+            if (clipboard.mode === "copy") {
+              preferences = createLibraryShortcut(preferences, {
+                name: clipboard.name + " (atalho)",
+                resourceKey: clipboard.resourceKey,
+                reference: clipboard.reference,
+                folderId: targetFolderId
+              }).preferences;
+            } else {
+              const separator = clipboard.resourceKey.indexOf(":");
+              if (separator <= 0) throw new Error("Referência copiada inválida.");
+              preferences = assignLibraryEntryFolder(preferences, clipboard.resourceKey.slice(0, separator), clipboard.resourceKey.slice(separator + 1), targetFolderId);
+              this._libraryClipboard = null;
+            }
+          }
+          await this._savePreferences(preferences);
+          refreshFolders(); refreshShortcuts(); await render();
+        };
+        this._closeLibraryContextMenu?.();
+        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+          { label: "Nova subpasta", action: async () => {
+            const result = await promptLibraryValue("Nova subpasta", [{ name: "name", label: "Nome da pasta", maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            const created = createLibraryFolder(this._getPreferences(), {
+              id: globalThis.foundry?.utils?.randomID?.(10), name, collection: folder.collection, parentId: folderId
             });
-            const childName = String(child?.name ?? "").trim();
-            if (!childName) return;
-            await this._savePreferences(createLibraryFolder(this._getPreferences(), {
-              id: globalThis.foundry?.utils?.randomID?.(10),
-              name: childName,
-              collection: folder.collection,
-              parentId: folderId
-            }).preferences);
+            await this._savePreferences(created.preferences);
             this._collapsedLibraryFolders.delete(folderId);
-          } else if (result?.action === "delete-folder") {
-            const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
-            const accepted = typeof DialogV2?.confirm === "function" && await DialogV2.confirm({
-              window: { title: "Excluir pasta" },
-              content: "<p>Os recursos serão mantidos sem pasta. As subpastas também serão removidas.</p>",
-              yes: { label: "Excluir" },
-              no: { label: "Cancelar" },
-              rejectClose: false
-            });
+            refreshFolders(); await render();
+          }},
+          { label: "Renomear", action: async () => {
+            const result = await promptLibraryValue("Renomear pasta", [{ name: "name", label: "Novo nome", value: folder.name, maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            if (!name) return;
+            await this._savePreferences(renameLibraryFolder(this._getPreferences(), folderId, name));
+            refreshFolders(); await render();
+          }},
+          { label: "Recortar", action: async () => {
+            this._libraryClipboard = { type: "folder", folderId, mode: "move" };
+            notify("info", "Pasta recortada. Use Colar em uma pasta de destino.");
+          }},
+          { label: "Copiar", action: async () => {
+            this._libraryClipboard = { type: "folder", folderId, mode: "copy" };
+            notify("info", "Estrutura da pasta copiada. Os documentos originais não serão duplicados.");
+          }},
+          { label: "Colar dentro", disabled: !this._libraryClipboard, action: () => pasteInto(folderId) },
+          { separator: true },
+          { label: "Mover para raiz", action: async () => {
+            await this._savePreferences(moveLibraryFolder(this._getPreferences(), folderId, ""));
+            refreshFolders(); await render();
+          }},
+          { label: "Excluir pasta", danger: true, action: async () => {
+            const accepted = await confirmLibraryAction("Excluir pasta", "<p>A pasta e suas subpastas serão removidas da organização. Os recursos continuarão na Biblioteca, sem serem apagados.</p>");
             if (!accepted) return;
-            const before = normalizeLibraryPreferences(this._getPreferences());
+            const current = normalizeLibraryPreferences(this._getPreferences());
             const descendants = new Set([folderId]);
             let changed = true;
             while (changed) {
               changed = false;
-              for (const item of before.folders) if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) { descendants.add(item.id); changed = true; }
+              for (const item of current.folders) if (item.parentId && descendants.has(item.parentId) && !descendants.has(item.id)) { descendants.add(item.id); changed = true; }
             }
-            await this._savePreferences(removeLibraryFolder(before, folderId));
+            await this._savePreferences(removeLibraryFolder(current, folderId));
             if (descendants.has(this._state.folder)) this._state.folder = "";
             for (const id of descendants) this._collapsedLibraryFolders.delete(id);
-          } else {
-            const name = String(result?.name ?? "").trim();
-            if (!name) return;
-            await this._savePreferences(renameLibraryFolder(this._getPreferences(), folderId, name));
-          }
-          refreshFolders();
-          await render();
-        } catch (error) {
-          notify("warn", error.message);
-        }
-      });
-      root.querySelector("[data-library-app-shortcuts]")?.addEventListener("click", async event => {
-        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
-        const button = target?.closest("[data-library-shortcut]");
-        if (!button) return;
-        this._state.smartView = "shortcut";
-        this._state.collectionId = button.dataset.libraryShortcut;
-        this._state.folder = "";
-        root.querySelectorAll("[data-library-smart-view]").forEach(item => item.classList.remove("active"));
-        refreshShortcuts();
-        await render();
-      });
-      root.querySelector("[data-library-app-shortcuts]")?.addEventListener("contextmenu", event => {
-        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
-        const button = target?.closest("[data-library-shortcut]");
-        if (!button) return;
-        const shortcutId = button.dataset.libraryShortcut;
-        this._closeLibraryContextMenu?.();
-        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
-          { label: "Excluir atalho", danger: true, action: async () => {
-            await this._savePreferences(removeLibraryShortcut(this._getPreferences(), shortcutId));
-            if (this._state.collectionId === shortcutId && this._state.smartView === "shortcut") {
-              this._state.smartView = "all"; this._state.collectionId = "";
-            }
-            refreshShortcuts(); await render();
-          } }
+            refreshFolders(); await render();
+          }}
         ]);
       });
-            root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
+
+      const resourceContainer = root.querySelector("[data-library-generic-items]");
+      resourceContainer?.addEventListener("contextmenu", event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const card = target?.closest("[data-library-resource-key]");
+        if (!card) {
+          this._closeLibraryContextMenu?.();
+          this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+            { label: "Nova pasta", action: async () => root.querySelector("[data-library-create-folder]")?.click() },
+            { label: "Colar na raiz", disabled: !this._libraryClipboard, action: async () => {
+              const clipboard = this._libraryClipboard;
+              if (!clipboard) return;
+              let preferences = normalizeLibraryPreferences(this._getPreferences());
+              if (clipboard.type === "folder") {
+                preferences = clipboard.mode === "copy"
+                  ? duplicateLibraryFolderTree(preferences, clipboard.folderId, { parentId: "", idPrefix: "copy-" + (globalThis.foundry?.utils?.randomID?.(5) ?? "nexus") }).preferences
+                  : moveLibraryFolder(preferences, clipboard.folderId, "");
+              } else if (clipboard.type === "resource") {
+                if (clipboard.mode === "copy") preferences = createLibraryShortcut(preferences, { name: clipboard.name + " (atalho)", resourceKey: clipboard.resourceKey, reference: clipboard.reference }).preferences;
+                else {
+                  const separator = clipboard.resourceKey.indexOf(":");
+                  if (separator > 0) preferences = assignLibraryEntryFolder(preferences, clipboard.resourceKey.slice(0, separator), clipboard.resourceKey.slice(separator + 1), "");
+                }
+              }
+              await this._savePreferences(preferences);
+              if (clipboard.mode === "move") this._libraryClipboard = null;
+              refreshFolders(); refreshShortcuts(); await render();
+            }}
+          ]);
+          return;
+        }
+        const resourceKey = card.dataset.libraryResourceKey;
+        let reference = {};
+        try { reference = JSON.parse(card.dataset.libraryReference || "{}"); } catch {}
+        const resourceName = card.querySelector(".nexus-library-generic-item strong")?.textContent || "Recurso";
+        this._closeLibraryContextMenu?.();
+        this._closeLibraryContextMenu = showLibraryContextMenu(event, [
+          { label: "Copiar referência", action: async () => {
+            this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "copy" };
+            notify("info", "Referência copiada para a Biblioteca.");
+          }},
+          { label: "Recortar referência", action: async () => {
+            this._libraryClipboard = { type: "resource", resourceKey, reference: getLibraryCatalogPreferenceReference(resourceKey), name: resourceName, mode: "move" };
+            notify("info", "Referência recortada. Use Colar em uma pasta.");
+          }},
+          { label: "Criar atalho", action: async () => {
+            const result = await promptLibraryValue("Criar atalho", [{ name: "name", label: "Nome do atalho", value: resourceName, maxLength: 80 }]);
+            const name = String(result?.name ?? "").trim();
+            const targetReference = getLibraryCatalogPreferenceReference(resourceKey);
+            if (!name || !targetReference) return;
+            await this._savePreferences(createLibraryShortcut(this._getPreferences(), { name, resourceKey, reference: targetReference, folderId: this._state.folder }).preferences);
+            refreshShortcuts(); notify("info", "Atalho criado.");
+          }},
+          { label: "Adicionar aos favoritos", action: async () => {
+            const current = normalizeLibraryPreferences(this._getPreferences());
+            const favorites = current.favorites.includes(resourceKey) ? current.favorites.filter(key => key !== resourceKey) : [resourceKey, ...current.favorites].slice(0, 500);
+            await this._savePreferences({ ...current, favorites });
+            await render();
+          }}
+        ]);
+      });
+
+      root.querySelector("[data-library-app-collections]")?.addEventListener("click", async event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         const button = target?.closest("[data-library-collection]");
         if (!button) return;
