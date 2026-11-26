@@ -53,3 +53,14 @@ assert.ok(libraryApplication.includes('root.querySelector(".nexus-library-action
   "The backup menu must close after an action, with Escape and when focus leaves it.");
 
 console.log("NEXUS universal library UI contract: OK");
+
+assert.match(libraryApplication, /await DialogV2\\.input\\(/,
+  "DialogV2 input helpers must be invoked through their class to preserve the static receiver.");
+assert.match(libraryApplication, /await DialogV2\\.confirm\\(/,
+  "DialogV2 confirmation helpers must preserve their static receiver.");
+assert.doesNotMatch(libraryApplication, /const (?:input|prompt|confirm) = globalThis\\.foundry\\?\\.applications\\?\\.api\\?\\.DialogV2\\?/,
+  "DialogV2 static helpers must not be detached from their class.");
+assert.match(libraryApplication, /thumbnailInput/,
+  "Saved Library resources must expose a custom thumbnail metadata field.");
+assert.match(libraryApplication, /nexus-library-filter-wrap/);
+assert.match(legacyStyles, /nexus-library-search-wrap > \\.nexus-library-search/);
