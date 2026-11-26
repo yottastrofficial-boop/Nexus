@@ -75,7 +75,18 @@
       <button type="button" data-library-smart-view="recent"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Recentes</span></button>
       <div class="nexus-library-custom-folder-heading">Pastas</div>
       <div class="nexus-library-custom-folders" data-library-app-folders></div>
-      <button type="button" data-library-create-folder class="nexus-library-create-folder"><i class="fa-solid fa-folder-plus" aria-hidden="true"></i><span>Nova pasta</span></button>
+      <div class="nexus-library-new-menu-wrap">
+        <button type="button" class="nexus-library-create-folder nexus-library-create-new-toggle" data-library-create-new-toggle aria-expanded="false"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Novo</span></button>
+        <div class="nexus-library-new-menu" data-library-create-new-menu hidden role="menu" aria-label="Criar novo recurso">
+          <button type="button" role="menuitem" data-library-create-folder data-library-new-action="folder"><i class="fa-solid fa-folder-plus" aria-hidden="true"></i><span>Pasta</span></button>
+          <button type="button" role="menuitem" data-library-new-action="asset"><i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i><span>Importar asset</span></button>
+          <button type="button" role="menuitem" data-library-new-action="shortcut"><i class="fa-solid fa-link" aria-hidden="true"></i><span>Atalho</span></button>
+          <button type="button" role="menuitem" data-library-new-action="layout"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Layout</span></button>
+          <button type="button" role="menuitem" data-library-new-action="component"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i><span>Componente</span></button>
+        </div>
+      </div>
+      <div class="nexus-library-custom-folder-heading">Atalhos</div>
+      <div class="nexus-library-custom-folders" data-library-app-shortcuts></div>
       <div class="nexus-library-custom-folder-heading">Coleções</div>
       <div class="nexus-library-custom-folders" data-library-app-collections></div>
       <button type="button" data-library-create-collection class="nexus-library-create-folder"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Nova coleção</span></button>
