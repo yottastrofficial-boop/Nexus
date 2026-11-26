@@ -1,11 +1,12 @@
-## 1.0.0.120 — estado centralizado e isolamento visual
+## 1.0.0.121 — Biblioteca NEXUS e refinamento da ficha
 
-- Adiciona fonte canônica para seleção, grupo, alvo do Inspector e painel ativo, mantendo accessors de compatibilidade.
-- Reconcilia IDs selecionados com o layout ativo e invalida alvos removidos.
-- Isola janelas nativas de Configurações dos resets genéricos de aplicações NEXUS.
-- Limita estilos globais de tipografia e cor às superfícies Foundry explicitamente suportadas.
-- Mantém ficha inicial em 800 × 800 e Canvas do modo padrão em uma única coluna.
-- Acrescenta testes unitários e contratos de regressão. Validação manual no Foundry permanece pendente.
+- Corrige a chamada dos métodos estáticos de DialogV2 na Biblioteca e no adaptador de temas, preservando o contexto da classe; isso corrige o caminho que podia causar o erro de leitura de `prompt` ao gerenciar pastas e coleções.
+- Reorganiza os filtros como popover compacto sobre a área de trabalho, sem reservar uma linha alta no layout.
+- Corrige a pesquisa para ter uma única superfície visual: o contêiner mantém borda/fundo e o input interno fica transparente e sem borda própria.
+- Padroniza a área de miniatura dos cards e apresenta paletas de temas em prévias compactas.
+- Permite definir/remover miniaturas personalizadas por URL HTTP(S) ou caminho relativo seguro, com validação no Core.
+- Aumenta a altura inicial da ficha de 800 para 836 px, mantendo largura 800 px e redimensionamento.
+- Amplia contratos automatizados para os fluxos alterados. Validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 
 ## 1.0.0.119 — sidebar nativa e workspace sem colunas fantasmas
 
