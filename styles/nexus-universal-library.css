@@ -897,3 +897,25 @@ html.nexus-design-system .nexus-library-application .nexus-library-panel-resizer
     max-height: 340px !important;
   }
 }
+
+html.nexus-design-system .nexus-library-application .nexus-library-tab-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-tab-label:hover {
+  background: transparent;
+  color: var(--nexus-panel-text, #edf0f6);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-tab:focus-within {
+  outline: 1px solid var(--nexus-accent, #79b8d8);
+  outline-offset: -2px;
+}
