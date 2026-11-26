@@ -1204,9 +1204,9 @@ html.nexus-design-system #chat-log .message-header { background: var(--nexus-ui-
 html.nexus-design-system #chat-log .message-content { background: var(--nexus-ui-surface-raised) !important; }
 
 /* The selected profile supplies the default text color and font throughout Foundry. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, #players, #chat) { color: var(--nexus-ui-text); }
+html.nexus-design-system:not([data-nexus-theme="foundry"]) body { color: var(--nexus-ui-text); }
 /* Use the selected profile font throughout Foundry, while preserving icon and code fonts. */
-html.nexus-design-system:not([data-nexus-theme="foundry"]) :is(#sidebar, #hotbar, #navigation, #controls, #players, #chat) :not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
+html.nexus-design-system:not([data-nexus-theme="foundry"]) body :not(#sidebar):not(#sidebar *):not(i):not(svg):not(code):not(pre):not([class*="fa-"]):not([class~="fa"]):not([class~="fas"]):not([class~="far"]):not([class~="fab"]):not([class~="fal"]):not([class~="fad"]):not([class*="icon"]):not([class*="material-symbols"]):not([class*="lucide"]) {
   font-family: var(--nexus-font-family, system-ui, sans-serif) !important;
 }
 html.nexus-design-system .nexus-design-sample-type :is(select, textarea) {
