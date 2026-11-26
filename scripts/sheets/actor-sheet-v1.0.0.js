@@ -2183,7 +2183,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
     layouts[active].name = clean;
     if ((layouts[active].tabMode ?? "text") === "text") layouts[active].tabValue = clean;
     await this._writeLayouts(layouts, active); this._currentLayout = layouts[active];
-    const tab = this.element?.querySelector(`.nexus-sidebar-right .nexus-layout-tab[data-layout-id="${active}"]`);
+    const tab = document.querySelector(`[data-nexus-floating-for="${this.id}"] .nexus-floating-tabs .nexus-layout-tab[data-layout-id="${CSS.escape(active)}"]`) ?? this.element?.querySelector(`.nexus-layout-tabs .nexus-layout-tab[data-layout-id="${CSS.escape(active)}"]`);
     if (tab) {
       const label = tab.querySelector(".nexus-layout-tab-label");
       if (label) label.textContent = clean;
@@ -3555,6 +3555,7 @@ if (!hasPath) propertyValueInput.value = "";
     const leftRail = root.querySelector(".nexus-appearance-rail");
     const sourceDrawer = root.querySelector(".nexus-appearance-drawer");
     const tabs = root.querySelector(".nexus-layout-tabs");
+    const libraryButton = root.querySelector(".nexus-open-library");
     const panelKeys = ["style", "component", "layers", "library", "aliases", "settings", "behavior"];
     const panelTitles = { style: "Aparência global", component: "Propriedades", layers: "Organização", library: "Biblioteca de elementos", aliases: "Estrutura de dados", settings: "Configurações do editor", behavior: "Comportamento" };
     const panelSizes = { style: [400, 600], component: [400, 600], layers: [400, 600], library: [900, 600], aliases: [400, 600], settings: [400, 600], behavior: [900, 600] };
@@ -3578,8 +3579,9 @@ if (!hasPath) propertyValueInput.value = "";
         </div>
       </div>
       <div class="nexus-floating-right" aria-label="Navegação de páginas">
+        <div class="nexus-floating-library"></div>
         <div class="nexus-floating-tabs"></div>
-        <button type="button" class="nexus-floating-add" data-floating-new-layout title="Adicionar página">＋</button>
+        <button type="button" class="nexus-floating-add" data-floating-new-layout title="Adicionar página" aria-label="Adicionar página">＋</button>
       </div>`;
     document.body.appendChild(portal);
 
@@ -3603,8 +3605,11 @@ if (!hasPath) propertyValueInput.value = "";
     }));
     sourceDrawer?.remove();
     leftRail?.remove();
-    if (tabs) portal.querySelector(".nexus-floating-tabs").append(tabs);
+    const floatingLibrary = portal.querySelector(".nexus-floating-library");
     const floatingTabs = portal.querySelector(".nexus-floating-tabs");
+    if (libraryButton) floatingLibrary?.append(libraryButton);
+    if (tabs) floatingTabs?.append(tabs);
+    root.querySelector(".nexus-layout-tabs-source")?.remove();
     let pendingLayoutClick = null;
     floatingTabs?.addEventListener("click", async event => {
       const tab = event.target.closest(".nexus-layout-tab");
@@ -3674,7 +3679,7 @@ if (!hasPath) propertyValueInput.value = "";
     const positionRails = () => {
       if (!app.isConnected || !portal.isConnected) return;
       const r = app.getBoundingClientRect();
-      const leftW = 42, rightW = 58;
+      const leftW = 42, rightW = 34;
       this._appearanceRailOffsets ??= { left: { x: -51, y: 72 }, right: { x: 9, y: 72 } };
       const lo = this._appearanceRailOffsets.left, ro = this._appearanceRailOffsets.right;
       const lx = clamp(r.left + lo.x, 4, Math.max(4, window.innerWidth - leftW - 4));

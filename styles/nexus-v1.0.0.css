@@ -10028,3 +10028,62 @@ html.nexus-design-system #sidebar .sidebar-tab.nexus-themed-directory .directory
   .nexus-design-studio-preview { grid-column: 1; }
   .nexus-design-settings-grid { grid-template-columns: minmax(0, 1fr) !important; }
 }
+
+
+/* NEXUS 1.0.0.116 — controles de página realmente flutuantes e chrome sem molduras redundantes. */
+.nexus-floating-right {
+  width:34px !important; max-width:34px !important; gap:9px !important;
+  padding:0 !important; border:0 !important; border-radius:0 !important;
+  background:transparent !important; box-shadow:none !important; overflow:visible !important;
+}
+.nexus-floating-library,
+.nexus-floating-tabs,
+.nexus-floating-tabs .nexus-layout-tabs {
+  display:flex !important; flex-direction:column !important; align-items:center !important;
+  gap:8px !important; width:34px !important; padding:0 !important;
+  border:0 !important; background:transparent !important; overflow:visible !important;
+}
+.nexus-floating-tabs .nexus-layout-tab-item { display:contents !important; }
+.nexus-floating-right .nexus-open-library,
+.nexus-floating-tabs .nexus-layout-tab,
+.nexus-floating-add {
+  display:grid !important; place-items:center !important; flex:0 0 34px !important;
+  width:34px !important; min-width:34px !important; height:34px !important; min-height:34px !important;
+  margin:0 !important; padding:0 !important; border:1px solid var(--nexus-panel-border,#43546a) !important;
+  border-radius:7px !important; color:var(--nexus-panel-text,#e7edf5) !important;
+  background:var(--nexus-panel-surface,#263344) !important; box-shadow:0 3px 10px #0005 !important;
+  cursor:pointer !important; line-height:1 !important; overflow:hidden !important;
+}
+.nexus-floating-right .nexus-open-library:hover,
+.nexus-floating-tabs .nexus-layout-tab:hover,
+.nexus-floating-add:hover,
+.nexus-floating-right .nexus-open-library:focus-visible,
+.nexus-floating-tabs .nexus-layout-tab:focus-visible,
+.nexus-floating-add:focus-visible {
+  border-color:var(--nexus-highlight-color,#78b7e8) !important;
+  background:var(--nexus-panel-hover,#34485f) !important;
+}
+.nexus-floating-tabs .nexus-layout-tab.active {
+  border-color:var(--nexus-highlight-color,#78b7e8) !important;
+  background:var(--nexus-button-color,#315b7d) !important;
+  box-shadow:inset 0 0 0 1px var(--nexus-highlight-color,#78b7e8),0 3px 10px #0005 !important;
+}
+.nexus-floating-tabs .nexus-layout-tab > i { display:block !important; width:100%; margin:0 !important; font-size:17px !important; line-height:1 !important; text-align:center !important; }
+.nexus-floating-tabs .nexus-layout-tab > img { display:block; width:25px; height:25px; object-fit:contain; margin:0 auto; }
+.nexus-floating-tabs .nexus-layout-tab-label { display:block !important; max-width:100%; padding:0 2px !important; font-size:10px !important; line-height:1 !important; text-align:center !important; overflow-wrap:anywhere; }
+.nexus-floating-add { font-size:20px !important; font-weight:400 !important; }
+.nexus-floating-right [hidden] { display:none !important; }
+
+/* Remove only the redundant outer chrome; preserve all ten macro slots and player entries. */
+html.nexus-design-system #hotbar,
+html.nexus-design-system #hotbar #action-bar,
+html.nexus-design-system #hotbar .bar-controls,
+html.nexus-design-system #players,
+html.nexus-design-system #players .players-list {
+  background:transparent !important; border-color:transparent !important;
+  box-shadow:none !important; border-radius:0 !important;
+}
+html.nexus-design-system #hotbar #action-bar { padding:0 !important; }
+html.nexus-design-system #hotbar .macro { border-color:var(--nexus-panel-border,#40546b); }
+html.nexus-design-system #hotbar .macro:hover { background:var(--nexus-panel-hover,#30445a) !important; }
+html.nexus-design-system #players .player { border-color:var(--nexus-panel-border,#40546b); }

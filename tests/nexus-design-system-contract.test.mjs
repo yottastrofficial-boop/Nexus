@@ -67,8 +67,8 @@ assert.match(designSystem, /#navigation \.scene:is\(\.active, \.view\)/,
   "Scene navigation must distinguish the viewed and active scene states.");
 assert.match(designSystem, /#navigation #scene-list[\s\S]*?overflow-x:\s*auto/,
   "Long scene lists must remain horizontally navigable instead of forcing clipped controls.");
-assert.match(designSystem, /\.nexus-sheet \.nexus-sidebar-right[\s\S]*?overflow:\s*auto/,
-  "Layout navigation must remain scrollable inside the character sheet.");
+assert.match(legacyStyles, /\.nexus-floating-tabs\s*\{[\s\S]*?overflow-y:auto !important; overflow-x:hidden !important;/,
+  "Floating layout buttons must remain vertically scrollable without an attached sidebar panel.");
 assert.match(legacyStyles, /\.nexus-panel-window/,
   "Appearance tools must retain independent native panel windows.");
 assert.match(legacyStyles, /\.nexus-design-studio-toolbar[\s\S]*?min-height:\s*58px/,
@@ -93,8 +93,8 @@ assert.ok(designSystem.includes("html.nexus-design-system .nexus-sheet .nexus-wo
   "NEXUS sheet layout must remain styled in the Foundry VTT preset.");
 assert.ok(!designSystem.includes('html.nexus-design-system:not([data-nexus-theme="foundry"]) .nexus-sheet'),
   "The native Foundry exception must not disable NEXUS-owned sheet styling.");
-assert.match(designSystem, /body[\s\S]*:not\(#sidebar\):not\(#sidebar \*\)[\s\S]*:not\(i\):not\(svg\):not\(code\):not\(pre\)[\s\S]*:not\(\[class\*="fa-"\]\)/,
-  "Profile typography must exclude native icon elements and Font Awesome classes.");
+assert.ok(designSystem.includes('body :not(#sidebar):not(#sidebar *):not(i):not(svg):not(code):not(pre):not([class*="fa-"])'),
+  "Profile typography must apply all icon exclusions to the same element, preserving native Foundry/Font Awesome families.");
 assert.match(designSystem, /@media \(prefers-reduced-motion: reduce\)/,
   "Native control transitions must respect the operating system reduced-motion preference.");
 

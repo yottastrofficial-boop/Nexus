@@ -26,8 +26,13 @@ test("character-sheet tools open detached ApplicationV2 panels from floating rai
     assert.match(template, new RegExp(`data-tool-panel="${panel}"`));
   }
   assert.match(template, /class="nexus-sidebar nexus-sidebar-left"/);
-  assert.match(template, /class="nexus-sidebar nexus-sidebar-right"/);
+  assert.doesNotMatch(template, /class="nexus-sidebar nexus-sidebar-right"/,
+    "Layout buttons must no longer live inside a sheet sidebar panel.");
+  assert.match(template, /class="nexus-layout-tabs-source" hidden/);
   assert.match(template, /data-open-nexus-library/);
+  assert.match(sheet, /floatingLibrary\?\.append\(libraryButton\)/);
+  assert.match(sheet, /floatingTabs\?\.append\(tabs\)/);
+  assert.match(legacyStyles, /\.nexus-floating-right\s*\{[\s\S]*?background:transparent !important; box-shadow:none !important;/);
   assert.doesNotMatch(designSystem, /nexus-floating/);
   assert.match(legacyStyles, /\.nexus-floating-left/);
   assert.match(legacyStyles, /\.nexus-panel-window/);

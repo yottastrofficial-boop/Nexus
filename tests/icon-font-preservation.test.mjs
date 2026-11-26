@@ -22,4 +22,10 @@ assert.doesNotMatch(legacy,
   /html\.nexus-design-system :is\([^{}]*\) :is\(button, input, select, textarea\)\s*\{[^}]*font-family\s*:\s*inherit/,
   "A broad ApplicationV2 font rule must not reach Font Awesome controls.");
 
+assert.ok(design.includes('body :not(#sidebar):not(#sidebar *):not(i):not(svg):not(code):not(pre):not([class*="fa-"])'),
+  "All icon exclusions must be compound conditions on the same target element; descendant combinators would leak the custom font onto icons.");
+assert.doesNotMatch(design,
+  /body\s+:not\(#sidebar\):not\(#sidebar \*\)\s+:not\(i\):not\(svg\)/,
+  "Profile font exclusions must not be split into descendant selectors.");
+
 console.log("NEXUS Font Awesome preservation audit: OK");

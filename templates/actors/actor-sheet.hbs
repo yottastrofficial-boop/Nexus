@@ -419,7 +419,7 @@ remove legacy typography selects                  <label class="nexus-inspector-
       </div>
     </main>
 
-    <aside class="nexus-sidebar nexus-sidebar-right" aria-label="Navegação de layouts">
+    <div class="nexus-layout-tabs-source" hidden aria-hidden="true">
       <button type="button" class="nexus-open-library" data-open-nexus-library title="Abrir Biblioteca Universal" aria-label="Abrir Biblioteca Universal"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
       <div class="nexus-layout-tabs">
         {{#each nexus.layouts as |layout|}}
@@ -433,8 +433,6 @@ remove legacy typography selects                  <label class="nexus-inspector-
           </div>
         {{/each}}
       </div>
-      {{#if (eq nexus.mode "appearance")}}<button type="button" class="nexus-add-layout-tab" data-action="new-layout">＋</button>{{/if}}
-
-    </aside>
+    </div>
   </section>
 </form>
