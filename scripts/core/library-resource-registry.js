@@ -658,7 +658,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
           return null;
         }
       }));
-      const items = records.filter(record => record && (requestedType === "all" || record.type === requestedType))
+      const items = records.filter(record => record && !(record.documentName === "Item" && String(record.documentType ?? "").toLocaleLowerCase() === "weapon") && (requestedType === "all" || record.type === requestedType))
         .map(toResource).filter(resource => (!requestedTags.length || requestedTags.every(tag => resource.tags.some(value => value.toLocaleLowerCase() === tag))) && (origin === "all" || resource.origin === origin));
       return { items, total: items.length, hasMore: false, nextCursor: null, errors: [] };
     }
