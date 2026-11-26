@@ -1978,10 +1978,12 @@ export class NexusActorSheet extends NexusActorSheetBase {
     const baseW = clamp(Number(options.template?.w) || (verticalResource ? 100 : Number(d.w)) || 160, 80, Math.min(600, layout.width));
     const baseH = clamp(Number(options.template?.h) || (verticalResource ? 190 : Number(d.h)) || 90, 48, Math.min(500, layout.height));
     const requestedPosition = options.position && typeof options.position === "object" ? options.position : null;
+    const snapStep = layout.snapEnabled ? Math.max(1, Number(layout.gridSize) || 10) : 1;
+    const snapCoordinate = value => Math.round((Number.isFinite(Number(value)) ? Number(value) : 0) / snapStep) * snapStep;
     const pos = requestedPosition
       ? {
-          x: clamp(Math.round(Number(requestedPosition.x) || 0), 0, Math.max(0, layout.width - baseW)),
-          y: clamp(Math.round(Number(requestedPosition.y) || 0), 0, Math.max(0, layout.height - baseH))
+          x: clamp(snapCoordinate(requestedPosition.x), 0, Math.max(0, layout.width - baseW)),
+          y: clamp(snapCoordinate(requestedPosition.y), 0, Math.max(0, layout.height - baseH))
         }
       : this._findFreePosition(layout, baseW, baseH);
     const id = `cmp-${foundry.utils.randomID(8)}`;
