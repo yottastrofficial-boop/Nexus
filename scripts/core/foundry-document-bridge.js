@@ -136,7 +136,6 @@ export function createFoundryDocumentBridge({
     const requestedTypes = type === "all" ? Object.keys(DOCUMENT_TYPES) : [String(type)];
     const unknown = requestedTypes.filter(key => !DOCUMENT_TYPES[key]);
     if (unknown.length) throw new Error("Tipo de documento Foundry desconhecido: " + unknown.join(", "));
-    const search = cleanQuery(query);
     const requestedTags = Array.isArray(tags) ? tags.map(value => String(value).toLocaleLowerCase()).slice(0, 32) : [];
     const start = Math.max(0, Math.floor(Number(offset) || 0));
     const pageSize = safeLimit(limit);
