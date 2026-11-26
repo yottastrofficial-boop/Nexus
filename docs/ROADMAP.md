@@ -1,3 +1,12 @@
+## 1.0.0.123 — estrutura e organização da Biblioteca
+
+- Estrutura inicial por domínios, aplicada uma única vez e sem sobrescrever pastas pessoais.
+- Tags de atores em vez de pastas fixas para Player/NPC/criatura.
+- Árvore expandível/recolhível, menus contextuais, operações de pasta e clipboard de referências.
+- Ação universal Novo para pasta, asset, atalho, layout e componente.
+- Previews quadrados e seleção somente por borda.
+- Próxima etapa: validar os fluxos no Foundry VTT 14 build 360, especialmente upload de mídia, importação de UUID e drag-and-drop para diretórios/Canvas; depois refinar categorias e mapeamentos sem alterar documentos nativos automaticamente.
+
 ## 1.0.0.122 — pesquisa e transferência da Biblioteca
 
 - Implementar consulta estruturada e indexação ampliada de metadados de compêndios.
