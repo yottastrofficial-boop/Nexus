@@ -133,7 +133,7 @@ console.log("NEXUS browser-style Library shell contract: OK");
 assert.match(libraryApplication, /aria-valuemin/);
 assert.match(libraryApplication, /aria-valuemax/);
 assert.match(libraryApplication, /setAttribute\("role", "separator"\)/,
-  "Resizable panes must expose an accessible slider control.");
+  "Resizable panes must expose an accessible separator control.");
 assert.match(libraryApplication, /event.key === "Home"/,
   "Resizable panes must support keyboard range boundaries.");
 assert.match(libraryApplication, /setAttribute\("aria-controls", childrenId\)/,
