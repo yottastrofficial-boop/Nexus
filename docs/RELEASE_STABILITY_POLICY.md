@@ -1,3 +1,7 @@
+## Candidata 1.0.0.124 — revisão arquitetural (2026-11-26)
+
+A base publicada 1.0.0.123 é a referência desta etapa. A candidata 1.0.0.124 introduz o registro de serviços compartilhados, contratos de eventos da Lógica desacoplados e guardrails de integridade do grafo de módulos. CI e pacote devem passar antes da integração; a validação funcional/visual no Foundry VTT 14 build 360 permanece pendente. A modernização do bootstrap, ficha, listeners, Biblioteca, CSS e templates continuará em etapas posteriores; esta candidata não deve ser descrita como refatoração integral concluída.
+
 ## Revisão atual 1.0.0.123 — Biblioteca hierárquica
 
 A PR #107 prepara a 1.0.0.123 com a nova taxonomia da Biblioteca, pastas hierárquicas, menus contextuais, criação de assets/atalhos/layouts/componentes e previews sem painel interno. A publicação estável depende da validação automatizada e da integração com o marcador [release]. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente; não declarar novo checkpoint funcional antes do retorno do usuário.
