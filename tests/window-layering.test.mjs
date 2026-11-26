@@ -13,8 +13,12 @@ assert.match(sheet, /_nexusFloatingCleanup/);
 assert.match(listeners, /sheet\._mountFloatingUI\(html\)/);
 assert.match(template, /class="nexus-sidebar nexus-sidebar-left"/,
   "The source panel container must remain available to be portaled into floating windows.");
-assert.match(template, /class="nexus-sidebar nexus-sidebar-right"/,
-  "The source layout tabs must remain available to be portaled into the floating navigation rail.");
+assert.doesNotMatch(template, /class="nexus-sidebar nexus-sidebar-right"/,
+  "Layout navigation must not remain inside a sidebar panel.");
+assert.match(template, /class="nexus-layout-tabs-source" hidden/,
+  "The source layout tabs remain available for the floating portal without rendering as a panel.");
+assert.match(template, /class="nexus-layout-tabs"/,
+  "The layout navigation content must remain available to the floating portal.");
 assert.match(styles, /\.nexus-sheet \.nexus-workspace[\s\S]*?display:\s*grid/);
 assert.match(legacyStyles, /\.nexus-floating-left/);
 assert.match(legacyStyles, /\.nexus-workspace\.nexus-workspace-clean[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/);
