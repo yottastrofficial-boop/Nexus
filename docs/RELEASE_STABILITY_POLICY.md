@@ -76,3 +76,8 @@ A publicação de uma release estável não equivale a checkpoint funcional. A e
 ## Próximo checkpoint
 
 A próxima versão funcionalmente estável deve passar por uma rodada de validação documentada no Foundry VTT 14 build 360. O relatório deve registrar: ambiente, versão instalada, Actors novos e antigos, fluxos testados, resultado, erros de console e evidências de persistência. Até essa validação, manter 1.0.0.70 como último checkpoint funcional confirmado.
+
+
+## Atualização de código 1.0.0.120
+
+O pacote candidato adiciona estado canônico para seleção e Inspector e isola as Configurações nativas dos estilos genéricos. Essas alterações passaram por CI automatizado, mas não alteram o último checkpoint funcional confirmado: 1.0.0.70, até avaliação manual no Foundry VTT 14.
