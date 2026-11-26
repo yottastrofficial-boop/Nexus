@@ -3,6 +3,7 @@ import { createLogicAssetEditor } from "./logic-editors.js";
 import { createLibraryThemeApplicationAdapter } from "./theme-inspector.js";
 import { createLibraryFolder, normalizeLibraryPreferences, ensureLibraryDefaultFolders, renameLibraryFolder, removeLibraryFolder, moveLibraryFolder, duplicateLibraryFolderTree, assignLibraryEntryFolder, createLibraryCollection, renameLibraryCollection, removeLibraryCollection, createLibraryShortcut, removeLibraryShortcut } from "../core/library-preferences.js";
 import { updateNexusLibraryCollection } from "../core/library-store.js";
+import { createLibraryTabManager } from "./library-tab-manager.js";
 
 /**
  * Standalone ApplicationV2 shell for the same universal Library services used
@@ -126,6 +127,16 @@ export function createLibraryApplicationClass({
         compendiumIds: [],
         viewMode: "grid",
         cardSize: "medium"
+      };
+      this._tabManager = createLibraryTabManager(this._state, {
+        createId: () => globalThis.foundry?.utils?.randomID?.(8) ?? "library-tab-" + Date.now()
+      });
+      this._state = this._tabManager.getActiveState();
+      this._panelSizes = {
+        navigation: 224,
+        inspector: 292,
+        inspectorHeight: 300,
+        ...(globalThis.game?.user?.getFlag?.("nexus", "libraryWindowPreferences") ?? {})
       };
       this._explorer = null;
       this._context = {};
@@ -316,7 +327,256 @@ export function createLibraryApplicationClass({
       };
       refreshShortcuts();
 
-      const render = () => this._explorer?.render({ ...this._state });
+      const appRoot = root.closest(".nexus-library-application") ?? root;
+      const tabStrip = root.querySelector("[data-library-tabs]");
+      const breadcrumbs = root.querySelector("[data-library-breadcrumbs]");
+      const navigationSearch = root.querySelector("[data-library-navigation-search]");
+      const searchWrap = root.querySelector(".nexus-library-search-wrap");
+      if (navigationSearch && searchWrap && !navigationSearch.contains(searchWrap)) navigationSearch.append(searchWrap);
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const applyPanelSizes = () => {
+        appRoot.style.setProperty("--nexus-library-navigation-width", clamp(Number(this._panelSizes.navigation) || 224, 150, 420) + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-width", clamp(Number(this._panelSizes.inspector) || 292, 210, 480) + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-height", clamp(Number(this._panelSizes.inspectorHeight) || 300, 180, 620) + "px");
+      };
+      applyPanelSizes();
+      const savePanelSizes = async () => {
+        try { await globalThis.game?.user?.setFlag?.("nexus", "libraryWindowPreferences", this._panelSizes); }
+        catch (error) { notify("warn", "Não foi possível salvar o tamanho dos painéis: " + error.message); }
+      };
+      const bindPanelResizer = (handle, type) => {
+        if (!handle || handle.dataset.bound === "true") return;
+        handle.dataset.bound = "true";
+        const isInspector = type === "inspector";
+        const isVertical = isInspector && globalThis.matchMedia?.("(max-width: 720px)")?.matches;
+        const dimension = isVertical ? "y" : "x";
+        const sizeKey = isVertical ? "inspectorHeight" : isInspector ? "inspector" : "navigation";
+        const start = event => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          const startPoint = dimension === "y" ? event.clientY : event.clientX;
+          const startSize = Number(this._panelSizes[sizeKey]) || (sizeKey === "navigation" ? 224 : sizeKey === "inspector" ? 292 : 300);
+          handle.classList.add("is-resizing");
+          handle.setPointerCapture?.(event.pointerId);
+          const move = next => {
+            const point = dimension === "y" ? next.clientY : next.clientX;
+            const delta = point - startPoint;
+            const nextSize = isInspector ? startSize - delta : startSize + delta;
+            this._panelSizes[sizeKey] = clamp(nextSize, sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180, sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620);
+            applyPanelSizes();
+          };
+          const finish = async next => {
+            move(next);
+            handle.classList.remove("is-resizing");
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+            await savePanelSizes();
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish, { once: true });
+          handle.addEventListener("pointercancel", finish, { once: true });
+        };
+        handle.addEventListener("pointerdown", start);
+        handle.addEventListener("keydown", async event => {
+          const step = event.shiftKey ? 32 : 12;
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+          event.preventDefault();
+          const increase = isVertical ? event.key === "ArrowUp" : isInspector ? event.key === "ArrowLeft" : event.key === "ArrowRight";
+          if (!increase && !(isVertical ? event.key === "ArrowDown" : isInspector ? event.key === "ArrowRight" : event.key === "ArrowLeft")) return;
+          const delta = increase ? step : -step;
+          this._panelSizes[sizeKey] = clamp((Number(this._panelSizes[sizeKey]) || 292) + delta, sizeKey === "navigation" ? 150 : sizeKey === "inspector" ? 210 : 180, sizeKey === "navigation" ? 420 : sizeKey === "inspector" ? 480 : 620);
+          applyPanelSizes();
+          await savePanelSizes();
+        });
+      };
+      bindPanelResizer(root.querySelector("[data-library-resize-sidebar]"), "navigation");
+      bindPanelResizer(root.querySelector("[data-library-resize-inspector]"), "inspector");
+
+      const currentLocation = () => ({
+        smartView: this._state.smartView,
+        folder: this._state.folder,
+        collectionId: this._state.collectionId
+      });
+      const getTabTitle = state => {
+        const prefs = normalizeLibraryPreferences(this._getPreferences());
+        if (state.folder) return prefs.folders.find(folder => folder.id === state.folder)?.name ?? "Pasta";
+        if (state.smartView === "favorites") return "Favoritos";
+        if (state.smartView === "recent") return "Recentes";
+        if (state.smartView === "collection") return prefs.collections.find(item => item.id === state.collectionId)?.name ?? "Coleção";
+        if (state.smartView === "shortcut") return prefs.shortcuts.find(item => item.id === state.collectionId)?.name ?? "Atalho";
+        return "Biblioteca";
+      };
+      const updateTabTitle = () => this._tabManager.renameActive(getTabTitle(this._state));
+      const renderBreadcrumbs = () => {
+        if (!breadcrumbs) return;
+        breadcrumbs.replaceChildren();
+        const addCrumb = (label, location, isLast = false) => {
+          if (breadcrumbs.childElementCount) {
+            const separator = document.createElement("span");
+            separator.className = "nexus-library-breadcrumb-separator";
+            separator.textContent = "›";
+            separator.setAttribute("aria-hidden", "true");
+            breadcrumbs.append(separator);
+          }
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "nexus-library-breadcrumb";
+          button.textContent = label;
+          button.title = label;
+          button.disabled = isLast;
+          button.addEventListener("click", async () => {
+            this._state.smartView = location.smartView;
+            this._state.folder = location.folder;
+            this._state.collectionId = location.collectionId;
+            refreshFolders(); refreshCollections(); refreshShortcuts();
+            await render();
+          });
+          breadcrumbs.append(button);
+        };
+        const rootLocation = { smartView: "all", folder: "", collectionId: "" };
+        addCrumb("Biblioteca", rootLocation, !this._state.folder && this._state.smartView === "all");
+        if (this._state.smartView !== "all") {
+          addCrumb(getTabTitle({ ...this._state, folder: "" }), { smartView: this._state.smartView, folder: "", collectionId: this._state.collectionId }, !this._state.folder);
+        }
+        const prefs = normalizeLibraryPreferences(this._getPreferences());
+        const chain = [];
+        let folder = prefs.folders.find(item => item.id === this._state.folder);
+        const seen = new Set();
+        while (folder && !seen.has(folder.id)) {
+          seen.add(folder.id);
+          chain.unshift(folder);
+          folder = folder.parentId ? prefs.folders.find(item => item.id === folder.parentId) : null;
+        }
+        chain.forEach((item, index) => addCrumb(item.name, { smartView: "all", folder: item.id, collectionId: "" }, index === chain.length - 1));
+      };
+      const renderTabs = () => {
+        if (!tabStrip) return;
+        tabStrip.replaceChildren();
+        for (const tab of this._tabManager.getTabs()) {
+          const item = document.createElement("div");
+          item.className = "nexus-library-tab";
+          item.setAttribute("role", "presentation");
+          const label = document.createElement("button");
+          label.type = "button";
+          label.className = "nexus-library-tab-label";
+          label.setAttribute("role", "tab");
+          label.setAttribute("aria-selected", String(tab.active));
+          label.tabIndex = tab.active ? 0 : -1;
+          label.title = tab.title;
+          label.textContent = tab.title;
+          label.addEventListener("click", async () => {
+            this._tabManager.setActiveState(this._state);
+            const next = this._tabManager.activate(tab.id);
+            if (!next) return;
+            this._state = next.state;
+            syncControlsFromState();
+            refreshFolders(); refreshCollections(); refreshShortcuts();
+            await render();
+          });
+          const close = document.createElement("button");
+          close.type = "button";
+          close.className = "nexus-library-tab-close";
+          close.setAttribute("aria-label", "Fechar aba " + tab.title);
+          close.title = "Fechar aba";
+          close.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+          close.addEventListener("click", async event => {
+            event.stopPropagation();
+            this._tabManager.setActiveState(this._state);
+            const next = this._tabManager.close(tab.id);
+            this._state = next.state;
+            syncControlsFromState();
+            refreshFolders(); refreshCollections(); refreshShortcuts();
+            await render();
+          });
+          item.append(label, close);
+          tabStrip.append(item);
+        }
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "nexus-library-tab-add";
+        add.setAttribute("aria-label", "Abrir nova aba");
+        add.title = "Nova aba";
+        add.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i>';
+        add.addEventListener("click", async () => {
+          this._tabManager.setActiveState(this._state);
+          const next = this._tabManager.create(this._state, getTabTitle(this._state));
+          this._state = next.state;
+          syncControlsFromState();
+          refreshFolders(); refreshCollections(); refreshShortcuts();
+          await render();
+        });
+        tabStrip.append(add);
+      };
+      const syncControlsFromState = () => {
+        const values = [
+          ["[data-library-search]", this._state.query],
+          ["[data-library-tag]", this._state.tag],
+          ["[data-library-origin]", this._state.origin],
+          ["[data-library-kind]", this._state.kind],
+          ["[data-library-type]", this._state.type],
+          ["[data-library-card-size]", this._state.cardSize]
+        ];
+        for (const [selector, value] of values) {
+          const control = root.querySelector(selector);
+          if (control) control.value = value ?? "";
+        }
+        const searchClear = root.querySelector("[data-library-clear-search]");
+        if (searchClear) searchClear.hidden = !String(this._state.query ?? "").trim();
+        const compendiums = root.querySelector("[data-library-compendiums]");
+        if (compendiums) [...compendiums.options].forEach(option => { option.selected = this._state.compendiumIds.includes(option.value); });
+        root.querySelectorAll("[data-library-collection-view-mode]").forEach(button => {
+          const active = button.dataset.libraryCollectionViewMode === this._state.viewMode;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        root.querySelectorAll("[data-library-smart-view]").forEach(button => button.classList.toggle("active", button.dataset.librarySmartView === this._state.smartView));
+      };
+      const syncNavigationButtons = () => {
+        const back = root.querySelector("[data-library-history-back]");
+        const forward = root.querySelector("[data-library-history-forward]");
+        const up = root.querySelector("[data-library-history-up]");
+        if (back) back.disabled = !this._tabManager.canBack();
+        if (forward) forward.disabled = !this._tabManager.canForward();
+        const currentFolder = normalizeLibraryPreferences(this._getPreferences()).folders.find(folder => folder.id === this._state.folder);
+        if (up) up.disabled = !currentFolder;
+      };
+      const renderChrome = () => {
+        updateTabTitle();
+        renderTabs();
+        renderBreadcrumbs();
+        syncNavigationButtons();
+      };
+      const render = async () => {
+        this._tabManager.setActiveState(this._state);
+        this._tabManager.recordNavigation(currentLocation());
+        renderChrome();
+        return this._explorer?.render({ ...this._state });
+      };
+      const applyHistoryLocation = async location => {
+        if (!location) return;
+        this._state.smartView = location.smartView;
+        this._state.folder = location.folder;
+        this._state.collectionId = location.collectionId;
+        syncControlsFromState();
+        refreshFolders(); refreshCollections(); refreshShortcuts();
+        await render();
+      };
+      root.querySelector("[data-library-history-back]")?.addEventListener("click", () => applyHistoryLocation(this._tabManager.back()));
+      root.querySelector("[data-library-history-forward]")?.addEventListener("click", () => applyHistoryLocation(this._tabManager.forward()));
+      root.querySelector("[data-library-history-up]")?.addEventListener("click", async () => {
+        const prefs = normalizeLibraryPreferences(this._getPreferences());
+        const folder = prefs.folders.find(item => item.id === this._state.folder);
+        if (!folder) return;
+        this._state.folder = folder.parentId || "";
+        this._state.smartView = "all";
+        this._state.collectionId = "";
+        refreshFolders(); refreshCollections(); refreshShortcuts();
+        await render();
+      });
+      root.querySelector("[data-library-create-new-proxy]")?.addEventListener("click", () => root.querySelector("[data-library-create-new-toggle]")?.click());
+      root.querySelector("[data-library-refresh]")?.addEventListener("click", () => render());
+      renderChrome();
       const notify = (method, message) => globalThis.ui?.notifications?.[method]?.(message);
       const backupService = () => globalThis.game?.nexus?.library?.backup;
       const makeImportPreview = async source => {
