@@ -30,27 +30,27 @@ Hooks.once("init", () => {
   // Registro público de serviços: dependências compartilhadas por subsistemas,
   // módulos e futuras integrações, sem acoplamento à classe da ficha.
   game.nexus.services ??= createNexusServiceRegistry({ context: { systemId: "nexus", version: game.system.version } });
-  const publishService = (name, value) => {
-    if (!game.nexus.services.has(name)) game.nexus.services.publish(name, value);
-    return value;
+  const registerService = (name, factory, options = {}) => {
+    if (!game.nexus.services.has(name)) game.nexus.services.register(name, factory, options);
+    return game.nexus.services.resolveSync(name);
   };
   // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
-  game.nexus.design ??= installNexusDesignSystem({
+  game.nexus.design = registerService("design", () => installNexusDesignSystem({
     gameRef: game,
     documentRef: document,
     hooks: Hooks,
     themeTokens: THEME_TOKENS,
     applyThemeTokens
-  });
-  publishService("design", game.nexus.design);
-  game.nexus.design.library ??= createDesignLibraryService({ getUser: () => game.user, design: game.nexus.design });
-  publishService("design.library", game.nexus.design.library);
-  const DesignStudioApplication = createDesignStudioApplicationClass({
-    ApplicationV2: foundry.applications.api.ApplicationV2,
-    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
-    design: game.nexus.design,
-    library: game.nexus.design.library
-  });
+  }));
+  game.nexus.design.library = registerService("design.library", ({ design }) =>
+    createDesignLibraryService({ getUser: () => game.user, design }), { dependencies: ["design"] });
+  const DesignStudioApplication = registerService("design.studioClass", ({ design, "design.library": library }) =>
+    createDesignStudioApplicationClass({
+      ApplicationV2: foundry.applications.api.ApplicationV2,
+      HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+      design,
+      library
+    }), { dependencies: ["design", "design.library"] });
   // Settings and direct launch use the same ApplicationV2 class and singleton reference.
   const DesignStudioMenuApplication = DesignStudioApplication;
   game.nexus.design.Studio = DesignStudioApplication;
@@ -69,25 +69,22 @@ Hooks.once("init", () => {
     return Promise.resolve(application.render({ force: true })).then(() => application);
   };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
-  game.nexus.resources ??= createResourceLifecycleManager();
-  publishService("resources", game.nexus.resources);
+  game.nexus.resources = registerService("resources", () => createResourceLifecycleManager());
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
-  game.nexus.documents ??= createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid });
-  publishService("documents", game.nexus.documents);
+  game.nexus.documents = registerService("documents", () => createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid }));
   // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
   // Os provedores retornam metadados leves; o conteúdo completo é resolvido sob demanda.
   game.nexus.library ??= {};
   game.nexus.library.designProfiles ??= game.nexus.design.library;
-  game.nexus.library.registry ??= createDefaultLibraryResourceRegistry({
+  game.nexus.library.registry = registerService("library.registry", ({ documents }) => createDefaultLibraryResourceRegistry({
     getUser: () => game.user,
     getWorldFlows: () => {
       try { return game.settings.get("nexus", "interactionLibrary") ?? []; }
       catch { return []; }
     },
-    documentBridge: game.nexus.documents,
+    documentBridge: documents,
     catalog: NEXUS_LIBRARY_CATALOG
-  });
-  publishService("library.registry", game.nexus.library.registry);
+  }), { dependencies: ["documents"] });
   game.nexus.library.list = options => game.nexus.library.registry.list(options);
   game.nexus.library.resolve = (reference, resource) => game.nexus.library.registry.resolve(reference, resource);
   game.nexus.library.getActions = (reference, resource) => game.nexus.library.registry.getActions(reference, resource);
@@ -95,8 +92,7 @@ Hooks.once("init", () => {
     game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
-  game.nexus.library.transfers ??= createLibraryTransferRegistry();
-  publishService("library.transfers", game.nexus.library.transfers);
+  game.nexus.library.transfers = registerService("library.transfers", () => createLibraryTransferRegistry());
   game.nexus.library.registerSourceAdapter = adapter => game.nexus.library.transfers.registerSource(adapter);
   game.nexus.library.registerDestinationAdapter = adapter => game.nexus.library.transfers.registerDestination(adapter);
   game.nexus.library.prepareTransfer = options => game.nexus.library.transfers.prepare(options);
@@ -106,25 +102,25 @@ Hooks.once("init", () => {
     sources: game.nexus.library.transfers.listSources(),
     destinations: game.nexus.library.transfers.listDestinations()
   });
-  game.nexus.library.backup ??= createLibraryBackupService({
+  game.nexus.library.backup = registerService("library.backup", () => createLibraryBackupService({
     getUser: () => game.user,
     getCatalog: () => NEXUS_LIBRARY_CATALOG,
     getThemePalettes: () => THEME_PALETTES,
     getWorldFlows: () => getInteractionLibrary(),
     setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
     getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
-  });
-  publishService("library.backup", game.nexus.library.backup);
-  const LibraryApplication = createLibraryApplicationClass({
-    ApplicationV2: foundry.applications.api.ApplicationV2,
-    HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
-    registry: game.nexus.library.registry,
-    getPreferences: () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences")),
-    savePreferences: preferences => {
-      if (typeof game.user?.setFlag !== "function") throw new Error("Não foi possível salvar as preferências da Biblioteca.");
-      return game.user.setFlag("nexus", "libraryPreferences", preferences);
-    }
-  });
+  }));
+  const LibraryApplication = registerService("library.applicationClass", ({ "library.registry": registry }) =>
+    createLibraryApplicationClass({
+      ApplicationV2: foundry.applications.api.ApplicationV2,
+      HandlebarsApplicationMixin: foundry.applications.api.HandlebarsApplicationMixin,
+      registry,
+      getPreferences: () => normalizeLibraryPreferences(game.user?.getFlag?.("nexus", "libraryPreferences")),
+      savePreferences: preferences => {
+        if (typeof game.user?.setFlag !== "function") throw new Error("Não foi possível salvar as preferências da Biblioteca.");
+        return game.user.setFlag("nexus", "libraryPreferences", preferences);
+      }
+    }), { dependencies: ["library.registry"] });
   game.nexus.library.Application = LibraryApplication;
   const LibraryMenuApplication = class extends LibraryApplication {
     constructor(options = {}) {
@@ -162,23 +158,21 @@ Hooks.once("init", () => {
     });
   }
   game.nexus.media ??= {};
-  game.nexus.media.formats = createMediaFormatRegistry();
-  publishService("media.formats", game.nexus.media.formats);
-  game.nexus.media.capabilities = createMediaCapabilityService({ registry: game.nexus.media.formats });
-  publishService("media.capabilities", game.nexus.media.capabilities);
-  game.nexus.media.pipeline = createMediaProcessingPipeline({
-    capabilityService: game.nexus.media.capabilities,
-    resourceManager: game.nexus.resources,
-    adapters: [createBrowserMediaAdapter(game.nexus.media.capabilities)]
-  });
-  publishService("media.pipeline", game.nexus.media.pipeline);
-  game.nexus.media.storage = createMediaStorageRouter([
+  game.nexus.media.formats = registerService("media.formats", () => createMediaFormatRegistry());
+  game.nexus.media.capabilities = registerService("media.capabilities", ({ "media.formats": registry }) =>
+    createMediaCapabilityService({ registry }), { dependencies: ["media.formats"] });
+  game.nexus.media.pipeline = registerService("media.pipeline", ({ "media.capabilities": capabilityService, resources }) =>
+    createMediaProcessingPipeline({
+      capabilityService,
+      resourceManager: resources,
+      adapters: [createBrowserMediaAdapter(capabilityService)]
+    }), { dependencies: ["media.capabilities", "resources"] });
+  game.nexus.media.storage = registerService("media.storage", () => createMediaStorageRouter([
     createFoundryMediaStorageAdapter({
       FilePicker: foundry.applications.apps.FilePicker,
       extensions: CONST.UPLOADABLE_FILE_EXTENSIONS
     })
-  ]);
-  publishService("media.storage", game.nexus.media.storage);
+  ]));
   game.nexus.media.createWorkerAdapter = createWorkerMediaAdapter;
   game.nexus.media.installWorkerRuntime = installNexusMediaWorkerRuntime;
   game.nexus.media.createCacheKey = createMediaCacheKey;
@@ -187,11 +181,10 @@ Hooks.once("init", () => {
     catch (error) { console.warn("NEXUS | Cache local de mídia indisponível.", error); }
   }
 
-  game.nexus.logic = {};
-  game.nexus.logic.registry = createLogicRegistry({ schemas: createNexusLogicSchemas() });
-  publishService("logic.registry", game.nexus.logic.registry);
-  game.nexus.logic.runtime = createLogicRuntime({ registry: game.nexus.logic.registry });
-  publishService("logic.runtime", game.nexus.logic.runtime);
+  game.nexus.logic ??= {};
+  game.nexus.logic.registry = registerService("logic.registry", () => createLogicRegistry({ schemas: createNexusLogicSchemas() }));
+  game.nexus.logic.runtime = registerService("logic.runtime", ({ "logic.registry": registry }) => createLogicRuntime({ registry }), { dependencies: ["logic.registry"] });
+  if (!game.nexus.services.has("logic.foundryIntegration")) game.nexus.services.register("logic.foundryIntegration", ({ "logic.runtime": runtime }) => installFoundryLogicIntegration({ hooks: Hooks, runtime, gameRef: game, constRef: CONST }), { dependencies: ["logic.runtime"] });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);
   game.nexus.logic.getActionDefinitions = () => game.nexus.logic.runtime.getActionDefinitions();
@@ -242,14 +235,7 @@ Hooks.once("ready", () => {
     console.error("NEXUS | Falha ao carregar a Biblioteca de Lógica.", error);
   }
   try {
-    game.nexus.logic.foundryIntegration?.uninstall?.();
-    game.nexus.logic.foundryIntegration = installFoundryLogicIntegration({
-      hooks: Hooks,
-      runtime: game.nexus.logic.runtime,
-      gameRef: game,
-      constRef: CONST
-    });
-    publishService("logic.foundryIntegration", game.nexus.logic.foundryIntegration);
+    game.nexus.logic.foundryIntegration = game.nexus.services.resolveSync("logic.foundryIntegration");
     console.info("NEXUS | Eventos do Foundry conectados à Lógica:", game.nexus.logic.foundryIntegration.bridge.hookCount);
   } catch (error) {
     console.error("NEXUS | Falha ao conectar eventos do Foundry à Lógica.", error);

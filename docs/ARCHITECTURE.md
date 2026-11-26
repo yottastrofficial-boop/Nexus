@@ -1,3 +1,9 @@
+## Atualização 1.0.0.125 — bootstrap por serviços
+
+O bootstrap agora constrói serviços centrais por factories registradas em `game.nexus.services` e resolve dependências síncronas em ordem durante `init`. Design, Design Library, Design Studio, Resource Lifecycle, Document Bridge, Library Registry/Transfer/Backup/Application, Media Format/Capabilities/Pipeline/Storage e Logic Registry/Runtime/Foundry Integration usam contratos explícitos. A fachada `game.nexus.*` continua disponível para compatibilidade. Fábricas assíncronas continuam usando `resolve()` fora do caminho síncrono de `init`.
+
+Esta etapa migra a criação de serviços, não extrai ainda a ficha, os listeners, CSS ou templates. Consulte `docs/ARCHITECTURE_REVIEW_2026-11-26.md` para o plano por domínio.
+
 ## Atualização arquitetural — revisão 1.0.0.124
 
 A revisão de ponta a ponta de 2026-11-26 está documentada em [ARCHITECTURE_REVIEW_2026-11-26.md](ARCHITECTURE_REVIEW_2026-11-26.md). A base 1.0.0.123 já possui módulos especializados, mas ainda concentra responsabilidades na ficha, listeners, CSS e validador de pacote. A nova camada `scripts/core/service-registry.js` publica serviços compartilhados em `game.nexus.services`, com dependências explícitas, resolução lazy, detecção de ciclos, diagnóstico e disposal. A primeira migração removeu a dependência dos schemas de Lógica em módulos de engine/Foundry ao centralizar contratos em `logic-events.js`.

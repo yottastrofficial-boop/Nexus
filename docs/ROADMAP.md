@@ -1,3 +1,12 @@
+## 1.0.0.125 — bootstrap por dependências
+
+- Migração de serviços centrais para factories do registro de serviços.
+- Dependências explícitas entre Design, Document Bridge, Library Registry, Media Pipeline e Logic Runtime.
+- Integração Foundry da Lógica resolvida pelo mesmo registro durante `ready`.
+- API pública `game.nexus.*` preservada.
+- Próximo: extrair resolução de propriedades da ficha e dividir listeners por domínio com lifecycle controlado.
+- Validação automatizada e pacote serão confirmados pelo CI; teste real no Foundry VTT 14 permanece pendente.
+
 ## Revisão arquitetural 1.0.0.124 — 2026-11-26
 
 - Auditoria de arquitetura estática e inventário da base 1.0.0.123 concluídos.

@@ -105,3 +105,18 @@ A folha principal continua sendo um arquivo legado grande, acompanhada por CSS d
 - Não reescrever a cascata CSS de uma vez.
 - Não declarar toda a arquitetura “concluída” porque existe um container de serviços.
 - Não declarar validação real no Foundry com base apenas no CI.
+
+
+## Continuação 1.0.0.125 — DI efetiva no bootstrap
+
+A etapa seguinte migrou os serviços centrais de publicação direta para factories do registro com dependências declaradas:
+
+- `design` → `design.library` → `design.studioClass`;
+- `resources` e `documents` como serviços de base;
+- `library.registry` depende de `documents`; `library.applicationClass` depende do registry;
+- `media.capabilities` depende de `media.formats`; `media.pipeline` depende de capabilities e resources; storage é serviço independente;
+- `logic.runtime` depende de `logic.registry`; a integração de hooks Foundry é registrada e resolvida no hook `ready` a partir do runtime.
+
+O registro agora oferece `resolveSync()` e `initializeSync()` para fábricas síncronas durante o hook `init`, sem transformar a inicialização do Foundry em uma sequência assíncrona não aguardada. Fábricas assíncronas devem usar `resolve()` fora desse caminho. As APIs `game.nexus.*` permanecem como fachadas de compatibilidade.
+
+A validação automatizada confirma syntax, imports, regressões e empacotamento. Ainda não foram extraídos a resolução de propriedades da ficha, os listeners, o CSS legado, os templates ou o validador de pacote; essas são as próximas fronteiras de trabalho. O teste real no Foundry VTT 14 continua sendo necessário para confirmar o lifecycle dos hooks e aplicações.

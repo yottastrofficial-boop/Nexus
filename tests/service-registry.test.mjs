@@ -63,3 +63,20 @@ test("encerra serviços na ordem inversa e uma única vez", async () => {
   assert.equal(registry.disposed, true);
   assert.throws(() => registry.register("core.late", () => ({})), /encerrado/);
 });
+
+test("resolveSync constrói grafo síncrono e injeta dependências em ordem", () => {
+  const order = [];
+  const registry = createNexusServiceRegistry();
+  registry.register("core.sync-a", () => { order.push("a"); return { value: 2 }; });
+  registry.register("feature.sync-b", ({ "core.sync-a": a }) => { order.push("b"); return a.value * 3; }, { dependencies: ["core.sync-a"] });
+  assert.equal(registry.resolveSync("feature.sync-b"), 6);
+  assert.deepEqual(order, ["a", "b"]);
+  assert.equal(registry.resolveSync("feature.sync-b"), 6);
+  assert.deepEqual(order, ["a", "b"]);
+});
+
+test("resolveSync rejeita fábricas assíncronas com orientação explícita", () => {
+  const registry = createNexusServiceRegistry();
+  registry.register("core.async-only", async () => ({ ready: true }));
+  assert.throws(() => registry.resolveSync("core.async-only"), /use resolve\(\)/);
+});

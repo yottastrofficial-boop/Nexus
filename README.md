@@ -1,16 +1,16 @@
-## Revisão arquitetural 1.0.0.124 em preparação
+## Revisão arquitetural 1.0.0.125 em preparação
 
-A revisão de ponta a ponta introduz um registro de serviços compartilhados, contratos de eventos desacoplados e testes de integridade do grafo de módulos. O trabalho continua por etapas para preservar dados, IDs e integração com Foundry V14. A auditoria e o plano estão em [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
+A revisão de ponta a ponta introduz um registro de serviços compartilhados, contratos de eventos desacoplados, teste de grafo de módulos e migração do bootstrap para factories com dependências explícitas. O trabalho continua por etapas para preservar dados, IDs e integração com Foundry V14. A auditoria e o plano estão em [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.124 em preparação · base publicada 1.0.0.123 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.125 em preparação · base publicada 1.0.0.124 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.124-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.125-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -20,7 +20,7 @@ O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência fle
 
 **Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
-**Revisão estrutural:** a 1.0.0.124 introduz um registro de serviços compartilhados, contratos de eventos desacoplados e guardrails de integridade do grafo de módulos. A migração do restante do sistema continuará por etapas para preservar dados e compatibilidade.
+**Revisão estrutural:** a 1.0.0.125 introduz um registro de serviços compartilhados, contratos de eventos desacoplados e guardrails de integridade do grafo de módulos. A migração do restante do sistema continuará por etapas para preservar dados e compatibilidade.
 
 ## Visão geral
 
@@ -32,9 +32,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Base publicada e revisão estrutural — 1.0.0.124
+## Base publicada e revisão estrutural — 1.0.0.125
 
-A base publicada 1.0.0.123 adiciona a estrutura hierárquica da Biblioteca, ações contextuais, criação universal e previews padronizados. A candidata 1.0.0.124 acrescenta o registro de serviços e contratos compartilhados, sem alterar schemas mecânicos ou dados persistidos. A arquitetura completa ainda será migrada por etapas; consulte [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
+A base publicada 1.0.0.124 inclui a estrutura hierárquica da Biblioteca e o registro de serviços. A versão 1.0.0.125 migra serviços centrais do bootstrap para factories com dependências explícitas, mantendo as APIs `game.nexus.*`. A ficha, listeners, CSS e templates ainda serão modernizados por etapas; consulte [Revisão arquitetural](docs/ARCHITECTURE_REVIEW_2026-11-26.md).
 
 Recursos presentes no código incluem:
 
@@ -55,7 +55,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Base publicada | 1.0.0.123; revisão estrutural .124 em preparação |
 | Idioma incluído | Português (Brasil) |
 
-A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base publicada 1.0.0.123 inclui a estrutura hierárquica da Biblioteca, menus contextuais, criação universal de recursos e previews padronizados. A candidata 1.0.0.124 acrescenta contratos de serviços e módulos. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
+A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base publicada 1.0.0.123 inclui a estrutura hierárquica da Biblioteca, menus contextuais, criação universal de recursos e previews padronizados. A candidata 1.0.0.125 acrescenta contratos de serviços e módulos. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
 
 ## Instalação
 
@@ -149,7 +149,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão preparada para publicação e sincronização do manifesto é **1.0.0.124**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão preparada para publicação e sincronização do manifesto é **1.0.0.125**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
