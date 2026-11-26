@@ -107,6 +107,9 @@ export function createFoundryDocumentBridge({
   };
 
   const matches = (record, query, tags = [], origin = "all") => {
+    // Keep restricted real-world weapon categories out of the searchable/importable
+    // NEXUS catalog while allowing unrelated RPG document types.
+    if (record.documentName === "Item" && String(record.documentType ?? "").toLocaleLowerCase() === "weapon") return false;
     if (!matchesLibrarySearchQuery(record, query)) return false;
     const recordOrigin = record.isCompendium ? "compendium" : "world";
     if (origin !== "all" && recordOrigin !== origin) return false;
