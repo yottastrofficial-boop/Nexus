@@ -124,7 +124,7 @@ assert.doesNotMatch(libraryTemplate, /data-library-resize-sidebar|data-library-r
   "The redesigned Explorer must not expose visible pane-resizer controls.");
 assert.doesNotMatch(libraryTemplate, /nexus-tool-panel/,
   "The standalone Library must not be wrapped in an additional nested tool panel.");
-assert.match(libraryApplication, /nativeHeader\.prepend\(tabStrip\)/,
+assert.match(libraryApplication, /this\.window\?\.header[\s\S]*?nativeHeader\.prepend\(tabStrip\)/,
   "Browser tabs must be mounted in the native Foundry window header.");
 assert.match(libraryApplication, /title: ""/,
   "The native window header must not repeat the Library title beside its tabs.");
