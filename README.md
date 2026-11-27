@@ -1,22 +1,22 @@
-## Biblioteca 1.0.0.136 preparada para publicação
+## Biblioteca 1.0.0.137 — correções visuais e de prévias
 
-A versão 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, validação/prévia de importação e confirmação. O pacote Foundry será publicado pelo workflow após a validação automatizada; o manifesto estável será sincronizado somente depois de confirmar o ZIP na Release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A versão 1.0.0.137 corrige a organização do Inspector e as prévias de fontes/temas, além de consolidar o layout da grade e controles da Lista. O pacote Foundry será publicado pelo workflow após a validação automatizada; o manifesto estável será sincronizado somente depois de confirmar o ZIP na Release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão candidata 1.0.0.136 · estável 1.0.0.135 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão candidata 1.0.0.137 · estável 1.0.0.136 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.136-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.137-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.135 publicada (manifesto estável).** **Versão 1.0.0.136** é a build atual da main e está em validação; o manifesto será sincronizado após a release.
+**Versão 1.0.0.136 publicada (manifesto estável).** **Versão 1.0.0.137** é a build atual da main e está em validação; o manifesto será sincronizado após a release.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
@@ -151,7 +151,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão preparada para publicação é **1.0.0.136**; o manifesto estável será sincronizado pelo workflow após a publicação do ZIP. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão preparada para publicação é **1.0.0.137**; o manifesto estável será sincronizado pelo workflow após a publicação do ZIP. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
