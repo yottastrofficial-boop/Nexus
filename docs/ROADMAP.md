@@ -7,7 +7,7 @@
 - Pastas são elementos de navegação e não participam das facetas de categoria/tipo.
 - Fontes mostram “Aa” no Grid e “Aa” + “Lorem ipsum dolor sit amet.” no Inspector.
 - Favoritos ficam no canto superior direito dos cartões.
-- CI, regressões e geração do pacote aprovadas no PR #117; validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- CI, regressões, pacote, release e manifesto aprovados/publicados; validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
