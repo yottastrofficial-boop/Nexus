@@ -236,3 +236,16 @@ html.nexus-design-system .nexus-library-application .nexus-library-resource-fact
   html.nexus-design-system .nexus-library-application .nexus-library-breadcrumbs { order:2!important; flex:1 1 auto!important; }
   html.nexus-design-system .nexus-library-application .nexus-library-navigation-controls { order:1!important; }
 }
+
+html.nexus-design-system .nexus-library-application .nexus-library-resource-meter-card-preview {
+  display:flex!important; flex-direction:column!important; justify-content:center!important; gap:7px!important;
+  width:100%!important; min-width:0!important; padding:6px!important; color:var(--nexus-panel-text,#e7edf5)!important;
+  font-size:8px!important; text-align:left!important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-resource-meter-card-preview > small {
+  display:block!important; min-width:0!important; overflow:hidden!important; text-overflow:ellipsis!important; white-space:nowrap!important;
+  color:var(--nexus-panel-muted,#9aadc2)!important; font-size:8px!important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-resource-meter-card-preview > strong {
+  display:block!important; color:var(--nexus-panel-text,#e7edf5)!important; font-size:9px!important; font-variant-numeric:tabular-nums!important;
+}
