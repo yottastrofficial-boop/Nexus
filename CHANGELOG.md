@@ -1,3 +1,13 @@
+## 1.0.0.139 — Prévia fiel de temas e fontes
+
+- Resolve o preset e o perfil visual do próprio tema selecionado, em vez de normalizar temas legados como o preset global NEXUS Escuro.
+- Preserva metadados visuais seguros de temas pessoais para o grid: paleta semântica, tipografia, layout e estilos por categoria de componente; custom CSS importado permanece excluído da prévia.
+- Usa um modelo de perfil compartilhado no grid e no Inspector, incluindo 18 tokens de paleta e configurações de botões, painéis, containers, destaques e campos.
+- Reescreve a mini-interface temática conforme o protótipo v6, com cabeçalho, navegação, painel, cartão, destaque, barra de recurso, campo e botões; o CSS da amostra fica isolado do tema global do Foundry/NEXUS.
+- Aplica a família tipográfica escolhida diretamente aos espécimes Aa, Lorem Epsum e 12345 !@#$%, e reforça o escopo para impedir que regras globais sobrescrevam a amostra.
+- Adiciona regressões para tema Medieval/Georgia, paleta personalizada, estilos de componentes e metadados seguros.
+- CI, pacote e publicação estável serão confirmados pelo workflow; teste visual no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.138 — Biblioteca: contrato visual unificado e prévias reais
 
 - Remove as regras concorrentes antigas da barra de pesquisa em CSS legado e substitui por um único contrato responsivo com ícone, campo e botão de limpar.
