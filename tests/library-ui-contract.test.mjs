@@ -129,7 +129,7 @@ assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(libraryUiContract, /nexus-library-theme-live-preview/);
 assert.match(libraryUiContract, /nexus-library-theme-live-track/);
-assert.match(libraryUiContract, /nexus-library-inspector-tab-button\\[aria-selected="true"\\]/);
+assert.match(libraryUiContract, /nexus-library-inspector-tab-button\[aria-selected="true"\]/);
 assert.match(libraryUiContract, /nexus-library-theme-card-preview/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
