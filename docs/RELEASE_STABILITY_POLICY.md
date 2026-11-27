@@ -1,10 +1,10 @@
-## Estado de distribuição — 1.0.0.138 (publicada)
+## Estado de distribuição — 1.0.0.139 (em validação)
 
-A versão estável atual é 1.0.0.138. CI, pacote ZIP, release e manifesto estável foram confirmados pelo workflow oficial. A validação visual/funcional no Foundry VTT 14 build 360 ainda depende de teste manual no cliente.
+A versão candidata 1.0.0.139 está em validação. A release estável e o manifesto serão sincronizados somente após CI, construção do ZIP e confirmação do asset pelo workflow. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
-- `system.json` e `manifest.json` declaram 1.0.0.138 e apontam para o pacote correspondente.
-- Asset `nexus.zip` confirmado na release v1.0.0.138 (496.309 bytes).
-- O pacote publicado não é declarado checkpoint funcional completo antes do teste manual.
+- `system.json` declara a candidata 1.0.0.139 e aponta para o ZIP correspondente.
+- `manifest.json` permanece na versão estável 1.0.0.138 até a publicação confirmar o pacote.
+- O pacote não será declarado checkpoint funcional completo antes do teste manual.
 
 ## Histórico de distribuição — 1.0.0.137 (publicada)
 
