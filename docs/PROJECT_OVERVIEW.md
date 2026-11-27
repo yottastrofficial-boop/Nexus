@@ -1,6 +1,7 @@
-## Estado do código — 1.0.0.137 (publicada)
+## Estado do código — 1.0.0.138 (em validação)
 
-A versão publicada revisa as prévias de fontes e temas, consolida o Grid em 64×64, reorganiza o Inspector com abas Padrão/Detalhes e neutraliza regras visuais legadas. CI, pacote, release e manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A revisão atual consolida o contrato visual da Biblioteca, usa tokens reais de tema na grade e no Inspector, separa conteúdo visual de metadados e restaura a miniatura da barra de recurso. O workflow ainda precisa confirmar CI, pacote e publicação estável; o teste visual/funcional no Foundry VTT 14 build 360 continua pendente.
+
 
 ## Estado do código — 1.0.0.136 (publicada)
 
