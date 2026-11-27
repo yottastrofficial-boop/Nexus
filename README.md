@@ -1,6 +1,6 @@
 ## Biblioteca 1.0.0.139 — prévias temáticas fiéis ao perfil
 
-A versão candidata 1.0.0.139 corrige a resolução de tema no grid e no Inspector: cada mini-interface usa o preset, a paleta completa, a tipografia e os estilos de componentes do próprio recurso, isolados do tema global. As fontes aplicam a família escolhida aos espécimes. CI, pacote, release e manifesto serão confirmados pelo workflow; o teste visual no Foundry VTT 14 build 360 continua manual.
+A Versão 1.0.0.139 em validação corrige a resolução de tema no grid e no Inspector: cada mini-interface usa o preset, a paleta completa, a tipografia e os estilos de componentes do próprio recurso, isolados do tema global. As fontes aplicam a família escolhida aos espécimes. CI, pacote, release e manifesto serão confirmados pelo workflow; o teste visual no Foundry VTT 14 build 360 continua manual.
 
 
 # NEXUS RPG
