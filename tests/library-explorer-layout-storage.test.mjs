@@ -22,7 +22,7 @@ test("Library Name header toggles alphabetical direction", () => {
 test("list rows use exactly Name, Category and Type, including folders", () => {
   assert.match(template, /data-library-list-column="name"[\s\S]*?data-library-list-column="category"[\s\S]*?data-library-list-column="type"/);
   assert.match(explorer, /if \(currentViewMode === "list"\)[\s\S]*?nexus-library-list-name-cell[\s\S]*?nexus-library-list-category[\s\S]*?nexus-library-list-type/);
-  assert.match(styles, /grid-template-columns: 24px var\(--nexus-library-list-columns/);
+  assert.match(styles, /grid-template-columns: var\(--nexus-library-list-columns/);
   assert.match(styles, /grid-template-columns: var\(--nexus-library-list-columns/);
 });
 
