@@ -5,7 +5,7 @@
 - Reordena a aba Padrão para mostrar identidade, metadados resumidos e a prévia; descrição, etiquetas, resumo/tipo/dimensões e fatos ficam em Detalhes.
 - Move a paleta para um dropdown abaixo da amostra do tema e garante que a amostra inclua uma barra de recurso visível.
 - Adiciona prévia de barra/medidor de recurso aos cartões da Biblioteca e documenta o padrão compartilhado para futuros recursos.
-- CI e validação do pacote passaram na main; o workflow estável publicará e verificará o asset `nexus.zip` antes de sincronizar o manifesto. Teste visual real no Foundry VTT 14 build 360 continua sendo um passo manual.
+- CI, validação do pacote, release v1.0.0.138, asset `nexus.zip` (496.309 bytes) e manifesto estável foram confirmados pelo workflow. Teste visual real no Foundry VTT 14 build 360 continua sendo um passo manual.
 
 ## 1.0.0.137 — Correções visuais e prévias da Biblioteca
 - Reescreve a prévia de fontes sem o bloco de specimen legado; a amostra mostra Aa, Lorem Epsum e 12345 !@#$% com a família real aplicada.
