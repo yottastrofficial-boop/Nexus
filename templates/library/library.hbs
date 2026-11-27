@@ -77,11 +77,8 @@
   </div>
 
   <div class="nexus-library-filter-wrap" id="nexus-library-filter-panel" data-library-filter-panel hidden>
-    <label class="nexus-library-app-filter"><span>Categoria</span><input type="search" data-library-kind list="nexus-library-category-options" placeholder="Pesquisar categoria..." autocomplete="off" maxlength="32"><datalist id="nexus-library-category-options"><option value="all" label="Todas"></option><option value="component" label="Componentes"></option><option value="composition" label="Composições"></option><option value="layout" label="Layouts"></option><option value="template" label="Modelos"></option><option value="asset" label="Recursos"></option><option value="media" label="Mídia"></option><option value="theme" label="Coleções visuais"></option><option value="style" label="Estilos e fontes"></option><option value="logic" label="Lógica"></option><option value="document" label="Documentos Foundry"></option></datalist></label>
-    <label class="nexus-library-app-filter"><span>Tipo</span><select data-library-type><option value="all">Todos</option><option value="property">Propriedades</option><option value="rule">Regras</option><option value="behavior">Comportamentos</option><option value="flow">Fluxos</option><option value="function">Funções</option><option value="actors">Actors</option><option value="items">Items</option><option value="scenes">Scenes</option><option value="journals">Journals</option><option value="macros">Macros</option><option value="playlists">Playlists</option><option value="tables">RollTables</option><option value="cards">Cards</option><option value="font">Fontes</option></select></label>
     <label class="nexus-library-app-filter"><span>Origem</span><select data-library-origin><option value="all">Todas</option><option value="core">Padrão</option><option value="personal">Pessoais</option><option value="module">Módulos</option><option value="addon">Complementos</option><option value="world">Mundo</option><option value="compendium">Compêndios</option></select></label>
     <label class="nexus-library-app-filter nexus-library-compendium-filter"><span>Compêndios</span><select data-library-compendiums multiple size="3" aria-label="Compêndios para incluir"></select></label>
-    <label class="nexus-library-app-filter"><span>Etiqueta</span><input type="text" data-library-tag list="nexus-library-tag-options" value="all" placeholder="Pesquisar etiqueta..." maxlength="48"><datalist id="nexus-library-tag-options"></datalist></label>
     <label class="nexus-library-app-filter"><span>Tamanho</span><select data-library-card-size><option value="small">Pequeno</option><option value="medium" selected>Médio</option><option value="large">Grande</option></select></label>
   </div>
 
@@ -103,8 +100,27 @@
     <section class="nexus-library-section-panel nexus-library-generic-panel" data-library-section-panel="collection">
       <div class="nexus-library-workspace">
         <main class="nexus-library-main">
-          <div class="nexus-library-section-heading"><strong data-library-collection-heading>Todos os recursos</strong><span data-library-collection-count>0 encontrados</span></div>
-          <div class="nexus-library-list-header" data-library-list-header><span data-library-list-column="name">Nome<i data-library-column-resize="name" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Nome" tabindex="0"></i></span><span data-library-list-column="category">Categoria<i data-library-column-resize="category" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Categoria" tabindex="0"></i></span><span data-library-list-column="size">Tamanho<i data-library-column-resize="size" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Tamanho" tabindex="0"></i></span><span data-library-list-column="modified">Modificado<i data-library-column-resize="modified" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Modificado" tabindex="0"></i></span><span data-library-list-column="tags">Etiquetas</span></div>
+          <div class="nexus-library-list-header" data-library-list-header>
+            <span data-library-list-column="name">Nome<i data-library-column-resize="name" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Nome" tabindex="0"></i></span>
+            <div class="nexus-library-list-filter" data-library-list-filter="category" data-library-list-column="category">
+              <button type="button" data-library-open-list-filter="category" aria-expanded="false">Categoria <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+              <div class="nexus-library-list-filter-popover" data-library-list-filter-popover="category" hidden>
+                <label for="nexus-library-category-filter">Pesquisar categoria</label>
+                <input id="nexus-library-category-filter" type="search" data-library-kind list="nexus-library-category-options" placeholder="Categoria..." autocomplete="off">
+                <datalist id="nexus-library-category-options"></datalist>
+              </div>
+              <i data-library-column-resize="category" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Categoria" tabindex="0"></i>
+            </div>
+            <div class="nexus-library-list-filter" data-library-list-filter="type" data-library-list-column="type">
+              <button type="button" data-library-open-list-filter="type" aria-expanded="false">Tipo <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
+              <div class="nexus-library-list-filter-popover" data-library-list-filter-popover="type" hidden>
+                <label for="nexus-library-type-filter">Pesquisar tipo</label>
+                <input id="nexus-library-type-filter" type="search" data-library-type list="nexus-library-type-options" placeholder="Tipo..." autocomplete="off">
+                <datalist id="nexus-library-type-options"></datalist>
+              </div>
+              <i data-library-column-resize="type" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Tipo" tabindex="0"></i>
+            </div>
+          </div>
           <div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items data-library-list-heading="Biblioteca"></div>
         </main>
         <div class="nexus-library-panel-resizer nexus-library-inspector-resizer" data-library-resize="inspector" role="separator" aria-orientation="vertical" aria-label="Redimensionar detalhes" tabindex="0"></div>
