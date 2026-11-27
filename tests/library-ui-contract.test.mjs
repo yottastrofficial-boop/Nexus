@@ -115,7 +115,9 @@ assert.match(styles, /data-view-mode="list"[\s\S]*?\.nexus-library-generic-item\
 assert.match(styles, /nexus-library-list-name-header > \.nexus-library-list-sort[\s\S]*?width: 100% !important[\s\S]*?min-height: 34px/);
 assert.match(styles, /nexus-library-list-filter > button\[data-library-open-list-filter\][\s\S]*?flex: 1 1 auto[\s\S]*?width: 100% !important/);
 assert.match(styles, /nexus-library-inspector-tabs[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
-assert.match(styles, /nexus-library-font-preview-samples/);\nassert.match(styles, /nexus-library-font-preview-aa/);\nassert.match(styles, /nexus-library-font-preview-glyphs/);
+assert.match(styles, /nexus-library-font-preview-samples/);
+assert.match(styles, /nexus-library-font-preview-aa/);
+assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(styles, /nexus-library-theme-live-preview/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
