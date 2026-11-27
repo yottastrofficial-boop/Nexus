@@ -1,5 +1,15 @@
 ## Estado de distribuição — 1.0.0.134 (publicada)
 
+A versão estável atual é 1.0.0.134. O código da main em revisão declara 1.0.0.135. O manifesto estável permanece nessa versão até que uma atualização seja integrada à `main`, validada e publicada pelo workflow oficial.
+
+- `system.json` da versão estável publicada declara 1.0.0.134 e aponta para o pacote correspondente.
+- `manifest.json` e `nexus.zip` da release 1.0.0.134 foram confirmados.
+- A próxima revisão da Biblioteca está sendo preparada na PR #119; não altera o manifesto estável antes da publicação.
+- A validação visual/funcional no Foundry VTT 14 build 360 continua pendente para a revisão atual.
+- A publicação do pacote não promove automaticamente a versão a checkpoint funcional; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no cliente real.
+
+## Estado de distribuição — 1.0.0.134 (publicada)
+
 A revisão 1.0.0.134 corrige o dimensionamento efetivo do Grid, reduz os cartões ao conteúdo, restaura prévias de temas com paletas reais, separa Prévia/Detalhes no Inspector, altera a interação das pastas para clique/duplo clique e corrige a mutabilidade das opções ApplicationV2 no Estúdio de Aparência.
 
 - `system.json` declara 1.0.0.134 e aponta para o pacote correspondente.

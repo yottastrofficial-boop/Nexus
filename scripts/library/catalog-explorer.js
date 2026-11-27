@@ -133,10 +133,13 @@ export function getLibraryThemePreviewColors(raw = {}) {
   const palette = profile.palette ?? entry.palette ?? entry.tokens ?? {};
   if (!palette || typeof palette !== "object" || Array.isArray(palette)) return [];
   return Object.entries(palette)
-    .filter(([key, value]) => THEME_PREVIEW_LABELS[key] && typeof value === "string" &&
+    .filter(([, value]) => typeof value === "string" &&
       /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()))
     .slice(0, 12)
-    .map(([key, value]) => ({ label: THEME_PREVIEW_LABELS[key], value: value.trim() }));
+    .map(([key, value]) => ({
+      label: THEME_PREVIEW_LABELS[key] ?? String(key).replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").replace(/^./, char => char.toLocaleUpperCase()).slice(0, 32),
+      value: value.trim()
+    }));
 }
 
 
@@ -431,15 +434,49 @@ export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
   return preview?.mediaType === "image" && preview.source === source ? source : "";
 }
 
+function renderLibraryFontPreview(resource, resolved) {
+  if (resource?.reference?.builtin !== "font") return null;
+  const model = getLibraryResourcePreviewModel(resource, resolved);
+  const family = String(model?.family ?? resolved?.family ?? resource.fontFamily ?? "system-ui, sans-serif").trim();
+  const section = makeElement("section", "nexus-library-font-preview");
+  section.dataset.previewKind = "font";
+  const specimen = makeElement("div", "nexus-library-font-preview-specimen");
+  specimen.style.setProperty("font-family", family, "important");
+  specimen.append(makeElement("strong", "", "Aa"));
+  specimen.append(makeElement("span", "", "NEXUS RPG"));
+  specimen.append(makeElement("p", "", "Lorem ipsum dolor sit amet"));
+  section.append(specimen);
+  const caption = makeElement("small", "nexus-library-font-preview-family", family);
+  section.append(caption);
+  return section;
+}
+
+function renderGenericLibraryPreview(resource) {
+  if (!resource || resource.reference?.builtin === "font" || resource.kind === "theme") return null;
+  const section = makeElement("section", "nexus-library-generic-resource-preview");
+  section.dataset.previewKind = String(resource.kind ?? "resource");
+  const visual = makeElement("div", "nexus-library-generic-resource-preview-visual");
+  const icon = makeElement("i", getLibraryResourceIcon(resource));
+  icon.setAttribute("aria-hidden", "true");
+  visual.append(icon);
+  if (resource.kind === "document" && ["cards", "card"].includes(String(resource.type).toLowerCase())) {
+    visual.classList.add("is-card-deck");
+    visual.append(makeElement("span", "nexus-library-generic-resource-preview-card"));
+    visual.append(makeElement("span", "nexus-library-generic-resource-preview-card"));
+  }
+  const title = makeElement("strong", "nexus-library-generic-resource-preview-name", resource.name || "Recurso");
+  const subtitle = makeElement("small", "nexus-library-generic-resource-preview-type",
+    [resource.kind, resource.documentType ?? resource.type].filter(Boolean).join(" · "));
+  section.append(visual, title, subtitle);
+  return section;
+}
+
 function renderLibraryResourcePreview(resource, resolved) {
   const model = getLibraryResourcePreviewModel(resource, resolved);
   if (!model || model.kind === "font") return null;
   const section = makeElement("section", "nexus-library-resource-preview");
   section.dataset.previewKind = model.kind;
-  if (model.kind !== "font") {
-    section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
-    section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
-  }
+
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
     const members = model.members;
     const bounds = {
@@ -775,26 +812,32 @@ export function createLibraryCatalogExplorer({
     tabs.setAttribute("role", "tablist");
     tabs.setAttribute("aria-label", "Visualização do recurso");
 
-    const previewTab = makeElement("button", "", "Prévia");
+    const previewTab = makeElement("button", "nexus-library-inspector-tab-button", "Padrão");
     previewTab.type = "button";
     previewTab.dataset.libraryInspectorTab = "preview";
     previewTab.id = "nexus-library-inspector-tab-preview";
     previewTab.setAttribute("role", "tab");
-    const detailsTab = makeElement("button", "", "Detalhes");
+    previewTab.setAttribute("aria-controls", "nexus-library-inspector-panel-preview");
+    previewTab.title = "Visualização principal do recurso";
+    const detailsTab = makeElement("button", "nexus-library-inspector-tab-button", "Detalhes");
     detailsTab.type = "button";
     detailsTab.dataset.libraryInspectorTab = "details";
     detailsTab.id = "nexus-library-inspector-tab-details";
     detailsTab.setAttribute("role", "tab");
+    detailsTab.setAttribute("aria-controls", "nexus-library-inspector-panel-details");
+    detailsTab.title = "Etiquetas, metadados e informações técnicas";
     tabs.append(previewTab, detailsTab);
 
     const previewPanel = makeElement("section", "nexus-library-inspector-panel");
     previewPanel.dataset.libraryInspectorPanel = "preview";
+    previewPanel.id = "nexus-library-inspector-panel-preview";
     previewPanel.setAttribute("role", "tabpanel");
     previewPanel.setAttribute("aria-labelledby", previewTab.id);
     for (const node of previewContent.filter(Boolean)) previewPanel.append(node);
 
     const detailsPanel = makeElement("section", "nexus-library-inspector-panel");
     detailsPanel.dataset.libraryInspectorPanel = "details";
+    detailsPanel.id = "nexus-library-inspector-panel-details";
     detailsPanel.setAttribute("role", "tabpanel");
     detailsPanel.setAttribute("aria-labelledby", detailsTab.id);
     for (const node of detailsContent.filter(Boolean)) detailsPanel.append(node);
@@ -869,9 +912,18 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
-    const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
+    const themeModel = resource.kind === "theme" ? getLibraryDesignProfilePreviewModel(resolved) : null;
+    const themeColors = resource.kind === "theme"
+      ? (themeModel?.palette?.map(color => ({ label: color.label, value: color.value })) ?? getLibraryThemePreviewColors(resolved))
+      : [];
     const previewModel = getLibraryResourcePreviewModel(resource, resolved);
+    const fontPreview = renderLibraryFontPreview(resource, resolved);
     const resourcePreview = renderLibraryResourcePreview(resource, resolved);
+    const genericPreview = !fontPreview && !resourcePreview && resource.kind !== "theme"
+      ? renderGenericLibraryPreview(resource)
+      : null;
+    const resourceSummary = makeElement("p", "nexus-library-resource-preview-summary", previewModel?.summary ?? "");
+    resourceSummary.hidden = !previewModel?.summary;
     const themePreview = makeElement("section", "nexus-library-theme-preview");
     themePreview.hidden = themeColors.length === 0;
     if (themeColors.length) {
@@ -887,6 +939,22 @@ export function createLibraryCatalogExplorer({
         swatches.append(swatch);
       }
       themePreview.append(swatches);
+      const palette = Object.fromEntries(themeColors.map(color => [color.label.toLowerCase(), color.value]));
+      const colorFor = (keys, fallback) => themeColors.find(color => keys.some(key => color.label.toLowerCase().includes(key)))?.value ?? fallback;
+      const sample = makeElement("div", "nexus-library-theme-live-preview");
+      sample.style.setProperty("--nexus-library-theme-surface", colorFor(["painel", "surface", "superfície", "card", "cartão"], "#202d3d"));
+      sample.style.setProperty("--nexus-library-theme-text", colorFor(["texto"], "#edf0f6"));
+      sample.style.setProperty("--nexus-library-theme-muted", colorFor(["secundário", "muted"], "#a5b6c9"));
+      sample.style.setProperty("--nexus-library-theme-accent", colorFor(["acento", "accent", "destaque", "highlight", "botão", "button"], "#79b8d8"));
+      sample.append(makeElement("small", "", "EXEMPLO DE INTERFACE"));
+      sample.append(makeElement("strong", "", resource.name));
+      const track = makeElement("span", "nexus-library-theme-live-track");
+      const fill = makeElement("i", "");
+      fill.style.width = "68%";
+      track.append(fill);
+      sample.append(track);
+      sample.append(makeElement("span", "nexus-library-theme-live-button", "Ação"));
+      themePreview.append(sample);
     }
     const facts = makeElement("dl", "nexus-library-resource-facts");
     const resourceFacts = [
@@ -895,6 +963,7 @@ export function createLibraryCatalogExplorer({
       ["Origem", resource.origin],
       ["Pasta", resource.folder],
       ["Etiquetas", resource.tags.join(", ") || "—"],
+      ["Estilo", resource.style ?? resource.reference?.style ?? ""],
       ["Versão", "v" + String(resource.version ?? 1)],
       ["Capacidades", resource.capabilities?.length ? resource.capabilities.join(", ") : "—"],
       ...(previewModel?.details ?? [])
@@ -1045,10 +1114,10 @@ export function createLibraryCatalogExplorer({
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, thumbnailLabel, save);
           const inspector = renderInspectorTabs(
-            [themePreview, ...(resourcePreview ? [resourcePreview] : [])],
-            [description, facts, folderLabel, collectionSection, updateSection, editor, actions]
+            [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(resourcePreview ? [resourcePreview] : []), ...(genericPreview ? [genericPreview] : [])],
+            [resourceSummary, facts, folderLabel, collectionSection, updateSection, editor, actions]
           );
-          detail.replaceChildren(heading, meta, inspector.root);
+          detail.replaceChildren(inspector.root);
           return;
         }
 
@@ -1123,10 +1192,10 @@ export function createLibraryCatalogExplorer({
     advanced.append(raw);
     const designProfilePreview = renderDesignProfilePreview(resource, resolved);
     const inspector = renderInspectorTabs(
-      [themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : [])],
-      [description, facts, folderLabel, collectionSection, updateSection, actions, advanced]
+      [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), ...(genericPreview ? [genericPreview] : [])],
+      [resourceSummary, facts, folderLabel, collectionSection, updateSection, actions, advanced]
     );
-    detail.replaceChildren(heading, meta, inspector.root);
+    detail.replaceChildren(inspector.root);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);

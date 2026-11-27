@@ -37,9 +37,22 @@ test("font and theme cards stay compact in grid while Inspector retains the full
   assert.match(explorer, /nexus-library-design-preview/);
 });
 
-test("Inspector separates the visual preview from resource details", () => {
-  assert.match(explorer, /renderInspectorTabs\([\s\S]*?\[description, facts, folderLabel, collectionSection, updateSection, actions, advanced\]/);
-  assert.match(explorer, /libraryInspectorTab === "details"/);
+test("Inspector starts on Padrão, places tabs first and keeps metadata in Detalhes", () => {
+  assert.match(explorer, /makeElement\("button", "nexus-library-inspector-tab-button", "Padrão"\)/);
+  assert.match(explorer, /makeElement\("button", "nexus-library-inspector-tab-button", "Detalhes"\)/);
+  assert.match(explorer, /previewContent\.filter\(Boolean\)/);
+  assert.match(explorer, /detail\.replaceChildren\(inspector\.root\)/);
+  assert.match(explorer, /\[heading, meta, description, \...\(fontPreview \? \[fontPreview\] : \[\]\)/);
+  assert.match(explorer, /\[resourceSummary, facts, folderLabel, collectionSection/);
+  assert.match(explorer, /\["Etiquetas", resource\.tags\.join\(", "\) \|\| "—"\]/);
+  assert.match(explorer, /nexus-library-resource-preview-summary/);
+  assert.doesNotMatch(explorer, /nexus-library-resource-preview-title/);
+  assert.match(explorer, /function renderLibraryFontPreview/);
+  assert.match(explorer, /nexus-library-font-preview-specimen/);
+  assert.match(explorer, /themeModel\?\.palette/);
+  assert.match(explorer, /nexus-library-theme-live-preview/);
+  assert.match(explorer, /currentInspectorTab = "preview"/);
+  assert.match(explorer, /await renderDetails\(resource\)/);
 });
 
 test("small configuration records stay structured in the canonical Library store", () => {

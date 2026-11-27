@@ -110,8 +110,13 @@ assert.match(libraryApplication, /showLibraryContextMenu/,
   "Folder and resource context menus should use an actual compact context menu.");
 assert.match(libraryApplication, /duplicateLibraryFolderTree/,
   "Copying a folder should duplicate only its organization tree.");
-assert.match(styles, /nexus-library-generic-card:has\(\.nexus-library-generic-item\.is-selected\)[\s\S]*?border-color:[\s\S]*?background: transparent !important/,
-  "Selected resources should receive only a highlight border, without a filled card panel.");
+assert.match(styles, /data-view-mode="list"[\s\S]*?\.nexus-library-generic-item\.is-selected[\s\S]*?border: 0 !important[\s\S]*?outline: 0 !important/,
+  "List rows must not use border or outline highlights; selection uses a restrained surface tint.");
+assert.match(styles, /nexus-library-list-name-header > \.nexus-library-list-sort[\s\S]*?width: 100% !important[\s\S]*?min-height: 34px/);
+assert.match(styles, /nexus-library-list-filter > button\[data-library-open-list-filter\][\s\S]*?flex: 1 1 auto[\s\S]*?width: 100% !important/);
+assert.match(styles, /nexus-library-inspector-tabs[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+assert.match(styles, /nexus-library-font-preview-specimen/);
+assert.match(styles, /nexus-library-theme-live-preview/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);

@@ -1,3 +1,17 @@
+## 1.0.0.135 — Prévia Padrão, Inspector refinado e controles de Lista
+
+- Renomeia a aba principal do Inspector para **Padrão** e melhora os tab buttons em um controle segmentado acessível, com estado ativo claro.
+- Move as abas para o topo do Inspector; nome, descrição e metadados resumidos permanecem na aba Padrão.
+- Move resumo técnico, fatos, etiquetas (incluindo tags como `style-font-core`) e metadados para Detalhes.
+- Remove o título redundante da prévia de recurso e evita que o resumo de tipo/dimensões ocupe a área visual.
+- Restaura a prévia tipográfica no Inspector usando a família resolvida, com espécime Aa e amostra de texto.
+- Expande a leitura de paletas de tema para aceitar tokens hex personalizados e cria uma amostra de interface com as cores reais do perfil/tema.
+- Faz os cabeçalhos Nome, Categoria e Tipo ocuparem toda a célula como controles funcionais; os separadores de redimensionamento permanecem independentes.
+- Remove highlights de borda/outline no modo Lista; seleção fica indicada por uma superfície discreta.
+- Selecionar um recurso abre o Inspector diretamente na aba Padrão.
+- Adiciona contratos para organização das abas, tags, resumo técnico, fontes, temas e cabeçalhos de Lista.
+- A validação visual/funcional no Foundry VTT 14 build 360 ainda deve ser realizada após a instalação.
+
 ## 1.0.0.134 — Biblioteca compacta, Inspector separado e correção do Estúdio
 
 - Corrige a cascata de CSS que sobrescrevia o tamanho configurado das miniaturas e impedia o Grid de aproveitar os 64 × 64 px disponíveis.

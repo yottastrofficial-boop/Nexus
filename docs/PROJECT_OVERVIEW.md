@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.135 (candidato)
+
+A revisão do Inspector separa Padrão e Detalhes, coloca os tabs no topo, mantém nome/descrição/metadados resumidos na visualização padrão e move resumo técnico, fatos e tags para Detalhes. A prévia de fontes usa a família resolvida e uma amostra tipográfica; temas usam tokens hex dinâmicos e uma mini-interface com a paleta real. Cabeçalhos Nome/Categoria/Tipo ocupam a célula inteira, enquanto a Lista não usa bordas/outline de seleção. Selecionar recurso abre Padrão. CI, release e manifesto estão pendentes; validação visual no Foundry VTT 14 build 360 também permanece necessária.
+
 ## Estado do código — 1.0.0.134
 
 A revisão da Biblioteca Universal consolida o Grid em cartões determinados pelo conteúdo, com miniaturas efetivas de 32/64/128 CSS px, título de até três linhas e sem padding/bordas decorativas redundantes. Temas exibem amostras da própria paleta. O Inspector separa Prévia e Detalhes; fontes, fatos técnicos e metadados ficam na aba de detalhes. Pastas usam clique para seleção e duplo clique para navegação. O Estúdio de Aparência passa a fornecer opções ApplicationV2 mutáveis por instância e clonar opções recebidas do submenu. CI, regressões, empacotamento, release, asset `nexus.zip` e manifesto da 1.0.0.134 foram aprovados/publicados. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
