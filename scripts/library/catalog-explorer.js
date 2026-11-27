@@ -433,22 +433,12 @@ export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
 
 function renderLibraryResourcePreview(resource, resolved) {
   const model = getLibraryResourcePreviewModel(resource, resolved);
-  if (!model) return null;
+  if (!model || model.kind === "font") return null;
   const section = makeElement("section", "nexus-library-resource-preview");
   section.dataset.previewKind = model.kind;
   if (model.kind !== "font") {
     section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
     section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
-  }
-  if (model.kind === "font") {
-    const specimen = makeElement("div", "nexus-library-font-specimen");
-    specimen.style.setProperty("font-family", model.family, "important");
-    const headline = makeElement("strong", "nexus-library-font-specimen-heading", "Aa");
-    headline.style.setProperty("font-family", model.family, "important");
-    const sample = makeElement("p", "nexus-library-font-specimen-normal", "Lorem ipsum dolor sit amet.");
-    sample.style.setProperty("font-family", model.family, "important");
-    specimen.append(headline, sample);
-    section.append(specimen);
   }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
     const members = model.members;
@@ -575,13 +565,6 @@ function renderLibraryResourcePreview(resource, resolved) {
     }
     section.append(colors);
   }
-  if (model.details?.length) {
-    const facts = makeElement("dl", "nexus-library-resource-preview-facts");
-    for (const [label, value] of model.details) {
-      facts.append(makeElement("dt", "", label), makeElement("dd", "", value));
-    }
-    section.append(facts);
-  }
   return section;
 }
 
@@ -618,6 +601,7 @@ export function createLibraryCatalogExplorer({
   let currentQuery = "";
   let currentSmartView = "all";
   let currentFolder = "";
+  let selectedFolderId = "";
   let currentCollectionId = "";
   let currentTag = "all";
   let currentOrigin = "all";
@@ -640,7 +624,10 @@ export function createLibraryCatalogExplorer({
     const button = makeElement("button", "nexus-library-folder-entry nexus-library-generic-item");
     button.type = "button";
     button.dataset.libraryOpenFolder = folder.id;
-    button.setAttribute("aria-label", "Abrir pasta " + folder.name);
+    button.dataset.libraryFolderSelect = folder.id;
+    button.setAttribute("aria-label", "Selecionar pasta " + folder.name);
+    button.title = "Clique para selecionar; duplo clique para abrir";
+    button.setAttribute("aria-pressed", "false");
     const preview = makeElement("span", "nexus-library-generic-preview nexus-library-folder-preview");
     preview.append(makeElement("i", "fa-solid fa-folder", ""));
     const name = makeElement("strong", "", folder.name);
@@ -683,9 +670,23 @@ export function createLibraryCatalogExplorer({
       preview.append(specimen);
     } else if (resource.kind === "theme") {
       preview.dataset.previewKind = "theme";
-      const icon = makeElement("i", "fa-solid fa-palette");
-      icon.setAttribute("aria-hidden", "true");
-      preview.append(icon);
+      const colors = Array.isArray(resource.previewColors)
+        ? resource.previewColors.filter(color => /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(color?.value ?? "").trim())).slice(0, 4)
+        : [];
+      if (colors.length) {
+        const swatches = makeElement("span", "nexus-library-theme-card-swatches");
+        for (const color of colors) {
+          const swatch = makeElement("i", "nexus-library-theme-card-swatch");
+          swatch.style.backgroundColor = color.value.trim();
+          swatch.setAttribute("aria-label", String(color.label ?? "Cor do tema"));
+          swatches.append(swatch);
+        }
+        preview.append(swatches);
+      } else {
+        const icon = makeElement("i", "fa-solid fa-palette");
+        icon.setAttribute("aria-hidden", "true");
+        preview.append(icon);
+      }
     } else if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
@@ -767,8 +768,76 @@ export function createLibraryCatalogExplorer({
     return card;
   };
 
+  let currentInspectorTab = "preview";
+  const renderInspectorTabs = (previewContent, detailsContent) => {
+    const root = makeElement("div", "nexus-library-inspector-content");
+    const tabs = makeElement("div", "nexus-library-inspector-tabs");
+    tabs.setAttribute("role", "tablist");
+    tabs.setAttribute("aria-label", "Visualização do recurso");
+
+    const previewTab = makeElement("button", "", "Prévia");
+    previewTab.type = "button";
+    previewTab.dataset.libraryInspectorTab = "preview";
+    previewTab.id = "nexus-library-inspector-tab-preview";
+    previewTab.setAttribute("role", "tab");
+    const detailsTab = makeElement("button", "", "Detalhes");
+    detailsTab.type = "button";
+    detailsTab.dataset.libraryInspectorTab = "details";
+    detailsTab.id = "nexus-library-inspector-tab-details";
+    detailsTab.setAttribute("role", "tab");
+    tabs.append(previewTab, detailsTab);
+
+    const previewPanel = makeElement("section", "nexus-library-inspector-panel");
+    previewPanel.dataset.libraryInspectorPanel = "preview";
+    previewPanel.setAttribute("role", "tabpanel");
+    previewPanel.setAttribute("aria-labelledby", previewTab.id);
+    for (const node of previewContent.filter(Boolean)) previewPanel.append(node);
+
+    const detailsPanel = makeElement("section", "nexus-library-inspector-panel");
+    detailsPanel.dataset.libraryInspectorPanel = "details";
+    detailsPanel.setAttribute("role", "tabpanel");
+    detailsPanel.setAttribute("aria-labelledby", detailsTab.id);
+    for (const node of detailsContent.filter(Boolean)) detailsPanel.append(node);
+
+    const activate = selected => {
+      currentInspectorTab = selected === "details" ? "details" : "preview";
+      for (const tab of [previewTab, detailsTab]) {
+        const active = tab.dataset.libraryInspectorTab === currentInspectorTab;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+      }
+      previewPanel.hidden = currentInspectorTab !== "preview";
+      detailsPanel.hidden = currentInspectorTab !== "details";
+    };
+    activate(currentInspectorTab);
+    root.append(tabs, previewPanel, detailsPanel);
+    return { root, detailsPanel };
+  };
+
+  detail.addEventListener("click", event => {
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const tab = target?.closest("[data-library-inspector-tab]");
+    if (!tab || !detail.contains(tab)) return;
+    const root = tab.closest(".nexus-library-inspector-content");
+    if (!root) return;
+    event.preventDefault();
+    const selected = tab.dataset.libraryInspectorTab === "details" ? "details" : "preview";
+    currentInspectorTab = selected;
+    root.querySelectorAll("[data-library-inspector-tab]").forEach(item => {
+      const active = item.dataset.libraryInspectorTab === selected;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-selected", String(active));
+      item.tabIndex = active ? 0 : -1;
+    });
+    root.querySelectorAll("[data-library-inspector-panel]").forEach(panel => {
+      panel.hidden = panel.dataset.libraryInspectorPanel !== selected;
+    });
+  });
+
   const renderDetails = async resource => {
     const version = ++detailRequestVersion;
+    currentInspectorTab = "preview";
     const key = resourceKey(resource);
     detail.dataset.selectedProvider = resource.providerId;
     detail.dataset.selectedResource = resource.id;
@@ -801,6 +870,7 @@ export function createLibraryCatalogExplorer({
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
     const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
+    const previewModel = getLibraryResourcePreviewModel(resource, resolved);
     const resourcePreview = renderLibraryResourcePreview(resource, resolved);
     const themePreview = makeElement("section", "nexus-library-theme-preview");
     themePreview.hidden = themeColors.length === 0;
@@ -826,7 +896,8 @@ export function createLibraryCatalogExplorer({
       ["Pasta", resource.folder],
       ["Etiquetas", resource.tags.join(", ") || "—"],
       ["Versão", "v" + String(resource.version ?? 1)],
-      ["Capacidades", resource.capabilities?.length ? resource.capabilities.join(", ") : "—"]
+      ["Capacidades", resource.capabilities?.length ? resource.capabilities.join(", ") : "—"],
+      ...(previewModel?.details ?? [])
     ];
     if (resource.providerId === "nexus-library" && resource.reference?.collection === "components") {
       resourceFacts.push(["Versão", "v" + String(resource.version ?? resolved?.version ?? 1)]);
@@ -973,7 +1044,11 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, thumbnailLabel, save);
-          detail.replaceChildren(heading, meta, themePreview, ...(resourcePreview ? [resourcePreview] : []), description, facts, folderLabel, collectionSection, updateSection, editor, actions);
+          const inspector = renderInspectorTabs(
+            [themePreview, ...(resourcePreview ? [resourcePreview] : [])],
+            [description, facts, folderLabel, collectionSection, updateSection, editor, actions]
+          );
+          detail.replaceChildren(heading, meta, inspector.root);
           return;
         }
 
@@ -1047,13 +1122,17 @@ export function createLibraryCatalogExplorer({
     });
     advanced.append(raw);
     const designProfilePreview = renderDesignProfilePreview(resource, resolved);
-    detail.replaceChildren(heading, meta, themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    const inspector = renderInspectorTabs(
+      [themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : [])],
+      [description, facts, folderLabel, collectionSection, updateSection, actions, advanced]
+    );
+    detail.replaceChildren(heading, meta, inspector.root);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);
-        if (specializedEditor && typeof specializedEditor.nodeType === "number") detail.append(specializedEditor);
+        if (specializedEditor && typeof specializedEditor.nodeType === "number") inspector.detailsPanel.append(specializedEditor);
       } catch (error) {
-        detail.append(makeElement("p", "nexus-library-empty", "Editor especializado indisponível: " + String(error?.message ?? error)));
+        inspector.detailsPanel.append(makeElement("p", "nexus-library-empty", "Editor especializado indisponível: " + String(error?.message ?? error)));
       }
     }
   };
@@ -1273,11 +1352,26 @@ export function createLibraryCatalogExplorer({
 
   container.addEventListener("click", async event => {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
-    const openFolder = target?.closest("[data-library-open-folder]");
-    if (openFolder && container.contains(openFolder)) {
+    const folderSelection = target?.closest("[data-library-folder-select]");
+    if (folderSelection && container.contains(folderSelection)) {
       event.preventDefault();
       event.stopPropagation();
-      if (typeof onOpenFolder === "function") await onOpenFolder(openFolder.dataset.libraryOpenFolder);
+      selectedFolderId = folderSelection.dataset.libraryFolderSelect;
+      container.querySelectorAll("[data-library-folder-select]").forEach(item => {
+        const active = item.dataset.libraryFolderSelect === selectedFolderId;
+        item.classList.toggle("is-selected", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      const preferences = getPreferences();
+      const folder = preferences.folders.find(item => item.id === selectedFolderId);
+      const childCount = preferences.folders.filter(item => item.parentId === selectedFolderId).length;
+      const panel = makeElement("div", "nexus-library-folder-selection-details");
+      panel.append(
+        makeElement("strong", "", folder?.name ?? "Pasta"),
+        makeElement("p", "", `${childCount} subpasta(s)`),
+        makeElement("p", "", "Clique duas vezes para abrir esta pasta.")
+      );
+      detail.replaceChildren(panel);
       return;
     }
     const loadMore = target?.closest("[data-library-load-more]");
@@ -1336,6 +1430,25 @@ export function createLibraryCatalogExplorer({
         detail.replaceChildren(makeElement("p", "nexus-library-detail-placeholder", `${selectedResourceKeys.size} selecionado(s). Clique com o botão direito para criar uma coleção.`));
       } else await renderDetails(resource);
     }
+  });
+
+  container.addEventListener("dblclick", async event => {
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const folder = target?.closest("[data-library-open-folder]");
+    if (!folder || !container.contains(folder)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof onOpenFolder === "function") await onOpenFolder(folder.dataset.libraryOpenFolder);
+  });
+
+  container.addEventListener("keydown", async event => {
+    if (event.key !== "Enter") return;
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const folder = target?.closest("[data-library-open-folder]");
+    if (!folder || !container.contains(folder)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof onOpenFolder === "function") await onOpenFolder(folder.dataset.libraryOpenFolder);
   });
 
   container.addEventListener("contextmenu", event => {
