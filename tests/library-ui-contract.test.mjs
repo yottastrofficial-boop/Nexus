@@ -118,6 +118,8 @@ assert.match(styles, /nexus-library-inspector-tabs[\s\S]*?grid-template-columns:
 assert.match(styles, /nexus-library-font-preview-samples/);
 assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
+assert.match(styles, /nexus-library-font-preview-aa/);
+assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(styles, /nexus-library-theme-live-preview/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
