@@ -423,10 +423,14 @@ function renderLibraryResourcePreview(resource, resolved) {
   section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
   if (model.kind === "font") {
     const specimen = makeElement("div", "nexus-library-font-specimen");
-    specimen.style.fontFamily = model.family;
-    specimen.append(makeElement("strong", "", "Aa Bb Cc 0123"));
-    specimen.append(makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit."));
-    specimen.append(makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ"));
+    specimen.style.setProperty("font-family", model.family, "important");
+    const headline = makeElement("strong", "", "Aa Bb Cc 0123");
+    headline.style.setProperty("font-family", model.family, "important");
+    const sample = makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    sample.style.setProperty("font-family", model.family, "important");
+    const glyphs = makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ");
+    glyphs.style.setProperty("font-family", model.family, "important");
+    specimen.append(headline, sample, glyphs);
     section.append(specimen);
   }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
@@ -659,7 +663,7 @@ export function createLibraryCatalogExplorer({
       sample.style.setProperty("font-family", family, "important");
       sample.append(makeElement("strong", "", "Aa"), makeElement("small", "", "0123"));
       preview.append(sample);
-    } else if (resource.kind === "theme" && resource.previewColors?.length) {
+    } else if (resource.kind === "theme") {
       preview.dataset.previewKind = "theme";
       const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
       preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? colors.painel ?? colors["superfície"] ?? colors.canvas ?? "#202e3e");
