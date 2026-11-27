@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource, getLibraryThemePreviewColors } from "../scripts/library/catalog-explorer.js";
+import { getLibraryCatalogResourceKey, getLibraryCatalogPreferenceReference, populateLibraryCompendiumSelect, getLibraryResourceIcon, getLibraryResourcePreviewModel, getLibraryMediaInsertionSource, getLibraryThemePreviewColors, getLibraryThemePreviewTokens, getLibraryResourceBarCardPreviewModel } from "../scripts/library/catalog-explorer.js";
 
 assert.equal(
   getLibraryCatalogResourceKey({
@@ -156,6 +156,29 @@ test("theme detail previews expose only known, safe palette colors", () => {
     ]
   );
   assert.deepEqual(getLibraryThemePreviewColors({ palette: { canvasColor: "red" } }), []);
+
+assert.deepEqual(
+  getLibraryThemePreviewTokens([
+    { key: "panel", label: "Painel", value: "#282018" },
+    { key: "surface", label: "Superfície", value: "#3b2e20" },
+    { key: "text", label: "Texto", value: "#f0e3c7" },
+    { key: "accent", label: "Acento", value: "#85663f" },
+    { key: "highlight", label: "Destaque", value: "#d7aa59" },
+    { key: "button", label: "Botão", value: "#77532c" }
+  ]),
+  {
+    canvas: "#171f2a", panel: "#282018", surface: "#3b2e20", card: "#273443",
+    input: "#111b27", border: "#3c5067", text: "#f0e3c7", muted: "#9aadc2",
+    accent: "#85663f", highlight: "#d7aa59", button: "#77532c", windowHeader: "#223246"
+  },
+  "Theme preview tokens must resolve by canonical palette key, not localized label or fallback."
+);
+assert.deepEqual(
+  getLibraryResourceBarCardPreviewModel({ kind: "component", type: "asset-meter", name: "Barra de recurso" }),
+  { type: "assetmeter", label: "Barra de recurso", current: 32, max: 40, percent: 80 }
+);
+assert.equal(getLibraryResourceBarCardPreviewModel({ kind: "component", type: "asset-text" }), null);
+
 });
 
 test("component inspector preview model carries safe appearance data", () => {
