@@ -395,6 +395,26 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         capabilities: ["resolve"]
       }, "nexus-library"));
     }
+    const builtInFonts = [
+      { id: "inter", name: "Inter", family: '"Inter", system-ui, sans-serif', description: "Fonte de interface preferencial declarada pelo stylesheet NEXUS.", tags: ["fonte", "tipografia", "interface", "ui"] },
+      { id: "system-ui", name: "System UI", family: "system-ui, sans-serif", description: "Fonte de sistema usada como fallback nativo.", tags: ["fonte", "tipografia", "sistema", "ui"] },
+      { id: "arial", name: "Arial", family: "Arial, Helvetica, sans-serif", description: "Fallback sans-serif compatível com sistemas comuns.", tags: ["fonte", "tipografia", "sans-serif"] },
+      { id: "monospace", name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", description: "Pilha monoespaçada usada em campos e trechos técnicos.", tags: ["fonte", "tipografia", "monoespaçada", "código"] }
+    ];
+    for (const font of builtInFonts) {
+      resources.push(normalizeResource({
+        id: "builtin-font:" + font.id,
+        kind: "style",
+        type: "font",
+        name: font.name,
+        description: font.description,
+        tags: font.tags,
+        origin: "core",
+        folder: "assets-fontes",
+        reference: { providerId: "nexus-library", builtin: "font", key: font.id },
+        capabilities: ["resolve"]
+      }, "nexus-library"));
+    }
     resources.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
     return Object.freeze(resources);
   };
@@ -581,6 +601,15 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     }
     if (reference?.builtin === "theme") {
       return [...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })), ...(catalog.themes ?? [])].find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
+    }
+    if (reference?.builtin === "font") {
+      const fonts = {
+        inter: { name: "Inter", family: '"Inter", system-ui, sans-serif', category: "Interface" },
+        "system-ui": { name: "System UI", family: "system-ui, sans-serif", category: "Sistema" },
+        arial: { name: "Arial", family: "Arial, Helvetica, sans-serif", category: "Sans-serif" },
+        monospace: { name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", category: "Código" }
+      };
+      return fonts[String(reference.key)] ?? null;
     }
     const collections = await getCollections(getUser());
     const collection = String(reference?.collection ?? "");
