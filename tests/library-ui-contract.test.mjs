@@ -187,18 +187,28 @@ console.log("NEXUS Library command bar contracts: OK");
 
 assert.ok(libraryApplication.includes("type-desc") && libraryApplication.includes("size-asc") && libraryApplication.includes("tag-desc"),
   "The sort control must accept all ascending and descending options, not silently reset them.");
-assert.ok(libraryTemplate.includes('data-library-column-resize="name"') && libraryTemplate.includes('data-library-column-resize="modified"'),
-  "List headers must expose adjustable column separators.");
+assert.ok(libraryTemplate.includes('data-library-column-resize="name"') &&
+  libraryTemplate.includes('data-library-column-resize="category"') &&
+  libraryTemplate.includes('data-library-column-resize="type"'),
+  "The compact Name/Category/Type list headers must expose adjustable column separators.");
 assert.ok(libraryApplication.includes("applyListColumnWidths") && libraryApplication.includes("setPointerCapture"),
   "Column resizing must respond to pointer input and apply shared grid widths.");
-assert.ok(libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') && libraryTemplate.includes('data-library-tag list="nexus-library-tag-options"'),
-  "Category and tag filters must expose searchable option lists.");
-assert.ok(styles.includes(".nexus-library-font-specimen") && styles.includes(".nexus-library-theme-miniature"),
-  "Font and theme resources must have their own meaningful previews.");
+assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &&
+  libraryTemplate.includes('data-library-open-list-filter="type"') &&
+  libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') &&
+  libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
+  !libraryTemplate.includes("data-library-tag"),
+  "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
+assert.ok(styles.includes(".nexus-library-font-specimen") &&
+  styles.includes(".nexus-library-theme-miniature") &&
+  styles.includes(".nexus-library-theme-list-mark") &&
+  styles.includes(".nexus-library-theme-highlight"),
+  "Font and theme resources must have expressive grid previews and a theme-token list marker.");
 assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
   "The search input must not draw a second border inside its single wrapper.");
-assert.ok(libraryApplication.includes("button.append(icon, textNode)"),
-  "Breadcrumbs must align an appropriate folder/view icon with the path label.");
+assert.ok(libraryApplication.includes("button.append(icon, textNode)") &&
+  libraryApplication.includes('separator.textContent = "/"'),
+  "Breadcrumbs must align their path labels and use Windows-style slash separators.");
 console.log("NEXUS Library 1.0.0.129 visual refinement contracts: OK");
 
 
@@ -211,10 +221,14 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
 assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
   catalogExplorer.includes('nexus-library-font-sample'),
   "Font samples must explicitly use the resolved font stack in both grid and detail.");
-assert.ok(catalogExplorer.includes('"Painel de exemplo"') &&
-  styles.includes("nexus-library-theme-miniature > p") &&
+assert.ok(catalogExplorer.includes('"Título principal"') &&
+  catalogExplorer.includes('"Destaque"') &&
+  catalogExplorer.includes('"Botão"') &&
+  catalogExplorer.includes('"Campo de texto"') &&
+  styles.includes("nexus-library-theme-copy") &&
+  styles.includes("nexus-library-theme-swatches") &&
   styles.includes("width: 84% !important"),
-  "Theme grid preview must show a readable panel, button and field at a large scale.");
+  "Theme grid preview must show typography, highlight, controls, progress and its real palette at a large scale.");
 assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
   "Folder navigation tiles must be visually integrated into the content view.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
