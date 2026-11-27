@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.128
+## Estado do código — 1.0.0.129
 
-A versão em preparação refina a Biblioteca 1.0.0.127: remove superfícies e highlights duplicados, transforma "Todas as pastas" em cabeçalho da árvore, agrega recursos de subpastas, mapeia pastas padrão para itens reais do catálogo, expõe fontes nativas e temas, cria uma lista compacta com colunas de metadados e classificação, adiciona seleção múltipla/coleções por contexto e implementa redimensionamento acessível da navegação e do Inspector. A versão estável do manifesto permanece 1.0.0.127 até o workflow confirmar a release e o ZIP 1.0.0.128. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.129 refina a Biblioteca após a captura do usuário: pesquisa em uma única superfície, breadcrumb com ícone alinhado, linha de lista com miniatura e nome agrupados, colunas corretas, redimensionamento de colunas, classificação completa, listas de sugestões para categoria/etiqueta e prévias de fontes e temas. Temas são apresentados como Coleções visuais; somente o nome da pasta padrão é migrado, sem alterar dados personalizados. O pacote candidato é 1.0.0.129; o manifesto estável permanece em 1.0.0.128 até a publicação e confirmação do ZIP. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 ## Estado do código — 1.0.0.126
 
