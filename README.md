@@ -1,16 +1,16 @@
-## Biblioteca 1.0.0.135 publicada
+## Biblioteca 1.0.0.136 preparada para publicação
 
-A 1.0.0.135 reorganiza o Inspector em **Padrão** e **Detalhes**, restaura prévias de fontes, temas e recursos, move tags e resumo técnico para Detalhes, amplia a área funcional dos cabeçalhos de Lista e remove highlights de borda no modo Lista. CI, release, ZIP e manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, validação/prévia de importação e confirmação. O pacote Foundry será publicado pelo workflow após a validação automatizada; o manifesto estável será sincronizado somente depois de confirmar o ZIP na Release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão estável 1.0.0.135 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão estável 1.0.0.136 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.135-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.136-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
@@ -151,7 +151,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão preparada para publicação é **1.0.0.129**; o manifesto estável permanece em **1.0.0.128** até o workflow publicar o ZIP e sincronizá-lo. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão preparada para publicação é **1.0.0.136**; o manifesto estável será sincronizado pelo workflow após a publicação do ZIP. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
