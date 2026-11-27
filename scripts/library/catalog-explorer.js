@@ -630,7 +630,7 @@ export function createLibraryCatalogExplorer({
     button.setAttribute("aria-pressed", "false");
     const preview = makeElement("span", "nexus-library-generic-preview nexus-library-folder-preview");
     preview.append(makeElement("i", "fa-solid fa-folder", ""));
-    const name = makeElement("strong", "", folder.name);
+    const name = makeElement("strong", "nexus-library-card-name", folder.name);
     if (currentViewMode === "list") {
       const nameCell = makeElement("span", "nexus-library-list-name-cell");
       nameCell.append(preview, name);
@@ -1357,6 +1357,8 @@ export function createLibraryCatalogExplorer({
       event.preventDefault();
       event.stopPropagation();
       selectedFolderId = folderSelection.dataset.libraryFolderSelect;
+      detail.dataset.selectedProvider = "";
+      detail.dataset.selectedResource = "";
       container.querySelectorAll("[data-library-folder-select]").forEach(item => {
         const active = item.dataset.libraryFolderSelect === selectedFolderId;
         item.classList.toggle("is-selected", active);
