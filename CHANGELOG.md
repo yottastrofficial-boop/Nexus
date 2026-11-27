@@ -10,7 +10,7 @@
 - Remove highlights de borda/outline no modo Lista; seleção fica indicada por uma superfície discreta.
 - Selecionar um recurso abre o Inspector diretamente na aba Padrão.
 - Adiciona contratos para organização das abas, tags, resumo técnico, fontes, temas e cabeçalhos de Lista.
-- A validação visual/funcional no Foundry VTT 14 build 360 ainda deve ser realizada após a instalação.
+- CI, regressões, pacote, release, asset `nexus.zip` (492.313 bytes) e manifesto 1.0.0.135 foram confirmados; a validação visual/funcional no Foundry VTT 14 build 360 ainda deve ser realizada após a instalação.
 
 ## 1.0.0.134 — Biblioteca compacta, Inspector separado e correção do Estúdio
 
