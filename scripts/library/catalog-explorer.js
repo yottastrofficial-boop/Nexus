@@ -1196,6 +1196,29 @@ export function createLibraryCatalogExplorer({
         return option;
       }));
     }
+    const categoryOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-category-options");
+    const typeOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-type-options");
+    const categoryLabels = {
+      component: "Componente", composition: "Composição", layout: "Layout", template: "Modelo",
+      asset: "Asset", media: "Mídia", theme: "Coleção visual", style: "Estilo", logic: "Lógica", document: "Documento"
+    };
+    const optionList = (records, keyOf, labelOf, allLabel) => {
+      const values = new Map([["all", allLabel]]);
+      for (const resource of records) {
+        const key = String(keyOf(resource) ?? "").trim();
+        if (key && !values.has(key)) values.set(key, String(labelOf(resource) ?? key));
+      }
+      return [...values].map(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.label = label;
+        return option;
+      });
+    };
+    categoryOptions?.replaceChildren(...optionList(currentResources, item => item.kind,
+      item => categoryLabels[item.kind] || item.kind, "Todas"));
+    typeOptions?.replaceChildren(...optionList(currentResources, item => item.type,
+      item => item.documentType || item.type, "Todos"));
     const visible = currentResources.filter(resource => {
       const key = resourceKey(resource);
       if (currentSmartView === "favorites" && !preferences.favorites.includes(key)) return false;
