@@ -2290,17 +2290,6 @@ html.nexus-design-system .nexus-library-application .nexus-library-font-specimen
 
 
 /* 1.0.0.130: folder navigation and high-occupancy visual previews. */
-html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview {
-  width: 84% !important;
-  height: auto !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: 190px !important;
-  max-height: none !important;
-  aspect-ratio: 1 / 1 !important;
-  margin: 0 auto 4px !important;
-  padding: 0 !important;
-}
 html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-font-sample {
   display: flex !important;
   flex-direction: column;
@@ -2799,52 +2788,70 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 }
 
 
-/* 1.0.0.133 — isolated adaptive Universal Library grid and predictable preview sizing. */
+/* 1.0.0.134 — compact, content-sized Universal Library grid. */
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] {
   --nexus-library-preview-size: 64px;
-  --nexus-library-card-min-width: 112px;
+  --nexus-library-card-min-width: 80px;
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--nexus-library-card-min-width)), 1fr)) !important;
   align-content: start;
   justify-items: stretch;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   min-width: 0;
-  padding: 10px;
+  padding: 4px;
   box-sizing: border-box;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"][data-card-size="small"] {
   --nexus-library-preview-size: 32px;
-  --nexus-library-card-min-width: 88px;
+  --nexus-library-card-min-width: 52px;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"][data-card-size="medium"] {
   --nexus-library-preview-size: 64px;
-  --nexus-library-card-min-width: 112px;
+  --nexus-library-card-min-width: 80px;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"][data-card-size="large"] {
   --nexus-library-preview-size: 128px;
-  --nexus-library-card-min-width: 176px;
+  --nexus-library-card-min-width: 144px;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] > .nexus-library-generic-card {
   position: relative;
   display: block;
   width: 100%;
   min-width: 0;
+  min-height: 0 !important;
+  height: auto !important;
   max-width: none;
-  justify-self: stretch;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 4px;
+  background: transparent !important;
+  box-shadow: none !important;
+  align-self: start;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-card > .nexus-library-generic-item {
   display: flex !important;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 7px;
+  gap: 2px;
   width: 100%;
   min-width: 0;
-  min-height: 0;
-  padding: 9px 7px !important;
-  box-sizing: border-box;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: center;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-card > .nexus-library-generic-item.is-selected,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-folder-entry.is-selected {
+  background: color-mix(in srgb, var(--nexus-accent, #79b8d8) 13%, transparent) !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview {
   display: grid !important;
@@ -2856,8 +2863,13 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   min-height: var(--nexus-library-preview-size) !important;
   max-width: var(--nexus-library-preview-size) !important;
   max-height: var(--nexus-library-preview-size) !important;
-  margin: 0 auto;
-  padding: 0;
+  align-self: center;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -2875,7 +2887,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   place-items: center;
   width: 100%;
   height: 100%;
-  font-size: min(72%, 48px) !important;
+  font-size: clamp(22px, calc(var(--nexus-library-preview-size) * .72), 48px) !important;
   line-height: 1;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-font-grid-specimen {
@@ -2889,36 +2901,57 @@ html.nexus-design-system .nexus-library-application .nexus-library-font-grid-spe
   white-space: nowrap;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-card-name {
-  display: block;
+  display: -webkit-box;
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  max-height: 3.9em;
+  margin: 0;
   overflow: hidden;
   color: var(--nexus-panel-text, #edf0f6);
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.3;
   text-align: center;
   text-overflow: ellipsis;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-favorite {
   position: absolute !important;
   z-index: 2;
-  top: 4px;
-  right: 4px;
+  top: 0;
+  right: 0;
   display: grid !important;
   place-items: center;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
   margin: 0 !important;
   padding: 0 !important;
-  border-radius: 6px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
   background: color-mix(in srgb, var(--nexus-panel-surface, #202d3d) 88%, transparent) !important;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-folder-meta {
-  display: none !important;
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-card-swatches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-card-swatch {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 2px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-folder-preview > i {
+  font-size: clamp(22px, calc(var(--nexus-library-preview-size) * .72), 48px) !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] {
   display: grid !important;
@@ -2963,16 +2996,52 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   white-space: nowrap;
   text-align: left;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-font-specimen {
-  gap: 5px;
+html.nexus-design-system .nexus-library-application .nexus-library-inspector-tabs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 8px;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-font-specimen-heading {
-  font-size: 32px;
-  line-height: 1.05;
+html.nexus-design-system .nexus-library-application .nexus-library-inspector-tabs > button {
+  min-width: 0;
+  padding: 5px 0 !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--nexus-panel-muted, #a5b6c9);
 }
-html.nexus-design-system .nexus-library-application .nexus-library-font-specimen-normal {
+html.nexus-design-system .nexus-library-application .nexus-library-inspector-tabs > button.is-active {
+  border-bottom-color: var(--nexus-accent, #79b8d8) !important;
+  color: var(--nexus-panel-text, #edf0f6);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-inspector-panel {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-inspector-panel[hidden] {
+  display: none !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-resource-preview {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-selection-details {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-selection-details p {
   margin: 0;
-  font-size: 11px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+  color: var(--nexus-panel-muted, #a5b6c9);
 }
