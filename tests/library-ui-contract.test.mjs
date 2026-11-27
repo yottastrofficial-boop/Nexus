@@ -84,8 +84,10 @@ assert.match(actorListeners, /_addSavedLibraryComponent\(payload\.entryId, \{\},
   "Saved components must be insertable by dropping directly onto the Canvas.");
 assert.match(actorListeners, /nexusLibraryCanvasDropBound/,
   "Canvas drop listeners must be bound once per rendered sheet root.");
-assert.match(actorSheet, /position: \{ width: 800, height: 836 \}/,
-  "The initial sheet window must preserve the canvas-plus-header geometry.");
+assert.match(actorSheet, /position: \{ width: 1100, height: 920 \}/,
+  "The initial sheet window must provide a larger viewport for the configured Canvas.");
+assert.match(actorSheet, /window: \{ resizable: true \}/,
+  "The character sheet window must remain user-resizable.");
 assert.match(actorSheet, /window: \{ resizable: false \}/,
   "The character sheet window must retain the requested fixed dimensions.");
 assert.match(documentBridge, /matchesLibrarySearchQuery/,
