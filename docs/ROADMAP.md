@@ -1,3 +1,13 @@
+## 1.0.0.134 — Refinamento da Biblioteca e Estúdio de Aparência
+
+- Consolidar a dimensão efetiva das prévias do Grid em 32/64/128 CSS px, sem regras legadas reduzindo o espaço útil.
+- Usar cartões compactos com miniatura de 64 × 64 px e título de até três linhas, sem altura artificial.
+- Apresentar cores reais dos temas nos cartões.
+- Separar Prévia e Detalhes no Inspector; fatos técnicos e metadados não ocupam a área visual principal.
+- Selecionar pastas com clique e abrir com duplo clique (Enter mantém acessibilidade por teclado).
+- Corrigir opções aninhadas do ApplicationV2 no Estúdio de Aparência.
+- A validação visual/funcional no Foundry VTT 14 build 360 permanece necessária após a instalação.
+
 ## 1.0.0.133 — Grid adaptativo e prévias proporcionais da Biblioteca
 
 - Grid adaptativo preenche a largura disponível, sem largura máxima fixa dos cartões.
