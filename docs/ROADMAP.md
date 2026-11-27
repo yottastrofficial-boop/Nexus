@@ -1,4 +1,4 @@
-## 1.0.0.136 — Backup da Biblioteca (candidata)
+## 1.0.0.137 — Correções visuais da Biblioteca (candidata)
 
 - API pública de exportação, preparação/validação, prévia e confirmação de importação do backup da Biblioteca.
 - A versão candidata será publicada após CI; o manifesto estável permanece na versão publicada até o workflow confirmar o ZIP.
