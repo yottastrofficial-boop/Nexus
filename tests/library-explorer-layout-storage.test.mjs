@@ -27,8 +27,9 @@ test("list rows use exactly Name, Category and Type, including folders", () => {
 });
 
 test("font and theme cards stay compact in grid while Inspector retains the full preview", () => {
-  assert.match(explorer, /if \(builtin === "font" \|\| resource\.kind === "theme"\)/);
-  assert.match(explorer, /fa-solid fa-font/);
+  assert.match(explorer, /if \(builtin === "font"\)/);
+  assert.match(explorer, /nexus-library-font-grid-specimen/);
+  assert.match(explorer, /resource\.fontFamily/);
   assert.match(explorer, /fa-solid fa-palette/);
   assert.match(explorer, /nexus-library-font-specimen/);
   assert.match(explorer, /nexus-library-design-preview/);
