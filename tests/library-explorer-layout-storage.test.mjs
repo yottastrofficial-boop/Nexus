@@ -39,7 +39,7 @@ test("font and theme cards stay compact in grid while Inspector retains the full
 
 test("Inspector separates the visual preview from resource details", () => {
   assert.match(explorer, /renderInspectorTabs\([\s\S]*?\[description, facts, folderLabel, collectionSection, updateSection, actions, advanced\]/);
-  assert.match(explorer, /data-library-inspector-tab = "details"|libraryInspectorTab = "details"/);
+  assert.match(explorer, /libraryInspectorTab === "details"/);
 });
 
 test("small configuration records stay structured in the canonical Library store", () => {
