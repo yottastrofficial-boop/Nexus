@@ -183,6 +183,7 @@ test("font resources expose a typographic specimen model using the resolved fami
   assert.equal(model.kind, "font");
   assert.equal(model.family, '"Inter", system-ui, sans-serif');
   assert.equal(model.sample, "Lorem ipsum dolor sit amet");
+  assert.match(model.family, /Inter/);
 });
 
 

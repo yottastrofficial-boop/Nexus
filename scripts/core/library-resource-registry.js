@@ -127,6 +127,7 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     documentType: cleanText(raw.documentType, 64),
     packLabel: cleanText(raw.packLabel, 120),
     previewColors: Object.freeze((Array.isArray(raw.previewColors) ? raw.previewColors : []).slice(0, 8).map(item => ({ label: cleanText(item?.label, 32), value: typeof item?.value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.value) ? item.value : "" })).filter(item => item.label && item.value)),
+    fontFamily: cleanText(raw.fontFamily, 180),
     folder: cleanText(raw.folder, 160),
     sizeBytes: Number.isFinite(Number(raw.sizeBytes ?? raw.size)) && Number(raw.sizeBytes ?? raw.size) >= 0 ? Number(raw.sizeBytes ?? raw.size) : null,
     modifiedAt: cleanText(raw.modifiedAt ?? raw.updatedAt ?? raw.lastModified, 40),
@@ -399,7 +400,12 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
     const builtInFonts = [
       { id: "inter", name: "Inter", family: '"Inter", system-ui, sans-serif', description: "Fonte de interface preferencial declarada pelo stylesheet NEXUS.", tags: ["fonte", "tipografia", "interface", "ui"] },
       { id: "system-ui", name: "System UI", family: "system-ui, sans-serif", description: "Fonte de sistema usada como fallback nativo.", tags: ["fonte", "tipografia", "sistema", "ui"] },
-      { id: "arial", name: "Arial", family: "Arial, Helvetica, sans-serif", description: "Fallback sans-serif compatível com sistemas comuns.", tags: ["fonte", "tipografia", "sans-serif"] },
+      { id: "arial", name: "Arial", family: "Arial, Helvetica, sans-serif", description: "Sans-serif compatível com sistemas comuns.", tags: ["fonte", "tipografia", "sans-serif"] },
+      { id: "roboto", name: "Roboto", family: 'Roboto, "Segoe UI", Arial, sans-serif', description: "Sans-serif de desenho neutro; usa Roboto quando instalada e fallback do sistema quando necessário.", tags: ["fonte", "tipografia", "sans-serif", "interface"] },
+      { id: "impact", name: "Impact", family: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif', description: "Display condensada e pesada para títulos curtos.", tags: ["fonte", "tipografia", "display", "condensada"] },
+      { id: "block", name: "Arial Black", family: '"Arial Black", Impact, sans-serif', description: "Sans-serif de peso alto e desenho compacto para títulos e chamadas.", tags: ["fonte", "tipografia", "display", "negrito"] },
+      { id: "script", name: "Segoe Script", family: '"Segoe Script", "Brush Script MT", cursive', description: "Pilha cursiva do sistema, com fallback cursive.", tags: ["fonte", "tipografia", "cursiva", "script"] },
+      { id: "georgia", name: "Georgia", family: 'Georgia, "Times New Roman", serif', description: "Serifada de leitura, com contraste visível em títulos e parágrafos.", tags: ["fonte", "tipografia", "serifada"] },
       { id: "monospace", name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", description: "Pilha monoespaçada usada em campos e trechos técnicos.", tags: ["fonte", "tipografia", "monoespaçada", "código"] }
     ];
     for (const font of builtInFonts) {
@@ -409,6 +415,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         type: "font",
         name: font.name,
         description: font.description,
+        fontFamily: font.family,
         tags: font.tags,
         origin: "core",
         folder: "assets-fontes",
@@ -608,6 +615,11 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         inter: { name: "Inter", family: '"Inter", system-ui, sans-serif', category: "Interface" },
         "system-ui": { name: "System UI", family: "system-ui, sans-serif", category: "Sistema" },
         arial: { name: "Arial", family: "Arial, Helvetica, sans-serif", category: "Sans-serif" },
+        roboto: { name: "Roboto", family: 'Roboto, "Segoe UI", Arial, sans-serif', category: "Sans-serif" },
+        impact: { name: "Impact", family: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif', category: "Display" },
+        block: { name: "Arial Black", family: '"Arial Black", Impact, sans-serif', category: "Display" },
+        script: { name: "Segoe Script", family: '"Segoe Script", "Brush Script MT", cursive', category: "Cursiva" },
+        georgia: { name: "Georgia", family: 'Georgia, "Times New Roman", serif', category: "Serifada" },
         monospace: { name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", category: "Código" }
       };
       return fonts[String(reference.key)] ?? null;

@@ -1,3 +1,15 @@
+## 1.0.0.131 — Prévias de temas e fontes, filtros de lista
+
+- Expande a prévia de temas em grade com título, subtítulo, texto normal, bold/italic, highlight, barras de progresso, botões primário/secundário, campo e paleta de cores derivada do próprio tema.
+- Na lista, temas usam um marcador compacto com fundo, cor de destaque e borda correspondentes ao tema.
+- Fontes passam a mostrar Aa em destaque e Lorem ipsum com amostras bold/italic; o Inspector mostra espécime completo com a família tipográfica resolvida.
+- Amplia o catálogo de fontes de sistema com pilhas distintas para Roboto, Impact/display, Segoe Script/cursiva, Georgia/serifada e Monospace, sempre com fallback local.
+- Lista simplificada para Nome, Categoria e Tipo; remove Tamanho, Modificado e Etiquetas das colunas.
+- Categoria e Tipo abrem filtros pesquisáveis diretamente nos cabeçalhos da lista; as opções disponíveis são sugeridas pelo catálogo. Etiquetas permanecem nos detalhes e podem ser encontradas pela busca global.
+- Mantém pastas primeiro em ordem alfabética e recursos depois em ordem alfabética; remove qualquer seletor redundante de ordenação de pastas.
+- Breadcrumb passa a usar separadores /, mantendo a navegação de caminho.
+- Atualiza contratos de regressão para fontes, miniaturas de tema, filtros, cabeçalhos e colunas redimensionáveis.
+- A validação automatizada e a publicação do pacote serão confirmadas pelo workflow. A validação visual/funcional manual permanece necessária no Foundry VTT 14 build 360.
 ## 1.0.0.130 — Navegação real de pastas e prévias visuais ampliadas
 
 - A Biblioteca agora mostra as pastas filhas diretamente no conteúdo, como o Explorador de Arquivos; abrir uma pasta altera o caminho e permite navegar de volta/subir.

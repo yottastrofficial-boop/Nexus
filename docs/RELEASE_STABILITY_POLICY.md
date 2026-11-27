@@ -1,12 +1,12 @@
-## Estado de distribuição — 1.0.0.130
+## Estado de distribuição — 1.0.0.131
 
-A 1.0.0.130 em preparação inclui navegação de pastas no conteúdo da Biblioteca, Assets globais como diretório pai, fontes nativas visíveis em Fontes com espécimes que usam a família correta, prévias de tema ampliadas e janela de ficha de 1100 × 920 redimensionável. O manifesto estável permanece em 1.0.0.129 até o workflow publicar e confirmar o ZIP 1.0.0.130.
+A 1.0.0.131 prepara a Biblioteca com prévias de tema compostas por componentes semânticos e cores do próprio perfil, espécimes tipográficos com variações normal/bold/italic, catálogo ampliado de fontes locais, lista Nome/Categoria/Tipo e filtros pesquisáveis nos cabeçalhos. Etiquetas permanecem nos detalhes e na busca global; não há filtro dedicado por etiqueta. O manifesto estável permanece em 1.0.0.130 até o workflow validar, publicar e confirmar o ZIP 1.0.0.131.
 
-- `system.json` em preparação: 1.0.0.130; download aponta para `v1.0.0.130/nexus.zip`.
-- `manifest.json` permanece em 1.0.0.129 durante a validação; o workflow o sincroniza após release e asset verificado.
-- CI, pacote e publicação desta revisão serão confirmados pelo workflow.
-- Validação visual/funcional pendente no Foundry VTT 14 build 360: navegar Assets globais → Fontes, conferir a lista de fontes, espécimes Monospace, miniaturas de temas em grade e escala do Canvas padrão versus Configurações.
-- O último checkpoint funcional confirmado permanece 1.0.0.70 até validação documentada no cliente real.
+- `system.json` em preparação: 1.0.0.131; download aponta para `v1.0.0.131/nexus.zip`.
+- `manifest.json` permanece em 1.0.0.130 durante a validação; o workflow sincroniza após release e asset verificado.
+- CI e pacote devem validar sintaxe, contratos, suíte completa e integridade do ZIP.
+- Validação visual/funcional pendente no Foundry VTT 14 build 360: prévias de tema em grade/lista, fontes cursivas/display/monospace, filtros Categoria/Tipo, busca por etiqueta, redimensionamento das três colunas e navegação por caminho com `/`.
+- A publicação do pacote não promove automaticamente o checkpoint funcional; a confirmação manual no cliente real continua necessária.
 
 ## Estado de distribuição — 1.0.0.129
 

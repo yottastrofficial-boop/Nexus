@@ -27,10 +27,10 @@ assert.doesNotMatch(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-applicati
   "A Biblioteca Universal não deve estilizar o sidebar do Foundry.");
 assert.doesNotMatch(styles, /#ui-left|#ui-top|#controls/,
   "A camada da Biblioteca não deve impor botões flutuantes aos controles nativos do Foundry.");
-assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
-  "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
-assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
-  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");
+assert.match(catalogExplorer, /\["tables", "Tabelas"\]/,
+  "O filtro de tipo deve sugerir a chave canônica tables usada pelo Foundry Document Bridge.");
+assert.doesNotMatch(catalogExplorer, /rolltables/,
+  "A chave legada rolltables não deve substituir a chave canônica tables.");
 assert.match(designSystem, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
@@ -116,18 +116,19 @@ assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
 assert.doesNotMatch(libraryTemplate, /data-library-folder-clear/, "The all-folders root is a heading, not a pseudo-folder item.");
-assert.match(libraryTemplate, /data-library-list-header[\s\S]*?Tamanho[\s\S]*?Modificado[\s\S]*?Etiquetas/, "List view exposes Explorer metadata columns.");
+assert.match(libraryTemplate, /data-library-list-header[\s\S]*?Nome[\s\S]*?Categoria[\s\S]*?Tipo/, "List view exposes the compact Name, Category and Type columns.");
+assert.doesNotMatch(libraryTemplate, /data-library-list-column="(?:size|modified|tags)"/, "Size, modification date and tags are not list columns.");
 assert.doesNotMatch(libraryTemplate, /data-library-create-collection/, "Empty collections must not be advertised as a permanent sidebar destination.");
-assert.match(libraryTemplate, /list="nexus-library-tag-options"[\s\S]*?datalist id="nexus-library-tag-options"/, "Tag filters provide searchable suggestions.");
+assert.doesNotMatch(libraryTemplate, /data-library-tag|nexus-library-tag-options/, "Tags are not exposed as a dedicated filter; they remain searchable through the global query.");
 assert.match(libraryApplication, /data-library-resize[\s\S]*?pointerdown[\s\S]*?setPointerCapture/, "Sidebar and Inspector resize hit areas must work with pointer input.");
 assert.match(libraryApplication, /defaultFolderFilters[\s\S]*?assets-fontes[\s\S]*?nexus-temas/, "Default folders must query relevant native catalog resources.");
 assert.match(libraryApplication, /Criar coleção com[\s\S]*?selectedKeys\.slice\(0, 500\)/, "Right-clicking a multi-selection creates a collection of the selected resource references.");
 assert.match(catalogExplorer, /selectedResourceKeys[\s\S]*?event\.shiftKey[\s\S]*?nexus-library-multi-selection-context/, "The catalog supports Ctrl/Shift multi-selection and context actions.");
 assert.match(catalogExplorer, /currentSortMode === "size-desc"[\s\S]*?currentSortMode === "modified-desc"[\s\S]*?currentSortMode === "tag-asc"/, "Explorer sorting supports size, modification date and tags.");
-assert.match(styles, /nexus-library-generic-items\[data-view-mode="list"\][\s\S]*?grid-template-columns[\s\S]*?nexus-library-list-tags/, "List view uses compact metadata columns and adaptive icons.");
+assert.match(styles, /nexus-library-generic-items\[data-view-mode="list"\][\s\S]*?grid-template-columns[\s\S]*?nexus-library-list-type/, "List view uses compact Category and Type metadata columns with adaptive icons.");
 assert.match(styles, /nexus-library-panel-resizer:hover::after[\s\S]*?nexus-accent/, "Resize separators remain visually quiet until hover/focus.");
 assert.match(styles, /nexus-library-folder-row > \.nexus-library-folder-toggle:hover[\s\S]*?background: transparent !important/, "Folder disclosure arrows do not receive a second button highlight.");
-assert.match(libraryTemplate, /option value="font">Fontes/, "Built-in fonts can be filtered in the catalog.");
+assert.match(catalogExplorer, /\["font", "Fonte"\]/, "Built-in fonts can be filtered through the searchable type suggestions.");
 assert.match(libraryApplication, /"assets-fontes": \{ kind: "style", type: "font" \}/, "The Fonts folder maps to native font resources.");
 assert.match(libraryApplication, /"nexus-temas": \{ kind: "theme" \}/, "The Themes folder maps to built-in and personal themes.");
 console.log("NEXUS Library taxonomy and context actions contracts: OK");
@@ -187,19 +188,29 @@ console.log("NEXUS Library command bar contracts: OK");
 
 assert.ok(libraryApplication.includes("type-desc") && libraryApplication.includes("size-asc") && libraryApplication.includes("tag-desc"),
   "The sort control must accept all ascending and descending options, not silently reset them.");
-assert.ok(libraryTemplate.includes('data-library-column-resize="name"') && libraryTemplate.includes('data-library-column-resize="modified"'),
-  "List headers must expose adjustable column separators.");
+assert.ok(libraryTemplate.includes('data-library-column-resize="name"') &&
+  libraryTemplate.includes('data-library-column-resize="category"') &&
+  libraryTemplate.includes('data-library-column-resize="type"'),
+  "The compact Name/Category/Type list headers must expose adjustable column separators.");
 assert.ok(libraryApplication.includes("applyListColumnWidths") && libraryApplication.includes("setPointerCapture"),
   "Column resizing must respond to pointer input and apply shared grid widths.");
-assert.ok(libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') && libraryTemplate.includes('data-library-tag list="nexus-library-tag-options"'),
-  "Category and tag filters must expose searchable option lists.");
-assert.ok(styles.includes(".nexus-library-font-specimen") && styles.includes(".nexus-library-theme-miniature"),
-  "Font and theme resources must have their own meaningful previews.");
+assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &&
+  libraryTemplate.includes('data-library-open-list-filter="type"') &&
+  libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') &&
+  libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
+  !libraryTemplate.includes("data-library-tag"),
+  "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
+assert.ok(styles.includes(".nexus-library-font-specimen") &&
+  styles.includes(".nexus-library-theme-miniature") &&
+  styles.includes(".nexus-library-theme-list-mark") &&
+  styles.includes(".nexus-library-theme-highlight"),
+  "Font and theme resources must have expressive grid previews and a theme-token list marker.");
 assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
   "The search input must not draw a second border inside its single wrapper.");
-assert.ok(libraryApplication.includes("button.append(icon, textNode)"),
-  "Breadcrumbs must align an appropriate folder/view icon with the path label.");
-console.log("NEXUS Library 1.0.0.129 visual refinement contracts: OK");
+assert.ok(libraryApplication.includes("button.append(icon, textNode)") &&
+  libraryApplication.includes('separator.textContent = "/"'),
+  "Breadcrumbs must align their path labels and use Windows-style slash separators.");
+console.log("NEXUS Library 1.0.0.131 visual refinement contracts: OK");
 
 
 assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplorer.includes("renderFolderCard") &&
@@ -211,10 +222,14 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
 assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
   catalogExplorer.includes('nexus-library-font-sample'),
   "Font samples must explicitly use the resolved font stack in both grid and detail.");
-assert.ok(catalogExplorer.includes('"Painel de exemplo"') &&
-  styles.includes("nexus-library-theme-miniature > p") &&
+assert.ok(catalogExplorer.includes('"Título principal"') &&
+  catalogExplorer.includes('"Destaque"') &&
+  catalogExplorer.includes('"Botão"') &&
+  catalogExplorer.includes('"Campo de texto"') &&
+  styles.includes("nexus-library-theme-copy") &&
+  styles.includes("nexus-library-theme-swatches") &&
   styles.includes("width: 84% !important"),
-  "Theme grid preview must show a readable panel, button and field at a large scale.");
+  "Theme grid preview must show typography, highlight, controls, progress and its real palette at a large scale.");
 assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
   "Folder navigation tiles must be visually integrated into the content view.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&

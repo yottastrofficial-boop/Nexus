@@ -1,11 +1,13 @@
-## 1.0.0.130 — Navegação de pastas, prévias visuais e Canvas
+## 1.0.0.131 — Prévias refinadas e lista compacta da Biblioteca
 
-- Mostrar pastas filhas no conteúdo do Explorer e abrir pastas com navegação de caminho, histórico e nível superior.
-- Assets globais funciona como diretório pai; Fontes, Imagens, Ícones, Texturas e Outros arquivos aparecem como subpastas.
-- Fontes nativas ficam acessíveis em Assets globais → Fontes; aplicar a família real a todos os espécimes, incluindo Monospace.
-- Aumentar a área útil das prévias de grade para cerca de 84% do cartão; miniatura de tema deve apresentar painel, texto, botão e campo.
-- Ampliar janela inicial da ficha para 1100 × 920, com resize, para reduzir a escala de ajuste do Canvas de 800 × 800.
-- Testes automatizados, pacote e release; validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- Temas em grade: apresentar título, subtítulo, texto normal, bold/italic, highlight, barras, botões, campo e paleta real do tema.
+- Temas em lista: marcador compacto com fundo, acento e borda do tema.
+- Fontes: espécime Aa + Lorem ipsum com variações normal, bold e italic; catálogo com pilhas locais Roboto-like, display condensada, cursiva, serifada e Monospace.
+- Lista: manter apenas Nome, Categoria e Tipo, com colunas redimensionáveis; remover Tamanho, Modificado e Etiquetas.
+- Categoria e Tipo: filtros pesquisáveis abertos diretamente nos cabeçalhos; etiquetas não são filtro, ficam nos detalhes e continuam pesquisáveis pela busca global.
+- Pastas aparecem primeiro em A–Z e recursos depois em A–Z, sem seletor redundante.
+- Breadcrumb usa / como separador.
+- CI, pacote e release automatizados; validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
