@@ -1,3 +1,9 @@
+## 1.0.0.136 — Backup da Biblioteca (candidata)
+
+- API pública de exportação, preparação/validação, prévia e confirmação de importação do backup da Biblioteca.
+- A versão candidata será publicada após CI; o manifesto estável permanece na versão publicada até o workflow confirmar o ZIP.
+- Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+
 ## 1.0.0.135 — Prévia de recursos e Inspector organizado (publicada)
 
 - Aba principal renomeada para Padrão; tabs segmentados acessíveis ficam no topo do Inspector.
