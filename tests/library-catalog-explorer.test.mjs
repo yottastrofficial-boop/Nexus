@@ -151,7 +151,8 @@ test("theme detail previews expose only known, safe palette colors", () => {
     [
       { label: "Canvas", value: "#101820" },
       { label: "Cartão", value: "#223344" },
-      { label: "Destaque", value: "#abc" }
+      { label: "Destaque", value: "#abc" },
+      { label: "Unknown Color", value: "#ffffff" }
     ]
   );
   assert.deepEqual(getLibraryThemePreviewColors({ palette: { canvasColor: "red" } }), []);
