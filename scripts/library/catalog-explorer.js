@@ -826,8 +826,8 @@ export function createLibraryCatalogExplorer({
     detailsTab.title = "Etiquetas, metadados e informações técnicas";
     tabs.append(previewTab, detailsTab);
 
-    // Keep the Inspector navigation and resource identity above both tab panels.
-    // The heading is supplied as the first preview node by renderDetails().
+    // Identity and metadata belong to the default tab, not a persistent header.
+    // This keeps the Details tab focused on tags, summaries and less-visual data.
     const contentNodes = previewContent.filter(Boolean);
     const heading = contentNodes[0]?.classList?.contains("nexus-library-detail-heading")
       ? contentNodes.shift()
@@ -838,6 +838,7 @@ export function createLibraryCatalogExplorer({
     previewPanel.id = "nexus-library-inspector-panel-preview";
     previewPanel.setAttribute("role", "tabpanel");
     previewPanel.setAttribute("aria-labelledby", previewTab.id);
+    if (heading) previewPanel.append(heading);
     for (const node of contentNodes) previewPanel.append(node);
 
     const detailsPanel = makeElement("section", "nexus-library-inspector-panel");
@@ -859,9 +860,7 @@ export function createLibraryCatalogExplorer({
       detailsPanel.hidden = currentInspectorTab !== "details";
     };
     activate(currentInspectorTab);
-    root.append(tabs);
-    if (heading) root.append(heading);
-    root.append(previewPanel, detailsPanel);
+    root.append(tabs, previewPanel, detailsPanel);
     return { root, detailsPanel };
   };
 
@@ -916,6 +915,39 @@ export function createLibraryCatalogExplorer({
 
     const heading = makeElement("div", "nexus-library-detail-heading");
     heading.append(makeElement("strong", "nexus-library-detail-title", resource.name));
+    const detailFavorite = makeElement("button", "nexus-library-detail-favorite");
+    detailFavorite.type = "button";
+    const favoriteKey = key;
+    const favoriteIsActive = getPreferences().favorites.includes(favoriteKey);
+    detailFavorite.classList.toggle("is-favorite", favoriteIsActive);
+    detailFavorite.setAttribute("aria-pressed", String(favoriteIsActive));
+    detailFavorite.setAttribute("aria-label", favoriteIsActive ? "Remover dos favoritos" : "Adicionar aos favoritos");
+    detailFavorite.title = detailFavorite.getAttribute("aria-label");
+    detailFavorite.append(makeElement("i", favoriteIsActive ? "fa-solid fa-star" : "fa-regular fa-star"));
+    detailFavorite.addEventListener("click", async () => {
+      const current = getPreferences();
+      const active = current.favorites.includes(favoriteKey);
+      const favorites = active
+        ? current.favorites.filter(item => item !== favoriteKey)
+        : [favoriteKey, ...current.favorites].slice(0, 500);
+      await savePreferences({ ...current, favorites });
+      detailFavorite.classList.toggle("is-favorite", !active);
+      detailFavorite.setAttribute("aria-pressed", String(!active));
+      detailFavorite.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
+      detailFavorite.title = detailFavorite.getAttribute("aria-label");
+      detailFavorite.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
+      container.querySelectorAll("[data-library-resource-key]").forEach(card => {
+        if (card.dataset.libraryResourceKey !== favoriteKey) return;
+        const button = card.querySelector("[data-library-resource-favorite]");
+        if (!button) return;
+        button.classList.toggle("is-favorite", !active);
+        button.setAttribute("aria-pressed", String(!active));
+        button.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
+        button.title = button.getAttribute("aria-label");
+        button.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
+      });
+    });
+    heading.append(detailFavorite);
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
