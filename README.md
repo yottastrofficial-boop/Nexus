@@ -16,7 +16,7 @@ A versão 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportaç
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.135 publicada (manifesto estável).** A versão 1.0.0.136 está em validação; o manifesto será sincronizado após a release.
+**Versão 1.0.0.135 publicada (manifesto estável).** **Versão 1.0.0.136** é a build atual da main e está em validação; o manifesto será sincronizado após a release.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
