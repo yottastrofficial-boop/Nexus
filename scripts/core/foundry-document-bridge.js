@@ -98,6 +98,9 @@ export function createFoundryDocumentBridge({
       collection: definition.collection,
       documentType: String(document.type ?? ""),
       name: String(document.name ?? "Sem nome"),
+      modifiedAt: Number.isFinite(Number(document._stats?.modifiedTime)) && Number(document._stats.modifiedTime) > 0
+        ? new Date(Number(document._stats.modifiedTime)).toISOString()
+        : "",
       img: String(document.img ?? document.thumbnail ?? ""),
       folder: String(document.folder?.name ?? ""),
       pack: String(document.pack ?? ""),
