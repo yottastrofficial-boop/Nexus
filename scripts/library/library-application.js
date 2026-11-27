@@ -223,6 +223,7 @@ export function createLibraryApplicationClass({
         listHeader?.style.setProperty("--nexus-library-list-columns", template);
         container.style.setProperty("--nexus-library-list-columns", template);
       };
+      if (this._libraryListColumnWidths) applyListColumnWidths();
       listColumnHandles.forEach((handle, index) => {
         handle.addEventListener("pointerdown", event => {
           if (event.button !== 0) return;
