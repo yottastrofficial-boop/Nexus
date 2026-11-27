@@ -1,22 +1,22 @@
-## Biblioteca 1.0.0.135 — revisão em validação
+## Biblioteca 1.0.0.135 publicada
 
-**Versão 1.0.0.135 na main (em validação).**\n\nA PR #119 prepara a versão 1.0.0.135: Inspector com abas Padrão/Detalhes, prévias restauradas de fontes, temas e recursos, tags e resumo técnico em Detalhes, cabeçalhos de Lista com área funcional completa e seleção sem contorno. A versão estável continua sendo 1.0.0.134 até a publicação oficial.
+A 1.0.0.135 reorganiza o Inspector em **Padrão** e **Detalhes**, restaura prévias de fontes, temas e recursos, move tags e resumo técnico para Detalhes, amplia a área funcional dos cabeçalhos de Lista e remove highlights de borda no modo Lista. CI, release, ZIP e manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão main 1.0.0.135 · Estável 1.0.0.134 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão estável 1.0.0.135 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.134-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.135-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.134 estável publicada.** O manifesto e o pacote estáveis permanecem sincronizados até a próxima publicação oficial.
+**Versão 1.0.0.135 publicada.** Manifesto e pacote estáveis sincronizados.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
