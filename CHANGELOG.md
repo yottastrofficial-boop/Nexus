@@ -1,3 +1,19 @@
+## 1.0.0.128 — Biblioteca: Explorer limpo, pastas reais e lista compacta
+
+- Remove o item pseudo-pasta "Todas as pastas"; o texto passa a ser o cabeçalho da árvore e a Biblioteca abre os recursos no painel principal.
+- Mantém a árvore hierárquica e faz pastas pai incluir recursos atribuídos às subpastas.
+- Mapeia pastas padrão para o conteúdo correspondente do catálogo: documentos Foundry, assets, fontes, temas, componentes, layouts, templates e lógica.
+- Adiciona ao catálogo as pilhas de fontes nativas usadas pelo NEXUS (Inter, System UI, Arial e Monospace), com metadados e resolução para prévia/inspeção.
+- Esconde a seção Coleções quando não há coleções; criação de coleção passa a ser uma ação contextual após seleção múltipla e clique direito.
+- Adiciona seleção múltipla com Ctrl/Cmd e Shift; o menu contextual cria uma coleção com as referências selecionadas sem duplicar documentos.
+- Reconstrói a visualização em lista como linhas compactas com ícone adaptativo e colunas Nome, Categoria, Tamanho, Modificado e Etiquetas.
+- Adiciona classificação por tamanho, data de modificação e etiqueta, além de nome, categoria e origem; sugere etiquetas disponíveis no filtro.
+- Preserva o tamanho e a data de modificação quando o provedor os fornece; documentos do mundo Foundry expõem o timestamp real de modificação. Valores ausentes são exibidos como —, sem inventar metadados.
+- Implementa redimensionamento funcional da navegação e do Inspector por alças de 6 px sem moldura permanente, com mouse/touch e teclado; largura limitada para manter o conteúdo utilizável.
+- Remove bordas duplicadas de botões de expandir pasta, breadcrumbs, navegação, pesquisa e comandos; bordas de highlight aparecem apenas em hover, foco ou seleção.
+- Atualiza contratos de regressão para árvore, lista, fontes, seleção múltipla, coleções contextuais e redimensionamento.
+- CI e pacote de validação aprovados; teste visual/funcional no Foundry VTT 14 build 360 ainda depende do usuário.
+
 ## 1.0.0.127 — Biblioteca: janela nativa e interface compacta
 
 - Move as abas para o cabeçalho nativo da janela ApplicationV2, removendo o título duplicado e a sensação de uma janela interna.
