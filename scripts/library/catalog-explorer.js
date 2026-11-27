@@ -640,9 +640,9 @@ export function createLibraryCatalogExplorer({
     } else if (resource.kind === "theme" && resource.previewColors?.length) {
       preview.dataset.previewKind = "theme";
       const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
-      preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? "#202e3e");
-      preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? "#78b7e8");
-      preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? "#edf0f6");
+      preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? colors.painel ?? colors["superfície"] ?? colors.canvas ?? "#202e3e");
+      preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? colors.acento ?? colors.destaque ?? colors.button ?? "#78b7e8");
+      preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? colors.texto ?? "#edf0f6");
       const mock = makeElement("span", "nexus-library-theme-miniature");
       mock.append(makeElement("strong", "", "Aa"));
       const button = makeElement("i", "", "Botão");
