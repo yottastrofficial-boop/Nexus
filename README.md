@@ -1,23 +1,23 @@
-## Biblioteca 1.0.0.138 — revisão do padrão visual e prévias
+## Biblioteca 1.0.0.139 — prévias temáticas fiéis ao perfil
 
-A versão 1.0.0.138 consolida a barra de pesquisa em uma única implementação, aplica a paleta real aos previews de temas na grade e no Inspector, corrige a hierarquia Padrão/Detalhes e restaura a miniatura da barra de recurso. Release v1.0.0.138 publicada; CI, pacote, asset `nexus.zip` (496.309 bytes) e manifesto estável foram confirmados pelo workflow. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+A versão candidata 1.0.0.139 corrige a resolução de tema no grid e no Inspector: cada mini-interface usa o preset, a paleta completa, a tipografia e os estilos de componentes do próprio recurso, isolados do tema global. As fontes aplicam a família escolhida aos espécimes. CI, pacote, release e manifesto serão confirmados pelo workflow; o teste visual no Foundry VTT 14 build 360 continua manual.
 
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão publicada 1.0.0.138 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão candidata 1.0.0.139 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.138-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.139-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.138 publicada (manifesto estável).** CI e empacotamento aprovados; a validação visual/funcional no Foundry VTT 14 build 360 ainda depende do teste manual.
+**Versão candidata 1.0.0.139; manifesto estável atual 1.0.0.138 até a confirmação da publicação.** CI e empacotamento serão confirmados pelo workflow; a validação visual/funcional no Foundry VTT 14 build 360 depende de teste manual.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
