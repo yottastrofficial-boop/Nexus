@@ -92,7 +92,7 @@ export function createLibraryApplicationClass({
     position: { width: 1180, height: 760 },
     window: {
       title: "",
-      icon: "",
+      icon: "fa-solid fa-folder-open",
       frame: true,
       positioned: true,
       resizable: true,
@@ -226,6 +226,7 @@ export function createLibraryApplicationClass({
       const cardSize = root.querySelector("[data-library-card-size]");
       const sortControl = root.querySelector("[data-library-sort]");
       const listHeader = root.querySelector("[data-library-list-header]");
+      const nameSortControl = root.querySelector("[data-library-sort-name]");
       const listColumnHandles = [...root.querySelectorAll("[data-library-column-resize]")];
       const closeListFilterPopovers = () => root.querySelectorAll("[data-library-list-filter-popover]").forEach(popover => {
         popover.hidden = true;
@@ -496,17 +497,9 @@ export function createLibraryApplicationClass({
           const button = document.createElement("button");
           button.type = "button";
           button.className = "nexus-library-breadcrumb";
-          const icon = document.createElement("i");
-          const smartViewIcon = location.smartView === "favorites" ? "fa-star"
-            : location.smartView === "recent" ? "fa-clock"
-              : location.smartView === "collection" ? "fa-layer-group"
-                : location.smartView === "shortcut" ? "fa-link"
-                  : location.folder ? "fa-folder" : "fa-house";
-          icon.className = "fa-solid " + smartViewIcon;
-          icon.setAttribute("aria-hidden", "true");
           const textNode = document.createElement("span");
           textNode.textContent = label;
-          button.append(icon, textNode);
+          button.append(textNode);
           button.dataset.libraryBreadcrumbType = location.folder ? "folder" : location.smartView || "library";
           button.title = label;
           button.disabled = isLast;
@@ -654,11 +647,26 @@ export function createLibraryApplicationClass({
               : this._libraryClipboard ? "Item pronto para colar" : "Nenhum item selecionado";
         }
       };
+      const syncNameSortControl = () => {
+        if (!nameSortControl) return;
+        const descending = this._state.sortMode === "name-desc";
+        const isNameSort = this._state.sortMode === "name-asc" || descending;
+        nameSortControl.dataset.sortDirection = isNameSort ? (descending ? "desc" : "asc") : "none";
+        nameSortControl.setAttribute("aria-label", isNameSort
+          ? (descending ? "Ordenado por nome, Z a A" : "Ordenado por nome, A a Z")
+          : "Ordenar por nome, A a Z");
+        nameSortControl.title = isNameSort
+          ? (descending ? "Ordenado por nome Z–A; clique para A–Z" : "Ordenado por nome A–Z; clique para Z–A")
+          : "Ordenar por nome A–Z";
+        const icon = nameSortControl.querySelector("i");
+        if (icon) icon.className = "fa-solid " + (descending ? "fa-arrow-down-z-a" : "fa-arrow-down-a-z");
+      };
       const renderChrome = () => {
         updateTabTitle();
         renderTabs();
         renderBreadcrumbs();
         syncNavigationButtons();
+        syncNameSortControl();
         updateCommandbar();
       };
       const defaultFolderFilters = {
@@ -945,6 +953,11 @@ export function createLibraryApplicationClass({
       sortControl?.addEventListener("change", () => {
         const allowedSortModes = ["name-asc", "name-desc", "type-asc", "type-desc", "source-asc", "source-desc", "size-desc", "size-asc", "modified-desc", "modified-asc", "tag-asc", "tag-desc"];
         this._state.sortMode = allowedSortModes.includes(sortControl.value) ? sortControl.value : "name-asc";
+        void render();
+      });
+      nameSortControl?.addEventListener("click", () => {
+        this._state.sortMode = this._state.sortMode === "name-asc" ? "name-desc" : "name-asc";
+        if (sortControl) sortControl.value = this._state.sortMode;
         void render();
       });
       viewControls.forEach(button => button.addEventListener("click", () => {

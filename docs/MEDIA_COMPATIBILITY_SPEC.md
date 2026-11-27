@@ -70,3 +70,10 @@ Registrar licença, versões, origem, configuração de build, hashes e avisos. 
 - JXL só pode ser pré-visualizado nativamente quando o ambiente oferece decoder compatível ou por um adaptador libjxl registrado.
 
 Assim, a versão conclui a infraestrutura extensível e os caminhos de integração, mas não declara suporte de decodificação universal ou conversão FFmpeg/JXL já entregue.
+
+
+## Movimentação de arquivos no Foundry V14 — 1.0.0.132
+
+A API pública de `FilePicker` documenta `browse`, `createDirectory`, `upload` e `uploadPersistent`, mas não documenta uma operação pública de mover ou excluir arquivos. A Biblioteca pode mover **referências** entre pastas lógicas do usuário; isso não altera o caminho físico do arquivo. Uma mudança física só poderá ser habilitada por um adaptador de storage que ofereça explicitamente essa capacidade no servidor. Não implementar um falso "move" baseado em copiar e apagar sem confirmação de que ambas as operações existem e sem mecanismo de rollback.
+
+Referência: [FilePicker — API V14](https://foundryvtt.com/api/v14/classes/foundry.applications.apps.FilePicker.html).

@@ -1863,7 +1863,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 }
 html.nexus-design-system .nexus-library-application .nexus-library-main:has(.nexus-library-generic-items[data-view-mode="list"]) .nexus-library-list-header {
   display: grid;
-  grid-template-columns: minmax(150px, 2fr) minmax(90px, 1fr) 76px 100px minmax(100px, 1.2fr);
+  grid-template-columns: var(--nexus-library-list-columns, minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr));
   gap: 12px;
   padding: 5px 34px 5px 34px;
   border-bottom: 1px solid color-mix(in srgb, var(--nexus-panel-border, #40546b) 50%, transparent);
@@ -1889,7 +1889,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item {
   display: grid !important;
-  grid-template-columns: 24px minmax(150px, 2fr) minmax(90px, 1fr) 76px 100px minmax(100px, 1.2fr);
+  grid-template-columns: var(--nexus-library-list-columns, minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr));
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -1961,7 +1961,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 @media (max-width: 1050px) {
   html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item,
   html.nexus-design-system .nexus-library-application .nexus-library-main:has(.nexus-library-generic-items[data-view-mode="list"]) .nexus-library-list-header {
-    grid-template-columns: 24px minmax(120px, 2fr) minmax(80px, 1fr) 68px minmax(90px, 1fr);
+    grid-template-columns: var(--nexus-library-list-columns, minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .9fr));
   }
   html.nexus-design-system .nexus-library-application .nexus-library-list-modified {
     display: none !important;
@@ -2730,4 +2730,70 @@ html.nexus-design-system .nexus-library-application .nexus-library-design-previe
   border: 1px solid var(--nexus-inspector-border, var(--nexus-panel-border, #40546b));
   background: transparent;
   color: inherit;
+}
+
+
+/* 1.0.0.132 — compact Explorer table and consistent font/theme cards. */
+html.nexus-design-system .nexus-library-application .nexus-library-list-header [data-library-list-column] {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-name-header {
+  justify-content: space-between;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-sort,
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 4px !important;
+  border: 0 !important;
+  border-radius: 3px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--nexus-panel-muted, #a5b6c9) !important;
+  font: inherit;
+  text-align: left;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-sort:hover,
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button:hover {
+  background: var(--nexus-panel-hover, #35485f) !important;
+  color: var(--nexus-panel-text, #edf0f6) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-sort:focus-visible,
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button:focus-visible {
+  outline: 1px solid var(--nexus-accent, #79b8d8) !important;
+  outline-offset: 1px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter {
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter-popover input {
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview[data-preview-kind="font"],
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview[data-preview-kind="theme"] {
+  display: grid;
+  place-items: center;
+  border: 0 !important;
+  background: transparent !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview[data-preview-kind="font"] > i,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview[data-preview-kind="theme"] > i {
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 27px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-name-cell > strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

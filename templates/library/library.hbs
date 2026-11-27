@@ -101,7 +101,10 @@
       <div class="nexus-library-workspace">
         <main class="nexus-library-main">
           <div class="nexus-library-list-header" data-library-list-header>
-            <span data-library-list-column="name">Nome<i data-library-column-resize="name" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Nome" tabindex="0"></i></span>
+            <div data-library-list-column="name" class="nexus-library-list-name-header">
+              <button type="button" class="nexus-library-list-sort" data-library-sort-name data-sort-direction="asc" aria-label="Ordenar por nome, A a Z" title="Ordenar por nome A–Z">Nome <i class="fa-solid fa-arrow-down-a-z" aria-hidden="true"></i></button>
+              <i data-library-column-resize="name" role="separator" aria-orientation="vertical" aria-label="Redimensionar coluna Nome" tabindex="0"></i>
+            </div>
             <div class="nexus-library-list-filter" data-library-list-filter="category" data-library-list-column="category">
               <button type="button" data-library-open-list-filter="category" aria-expanded="false">Categoria <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>
               <div class="nexus-library-list-filter-popover" data-library-list-filter-popover="category" hidden>

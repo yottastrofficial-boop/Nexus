@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.131
+## Estado do código — 1.0.0.132
 
-A 1.0.0.131 aprimora a apresentação da Biblioteca sem alterar o modelo de dados dos recursos: temas exibem espécimes com hierarquia tipográfica, highlight, barras, botões, campos e paleta extraída do próprio perfil; fontes mostram Aa e amostras Lorem ipsum normais, bold e italic, com pilhas locais distintas. A lista passa a ter somente Nome, Categoria e Tipo; Categoria e Tipo abrem filtros pesquisáveis nos cabeçalhos, enquanto etiquetas ficam nos detalhes e permanecem indexadas pela busca global. O breadcrumb usa separadores /. system.json prepara 1.0.0.131; o manifesto estável permanece em 1.0.0.130 até a publicação confirmada. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+A 1.0.0.132 corrige o alinhamento da lista para Nome/Categoria/Tipo, adiciona ordenação A–Z/Z–A pelo cabeçalho Nome, compacta fontes e temas no grid e coloca a descrição abaixo da prévia no Inspector. O ícone da Biblioteca fica no cabeçalho nativo e o breadcrumb mantém somente o caminho. A organização de arquivos distingue pastas lógicas da Biblioteca dos caminhos físicos do storage; configurações pequenas são registros JSON no libraryStore. system.json prepara 1.0.0.132; o manifesto estável permanece em 1.0.0.131 até a publicação confirmada. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## Estado do código — 1.0.0.129
 

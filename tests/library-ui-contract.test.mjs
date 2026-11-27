@@ -207,10 +207,12 @@ assert.ok(styles.includes(".nexus-library-font-specimen") &&
   "Font and theme resources must have expressive grid previews and a theme-token list marker.");
 assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
   "The search input must not draw a second border inside its single wrapper.");
-assert.ok(libraryApplication.includes("button.append(icon, textNode)") &&
-  libraryApplication.includes('separator.textContent = "/"'),
-  "Breadcrumbs must align their path labels and use Windows-style slash separators.");
-console.log("NEXUS Library 1.0.0.131 visual refinement contracts: OK");
+assert.ok(libraryApplication.includes("button.append(textNode)") &&
+  !libraryApplication.includes("button.append(icon, textNode)") &&
+  libraryApplication.includes('separator.textContent = "/"') &&
+  libraryApplication.includes('icon: "fa-solid fa-folder-open"'),
+  "Breadcrumbs must show only the path while the native window header owns the Library icon.");
+console.log("NEXUS Library 1.0.0.132 visual refinement contracts: OK");
 
 
 assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplorer.includes("renderFolderCard") &&
@@ -219,17 +221,15 @@ assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplore
 assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') === false &&
   libraryApplication.includes("folder: this._state.folder"),
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
-assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
-  catalogExplorer.includes('nexus-library-font-sample'),
-  "Font samples must explicitly use the resolved font stack in both grid and detail.");
-assert.ok(catalogExplorer.includes('"Título principal"') &&
-  catalogExplorer.includes('"Destaque"') &&
-  catalogExplorer.includes('"Botão"') &&
-  catalogExplorer.includes('"Campo de texto"') &&
-  styles.includes("nexus-library-theme-copy") &&
-  styles.includes("nexus-library-theme-swatches") &&
-  styles.includes("width: 84% !important"),
-  "Theme grid preview must show typography, highlight, controls, progress and its real palette at a large scale.");
+assert.ok(catalogExplorer.includes("model.family") &&
+  catalogExplorer.includes("nexus-library-font-specimen") &&
+  catalogExplorer.includes("fa-solid fa-font"),
+  "Font specimens use the resolved family in the Inspector while grid cards stay compact.");
+assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
+  catalogExplorer.includes("nexus-library-theme-preview") &&
+  catalogExplorer.includes("fa-solid fa-palette") &&
+  styles.includes("nexus-library-theme-swatches"),
+  "Theme details retain semantic previews while grid cards show only a compact palette icon.");
 assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
   "Folder navigation tiles must be visually integrated into the content view.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&

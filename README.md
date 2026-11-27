@@ -1,22 +1,22 @@
-## Biblioteca 1.0.0.131 em preparação
+## Biblioteca 1.0.0.132 em preparação
 
-A 1.0.0.131 refina as prévias de temas e fontes, amplia as famílias tipográficas de sistema, simplifica a lista para Nome/Categoria/Tipo e coloca filtros pesquisáveis de Categoria e Tipo diretamente nos cabeçalhos. Etiquetas ficam nos detalhes e continuam pesquisáveis pela busca global. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.132 corrige o alinhamento da lista Nome/Categoria/Tipo, torna Nome clicável para alternar A–Z/Z–A, simplifica fontes e temas no grid e reorganiza o Inspector. Também esclarece a diferença entre mover uma referência na Biblioteca e mover fisicamente um arquivo no storage. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.131 em preparação · base publicada 1.0.0.130 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.132 em preparação · base publicada 1.0.0.131 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.131-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.132-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão estável publicada:** 1.0.0.130. **Versão em preparação:** 1.0.0.131 (prévias refinadas de temas/fontes e filtros de lista). O manifesto estável permanece em 1.0.0.130 até a publicação do novo pacote.
+**Versão estável publicada:** 1.0.0.131. **Versão em preparação:** 1.0.0.132 (lista alinhada, ordenação pelo cabeçalho, previews compactos e organização de mídia). O manifesto estável permanece em 1.0.0.131 até a publicação do novo pacote.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
