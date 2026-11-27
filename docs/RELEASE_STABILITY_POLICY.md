@@ -2,12 +2,12 @@
 
 A versão 1.0.0.137 está na main em validação automatizada. A versão estável e o manifesto permanecem em 1.0.0.136 até o workflow validar o código, publicar o ZIP e sincronizar o manifesto. Não considerar a atualização instalada/validada no Foundry real antes dos testes manuais.
 
-## Estado de distribuição — 1.0.0.135 (publicada)
+## Estado de distribuição — 1.0.0.136 (publicada)
 
-A versão estável atual é 1.0.0.135. O pacote, a release e o manifesto estável foram confirmados pelo workflow oficial.
+A versão estável atual é 1.0.0.136. O pacote, a release e o manifesto estável foram confirmados pelo workflow oficial.
 
-- `system.json` e `manifest.json` declaram 1.0.0.135 e apontam para o pacote correspondente.
-- Asset `nexus.zip` confirmado na release 1.0.0.135 (492.313 bytes).
+- `system.json` e `manifest.json` declaram 1.0.0.136 e apontam para o pacote correspondente.
+- Asset `nexus.zip` confirmado na release 1.0.0.136 (492.768 bytes).
 - CI, regressões, validação de pacote e publicação aprovados.
 - Validação visual/funcional pendente no Foundry VTT 14 build 360: fontes reais, temas personalizados e presets, prévia de componentes/cards/layouts, posição e funcionamento das abas, tags em Detalhes, área integral dos cabeçalhos e seleção sem borda na Lista.
 - A publicação do pacote não promove automaticamente a versão a checkpoint funcional; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no cliente real.
