@@ -1,3 +1,13 @@
+## Estado de distribuição — 1.0.0.134 (candidato)
+
+A revisão 1.0.0.134 corrige o dimensionamento efetivo do Grid, reduz os cartões ao conteúdo, restaura prévias de temas com paletas reais, separa Prévia/Detalhes no Inspector, altera a interação das pastas para clique/duplo clique e corrige a mutabilidade das opções ApplicationV2 no Estúdio de Aparência.
+
+- `system.json` declara 1.0.0.134 e aponta para o pacote correspondente.
+- O manifesto estável permanece na última release confirmada até o workflow validar, publicar e verificar o asset `nexus.zip`.
+- CI deve executar sintaxe, contratos, suíte completa e geração do ZIP.
+- Validação manual pendente no Foundry VTT 14 build 360: dimensões 32/64/128, títulos longos, miniaturas e fallback, paletas de temas, abas Prévia/Detalhes, clique/duplo clique/teclado em pastas e abertura do Estúdio de Aparência.
+- A publicação do pacote não promove automaticamente a versão a checkpoint funcional; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no cliente real.
+
 ## Estado de distribuição — 1.0.0.133
 
 A versão 1.0.0.133 foi publicada e atualiza a Biblioteca Universal com Grid adaptativo, prévias proporcionais em 32/64/128 CSS px, ícone alternativo quando miniaturas não estão disponíveis, estrutura separada para Grid/Lista, pastas fora das facetas, prévias tipográficas compactas e favoritos reposicionados. Os workflows de validação, regressão e empacotamento foram aprovados no Pull Request #117 e na publicação da release; o roadmap e a visão do projeto também refletem a versão publicada 1.0.0.133.
