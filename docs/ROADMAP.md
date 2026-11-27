@@ -1,10 +1,12 @@
 ## 1.0.0.137 — Correções visuais da Biblioteca (candidata)
 
-- API pública de exportação, preparação/validação, prévia e confirmação de importação do backup da Biblioteca.
-- A versão candidata será publicada após CI; o manifesto estável permanece na versão publicada até o workflow confirmar o ZIP.
-- Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- Prévia de fontes com família real e amostras Aa, Lorem Epsum e 12345 !@#$%.
+- Prévia de temas com mini-interface ampliada e paleta recolhida em dropdown.
+- Grid com visualização efetiva 64×64, título até três linhas, favoritos em estrela e estilos consolidados.
+- Inspector com tabs no topo; identidade e meta em Padrão; tags e resumo em Detalhes.
+- Contratos de teste atualizados; publicação depende de CI e confirmação do ZIP. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
-## 1.0.0.135 — Prévia de recursos e Inspector organizado (publicada)
+## 1.0.0.136 — Prévia de recursos e Inspector organizado (publicada)
 
 - Aba principal renomeada para Padrão; tabs segmentados acessíveis ficam no topo do Inspector.
 - Nome, descrição e meta resumida na visualização Padrão; resumo técnico, fatos e tags na aba Detalhes.
