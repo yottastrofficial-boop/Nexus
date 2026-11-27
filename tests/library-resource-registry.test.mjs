@@ -56,13 +56,13 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 21, "A listagem inclui coleções pessoais, catálogo de componentes, temas e oito pilhas de fontes nativas.");
+assert.equal(nexusPage.total, 22, "A listagem inclui coleções pessoais, catálogo de componentes, temas e oito pilhas de fontes nativas.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
   "A listagem deve expor metadados, não payloads completos.");
 const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
-assert.equal(fontsPage.total, 8, "The Library exposes the native font stacks used by the NEXUS UI.");
+assert.equal(fontsPage.total, 9, "The Library exposes the native font stacks used by the NEXUS UI.");
 const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
 assert.ok(interFont && interFont.kind === "style" && interFont.tags.includes("fonte"));
 assert.equal(interFont.folder, "assets-fontes",
@@ -74,6 +74,8 @@ const scriptFont = await nexusProvider.resolve({ providerId: "nexus-library", bu
 assert.equal(scriptFont.family, '"Segoe Script", "Brush Script MT", cursive');
 const displayFont = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "impact" });
 assert.match(displayFont.family, /Impact/);
+const blockFont = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "block" });
+assert.match(blockFont.family, /Arial Black/);
 const resolvedInter = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "inter" });
 assert.equal(resolvedInter.family, '"Inter", system-ui, sans-serif', "Font resources resolve to their documented CSS family stack.");
 
