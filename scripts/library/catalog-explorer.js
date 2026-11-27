@@ -133,10 +133,13 @@ export function getLibraryThemePreviewColors(raw = {}) {
   const palette = profile.palette ?? entry.palette ?? entry.tokens ?? {};
   if (!palette || typeof palette !== "object" || Array.isArray(palette)) return [];
   return Object.entries(palette)
-    .filter(([key, value]) => THEME_PREVIEW_LABELS[key] && typeof value === "string" &&
+    .filter(([, value]) => typeof value === "string" &&
       /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()))
     .slice(0, 12)
-    .map(([key, value]) => ({ label: THEME_PREVIEW_LABELS[key], value: value.trim() }));
+    .map(([key, value]) => ({
+      label: THEME_PREVIEW_LABELS[key] ?? String(key).replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").replace(/^./, char => char.toLocaleUpperCase()).slice(0, 32),
+      value: value.trim()
+    }));
 }
 
 
@@ -913,6 +916,22 @@ export function createLibraryCatalogExplorer({
         swatches.append(swatch);
       }
       themePreview.append(swatches);
+      const palette = Object.fromEntries(themeColors.map(color => [color.label.toLowerCase(), color.value]));
+      const colorFor = (keys, fallback) => themeColors.find(color => keys.some(key => color.label.toLowerCase().includes(key)))?.value ?? fallback;
+      const sample = makeElement("div", "nexus-library-theme-live-preview");
+      sample.style.setProperty("--nexus-library-theme-surface", colorFor(["painel", "surface", "superfície", "card", "cartão"], "#202d3d"));
+      sample.style.setProperty("--nexus-library-theme-text", colorFor(["texto"], "#edf0f6"));
+      sample.style.setProperty("--nexus-library-theme-muted", colorFor(["secundário", "muted"], "#a5b6c9"));
+      sample.style.setProperty("--nexus-library-theme-accent", colorFor(["acento", "accent", "destaque", "highlight", "botão", "button"], "#79b8d8"));
+      sample.append(makeElement("small", "", "EXEMPLO DE INTERFACE"));
+      sample.append(makeElement("strong", "", resource.name));
+      const track = makeElement("span", "nexus-library-theme-live-track");
+      const fill = makeElement("i", "");
+      fill.style.width = "68%";
+      track.append(fill);
+      sample.append(track);
+      sample.append(makeElement("span", "nexus-library-theme-live-button", "Ação"));
+      themePreview.append(sample);
     }
     const facts = makeElement("dl", "nexus-library-resource-facts");
     const resourceFacts = [
