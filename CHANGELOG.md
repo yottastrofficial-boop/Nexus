@@ -9,7 +9,7 @@
 - Pastas passam a ser selecionadas com um clique e abertas com duplo clique; Enter também abre a pasta selecionada.
 - Faz o Estúdio de Aparência fornecer opções ApplicationV2 mutáveis por instância e clonar profundamente as opções recebidas do submenu.
 - Adiciona regressões para opções congeladas, seleção/abertura de pastas, dimensões do Grid e separação entre prévia e detalhes.
-- CI e validação automatizada serão confirmados pelo workflow. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+- CI, regressões, pacote, release, asset `nexus.zip` e manifesto da 1.0.0.134 foram aprovados/publicados. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 ## 1.0.0.133 — Biblioteca: Grid adaptativo e prévias proporcionais
 
