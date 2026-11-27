@@ -32,7 +32,8 @@ test("font and theme cards stay compact in grid while Inspector retains the full
   assert.match(explorer, /resource\.fontFamily/);
   assert.match(explorer, /fa-solid fa-palette/);
   assert.doesNotMatch(explorer, /nexus-library-font-specimen|nexus-library-resource-preview-facts/);
-  assert.match(explorer, /nexus-library-theme-card-swatches/);
+  assert.match(explorer, /nexus-library-theme-card-preview/);
+  assert.match(explorer, /nexus-library-resource-meter-card-preview/);
   assert.match(explorer, /nexus-library-inspector-tabs/);
   assert.match(explorer, /nexus-library-design-preview/);
 });
@@ -42,8 +43,8 @@ test("Inspector starts on Padrão, places identity in Padrão and technical meta
   assert.match(explorer, /makeElement\("button", "nexus-library-inspector-tab-button", "Detalhes"\)/);
   assert.match(explorer, /previewContent\.filter\(Boolean\)/);
   assert.match(explorer, /detail\.replaceChildren\(inspector\.root\)/);
-  assert.match(explorer, /\[heading, meta, description, \...\(fontPreview \? \[fontPreview\] : \[\]\)/);
-  assert.match(explorer, /\[resourceSummary, facts, folderLabel, collectionSection/);
+  assert.match(explorer, /\[heading, meta, \...\(fontPreview \? \[fontPreview\] : \[\]\), themePreview/);
+  assert.match(explorer, /\[description, resourceSummary, facts, folderLabel, collectionSection/);
   assert.match(explorer, /\["Etiquetas", resource\.tags\.join\(", "\) \|\| "—"\]/);
   assert.match(explorer, /nexus-library-resource-preview-summary/);
   assert.doesNotMatch(explorer, /nexus-library-resource-preview-title/);
