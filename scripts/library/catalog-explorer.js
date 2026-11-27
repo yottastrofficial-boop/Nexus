@@ -274,7 +274,7 @@ const safeDimension = value => {
 const normalizeThemeColorKey = value => String(value ?? "")
   .replace(/([a-z])([A-Z])/g, "$1 $2")
   .toLocaleLowerCase("pt-BR")
-  .replace(/[\\s_-]+/g, "");
+  .replace(/[^a-z0-9]/g, "");
 
 export function getLibraryThemePreviewTokens(rawColors = []) {
   const entries = Array.isArray(rawColors)
@@ -309,7 +309,7 @@ export function getLibraryThemePreviewTokens(rawColors = []) {
 }
 
 export function getLibraryResourceBarCardPreviewModel(resource = {}) {
-  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\\s_-]+/g, "");
+  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[^a-z0-9]/g, "");
   const component = resource.kind === "component" || resource.reference?.collection === "components";
   if (!component || !["resourcemeter", "assetmeter", "resourcebar", "pvbar", "pmbar", "pebar", "pvring", "pmring", "pering", "sheetresource"].includes(type)) return null;
   return Object.freeze({
