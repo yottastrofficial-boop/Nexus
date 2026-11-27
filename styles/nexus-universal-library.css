@@ -249,32 +249,8 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   gap: 8px;
   min-width: 0;
 }
-html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-search-wrap {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: auto !important;
-  max-width: none !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 10px !important;
-  border: 1px solid var(--nexus-panel-border, #40546b) !important;
-  border-radius: 8px !important;
-  background: var(--nexus-panel-input, #101a26) !important;
-  box-shadow: none !important;
-}
-html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-search-wrap > .nexus-library-search {
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  height: 32px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
+
+
 html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-filter-wrap {
   position: absolute !important;
   top: calc(100% + 7px);
@@ -716,19 +692,9 @@ html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb-se
   color: var(--nexus-panel-muted, #a5b6c9);
   font-size: 10px;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search {
-  flex: 0 1 260px;
-  min-width: 120px;
-  max-width: 340px;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search .nexus-library-search-wrap {
-  width: 100%;
-  min-width: 0;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search .nexus-library-search {
-  width: 100%;
-  min-width: 0;
-}
+
+
+
 html.nexus-design-system .nexus-library-application .nexus-library-commandbar {
   grid-column: 1 / -1;
   grid-row: 3;
@@ -845,9 +811,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-panel-resizer
     order: 2;
     flex-basis: 100%;
   }
-  html.nexus-design-system .nexus-library-application .nexus-library-navigation-search {
-    flex: 1 1 160px;
-  }
+  
   html.nexus-design-system .nexus-library-application .nexus-library-commandbar-status {
     display: none;
   }
@@ -1185,52 +1149,12 @@ html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb {
 html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb:hover:not(:disabled) {
   background: var(--nexus-panel-hover, #35485f);
 }
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search {
-  flex: 0 1 250px;
-  min-width: 130px;
-  max-width: 300px;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  height: 28px;
-  padding: 0 8px;
-  border: 1px solid var(--nexus-panel-border, #40546b);
-  border-radius: 5px;
-  background: var(--nexus-input-surface, #111c28);
-  box-shadow: none;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > .nexus-library-search {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0 !important;
-  outline: 0;
-  border-radius: 0;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: 11px;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > .nexus-library-search:focus {
-  outline: 0;
-  box-shadow: none !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-clear {
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-clear[hidden] {
-  display: none !important;
-}
+
+
+
+
+
+
 html.nexus-design-system .nexus-library-application .nexus-library-commandbar {
   position: relative;
   grid-column: 1;
@@ -1651,10 +1575,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-item 
   html.nexus-design-system .nexus-library-application .nexus-library-navigation-bar {
     flex-wrap: wrap;
   }
-  html.nexus-design-system .nexus-library-application .nexus-library-navigation-search {
-    flex: 1 1 100%;
-    max-width: none;
-  }
+  
   html.nexus-design-system .nexus-library-application .nexus-library-body {
     grid-template-columns: 1fr !important;
     grid-template-rows: auto minmax(0, 1fr) !important;
@@ -1989,25 +1910,13 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 
 
 /* Final touch: a single hit surface, no nested button/panel chrome. */
-html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb,
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search,
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap,
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > i,
-html.nexus-design-system .nexus-library-application .nexus-library-search-clear,
-html.nexus-design-system .nexus-library-application .nexus-library-section-heading,
-html.nexus-design-system .nexus-library-application .nexus-library-list-header {
+html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb, html.nexus-design-system .nexus-library-application .nexus-library-section-heading, html.nexus-design-system .nexus-library-application .nexus-library-list-header {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
 }
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap {
-  border: 1px solid color-mix(in srgb, var(--nexus-panel-border, #40546b) 75%, transparent) !important;
-  border-radius: 5px !important;
-  background: color-mix(in srgb, var(--nexus-panel-input, #101a26) 70%, transparent) !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap:focus-within {
-  border-color: var(--nexus-accent, #79b8d8) !important;
-}
+
+
 html.nexus-design-system .nexus-library-application .nexus-library-breadcrumb:hover {
   border-color: transparent !important;
   background: color-mix(in srgb, var(--nexus-panel-hover, #35485f) 45%, transparent) !important;
@@ -2053,57 +1962,11 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 
 
 /* 1.0.0.129 — precise Explorer polish: single search surface, aligned rows and adjustable columns. */
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search,
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search::before,
-html.nexus-design-system .nexus-library-application .nexus-library-navigation-search::after {
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap {
-  box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  padding: 0 9px !important;
-  border: 1px solid var(--nexus-panel-border, #40546b) !important;
-  border-radius: 7px !important;
-  background: var(--nexus-panel-input, #101a26) !important;
-  box-shadow: none !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > input.nexus-library-search,
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > input.nexus-library-search:focus,
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > input.nexus-library-search:focus-visible {
-  box-sizing: border-box !important;
-  flex: 1 1 auto !important;
-  width: 0 !important;
-  min-width: 0 !important;
-  height: 30px !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > input.nexus-library-search::-webkit-search-decoration,
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > input.nexus-library-search::-webkit-search-cancel-button {
-  display: none !important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-search-wrap > i {
-  flex: 0 0 auto;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
+
+
+
+
+
 html.nexus-design-system .nexus-library-application .nexus-library-breadcrumbs {
   justify-content: flex-start !important;
   align-items: center !important;
