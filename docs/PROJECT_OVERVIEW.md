@@ -1,7 +1,6 @@
-## Estado do código — 1.0.0.138 (publicada)
+## Estado do código — 1.0.0.139 (em validação)
 
-A revisão atual consolida o contrato visual da Biblioteca, usa tokens reais de tema na grade e no Inspector, separa conteúdo visual de metadados e restaura a miniatura da barra de recurso. CI, pacote, release v1.0.0.138, asset `nexus.zip` (496.309 bytes) e manifesto estável foram confirmados pelo workflow. O teste visual/funcional no Foundry VTT 14 build 360 continua pendente.
-
+A revisão resolve temas pelo preset próprio, preserva tokens seguros de temas pessoais, inclui estilos de componentes e usa o mesmo modelo no Grid e Inspector. As amostras aplicam diretamente a família de fonte e isolam o CSS do tema global. CI e publicação serão confirmados pelo workflow; teste visual no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado do código — 1.0.0.136 (publicada)
 
