@@ -445,15 +445,9 @@ function renderLibraryResourcePreview(resource, resolved) {
     specimen.style.setProperty("font-family", model.family, "important");
     const headline = makeElement("strong", "nexus-library-font-specimen-heading", "Aa");
     headline.style.setProperty("font-family", model.family, "important");
-    const sample = makeElement("p", "nexus-library-font-specimen-normal", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    const sample = makeElement("p", "nexus-library-font-specimen-normal", "Lorem ipsum dolor sit amet.");
     sample.style.setProperty("font-family", model.family, "important");
-    const bold = makeElement("p", "nexus-library-font-specimen-bold", "Lorem ipsum dolor sit amet.");
-    bold.style.setProperty("font-family", model.family, "important");
-    const italic = makeElement("p", "nexus-library-font-specimen-italic", "Lorem ipsum dolor sit amet.");
-    italic.style.setProperty("font-family", model.family, "important");
-    const glyphs = makeElement("small", "", "0123456789 · ÁÉÍÓÚ · @ # &");
-    glyphs.style.setProperty("font-family", model.family, "important");
-    specimen.append(headline, sample, bold, italic, glyphs);
+    specimen.append(headline, sample);
     section.append(specimen);
   }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
@@ -650,17 +644,16 @@ export function createLibraryCatalogExplorer({
     const preview = makeElement("span", "nexus-library-generic-preview nexus-library-folder-preview");
     preview.append(makeElement("i", "fa-solid fa-folder", ""));
     const name = makeElement("strong", "", folder.name);
-    const meta = makeElement("small", "nexus-library-folder-meta", children ? countLabel(children, "subpasta") : "Pasta");
     if (currentViewMode === "list") {
       const nameCell = makeElement("span", "nexus-library-list-name-cell");
       nameCell.append(preview, name);
       button.append(
         nameCell,
         makeElement("span", "nexus-library-list-category", ""),
-        makeElement("span", "nexus-library-list-type", "Pasta")
+        makeElement("span", "nexus-library-list-type", "")
       );
     } else {
-      button.append(preview, name, meta);
+      button.append(preview, name);
     }
     card.append(button);
     return card;
@@ -682,9 +675,15 @@ export function createLibraryCatalogExplorer({
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
     const builtin = resource.reference?.builtin;
-    if (builtin === "font" || resource.kind === "theme") {
-      preview.dataset.previewKind = builtin === "font" ? "font" : "theme";
-      const icon = makeElement("i", builtin === "font" ? "fa-solid fa-font" : "fa-solid fa-palette");
+    if (builtin === "font") {
+      preview.dataset.previewKind = "font";
+      const specimen = makeElement("strong", "nexus-library-font-grid-specimen", "Aa");
+      specimen.style.setProperty("font-family", String(resource.fontFamily ?? "system-ui, sans-serif"), "important");
+      specimen.setAttribute("aria-hidden", "true");
+      preview.append(specimen);
+    } else if (resource.kind === "theme") {
+      preview.dataset.previewKind = "theme";
+      const icon = makeElement("i", "fa-solid fa-palette");
       icon.setAttribute("aria-hidden", "true");
       preview.append(icon);
     } else if (thumbnail) {
@@ -700,8 +699,9 @@ export function createLibraryCatalogExplorer({
       preview.append(icon);
     }
 
+    const name = makeElement("strong", "nexus-library-card-name", resource.name);
     const nameCell = makeElement("span", "nexus-library-list-name-cell");
-    nameCell.append(preview, makeElement("strong", "", resource.name));
+    nameCell.append(preview.cloneNode(true), name.cloneNode(true));
     const categoryLabels = {
       component: "Componente", composition: "Composição", layout: "Layout", template: "Modelo",
       asset: "Asset", media: "Mídia", theme: "Coleção visual", style: "Estilo", logic: "Lógica", document: "Documento"
@@ -718,7 +718,11 @@ export function createLibraryCatalogExplorer({
     const typeLabel = resource.documentType || typeLabels[resource.type] || resource.type || "—";
     const categoryCell = makeElement("span", "nexus-library-list-category", category);
     const typeCell = makeElement("span", "nexus-library-list-type", typeLabel);
-    select.append(nameCell, categoryCell, typeCell);
+    if (currentViewMode === "list") {
+      select.append(nameCell, categoryCell, typeCell);
+    } else {
+      select.append(preview, name);
+    }
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
     const isFavorite = preferences.favorites.includes(key);
     const favorite = makeElement("button", "nexus-library-favorite");
