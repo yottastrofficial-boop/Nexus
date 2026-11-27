@@ -14,6 +14,21 @@ globalThis.Hooks = {
 };
 
 const store = createEmptyNexusLibraryStore();
+store.collections.themes.push({
+  id: "theme-preview",
+  name: "Tema personalizado",
+  profile: {
+    schemaVersion: 3,
+    preset: "medieval",
+    palette: { canvas: "#111111", panel: "#222222", text: "#eeeeee" },
+    typography: { family: "Georgia", baseSize: 15 },
+    layout: { density: "spacious", radius: "soft", spacing: 1.5, controlHeight: 40 },
+    components: {
+      buttons: { background: "#123456", text: "#ffffff", border: "#456789", borderStyle: "dashed", borderWidth: 2, radius: 9 }
+    },
+    customCss: { buttons: "body { background:url(javascript:alert(1)); }" }
+  }
+});
 store.collections.components.push({
   id: "component-health",
   name: "Indicador de recurso",
@@ -61,6 +76,14 @@ assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
   "A listagem deve expor metadados, não payloads completos.");
+const themePage = await nexusProvider.list({ type: "theme", limit: 20 });
+const customThemeResource = themePage.items.find(item => item.reference?.collection === "themes" && item.reference?.id === "theme-preview");
+assert.equal(customThemeResource?.themePreview?.typography?.family, "Georgia");
+assert.equal(customThemeResource?.themePreview?.components?.buttons?.background, "#123456");
+assert.equal(customThemeResource?.themePreview?.components?.buttons?.borderStyle, "dashed");
+assert.equal(Object.hasOwn(customThemeResource.themePreview, "customCss"), false,
+  "Theme preview metadata must exclude custom CSS so previewing a theme never executes imported styles.");
+
 const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
 assert.equal(fontsPage.total, 9, "The Library exposes the native font stacks used by the NEXUS UI.");
 const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
