@@ -226,7 +226,7 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
 assert.ok(catalogExplorer.includes("nexus-library-font-grid-specimen") &&
   catalogExplorer.includes("resource.fontFamily") &&
   catalogExplorer.includes('"Aa"') &&
-  catalogExplorer.includes("Lorem ipsum dolor sit amet.") &&
+  catalogExplorer.includes("Lorem ipsum dolor sit amet") &&
   !catalogExplorer.includes("nexus-library-font-specimen") &&
   !catalogExplorer.includes("nexus-library-resource-preview-facts"),
   "Font metadata stays out of the visual preview while the compact Aa card remains.");
