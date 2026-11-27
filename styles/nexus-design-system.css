@@ -336,50 +336,13 @@ html.nexus-design-system .nexus-library-toolbar-main {
   min-width: 0;
 }
 
-html.nexus-design-system .nexus-library-search-wrap {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  align-items: center !important;
-  gap: 9px !important;
-  width: auto !important;
-  min-width: 0 !important;
-  height: 38px !important;
-  min-height: 38px !important;
-  margin: 0 !important;
-  padding: 0 11px !important;
-  border: 1px solid var(--nexus-ui-border) !important;
-  border-radius: 8px !important;
-  color: var(--nexus-ui-muted) !important;
-  background: var(--nexus-ui-field) !important;
-  box-shadow: none !important;
-}
 
-html.nexus-design-system .nexus-library-search-wrap > i {
-  flex: 0 0 auto;
-  color: var(--nexus-ui-muted);
-  font-size: 14px;
-}
 
-html.nexus-design-system .nexus-library-search-wrap .nexus-library-search {
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  color: var(--nexus-ui-text) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
 
-html.nexus-design-system .nexus-library-search-wrap:focus-within {
-  border-color: var(--nexus-ui-accent) !important;
-  outline: 1px solid color-mix(in srgb, var(--nexus-ui-accent) 35%, transparent);
-}
+
+
+
+
 
 html.nexus-design-system .nexus-library-toolbar-controls {
   display: flex;
@@ -473,9 +436,7 @@ html.nexus-design-system .nexus-library-toolbar-unified .nexus-library-count {
   html.nexus-design-system .nexus-library-toolbar-main {
     flex-wrap: wrap;
   }
-  html.nexus-design-system .nexus-library-search-wrap {
-    flex: 1 1 100% !important;
-  }
+  
   html.nexus-design-system .nexus-library-toolbar-controls {
     width: 100%;
     justify-content: flex-end;
@@ -943,30 +904,11 @@ html.nexus-design-system .nexus-library-actions-popover > button:focus-visible {
   background: var(--nexus-ui-surface-hover) !important;
 }
 
-html.nexus-design-system .nexus-library-search-clear {
-  display: grid;
-  flex: 0 0 26px;
-  place-items: center;
-  width: 26px;
-  min-width: 26px;
-  height: 26px;
-  min-height: 26px;
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  color: var(--nexus-ui-muted);
-  background: transparent;
-  cursor: pointer;
-}
 
-html.nexus-design-system .nexus-library-search-clear:hover {
-  color: var(--nexus-ui-text);
-  background: var(--nexus-ui-surface-hover);
-}
 
-html.nexus-design-system .nexus-library-search-clear[hidden] {
-  display: none !important;
-}
+
+
+
 
 html.nexus-design-system:not([data-nexus-theme="foundry"]) #navigation {
   box-sizing: border-box;
