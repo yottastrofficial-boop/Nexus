@@ -209,7 +209,7 @@ assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes
 assert.ok(libraryApplication.includes("button.append(icon, textNode)") &&
   libraryApplication.includes('separator.textContent = "/"'),
   "Breadcrumbs must align their path labels and use Windows-style slash separators.");
-console.log("NEXUS Library 1.0.0.129 visual refinement contracts: OK");
+console.log("NEXUS Library 1.0.0.131 visual refinement contracts: OK");
 
 
 assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplorer.includes("renderFolderCard") &&
