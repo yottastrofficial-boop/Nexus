@@ -1,4 +1,4 @@
-## 1.0.0.131 — Pré-vias refinadas e lista compacta da Biblioteca
+## 1.0.0.131 — Prévias refinadas e lista compacta da Biblioteca
 
 - Temas em grade: apresentar título, subtítulo, texto normal, bold/italic, highlight, barras, botões, campo e paleta real do tema.
 - Temas em lista: marcador compacto com fundo, acento e borda do tema.
