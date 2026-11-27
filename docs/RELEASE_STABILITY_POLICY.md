@@ -1,10 +1,10 @@
-## Estado de distribuição — 1.0.0.134 (candidato)
+## Estado de distribuição — 1.0.0.134 (publicada)
 
 A revisão 1.0.0.134 corrige o dimensionamento efetivo do Grid, reduz os cartões ao conteúdo, restaura prévias de temas com paletas reais, separa Prévia/Detalhes no Inspector, altera a interação das pastas para clique/duplo clique e corrige a mutabilidade das opções ApplicationV2 no Estúdio de Aparência.
 
 - `system.json` declara 1.0.0.134 e aponta para o pacote correspondente.
-- O manifesto estável permanece na última release confirmada até o workflow validar, publicar e verificar o asset `nexus.zip`.
-- CI deve executar sintaxe, contratos, suíte completa e geração do ZIP.
+- `manifest.json` e `system.json` estão sincronizados para 1.0.0.134 após a confirmação do asset `nexus.zip` (489.825 bytes).
+- CI e regressões aprovados: 71/71 arquivos JavaScript verificados e 52/52 arquivos de teste aprovados; pacote ZIP gerado, release publicada e manifesto sincronizado.
 - Validação manual pendente no Foundry VTT 14 build 360: dimensões 32/64/128, títulos longos, miniaturas e fallback, paletas de temas, abas Prévia/Detalhes, clique/duplo clique/teclado em pastas e abertura do Estúdio de Aparência.
 - A publicação do pacote não promove automaticamente a versão a checkpoint funcional; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no cliente real.
 
