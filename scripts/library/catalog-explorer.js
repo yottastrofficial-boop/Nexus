@@ -997,7 +997,8 @@ export function createLibraryCatalogExplorer({
       raw.dataset.loaded = "true";
     });
     advanced.append(raw);
-    detail.replaceChildren(heading, meta, description, themePreview, ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    const designProfilePreview = renderDesignProfilePreview(resource, resolved);
+    detail.replaceChildren(heading, meta, description, themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);
