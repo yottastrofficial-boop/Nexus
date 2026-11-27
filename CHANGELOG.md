@@ -1,3 +1,11 @@
+## 1.0.0.136 — Backup da Biblioteca e API de transferência
+
+- Expõe operações públicas de backup da Biblioteca em `game.nexus.library`: exportação, preparação de importação, confirmação e importação direta.
+- Mantém o fluxo de importação separado em validação/prévia e confirmação, preservando conflitos e recusando prévias desatualizadas.
+- Atualiza a versão do sistema Foundry para 1.0.0.136 e o endereço do pacote da release.
+- Importação/exportação é para backups de recursos da Biblioteca NEXUS; não representa transferência direta de Actors ou inventários entre fichas.
+- A validação automatizada e a publicação do ZIP serão confirmadas pelo workflow de release. A validação visual/funcional no Foundry VTT 14 build 360 permanece necessária.
+
 ## 1.0.0.135 — Prévia Padrão, Inspector refinado e controles de Lista
 
 - Renomeia a aba principal do Inspector para **Padrão** e melhora os tab buttons em um controle segmentado acessível, com estado ativo claro.
