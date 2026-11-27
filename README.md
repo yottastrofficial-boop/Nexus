@@ -1,12 +1,12 @@
-## Biblioteca 1.0.0.133 em preparação
+## Biblioteca 1.0.0.133 publicada
 
-A 1.0.0.133 atualiza o Grid adaptativo, o dimensionamento proporcional das prévias, os cartões de fontes, o tratamento de pastas e o posicionamento dos favoritos. CI, testes e pacote foram aprovados; a validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.133 atualiza o Grid adaptativo, o dimensionamento proporcional das prévias, os cartões de fontes, o tratamento de pastas e o posicionamento dos favoritos. CI, testes, pacote, release e manifesto foram confirmados; a validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.133 em preparação · base publicada 1.0.0.131 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.133 publicada · Foundry VTT 14 · Foundry VTT 14
 </p>
 
 <p align="center">
