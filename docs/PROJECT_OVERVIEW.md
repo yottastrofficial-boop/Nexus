@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.132
+## Estado do código — 1.0.0.133
 
-A 1.0.0.132 corrige o alinhamento da lista para Nome/Categoria/Tipo, adiciona ordenação A–Z/Z–A pelo cabeçalho Nome, compacta fontes e temas no grid e coloca a descrição abaixo da prévia no Inspector. O ícone da Biblioteca fica no cabeçalho nativo e o breadcrumb mantém somente o caminho. A organização de arquivos distingue pastas lógicas da Biblioteca dos caminhos físicos do storage; configurações pequenas são registros JSON no libraryStore. system.json prepara 1.0.0.132; o manifesto estável permanece em 1.0.0.131 até a publicação confirmada. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+A 1.0.0.133 atualiza a Biblioteca Universal com Grid adaptativo, prévias redimensionadas proporcionalmente para 32/64/128 CSS px, fallback por ícone, cartões Grid separados das linhas Lista, pastas fora das facetas, espécime tipográfico compacto e favoritos reposicionados. Os workflows de regressão, validação e empacotamento foram aprovados no PR #117. O pacote candidato é 1.0.0.133; o manifesto estável permanece em 1.0.0.132 até a release e o ZIP serem confirmados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## Estado do código — 1.0.0.129
 
