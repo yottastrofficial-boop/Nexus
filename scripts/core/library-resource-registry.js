@@ -97,6 +97,51 @@ function cloneReference(value, depth = 0) {
   return result;
 }
 
+const THEME_PREVIEW_COMPONENTS = Object.freeze(["buttons", "panels", "containers", "highlights", "fields"]);
+function normalizeThemePreview(raw) {
+  if (!isPlainObject(raw)) return null;
+  const source = isPlainObject(raw.profile) ? raw.profile : raw;
+  const paletteSource = isPlainObject(source.palette) ? source.palette : {};
+  const palette = {};
+  for (const [key, value] of Object.entries(paletteSource)) {
+    if (/^(panel|surface|input|border|text|muted|hover|scroll|windowHeader|windowContent|menu|placeholder|resourceButton|canvas|card|accent|highlight|button)$/.test(key) &&
+        typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim())) palette[key] = value.trim();
+  }
+  const typography = isPlainObject(source.typography) ? source.typography : {};
+  const family = cleanText(typography.family, 180);
+  const safeFamily = family && /^[\w\s'",.-]+$/.test(family) ? family : "";
+  const layoutSource = isPlainObject(source.layout) ? source.layout : {};
+  const layout = {
+    density: ["compact", "comfortable", "spacious"].includes(layoutSource.density) ? layoutSource.density : "comfortable",
+    radius: ["sharp", "soft", "rounded"].includes(layoutSource.radius) ? layoutSource.radius : "rounded",
+    spacing: Math.min(3, Math.max(0.5, Number(layoutSource.spacing) || 1)),
+    controlHeight: Math.min(44, Math.max(28, Number(layoutSource.controlHeight) || 34))
+  };
+  const componentsSource = isPlainObject(source.components) ? source.components : {};
+  const components = {};
+  for (const key of THEME_PREVIEW_COMPONENTS) {
+    const component = isPlainObject(componentsSource[key]) ? componentsSource[key] : {};
+    const safeColor = value => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value.trim()) ? value.trim() : "";
+    components[key] = {
+      background: safeColor(component.background),
+      text: safeColor(component.text),
+      border: safeColor(component.border),
+      borderStyle: ["solid", "dashed", "dotted", "none"].includes(component.borderStyle) ? component.borderStyle : "solid",
+      borderWidth: Math.min(4, Math.max(0, Number(component.borderWidth) || 0)),
+      radius: Math.min(18, Math.max(0, Number(component.radius) || 0))
+    };
+  }
+  return Object.freeze({
+    schemaVersion: Number(source.schemaVersion) || DESIGN_PROFILE_SCHEMA_VERSION,
+    preset: cleanText(source.preset ?? source.id, 48),
+    name: cleanText(source.name, 120),
+    palette: Object.freeze(palette),
+    typography: Object.freeze({ family: safeFamily, baseSize: Math.min(18, Math.max(10, Number(typography.baseSize) || 13)) }),
+    layout: Object.freeze(layout),
+    components: Object.freeze(Object.fromEntries(Object.entries(components).map(([key, value]) => [key, Object.freeze(value)])))
+  });
+}
+
 function normalizeResource(raw, providerId, defaultOrigin = providerId) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new TypeError("O provedor retornou um recurso inválido.");
@@ -128,6 +173,7 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     packLabel: cleanText(raw.packLabel, 120),
     previewColors: Object.freeze((Array.isArray(raw.previewColors) ? raw.previewColors : []).slice(0, 8).map(item => ({ label: cleanText(item?.label, 32), value: typeof item?.value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.value) ? item.value : "" })).filter(item => item.label && item.value)),
     fontFamily: cleanText(raw.fontFamily, 180),
+    themePreview: normalizeThemePreview(raw.themePreview),
     folder: cleanText(raw.folder, 160),
     sizeBytes: Number.isFinite(Number(raw.sizeBytes ?? raw.size)) && Number(raw.sizeBytes ?? raw.size) >= 0 ? Number(raw.sizeBytes ?? raw.size) : null,
     modifiedAt: cleanText(raw.modifiedAt ?? raw.updatedAt ?? raw.lastModified, 40),
@@ -339,7 +385,8 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
           description: entry.description ?? "",
           tags: entry.tags ?? [],
           thumbnail: entry.thumbnail ?? entry.img ?? entry.icon ?? "",
-          previewColors: Object.entries(entry.profile?.palette ?? entry.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 8).map(([label, value]) => ({ label, value })),
+          previewColors: Object.entries(entry.profile?.palette ?? entry.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 18).map(([label, value]) => ({ label, value })),
+          themePreview: collection === "themes" ? (entry.profile ?? entry) : undefined,
           folder: entry.folder ?? "",
           origin: entry.origin ?? "personal",
           reference: { providerId: "nexus-library", collection, id: String(entry.id) },
@@ -391,7 +438,8 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         name: theme.name ?? theme.label ?? THEME_LABELS[theme.id] ?? theme.id,
         description: theme.description ?? "",
         tags: theme.tags ?? [],
-        previewColors: Object.entries(theme.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 8).map(([label, value]) => ({ label, value })),
+        previewColors: Object.entries(theme.palette ?? {}).filter(([, value]) => typeof value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)).slice(0, 18).map(([label, value]) => ({ label, value })),
+        themePreview: theme.profile ?? theme,
         origin: "core",
         reference: { providerId: "nexus-library", builtin: "theme", key: String(theme.id ?? theme.key) },
         capabilities: ["resolve"]
