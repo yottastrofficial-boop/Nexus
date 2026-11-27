@@ -16,7 +16,7 @@ A 1.0.0.134 corrige o dimensionamento efetivo das miniaturas, remove espaço vaz
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão estável publicada:** 1.0.0.134. O manifesto original `manifest.json` e o pacote `nexus.zip` foram sincronizados após a confirmação da release.
+**Versão 1.0.0.134 publicada.** Manifesto estável e pacote sincronizados. O manifesto original `manifest.json` e o pacote `nexus.zip` foram sincronizados após a confirmação da release.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
