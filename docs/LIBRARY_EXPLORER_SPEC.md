@@ -11,14 +11,20 @@ A Biblioteca é um explorador universal de conteúdos reutilizáveis. Coleções
 - **Recentes:** visão transversal dos últimos itens consultados.
 - **Coleções especializadas:** elementos disponíveis, meus componentes, temas, modelos, fluxos, predefinições, componentes salvos, mídia, estilos, propriedades, regras, comportamentos e funções.
 - **Pastas:** pastas pessoais podem ser globais (livres) ou vinculadas a uma coleção. A associação é metadado do usuário e não altera o tipo ou conteúdo do item.
-- **Etiquetas:** chips gerados a partir das etiquetas realmente presentes nos itens salvos; a pesquisa e o filtro atuam sobre a coleção visível.
+- **Etiquetas:** são metadados exibidos no Inspector e continuam indexadas pela busca global; não ocupam coluna nem oferecem filtro dedicado na lista.
+- **Lista:** mostra Nome, Categoria e Tipo; Categoria e Tipo abrem campos de pesquisa contextual nos próprios cabeçalhos. As três colunas podem ser redimensionadas.
+- **Ordenação:** pastas aparecem primeiro em A–Z e, em seguida, os recursos em A–Z; a ordenação padrão não exige um seletor de pastas.
 - **Visualização:** grade e lista compartilham os mesmos controles e padrões de cartão.
 
 As visões Todos os itens, Favoritos e Recentes agregam conteúdo salvo. Os elementos padrão do catálogo continuam disponíveis na área Elementos disponíveis; não são convertidos artificialmente em definições pessoais.
 
 ## Cartões e Inspector
 
-Os cartões seguem uma estrutura comum de prévia, título, metadado e estado de favorito. A área de prévia possui altura uniforme; temas mostram amostras de paleta e recursos pessoais podem usar uma imagem personalizada. A prévia usa dados inertes e não executa HTML, CSS, JavaScript ou expressões importadas.
+Os cartões seguem uma estrutura comum de prévia, título, metadado e estado de favorito. A área de prévia possui altura uniforme; temas em grade apresentam uma amostra inerte do próprio perfil (hierarquia de texto, destaque, barras, botões, campo e paleta), enquanto em lista usam um marcador compacto com fundo, acento e borda do tema. Fontes exibem Aa e Lorem ipsum com variações tipográficas normal, bold e italic; suas pilhas CSS usam famílias disponíveis no sistema e fallbacks locais. Recursos pessoais podem usar uma imagem personalizada. A prévia usa dados inertes e não executa HTML, CSS, JavaScript ou expressões importadas.
+
+### Refinamento visual 1.0.0.131
+
+A lista usa somente Nome, Categoria e Tipo. Os filtros de Categoria e Tipo são pesquisáveis e abertos pelo respectivo cabeçalho; as sugestões são derivadas dos recursos carregados e complementadas pelos tipos nativos conhecidos. Etiquetas não são filtro separado: aparecem nos detalhes e podem ser localizadas pela busca global. A lista mantém o redimensionamento das colunas. O breadcrumb representa níveis com `/`, por exemplo `Biblioteca/Assets globais/Fontes`.
 
 O Inspector genérico permite:
 - consultar prévias contextuais seguras;
