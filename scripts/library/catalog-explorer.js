@@ -451,6 +451,26 @@ function renderLibraryFontPreview(resource, resolved) {
   return section;
 }
 
+function renderGenericLibraryPreview(resource) {
+  if (!resource || resource.reference?.builtin === "font" || resource.kind === "theme") return null;
+  const section = makeElement("section", "nexus-library-generic-resource-preview");
+  section.dataset.previewKind = String(resource.kind ?? "resource");
+  const visual = makeElement("div", "nexus-library-generic-resource-preview-visual");
+  const icon = makeElement("i", getLibraryResourceIcon(resource));
+  icon.setAttribute("aria-hidden", "true");
+  visual.append(icon);
+  if (resource.kind === "document" && ["cards", "card"].includes(String(resource.type).toLowerCase())) {
+    visual.classList.add("is-card-deck");
+    visual.append(makeElement("span", "nexus-library-generic-resource-preview-card"));
+    visual.append(makeElement("span", "nexus-library-generic-resource-preview-card"));
+  }
+  const title = makeElement("strong", "nexus-library-generic-resource-preview-name", resource.name || "Recurso");
+  const subtitle = makeElement("small", "nexus-library-generic-resource-preview-type",
+    [resource.kind, resource.documentType ?? resource.type].filter(Boolean).join(" · "));
+  section.append(visual, title, subtitle);
+  return section;
+}
+
 function renderLibraryResourcePreview(resource, resolved) {
   const model = getLibraryResourcePreviewModel(resource, resolved);
   if (!model || model.kind === "font") return null;
@@ -899,6 +919,9 @@ export function createLibraryCatalogExplorer({
     const previewModel = getLibraryResourcePreviewModel(resource, resolved);
     const fontPreview = renderLibraryFontPreview(resource, resolved);
     const resourcePreview = renderLibraryResourcePreview(resource, resolved);
+    const genericPreview = !fontPreview && !resourcePreview && resource.kind !== "theme"
+      ? renderGenericLibraryPreview(resource)
+      : null;
     const resourceSummary = makeElement("p", "nexus-library-resource-preview-summary", previewModel?.summary ?? "");
     resourceSummary.hidden = !previewModel?.summary;
     const themePreview = makeElement("section", "nexus-library-theme-preview");
@@ -1091,7 +1114,7 @@ export function createLibraryCatalogExplorer({
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, thumbnailLabel, save);
           const inspector = renderInspectorTabs(
-            [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(resourcePreview ? [resourcePreview] : [])],
+            [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(resourcePreview ? [resourcePreview] : []), ...(genericPreview ? [genericPreview] : [])],
             [resourceSummary, facts, folderLabel, collectionSection, updateSection, editor, actions]
           );
           detail.replaceChildren(inspector.root);
@@ -1169,7 +1192,7 @@ export function createLibraryCatalogExplorer({
     advanced.append(raw);
     const designProfilePreview = renderDesignProfilePreview(resource, resolved);
     const inspector = renderInspectorTabs(
-      [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : [])],
+      [heading, meta, description, ...(fontPreview ? [fontPreview] : []), themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), ...(genericPreview ? [genericPreview] : [])],
       [resourceSummary, facts, folderLabel, collectionSection, updateSection, actions, advanced]
     );
     detail.replaceChildren(inspector.root);
