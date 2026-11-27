@@ -1,9 +1,9 @@
 ## Estado de distribuição — 1.0.0.133
 
-A versão em preparação 1.0.0.133 atualiza a Biblioteca Universal com Grid adaptativo, prévias proporcionais em 32/64/128 CSS px, ícone alternativo quando miniaturas não estão disponíveis, estrutura separada para Grid/Lista, pastas fora das facetas, prévias tipográficas compactas e favoritos reposicionados. Os workflows de validação, regressão e empacotamento foram aprovados no Pull Request #117; o roadmap e a visão do projeto também refletem a versão em preparação 1.0.0.133.
+A versão 1.0.0.133 foi publicada e atualiza a Biblioteca Universal com Grid adaptativo, prévias proporcionais em 32/64/128 CSS px, ícone alternativo quando miniaturas não estão disponíveis, estrutura separada para Grid/Lista, pastas fora das facetas, prévias tipográficas compactas e favoritos reposicionados. Os workflows de validação, regressão e empacotamento foram aprovados no Pull Request #117 e na publicação da release; o roadmap e a visão do projeto também refletem a versão publicada 1.0.0.133.
 
-- `system.json` candidato: 1.0.0.133; download aponta para `v1.0.0.133/nexus.zip`.
-- `manifest.json` permanece na versão estável 1.0.0.132 até o workflow publicar a release e confirmar o asset `nexus.zip`.
+- `system.json`: 1.0.0.133; download aponta para `v1.0.0.133/nexus.zip`.
+- `manifest.json` foi sincronizado para 1.0.0.133 após a confirmação do asset `nexus.zip`.
 - Validação visual/funcional pendente no Foundry VTT 14 build 360: tamanhos 32/64/128, miniaturas de imagens, fallback, fontes, temas, cenas, favoritos, pastas e larguras variadas da janela.
 - A publicação do pacote não promove automaticamente a versão a checkpoint funcional; a confirmação manual no cliente real continua necessária.
 
