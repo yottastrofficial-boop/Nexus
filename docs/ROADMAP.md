@@ -1,4 +1,4 @@
-## 1.0.0.135 — Prévia de recursos e Inspector organizado (candidato)
+## 1.0.0.135 — Prévia de recursos e Inspector organizado (publicada)
 
 - Aba principal renomeada para Padrão; tabs segmentados acessíveis ficam no topo do Inspector.
 - Nome, descrição e meta resumida na visualização Padrão; resumo técnico, fatos e tags na aba Detalhes.
@@ -6,7 +6,7 @@
 - Prévia de tema com tokens semânticos e chaves hex personalizadas, incluindo amostra de interface.
 - Cabeçalhos Nome/Categoria/Tipo usam a célula inteira como área clicável; redimensionadores ficam em alvos próprios.
 - Remover bordas e outlines de seleção do modo Lista; selecionar item abre Padrão.
-- Testes automatizados e validação visual no Foundry VTT 14 build 360 necessários antes de promover a candidata.
+- CI, testes automatizados, release, ZIP e manifesto aprovados/publicados; validação visual no Foundry VTT 14 build 360 permanece pendente.
 
 ## 1.0.0.134 — Refinamento da Biblioteca e Estúdio de Aparência
 
