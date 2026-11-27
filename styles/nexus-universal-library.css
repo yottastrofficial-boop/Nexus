@@ -2287,3 +2287,143 @@ html.nexus-design-system .nexus-library-application .nexus-library-font-specimen
   color: var(--nexus-panel-muted, #a5b6c9);
   font-size: 11px;
 }
+
+
+/* 1.0.0.130: folder navigation and high-occupancy visual previews. */
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-generic-preview {
+  width: 84% !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 190px !important;
+  max-height: none !important;
+  aspect-ratio: 1 / 1 !important;
+  margin: 0 auto 4px !important;
+  padding: 0 !important;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-font-sample {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: inherit !important;
+  line-height: 1;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-font-sample > strong {
+  font-size: clamp(32px, 5vw, 58px) !important;
+  font-weight: 600;
+  line-height: 1;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-font-sample > small {
+  font-size: clamp(12px, 1.3vw, 17px) !important;
+  font-weight: 500;
+  line-height: 1.2;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-miniature {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  align-content: stretch;
+  justify-content: stretch;
+  gap: 7px;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 10px !important;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--nexus-theme-preview-text) 24%, transparent);
+  border-radius: 10px;
+  background: var(--nexus-theme-preview-panel);
+  color: var(--nexus-theme-preview-text);
+  font-size: 12px !important;
+  text-align: left;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-miniature > strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(12px, 1.4vw, 17px) !important;
+  font-weight: 700;
+  line-height: 1.2;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-miniature > p {
+  align-self: stretch;
+  margin: 0;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--nexus-theme-preview-text) 16%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--nexus-theme-preview-text) 4%, transparent);
+  font-size: clamp(10px, 1.1vw, 13px) !important;
+  line-height: 1.35;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-miniature > i {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: var(--nexus-theme-preview-accent);
+  color: var(--nexus-theme-preview-text);
+  font-size: 11px !important;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.2;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-theme-miniature > small {
+  display: block;
+  min-height: 26px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--nexus-theme-preview-text) 32%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--nexus-theme-preview-panel) 90%, #000);
+  color: var(--nexus-theme-preview-text);
+  font-size: 10px !important;
+  line-height: 1.2;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-folder-card {
+  align-self: start;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-folder-entry {
+  color: var(--nexus-panel-text, #e7edf5);
+  cursor: pointer;
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-folder-preview {
+  color: var(--nexus-panel-muted, #a5b6c9);
+}
+html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-folder-preview > i {
+  font-size: clamp(40px, 5vw, 64px);
+  color: var(--nexus-panel-muted, #a5b6c9);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-folder-card {
+  display: block !important;
+  min-height: 30px;
+  border: 0 !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-folder-entry {
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  justify-items: stretch !important;
+  align-items: center;
+  gap: 8px !important;
+  min-height: 30px;
+  padding: 3px 12px !important;
+  text-align: left;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-folder-preview {
+  width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-folder-preview > i {
+  font-size: 16px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-folder-meta {
+  display: none;
+}
