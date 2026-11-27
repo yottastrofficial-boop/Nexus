@@ -280,7 +280,7 @@ export function getLibraryThemePreviewTokens(rawColors = []) {
   const entries = Array.isArray(rawColors)
     ? rawColors
     : rawColors && typeof rawColors === "object"
-      ? Object.entries(rawColors).map(([label, value]) => ({ label, value }))
+      ? Object.entries(rawColors).map(([key, value]) => ({ key, value }))
       : [];
   const colors = new Map(entries
     .filter(item => item && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(item.value ?? "").trim()))
@@ -296,15 +296,21 @@ export function getLibraryThemePreviewTokens(rawColors = []) {
     canvas: pick(["canvas", "canvasColor", "background"], "#171f2a"),
     panel: pick(["panel", "panelColor"], "#182330"),
     surface: pick(["surface", "surfaceColor"], "#202e3e"),
-    card: pick(["card", "cardColor"], "#273443"),
-    input: pick(["input", "field", "fieldColor"], "#111b27"),
+    input: pick(["input", "inputColor", "field", "fieldColor"], "#111b27"),
     border: pick(["border", "borderColor"], "#3c5067"),
     text: pick(["text", "textColor"], "#e7edf5"),
-    muted: pick(["muted", "mutedText", "secondaryText"], "#9aadc2"),
+    muted: pick(["muted", "mutedText", "mutedTextColor", "secondaryText"], "#9aadc2"),
+    hover: pick(["hover", "hoverColor"], "#2a3d52"),
+    scroll: pick(["scroll", "scrollColor"], "#111923"),
+    windowHeader: pick(["windowHeader", "windowHeaderColor"], "#223246"),
+    windowContent: pick(["windowContent", "windowContentColor"], "#192431"),
+    menu: pick(["menu", "menuColor"], "#202f40"),
+    placeholder: pick(["placeholder", "placeholderColor"], "#91a6bd"),
+    resourceButton: pick(["resourceButton", "resourceButtonColor"], "#315b7d"),
+    card: pick(["card", "cardColor"], "#273443"),
     accent: pick(["accent", "accentColor"], "#52647b"),
     highlight: pick(["highlight", "highlightColor", "selected"], "#78b7e8"),
-    button: pick(["button", "buttonColor", "resourceButton"], "#315b7d"),
-    windowHeader: pick(["windowHeader", "windowHeaderColor"], "#223246")
+    button: pick(["button", "buttonColor"], "#315b7d")
   });
 }
 
@@ -334,48 +340,67 @@ function createLibraryResourceBarCardPreview(resource) {
   return preview;
 }
 
-function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}, layout = {}, compact = false } = {}) {
+function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}, layout = {}, components = {}, compact = false } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
   const root = makeElement("div", compact
     ? "nexus-library-theme-sample nexus-library-theme-card-preview"
     : "nexus-library-theme-sample nexus-library-theme-live-preview");
   root.dataset.previewSize = compact ? "compact" : "full";
+  root.dataset.themePreset = String(layout.preset ?? "");
   for (const [key, value] of Object.entries(tokens)) root.style.setProperty("--nexus-library-theme-" + key, value);
-  root.style.setProperty("--nexus-library-theme-font", String(typography.family ?? "inherit"));
+  const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
+  root.style.setProperty("--nexus-library-theme-font", family);
   root.style.setProperty("--nexus-library-theme-font-size", (compact ? 7 : Number(typography.baseSize) || 13) + "px");
   root.style.setProperty("--nexus-library-theme-radius", layout.radius === "sharp" ? "0px" : layout.radius === "soft" ? "4px" : compact ? "5px" : "8px");
   root.style.setProperty("--nexus-library-theme-control-height", (compact ? 12 : Math.max(28, Math.min(44, Number(layout.controlHeight) || 34))) + "px");
   root.style.setProperty("--nexus-library-theme-gap", compact ? "3px" : Math.max(4, (Number(layout.spacing) || 1) * 8) + "px");
+  for (const [key, style] of Object.entries(components ?? {})) {
+    if (!["buttons", "panels", "containers", "highlights", "fields"].includes(key) || !style) continue;
+    const prefix = "--nexus-library-theme-component-" + key + "-";
+    for (const [property, token] of [["background", "background"], ["text", "text"], ["border", "border"], ["borderStyle", "border-style"], ["borderWidth", "border-width"], ["radius", "radius"]]) {
+      const value = style[property];
+      if (value !== undefined && value !== null && value !== "") root.style.setProperty(prefix + token, String(value));
+    }
+  }
 
   const header = makeElement("header", "nexus-library-theme-live-header");
-  header.append(makeElement("small", "", compact ? "N" : "NEXUS · PRÉVIA"),
+  header.append(makeElement("small", "", compact ? "NEXUS · PRÉVIA" : "NEXUS · PRÉVIA"),
     makeElement("strong", "", String(name).slice(0, compact ? 18 : 64)));
   root.append(header);
 
+  const body = makeElement("div", "nexus-library-theme-live-body");
   const nav = makeElement("nav", "nexus-library-theme-live-nav");
-  nav.append(makeElement("span", "is-active", compact ? "Ficha" : "Ficha"),
+  nav.append(makeElement("span", "is-active", "Ficha"),
     makeElement("span", "", compact ? "Atrib." : "Atributos"),
-    makeElement("span", "", compact ? "Efeitos" : "Efeitos"));
-  root.append(nav);
+    makeElement("span", "", "Efeitos"));
+  body.append(nav);
 
   const panel = makeElement("section", "nexus-library-theme-live-panel");
   panel.append(makeElement("small", "", compact ? "PERSONAGEM" : "PERSONAGEM · EXEMPLO"));
-  panel.append(makeElement("strong", "", compact ? "Exemplo" : "Exemplo de interface"));
-  panel.append(makeElement("span", "nexus-library-theme-live-highlight", compact ? "Ativo" : "Destaque selecionado"));
+  panel.append(makeElement("strong", "", compact ? "Exemplo de interface" : "Exemplo de interface"));
+  panel.append(makeElement("span", "nexus-library-theme-live-highlight", compact ? "Destaque selecionado" : "Destaque selecionado"));
 
   const resource = makeElement("div", "nexus-library-theme-live-resource");
-  resource.append(makeElement("small", "", compact ? "PV" : "PV · 32 / 40"));
+  resource.append(makeElement("small", "", compact ? "PV · 32 / 40" : "PV · 32 / 40"));
   const track = makeElement("span", "nexus-library-theme-live-track");
   const fill = makeElement("i", "");
-  fill.style.width = "80%";
+  fill.style.width = "68%";
   track.append(fill);
   resource.append(track);
   panel.append(resource);
 
-  const field = makeElement("span", "nexus-library-theme-live-field", compact ? "Campo" : "Campo de exemplo");
-  const button = makeElement("button", "nexus-library-theme-live-button", compact ? "OK" : "Ação");
-  panel.append(field, button);
-  root.append(panel);
+  const card = makeElement("div", "nexus-library-theme-live-card");
+  card.append(makeElement("small", "", "ATRIBUTO"), makeElement("strong", "", "FOR 16"));
+  panel.append(card);
+
+  const field = makeElement("span", "nexus-library-theme-live-field", compact ? "Campo de exemplo" : "Campo de exemplo");
+  const controls = makeElement("div", "nexus-library-theme-live-controls");
+  controls.append(field,
+    makeElement("button", "nexus-library-theme-live-button", compact ? "Ação" : "Ação"),
+    makeElement("button", "nexus-library-theme-live-button is-secondary", "Secundário"));
+  panel.append(controls);
+  body.append(panel);
+  root.append(body);
   return root;
 }
 
@@ -543,17 +568,26 @@ export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
   return preview?.mediaType === "image" && preview.source === source ? source : "";
 }
 
+function safeFontFamily(value) {
+  const family = String(value ?? "").trim();
+  return family && family.length <= 180 && /^[\\w\\s'",.-]+$/.test(family) ? family : "";
+}
+
 function renderLibraryFontPreview(resource, resolved) {
   if (resource?.reference?.builtin !== "font") return null;
   const model = getLibraryResourcePreviewModel(resource, resolved);
-  const family = String(model?.family ?? resolved?.family ?? resource.fontFamily ?? "system-ui, sans-serif").trim();
+  const family = safeFontFamily(model?.family ?? resolved?.family ?? resource.fontFamily) || "system-ui, sans-serif";
   const section = makeElement("section", "nexus-library-font-preview");
   section.dataset.previewKind = "font";
   section.style.setProperty("--nexus-library-preview-font", family);
+  section.style.setProperty("font-family", family, "important");
   const samples = makeElement("div", "nexus-library-font-preview-samples");
-  samples.append(makeElement("strong", "nexus-library-font-preview-aa", "Aa"));
-  samples.append(makeElement("p", "nexus-library-font-preview-lorem", "Lorem Epsum"));
-  samples.append(makeElement("span", "nexus-library-font-preview-glyphs", "12345 !@#$%"));
+  samples.style.setProperty("font-family", family, "important");
+  const aa = makeElement("strong", "nexus-library-font-preview-aa", "Aa");
+  const lorem = makeElement("p", "nexus-library-font-preview-lorem", "Lorem Epsum");
+  const glyphs = makeElement("span", "nexus-library-font-preview-glyphs", "12345 !@#$%");
+  for (const sample of [aa, lorem, glyphs]) sample.style.setProperty("font-family", family, "important");
+  samples.append(aa, lorem, glyphs);
   section.append(samples);
   return section;
 }
