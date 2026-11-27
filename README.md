@@ -17,7 +17,7 @@ A versão candidata 1.0.0.139 corrige a resolução de tema no grid e no Inspect
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão candidata 1.0.0.139; manifesto estável atual 1.0.0.138 até a confirmação da publicação.** CI e empacotamento serão confirmados pelo workflow; a validação visual/funcional no Foundry VTT 14 build 360 depende de teste manual.
+**Versão 1.0.0.138 publicada (manifesto estável); a linha principal contém as alterações de 1.0.0.139 em validação.** CI e empacotamento serão confirmados pelo workflow; a validação visual/funcional no Foundry VTT 14 build 360 depende de teste manual.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
