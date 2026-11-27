@@ -1,8 +1,8 @@
 ## Estado de distribuição — 1.0.0.130
 
-A 1.0.0.130 candidata inclui navegação de pastas no conteúdo da Biblioteca, Assets globais como diretório pai, fontes nativas visíveis em Fontes com espécimes que usam a família correta, prévias de tema ampliadas e janela de ficha de 1100 × 920 redimensionável. O manifesto estável permanece em 1.0.0.129 até o workflow publicar e confirmar o ZIP 1.0.0.130.
+A 1.0.0.130 em preparação inclui navegação de pastas no conteúdo da Biblioteca, Assets globais como diretório pai, fontes nativas visíveis em Fontes com espécimes que usam a família correta, prévias de tema ampliadas e janela de ficha de 1100 × 920 redimensionável. O manifesto estável permanece em 1.0.0.129 até o workflow publicar e confirmar o ZIP 1.0.0.130.
 
-- `system.json` candidato: 1.0.0.130; download aponta para `v1.0.0.130/nexus.zip`.
+- `system.json` em preparação: 1.0.0.130; download aponta para `v1.0.0.130/nexus.zip`.
 - `manifest.json` permanece em 1.0.0.129 durante a validação; o workflow o sincroniza após release e asset verificado.
 - CI, pacote e publicação desta revisão serão confirmados pelo workflow.
 - Validação visual/funcional pendente no Foundry VTT 14 build 360: navegar Assets globais → Fontes, conferir a lista de fontes, espécimes Monospace, miniaturas de temas em grade e escala do Canvas padrão versus Configurações.
