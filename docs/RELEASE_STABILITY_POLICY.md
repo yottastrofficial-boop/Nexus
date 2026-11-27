@@ -1,6 +1,6 @@
 ## Estado de distribuição — 1.0.0.134 (publicada)
 
-A versão estável atual é 1.0.0.134. O manifesto estável permanece nessa versão até que uma atualização seja integrada à `main`, validada e publicada pelo workflow oficial.
+A versão estável atual é 1.0.0.134. O código da main em revisão declara 1.0.0.135. O manifesto estável permanece nessa versão até que uma atualização seja integrada à `main`, validada e publicada pelo workflow oficial.
 
 - `system.json` da versão estável publicada declara 1.0.0.134 e aponta para o pacote correspondente.
 - `manifest.json` e `nexus.zip` da release 1.0.0.134 foram confirmados.
