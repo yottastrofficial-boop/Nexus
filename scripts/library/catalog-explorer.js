@@ -627,8 +627,20 @@ export function createLibraryCatalogExplorer({
     }
 
     const title = makeElement("strong", "", resource.name);
-    const meta = makeElement("small", "", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
-    select.append(preview, title, meta);
+    const category = resource.documentType || resource.kind || resource.type;
+    const meta = makeElement("small", "nexus-library-resource-meta", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
+    const categoryCell = makeElement("span", "nexus-library-list-category", category);
+    const bytes = Number(resource.sizeBytes);
+    const sizeCell = makeElement("span", "nexus-library-list-size", Number.isFinite(bytes) && bytes > 0
+      ? bytes >= 1024 * 1024 ? (bytes / (1024 * 1024)).toFixed(1) + " MB"
+        : bytes >= 1024 ? Math.round(bytes / 1024) + " KB" : bytes + " B"
+      : "—");
+    const modified = Date.parse(resource.modifiedAt ?? "");
+    const modifiedCell = makeElement("span", "nexus-library-list-modified", Number.isFinite(modified)
+      ? new Date(modified).toLocaleDateString("pt-BR")
+      : "—");
+    const tagsCell = makeElement("span", "nexus-library-list-tags", (resource.tags ?? []).join(", ") || "—");
+    select.append(preview, title, meta, categoryCell, sizeCell, modifiedCell, tagsCell);
 
     const isFavorite = preferences.favorites.includes(key);
     const favorite = makeElement("button", "nexus-library-favorite");
@@ -969,7 +981,7 @@ export function createLibraryCatalogExplorer({
     currentCompendiumIds = Array.isArray(compendiumIds) ? [...new Set(compendiumIds.map(String).filter(Boolean))].slice(0, 32) : [];
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
-    currentSortMode = ["name-asc", "name-desc", "type-asc", "source-asc"].includes(sortMode) ? sortMode : "name-asc";
+    currentSortMode = ["name-asc", "name-desc", "type-asc", "source-asc", "size-desc", "modified-desc", "tag-asc"].includes(sortMode) ? sortMode : "name-asc";
     const version = ++renderRequestVersion;
     if (!append) {
       detailRequestVersion++;
@@ -1049,6 +1061,9 @@ export function createLibraryCatalogExplorer({
       if (currentSortMode === "name-desc") return compareText(right.name ?? right.title ?? right.label, left.name ?? left.title ?? left.label);
       if (currentSortMode === "type-asc") return compareText(left.kind ?? left.type, right.kind ?? right.type) || compareText(left.name ?? left.title, right.name ?? right.title);
       if (currentSortMode === "source-asc") return compareText(left.origin ?? left.source ?? left.providerId, right.origin ?? right.source ?? right.providerId) || compareText(left.name ?? left.title, right.name ?? right.title);
+      if (currentSortMode === "size-desc") return (Number(right.sizeBytes) || -1) - (Number(left.sizeBytes) || -1) || compareText(left.name, right.name);
+      if (currentSortMode === "modified-desc") return (Date.parse(right.modifiedAt ?? "") || 0) - (Date.parse(left.modifiedAt ?? "") || 0) || compareText(left.name, right.name);
+      if (currentSortMode === "tag-asc") return compareText((left.tags ?? []).join(", "), (right.tags ?? []).join(", ")) || compareText(left.name, right.name);
       return compareText(left.name ?? left.title ?? left.label, right.name ?? right.title ?? right.label);
     });
 
