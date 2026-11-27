@@ -191,6 +191,17 @@ export function createLibraryApplicationClass({
             runtime: logic.runtime,
             onSave: asset => logic.save(asset)
           });
+        },
+        onOpenFolder: async folderId => {
+          this._state.smartView = "all";
+          this._state.collectionId = "";
+          this._state.folder = String(folderId ?? "");
+          syncControlsFromState();
+          root.querySelectorAll("[data-library-smart-view]").forEach(item =>
+            item.classList.toggle("active", item.dataset.librarySmartView === "all"));
+          refreshFolders();
+          refreshCollections();
+          await render();
         }
       });
 
@@ -634,7 +645,6 @@ export function createLibraryApplicationClass({
         "tabelas-rolagem": { kind: "document", type: "tables" },
         "macros": { kind: "document", type: "macros" },
         "audio": { kind: "media" },
-        "assets-globais": { kind: "asset" },
         "assets-fontes": { kind: "style", type: "font" },
         "assets-imagens": { kind: "media" },
         "assets-icones": { kind: "asset" },
@@ -654,7 +664,7 @@ export function createLibraryApplicationClass({
         const folderFilter = defaultFolderFilters[this._state.folder] ?? null;
         const explorerState = {
           ...this._state,
-          folder: folderFilter ? "" : this._state.folder,
+          folder: this._state.folder,
           kind: this._state.kind === "all" ? folderFilter?.kind ?? "all" : this._state.kind,
           type: this._state.type === "all" ? folderFilter?.type ?? "all" : this._state.type,
           folderFilter
