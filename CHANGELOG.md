@@ -1,3 +1,14 @@
+## 1.0.0.130 — Navegação real de pastas e prévias visuais ampliadas
+
+- A Biblioteca agora mostra as pastas filhas diretamente no conteúdo, como o Explorador de Arquivos; abrir uma pasta altera o caminho e permite navegar de volta/subir.
+- Corrige Assets globais para atuar como pasta-pai e exibir Fontes, Imagens, Ícones, Texturas e Outros arquivos, em vez de filtrar apenas recursos do tipo asset.
+- Mantém a estrutura de pastas ao navegar e mostra itens correspondentes às pastas de categoria; as fontes nativas continuam classificadas em Assets globais → Fontes.
+- Amostras de fonte aplicam explicitamente a família CSS resolvida em cada elemento; a pilha Monospace usa uma fonte monoespaçada tanto no Aa quanto na amostra maior.
+- Prévia de tema em grade agora ocupa aproximadamente 84% da área útil do cartão e mostra painel, hierarquia de texto, botão e campo em tamanho legível.
+- Prévia de fontes em grade ampliada e com família tipográfica real; a lista permanece compacta.
+- A janela padrão da ficha de personagem foi ampliada para 1100 × 920 e agora pode ser redimensionada, permitindo que o Canvas padrão de 800 × 800 apareça mais próximo do tamanho configurado.
+- Adiciona contratos de regressão para navegação de pastas, classificação de fontes, amostras tipográficas, mockup de temas e tamanho inicial da ficha.
+
 ## 1.0.0.129 — Biblioteca: pesquisa única, lista alinhada e prévias reais
 
 - Corrige a barra de pesquisa para ter uma única borda externa; input, ícone e botão de limpar permanecem sem molduras internas ou focus ring duplicado.
