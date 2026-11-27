@@ -5,6 +5,7 @@ const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.u
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
 const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
 const libraryUiContract = readFileSync(new URL("../styles/nexus-library-ui-contract.css", import.meta.url), "utf8");
+const libraryUiContract = readFileSync(new URL("../styles/nexus-library-ui-contract.css", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
@@ -14,6 +15,8 @@ const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-liste
 const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-bridge.js", import.meta.url), "utf8");
 
 
+assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
+  "The shared Library UI contract must load after the legacy and design-system layers.");
 assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
   "The shared Library UI contract must load after the legacy and design-system layers.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
