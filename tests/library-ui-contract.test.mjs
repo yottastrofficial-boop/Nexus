@@ -181,3 +181,20 @@ assert.ok(libraryApplication.includes('data-library-command="paste"') &&
   libraryApplication.includes("setClipboard"),
   "Cut, copy and paste controls must execute Library operations rather than remain decorative.");
 console.log("NEXUS Library command bar contracts: OK");
+
+
+assert.ok(libraryApplication.includes("type-desc") && libraryApplication.includes("size-asc") && libraryApplication.includes("tag-desc"),
+  "The sort control must accept all ascending and descending options, not silently reset them.");
+assert.ok(libraryTemplate.includes('data-library-column-resize="name"') && libraryTemplate.includes('data-library-column-resize="modified"'),
+  "List headers must expose adjustable column separators.");
+assert.ok(libraryApplication.includes("applyListColumnWidths") && libraryApplication.includes("setPointerCapture"),
+  "Column resizing must respond to pointer input and apply shared grid widths.");
+assert.ok(libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') && libraryTemplate.includes('data-library-tag list="nexus-library-tag-options"'),
+  "Category and tag filters must expose searchable option lists.");
+assert.ok(styles.includes(".nexus-library-font-specimen") && styles.includes(".nexus-library-theme-miniature"),
+  "Font and theme resources must have their own meaningful previews.");
+assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
+  "The search input must not draw a second border inside its single wrapper.");
+assert.ok(libraryApplication.includes("button.append(icon, textNode)"),
+  "Breadcrumbs must align an appropriate folder/view icon with the path label.");
+console.log("NEXUS Library 1.0.0.129 visual refinement contracts: OK");
