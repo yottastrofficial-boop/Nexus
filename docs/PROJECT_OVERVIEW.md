@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.137 (candidata)
+## Estado do código — 1.0.0.137 (publicada)
 
-A candidata revisa as prévias de fontes e temas, consolida o Grid em 64×64, reorganiza o Inspector com abas Padrão/Detalhes e remove regras visuais legadas que sobrepunham a apresentação. O manifesto estável continua na versão publicada até a confirmação do pacote pela pipeline. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A versão publicada revisa as prévias de fontes e temas, consolida o Grid em 64×64, reorganiza o Inspector com abas Padrão/Detalhes e neutraliza regras visuais legadas. CI, pacote, release e manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
 
 ## Estado do código — 1.0.0.136 (publicada)
 
