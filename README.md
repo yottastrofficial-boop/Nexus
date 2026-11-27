@@ -1,6 +1,6 @@
 ## Biblioteca 1.0.0.135 — revisão em validação
 
-A PR #119 prepara a versão 1.0.0.135: Inspector com abas Padrão/Detalhes, prévias restauradas de fontes, temas e recursos, tags e resumo técnico em Detalhes, cabeçalhos de Lista com área funcional completa e seleção sem contorno. A versão estável continua sendo 1.0.0.134 até a publicação oficial.
+**Versão 1.0.0.135 na main (em validação).**\n\nA PR #119 prepara a versão 1.0.0.135: Inspector com abas Padrão/Detalhes, prévias restauradas de fontes, temas e recursos, tags e resumo técnico em Detalhes, cabeçalhos de Lista com área funcional completa e seleção sem contorno. A versão estável continua sendo 1.0.0.134 até a publicação oficial.
 
 # NEXUS RPG
 
