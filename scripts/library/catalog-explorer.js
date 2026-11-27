@@ -1053,6 +1053,16 @@ export function createLibraryCatalogExplorer({
     cursor = page.cursor ?? {};
     hasMore = Boolean(page.hasMore);
     currentResources = append ? [...currentResources, ...page.items] : [...page.items];
+    const tagOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-tag-options");
+    if (tagOptions) {
+      const tags = [...new Set(currentResources.flatMap(resource => Array.isArray(resource.tags) ? resource.tags : []))]
+        .sort((left, right) => String(left).localeCompare(String(right), "pt-BR", { sensitivity: "base" }));
+      tagOptions.replaceChildren(...tags.map(tag => {
+        const option = document.createElement("option");
+        option.value = tag;
+        return option;
+      }));
+    }
     const visible = currentResources.filter(resource => {
       const key = resourceKey(resource);
       if (currentSmartView === "favorites" && !preferences.favorites.includes(key)) return false;
@@ -1089,7 +1099,7 @@ export function createLibraryCatalogExplorer({
     }
     const heading = container.closest("[data-library-section-panel]")?.querySelector("[data-library-collection-heading]");
     const count = container.closest("[data-library-section-panel]")?.querySelector("[data-library-collection-count]");
-    if (heading) heading.textContent = "Todos os recursos";
+    if (heading) heading.textContent = "Biblioteca";
     if (count) count.textContent = `${currentResources.length} exibidos · ${page.total} encontrados`;
     if (!append) {
       detail.dataset.selectedProvider = "";
