@@ -1889,7 +1889,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 }
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item {
   display: grid !important;
-  grid-template-columns: 24px var(--nexus-library-list-columns, minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr));
+  grid-template-columns: var(--nexus-library-list-columns, minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr));
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -1961,7 +1961,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 @media (max-width: 1050px) {
   html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item,
   html.nexus-design-system .nexus-library-application .nexus-library-main:has(.nexus-library-generic-items[data-view-mode="list"]) .nexus-library-list-header {
-    grid-template-columns: 24px var(--nexus-library-list-columns, minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .9fr));
+    grid-template-columns: var(--nexus-library-list-columns, minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .9fr));
   }
   html.nexus-design-system .nexus-library-application .nexus-library-list-modified {
     display: none !important;
