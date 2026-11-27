@@ -71,7 +71,7 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 22, "A listagem inclui coleções pessoais, catálogo de componentes, temas e nove pilhas de fontes nativas.");
+assert.equal(nexusPage.total, 23, "A listagem inclui coleções pessoais, catálogo de componentes, temas e nove pilhas de fontes nativas.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
