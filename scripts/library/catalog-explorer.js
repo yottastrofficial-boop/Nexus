@@ -344,6 +344,7 @@ function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}
   root.style.setProperty("--nexus-library-theme-font", String(typography.family ?? "inherit"));
   root.style.setProperty("--nexus-library-theme-font-size", (compact ? 7 : Number(typography.baseSize) || 13) + "px");
   root.style.setProperty("--nexus-library-theme-radius", layout.radius === "sharp" ? "0px" : layout.radius === "soft" ? "4px" : compact ? "5px" : "8px");
+  root.style.setProperty("--nexus-library-theme-control-height", (compact ? 12 : Math.max(28, Math.min(44, Number(layout.controlHeight) || 34))) + "px");
   root.style.setProperty("--nexus-library-theme-gap", compact ? "3px" : Math.max(4, (Number(layout.spacing) || 1) * 8) + "px");
 
   const header = makeElement("header", "nexus-library-theme-live-header");
