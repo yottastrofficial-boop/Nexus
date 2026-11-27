@@ -173,3 +173,14 @@ test("component inspector preview model carries safe appearance data", () => {
   );
   assert.equal(unsafe.preview.source, "");
 });
+
+
+test("font resources expose a typographic specimen model using the resolved family", () => {
+  const model = getLibraryResourcePreviewModel(
+    { kind: "style", type: "font", name: "Inter", reference: { providerId: "nexus-library", builtin: "font", key: "inter" } },
+    { name: "Inter", family: '"Inter", system-ui, sans-serif', category: "Interface" }
+  );
+  assert.equal(model.kind, "font");
+  assert.equal(model.family, '"Inter", system-ui, sans-serif');
+  assert.equal(model.sample, "Lorem ipsum dolor sit amet");
+});
