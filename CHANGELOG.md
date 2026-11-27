@@ -1,4 +1,4 @@
-## 1.0.0.136 — Backup da Biblioteca e API de transferência
+## 1.0.0.137 — Correções visuais e prévias da Biblioteca\n- Reescreve a prévia de fontes sem o bloco de specimen legado; a amostra mostra Aa, Lorem Epsum e 12345 !@#$% com a família real aplicada.\n- Expande a prévia de tema com navegação, painel, destaque, barras e ações; move a paleta para um dropdown.\n- Consolida a grade em previews 64×64, títulos limitados a três linhas, favoritos em estrela e regras finais de estilo para neutralizar a cascata antiga.\n- Coloca nome e metadados resumidos dentro da aba Padrão; mantém tags, resumo e dados complementares em Detalhes.\n- Atualiza contratos de teste para a nova apresentação. A validação visual/funcional no Foundry VTT 14 build 360 ainda é necessária.\n\n## 1.0.0.136 — Backup da Biblioteca e API de transferência
 
 - Expõe operações públicas de backup da Biblioteca em `game.nexus.library`: exportação, preparação de importação, confirmação e importação direta.
 - Mantém o fluxo de importação separado em validação/prévia e confirmação, preservando conflitos e recusando prévias desatualizadas.
