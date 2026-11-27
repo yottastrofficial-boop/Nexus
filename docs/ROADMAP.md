@@ -1,4 +1,4 @@
-## 1.0.0.138 — Biblioteca: contrato visual unificado (publicada)
+## 1.0.0.139 — Biblioteca: prévias de temas e fontes (em validação)
 
 - Reescreve a pesquisa em uma única regra compartilhada e responsiva; remove os estilos concorrentes da cascata legada.
 - Aplica a paleta real por chave semântica aos previews de tema da grade e do Inspector.
@@ -302,3 +302,9 @@ A versão `1.0.0.107` está publicada na release `v1.0.0.107`, com ZIP confirmad
 - Configurações nativas isoladas dos estilos genéricos de aplicação.
 - Ficha 800 × 800 e Canvas padrão em coluna única preservados.
 - Validação manual no Foundry VTT 14 pendente.
+- Corrige o preset aplicado ao preview de temas internos e mantém paleta, tipografia e estilos do próprio perfil.
+- Unifica modelo no grid/Inspector, amplia para 18 tokens e inclui estilos de componentes seguros.
+- Isola CSS da amostra do tema global e aplica a família da fonte diretamente aos espécimes.
+- CI, pacote e release serão confirmados pelo workflow; teste visual no Foundry VTT 14 build 360 permanece manual.
+
+
