@@ -1,12 +1,12 @@
-## Biblioteca 1.0.0.134 publicada
+## Biblioteca 1.0.0.135 — revisão em validação
 
-A 1.0.0.134 corrige o dimensionamento efetivo das miniaturas, remove espaço vazio dos cartões, exibe as paletas reais dos temas, separa Prévia e Detalhes no Inspector, altera a navegação das pastas para clique/duplo clique e corrige a abertura do Estúdio de Aparência. A suíte automatizada, o pacote, a release, o asset e o manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 ainda depende da instalação e do teste no cliente.
+A PR #119 prepara a versão 1.0.0.135: Inspector com abas Padrão/Detalhes, prévias restauradas de fontes, temas e recursos, tags e resumo técnico em Detalhes, cabeçalhos de Lista com área funcional completa e seleção sem contorno. A versão estável continua sendo 1.0.0.134 até a publicação oficial.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão estável 1.0.0.134 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão main 1.0.0.135 · Estável 1.0.0.134 · Foundry VTT 14
 </p>
 
 <p align="center">
