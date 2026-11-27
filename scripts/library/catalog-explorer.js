@@ -423,10 +423,14 @@ function renderLibraryResourcePreview(resource, resolved) {
   section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
   if (model.kind === "font") {
     const specimen = makeElement("div", "nexus-library-font-specimen");
-    specimen.style.fontFamily = model.family;
-    specimen.append(makeElement("strong", "", "Aa Bb Cc 0123"));
-    specimen.append(makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit."));
-    specimen.append(makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ"));
+    specimen.style.setProperty("font-family", model.family, "important");
+    const headline = makeElement("strong", "", "Aa Bb Cc 0123");
+    headline.style.setProperty("font-family", model.family, "important");
+    const sample = makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    sample.style.setProperty("font-family", model.family, "important");
+    const glyphs = makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ");
+    glyphs.style.setProperty("font-family", model.family, "important");
+    specimen.append(headline, sample, glyphs);
     section.append(specimen);
   }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
@@ -578,6 +582,7 @@ export function createLibraryCatalogExplorer({
   canUpdateDefinition = () => false,
   onUpdateDefinition = null,
   renderSpecializedEditor = null,
+  onOpenFolder = null,
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -611,6 +616,23 @@ export function createLibraryCatalogExplorer({
     container.replaceChildren(makeElement("p", "nexus-library-empty", message));
   };
 
+  const renderFolderCard = (folder, preferences) => {
+    const children = preferences.folders.filter(item => item.parentId === folder.id).length;
+    const card = makeElement("article", "nexus-library-generic-card nexus-library-folder-card");
+    card.dataset.libraryFolderEntry = folder.id;
+    const button = makeElement("button", "nexus-library-folder-entry nexus-library-generic-item");
+    button.type = "button";
+    button.dataset.libraryOpenFolder = folder.id;
+    button.setAttribute("aria-label", "Abrir pasta " + folder.name);
+    const preview = makeElement("span", "nexus-library-generic-preview nexus-library-folder-preview");
+    preview.append(makeElement("i", "fa-solid fa-folder", ""));
+    const name = makeElement("strong", "", folder.name);
+    const meta = makeElement("small", "nexus-library-folder-meta", children ? countLabel(children, "subpasta") : "Pasta");
+    button.append(preview, name, meta);
+    card.append(button);
+    return card;
+  };
+
   const renderResourceCard = (resource, preferences) => {
     const key = resourceKey(resource);
     const card = makeElement("article", "nexus-library-generic-card");
@@ -634,20 +656,25 @@ export function createLibraryCatalogExplorer({
         arial: "Arial, Helvetica, sans-serif",
         monospace: "ui-monospace, SFMono-Regular, Consolas, monospace"
       };
+      const family = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
       preview.dataset.previewKind = "font";
-      preview.style.fontFamily = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
-      preview.append(makeElement("span", "nexus-library-font-sample", "Aa"));
-    } else if (resource.kind === "theme" && resource.previewColors?.length) {
+      preview.style.setProperty("font-family", family, "important");
+      const sample = makeElement("span", "nexus-library-font-sample");
+      sample.style.setProperty("font-family", family, "important");
+      sample.append(makeElement("strong", "", "Aa"), makeElement("small", "", "0123"));
+      preview.append(sample);
+    } else if (resource.kind === "theme") {
       preview.dataset.previewKind = "theme";
       const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
       preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? colors.painel ?? colors["superfície"] ?? colors.canvas ?? "#202e3e");
       preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? colors.acento ?? colors.destaque ?? colors.button ?? "#78b7e8");
       preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? colors.texto ?? "#edf0f6");
       const mock = makeElement("span", "nexus-library-theme-miniature");
-      mock.append(makeElement("strong", "", "Aa"));
-      const button = makeElement("i", "", "Botão");
+      const title = makeElement("strong", "", "Painel de exemplo");
+      const sample = makeElement("p", "", "Texto de interface e hierarquia tipográfica");
+      const button = makeElement("i", "", "Botão principal");
       const input = makeElement("small", "", "Campo de texto");
-      mock.append(button, input);
+      mock.append(title, sample, button, input);
       preview.append(mock);
     } else if (thumbnail) {
       const image = document.createElement("img");
@@ -1148,9 +1175,18 @@ export function createLibraryCatalogExplorer({
       return compareText(left.name ?? left.title ?? left.label, right.name ?? right.title ?? right.label);
     });
 
+    const folderEntries = currentSmartView === "all" &&
+      (Boolean(currentFolder) || (currentKind === "all" && currentType === "all"))
+      ? preferences.folders
+        .filter(folder => (folder.parentId || "") === currentFolder)
+        .filter(folder => !currentQuery || folder.name.toLocaleLowerCase("pt-BR").includes(currentQuery.toLocaleLowerCase("pt-BR")))
+        .sort((left, right) => compareText(left.name, right.name))
+      : [];
+
     container.replaceChildren();
+    for (const folder of folderEntries) container.append(renderFolderCard(folder, preferences));
     for (const resource of visible) container.append(renderResourceCard(resource, preferences));
-    if (!visible.length) {
+    if (!visible.length && !folderEntries.length) {
       const message = page.errors?.length
         ? "Algumas fontes da Biblioteca não puderam ser consultadas."
         : currentSmartView === "favorites" ? "Nenhum favorito nesta página do catálogo."
@@ -1177,6 +1213,13 @@ export function createLibraryCatalogExplorer({
 
   container.addEventListener("click", async event => {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const openFolder = target?.closest("[data-library-open-folder]");
+    if (openFolder && container.contains(openFolder)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof onOpenFolder === "function") await onOpenFolder(openFolder.dataset.libraryOpenFolder);
+      return;
+    }
     const loadMore = target?.closest("[data-library-load-more]");
     if (loadMore && container.contains(loadMore)) {
       loadMore.remove();

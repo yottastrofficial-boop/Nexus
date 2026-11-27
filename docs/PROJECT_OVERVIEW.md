@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.130
+
+A 1.0.0.130 implementa navegação de diretórios dentro do Explorer: as pastas filhas aparecem na área principal e podem ser abertas, mantendo o caminho e a hierarquia. Assets globais deixa de ser um filtro de tipo que escondia suas subpastas; Fontes aparece dentro dele e os recursos nativos de fonte são mostrados na pasta correspondente. As prévias de fonte aplicam a família tipográfica real, inclusive Monospace; temas em grade exibem um mockup ampliado de painel, botão, campo e texto. A janela inicial da ficha passa a 1100 × 920, redimensionável, para permitir que o Canvas de 800 × 800 se aproxime da escala configurada. Pacote candidato 1.0.0.130; manifesto estável 1.0.0.129 até a release. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+
 ## Estado do código — 1.0.0.129
 
 A 1.0.0.129 refina a Biblioteca após a captura do usuário: pesquisa em uma única superfície, breadcrumb com ícone alinhado, linha de lista com miniatura e nome agrupados, colunas corretas, redimensionamento de colunas, classificação completa, listas de sugestões para categoria/etiqueta e prévias de fontes e temas. Temas são apresentados como Coleções visuais; somente o nome da pasta padrão é migrado, sem alterar dados personalizados. O pacote candidato é 1.0.0.129; o manifesto estável permanece em 1.0.0.128 até a publicação e confirmação do ZIP. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.

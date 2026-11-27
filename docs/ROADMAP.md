@@ -1,3 +1,12 @@
+## 1.0.0.130 — Navegação de pastas, prévias visuais e Canvas
+
+- Mostrar pastas filhas no conteúdo do Explorer e abrir pastas com navegação de caminho, histórico e nível superior.
+- Assets globais funciona como diretório pai; Fontes, Imagens, Ícones, Texturas e Outros arquivos aparecem como subpastas.
+- Fontes nativas ficam acessíveis em Assets globais → Fontes; aplicar a família real a todos os espécimes, incluindo Monospace.
+- Aumentar a área útil das prévias de grade para cerca de 84% do cartão; miniatura de tema deve apresentar painel, texto, botão e campo.
+- Ampliar janela inicial da ficha para 1100 × 920, com resize, para reduzir a escala de ajuste do Canvas de 800 × 800.
+- Testes automatizados, pacote e release; validação visual/funcional no Foundry VTT 14 build 360 pendente.
+
 ## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
 - Pesquisa com um único contorno externo; remover borda interna do input e alinhar ícone/limpar dentro da mesma superfície.

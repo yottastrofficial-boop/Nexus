@@ -1,22 +1,22 @@
-## Biblioteca 1.0.0.129 em preparação
+## Biblioteca e Canvas 1.0.0.130 em preparação
 
-A 1.0.0.129 refina a Biblioteca após o teste visual da 1.0.0.128: remove molduras duplicadas, organiza a árvore real de pastas, mostra fontes e temas nativos, compacta a lista com colunas de metadados, habilita seleção múltipla/coleções por contexto e corrige o redimensionamento dos painéis. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.130 corrige a navegação real por pastas (incluindo Assets globais → Fontes), amplia as prévias de fontes e temas em grade, aplica de fato as famílias tipográficas às amostras e aumenta a janela inicial da ficha para 1100 × 920, com redimensionamento. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.129 em preparação · base publicada 1.0.0.128 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.130 em preparação · base publicada 1.0.0.129 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.129-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.130-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão estável publicada:** 1.0.0.128. **Versão em preparação:** 1.0.0.129 (refinamento do Explorer da Biblioteca). O manifesto estável permanece em 1.0.0.128 até a publicação do novo pacote.
+**Versão estável publicada:** 1.0.0.129. **Versão em preparação:** 1.0.0.130 (navegação de pastas, prévias visuais e Canvas). O manifesto estável permanece em 1.0.0.129 até a publicação do novo pacote.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 

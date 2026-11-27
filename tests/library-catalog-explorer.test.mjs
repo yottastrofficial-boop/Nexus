@@ -184,3 +184,13 @@ test("font resources expose a typographic specimen model using the resolved fami
   assert.equal(model.family, '"Inter", system-ui, sans-serif');
   assert.equal(model.sample, "Lorem ipsum dolor sit amet");
 });
+
+
+const monospacePreview = getLibraryResourcePreviewModel(
+  { kind: "style", type: "font", reference: { builtin: "font", key: "monospace" } },
+  { family: "ui-monospace, SFMono-Regular, Consolas, monospace", category: "Código" }
+);
+assert.equal(monospacePreview.kind, "font");
+assert.equal(monospacePreview.family, "ui-monospace, SFMono-Regular, Consolas, monospace");
+assert.equal(monospacePreview.sample, "Lorem ipsum dolor sit amet",
+  "Font specimens must use the resolved font family for both Aa and the longer sample.");
