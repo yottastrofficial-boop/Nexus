@@ -515,7 +515,7 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
     };
   }
   if (reference.builtin === "font") {
-    const family = String(data.family ?? resource.fontFamily ?? "system-ui, sans-serif");
+    const family = safeFontFamily(data.family ?? resource.fontFamily) || "system-ui, sans-serif";
     return {
       kind: "font",
       title: "Prévia tipográfica",
@@ -570,7 +570,7 @@ export function getLibraryMediaInsertionSource(resource = {}, resolved = {}) {
 
 function safeFontFamily(value) {
   const family = String(value ?? "").trim();
-  return family && family.length <= 180 && /^[\\w\\s'",.-]+$/.test(family) ? family : "";
+  return family && family.length <= 180 && /^[\w\s'",.-]+$/.test(family) ? family : "";
 }
 
 function renderLibraryFontPreview(resource, resolved) {
@@ -843,7 +843,7 @@ export function createLibraryCatalogExplorer({
     if (builtin === "font") {
       preview.dataset.previewKind = "font";
       const specimen = makeElement("strong", "nexus-library-font-grid-specimen", "Aa");
-      specimen.style.setProperty("font-family", String(resource.fontFamily ?? "system-ui, sans-serif"), "important");
+      specimen.style.setProperty("font-family", safeFontFamily(resource.fontFamily) || "system-ui, sans-serif", "important");
       specimen.setAttribute("aria-hidden", "true");
       preview.append(specimen);
     } else if (resource.kind === "theme") {
