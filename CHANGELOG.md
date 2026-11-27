@@ -3,7 +3,7 @@
 - Expande a prévia de tema com navegação, painel, destaque, barras e ações; move a paleta para um dropdown.
 - Consolida a grade em previews 64×64, títulos limitados a três linhas, favoritos em estrela e regras finais de estilo para neutralizar a cascata antiga.
 - Coloca nome e metadados resumidos dentro da aba Padrão; mantém tags, resumo e dados complementares em Detalhes.
-- Atualiza contratos de teste para a nova apresentação. A validação visual/funcional no Foundry VTT 14 build 360 ainda é necessária.
+- Atualiza contratos de teste para a nova apresentação. CI e regressões automatizadas aprovados; a validação visual/funcional no Foundry VTT 14 build 360 ainda é necessária.
 
 ## 1.0.0.136 — Backup da Biblioteca e API de transferência
 
