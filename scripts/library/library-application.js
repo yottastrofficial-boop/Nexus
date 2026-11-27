@@ -227,7 +227,10 @@ export function createLibraryApplicationClass({
       const sortControl = root.querySelector("[data-library-sort]");
       const listHeader = root.querySelector("[data-library-list-header]");
       const listColumnHandles = [...root.querySelectorAll("[data-library-column-resize]")];
-      const closeListFilterPopovers = () => root.querySelectorAll("[data-library-list-filter-popover]").forEach(popover => { popover.hidden = true; });
+      const closeListFilterPopovers = () => root.querySelectorAll("[data-library-list-filter-popover]").forEach(popover => {
+        popover.hidden = true;
+        root.querySelector('[data-library-open-list-filter="' + popover.dataset.libraryListFilterPopover + '"]')?.setAttribute("aria-expanded", "false");
+      });
       root.querySelectorAll("[data-library-open-list-filter]").forEach(button => {
         button.addEventListener("click", event => {
           event.preventDefault();
@@ -238,6 +241,7 @@ export function createLibraryApplicationClass({
           closeListFilterPopovers();
           if (popover && shouldOpen) {
             popover.hidden = false;
+            button.setAttribute("aria-expanded", "true");
             popover.querySelector("input")?.focus();
           }
         });
