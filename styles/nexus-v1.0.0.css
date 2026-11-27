@@ -278,7 +278,7 @@
   color: #e7edf5; background: #263344; cursor: pointer;
 }
 .nexus-floating-close:hover { border-color: var(--nexus-accent-color); }
-.nexus-library-search { width: 100%; margin: 6px 0 10px; padding: 7px; color: #e7edf5; background: #121b26; border: 1px solid #43546a; border-radius: 5px; }
+
 .nexus-library-assets { display: flex; flex-direction: column; gap: 7px; }
 .nexus-library-asset { display: flex; flex-direction: column; gap: 5px; padding: 7px; border: 1px solid #344153; border-radius: 6px; background: #202d3d; }
 .nexus-library-asset[hidden] { display: none !important; }
@@ -327,11 +327,11 @@
 .nexus-floating-close { right: 0; top: 6px; }
 .nexus-floating-left-rail button, .nexus-floating-add{ accent-color: var(--nexus-accent-color, #7188a4); }
 .nexus-floating-left-rail button:hover, .nexus-floating-add:hover{ border-color: var(--nexus-accent-color, #7188a4) !important; background-color: var(--nexus-panel-hover,#34485f) !important; }
-.nexus-tool-panel input:focus, .nexus-sheet input:focus, .nexus-library-search:focus { outline-color: var(--nexus-accent-color, #7188a4) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--nexus-accent-color, #7188a4) 25%, transparent) !important; }
+.nexus-tool-panel input:focus, .nexus-sheet input:focus { outline-color: var(--nexus-accent-color, #7188a4) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--nexus-accent-color, #7188a4) 25%, transparent) !important; }
 .nexus-library-panel { display: flex; flex-direction: column; gap: 10px; }
 .nexus-library-header h3 { margin-bottom: 5px !important; }
 .nexus-library-header p { margin: 0; }
-.nexus-library-search { flex: 0 0 auto; width: 100%; padding: 9px 11px; border: 1px solid #465b73; border-radius: 7px; color: #e7edf5; background: #101a26; font-size: 12px; }
+
 .nexus-library-explorer { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); min-height: 340px; max-height: min(58vh, 620px); border: 1px solid #34465a; border-radius: 8px; overflow: hidden; background: #121c28; }
 .nexus-library-tree { min-width: 0; padding: 8px 6px; overflow: auto; border-right: 1px solid #34465a; background: #172330; }
 .nexus-library-tree button { display: flex; align-items: center; gap: 7px; width: 100%; min-height: 30px; padding: 5px 7px; border: 1px solid transparent; border-radius: 5px; color: #c2cfde; background: transparent; text-align: left; font-size: 10px; cursor: pointer; }
@@ -522,7 +522,7 @@
 .nexus-preview-number { font-size:28px; }
 .nexus-library-token { display:grid; place-items:center; width:48px; height:48px; border:1px solid #607792; border-radius:50%; color:#e5edf6; background:#172230; font-size:30px; }
 .nexus-library-note-lines { width:88%; height:50px; background:repeating-linear-gradient(to bottom,transparent 0 10px,#647d99 11px 12px); }
-.nexus-library-search { width:100%; margin-bottom:9px; }
+
 
 @media (max-width:760px) { .nexus-library-explorer { grid-template-columns:145px minmax(0,1fr); }.nexus-library-assets { grid-template-columns:repeat(auto-fill,minmax(105px,1fr)); } }
 .nexus-folder-icon { position:relative; width:14px; height:10px; border:1px solid #a5b7cb; border-radius:2px; background:#435b75; box-sizing:border-box; }
@@ -572,9 +572,9 @@
 .nexus-library-header { margin:0 !important; padding:2px 2px 0; }
 .nexus-library-header h3 { font-size:17px; letter-spacing:-.02em; }
 .nexus-library-header span { font-size:9px; opacity:.7; }
-.nexus-library-search-wrap { display:flex; align-items:center; gap:7px; width:min(100%,390px); height:34px; padding:0 10px; border:1px solid #3b4e64; border-radius:8px; background:#121d2a; color:#91a8c2; }
-.nexus-library-search-wrap > span { font-size:20px; line-height:1; }
-.nexus-library-search { width:100% !important; height:30px !important; min-height:30px !important; margin:0 !important; padding:0 !important; border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent !important; color:#e8eff8 !important; font-size:11px !important; }
+
+
+
 .nexus-library-content { min-width:0; min-height:300px; max-height:min(66vh,690px); overflow:auto; padding:7px 2px 4px; border:0; background:transparent; }
 .nexus-library-assets { display:grid !important; grid-template-columns:repeat(auto-fill,minmax(142px,1fr)) !important; gap:10px !important; align-content:start; }
 .nexus-library-asset { display:flex !important; flex-direction:column; justify-content:flex-start !important; align-items:stretch !important; gap:8px !important; min-height:150px !important; padding:10px !important; border:1px solid #34475d !important; border-radius:10px !important; background:linear-gradient(155deg,#25364a,#1a2736) !important; text-align:left; transition:border-color .15s ease,transform .15s ease,background .15s ease; }
@@ -609,13 +609,13 @@
 .nexus-asset-table { display:grid; grid-template-columns:repeat(var(--nexus-table-columns,3),minmax(0,1fr)); grid-template-rows:repeat(var(--nexus-table-rows,3),minmax(0,1fr)); width:100%; height:100%; min-height:60px; border-top:1px solid #758ba4; border-left:1px solid #758ba4; overflow:hidden; }
 .nexus-asset-table span { min-width:0; min-height:0; border-right:1px solid #758ba4; border-bottom:1px solid #758ba4; }
 .nexus-asset-image { display:block; width:100%; height:100%; object-fit:contain; }
-@media(max-width:720px) { .nexus-library-assets { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)) !important; } .nexus-library-search-wrap { width:100%; } }
+@media(max-width:720px) { .nexus-library-assets { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)) !important; }  }
 .nexus-asset-table .nexus-table-cell { width:100%; min-width:0; min-height:0; height:100%; padding:3px 4px; border:0; border-right:1px solid #758ba4; border-bottom:1px solid #758ba4; border-radius:0; box-shadow:none; color:inherit; background:transparent; font-size:10px; }
 .nexus-asset-table .nexus-table-cell:focus { outline:1px solid #9bbce0; outline-offset:-1px; background:#31465d; }
 
 /* v1.8 — superfícies limpas, prévias 1:1 e grupos sem divisões internas */
 .nexus-library-panel { gap: 9px !important; }
-.nexus-library-search-wrap { width: min(100%, 310px) !important; height: 32px !important; }
+
 .nexus-library-content { max-height: min(68vh, 700px) !important; }
 .nexus-library-assets { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)) !important; gap: 14px !important; }
 .nexus-library-asset {
@@ -685,9 +685,9 @@
 .nexus-library-header p { margin:0; color:#94a6bb; font-size:11px; line-height:1.45; }
 .nexus-library-version { flex:none; padding:5px 8px; border:1px solid #3b5068; border-radius:99px; color:#9fb4cc; background:#1b2938; font-size:9px; }
 .nexus-library-toolbar { display:flex; align-items:center; gap:10px; }
-.nexus-library-search-wrap { display:flex!important; flex:1; flex-direction:row!important; align-items:center; gap:8px!important; min-width:0; margin:0!important; padding:0 10px; border:1px solid #3b5068; border-radius:8px; background:#101a26; }
-.nexus-library-search-wrap > span { color:#8fa7c2; font-size:18px; }
-.nexus-library-search { min-width:0; border:0!important; outline:0; background:transparent!important; box-shadow:none!important; }
+
+
+
 .nexus-library-count { flex:none; color:#8fa4bb; font-size:10px; white-space:nowrap; }
 .nexus-library-categories { display:flex; flex-wrap:wrap; gap:6px; padding-bottom:10px; border-bottom:1px solid #304255; }
 .nexus-library-categories button { min-height:29px; padding:5px 10px; border:1px solid #34495f; border-radius:7px; color:#aebed0; background:#1a2735; font-size:10px; cursor:pointer; }
@@ -773,13 +773,8 @@
   gap: 13px !important;
 }
 .nexus-library-toolbar { gap: 12px !important; }
-.nexus-library-search-wrap {
-  width: auto !important;
-  min-height: 38px !important;
-  height: 38px !important;
-  padding: 0 12px !important;
-}
-.nexus-library-search { min-height: 34px !important; font-size: 12px !important; }
+
+
 .nexus-library-count { font-size: 10px; }
 .nexus-library-categories { gap: 7px !important; padding: 0 0 12px !important; }
 .nexus-library-categories button { min-height: 32px; padding: 6px 12px; font-size: 10px; }
@@ -955,7 +950,7 @@
 
 .nexus-library-panel { height:100%; min-height:0; overflow:hidden; gap:10px!important; }
 .nexus-library-toolbar { display:grid!important; grid-template-columns:minmax(180px,1fr) 130px auto; align-items:center; gap:8px!important; }
-.nexus-library-search-wrap { width:100%!important; min-width:0; }
+
 .nexus-library-tag { min-width:0; height:34px; padding:0 9px; border:1px solid #3b5068; border-radius:8px; color:#dce7f3; background:#101a26; font-size:11px; }
 .nexus-library-workspace { flex:1; min-height:0!important; grid-template-columns:minmax(0,1fr) 310px!important; gap:12px!important; }
 .nexus-library-main { min-height:0; overflow:auto; }
@@ -1235,8 +1230,8 @@
   min-width:0 !important;
   margin:0 !important;
 }
-.nexus-panel-window .nexus-library-search-wrap { flex:1 1 auto !important; min-width:0 !important; }
-.nexus-panel-window .nexus-library-search { min-width:0 !important; width:100% !important; }
+
+
 .nexus-panel-window .nexus-library-tag { flex:0 1 140px !important; min-width:90px !important; }
 .nexus-panel-window .nexus-library-count { flex:0 0 auto !important; white-space:nowrap !important; }
 .nexus-panel-window .nexus-library-workspace {
@@ -1735,8 +1730,8 @@
 .nexus-library-eyebrow { color:#8294aa; font-size:9px; font-weight:750; letter-spacing:.13em; }
 .nexus-library-header .nexus-library-count { color:#91a0b2; font-size:10px; }
 .nexus-library-toolbar { flex:0 0 auto; gap:7px; }
-.nexus-library-search-wrap { flex:1; min-width:0; }
-.nexus-library-search-wrap input,.nexus-library-tag { min-height:32px; border:1px solid #354252; border-radius:6px; color:#e2eaf3; background:#121821; font-size:11px; }
+
+.nexus-library-tag { min-height:32px; border:1px solid #354252; border-radius:6px; color:#e2eaf3; background:#121821; font-size:11px; }
 .nexus-library-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(245px, .82fr); gap:14px; flex:1; min-height:0; align-items:stretch; }
 .nexus-library-main { display:flex; flex-direction:column; min-height:0; }
 .nexus-library-section-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 8px; color:#dce5ef; font-size:10px; }
@@ -2430,32 +2425,19 @@
   --color-text-placeholder: var(--nexus-placeholder-color, #91a6bd);
   --color-border: var(--nexus-panel-border, #3c5067);
 }
-.nexus-panel-window .nexus-library-search-wrap,
-.nexus-panel-window .nexus-library-search,
-.nexus-panel-window .nexus-library-tag,
-.nexus-panel-window .nexus-library-details,
-.nexus-panel-window input[data-component-setting="currentPath"],
-.nexus-panel-window input[data-component-setting="maxPath"] {
+.nexus-panel-window .nexus-library-tag, .nexus-panel-window .nexus-library-details, .nexus-panel-window input[data-component-setting="currentPath"], .nexus-panel-window input[data-component-setting="maxPath"] {
   color: var(--nexus-panel-text, #e7edf5) !important;
   border-color: var(--nexus-panel-border, #3c5067) !important;
   background-color: var(--nexus-panel-input, #111b27) !important;
 }
-.nexus-panel-window .nexus-library-search-wrap:focus-within{
-  border-color: var(--nexus-highlight-color, #78b7e8) !important;
-  outline-color: var(--nexus-highlight-color, #78b7e8) !important;
-}
+
 .nexus-panel-window .nexus-library-header,
 .nexus-panel-window .nexus-library-toolbar,
 .nexus-panel-window .nexus-library-section-heading,
 .nexus-panel-window .nexus-layer-controls {
   color: var(--nexus-panel-text, #e7edf5) !important;
 }
-.nexus-panel-window .nexus-library-search-wrap,
-.nexus-panel-window .nexus-library-tag,
-.nexus-panel-window .nexus-layer-list,
-.nexus-panel-window .nexus-layer-entry,
-.nexus-panel-window .nexus-layer-folder,
-.nexus-panel-window .nexus-layer-children {
+.nexus-panel-window .nexus-library-tag, .nexus-panel-window .nexus-layer-list, .nexus-panel-window .nexus-layer-entry, .nexus-panel-window .nexus-layer-folder, .nexus-panel-window .nexus-layer-children {
   border-color: var(--nexus-panel-border, #3c5067) !important;
 }
 .nexus-panel-window .nexus-layer-entry,
@@ -2533,13 +2515,10 @@
 .nexus-layout-edit-form input,.nexus-layout-edit-form select { min-height:32px; padding:5px 7px; color:var(--nexus-panel-text,#e7edf5); background:var(--nexus-panel-input,#111b27); border:1px solid var(--nexus-panel-border,#3c5067); border-radius:5px; }
 
 /* Theme coverage: all remaining NEXUS-owned surfaces inherit the active design tokens. */
-.nexus-sidebar, .nexus-appearance-drawer, .nexus-library-content, .nexus-library-tree, .nexus-library-details, .nexus-library-search-wrap, .nexus-library-tag, .nexus-layer-list, .nexus-tool-panel{ color:var(--nexus-panel-text,#e7edf5); background-color:var(--nexus-panel-bg,#182330); }
-.nexus-library-search-wrap,
-.nexus-library-tag,
-.nexus-panel-window .nexus-library-search,
-.nexus-panel-window .nexus-library-tag { color:var(--nexus-panel-text,#e7edf5) !important; background:var(--nexus-panel-input,#111b27) !important; border-color:var(--nexus-panel-border,#3c5067) !important; }
-.nexus-library-search-wrap input { color:var(--nexus-panel-text,#e7edf5) !important; background:transparent !important; }
-.nexus-library-search-wrap input::placeholder { color:var(--nexus-placeholder-color,#91a6bd) !important; opacity:1 !important; }
+.nexus-sidebar, .nexus-appearance-drawer, .nexus-library-content, .nexus-library-tree, .nexus-library-details, .nexus-library-tag, .nexus-layer-list, .nexus-tool-panel { color:var(--nexus-panel-text,#e7edf5); background-color:var(--nexus-panel-bg,#182330); }
+.nexus-library-tag, .nexus-panel-window .nexus-library-tag { color:var(--nexus-panel-text,#e7edf5) !important; background:var(--nexus-panel-input,#111b27) !important; border-color:var(--nexus-panel-border,#3c5067) !important; }
+
+
 .nexus-layer-row { color:var(--nexus-panel-text,#e7edf5) !important; }
 .nexus-layer-row.active { background:var(--nexus-panel-hover,#2a3d52) !important; }
 .nexus-layer-controls button,
@@ -4986,7 +4965,6 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   display:grid !important; grid-template-columns:minmax(0,1fr) minmax(130px,170px) !important;
   gap:10px !important; width:100% !important;
 }
-.nexus-panel-window .nexus-library-search-wrap,
 .nexus-panel-window .nexus-library-tag { min-width:0 !important; width:100% !important; }
 .nexus-panel-window .nexus-library-workspace {
   display:grid !important; grid-template-columns:minmax(0,1fr) minmax(240px,270px) !important;
@@ -5199,9 +5177,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 /* 1.0.0.24 — biblioteca modular e seletor único de propriedades */
 .nexus-panel-window .nexus-library-panel{display:flex!important;flex-direction:column!important;gap:10px!important;min-width:0!important;overflow:auto!important}
 .nexus-panel-window .nexus-library-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(130px,180px)!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important}
-.nexus-panel-window .nexus-library-search-wrap{display:flex!important;position:relative!important;flex-direction:row!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0 10px!important;box-sizing:border-box!important}
-.nexus-panel-window .nexus-library-search-wrap>span{flex:0 0 auto!important;line-height:1!important}
-.nexus-panel-window .nexus-library-search-wrap input.nexus-library-search{display:block!important;position:static!important;flex:1 1 auto!important;width:100%!important;min-width:0!important;height:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;outline:0!important;background:transparent!important}
+
+
+
 .nexus-panel-window .nexus-library-tag{width:100%!important;min-width:0!important;height:36px!important;margin:0!important}
 .nexus-library-header-actions{display:flex;align-items:center;gap:7px;min-width:0}
 .nexus-library-header-actions>button{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid var(--nexus-panel-border,#43546a);border-radius:6px;background:var(--nexus-panel-card,#273443);color:var(--nexus-panel-text,#e7edf5)}
@@ -5256,47 +5234,9 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   width:100%!important;
   min-width:0!important;
 }
-.nexus-panel-window label.nexus-library-search-wrap,
-.nexus-library-panel label.nexus-library-search-wrap{
-  display:grid!important;
-  grid-template-columns:16px minmax(0,1fr)!important;
-  align-items:center!important;
-  flex:1 1 260px!important;
-  width:auto!important;
-  min-width:0!important;
-  height:36px!important;
-  min-height:36px!important;
-  margin:0!important;
-  padding:0 10px!important;
-  gap:8px!important;
-  box-sizing:border-box!important;
-}
-.nexus-panel-window .nexus-library-search-wrap>span,
-.nexus-library-panel .nexus-library-search-wrap>span{
-  display:block!important;
-  position:static!important;
-  flex:none!important;
-  width:16px!important;
-  line-height:1!important;
-}
-.nexus-panel-window input.nexus-library-search,
-.nexus-library-panel input.nexus-library-search{
-  display:block!important;
-  position:static!important;
-  inset:auto!important;
-  grid-column:2!important;
-  width:100%!important;
-  min-width:0!important;
-  max-width:100%!important;
-  height:32px!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  box-shadow:none!important;
-  outline:0!important;
-  background:transparent!important;
-}
+
+
+
 .nexus-panel-window .nexus-library-tag,
 .nexus-library-panel .nexus-library-tag{
   display:block!important;
@@ -5363,8 +5303,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 @media(max-width:620px){
   .nexus-panel-window .nexus-library-toolbar,
   .nexus-library-panel .nexus-library-toolbar{flex-direction:column!important;align-items:stretch!important}
-  .nexus-panel-window label.nexus-library-search-wrap,
-  .nexus-library-panel label.nexus-library-search-wrap{flex:1 1 auto!important;width:100%!important}
+  
   .nexus-panel-window .nexus-library-tag,
   .nexus-library-panel .nexus-library-tag{flex:1 1 auto!important;width:100%!important}
 }
@@ -7518,17 +7457,8 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   display: grid !important; grid-template-columns: minmax(0,1fr) minmax(150px,190px) !important;
   align-items: center !important; gap: 8px !important;
 }
-.nexus-panel-window:has(.nexus-library-panel) .nexus-library-search-wrap {
-  display: flex !important; align-items: center !important; gap: 8px !important; min-width: 0 !important;
-  height: 36px !important; padding: 0 10px !important; border: 1px solid var(--nexus-panel-border,#3c5067) !important;
-  border-radius: 6px !important; color: var(--nexus-panel-muted,#9aadc2) !important;
-  background: var(--nexus-panel-input,#111b27) !important;
-}
-.nexus-panel-window:has(.nexus-library-panel) .nexus-library-search {
-  flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important; height: 32px !important;
-  margin: 0 !important; padding: 0 !important; border: 0 !important; outline: 0 !important;
-  color: var(--nexus-panel-text,#e7edf5) !important; background: transparent !important; box-shadow: none !important;
-}
+
+
 .nexus-panel-window:has(.nexus-library-panel) .nexus-library-tag {
   width: 100% !important; min-width: 0 !important; height: 36px !important; margin: 0 !important;
 }
@@ -8162,12 +8092,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
   flex-wrap:nowrap!important;
   min-width:0!important;
 }
-.nexus-library-toolbar-unified .nexus-library-search-wrap {
-  flex:0 1 390px!important;
-  width:min(390px,48%)!important;
-  min-width:190px!important;
-  height:36px!important;
-}
+
 .nexus-library-filter-wrap { position:relative; flex:none; }
 .nexus-library-filter-button {
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
@@ -8239,7 +8164,7 @@ dialog:has(.nexus-layout-edit-form) input { color:var(--nexus-panel-text,#e7edf5
 }
 @media(max-width:720px) {
   .nexus-library-toolbar-unified { flex-wrap:wrap!important; }
-  .nexus-library-toolbar-unified .nexus-library-search-wrap { flex:1 1 100%!important; width:100%!important; }
+  
   .nexus-library-toolbar-unified .nexus-library-count { display:none!important; }
 }
 
@@ -9451,18 +9376,8 @@ html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has
   border-radius: var(--nexus-radius-panel, 9px);
   background: var(--nexus-panel-surface, #202d3d) !important;
 }
-html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-search-wrap {
-  flex: 1 1 230px !important;
-  min-width: 180px;
-  max-width: none;
-}
-html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-search {
-  width: 100%;
-  min-height: 38px;
-  color: var(--nexus-field-text, #e7edf5) !important;
-  border: 1px solid var(--nexus-field-border, #40546b) !important;
-  background: var(--nexus-field-bg, #101a26) !important;
-}
+
+
 html.nexus-design-system :is(.nexus-library-application, .nexus-panel-window:has(.nexus-library-panel)) .nexus-library-filter-wrap {
   display: flex;
   flex: 1 1 100%;
