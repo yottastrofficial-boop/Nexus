@@ -1,4 +1,4 @@
-## 1.0.0.131 — Pré-vias de temas e fontes, filtros de lista
+## 1.0.0.131 — Prévias de temas e fontes, filtros de lista
 
 - Expande a prévia de temas em grade com título, subtítulo, texto normal, bold/italic, highlight, barras de progresso, botões primário/secundário, campo e paleta de cores derivada do próprio tema.
 - Na lista, temas usam um marcador compacto com fundo, cor de destaque e borda correspondentes ao tema.
