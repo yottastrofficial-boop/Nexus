@@ -217,12 +217,11 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
   !libraryTemplate.includes("data-library-tag"),
   "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
-assert.ok(styles.includes(".nexus-library-theme-miniature") &&
-  styles.includes(".nexus-library-theme-list-mark") &&
-  styles.includes(".nexus-library-theme-highlight") &&
-  styles.includes(".nexus-library-theme-card-swatches"),
-  "Theme cards must show palette colors without adding a framed specimen panel.");
-assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
+assert.ok(catalogExplorer.includes("nexus-library-theme-card-preview") &&
+  libraryUiContract.includes("nexus-library-theme-card-preview") &&
+  catalogExplorer.includes("getLibraryThemePreviewTokens"),
+  "Theme cards must use the shared, token-driven mini-interface preview.");
+assert.ok(libraryUiContract.includes("input.nexus-library-search:focus") && libraryUiContract.includes("border:0!important"),
   "The search input must not draw a second border inside its single wrapper.");
 assert.ok(libraryApplication.includes("button.append(textNode)") &&
   !libraryApplication.includes("button.append(icon, textNode)") &&
