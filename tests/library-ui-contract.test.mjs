@@ -198,3 +198,24 @@ assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes
 assert.ok(libraryApplication.includes("button.append(icon, textNode)"),
   "Breadcrumbs must align an appropriate folder/view icon with the path label.");
 console.log("NEXUS Library 1.0.0.129 visual refinement contracts: OK");
+
+
+assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplorer.includes("renderFolderCard") &&
+  catalogExplorer.includes("folderEntries"),
+  "Explorer content must show direct child folders and allow opening them.");
+assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') === false &&
+  libraryApplication.includes("folder: this._state.folder"),
+  "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
+assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
+  catalogExplorer.includes('nexus-library-font-sample'),
+  "Font samples must explicitly use the resolved font stack in both grid and detail.");
+assert.ok(catalogExplorer.includes('"Painel de exemplo"') &&
+  styles.includes("nexus-library-theme-miniature > p") &&
+  styles.includes("width: 84% !important"),
+  "Theme grid preview must show a readable panel, button and field at a large scale.");
+assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
+  "Folder navigation tiles must be visually integrated into the content view.");
+assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
+  actorSheet.includes("window: { resizable: true }"),
+  "The character sheet must provide enough default viewport for the 800px configured canvas.");
+console.log("NEXUS 1.0.0.130 folder, preview and canvas contracts: OK");
