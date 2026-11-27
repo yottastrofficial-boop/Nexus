@@ -4,8 +4,7 @@ import { readFileSync } from "node:fs";
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
 const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
-const libraryUiContract = readFileSync(new URL("../styles/nexus-library-ui-contract.css", import.meta.url), "utf8");
-const libraryUiContract = readFileSync(new URL("../styles/nexus-library-ui-contract.css", import.meta.url), "utf8");
+const libraryUiContract = designSystem;
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
@@ -15,8 +14,8 @@ const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-liste
 const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-bridge.js", import.meta.url), "utf8");
 
 
-assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
-  "The shared Library UI contract must load after the legacy and design-system layers.");
+assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
+  "The Design System must remain the final stylesheet and contain the shared Library contract.");
 assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
   "The shared Library UI contract must load after the legacy and design-system layers.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
@@ -79,7 +78,7 @@ assert.ok(catalogExplorer.includes("thumbnailInput"),
 assert.ok(libraryUiContract.includes(".nexus-library-navigation-search input.nexus-library-search") && libraryUiContract.includes("grid-template-columns:18px minmax(0,1fr) 22px"),
   "The rebuilt search must use one icon/input/clear control grid.");
 assert.doesNotMatch(styles, /nexus-library-search-wrap/, "The legacy universal stylesheet must not retain competing search rules.");
-assert.doesNotMatch(designSystem, /nexus-library-search-wrap/, "The design-system stylesheet must not retain competing search rules.");
+assert.match(designSystem, /nexus-library-navigation-search \.nexus-library-search-wrap/, "The Design System must contain the rewritten navigation search control.");
 
 
 assert.match(libraryTemplate, /aria-describedby="nexus-library-search-help"/,
