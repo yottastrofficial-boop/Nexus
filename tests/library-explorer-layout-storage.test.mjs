@@ -31,12 +31,15 @@ test("font and theme cards stay compact in grid while Inspector retains the full
   assert.match(explorer, /nexus-library-font-grid-specimen/);
   assert.match(explorer, /resource\.fontFamily/);
   assert.match(explorer, /fa-solid fa-palette/);
-  assert.match(explorer, /nexus-library-font-specimen/);
+  assert.doesNotMatch(explorer, /nexus-library-font-specimen|nexus-library-resource-preview-facts/);
+  assert.match(explorer, /nexus-library-theme-card-swatches/);
+  assert.match(explorer, /nexus-library-inspector-tabs/);
   assert.match(explorer, /nexus-library-design-preview/);
 });
 
-test("Inspector description follows the resource preview", () => {
-  assert.match(explorer, /detail\.replaceChildren\(heading, meta, themePreview,[\s\S]*?\.\.\.\(resourcePreview \? \[resourcePreview\] : \[\]\), description, facts/);
+test("Inspector separates the visual preview from resource details", () => {
+  assert.match(explorer, /renderInspectorTabs\([\s\S]*?\[description, facts, folderLabel, collectionSection, updateSection, actions, advanced\]/);
+  assert.match(explorer, /data-library-inspector-tab = "details"|libraryInspectorTab = "details"/);
 });
 
 test("small configuration records stay structured in the canonical Library store", () => {
