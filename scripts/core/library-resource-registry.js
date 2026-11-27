@@ -128,6 +128,8 @@ function normalizeResource(raw, providerId, defaultOrigin = providerId) {
     packLabel: cleanText(raw.packLabel, 120),
     previewColors: Object.freeze((Array.isArray(raw.previewColors) ? raw.previewColors : []).slice(0, 8).map(item => ({ label: cleanText(item?.label, 32), value: typeof item?.value === "string" && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.value) ? item.value : "" })).filter(item => item.label && item.value)),
     folder: cleanText(raw.folder, 160),
+    sizeBytes: Number.isFinite(Number(raw.sizeBytes)) && Number(raw.sizeBytes) >= 0 ? Number(raw.sizeBytes) : null,
+    modifiedAt: cleanText(raw.modifiedAt, 40),
     origin: cleanText(raw.origin, 48) || defaultOrigin,
     reference: Object.freeze(cloneReference(raw.reference ?? {})),
     capabilities: Object.freeze(capabilities),
