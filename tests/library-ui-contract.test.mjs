@@ -222,16 +222,14 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
   libraryApplication.includes("folder: this._state.folder"),
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
 assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
-  catalogExplorer.includes('nexus-library-font-sample'),
-  "Font samples must explicitly use the resolved font stack in both grid and detail.");
-assert.ok(catalogExplorer.includes('"Título principal"') &&
-  catalogExplorer.includes('"Destaque"') &&
-  catalogExplorer.includes('"Botão"') &&
-  catalogExplorer.includes('"Campo de texto"') &&
-  styles.includes("nexus-library-theme-copy") &&
-  styles.includes("nexus-library-theme-swatches") &&
-  styles.includes("width: 84% !important"),
-  "Theme grid preview must show typography, highlight, controls, progress and its real palette at a large scale.");
+  catalogExplorer.includes('nexus-library-font-sample') &&
+  catalogExplorer.includes("fa-solid fa-font"),
+  "Font specimens use the resolved family in the Inspector while grid cards stay compact.");
+assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
+  catalogExplorer.includes("nexus-library-theme-preview") &&
+  catalogExplorer.includes("fa-solid fa-palette") &&
+  styles.includes("nexus-library-theme-swatches"),
+  "Theme details retain semantic previews while grid cards show only a compact palette icon.");
 assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
   "Folder navigation tiles must be visually integrated into the content view.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
