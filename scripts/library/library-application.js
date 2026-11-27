@@ -239,13 +239,6 @@ export function createLibraryApplicationClass({
         if (!nav) return;
         const preferences = normalizeLibraryPreferences(this._getPreferences());
         nav.replaceChildren();
-        const clear = document.createElement("button");
-        clear.type = "button";
-        clear.dataset.libraryFolderClear = "";
-        clear.className = "nexus-library-custom-folder nexus-library-folder-clear";
-        clear.innerHTML = '<i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Todas as pastas</span>';
-        clear.classList.toggle("active", !this._state.folder && !this._state.collectionId && this._state.smartView === "all");
-        nav.append(clear);
         const childrenByParent = new Map();
         for (const folder of preferences.folders) {
           const parentId = folder.parentId || "";
@@ -300,7 +293,10 @@ export function createLibraryApplicationClass({
         const nav = root.querySelector("[data-library-app-collections]");
         if (!nav) return;
         nav.replaceChildren();
-        for (const collection of normalizeLibraryPreferences(this._getPreferences()).collections) {
+        const collections = normalizeLibraryPreferences(this._getPreferences()).collections;
+        const section = root.querySelector("[data-library-collections-section]");
+        if (section) section.hidden = collections.length === 0;
+        for (const collection of collections) {
           const button = document.createElement("button");
           button.type = "button";
           button.className = "nexus-library-custom-folder";
@@ -336,6 +332,53 @@ export function createLibraryApplicationClass({
         nativeHeader.prepend(tabStrip);
       }
       appRoot.classList.add("nexus-library-native-window");
+      this._libraryPanelSizes ??= { navigation: 210, inspector: 270 };
+      const applyLibraryPanelSizes = () => {
+        appRoot.style.setProperty("--nexus-library-navigation-width", this._libraryPanelSizes.navigation + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-width", this._libraryPanelSizes.inspector + "px");
+      };
+      applyLibraryPanelSizes();
+      root.querySelectorAll("[data-library-resize]").forEach(handle => {
+        const type = handle.dataset.libraryResize;
+        const isNavigation = type === "sidebar";
+        const min = isNavigation ? 150 : 210;
+        const max = isNavigation ? 360 : 460;
+        handle.setAttribute("aria-valuemin", String(min));
+        handle.setAttribute("aria-valuemax", String(max));
+        handle.setAttribute("aria-valuenow", String(isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector));
+        const update = value => {
+          const clamped = Math.max(min, Math.min(max, Math.round(value)));
+          this._libraryPanelSizes[type === "sidebar" ? "navigation" : "inspector"] = clamped;
+          handle.setAttribute("aria-valuenow", String(clamped));
+          applyLibraryPanelSizes();
+        };
+        handle.addEventListener("pointerdown", event => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          const startX = event.clientX;
+          const startWidth = isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector;
+          handle.classList.add("is-resizing");
+          const move = moveEvent => update(startWidth + (isNavigation ? 1 : -1) * (moveEvent.clientX - startX));
+          const finish = () => {
+            handle.classList.remove("is-resizing");
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+            handle.removeEventListener("lostpointercapture", finish);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish);
+          handle.addEventListener("pointercancel", finish);
+          handle.addEventListener("lostpointercapture", finish);
+          try { handle.setPointerCapture(event.pointerId); } catch {}
+        });
+        handle.addEventListener("keydown", event => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          const direction = (event.key === "ArrowRight" ? 1 : -1) * (isNavigation ? 1 : -1);
+          update((isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector) + direction * (event.shiftKey ? 25 : 10));
+        });
+      });
       const breadcrumbs = root.querySelector("[data-library-breadcrumbs]");
       const currentLocation = () => ({
         smartView: this._state.smartView,
