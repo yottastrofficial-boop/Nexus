@@ -828,12 +828,19 @@ export function createLibraryCatalogExplorer({
     detailsTab.title = "Etiquetas, metadados e informações técnicas";
     tabs.append(previewTab, detailsTab);
 
+    // Keep the Inspector navigation and resource identity above both tab panels.
+    // The heading is supplied as the first preview node by renderDetails().
+    const contentNodes = previewContent.filter(Boolean);
+    const heading = contentNodes[0]?.classList?.contains("nexus-library-detail-heading")
+      ? contentNodes.shift()
+      : null;
+
     const previewPanel = makeElement("section", "nexus-library-inspector-panel");
     previewPanel.dataset.libraryInspectorPanel = "preview";
     previewPanel.id = "nexus-library-inspector-panel-preview";
     previewPanel.setAttribute("role", "tabpanel");
     previewPanel.setAttribute("aria-labelledby", previewTab.id);
-    for (const node of previewContent.filter(Boolean)) previewPanel.append(node);
+    for (const node of contentNodes) previewPanel.append(node);
 
     const detailsPanel = makeElement("section", "nexus-library-inspector-panel");
     detailsPanel.dataset.libraryInspectorPanel = "details";
@@ -854,7 +861,9 @@ export function createLibraryCatalogExplorer({
       detailsPanel.hidden = currentInspectorTab !== "details";
     };
     activate(currentInspectorTab);
-    root.append(tabs, previewPanel, detailsPanel);
+    root.append(tabs);
+    if (heading) root.append(heading);
+    root.append(previewPanel, detailsPanel);
     return { root, detailsPanel };
   };
 
