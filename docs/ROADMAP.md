@@ -1,10 +1,10 @@
-## 1.0.0.137 — Correções visuais da Biblioteca (candidata)
+## 1.0.0.137 — Correções visuais da Biblioteca (publicada)
 
 - Prévia de fontes com família real e amostras Aa, Lorem Epsum e 12345 !@#$%.
 - Prévia de temas com mini-interface ampliada e paleta recolhida em dropdown.
 - Grid com visualização efetiva 64×64, título até três linhas, favoritos em estrela e estilos consolidados.
 - Inspector com tabs no topo; identidade e meta em Padrão; tags e resumo em Detalhes.
-- Contratos de teste atualizados; publicação depende de CI e confirmação do ZIP. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- CI, pacote, release v1.0.0.137, asset e manifesto confirmados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.136 — Prévia de recursos e Inspector organizado (publicada)
 
