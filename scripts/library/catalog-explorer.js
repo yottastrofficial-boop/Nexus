@@ -572,6 +572,8 @@ export function createLibraryCatalogExplorer({
   let renderRequestVersion = 0;
   let detailRequestVersion = 0;
   let currentResources = [];
+  const selectedResourceKeys = new Set();
+  let lastSelectedResourceKey = "";
   let currentQuery = "";
   let currentSmartView = "all";
   let currentFolder = "";
@@ -600,6 +602,8 @@ export function createLibraryCatalogExplorer({
     select.dataset.libraryResource = resource.id;
     select.dataset.libraryProvider = resource.providerId;
     select.setAttribute("aria-label", `${resource.name}, ${resource.type}`);
+    select.classList.toggle("is-selected", selectedResourceKeys.has(key));
+    select.setAttribute("aria-pressed", String(selectedResourceKeys.has(key)));
 
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
@@ -1121,20 +1125,57 @@ export function createLibraryCatalogExplorer({
     }
     const selected = target?.closest("[data-library-resource]");
     if (selected && container.contains(selected)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const resource = currentResources.find(item =>
-        item.providerId === selected.dataset.libraryProvider && item.id === selected.dataset.libraryResource
-      );
-      if (resource) {
-        container.querySelectorAll("[data-library-resource]").forEach(item =>
-          item.classList.toggle("is-selected", item === selected)
-        );
-        await renderDetails(resource);
-      }
+      event.preventDefault(); event.stopPropagation();
+      const card = selected.closest("[data-library-resource-key]");
+      const key = card?.dataset.libraryResourceKey;
+      const resource = currentResources.find(item => item.providerId === selected.dataset.libraryProvider && item.id === selected.dataset.libraryResource);
+      if (!resource || !key) return;
+      const multi = event.ctrlKey || event.metaKey;
+      if (event.shiftKey && lastSelectedResourceKey) {
+        const buttons = [...container.querySelectorAll("[data-library-resource]")];
+        const startIndex = buttons.findIndex(item => item.closest("[data-library-resource-key]")?.dataset.libraryResourceKey === lastSelectedResourceKey);
+        const endIndex = buttons.indexOf(selected);
+        if (startIndex >= 0 && endIndex >= 0) {
+          selectedResourceKeys.clear();
+          buttons.slice(Math.min(startIndex, endIndex), Math.max(startIndex, endIndex) + 1).forEach(item => {
+            const itemKey = item.closest("[data-library-resource-key]")?.dataset.libraryResourceKey;
+            if (itemKey) selectedResourceKeys.add(itemKey);
+          });
+        }
+      } else if (multi) {
+        if (selectedResourceKeys.has(key)) selectedResourceKeys.delete(key); else selectedResourceKeys.add(key);
+      } else { selectedResourceKeys.clear(); selectedResourceKeys.add(key); }
+      lastSelectedResourceKey = key;
+      container.querySelectorAll("[data-library-resource]").forEach(item => {
+        const itemKey = item.closest("[data-library-resource-key]")?.dataset.libraryResourceKey;
+        const active = Boolean(itemKey && selectedResourceKeys.has(itemKey));
+        item.classList.toggle("is-selected", active); item.setAttribute("aria-pressed", String(active));
+      });
+      if (multi || event.shiftKey) {
+        detail.dataset.selectedProvider = ""; detail.dataset.selectedResource = "";
+        detail.replaceChildren(makeElement("p", "nexus-library-detail-placeholder", `${selectedResourceKeys.size} selecionado(s). Clique com o botão direito para criar uma coleção.`));
+      } else await renderDetails(resource);
     }
   });
 
+  container.addEventListener("contextmenu", event => {
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const card = target?.closest("[data-library-resource-key]");
+    if (!card || !container.contains(card)) return;
+    const key = card.dataset.libraryResourceKey;
+    if (!selectedResourceKeys.has(key)) {
+      selectedResourceKeys.clear(); selectedResourceKeys.add(key); lastSelectedResourceKey = key;
+      container.querySelectorAll("[data-library-resource]").forEach(item => {
+        const itemKey = item.closest("[data-library-resource-key]")?.dataset.libraryResourceKey;
+        const active = Boolean(itemKey && selectedResourceKeys.has(itemKey));
+        item.classList.toggle("is-selected", active); item.setAttribute("aria-pressed", String(active));
+      });
+    }
+    if (selectedResourceKeys.size > 1) {
+      event.preventDefault();
+      container.dispatchEvent(new CustomEvent("nexus-library-multi-selection-context", { bubbles: true, detail: { event, keys: [...selectedResourceKeys] } }));
+    }
+  });
   return Object.freeze({
     render,
     getState: () => Object.freeze({ cursor, hasMore, count: currentResources.length })
