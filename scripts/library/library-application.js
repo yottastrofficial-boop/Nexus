@@ -564,11 +564,41 @@ export function createLibraryApplicationClass({
         syncNavigationButtons();
         updateCommandbar();
       };
+      const defaultFolderFilters = {
+        "atores": { kind: "document", type: "actors" },
+        "itens": { kind: "document", type: "items" },
+        "cenas": { kind: "document", type: "scenes" },
+        "documentos": { kind: "document", type: "journals" },
+        "baralhos": { kind: "document", type: "cards" },
+        "tabelas-rolagem": { kind: "document", type: "tables" },
+        "macros": { kind: "document", type: "macros" },
+        "audio": { kind: "media" },
+        "assets-globais": { kind: "asset" },
+        "assets-fontes": { kind: "style", type: "font" },
+        "assets-imagens": { kind: "media" },
+        "assets-icones": { kind: "asset" },
+        "assets-texturas": { kind: "media" },
+        "assets-outros": { kind: "asset" },
+        "nexus-temas": { kind: "theme" },
+        "nexus-componentes": { kind: "component" },
+        "nexus-layouts": { kind: "layout" },
+        "nexus-templates": { kind: "template" },
+        "nexus-regras": { kind: "logic", type: "rule" },
+        "nexus-comportamentos": { kind: "logic", type: "behavior" }
+      };
       const render = async () => {
         this._tabManager.setActiveState(this._state);
         this._tabManager.recordNavigation(currentLocation());
         renderChrome();
-        const result = await this._explorer?.render({ ...this._state });
+        const folderFilter = defaultFolderFilters[this._state.folder] ?? null;
+        const explorerState = {
+          ...this._state,
+          folder: folderFilter ? "" : this._state.folder,
+          kind: this._state.kind === "all" ? folderFilter?.kind ?? "all" : this._state.kind,
+          type: this._state.type === "all" ? folderFilter?.type ?? "all" : this._state.type,
+          folderFilter
+        };
+        const result = await this._explorer?.render(explorerState);
         updateCommandbar();
         return result;
       };
