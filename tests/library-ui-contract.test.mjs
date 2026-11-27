@@ -27,10 +27,10 @@ assert.doesNotMatch(styles, /#sidebar \.tab\.sidebar-tab\.nexus-themed-applicati
   "A Biblioteca Universal não deve estilizar o sidebar do Foundry.");
 assert.doesNotMatch(styles, /#ui-left|#ui-top|#controls/,
   "A camada da Biblioteca não deve impor botões flutuantes aos controles nativos do Foundry.");
-assert.match(libraryTemplate, /<option value="tables">RollTables<\/option>/,
-  "O filtro de RollTables deve usar a chave declarada pelo Foundry Document Bridge.");
-assert.doesNotMatch(libraryTemplate, /<option value="rolltables">RollTables<\/option>/,
-  "A chave legada rolltables não deve impedir a filtragem do tipo tables.");
+assert.match(catalogExplorer, /\["tables", "Tabelas"\]/,
+  "O filtro de tipo deve sugerir a chave canônica tables usada pelo Foundry Document Bridge.");
+assert.doesNotMatch(catalogExplorer, /rolltables/,
+  "A chave legada rolltables não deve substituir a chave canônica tables.");
 assert.match(designSystem, /:focus-visible/,
   "Os controles devem preservar foco visível para navegação por teclado.");
 
