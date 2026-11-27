@@ -1,10 +1,10 @@
-## 1.0.0.138 — Biblioteca: contrato visual unificado (em validação)
+## 1.0.0.138 — Biblioteca: contrato visual unificado (publicada)
 
 - Reescreve a pesquisa em uma única regra compartilhada e responsiva; remove os estilos concorrentes da cascata legada.
 - Aplica a paleta real por chave semântica aos previews de tema da grade e do Inspector.
 - Reorganiza Padrão/Detalhes conforme o protótipo aprovado e move a paleta para abaixo da amostra.
 - Restaura a prévia de barra de recurso em temas e cartões de componentes.
-- CI, pacote e publicação estável serão confirmados pelo workflow. Teste visual no Foundry VTT 14 build 360 permanece manual.
+- CI, pacote, release v1.0.0.138, asset `nexus.zip` (496.309 bytes) e manifesto estável foram confirmados. Teste visual no Foundry VTT 14 build 360 permanece manual.
 
 
 ## 1.0.0.136 — Prévia de recursos e Inspector organizado (publicada)
