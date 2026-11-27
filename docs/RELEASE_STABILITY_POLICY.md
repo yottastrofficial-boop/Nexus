@@ -1,3 +1,7 @@
+## Candidata em preparação — 1.0.0.136
+
+A versão 1.0.0.136 está na main como candidata. A versão estável e o manifesto permanecem em 1.0.0.135 até o workflow validar o código, publicar o ZIP e sincronizar o manifesto. Não considerar a candidata instalada/validada no Foundry real antes dos testes manuais.
+
 ## Estado de distribuição — 1.0.0.135 (publicada)
 
 A versão estável atual é 1.0.0.135. O pacote, a release e o manifesto estável foram confirmados pelo workflow oficial.
