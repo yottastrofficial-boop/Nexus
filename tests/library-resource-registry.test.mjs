@@ -65,6 +65,9 @@ const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
 assert.equal(fontsPage.total, 4, "The Library exposes the native font stacks used by the NEXUS UI.");
 const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
 assert.ok(interFont && interFont.kind === "style" && interFont.tags.includes("fonte"));
+assert.equal(interFont.folder, "assets-fontes",
+  "Native font metadata must be classified in the global assets Fonts folder.");
+
 const resolvedInter = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "inter" });
 assert.equal(resolvedInter.family, '"Inter", system-ui, sans-serif', "Font resources resolve to their documented CSS family stack.");
 
