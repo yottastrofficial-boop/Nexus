@@ -1,12 +1,12 @@
-## Estado de distribuição — 1.0.0.135 (candidato)
+## Estado de distribuição — 1.0.0.134 (publicada)
 
-A candidata 1.0.0.135 reorganiza a prévia e os detalhes do Inspector, restaura previews de fontes e temas, move tags e resumo técnico para Detalhes, amplia os controles de cabeçalho da Lista e elimina highlights de borda no modo Lista.
+A versão estável atual é 1.0.0.134. O manifesto estável permanece nessa versão até que uma atualização seja integrada à `main`, validada e publicada pelo workflow oficial.
 
-- `system.json` declara 1.0.0.135 e aponta para o pacote candidato.
-- `manifest.json` permanece na última release estável até CI, empacotamento, release e asset `nexus.zip` serem confirmados.
-- CI deve executar sintaxe, contratos de UI, suíte completa e geração do ZIP.
-- Validação manual pendente no Foundry VTT 14 build 360: fontes reais, temas personalizados e presets, prévia de componentes/cards/layouts, posição e funcionamento das abas, tags em Detalhes, área integral dos cabeçalhos e seleção sem borda na Lista.
-- A publicação do pacote não promove automaticamente a versão a checkpoint funcional; último checkpoint confirmado permanece 1.0.0.70 até validação no cliente real.
+- `system.json` da versão estável publicada declara 1.0.0.134 e aponta para o pacote correspondente.
+- `manifest.json` e `nexus.zip` da release 1.0.0.134 foram confirmados.
+- A próxima revisão da Biblioteca está sendo preparada na PR #119; não altera o manifesto estável antes da publicação.
+- A validação visual/funcional no Foundry VTT 14 build 360 continua pendente para a revisão atual.
+- A publicação do pacote não promove automaticamente a versão a checkpoint funcional; o último checkpoint funcional confirmado permanece 1.0.0.70 até validação no cliente real.
 
 ## Estado de distribuição — 1.0.0.134 (publicada)
 
