@@ -578,6 +578,7 @@ export function createLibraryCatalogExplorer({
   canUpdateDefinition = () => false,
   onUpdateDefinition = null,
   renderSpecializedEditor = null,
+  onOpenFolder = null,
 } = {}) {
   if (!registry || typeof registry.list !== "function" || typeof registry.resolve !== "function") {
     throw new TypeError("O Explorer precisa de um registro válido da Biblioteca.");
@@ -634,9 +635,13 @@ export function createLibraryCatalogExplorer({
         arial: "Arial, Helvetica, sans-serif",
         monospace: "ui-monospace, SFMono-Regular, Consolas, monospace"
       };
+      const family = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
       preview.dataset.previewKind = "font";
-      preview.style.fontFamily = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
-      preview.append(makeElement("span", "nexus-library-font-sample", "Aa"));
+      preview.style.setProperty("font-family", family, "important");
+      const sample = makeElement("span", "nexus-library-font-sample");
+      sample.style.setProperty("font-family", family, "important");
+      sample.append(makeElement("strong", "", "Aa"), makeElement("small", "", "0123"));
+      preview.append(sample);
     } else if (resource.kind === "theme" && resource.previewColors?.length) {
       preview.dataset.previewKind = "theme";
       const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
@@ -644,10 +649,11 @@ export function createLibraryCatalogExplorer({
       preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? colors.acento ?? colors.destaque ?? colors.button ?? "#78b7e8");
       preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? colors.texto ?? "#edf0f6");
       const mock = makeElement("span", "nexus-library-theme-miniature");
-      mock.append(makeElement("strong", "", "Aa"));
-      const button = makeElement("i", "", "Botão");
+      const title = makeElement("strong", "", "Painel de exemplo");
+      const sample = makeElement("p", "", "Texto de interface e hierarquia tipográfica");
+      const button = makeElement("i", "", "Botão principal");
       const input = makeElement("small", "", "Campo de texto");
-      mock.append(button, input);
+      mock.append(title, sample, button, input);
       preview.append(mock);
     } else if (thumbnail) {
       const image = document.createElement("img");
@@ -1149,8 +1155,9 @@ export function createLibraryCatalogExplorer({
     });
 
     container.replaceChildren();
+    for (const folder of folderEntries) container.append(renderFolderCard(folder, preferences));
     for (const resource of visible) container.append(renderResourceCard(resource, preferences));
-    if (!visible.length) {
+    if (!visible.length && !folderEntries.length) {
       const message = page.errors?.length
         ? "Algumas fontes da Biblioteca não puderam ser consultadas."
         : currentSmartView === "favorites" ? "Nenhum favorito nesta página do catálogo."
@@ -1177,6 +1184,13 @@ export function createLibraryCatalogExplorer({
 
   container.addEventListener("click", async event => {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const openFolder = target?.closest("[data-library-open-folder]");
+    if (openFolder && container.contains(openFolder)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof onOpenFolder === "function") await onOpenFolder(openFolder.dataset.libraryOpenFolder);
+      return;
+    }
     const loadMore = target?.closest("[data-library-load-more]");
     if (loadMore && container.contains(loadMore)) {
       loadMore.remove();
