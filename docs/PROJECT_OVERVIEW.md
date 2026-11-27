@@ -1,6 +1,6 @@
 ## Estado do código — 1.0.0.134
 
-A revisão da Biblioteca Universal consolida o Grid em cartões determinados pelo conteúdo, com miniaturas efetivas de 32/64/128 CSS px, título de até três linhas e sem padding/bordas decorativas redundantes. Temas exibem amostras da própria paleta. O Inspector separa Prévia e Detalhes; fontes, fatos técnicos e metadados ficam na aba de detalhes. Pastas usam clique para seleção e duplo clique para navegação. O Estúdio de Aparência passa a fornecer opções ApplicationV2 mutáveis por instância e clonar opções recebidas do submenu. CI e empacotamento dependem da execução do workflow; a validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A revisão da Biblioteca Universal consolida o Grid em cartões determinados pelo conteúdo, com miniaturas efetivas de 32/64/128 CSS px, título de até três linhas e sem padding/bordas decorativas redundantes. Temas exibem amostras da própria paleta. O Inspector separa Prévia e Detalhes; fontes, fatos técnicos e metadados ficam na aba de detalhes. Pastas usam clique para seleção e duplo clique para navegação. O Estúdio de Aparência passa a fornecer opções ApplicationV2 mutáveis por instância e clonar opções recebidas do submenu. CI, regressões, empacotamento, release, asset `nexus.zip` e manifesto da 1.0.0.134 foram aprovados/publicados. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 ## Estado do código — 1.0.0.133
 
