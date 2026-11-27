@@ -79,23 +79,27 @@
 
   <div class="nexus-library-body nexus-library-app-body">
     <nav class="nexus-library-section-tabs" aria-label="Navegação da Biblioteca">
-      <button type="button" class="active" data-library-smart-view="all"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Todos os itens</span></button>
+      <button type="button" class="active" data-library-smart-view="all"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Biblioteca</span></button>
       <button type="button" data-library-smart-view="favorites"><i class="fa-solid fa-star" aria-hidden="true"></i><span>Favoritos</span></button>
       <button type="button" data-library-smart-view="recent"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Recentes</span></button>
-      <div class="nexus-library-custom-folder-heading">Pastas</div>
+      <div class="nexus-library-custom-folder-heading nexus-library-folder-root-label">Todas as pastas</div>
       <div class="nexus-library-custom-folders" data-library-app-folders></div>
       <div class="nexus-library-custom-folder-heading">Atalhos</div>
       <div class="nexus-library-custom-folders" data-library-app-shortcuts></div>
-      <div class="nexus-library-custom-folder-heading">Coleções</div>
-      <div class="nexus-library-custom-folders" data-library-app-collections></div>
-      <button type="button" data-library-create-collection class="nexus-library-create-folder" aria-label="Nova coleção" title="Nova coleção"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></button>
+      <div class="nexus-library-collections-section" data-library-collections-section hidden>
+        <div class="nexus-library-custom-folder-heading">Coleções</div>
+        <div class="nexus-library-custom-folders" data-library-app-collections></div>
+      </div>
     </nav>
+    <div class="nexus-library-panel-resizer nexus-library-sidebar-resizer" data-library-resize="sidebar" role="separator" aria-orientation="vertical" aria-label="Redimensionar navegação" tabindex="0"></div>
     <section class="nexus-library-section-panel nexus-library-generic-panel" data-library-section-panel="collection">
       <div class="nexus-library-workspace">
         <main class="nexus-library-main">
           <div class="nexus-library-section-heading"><strong data-library-collection-heading>Todos os recursos</strong><span data-library-collection-count>0 encontrados</span></div>
-          <div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items data-library-list-heading="Todos os recursos"></div>
+          <div class="nexus-library-list-header" data-library-list-header aria-hidden="true"><span>Nome</span><span>Categoria</span><span>Tamanho</span><span>Modificado</span><span>Etiquetas</span></div>
+          <div class="nexus-library-assets nexus-library-generic-items" data-library-generic-items data-library-list-heading="Biblioteca"></div>
         </main>
+        <div class="nexus-library-panel-resizer nexus-library-inspector-resizer" data-library-resize="inspector" role="separator" aria-orientation="vertical" aria-label="Redimensionar detalhes" tabindex="0"></div>
         <aside class="nexus-library-details nexus-library-generic-details" data-library-generic-details>
           <div class="nexus-library-detail-placeholder"><p>Selecione um recurso para consultar seus detalhes.</p></div>
         </aside>
