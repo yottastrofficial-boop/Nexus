@@ -162,3 +162,40 @@ test("campaign application fails visibly when the Foundry confirmation API is un
   );
   assert.equal(writes, 0);
 });
+
+test("built-in theme preview resolves its own preset, typography, full palette and component defaults", () => {
+  const model = getLibraryDesignProfilePreviewModel({
+    id: "builtin-theme:medieval",
+    name: "Medieval",
+    previewColors: [{ label: "canvasColor", value: "#1b1712" }],
+    reference: { builtin: "theme", key: "medieval" }
+  });
+  assert.equal(model.supported, true);
+  assert.equal(model.preset, "medieval");
+  assert.equal(model.typography.family, "Georgia");
+  assert.equal(model.palette.find(color => color.key === "canvas").value, "#1b1712");
+  assert.equal(model.palette.length, 18);
+  assert.equal(model.components.panels.background, model.palette.find(color => color.key === "surface").value);
+  assert.ok(model.components.buttons && model.components.fields && model.components.containers && model.components.highlights);
+});
+
+test("custom theme preview uses sanitized profile metadata, not the active global preset", () => {
+  const model = getLibraryDesignProfilePreviewModel({
+    id: "themes:custom-medieval",
+    name: "Meu tema",
+    themePreview: {
+      schemaVersion: 3,
+      preset: "medieval",
+      name: "Meu tema",
+      palette: { canvas: "#111111", panel: "#222222", text: "#eeeeee" },
+      typography: { family: "Georgia", baseSize: 15 },
+      layout: { density: "spacious", radius: "soft", spacing: 1.5, controlHeight: 40 },
+      components: { buttons: { background: "#123456", text: "#ffffff", border: "#456789", borderStyle: "dashed", borderWidth: 2, radius: 9 } }
+    }
+  });
+  assert.equal(model.preset, "medieval");
+  assert.equal(model.palette.find(color => color.key === "canvas").value, "#111111");
+  assert.equal(model.typography.family, "Georgia");
+  assert.equal(model.components.buttons.background, "#123456");
+  assert.equal(model.components.buttons.borderStyle, "dashed");
+});
