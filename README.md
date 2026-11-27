@@ -1,6 +1,6 @@
 ## Biblioteca 1.0.0.138 — revisão do padrão visual e prévias
 
-A versão 1.0.0.138 consolida a barra de pesquisa em uma única implementação, aplica a paleta real aos previews de temas na grade e no Inspector, corrige a hierarquia Padrão/Detalhes e restaura a miniatura da barra de recurso. A release será validada pelo workflow antes da sincronização final do manifesto.
+A versão 1.0.0.138 consolida a barra de pesquisa em uma única implementação, aplica a paleta real aos previews de temas na grade e no Inspector, corrige a hierarquia Padrão/Detalhes e restaura a miniatura da barra de recurso. Release v1.0.0.138 publicada; CI, pacote, asset `nexus.zip` (496.309 bytes) e manifesto estável foram confirmados pelo workflow. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
 
 # NEXUS RPG
