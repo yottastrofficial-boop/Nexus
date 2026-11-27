@@ -48,7 +48,9 @@ test("Inspector starts on Padrão, places identity in Padrão and technical meta
   assert.match(explorer, /nexus-library-resource-preview-summary/);
   assert.doesNotMatch(explorer, /nexus-library-resource-preview-title/);
   assert.match(explorer, /function renderLibraryFontPreview/);
-  assert.match(explorer, /nexus-library-font-preview-samples/);\n  assert.match(explorer, /nexus-library-font-preview-aa/);\n  assert.match(explorer, /nexus-library-font-preview-glyphs/);
+  assert.match(explorer, /nexus-library-font-preview-samples/);
+  assert.match(explorer, /nexus-library-font-preview-aa/);
+  assert.match(explorer, /nexus-library-font-preview-glyphs/);
   assert.match(explorer, /themeModel\?\.palette/);
   assert.match(explorer, /nexus-library-theme-live-preview/);
   assert.match(explorer, /currentInspectorTab = "preview"/);
