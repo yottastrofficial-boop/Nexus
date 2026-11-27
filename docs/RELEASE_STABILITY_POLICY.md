@@ -1,11 +1,11 @@
-## Estado de distribuição — 1.0.0.128
+## Estado de distribuição — 1.0.0.129
 
-A 1.0.0.128 refina o Explorer: controles sem molduras duplicadas, árvore de pastas real com conteúdo, fontes/temas nativos, lista compacta com colunas e classificação, seleção múltipla com coleção contextual e redimensionamento acessível. Valores de tamanho/data só são mostrados quando o provedor fornece metadados reais. O manifesto estável permanece na 1.0.0.127 até o workflow publicar e confirmar o ZIP 1.0.0.128.
+A 1.0.0.129 corrige a pesquisa com borda única, breadcrumb com ícone e alinhamento, lista com célula Nome composta e colunas alinhadas, resize de colunas, modos de ordenação completos, sugestões pesquisáveis de categoria/etiqueta e prévias de fonte/tema. A migração de "Temas" para "Coleções visuais" altera apenas o nome da pasta padrão. O manifesto estável permanece na 1.0.0.128 até o workflow publicar e confirmar o ZIP 1.0.0.129.
 
-- A versão `system.json` em preparação é 1.0.0.128 e o download declarado aponta para `v1.0.0.128/nexus.zip`.
-- `manifest.json` permanece na versão estável 1.0.0.127 durante a validação e só avança após confirmação do pacote.
-- CI e empacotamento da rodada anterior aprovados; a execução final da 1.0.0.128 deve ser confirmada antes da integração.
-- Validação visual/funcional pendente no Foundry VTT 14 build 360: hierarquia, fontes/temas, lista, filtros, coleção por clique direito, resize de ambos os separadores e ausência de superfícies duplicadas.
+- `system.json` candidato: 1.0.0.129; download aponta para `v1.0.0.129/nexus.zip`.
+- `manifest.json` permanece em 1.0.0.128 durante a validação; o workflow deve sincronizá-lo somente após a release e o asset.
+- CI, pacote e publicação desta revisão ainda precisam ser confirmados pelo workflow.
+- Validação visual/funcional pendente no Foundry VTT 14 build 360: borda única de pesquisa, breadcrumb, alinhamento da lista, arraste das colunas, ordenação, filtros e previews.
 - O último checkpoint funcional confirmado permanece 1.0.0.70 até validação documentada no cliente real.
 
 ## Estado de distribuição — 1.0.0.126 (2026-11-26)
