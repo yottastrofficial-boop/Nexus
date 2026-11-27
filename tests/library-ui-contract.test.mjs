@@ -16,8 +16,6 @@ const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-br
 
 assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet and contain the shared Library contract.");
-assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
-  "The shared Library UI contract must load after the legacy and design-system layers.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
 assert.match(styles, /\.nexus-library-application \.nexus-library-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) var\(--nexus-library-inspector-width\)/,
