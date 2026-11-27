@@ -116,7 +116,7 @@ assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pas
 assert.doesNotMatch(libraryTemplate, /data-library-folder-clear/, "The all-folders root is a heading, not a pseudo-folder item.");
 assert.match(libraryTemplate, /data-library-list-header[\s\S]*?Tamanho[\s\S]*?Modificado[\s\S]*?Etiquetas/, "List view exposes Explorer metadata columns.");
 assert.doesNotMatch(libraryTemplate, /data-library-create-collection/, "Empty collections must not be advertised as a permanent sidebar destination.");
-assert.match(libraryTemplate, /data-library-tag-options/, "Tag filters provide searchable suggestions.");
+assert.match(libraryTemplate, /list="nexus-library-tag-options"[\s\S]*?datalist id="nexus-library-tag-options"/, "Tag filters provide searchable suggestions.");
 assert.match(libraryApplication, /data-library-resize[\s\S]*?pointerdown[\s\S]*?setPointerCapture/, "Sidebar and Inspector resize hit areas must work with pointer input.");
 assert.match(libraryApplication, /defaultFolderFilters[\s\S]*?assets-fontes[\s\S]*?nexus-temas/, "Default folders must query relevant native catalog resources.");
 assert.match(libraryApplication, /Criar coleção com[\s\S]*?selectedKeys\.slice\(0, 500\)/, "Right-clicking a multi-selection creates a collection of the selected resource references.");
