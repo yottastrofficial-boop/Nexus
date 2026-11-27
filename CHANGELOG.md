@@ -6,7 +6,7 @@
 - Reescreve a mini-interface temática conforme o protótipo v6, com cabeçalho, navegação, painel, cartão, destaque, barra de recurso, campo e botões; o CSS da amostra fica isolado do tema global do Foundry/NEXUS.
 - Aplica a família tipográfica escolhida diretamente aos espécimes Aa, Lorem Epsum e 12345 !@#$%, e reforça o escopo para impedir que regras globais sobrescrevam a amostra.
 - Adiciona regressões para tema Medieval/Georgia, paleta personalizada, estilos de componentes e metadados seguros.
-- CI e construção/validação do pacote passaram no workflow 46075185683. A publicação estável verificará o asset ZIP antes de sincronizar o manifesto; teste visual no Foundry VTT 14 build 360 permanece manual.
+- CI, pacote e publicação estável foram confirmados pelo workflow 46075237452; asset `nexus.zip` publicado (499.335 bytes) e manifesto sincronizado em 1.0.0.139. Teste visual no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.138 — Biblioteca: contrato visual unificado e prévias reais
 
