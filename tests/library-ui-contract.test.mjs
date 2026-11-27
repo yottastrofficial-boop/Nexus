@@ -221,8 +221,8 @@ assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplore
 assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') === false &&
   libraryApplication.includes("folder: this._state.folder"),
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
-assert.ok(catalogExplorer.includes('setProperty("font-family", family, "important")') &&
-  catalogExplorer.includes('nexus-library-font-sample') &&
+assert.ok(catalogExplorer.includes("model.family") &&
+  catalogExplorer.includes("nexus-library-font-specimen") &&
   catalogExplorer.includes("fa-solid fa-font"),
   "Font specimens use the resolved family in the Inspector while grid cards stay compact.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
