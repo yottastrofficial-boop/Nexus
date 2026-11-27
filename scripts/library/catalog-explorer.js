@@ -308,6 +308,32 @@ export function getLibraryThemePreviewTokens(rawColors = []) {
   });
 }
 
+export function getLibraryResourceBarCardPreviewModel(resource = {}) {
+  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\\s_-]+/g, "");
+  const component = resource.kind === "component" || resource.reference?.collection === "components";
+  if (!component || !["resourcemeter", "assetmeter", "resourcebar", "pvbar", "pmbar", "pebar", "pvring", "pmring", "pering", "sheetresource"].includes(type)) return null;
+  return Object.freeze({
+    type,
+    label: String(resource.name ?? resource.label ?? "Recurso").slice(0, 48),
+    current: 32,
+    max: 40,
+    percent: 80
+  });
+}
+
+function createLibraryResourceBarCardPreview(resource) {
+  const model = getLibraryResourceBarCardPreviewModel(resource);
+  if (!model) return null;
+  const preview = makeElement("div", "nexus-library-resource-meter-card-preview");
+  preview.append(makeElement("small", "", model.label));
+  const track = makeElement("span", "nexus-library-component-preview-track");
+  const fill = makeElement("i", "");
+  fill.style.width = model.percent + "%";
+  track.append(fill);
+  preview.append(track, makeElement("strong", "", model.current + " / " + model.max));
+  return preview;
+}
+
 function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}, layout = {}, compact = false } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
   const root = makeElement("div", compact
@@ -793,6 +819,9 @@ export function createLibraryCatalogExplorer({
         palette: themeColors,
         compact: true
       }));
+    } else if (getLibraryResourceBarCardPreviewModel(resource)) {
+      preview.dataset.previewKind = "resource-bar";
+      preview.append(createLibraryResourceBarCardPreview(resource));
     } else if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
