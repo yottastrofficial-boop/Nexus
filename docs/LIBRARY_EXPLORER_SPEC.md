@@ -177,3 +177,33 @@ A árvore oferece disclosure expandir/recolher e preserva a hierarquia. O menu c
 O botão **Novo** reúne ações de criação. Importar asset usa o FilePicker/upload nativo do Foundry e registra mídia pessoal. Atalhos armazenam uma referência ao recurso original. Layouts e componentes novos são entradas pessoais editáveis; sua estrutura não substitui schemas mecânicos do NEXUS.
 
 Os cards usam preview quadrado, sem moldura/painel interno, com imagens em object-fit: contain. A seleção é indicada somente por borda de destaque. Previews são representações inertes e não executam conteúdo importado.
+
+
+## Padrão visual reutilizável — Biblioteca 1.0.0.138
+
+A Biblioteca mantém uma única camada de contrato visual, carregada após os estilos base e o Design System: `styles/nexus-library-ui-contract.css`. Regras antigas de pesquisa foram removidas dos estilos legados para impedir que uma nova definição seja sobrescrita por cascatas concorrentes.
+
+### Pesquisa
+
+- A barra de pesquisa é uma superfície única com ícone, campo flexível e ação de limpar.
+- O campo deve ocupar o espaço restante sem ultrapassar a área de navegação.
+- Em larguras estreitas, a pesquisa ocupa uma linha própria; breadcrumb e navegação continuam utilizáveis.
+- A aparência, foco, dimensões e estados do controle são definidos uma vez no contrato compartilhado, não por tipo de recurso.
+
+### Cartões e prévias
+
+- Cada prévia usa uma área de conteúdo padronizada e dados inertes; conteúdo importado não é executado.
+- Temas usam os tokens semânticos reais do perfil (chave canônica, não o rótulo traduzido) e uma mini-interface consistente em grade e Inspector.
+- A amostra de tema demonstra cabeçalho, navegação, superfície, destaque, campo, botão e barra de recurso; a paleta detalhada fica em um disclosure abaixo da amostra.
+- Componentes de medidor/barra de recurso recebem uma miniatura visual no cartão, sem depender de uma miniatura externa.
+- Fontes usam a família resolvida na amostra tipográfica.
+- Novos tipos podem reutilizar os padrões de superfície, metadados e estados; somente o conteúdo específico do tipo deve ser criado.
+
+### Inspector — hierarquia aprovada
+
+- **Padrão:** nome, metadados resumidos e prévia visual. A seleção abre nesta aba.
+- **Detalhes:** descrição, etiquetas, resumo/tipo/dimensões, fatos técnicos, pasta, coleções e ações.
+- O favorito permanece acessível no cabeçalho do recurso e sincronizado com o cartão.
+- O estado visual selecionado é explícito e consistente: a aba ativa usa o tratamento de destaque; a inativa usa superfície neutra.
+
+Esta hierarquia e os tokens da prévia são contratos para futuras adições, evitando que cada recurso redefina a pesquisa, as abas, o espaçamento ou a estrutura de apresentação.
