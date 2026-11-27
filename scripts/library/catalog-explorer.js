@@ -120,7 +120,11 @@ const THEME_PREVIEW_LABELS = Object.freeze({
   buttonColor: "Botão", button: "Botão",
   accentColor: "Acento", accent: "Acento",
   panelColor: "Painel", panel: "Painel",
-  surfaceColor: "Superfície", surface: "Superfície"
+  surfaceColor: "Superfície", surface: "Superfície",
+  textColor: "Texto", text: "Texto",
+  borderColor: "Borda", border: "Borda",
+  fieldColor: "Campo", field: "Campo",
+  mutedTextColor: "Texto secundário", mutedText: "Texto secundário"
 });
 
 export function getLibraryThemePreviewColors(raw = {}) {
@@ -169,14 +173,27 @@ function renderDesignProfilePreview(resource, resolved) {
   nav.append(makeElement("span", "is-active", "Ficha"), makeElement("span", "", "Inventário"), makeElement("span", "", "Efeitos"));
   const content = makeElement("div", "nexus-library-design-preview-content");
   content.append(makeElement("small", "", "PERSONAGEM · EXEMPLO"));
-  content.append(makeElement("strong", "nexus-library-design-preview-value", "42 / 50"));
-  content.append(makeElement("span", "nexus-library-design-preview-track"));
+  content.append(makeElement("strong", "nexus-library-design-preview-value", "Título de exemplo"));
+  content.append(makeElement("span", "nexus-library-design-preview-subtitle", "Subtítulo da interface"));
+  const description = makeElement("p", "nexus-library-design-preview-copy", "Texto normal com ");
+  description.append(makeElement("strong", "", "bold"), document.createTextNode(" e "), makeElement("em", "", "italic"), document.createTextNode(" para demonstrar a hierarquia tipográfica."));
+  content.append(description);
+  const highlight = makeElement("span", "nexus-library-design-preview-highlight", "Destaque ativo");
+  content.append(highlight);
+  const progress = makeElement("div", "nexus-library-design-preview-progress");
+  const progressFill = makeElement("span", "");
+  progressFill.style.width = "68%";
+  progress.append(progressFill);
+  const secondaryProgress = makeElement("div", "nexus-library-design-preview-progress is-secondary");
+  const secondaryFill = makeElement("span", "");
+  secondaryFill.style.width = "42%";
+  secondaryProgress.append(secondaryFill);
+  content.append(progress, secondaryProgress);
   const sampleCard = makeElement("div", "nexus-library-design-preview-card");
   sampleCard.append(makeElement("small", "", "ATRIBUTO"), makeElement("strong", "", "FOR 16"));
   content.append(sampleCard);
-  content.append(makeElement("p", "", "Amostra de texto secundário e conteúdo de painel."));
   const controls = makeElement("div", "nexus-library-design-preview-controls");
-  controls.append(makeElement("span", "", "Campo de exemplo"), makeElement("button", "", "Ação"));
+  controls.append(makeElement("span", "", "Campo de exemplo"), makeElement("button", "", "Ação"), makeElement("button", "is-secondary", "Secundário"));
   content.append(controls);
   const scroll = makeElement("span", "nexus-library-design-preview-scroll");
   body.append(nav, content, scroll);
@@ -419,18 +436,24 @@ function renderLibraryResourcePreview(resource, resolved) {
   if (!model) return null;
   const section = makeElement("section", "nexus-library-resource-preview");
   section.dataset.previewKind = model.kind;
-  section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
-  section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  if (model.kind !== "font") {
+    section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
+    section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  }
   if (model.kind === "font") {
     const specimen = makeElement("div", "nexus-library-font-specimen");
     specimen.style.setProperty("font-family", model.family, "important");
-    const headline = makeElement("strong", "", "Aa Bb Cc 0123");
+    const headline = makeElement("strong", "nexus-library-font-specimen-heading", "Aa");
     headline.style.setProperty("font-family", model.family, "important");
-    const sample = makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+    const sample = makeElement("p", "nexus-library-font-specimen-normal", "Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
     sample.style.setProperty("font-family", model.family, "important");
-    const glyphs = makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ");
+    const bold = makeElement("p", "nexus-library-font-specimen-bold", "Lorem ipsum dolor sit amet.");
+    bold.style.setProperty("font-family", model.family, "important");
+    const italic = makeElement("p", "nexus-library-font-specimen-italic", "Lorem ipsum dolor sit amet.");
+    italic.style.setProperty("font-family", model.family, "important");
+    const glyphs = makeElement("small", "", "0123456789 · ÁÉÍÓÚ · @ # &");
     glyphs.style.setProperty("font-family", model.family, "important");
-    specimen.append(headline, sample, glyphs);
+    specimen.append(headline, sample, bold, italic, glyphs);
     section.append(specimen);
   }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
@@ -650,32 +673,65 @@ export function createLibraryCatalogExplorer({
     const thumbnail = text(resource.thumbnail).trim();
     const builtin = resource.reference?.builtin;
     if (builtin === "font") {
-      const families = {
-        inter: '"Inter", system-ui, sans-serif',
-        "system-ui": "system-ui, sans-serif",
-        arial: "Arial, Helvetica, sans-serif",
-        monospace: "ui-monospace, SFMono-Regular, Consolas, monospace"
-      };
-      const family = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
+      const family = resource.fontFamily || "system-ui, sans-serif";
       preview.dataset.previewKind = "font";
       preview.style.setProperty("font-family", family, "important");
       const sample = makeElement("span", "nexus-library-font-sample");
       sample.style.setProperty("font-family", family, "important");
-      sample.append(makeElement("strong", "", "Aa"), makeElement("small", "", "0123"));
+      const headline = makeElement("strong", "", "Aa");
+      headline.style.setProperty("font-family", family, "important");
+      const line = makeElement("small", "", "Lorem ipsum");
+      line.style.setProperty("font-family", family, "important");
+      const styles = makeElement("small", "nexus-library-font-sample-styles", "Bold · Italic");
+      styles.style.setProperty("font-family", family, "important");
+      sample.append(headline, line, styles);
       preview.append(sample);
     } else if (resource.kind === "theme") {
       preview.dataset.previewKind = "theme";
-      const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
-      preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? colors.painel ?? colors["superfície"] ?? colors.canvas ?? "#202e3e");
-      preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? colors.acento ?? colors.destaque ?? colors.button ?? "#78b7e8");
-      preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? colors.texto ?? "#edf0f6");
-      const mock = makeElement("span", "nexus-library-theme-miniature");
-      const title = makeElement("strong", "", "Painel de exemplo");
-      const sample = makeElement("p", "", "Texto de interface e hierarquia tipográfica");
-      const button = makeElement("i", "", "Botão principal");
-      const input = makeElement("small", "", "Campo de texto");
-      mock.append(title, sample, button, input);
-      preview.append(mock);
+      const palette = Array.isArray(resource.previewColors) ? resource.previewColors : [];
+      const colors = Object.fromEntries(palette.map(color => [String(color.label).toLowerCase(), color.value]));
+      const color = (...keys) => keys.map(key => colors[key]).find(value => typeof value === "string") || "";
+      const panel = color("panel", "painel", "surface", "superfície", "card", "cartão", "canvas") || "#202e3e";
+      const accent = color("accent", "acento", "highlight", "destaque") || "#78b7e8";
+      const textColor = color("text", "texto") || "#edf0f6";
+      const border = color("border", "borda") || textColor;
+      const buttonColor = color("button", "botão") || accent;
+      const field = color("field", "campo") || panel;
+      preview.style.setProperty("--nexus-theme-preview-panel", panel);
+      preview.style.setProperty("--nexus-theme-preview-accent", accent);
+      preview.style.setProperty("--nexus-theme-preview-text", textColor);
+      preview.style.setProperty("--nexus-theme-preview-border", border);
+      preview.style.setProperty("--nexus-theme-preview-button", buttonColor);
+      preview.style.setProperty("--nexus-theme-preview-field", field);
+      if (currentViewMode === "list") {
+        const mark = makeElement("span", "nexus-library-theme-list-mark");
+        const dot = makeElement("i", "");
+        mark.append(dot);
+        preview.append(mark);
+      } else {
+        const mock = makeElement("span", "nexus-library-theme-miniature");
+        const heading = makeElement("span", "nexus-library-theme-heading");
+        heading.append(makeElement("strong", "", "Título principal"), makeElement("small", "", "Subtítulo"));
+        const sample = makeElement("p", "nexus-library-theme-copy", "Texto normal com ");
+        sample.append(makeElement("strong", "", "bold"), document.createTextNode(" e "), makeElement("em", "", "italic"));
+        const highlight = makeElement("span", "nexus-library-theme-highlight", "Destaque");
+        const progress = makeElement("span", "nexus-library-theme-progress");
+        const fill = makeElement("i", "");
+        fill.style.width = "68%";
+        progress.append(fill);
+        const controls = makeElement("span", "nexus-library-theme-controls");
+        controls.append(makeElement("b", "is-primary", "Botão"), makeElement("b", "is-secondary", "Secundário"));
+        const input = makeElement("span", "nexus-library-theme-field", "Campo de texto");
+        const swatches = makeElement("span", "nexus-library-theme-swatches");
+        for (const entry of palette.slice(0, 6)) {
+          const swatch = makeElement("i", "");
+          swatch.style.backgroundColor = entry.value;
+          swatch.title = entry.label + ": " + entry.value;
+          swatches.append(swatch);
+        }
+        mock.append(heading, sample, highlight, progress, controls, input, swatches);
+        preview.append(mock);
+      }
     } else if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
@@ -691,22 +747,23 @@ export function createLibraryCatalogExplorer({
 
     const nameCell = makeElement("span", "nexus-library-list-name-cell");
     nameCell.append(preview, makeElement("strong", "", resource.name));
+    const categoryLabels = {
+      component: "Componente", composition: "Composição", layout: "Layout", template: "Modelo",
+      asset: "Asset", media: "Mídia", theme: "Coleção visual", style: "Estilo", logic: "Lógica", document: "Documento"
+    };
     const category = resource.kind === "theme" ? "Coleção visual"
       : builtin === "font" ? "Fonte"
-        : resource.documentType || resource.kind || resource.type;
-    const meta = makeElement("small", "nexus-library-resource-meta", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
+        : categoryLabels[resource.kind] || resource.kind || "Recurso";
+    const typeLabels = {
+      font: "Fonte", theme: "Tema", component: "Componente", asset: "Asset", media: "Mídia",
+      actors: "Atores", items: "Itens", scenes: "Cenas", journals: "Documentos",
+      macros: "Macros", playlists: "Playlists", tables: "Tabelas", cards: "Baralhos",
+      property: "Propriedade", rule: "Regra", behavior: "Comportamento", flow: "Fluxo", function: "Função"
+    };
+    const typeLabel = resource.documentType || typeLabels[resource.type] || resource.type || "—";
     const categoryCell = makeElement("span", "nexus-library-list-category", category);
-    const bytes = Number(resource.sizeBytes);
-    const sizeCell = makeElement("span", "nexus-library-list-size", Number.isFinite(bytes) && bytes > 0
-      ? bytes >= 1024 * 1024 ? (bytes / (1024 * 1024)).toFixed(1) + " MB"
-        : bytes >= 1024 ? Math.round(bytes / 1024) + " KB" : bytes + " B"
-      : "—");
-    const modified = Date.parse(resource.modifiedAt ?? "");
-    const modifiedCell = makeElement("span", "nexus-library-list-modified", Number.isFinite(modified)
-      ? new Date(modified).toLocaleDateString("pt-BR")
-      : "—");
-    const tagsCell = makeElement("span", "nexus-library-list-tags", (resource.tags ?? []).join(", ") || "—");
-    select.append(nameCell, categoryCell, sizeCell, modifiedCell, tagsCell);
+    const typeCell = makeElement("span", "nexus-library-list-type", typeLabel);
+    select.append(nameCell, categoryCell, typeCell);
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
     const isFavorite = preferences.favorites.includes(key);
     const favorite = makeElement("button", "nexus-library-favorite");
