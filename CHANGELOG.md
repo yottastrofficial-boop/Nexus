@@ -1,3 +1,12 @@
+## 1.0.0.138 — Biblioteca: contrato visual unificado e prévias reais
+
+- Remove as regras concorrentes antigas da barra de pesquisa em CSS legado e substitui por um único contrato responsivo com ícone, campo e botão de limpar.
+- Reutiliza um renderizador de prévia temática em grade e Inspector, usando tokens semânticos por chave canônica; aplica paleta, tipografia, geometria e controles do tema.
+- Reordena a aba Padrão para mostrar identidade, metadados resumidos e a prévia; descrição, etiquetas, resumo/tipo/dimensões e fatos ficam em Detalhes.
+- Move a paleta para um dropdown abaixo da amostra do tema e garante que a amostra inclua uma barra de recurso visível.
+- Adiciona prévia de barra/medidor de recurso aos cartões da Biblioteca e documenta o padrão compartilhado para futuros recursos.
+- CI e pacote serão confirmados pelo workflow de publicação; teste visual real no Foundry VTT 14 build 360 continua sendo um passo manual.
+
 ## 1.0.0.137 — Correções visuais e prévias da Biblioteca
 - Reescreve a prévia de fontes sem o bloco de specimen legado; a amostra mostra Aa, Lorem Epsum e 12345 !@#$% com a família real aplicada.
 - Expande a prévia de tema com navegação, painel, destaque, barras e ações; move a paleta para um dropdown.
