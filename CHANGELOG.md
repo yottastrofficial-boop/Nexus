@@ -1,3 +1,16 @@
+## 1.0.0.133 — Biblioteca: Grid adaptativo e prévias proporcionais
+
+- Isola o Grid da Biblioteca Universal das regras legadas de `nexus-library-assets`.
+- Reconstrói a grade com colunas adaptativas que ocupam a largura disponível, sem impor largura máxima fixa aos cartões.
+- Faz Pequeno/Médio/Grande controlar a dimensão de exibição das prévias (32/64/128 CSS px), sem exigir que os arquivos originais tenham essas dimensões.
+- Redimensiona imagens preservando proporção e sem recorte; quando a miniatura não existe ou falha, apresenta um ícone representativo do recurso.
+- Separa a estrutura dos cartões Grid e das linhas Lista; o Grid mostra miniatura e nome, sem rótulos de categoria/tipo.
+- Trata pastas como elementos de navegação, sem tipo/categoria e sem participação nas facetas.
+- Mostra “Aa” na prévia de fontes e reduz o espécime do Inspector para “Aa” + “Lorem ipsum dolor sit amet.”.
+- Reposiciona o favorito no canto superior direito dos cartões.
+- Atualiza os contratos de regressão para o novo comportamento.
+- CI, validação automatizada e geração do pacote aprovadas; validação visual/funcional no Foundry VTT 14 build 360 ainda pendente.
+
 ## 1.0.0.132 — Biblioteca: lista, previews e organização de mídia
 
 - Corrige a tabela da Biblioteca para usar exatamente as colunas Nome, Categoria e Tipo; pastas mantêm o nome na primeira coluna e são identificadas como pasta na coluna Tipo.
