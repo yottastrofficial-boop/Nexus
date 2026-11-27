@@ -1,11 +1,11 @@
 import {
   DESIGN_PROFILE_PALETTE_KEYS,
   DESIGN_PROFILE_SCHEMA_VERSION,
-  DESIGN_THEME_CHOICES,
   createDefaultDesignProfile,
   normalizeDesignProfile,
   getDesignProfileDiagnostics
 } from "../core/design-profile.js";
+import { DESIGN_THEME_CHOICES } from "../core/design-constants.js";
 
 const PALETTE_LABELS = Object.freeze({
   panel: "Painel", surface: "Superfície", input: "Campo", border: "Borda",
