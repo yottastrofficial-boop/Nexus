@@ -2427,3 +2427,307 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
 html.nexus-design-system .nexus-library-application .nexus-library-folder-meta {
   display: none;
 }
+
+
+/* 1.0.0.131 — compact list filters and expressive, data-driven previews. */
+html.nexus-design-system .nexus-library-application .nexus-library-list-header {
+  grid-template-columns: var(--nexus-library-list-columns, minmax(180px, 2fr) minmax(100px, 1fr) minmax(110px, 1fr)) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item {
+  grid-template-columns: var(--nexus-library-list-columns, minmax(180px, 2fr) minmax(100px, 1fr) minmax(110px, 1fr)) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-header > [data-library-list-column],
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter {
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button:hover,
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--nexus-accent, #79b8d8) 16%, transparent);
+  color: var(--nexus-panel-text, #edf0f6);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter > button > i {
+  font-size: 9px;
+  opacity: .72;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 5px);
+  left: 0;
+  display: grid;
+  gap: 6px;
+  width: min(240px, 65vw);
+  padding: 9px;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: 7px;
+  background: var(--nexus-panel-surface, #202d3d);
+  box-shadow: 0 8px 22px #0006;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter-popover[hidden] {
+  display: none !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter-popover > label {
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-list-filter-popover > input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: 5px;
+  background: var(--nexus-panel-input, #101a26);
+  color: var(--nexus-panel-text, #edf0f6);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-category,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-type {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  align-self: center;
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 11px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-size,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-modified,
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-list-tags {
+  display: none !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-sample {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  text-align: center;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-sample > strong {
+  font-size: clamp(34px, 5vw, 62px) !important;
+  line-height: 1;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-sample > small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(10px, 1.1vw, 14px);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-sample-styles {
+  opacity: .7;
+  font-size: 9px !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-font-sample > small {
+  display: none;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-specimen {
+  gap: 9px;
+  padding: 16px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-specimen-heading {
+  font-size: clamp(48px, 7vw, 72px) !important;
+  line-height: 1.05;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-specimen > p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-specimen-bold {
+  font-weight: 800;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-specimen-italic {
+  font-style: italic;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature {
+  display: grid !important;
+  grid-template-rows: auto auto auto minmax(5px, auto) auto auto auto;
+  align-content: stretch;
+  justify-content: stretch;
+  gap: 5px;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
+  padding: 9px !important;
+  overflow: hidden;
+  border: 1px solid var(--nexus-theme-preview-border, #50647a);
+  border-radius: 9px;
+  background: var(--nexus-theme-preview-panel, #202e3e);
+  color: var(--nexus-theme-preview-text, #edf0f6);
+  text-align: left;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-heading > strong {
+  overflow: hidden;
+  font-size: clamp(10px, 1.2vw, 14px);
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-heading > small {
+  color: color-mix(in srgb, var(--nexus-theme-preview-text) 70%, transparent);
+  font-size: clamp(8px, .9vw, 10px);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-copy {
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(8px, .9vw, 10px);
+  line-height: 1.25;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-highlight {
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 7px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--nexus-theme-preview-accent, #78b7e8);
+  color: var(--nexus-theme-preview-text, #edf0f6);
+  font-size: 8px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-progress {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border: 1px solid var(--nexus-theme-preview-border, #50647a);
+  border-radius: 5px;
+  background: var(--nexus-theme-preview-field, #172535);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-progress > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--nexus-theme-preview-accent, #78b7e8);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-controls {
+  display: flex;
+  gap: 4px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-controls > b {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 4px 5px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--nexus-theme-preview-button, var(--nexus-theme-preview-accent, #78b7e8));
+  color: var(--nexus-theme-preview-text, #edf0f6);
+  font-size: 8px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-controls > .is-secondary {
+  border: 1px solid var(--nexus-theme-preview-border, #50647a);
+  background: transparent;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-field {
+  display: block;
+  min-width: 0;
+  padding: 4px 6px;
+  overflow: hidden;
+  border: 1px solid var(--nexus-theme-preview-border, #50647a);
+  border-radius: 4px;
+  background: var(--nexus-theme-preview-field, #172535);
+  color: var(--nexus-theme-preview-text, #edf0f6);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-swatches {
+  display: flex;
+  gap: 3px;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-swatches > i {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 9px;
+  border: 1px solid color-mix(in srgb, var(--nexus-theme-preview-text) 35%, transparent);
+  border-radius: 2px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-list-mark {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--nexus-theme-preview-border, #50647a);
+  border-radius: 5px;
+  background: var(--nexus-theme-preview-panel, #202e3e);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-list-mark > i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--nexus-theme-preview-accent, #78b7e8);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--nexus-theme-preview-text) 25%, transparent);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-copy {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-subtitle {
+  color: var(--nexus-inspector-muted-text, var(--nexus-panel-muted, #a5b6c9));
+  font-size: 11px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-highlight {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--nexus-inspector-highlight, var(--nexus-accent, #78b7e8));
+  color: var(--nexus-inspector-text, #edf0f6);
+  font-size: 10px;
+  font-weight: 700;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-progress {
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid var(--nexus-inspector-border, var(--nexus-panel-border, #40546b));
+  border-radius: 6px;
+  background: var(--nexus-inspector-field, var(--nexus-panel-input, #101a26));
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--nexus-inspector-accent, var(--nexus-accent, #78b7e8));
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-progress.is-secondary > span {
+  background: var(--nexus-inspector-highlight, var(--nexus-accent, #78b7e8));
+}
+html.nexus-design-system .nexus-library-application .nexus-library-design-preview-controls > button.is-secondary {
+  border: 1px solid var(--nexus-inspector-border, var(--nexus-panel-border, #40546b));
+  background: transparent;
+  color: inherit;
+}
