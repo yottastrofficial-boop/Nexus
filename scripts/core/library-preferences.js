@@ -151,7 +151,7 @@ const LIBRARY_BASE_TREE = [
   ["compendios", "Compêndios", [["compendios-nexus", "Compêndios NEXUS", []], ["compendios-mundo", "Compêndios do mundo", []], ["compendios-referencias", "Referências externas", []]]],
   ["macros", "Macros", []],
   ["assets-globais", "Assets globais", [["assets-imagens", "Imagens", []], ["assets-icones", "Ícones", []], ["assets-texturas", "Texturas", []], ["assets-fontes", "Fontes", []], ["assets-outros", "Outros arquivos", []]]],
-  ["nexus", "NEXUS", [["nexus-layouts", "Layouts", []], ["nexus-componentes", "Componentes", []], ["nexus-temas", "Temas", []], ["nexus-templates", "Templates", []], ["nexus-regras", "Regras", []], ["nexus-comportamentos", "Comportamentos", []], ["nexus-extensoes", "Extensões", []]]]
+  ["nexus", "NEXUS", [["nexus-layouts", "Layouts", []], ["nexus-componentes", "Componentes", []], ["nexus-temas", "Coleções visuais", []], ["nexus-templates", "Templates", []], ["nexus-regras", "Regras", []], ["nexus-comportamentos", "Comportamentos", []], ["nexus-extensoes", "Extensões", []]]]
 ];
 
 /** Adds the initial domain-based tree once, without overwriting or reclassifying user folders. */
@@ -172,6 +172,7 @@ export function ensureLibraryDefaultFolders(raw) {
         folder = created.folder;
       }
       folder.isDefault = true;
+      if (key === "nexus-temas" && folder.name === "Temas") folder.name = "Coleções visuais";
       ensureNodes(children, folder.id);
     }
   };

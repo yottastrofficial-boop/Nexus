@@ -1,13 +1,14 @@
-## 1.0.0.128 — Explorer da Biblioteca
+## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
-- Remover superfícies duplicadas e highlights redundantes; controles de pasta, breadcrumb, navegação e pesquisa devem ter somente um alvo visual.
-- Árvore com cabeçalho "Todas as pastas", sem pseudo-pasta que representa todos os recursos; pastas pai agregam itens das subpastas.
-- Mapear pastas padrão para documentos Foundry, fontes nativas, temas e categorias de assets NEXUS.
-- Visualização em lista compacta com ícones adaptativos e colunas Nome, Categoria, Tamanho, Modificado e Etiquetas.
-- Classificação por nome, categoria, origem, tamanho, modificação e etiqueta; filtro de etiquetas com sugestões.
-- Seleção múltipla e criação de coleção no menu de contexto; ocultar Coleções quando não houver nenhuma.
-- Redimensionamento real da navegação e do Inspector com hit-area discreta, mouse/touch e teclado.
-- CI/testes e pacote de validação automatizados; validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- Pesquisa com um único contorno externo; remover borda interna do input e alinhar ícone/limpar dentro da mesma superfície.
+- Breadcrumb alinhado, com ícone de biblioteca/pasta/visão/coleção e texto truncado sem deslocamento.
+- Corrigir estrutura da linha de lista: miniatura + nome dentro da coluna Nome; categoria, tamanho, modificação e etiquetas nas colunas alinhadas ao cabeçalho.
+- Redimensionar colunas Nome, Categoria, Tamanho e Modificado por arraste e teclado, preservando as larguras durante re-render.
+- Corrigir aceitação de todos os modos A–Z/Z–A para nome, categoria, origem, tamanho, modificação e etiqueta.
+- Pesquisar categorias e etiquetas disponíveis com listas de sugestões.
+- Mostrar specimen Lorem ipsum da fonte e mockup de painel/botão/campo para temas.
+- Classificar os temas na Biblioteca como Coleções visuais e migrar apenas o nome da pasta padrão correspondente, sem modificar coleções ou perfis do usuário.
+- CI, testes, pacote, release e manifesto; validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.126 — Biblioteca em janela com abas
 

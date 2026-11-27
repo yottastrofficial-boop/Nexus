@@ -1,3 +1,18 @@
+## 1.0.0.129 — Biblioteca: pesquisa única, lista alinhada e prévias reais
+
+- Corrige a barra de pesquisa para ter uma única borda externa; input, ícone e botão de limpar permanecem sem molduras internas ou focus ring duplicado.
+- Reposiciona o breadcrumb com alinhamento vertical, ícones de contexto (Biblioteca, Favoritos, Recentes, Coleção, Atalho e Pasta) e rótulo truncado corretamente.
+- Reconstrói as linhas de lista com uma célula Nome composta por miniatura + texto, alinhada com os cabeçalhos; ícones não invadem nem deslocam o nome.
+- Mostra categoria, tamanho, modificação e etiquetas nas colunas correspondentes; metadados ausentes permanecem como —.
+- Implementa redimensionamento individual das colunas Nome, Categoria, Tamanho e Modificado por arraste e teclado, com largura mínima e persistência durante re-renderização da janela.
+- Corrige o contrato de classificação da barra: A–Z/Z–A, categoria, origem, tamanho, modificação e etiqueta agora aceitam todos os modos ascendentes e descendentes, sem voltar silenciosamente para Nome A–Z.
+- Categoria e etiqueta têm listas de sugestões pesquisáveis por datalist, usando categorias e etiquetas existentes no catálogo.
+- Fontes nativas exibem uma amostra tipográfica (Aa, Lorem ipsum e caracteres acentuados) com a família resolvida.
+- Temas/perfis visuais exibem miniatura de painel, botão e campo; o Inspector mostra a prévia do perfil com sua tipografia, paleta e geometria.
+- Categoriza os temas como **Coleções visuais** na Biblioteca e migra apenas o nome da pasta padrão “Temas” para “Coleções visuais”, sem alterar pastas personalizadas nem os dados dos perfis.
+- Mantém as fontes em Assets globais → Fontes e os temas em NEXUS → Coleções visuais, preservando referências e ações de aplicação.
+- Adiciona contratos de regressão para pesquisa, breadcrumb, lista, colunas redimensionáveis, opções de ordenação e prévias de fonte/tema.
+
 ## 1.0.0.128 — Biblioteca: Explorer limpo, pastas reais e lista compacta
 
 - Remove o item pseudo-pasta "Todas as pastas"; o texto passa a ser o cabeçalho da árvore e a Biblioteca abre os recursos no painel principal.

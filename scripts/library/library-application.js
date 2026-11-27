@@ -214,6 +214,56 @@ export function createLibraryApplicationClass({
       const viewControls = [...root.querySelectorAll("[data-library-collection-view-mode]")];
       const cardSize = root.querySelector("[data-library-card-size]");
       const sortControl = root.querySelector("[data-library-sort]");
+      const listHeader = root.querySelector("[data-library-list-header]");
+      const listColumnHandles = [...root.querySelectorAll("[data-library-column-resize]")];
+      const applyListColumnWidths = () => {
+        const widths = this._libraryListColumnWidths;
+        if (!widths || widths.length < 4) return;
+        const template = widths.slice(0, 4).map(width => Math.round(width) + "px").join(" ") + " minmax(100px, 1fr)";
+        listHeader?.style.setProperty("--nexus-library-list-columns", template);
+        container.style.setProperty("--nexus-library-list-columns", template);
+      };
+      if (this._libraryListColumnWidths) applyListColumnWidths();
+      listColumnHandles.forEach((handle, index) => {
+        handle.addEventListener("pointerdown", event => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          if (!this._libraryListColumnWidths) {
+            this._libraryListColumnWidths = [...(listHeader?.querySelectorAll("[data-library-list-column]") ?? [])]
+              .slice(0, 4).map((column, columnIndex) => Math.max([180, 100, 76, 100][columnIndex], column.getBoundingClientRect().width));
+          }
+          const widths = this._libraryListColumnWidths;
+          const startX = event.clientX;
+          const startWidth = widths[index];
+          const minWidth = [180, 100, 64, 84][index];
+          const move = moveEvent => {
+            widths[index] = Math.max(minWidth, startWidth + moveEvent.clientX - startX);
+            applyListColumnWidths();
+          };
+          const finish = () => {
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+            handle.removeEventListener("lostpointercapture", finish);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish);
+          handle.addEventListener("pointercancel", finish);
+          handle.addEventListener("lostpointercapture", finish);
+          try { handle.setPointerCapture(event.pointerId); } catch {}
+        });
+        handle.addEventListener("keydown", event => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          if (!this._libraryListColumnWidths) {
+            this._libraryListColumnWidths = [...(listHeader?.querySelectorAll("[data-library-list-column]") ?? [])]
+              .slice(0, 4).map((column, columnIndex) => Math.max([180, 100, 76, 100][columnIndex], column.getBoundingClientRect().width));
+          }
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          this._libraryListColumnWidths[index] = Math.max([180, 100, 64, 84][index], this._libraryListColumnWidths[index] + direction * (event.shiftKey ? 24 : 8));
+          applyListColumnWidths();
+        });
+      });
       if (search) search.value = this._state.query;
       const syncSearchClear = () => {
         const hasQuery = Boolean(search?.value?.trim());
@@ -410,7 +460,18 @@ export function createLibraryApplicationClass({
           const button = document.createElement("button");
           button.type = "button";
           button.className = "nexus-library-breadcrumb";
-          button.textContent = label;
+          const icon = document.createElement("i");
+          const smartViewIcon = location.smartView === "favorites" ? "fa-star"
+            : location.smartView === "recent" ? "fa-clock"
+              : location.smartView === "collection" ? "fa-layer-group"
+                : location.smartView === "shortcut" ? "fa-link"
+                  : location.folder ? "fa-folder" : "fa-house";
+          icon.className = "fa-solid " + smartViewIcon;
+          icon.setAttribute("aria-hidden", "true");
+          const textNode = document.createElement("span");
+          textNode.textContent = label;
+          button.append(icon, textNode);
+          button.dataset.libraryBreadcrumbType = location.folder ? "folder" : location.smartView || "library";
           button.title = label;
           button.disabled = isLast;
           button.addEventListener("click", async () => {
@@ -847,7 +908,8 @@ export function createLibraryApplicationClass({
         void render();
       });
       sortControl?.addEventListener("change", () => {
-        this._state.sortMode = ["name-asc", "name-desc", "type-asc", "source-asc"].includes(sortControl.value) ? sortControl.value : "name-asc";
+        const allowedSortModes = ["name-asc", "name-desc", "type-asc", "type-desc", "source-asc", "source-desc", "size-desc", "size-asc", "modified-desc", "modified-asc", "tag-asc", "tag-desc"];
+        this._state.sortMode = allowedSortModes.includes(sortControl.value) ? sortControl.value : "name-asc";
         void render();
       });
       viewControls.forEach(button => button.addEventListener("click", () => {
