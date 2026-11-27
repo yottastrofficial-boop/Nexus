@@ -3394,3 +3394,63 @@ html.nexus-design-system .nexus-library-application .nexus-library-theme-live-bu
   font-size: 9px;
   font-weight: 700;
 }
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 4px 0;
+  text-align: center;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 128px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  color: var(--nexus-panel-muted, #a5b6c9);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-visual > i {
+  font-size: clamp(30px, 5vw, 56px);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-visual.is-card-deck {
+  width: min(100%, 110px);
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: 8px;
+  background: var(--nexus-panel-surface, #202d3d);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-card {
+  position: absolute;
+  inset: 12% 15%;
+  border: 1px solid color-mix(in srgb, var(--nexus-panel-text, #edf0f6) 22%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--nexus-panel-surface, #202d3d) 90%, var(--nexus-accent, #79b8d8));
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-card:nth-child(2) {
+  transform: translate(-8px, -4px) rotate(-8deg);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-card:nth-child(3) {
+  transform: translate(8px, 3px) rotate(7deg);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-visual.is-card-deck > i {
+  z-index: 1;
+  font-size: 24px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-name {
+  max-width: 100%;
+  color: var(--nexus-panel-text, #edf0f6);
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-generic-resource-preview-type {
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 10px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
