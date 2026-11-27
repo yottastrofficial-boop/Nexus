@@ -651,7 +651,17 @@ export function createLibraryCatalogExplorer({
     preview.append(makeElement("i", "fa-solid fa-folder", ""));
     const name = makeElement("strong", "", folder.name);
     const meta = makeElement("small", "nexus-library-folder-meta", children ? countLabel(children, "subpasta") : "Pasta");
-    button.append(preview, name, meta);
+    if (currentViewMode === "list") {
+      const nameCell = makeElement("span", "nexus-library-list-name-cell");
+      nameCell.append(preview, name);
+      button.append(
+        nameCell,
+        makeElement("span", "nexus-library-list-category", ""),
+        makeElement("span", "nexus-library-list-type", "Pasta")
+      );
+    } else {
+      button.append(preview, name, meta);
+    }
     card.append(button);
     return card;
   };
@@ -672,67 +682,11 @@ export function createLibraryCatalogExplorer({
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
     const builtin = resource.reference?.builtin;
-    if (builtin === "font") {
-      const family = resource.fontFamily || "system-ui, sans-serif";
-      preview.dataset.previewKind = "font";
-      preview.style.setProperty("font-family", family, "important");
-      const sample = makeElement("span", "nexus-library-font-sample");
-      sample.style.setProperty("font-family", family, "important");
-      const headline = makeElement("strong", "", "Aa");
-      headline.style.setProperty("font-family", family, "important");
-      const line = makeElement("small", "", "Lorem ipsum");
-      line.style.setProperty("font-family", family, "important");
-      const styles = makeElement("small", "nexus-library-font-sample-styles");
-      styles.style.setProperty("font-family", family, "important");
-      styles.append(makeElement("b", "", "Bold"), document.createTextNode(" · "), makeElement("i", "", "Italic"));
-      sample.append(headline, line, styles);
-      preview.append(sample);
-    } else if (resource.kind === "theme") {
-      preview.dataset.previewKind = "theme";
-      const palette = Array.isArray(resource.previewColors) ? resource.previewColors : [];
-      const colors = Object.fromEntries(palette.map(color => [String(color.label).toLowerCase(), color.value]));
-      const color = (...keys) => keys.map(key => colors[key]).find(value => typeof value === "string") || "";
-      const panel = color("panel", "painel", "surface", "superfície", "card", "cartão", "canvas") || "#202e3e";
-      const accent = color("accent", "acento", "highlight", "destaque") || "#78b7e8";
-      const textColor = color("text", "texto") || "#edf0f6";
-      const border = color("border", "borda") || textColor;
-      const buttonColor = color("button", "botão") || accent;
-      const field = color("field", "campo") || panel;
-      preview.style.setProperty("--nexus-theme-preview-panel", panel);
-      preview.style.setProperty("--nexus-theme-preview-accent", accent);
-      preview.style.setProperty("--nexus-theme-preview-text", textColor);
-      preview.style.setProperty("--nexus-theme-preview-border", border);
-      preview.style.setProperty("--nexus-theme-preview-button", buttonColor);
-      preview.style.setProperty("--nexus-theme-preview-field", field);
-      if (currentViewMode === "list") {
-        const mark = makeElement("span", "nexus-library-theme-list-mark");
-        const dot = makeElement("i", "");
-        mark.append(dot);
-        preview.append(mark);
-      } else {
-        const mock = makeElement("span", "nexus-library-theme-miniature");
-        const heading = makeElement("span", "nexus-library-theme-heading");
-        heading.append(makeElement("strong", "", "Título principal"), makeElement("small", "", "Subtítulo"));
-        const sample = makeElement("p", "nexus-library-theme-copy", "Texto normal com ");
-        sample.append(makeElement("strong", "", "bold"), document.createTextNode(" e "), makeElement("em", "", "italic"));
-        const highlight = makeElement("span", "nexus-library-theme-highlight", "Destaque");
-        const progress = makeElement("span", "nexus-library-theme-progress");
-        const fill = makeElement("i", "");
-        fill.style.width = "68%";
-        progress.append(fill);
-        const controls = makeElement("span", "nexus-library-theme-controls");
-        controls.append(makeElement("b", "is-primary", "Botão"), makeElement("b", "is-secondary", "Secundário"));
-        const input = makeElement("span", "nexus-library-theme-field", "Campo de texto");
-        const swatches = makeElement("span", "nexus-library-theme-swatches");
-        for (const entry of palette.slice(0, 6)) {
-          const swatch = makeElement("i", "");
-          swatch.style.backgroundColor = entry.value;
-          swatch.title = entry.label + ": " + entry.value;
-          swatches.append(swatch);
-        }
-        mock.append(heading, sample, highlight, progress, controls, input, swatches);
-        preview.append(mock);
-      }
+    if (builtin === "font" || resource.kind === "theme") {
+      preview.dataset.previewKind = builtin === "font" ? "font" : "theme";
+      const icon = makeElement("i", builtin === "font" ? "fa-solid fa-font" : "fa-solid fa-palette");
+      icon.setAttribute("aria-hidden", "true");
+      preview.append(icon);
     } else if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
@@ -1009,7 +963,7 @@ export function createLibraryCatalogExplorer({
             }
           });
           editor.append(nameLabel, descriptionLabel, tagsLabel, thumbnailLabel, save);
-          detail.replaceChildren(heading, meta, description, themePreview, ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, editor, actions);
+          detail.replaceChildren(heading, meta, themePreview, ...(resourcePreview ? [resourcePreview] : []), description, facts, folderLabel, collectionSection, updateSection, editor, actions);
           return;
         }
 
@@ -1083,7 +1037,7 @@ export function createLibraryCatalogExplorer({
     });
     advanced.append(raw);
     const designProfilePreview = renderDesignProfilePreview(resource, resolved);
-    detail.replaceChildren(heading, meta, description, themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), facts, folderLabel, collectionSection, updateSection, actions, advanced);
+    detail.replaceChildren(heading, meta, themePreview, ...(designProfilePreview ? [designProfilePreview] : []), ...(resourcePreview ? [resourcePreview] : []), description, facts, folderLabel, collectionSection, updateSection, actions, advanced);
     if (typeof renderSpecializedEditor === "function") {
       try {
         const specializedEditor = renderSpecializedEditor(resource, resolved);
@@ -1273,7 +1227,9 @@ export function createLibraryCatalogExplorer({
       ? preferences.folders
         .filter(folder => (folder.parentId || "") === currentFolder)
         .filter(folder => !currentQuery || folder.name.toLocaleLowerCase("pt-BR").includes(currentQuery.toLocaleLowerCase("pt-BR")))
-        .sort((left, right) => compareText(left.name, right.name))
+        .sort((left, right) => currentSortMode === "name-desc"
+          ? compareText(right.name, left.name)
+          : compareText(left.name, right.name))
       : [];
 
     container.replaceChildren();

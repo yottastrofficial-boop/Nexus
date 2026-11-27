@@ -1,3 +1,14 @@
+## 1.0.0.132 — Biblioteca: lista, previews e organização de mídia
+
+- Corrige a tabela da Biblioteca para usar exatamente as colunas Nome, Categoria e Tipo; pastas mantêm o nome na primeira coluna e são identificadas como pasta na coluna Tipo.
+- Nome passa a alternar a ordenação A–Z/Z–A ao clicar no cabeçalho; a ordenação de pastas acompanha a direção selecionada.
+- Fontes e temas usam somente ícone e nome no grid, mantendo prévias detalhadas no Inspector.
+- Descrição do recurso passa a aparecer abaixo da prévia no Inspector.
+- Ícone da Biblioteca fica no cabeçalho nativo da janela; breadcrumb mantém apenas o caminho e os separadores.
+- Documenta a movimentação lógica de recursos entre pastas e a limitação da API pública FilePicker V14 para movimentação física.
+- Define o armazenamento canônico de configurações pequenas como registros JSON no libraryStore, evitando arquivos minúsculos separados.
+- Mantém a correção de opções mutáveis da ApplicationV2 no Estúdio de Aparência; não reintroduz objetos congelados.
+
 ## 1.0.0.131 — Prévias de temas e fontes, filtros de lista
 
 - Expande a prévia de temas em grade com título, subtítulo, texto normal, bold/italic, highlight, barras de progresso, botões primário/secundário, campo e paleta de cores derivada do próprio tema.

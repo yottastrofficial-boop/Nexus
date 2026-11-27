@@ -1,11 +1,11 @@
-## Estado de distribuição — 1.0.0.131
+## Estado de distribuição — 1.0.0.132
 
-A 1.0.0.131 prepara a Biblioteca com prévias de tema compostas por componentes semânticos e cores do próprio perfil, espécimes tipográficos com variações normal/bold/italic, catálogo ampliado de fontes locais, lista Nome/Categoria/Tipo e filtros pesquisáveis nos cabeçalhos. Etiquetas permanecem nos detalhes e na busca global; não há filtro dedicado por etiqueta. O manifesto estável permanece em 1.0.0.130 até o workflow validar, publicar e confirmar o ZIP 1.0.0.131.
+A 1.0.0.132 atualiza a Biblioteca com tabela alinhada de três colunas, ordenação pelo cabeçalho Nome, cards compactos de fontes/temas e Inspector com descrição abaixo da prévia. Também documenta a diferença entre mover referências em pastas lógicas e mover fisicamente arquivos no servidor, além do uso do libraryStore para configurações pequenas.
 
-- `system.json` em preparação: 1.0.0.131; download aponta para `v1.0.0.131/nexus.zip`.
-- `manifest.json` permanece em 1.0.0.130 durante a validação; o workflow sincroniza após release e asset verificado.
+- `system.json` em preparação: 1.0.0.132; download aponta para `v1.0.0.132/nexus.zip`.
+- `manifest.json` permanece em 1.0.0.131 durante a validação; o workflow sincroniza após release e asset verificado.
 - CI e pacote devem validar sintaxe, contratos, suíte completa e integridade do ZIP.
-- Validação visual/funcional pendente no Foundry VTT 14 build 360: prévias de tema em grade/lista, fontes cursivas/display/monospace, filtros Categoria/Tipo, busca por etiqueta, redimensionamento das três colunas e navegação por caminho com `/`.
+- Validação visual/funcional pendente no Foundry VTT 14 build 360: colunas Nome/Categoria/Tipo, alternância A–Z/Z–A, cards compactos, preview do Inspector e movimentação lógica de mídia.
 - A publicação do pacote não promove automaticamente o checkpoint funcional; a confirmação manual no cliente real continua necessária.
 
 ## Estado de distribuição — 1.0.0.129

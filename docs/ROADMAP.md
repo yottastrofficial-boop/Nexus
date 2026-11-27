@@ -1,13 +1,13 @@
-## 1.0.0.131 — Prévias refinadas e lista compacta da Biblioteca
+## 1.0.0.132 — Lista alinhada, previews compactos e organização de mídia
 
-- Temas em grade: apresentar título, subtítulo, texto normal, bold/italic, highlight, barras, botões, campo e paleta real do tema.
-- Temas em lista: marcador compacto com fundo, acento e borda do tema.
-- Fontes: espécime Aa + Lorem ipsum com variações normal, bold e italic; catálogo com pilhas locais Roboto-like, display condensada, cursiva, serifada e Monospace.
-- Lista: manter apenas Nome, Categoria e Tipo, com colunas redimensionáveis; remover Tamanho, Modificado e Etiquetas.
-- Categoria e Tipo: filtros pesquisáveis abertos diretamente nos cabeçalhos; etiquetas não são filtro, ficam nos detalhes e continuam pesquisáveis pela busca global.
-- Pastas aparecem primeiro em A–Z e recursos depois em A–Z, sem seletor redundante.
-- Breadcrumb usa / como separador.
-- CI, pacote e release automatizados; validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- Corrigir o grid da lista para usar exatamente Nome, Categoria e Tipo; pastas aparecem com o nome na primeira coluna e tipo "Pasta".
+- Cabeçalho Nome alterna A–Z/Z–A por clique; pastas acompanham a direção da ordenação.
+- Fontes e temas exibem somente ícone e nome no grid; as prévias detalhadas continuam no Inspector.
+- Descrição aparece abaixo da prévia do recurso no Inspector.
+- Ícone da Biblioteca fica no cabeçalho nativo; breadcrumb mostra apenas o caminho com /.
+- Movimentação entre pastas da Biblioteca altera a organização lógica, sem mover o arquivo original no storage.
+- Configurações pequenas ficam em registros JSON do libraryStore, sem criar um arquivo físico por ajuste.
+- Compatibilidade com Foundry VTT 14 build 360; validação visual/funcional no cliente real permanece pendente.
 
 ## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
