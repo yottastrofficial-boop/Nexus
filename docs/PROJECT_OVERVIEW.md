@@ -1,6 +1,6 @@
 ## Estado do código — 1.0.0.133
 
-A 1.0.0.133 atualiza a Biblioteca Universal com Grid adaptativo, prévias redimensionadas proporcionalmente para 32/64/128 CSS px, fallback por ícone, cartões Grid separados das linhas Lista, pastas fora das facetas, espécime tipográfico compacto e favoritos reposicionados. Os workflows de regressão, validação e empacotamento foram aprovados no PR #117. O pacote candidato é 1.0.0.133; o manifesto estável permanece em 1.0.0.132 até a release e o ZIP serem confirmados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+A 1.0.0.133 atualiza a Biblioteca Universal com Grid adaptativo, prévias redimensionadas proporcionalmente para 32/64/128 CSS px, fallback por ícone, cartões Grid separados das linhas Lista, pastas fora das facetas, espécime tipográfico compacto e favoritos reposicionados. Os workflows de regressão, validação e empacotamento foram aprovados no PR #117; a release, o ZIP e o manifesto também foram confirmados. A release 1.0.0.133, o ZIP e o manifesto foram publicados e sincronizados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## Estado do código — 1.0.0.129
 
