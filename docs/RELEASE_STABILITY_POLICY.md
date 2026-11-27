@@ -1,9 +1,9 @@
-## Estado de distribuição — 1.0.0.138 (publicada)
+## Estado de distribuição — 1.0.0.139 (publicada)
 
-Uma release estável só é publicada pelo workflow oficial após CI, construção do pacote e confirmação do asset. A versão estável disponível no manifesto é 1.0.0.138; a linha principal do repositório contém o trabalho de revisão 1.0.0.139, ainda sujeito a validação e publicação. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+Uma release estável só é publicada pelo workflow oficial após CI, construção do pacote e confirmação do asset. A versão estável disponível no manifesto é 1.0.0.139. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
-- `system.json` declara 1.0.0.139 e aponta para o pacote correspondente da linha principal.
-- `manifest.json` permanece em 1.0.0.138 até o workflow confirmar a nova release.
+- `system.json` e `manifest.json` declaram 1.0.0.139 e apontam para o pacote correspondente.
+- Asset `nexus.zip` confirmado na release v1.0.0.139 (499.335 bytes).
 - O pacote não será declarado checkpoint funcional completo antes do teste manual.
 
 ## Histórico de distribuição — 1.0.0.137 (publicada)
