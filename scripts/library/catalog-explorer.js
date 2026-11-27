@@ -440,14 +440,12 @@ function renderLibraryFontPreview(resource, resolved) {
   const family = String(model?.family ?? resolved?.family ?? resource.fontFamily ?? "system-ui, sans-serif").trim();
   const section = makeElement("section", "nexus-library-font-preview");
   section.dataset.previewKind = "font";
-  const specimen = makeElement("div", "nexus-library-font-preview-specimen");
-  specimen.style.setProperty("font-family", family, "important");
-  specimen.append(makeElement("strong", "", "Aa"));
-  specimen.append(makeElement("span", "", "NEXUS RPG"));
-  specimen.append(makeElement("p", "", "Lorem ipsum dolor sit amet"));
-  section.append(specimen);
-  const caption = makeElement("small", "nexus-library-font-preview-family", family);
-  section.append(caption);
+  section.style.setProperty("--nexus-library-preview-font", family);
+  const samples = makeElement("div", "nexus-library-font-preview-samples");
+  samples.append(makeElement("strong", "nexus-library-font-preview-aa", "Aa"));
+  samples.append(makeElement("p", "nexus-library-font-preview-lorem", "Lorem Epsum"));
+  samples.append(makeElement("span", "nexus-library-font-preview-glyphs", "12345 !@#$%"));
+  section.append(samples);
   return section;
 }
 
@@ -947,7 +945,10 @@ export function createLibraryCatalogExplorer({
         swatch.append(sample, makeElement("small", "", color.label));
         swatches.append(swatch);
       }
-      themePreview.append(swatches);
+      const paletteDetails = makeElement("details", "nexus-library-theme-palette-details");
+      const paletteSummary = makeElement("summary", "", "Paleta de cores");
+      paletteDetails.append(paletteSummary, swatches);
+      themePreview.append(paletteDetails);
       const palette = Object.fromEntries(themeColors.map(color => [color.label.toLowerCase(), color.value]));
       const colorFor = (keys, fallback) => themeColors.find(color => keys.some(key => color.label.toLowerCase().includes(key)))?.value ?? fallback;
       const sample = makeElement("div", "nexus-library-theme-live-preview");
@@ -955,14 +956,29 @@ export function createLibraryCatalogExplorer({
       sample.style.setProperty("--nexus-library-theme-text", colorFor(["texto"], "#edf0f6"));
       sample.style.setProperty("--nexus-library-theme-muted", colorFor(["secundário", "muted"], "#a5b6c9"));
       sample.style.setProperty("--nexus-library-theme-accent", colorFor(["acento", "accent", "destaque", "highlight", "botão", "button"], "#79b8d8"));
-      sample.append(makeElement("small", "", "EXEMPLO DE INTERFACE"));
-      sample.append(makeElement("strong", "", resource.name));
+      const sampleHeader = makeElement("header", "nexus-library-theme-live-header");
+      sampleHeader.append(makeElement("small", "", "NEXUS · PRÉVIA"), makeElement("strong", "", resource.name));
+      sample.append(sampleHeader);
+      const sampleNav = makeElement("nav", "nexus-library-theme-live-nav");
+      sampleNav.append(makeElement("span", "is-active", "Ficha"), makeElement("span", "", "Atributos"), makeElement("span", "", "Efeitos"));
+      sample.append(sampleNav);
+      const samplePanel = makeElement("section", "nexus-library-theme-live-panel");
+      samplePanel.append(makeElement("small", "", "PERSONAGEM"), makeElement("strong", "", "Exemplo de interface"));
+      samplePanel.append(makeElement("span", "nexus-library-theme-live-highlight", "Destaque selecionado"));
       const track = makeElement("span", "nexus-library-theme-live-track");
       const fill = makeElement("i", "");
       fill.style.width = "68%";
       track.append(fill);
-      sample.append(track);
-      sample.append(makeElement("span", "nexus-library-theme-live-button", "Ação"));
+      samplePanel.append(track);
+      const secondaryTrack = makeElement("span", "nexus-library-theme-live-track is-secondary");
+      const secondaryFill = makeElement("i", "");
+      secondaryFill.style.width = "42%";
+      secondaryTrack.append(secondaryFill);
+      samplePanel.append(secondaryTrack);
+      const sampleFooter = makeElement("footer", "nexus-library-theme-live-footer");
+      sampleFooter.append(makeElement("span", "nexus-library-theme-live-badge", "Ativo"), makeElement("span", "nexus-library-theme-live-button", "Ação"));
+      samplePanel.append(sampleFooter);
+      sample.append(samplePanel);
       themePreview.append(sample);
     }
     const facts = makeElement("dl", "nexus-library-resource-facts");
