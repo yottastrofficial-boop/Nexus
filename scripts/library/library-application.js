@@ -1091,6 +1091,44 @@ export function createLibraryApplicationClass({
           }]);
           return;
         }
+        const selectedCards = [...resourceContainer.querySelectorAll(".nexus-library-generic-item.is-selected")]
+          .map(button => button.closest("[data-library-resource-key]"))
+          .filter(Boolean);
+        if (selectedCards.length > 1) {
+          event.preventDefault();
+          const selectedKeys = [...new Set(selectedCards.map(item => item.dataset.libraryResourceKey).filter(Boolean))];
+          this._closeLibraryContextMenu?.();
+          this._closeLibraryContextMenu = showLibraryContextMenu(event, [{
+            label: "Criar coleção com " + selectedKeys.length + " recursos",
+            action: async () => {
+              const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+              if (typeof DialogV2?.input !== "function") return;
+              const result = await DialogV2.input({
+                window: { title: "Criar coleção dos recursos selecionados" },
+                content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+                ok: { label: "Criar coleção" },
+                rejectClose: false
+              });
+              const name = String(result?.name ?? "").trim();
+              if (!name) return;
+              try {
+                const created = createLibraryCollection(this._getPreferences(), {
+                  id: globalThis.foundry?.utils?.randomID?.(10),
+                  name
+                });
+                created.collection.resources = selectedKeys.slice(0, 500);
+                await this._savePreferences(created.preferences);
+                this._state.smartView = "collection";
+                this._state.collectionId = created.collection.id;
+                this._state.folder = "";
+                refreshCollections(); refreshFolders(); refreshShortcuts();
+                await render();
+                notify("info", "Coleção criada com " + created.collection.resources.length + " recursos.");
+              } catch (error) { notify("warn", error.message); }
+            }
+          }]);
+          return;
+        }
         const resourceKey = card.dataset.libraryResourceKey;
         let reference = {};
         try { reference = JSON.parse(card.dataset.libraryReference || "{}"); } catch {}
