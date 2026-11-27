@@ -1,4 +1,4 @@
-## Estado do código — 1.0.0.136 (candidata)
+## Estado do código — 1.0.0.137 (candidata)
 
 A candidata expõe a API pública de backup da Biblioteca: exportar, preparar e validar uma importação, apresentar a prévia e confirmar o commit. O manifesto estável continua na versão publicada até a confirmação do pacote pela pipeline. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
 
