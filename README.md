@@ -1,16 +1,12 @@
-## Biblioteca 1.0.0.134 — cartões compactos e Inspector organizado
+## Biblioteca 1.0.0.134 publicada
 
-A revisão 1.0.0.134 corrige o tamanho efetivo das miniaturas, elimina espaço vazio dos cartões, mostra paletas reais nos temas, separa Prévia e Detalhes no Inspector, muda a navegação de pastas para clique/duplo clique e corrige a abertura do Estúdio de Aparência. CI e publicação serão confirmados pelo workflow; a validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
-
-## Biblioteca 1.0.0.133 publicada
-
-A 1.0.0.133 atualiza o Grid adaptativo, o dimensionamento proporcional das prévias, os cartões de fontes, o tratamento de pastas e o posicionamento dos favoritos. CI, testes, pacote, release e manifesto foram confirmados; a validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.134 corrige o dimensionamento efetivo das miniaturas, remove espaço vazio dos cartões, exibe as paletas reais dos temas, separa Prévia e Detalhes no Inspector, altera a navegação das pastas para clique/duplo clique e corrige a abertura do Estúdio de Aparência. A suíte automatizada, o pacote, a release, o asset e o manifesto foram confirmados. A validação visual/funcional no Foundry VTT 14 build 360 ainda depende da instalação e do teste no cliente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.134 em preparação · Foundry VTT 14
+  Projeto em desenvolvimento · Versão estável 1.0.0.134 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -20,7 +16,7 @@ A 1.0.0.133 atualiza o Grid adaptativo, o dimensionamento proporcional das prév
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão do pacote:** 1.0.0.134. O manifesto estável avança somente após o workflow confirmar a release e o asset nexus.zip.nhada, ordenação pelo cabeçalho, previews compactos e organização de mídia). O manifesto estável permanece em 1.0.0.131 até a publicação do novo pacote.
+**Versão estável publicada:** 1.0.0.134. O manifesto original `manifest.json` e o pacote `nexus.zip` foram sincronizados após a confirmação da release.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
