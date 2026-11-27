@@ -692,6 +692,12 @@ export function createLibraryCatalogExplorer({
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
+      image.addEventListener("error", () => {
+        if (image.parentElement !== preview) return;
+        const fallback = makeElement("i", getLibraryResourceIcon(resource));
+        fallback.setAttribute("aria-hidden", "true");
+        preview.replaceChildren(fallback);
+      }, { once: true });
       preview.append(image);
     } else {
       const icon = makeElement("i", getLibraryResourceIcon(resource));
@@ -1164,6 +1170,7 @@ export function createLibraryCatalogExplorer({
     const optionList = (records, keyOf, labelOf, allLabel, defaults = []) => {
       const values = new Map([["all", allLabel], ...defaults]);
       for (const resource of records) {
+        if (resource.kind === "folder" || resource.type === "folder") continue;
         const key = String(keyOf(resource) ?? "").trim();
         if (key && !values.has(key)) values.set(key, String(labelOf(resource) ?? key));
       }
