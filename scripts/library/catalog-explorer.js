@@ -1123,7 +1123,10 @@ export function createLibraryCatalogExplorer({
     visible.sort((left, right) => {
       if (currentSortMode === "name-desc") return compareText(right.name ?? right.title ?? right.label, left.name ?? left.title ?? left.label);
       if (currentSortMode === "type-asc" || currentSortMode === "type-desc") {
-        const order = compareText(left.kind ?? left.type, right.kind ?? right.type);
+        const categoryLabel = resource => resource.kind === "theme" ? "Coleção visual"
+          : resource.reference?.builtin === "font" ? "Fonte"
+            : resource.documentType ?? resource.kind ?? resource.type;
+        const order = compareText(categoryLabel(left), categoryLabel(right));
         return (currentSortMode === "type-desc" ? -order : order) || compareText(left.name ?? left.title, right.name ?? right.title);
       }
       if (currentSortMode === "source-asc" || currentSortMode === "source-desc") {
