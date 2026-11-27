@@ -6,7 +6,7 @@ const studio = read("../scripts/apps/design-studio.js");
 const init = read("../scripts/nexus-v1.0.0.js");
 const dsCss = read("../styles/nexus-design-system.css");
 const sheetCss = read("../styles/nexus-v1.0.0.css");
-assert.match(sheet,/position: \{ width: 800, height: 836 \}/);
+assert.match(sheet,/position: \{ width: 1100, height: 920 \}/);
 assert.match(sheet,/normalizeSheetSelection\(ids, components\)/);
 assert.match(sheet,/resolveSheetFocusTarget\(/);
 assert.match(sheet,/componentPanel\?\.isConnected \? componentPanel/);
