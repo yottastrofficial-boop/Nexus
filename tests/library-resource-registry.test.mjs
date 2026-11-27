@@ -56,11 +56,17 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 13, "A listagem inclui coleções pessoais, catálogo de componentes e temas padrão, incluindo Foundry VTT.");
+assert.equal(nexusPage.total, 17, "A listagem inclui coleções pessoais, catálogo de componentes, temas e quatro pilhas de fontes nativas.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
   "A listagem deve expor metadados, não payloads completos.");
+const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
+assert.equal(fontsPage.total, 4, "The Library exposes the native font stacks used by the NEXUS UI.");
+const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
+assert.ok(interFont && interFont.kind === "style" && interFont.tags.includes("fonte"));
+const resolvedInter = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "inter" });
+assert.equal(resolvedInter.family, '"Inter", system-ui, sans-serif', "Font resources resolve to their documented CSS family stack.");
 
 const nextNexusPage = await nexusProvider.list({ limit: 2, cursor: nexusPage.nextCursor });
 assert.equal(nextNexusPage.items.length, 2);

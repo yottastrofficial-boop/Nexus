@@ -239,13 +239,6 @@ export function createLibraryApplicationClass({
         if (!nav) return;
         const preferences = normalizeLibraryPreferences(this._getPreferences());
         nav.replaceChildren();
-        const clear = document.createElement("button");
-        clear.type = "button";
-        clear.dataset.libraryFolderClear = "";
-        clear.className = "nexus-library-custom-folder nexus-library-folder-clear";
-        clear.innerHTML = '<i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Todas as pastas</span>';
-        clear.classList.toggle("active", !this._state.folder && !this._state.collectionId && this._state.smartView === "all");
-        nav.append(clear);
         const childrenByParent = new Map();
         for (const folder of preferences.folders) {
           const parentId = folder.parentId || "";
@@ -300,7 +293,10 @@ export function createLibraryApplicationClass({
         const nav = root.querySelector("[data-library-app-collections]");
         if (!nav) return;
         nav.replaceChildren();
-        for (const collection of normalizeLibraryPreferences(this._getPreferences()).collections) {
+        const collections = normalizeLibraryPreferences(this._getPreferences()).collections;
+        const section = root.querySelector("[data-library-collections-section]");
+        if (section) section.hidden = collections.length === 0;
+        for (const collection of collections) {
           const button = document.createElement("button");
           button.type = "button";
           button.className = "nexus-library-custom-folder";
@@ -336,6 +332,53 @@ export function createLibraryApplicationClass({
         nativeHeader.prepend(tabStrip);
       }
       appRoot.classList.add("nexus-library-native-window");
+      this._libraryPanelSizes ??= { navigation: 210, inspector: 270 };
+      const applyLibraryPanelSizes = () => {
+        appRoot.style.setProperty("--nexus-library-navigation-width", this._libraryPanelSizes.navigation + "px");
+        appRoot.style.setProperty("--nexus-library-inspector-width", this._libraryPanelSizes.inspector + "px");
+      };
+      applyLibraryPanelSizes();
+      root.querySelectorAll("[data-library-resize]").forEach(handle => {
+        const type = handle.dataset.libraryResize;
+        const isNavigation = type === "sidebar";
+        const min = isNavigation ? 150 : 210;
+        const max = isNavigation ? 360 : 460;
+        handle.setAttribute("aria-valuemin", String(min));
+        handle.setAttribute("aria-valuemax", String(max));
+        handle.setAttribute("aria-valuenow", String(isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector));
+        const update = value => {
+          const clamped = Math.max(min, Math.min(max, Math.round(value)));
+          this._libraryPanelSizes[type === "sidebar" ? "navigation" : "inspector"] = clamped;
+          handle.setAttribute("aria-valuenow", String(clamped));
+          applyLibraryPanelSizes();
+        };
+        handle.addEventListener("pointerdown", event => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          const startX = event.clientX;
+          const startWidth = isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector;
+          handle.classList.add("is-resizing");
+          const move = moveEvent => update(startWidth + (isNavigation ? 1 : -1) * (moveEvent.clientX - startX));
+          const finish = () => {
+            handle.classList.remove("is-resizing");
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", finish);
+            handle.removeEventListener("pointercancel", finish);
+            handle.removeEventListener("lostpointercapture", finish);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", finish);
+          handle.addEventListener("pointercancel", finish);
+          handle.addEventListener("lostpointercapture", finish);
+          try { handle.setPointerCapture(event.pointerId); } catch {}
+        });
+        handle.addEventListener("keydown", event => {
+          if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          event.preventDefault();
+          const direction = (event.key === "ArrowRight" ? 1 : -1) * (isNavigation ? 1 : -1);
+          update((isNavigation ? this._libraryPanelSizes.navigation : this._libraryPanelSizes.inspector) + direction * (event.shiftKey ? 25 : 10));
+        });
+      });
       const breadcrumbs = root.querySelector("[data-library-breadcrumbs]");
       const currentLocation = () => ({
         smartView: this._state.smartView,
@@ -521,11 +564,41 @@ export function createLibraryApplicationClass({
         syncNavigationButtons();
         updateCommandbar();
       };
+      const defaultFolderFilters = {
+        "atores": { kind: "document", type: "actors" },
+        "itens": { kind: "document", type: "items" },
+        "cenas": { kind: "document", type: "scenes" },
+        "documentos": { kind: "document", type: "journals" },
+        "baralhos": { kind: "document", type: "cards" },
+        "tabelas-rolagem": { kind: "document", type: "tables" },
+        "macros": { kind: "document", type: "macros" },
+        "audio": { kind: "media" },
+        "assets-globais": { kind: "asset" },
+        "assets-fontes": { kind: "style", type: "font" },
+        "assets-imagens": { kind: "media" },
+        "assets-icones": { kind: "asset" },
+        "assets-texturas": { kind: "media" },
+        "assets-outros": { kind: "asset" },
+        "nexus-temas": { kind: "theme" },
+        "nexus-componentes": { kind: "component" },
+        "nexus-layouts": { kind: "layout" },
+        "nexus-templates": { kind: "template" },
+        "nexus-regras": { kind: "logic", type: "rule" },
+        "nexus-comportamentos": { kind: "logic", type: "behavior" }
+      };
       const render = async () => {
         this._tabManager.setActiveState(this._state);
         this._tabManager.recordNavigation(currentLocation());
         renderChrome();
-        const result = await this._explorer?.render({ ...this._state });
+        const folderFilter = defaultFolderFilters[this._state.folder] ?? null;
+        const explorerState = {
+          ...this._state,
+          folder: folderFilter ? "" : this._state.folder,
+          kind: this._state.kind === "all" ? folderFilter?.kind ?? "all" : this._state.kind,
+          type: this._state.type === "all" ? folderFilter?.type ?? "all" : this._state.type,
+          folderFilter
+        };
+        const result = await this._explorer?.render(explorerState);
         updateCommandbar();
         return result;
       };
@@ -978,6 +1051,44 @@ export function createLibraryApplicationClass({
               refreshFolders(); refreshShortcuts(); await render();
             }}
           ]);
+          return;
+        }
+        const selectedCards = [...resourceContainer.querySelectorAll(".nexus-library-generic-item.is-selected")]
+          .map(button => button.closest("[data-library-resource-key]"))
+          .filter(Boolean);
+        if (selectedCards.length > 1) {
+          event.preventDefault();
+          const selectedKeys = [...new Set(selectedCards.map(item => item.dataset.libraryResourceKey).filter(Boolean))];
+          this._closeLibraryContextMenu?.();
+          this._closeLibraryContextMenu = showLibraryContextMenu(event, [{
+            label: "Criar coleção com " + selectedKeys.length + " recursos",
+            action: async () => {
+              const DialogV2 = globalThis.foundry?.applications?.api?.DialogV2;
+              if (typeof DialogV2?.input !== "function") return;
+              const result = await DialogV2.input({
+                window: { title: "Criar coleção dos recursos selecionados" },
+                content: '<label>Nome da coleção<input type="text" name="name" maxlength="80" autocomplete="off"></label>',
+                ok: { label: "Criar coleção" },
+                rejectClose: false
+              });
+              const name = String(result?.name ?? "").trim();
+              if (!name) return;
+              try {
+                const created = createLibraryCollection(this._getPreferences(), {
+                  id: globalThis.foundry?.utils?.randomID?.(10),
+                  name
+                });
+                created.collection.resources = selectedKeys.slice(0, 500);
+                await this._savePreferences(created.preferences);
+                this._state.smartView = "collection";
+                this._state.collectionId = created.collection.id;
+                this._state.folder = "";
+                refreshCollections(); refreshFolders(); refreshShortcuts();
+                await render();
+                notify("info", "Coleção criada com " + created.collection.resources.length + " recursos.");
+              } catch (error) { notify("warn", error.message); }
+            }
+          }]);
           return;
         }
         const resourceKey = card.dataset.libraryResourceKey;

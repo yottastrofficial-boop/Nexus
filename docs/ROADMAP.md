@@ -1,11 +1,13 @@
-## 1.0.0.127 — reconstrução estrutural da Biblioteca
+## 1.0.0.128 — Explorer da Biblioteca
 
-- Abas integradas ao cabeçalho nativo ApplicationV2.
-- Barra de navegação única com histórico, breadcrumb e pesquisa de superfície única.
-- Barra de comandos compacta por ícones, incluindo Novo contextual, operações de edição, classificação e visualização.
-- Layout plano sem painéis externos decorativos nem alças visíveis de redimensionamento.
-- Navegação, cartões e Inspector com dimensões e densidade compactas.
-- CI e empacotamento automatizados; teste visual/funcional no Foundry VTT 14 build 360 pendente.
+- Remover superfícies duplicadas e highlights redundantes; controles de pasta, breadcrumb, navegação e pesquisa devem ter somente um alvo visual.
+- Árvore com cabeçalho "Todas as pastas", sem pseudo-pasta que representa todos os recursos; pastas pai agregam itens das subpastas.
+- Mapear pastas padrão para documentos Foundry, fontes nativas, temas e categorias de assets NEXUS.
+- Visualização em lista compacta com ícones adaptativos e colunas Nome, Categoria, Tamanho, Modificado e Etiquetas.
+- Classificação por nome, categoria, origem, tamanho, modificação e etiqueta; filtro de etiquetas com sugestões.
+- Seleção múltipla e criação de coleção no menu de contexto; ocultar Coleções quando não houver nenhuma.
+- Redimensionamento real da navegação e do Inspector com hit-area discreta, mouse/touch e teclado.
+- CI/testes e pacote de validação automatizados; validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.126 — Biblioteca em janela com abas
 

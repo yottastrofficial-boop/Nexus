@@ -13,6 +13,18 @@ test("lista documentos nativos com metadados leves e paginação", async () => {
   assert.equal(page.items[0].uuid, "Actor.a1");
 });
 
+test("expõe data de modificação real para documentos do mundo", async () => {
+  const actor = {
+    id: "date-1", uuid: "Actor.date-1", documentName: "Actor", name: "Com data",
+    _stats: { modifiedTime: 1764201600000 }
+  };
+  const bridge = createFoundryDocumentBridge({
+    gameRef: { user: { isGM: true }, actors: new Map([["date-1", actor]]) }
+  });
+  const page = await bridge.list({ type: "actors" });
+  assert.equal(page.items[0].modifiedAt, new Date(1764201600000).toISOString());
+});
+
 test("consulta compêndios apenas quando solicitada e resolve UUID sob demanda", async () => {
   let indexed = 0, resolved = "";
   const pack = { documentName: "Macro", collection: "world.macros", getIndex: async () => { indexed++; return [{ _id: "m1", name: "Macro teste" }]; } };

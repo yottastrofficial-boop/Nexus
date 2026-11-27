@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.127
+## Estado do código — 1.0.0.128
 
-A versão em preparação reconstrói a Biblioteca como uma janela ApplicationV2 com abas integradas ao cabeçalho nativo, sem título duplicado ou janela interna. A área de trabalho usa uma única barra de navegação e uma barra de comandos compacta com ícones, menu Novo ancorado, classificação e modos de visualização. A estrutura remove molduras externas e divisores visíveis de redimensionamento, preservando a hierarquia, catálogo, preferências, histórico por aba e Inspector. A versão estável do manifesto permanece 1.0.0.126 até a release 1.0.0.127 ser publicada.
+A versão em preparação refina a Biblioteca 1.0.0.127: remove superfícies e highlights duplicados, transforma "Todas as pastas" em cabeçalho da árvore, agrega recursos de subpastas, mapeia pastas padrão para itens reais do catálogo, expõe fontes nativas e temas, cria uma lista compacta com colunas de metadados e classificação, adiciona seleção múltipla/coleções por contexto e implementa redimensionamento acessível da navegação e do Inspector. A versão estável do manifesto permanece 1.0.0.127 até o workflow confirmar a release e o ZIP 1.0.0.128. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 ## Estado do código — 1.0.0.126
 

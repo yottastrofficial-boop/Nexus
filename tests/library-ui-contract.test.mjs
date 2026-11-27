@@ -112,6 +112,22 @@ assert.match(styles, /nexus-library-generic-card:has\(\.nexus-library-generic-it
   "Selected resources should receive only a highlight border, without a filled card panel.");
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
+assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
+assert.doesNotMatch(libraryTemplate, /data-library-folder-clear/, "The all-folders root is a heading, not a pseudo-folder item.");
+assert.match(libraryTemplate, /data-library-list-header[\s\S]*?Tamanho[\s\S]*?Modificado[\s\S]*?Etiquetas/, "List view exposes Explorer metadata columns.");
+assert.doesNotMatch(libraryTemplate, /data-library-create-collection/, "Empty collections must not be advertised as a permanent sidebar destination.");
+assert.match(libraryTemplate, /list="nexus-library-tag-options"[\s\S]*?datalist id="nexus-library-tag-options"/, "Tag filters provide searchable suggestions.");
+assert.match(libraryApplication, /data-library-resize[\s\S]*?pointerdown[\s\S]*?setPointerCapture/, "Sidebar and Inspector resize hit areas must work with pointer input.");
+assert.match(libraryApplication, /defaultFolderFilters[\s\S]*?assets-fontes[\s\S]*?nexus-temas/, "Default folders must query relevant native catalog resources.");
+assert.match(libraryApplication, /Criar coleção com[\s\S]*?selectedKeys\.slice\(0, 500\)/, "Right-clicking a multi-selection creates a collection of the selected resource references.");
+assert.match(catalogExplorer, /selectedResourceKeys[\s\S]*?event\.shiftKey[\s\S]*?nexus-library-multi-selection-context/, "The catalog supports Ctrl/Shift multi-selection and context actions.");
+assert.match(catalogExplorer, /currentSortMode === "size-desc"[\s\S]*?currentSortMode === "modified-desc"[\s\S]*?currentSortMode === "tag-asc"/, "Explorer sorting supports size, modification date and tags.");
+assert.match(styles, /nexus-library-generic-items\[data-view-mode="list"\][\s\S]*?grid-template-columns[\s\S]*?nexus-library-list-tags/, "List view uses compact metadata columns and adaptive icons.");
+assert.match(styles, /nexus-library-panel-resizer:hover::after[\s\S]*?nexus-accent/, "Resize separators remain visually quiet until hover/focus.");
+assert.match(styles, /nexus-library-folder-row > \.nexus-library-folder-toggle:hover[\s\S]*?background: transparent !important/, "Folder disclosure arrows do not receive a second button highlight.");
+assert.match(libraryTemplate, /option value="font">Fontes/, "Built-in fonts can be filtered in the catalog.");
+assert.match(libraryApplication, /"assets-fontes": \{ kind: "style", type: "font" \}/, "The Fonts folder maps to native font resources.");
+assert.match(libraryApplication, /"nexus-temas": \{ kind: "theme" \}/, "The Themes folder maps to built-in and personal themes.");
 console.log("NEXUS Library taxonomy and context actions contracts: OK");
 
 assert.match(libraryTemplate, /data-library-tabs/,

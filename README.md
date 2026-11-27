@@ -1,22 +1,22 @@
-## Biblioteca 1.0.0.127 em preparação
+## Biblioteca 1.0.0.128 em preparação
 
-A 1.0.0.127 reconstrói a apresentação da Biblioteca como uma janela nativa com abas no cabeçalho, comandos compactos e superfícies planas. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A 1.0.0.128 refina a Biblioteca após o teste visual da 1.0.0.127: remove molduras duplicadas, organiza a árvore real de pastas, mostra fontes e temas nativos, compacta a lista com colunas de metadados, habilita seleção múltipla/coleções por contexto e corrige o redimensionamento dos painéis. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão 1.0.0.127 em preparação · base publicada 1.0.0.126 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão 1.0.0.128 em preparação · base publicada 1.0.0.127 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.127-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.128-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão estável publicada:** 1.0.0.126. **Versão em preparação:** 1.0.0.127 (reconstrução estrutural da janela da Biblioteca). O manifesto estável permanece em 1.0.0.126 até a publicação do novo pacote.
+**Versão estável publicada:** 1.0.0.127. **Versão em preparação:** 1.0.0.128 (refinamento do Explorer da Biblioteca). O manifesto estável permanece em 1.0.0.127 até a publicação do novo pacote.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
@@ -34,9 +34,9 @@ A proposta de longo prazo é separar três responsabilidades:
 
 Essa separação orienta o planejamento do projeto. Nem todos esses recursos estão implementados na versão atual; consulte [Visão do projeto](docs/PROJECT_OVERVIEW.md) e [Roadmap](docs/ROADMAP.md).
 
-## Base publicada e revisão estrutural — 1.0.0.126
+## Base publicada e revisão estrutural — 1.0.0.127
 
-A base publicada 1.0.0.126 inclui a janela da Biblioteca com abas independentes, histórico, breadcrumb e comandos. A versão em preparação 1.0.0.127 reconstrói a interface com abas no cabeçalho nativo, barra única de comandos por ícones, menu Novo contextual e superfícies planas, sem divisores de redimensionamento aparentes. A validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
+A base publicada 1.0.0.127 trouxe a janela da Biblioteca com abas no cabeçalho nativo e comandos compactos. A 1.0.0.128 ajusta o Explorer: hierarquia de pastas, fontes/temas, lista com metadados, filtros e classificação, seleção múltipla, coleções contextuais e redimensionamento funcional com alças discretas. CI e pacote serão confirmados no workflow; a validação visual e funcional no Foundry VTT 14 build 360 permanece pendente.
 
 Recursos presentes no código incluem:
 
@@ -54,7 +54,7 @@ A existência de infraestrutura não significa que todos os editores, executores
 | Requisito | Versão |
 |---|---|
 | Foundry Virtual Tabletop | V14 |
-| Base publicada | 1.0.0.126; atualização .127 em preparação |
+| Base publicada | 1.0.0.127; atualização .128 em preparação |
 | Idioma incluído | Português (Brasil) |
 
 A compatibilidade declarada em `system.json` é Foundry VTT 14, build 360. A base publicada 1.0.0.123 inclui a estrutura hierárquica da Biblioteca, menus contextuais, criação universal de recursos e previews padronizados. A candidata 1.0.0.125 acrescenta contratos de serviços e módulos. A validação visual e funcional no cliente Foundry VTT 14 build 360 continua pendente. Não presuma compatibilidade com versões anteriores ou posteriores sem validação específica.
@@ -151,7 +151,7 @@ Os pacotes são JSON versionado e preservam configurações e referências inter
 
 ## Estado e validação
 
-A versão preparada para publicação e sincronização do manifesto é **1.0.0.127**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
+A versão preparada para publicação e sincronização do manifesto é **1.0.0.128**. A validação visual e funcional no Foundry VTT 14 build 360 continua pendente. A validação automatizada não substitui a validação funcional no Foundry real. A última versão funcionalmente confirmada continua sendo a 1.0.0.70.
 
 O último checkpoint funcional confirmado no Foundry permanece **1.0.0.70**, conforme a [política de estabilidade](docs/RELEASE_STABILITY_POLICY.md). Isso não significa que as versões posteriores estejam necessariamente defeituosas; significa que ainda falta evidência documentada para promovê-las a checkpoint funcional.
 
