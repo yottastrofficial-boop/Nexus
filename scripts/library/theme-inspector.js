@@ -40,7 +40,7 @@ export function getLibraryDesignProfilePreviewModel(raw) {
   if (!source || typeof source !== "object" || Array.isArray(source)) return null;
 
   const builtinTheme = entry.reference?.builtin === "theme" || source.reference?.builtin === "theme";
-  const presetCandidate = source.preset ?? source.id ?? entry.reference?.key ?? source.reference?.key;
+  const presetCandidate = source.preset ?? ((entry.reference?.builtin === "theme" || source.reference?.builtin === "theme") ? (entry.reference?.key ?? source.reference?.key ?? source.id) : (source.id ?? entry.reference?.key ?? source.reference?.key));
   const hasPreset = typeof presetCandidate === "string" && Object.hasOwn(DESIGN_THEME_CHOICES, presetCandidate);
   const isThemeEntry = builtinTheme || hasPreset || Boolean(entry.themePreview);
   let profileSource = source;
