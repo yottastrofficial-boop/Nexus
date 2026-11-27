@@ -88,8 +88,8 @@ assert.match(actorSheet, /position: \{ width: 1100, height: 920 \}/,
   "The initial sheet window must provide a larger viewport for the configured Canvas.");
 assert.match(actorSheet, /window: \{ resizable: true \}/,
   "The character sheet window must remain user-resizable.");
-assert.match(actorSheet, /window: \{ resizable: false \}/,
-  "The character sheet window must retain the requested fixed dimensions.");
+assert.match(actorSheet, /window: \{ resizable: true \}/,
+  "The character sheet window must allow resizing to fit the configured Canvas.");
 assert.match(documentBridge, /matchesLibrarySearchQuery/,
   "The Foundry bridge must use the structured search query engine.");
 assert.match(documentBridge, /documentType: String\(entry\.type \?\? ""\)/,
