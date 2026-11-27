@@ -682,8 +682,9 @@ export function createLibraryCatalogExplorer({
       headline.style.setProperty("font-family", family, "important");
       const line = makeElement("small", "", "Lorem ipsum");
       line.style.setProperty("font-family", family, "important");
-      const styles = makeElement("small", "nexus-library-font-sample-styles", "Bold · Italic");
+      const styles = makeElement("small", "nexus-library-font-sample-styles");
       styles.style.setProperty("font-family", family, "important");
+      styles.append(makeElement("b", "", "Bold"), document.createTextNode(" · "), makeElement("i", "", "Italic"));
       sample.append(headline, line, styles);
       preview.append(sample);
     } else if (resource.kind === "theme") {
@@ -1202,8 +1203,8 @@ export function createLibraryCatalogExplorer({
       component: "Componente", composition: "Composição", layout: "Layout", template: "Modelo",
       asset: "Asset", media: "Mídia", theme: "Coleção visual", style: "Estilo", logic: "Lógica", document: "Documento"
     };
-    const optionList = (records, keyOf, labelOf, allLabel) => {
-      const values = new Map([["all", allLabel]]);
+    const optionList = (records, keyOf, labelOf, allLabel, defaults = []) => {
+      const values = new Map([["all", allLabel], ...defaults]);
       for (const resource of records) {
         const key = String(keyOf(resource) ?? "").trim();
         if (key && !values.has(key)) values.set(key, String(labelOf(resource) ?? key));
@@ -1215,10 +1216,22 @@ export function createLibraryCatalogExplorer({
         return option;
       });
     };
+    const categoryDefaults = [
+      ["component", "Componente"], ["composition", "Composição"], ["layout", "Layout"],
+      ["template", "Modelo"], ["asset", "Asset"], ["media", "Mídia"], ["theme", "Coleção visual"],
+      ["style", "Estilo"], ["logic", "Lógica"], ["document", "Documento"]
+    ];
+    const typeDefaults = [
+      ["font", "Fonte"], ["theme", "Tema"], ["component", "Componente"], ["asset", "Asset"],
+      ["media", "Mídia"], ["property", "Propriedade"], ["rule", "Regra"], ["behavior", "Comportamento"],
+      ["flow", "Fluxo"], ["function", "Função"], ["actors", "Atores"], ["items", "Itens"],
+      ["scenes", "Cenas"], ["journals", "Documentos"], ["macros", "Macros"], ["playlists", "Playlists"],
+      ["tables", "Tabelas"], ["cards", "Baralhos"]
+    ];
     categoryOptions?.replaceChildren(...optionList(currentResources, item => item.kind,
-      item => categoryLabels[item.kind] || item.kind, "Todas"));
+      item => categoryLabels[item.kind] || item.kind, "Todas", categoryDefaults));
     typeOptions?.replaceChildren(...optionList(currentResources, item => item.type,
-      item => item.documentType || item.type, "Todos"));
+      item => item.documentType || item.type, "Todos", typeDefaults));
     const visible = currentResources.filter(resource => {
       const key = resourceKey(resource);
       if (currentSmartView === "favorites" && !preferences.favorites.includes(key)) return false;
