@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const manifest = JSON.parse(readFileSync(new URL("../system.json", import.meta.url), "utf8"));
 const styles = readFileSync(new URL("../styles/nexus-universal-library.css", import.meta.url), "utf8");
 const designSystem = readFileSync(new URL("../styles/nexus-design-system.css", import.meta.url), "utf8");
+const libraryUiContract = readFileSync(new URL("../styles/nexus-library-ui-contract.css", import.meta.url), "utf8");
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
@@ -13,6 +14,8 @@ const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-liste
 const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-bridge.js", import.meta.url), "utf8");
 
 
+assert.ok(manifest.styles.includes("styles/nexus-library-ui-contract.css") && manifest.styles.indexOf("styles/nexus-library-ui-contract.css") > manifest.styles.indexOf("styles/nexus-design-system.css"),
+  "The shared Library UI contract must load after the legacy and design-system layers.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
 assert.match(styles, /\.nexus-library-application \.nexus-library-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) var\(--nexus-library-inspector-width\)/,
@@ -70,8 +73,10 @@ assert.ok(!libraryApplication.includes("const input = globalThis.foundry?.applic
   "DialogV2 static helpers must not be detached from their class.");
 assert.ok(catalogExplorer.includes("thumbnailInput"),
   "Saved Library resources must expose a custom thumbnail metadata field.");
-assert.ok(styles.includes(".nexus-library-search-wrap > .nexus-library-search"),
-  "The search input must not render a second nested surface.");
+assert.ok(libraryUiContract.includes(".nexus-library-navigation-search input.nexus-library-search") && libraryUiContract.includes("grid-template-columns:18px minmax(0,1fr) 22px"),
+  "The rebuilt search must use one icon/input/clear control grid.");
+assert.doesNotMatch(styles, /nexus-library-search-wrap/, "The legacy universal stylesheet must not retain competing search rules.");
+assert.doesNotMatch(designSystem, /nexus-library-search-wrap/, "The design-system stylesheet must not retain competing search rules.");
 
 
 assert.match(libraryTemplate, /aria-describedby="nexus-library-search-help"/,
@@ -120,7 +125,10 @@ assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
-assert.match(styles, /nexus-library-theme-live-preview/);
+assert.match(libraryUiContract, /nexus-library-theme-live-preview/);
+assert.match(libraryUiContract, /nexus-library-theme-live-track/);
+assert.match(libraryUiContract, /nexus-library-inspector-tab-button\\[aria-selected="true"\\]/);
+assert.match(libraryUiContract, /nexus-library-theme-card-preview/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
@@ -241,10 +249,11 @@ assert.ok(catalogExplorer.includes("nexus-library-font-grid-specimen") &&
   "Font metadata stays out of the visual preview while the compact Aa card remains.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogExplorer.includes("nexus-library-theme-preview") &&
-  catalogExplorer.includes("nexus-library-theme-card-swatches") &&
-  catalogExplorer.includes("fa-solid fa-palette") &&
-  styles.includes("nexus-library-theme-swatches"),
-  "Theme details retain semantic previews and grid cards display actual palette colors.");
+  catalogExplorer.includes("nexus-library-theme-card-preview") &&
+  catalogExplorer.includes("getLibraryThemePreviewTokens") &&
+  catalogExplorer.includes("getLibraryResourceBarCardPreviewModel") &&
+  libraryUiContract.includes("nexus-library-theme-swatches"),
+  "Theme cards and Inspector share token-driven previews, and resource-meter cards have a visible preview.");
 assert.ok(styles.includes("nexus-library-folder-card") &&
   styles.includes("nexus-library-folder-preview") &&
   styles.includes("--nexus-library-preview-size: 64px") &&
