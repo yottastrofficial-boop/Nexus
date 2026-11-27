@@ -848,10 +848,14 @@ export function createLibraryCatalogExplorer({
       preview.append(specimen);
     } else if (resource.kind === "theme") {
       preview.dataset.previewKind = "theme";
-      const themeColors = Array.isArray(resource.previewColors) ? resource.previewColors : [];
+      const themeModel = getLibraryDesignProfilePreviewModel(resource);
+      const themeColors = themeModel?.palette ?? (Array.isArray(resource.previewColors) ? resource.previewColors : []);
       preview.append(createLibraryThemeSample({
         name: resource.name,
         palette: themeColors,
+        typography: themeModel?.typography ?? {},
+        layout: { ...(themeModel?.layout ?? {}), preset: themeModel?.preset },
+        components: themeModel?.components ?? {},
         compact: true
       }));
     } else if (getLibraryResourceBarCardPreviewModel(resource)) {
@@ -1106,7 +1110,8 @@ export function createLibraryCatalogExplorer({
         name: resource.name,
         palette,
         typography: themeModel?.typography ?? {},
-        layout: themeModel?.layout ?? {},
+        layout: { ...(themeModel?.layout ?? {}), preset: themeModel?.preset },
+        components: themeModel?.components ?? {},
         compact: false
       });
       themePreview.append(sample);
