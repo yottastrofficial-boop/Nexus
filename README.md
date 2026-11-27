@@ -6,7 +6,7 @@ A 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, val
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão estável 1.0.0.136 · Foundry VTT 14
+  Projeto em desenvolvimento · Versão candidata 1.0.0.136 · estável 1.0.0.135 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@ A 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, val
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.135 publicada.** Manifesto e pacote estáveis sincronizados.
+**Versão estável 1.0.0.135 publicada.** A 1.0.0.136 está em validação; o manifesto será sincronizado após a release.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
