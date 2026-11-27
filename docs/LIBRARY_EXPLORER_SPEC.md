@@ -1,3 +1,15 @@
+## Prévia de temas e fontes — contrato v6 (1.0.0.139)
+
+- A prévia de tema no Grid e no Inspector deve derivar do perfil do próprio recurso selecionado, nunca do perfil global atualmente aplicado ao Foundry ou ao NEXUS.
+- O resolver aceita perfis atuais e entradas legadas. Para temas internos, usa a chave estável do preset; não usa o ID `builtin-theme:<preset>` como preset.
+- O modelo compartilhado inclui os 18 tokens semânticos, tipografia, tamanho base, densidade, geometria, espaçamento, altura dos controles e estilos de `buttons`, `panels`, `containers`, `highlights` e `fields`.
+- Os cartões do Grid utilizam a variante compacta do mesmo renderizador do Inspector. Não criar previews separados que usem somente `previewColors` ou valores padrão.
+- A mini-interface demonstra cabeçalho, navegação, painel, cartão, destaque, barra de recurso, campo e botões, refletindo os valores do perfil.
+- Fontes: Grid mostra somente `Aa` em tamanho grande; Inspector mostra `Aa`, `Lorem Epsum` e `12345 !@#$%`. Os espécimes aplicam diretamente a família do recurso.
+- A raiz e os descendentes de cada preview têm escopo tipográfico explícito para evitar herança de seletores globais do Foundry/NEXUS.
+- Metadados de preview de temas pessoais incluem somente tokens visuais validados. `customCss` não é executado nem incluído na miniatura.
+- A prévia é demonstrativa e inerte; não executa componentes, HTML, CSS ou JavaScript armazenados no recurso.
+
 # Biblioteca NEXUS — contrato de definições, coleções e instâncias
 
 ## Objetivo
