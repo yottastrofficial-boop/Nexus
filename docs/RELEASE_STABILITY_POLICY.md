@@ -1,11 +1,11 @@
-## Estado de distribuição — 1.0.0.127
+## Estado de distribuição — 1.0.0.128
 
-A versão 1.0.0.127 prepara a reconstrução estrutural da janela da Biblioteca. As abas passam para o cabeçalho nativo ApplicationV2; comandos e navegação são reorganizados em barras planas e compactas; superfícies internas redundantes e alças visíveis de redimensionamento são removidas. A classificação e o modo de visualização passam a fazer parte da barra principal. O manifesto estável permanece na 1.0.0.126 até a release 1.0.0.127 e seu asset ZIP serem confirmados pelo workflow.
+A 1.0.0.128 refina o Explorer: controles sem molduras duplicadas, árvore de pastas real com conteúdo, fontes/temas nativos, lista compacta com colunas e classificação, seleção múltipla com coleção contextual e redimensionamento acessível. Valores de tamanho/data só são mostrados quando o provedor fornece metadados reais. O manifesto estável permanece na 1.0.0.127 até o workflow publicar e confirmar o ZIP 1.0.0.128.
 
-- A versão `system.json` em preparação é 1.0.0.127 e o download declarado aponta para `v1.0.0.127/nexus.zip`.
-- `manifest.json` permanece na versão estável 1.0.0.126 durante a validação e só avança após confirmação do pacote.
-- CI e empacotamento automatizados aprovados na branch de correção.
-- Validação visual/funcional pendente no Foundry VTT 14 build 360: tabs no cabeçalho real, controles nativos de janela, menu Novo, comandos, classificação, pesquisa, navegação e layout em diferentes larguras.
+- A versão `system.json` em preparação é 1.0.0.128 e o download declarado aponta para `v1.0.0.128/nexus.zip`.
+- `manifest.json` permanece na versão estável 1.0.0.127 durante a validação e só avança após confirmação do pacote.
+- CI e empacotamento da rodada anterior aprovados; a execução final da 1.0.0.128 deve ser confirmada antes da integração.
+- Validação visual/funcional pendente no Foundry VTT 14 build 360: hierarquia, fontes/temas, lista, filtros, coleção por clique direito, resize de ambos os separadores e ausência de superfícies duplicadas.
 - O último checkpoint funcional confirmado permanece 1.0.0.70 até validação documentada no cliente real.
 
 ## Estado de distribuição — 1.0.0.126 (2026-11-26)
