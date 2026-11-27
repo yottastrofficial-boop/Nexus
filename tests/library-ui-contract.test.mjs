@@ -200,11 +200,11 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
   !libraryTemplate.includes("data-library-tag"),
   "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
-assert.ok(styles.includes(".nexus-library-font-specimen") &&
-  styles.includes(".nexus-library-theme-miniature") &&
+assert.ok(styles.includes(".nexus-library-theme-miniature") &&
   styles.includes(".nexus-library-theme-list-mark") &&
-  styles.includes(".nexus-library-theme-highlight"),
-  "Font and theme resources must have expressive grid previews and a theme-token list marker.");
+  styles.includes(".nexus-library-theme-highlight") &&
+  styles.includes(".nexus-library-theme-card-swatches"),
+  "Theme cards must show palette colors without adding a framed specimen panel.");
 assert.ok(styles.includes("input.nexus-library-search:focus") && styles.includes("border: 0 !important"),
   "The search input must not draw a second border inside its single wrapper.");
 assert.ok(libraryApplication.includes("button.append(textNode)") &&
@@ -215,26 +215,33 @@ assert.ok(libraryApplication.includes("button.append(textNode)") &&
 console.log("NEXUS Library 1.0.0.132 visual refinement contracts: OK");
 
 
-assert.ok(catalogExplorer.includes("data-library-open-folder") && catalogExplorer.includes("renderFolderCard") &&
-  catalogExplorer.includes("folderEntries"),
-  "Explorer content must show direct child folders and allow opening them.");
+assert.ok(catalogExplorer.includes("data-library-open-folder") &&
+  catalogExplorer.includes("data-library-folder-select") &&
+  catalogExplorer.includes('addEventListener("dblclick"') &&
+  catalogExplorer.includes("renderFolderCard") && catalogExplorer.includes("folderEntries"),
+  "Folder single click selects and double click opens the selected folder.");
 assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') === false &&
   libraryApplication.includes("folder: this._state.folder"),
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
-assert.ok(catalogExplorer.includes("model.family") &&
-  catalogExplorer.includes("nexus-library-font-specimen") &&
-  catalogExplorer.includes("nexus-library-font-grid-specimen") &&
+assert.ok(catalogExplorer.includes("nexus-library-font-grid-specimen") &&
   catalogExplorer.includes("resource.fontFamily") &&
   catalogExplorer.includes('"Aa"') &&
-  catalogExplorer.includes("Lorem ipsum dolor sit amet."),
-  "Font cards render a compact Aa specimen in the resolved family and the Inspector keeps the short sample.");
+  catalogExplorer.includes("Lorem ipsum dolor sit amet") &&
+  !catalogExplorer.includes("nexus-library-font-specimen") &&
+  !catalogExplorer.includes("nexus-library-resource-preview-facts"),
+  "Font metadata stays out of the visual preview while the compact Aa card remains.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogExplorer.includes("nexus-library-theme-preview") &&
+  catalogExplorer.includes("nexus-library-theme-card-swatches") &&
   catalogExplorer.includes("fa-solid fa-palette") &&
   styles.includes("nexus-library-theme-swatches"),
-  "Theme details retain semantic previews while grid cards show only a compact palette icon.");
-assert.ok(styles.includes("nexus-library-folder-card") && styles.includes("nexus-library-folder-preview"),
-  "Folder navigation tiles must be visually integrated into the content view.");
+  "Theme details retain semantic previews and grid cards display actual palette colors.");
+assert.ok(styles.includes("nexus-library-folder-card") &&
+  styles.includes("nexus-library-folder-preview") &&
+  styles.includes("--nexus-library-preview-size: 64px") &&
+  styles.includes("-webkit-line-clamp: 3") &&
+  styles.includes("nexus-library-inspector-tabs"),
+  "Grid uses a true 64px preview, up to three title lines, and a separate Inspector Details tab.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
   actorSheet.includes("window: { resizable: true }"),
   "The character sheet must provide enough default viewport for the 800px configured canvas.");

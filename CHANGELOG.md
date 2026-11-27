@@ -1,3 +1,16 @@
+## 1.0.0.134 — Biblioteca compacta, Inspector separado e correção do Estúdio
+
+- Corrige a cascata de CSS que sobrescrevia o tamanho configurado das miniaturas e impedia o Grid de aproveitar os 64 × 64 px disponíveis.
+- Reorganiza os cartões para usar miniatura de 64 × 64 px, título abaixo com até três linhas e altura determinada pelo conteúdo, sem espaço vazio artificial.
+- Remove padding e contornos redundantes dos cartões; mantém realce discreto para seleção e favorito compacto.
+- Mostra paletas reais nos cartões de temas, em vez de um ícone genérico quando as cores estão disponíveis.
+- Separa a prévia visual da aba Detalhes no Inspector; metadados, fatos técnicos, ações e atribuição de pasta ficam fora da prévia.
+- Remove espécimes tipográficos e listas de fatos do bloco principal de prévia; informações da fonte ficam na aba de detalhes.
+- Pastas passam a ser selecionadas com um clique e abertas com duplo clique; Enter também abre a pasta selecionada.
+- Faz o Estúdio de Aparência fornecer opções ApplicationV2 mutáveis por instância e clonar profundamente as opções recebidas do submenu.
+- Adiciona regressões para opções congeladas, seleção/abertura de pastas, dimensões do Grid e separação entre prévia e detalhes.
+- CI e validação automatizada serão confirmados pelo workflow. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+
 ## 1.0.0.133 — Biblioteca: Grid adaptativo e prévias proporcionais
 
 - Isola o Grid da Biblioteca Universal das regras legadas de `nexus-library-assets`.

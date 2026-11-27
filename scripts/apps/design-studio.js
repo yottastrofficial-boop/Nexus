@@ -70,16 +70,17 @@ export function createDesignStudioApplicationClass({
   };
 
   return class NexusDesignStudio extends BaseApplication {
-    static DEFAULT_OPTIONS = defaultOptions;
+    static get DEFAULT_OPTIONS() {
+      // Foundry may normalize nested ApplicationV2 options in-place. Return a
+      // fresh mutable tree for every access instead of sharing freeze-prone state.
+      return clone(defaultOptions);
+    }
     static PARTS = { main: { template: "systems/nexus/templates/apps/design-studio.hbs" } };
 
     constructor(options = {}) {
       // The settings submenu may supply frozen options; ApplicationV2 normalizes
       // nested position fields, so give it a mutable copy.
-      const mutableOptions = {
-        ...options,
-        ...(options?.position && typeof options.position === "object" ? { position: { ...options.position } } : {})
-      };
+      const mutableOptions = clone(options ?? {});
       super(mutableOptions);
       design.application = this;
       this._target = globalThis.game?.user?.isGM ? "world" : "user";

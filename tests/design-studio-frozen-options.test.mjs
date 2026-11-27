@@ -15,10 +15,11 @@ class FakeApplicationV2 {
 
   constructor(options = {}) {
     // Mirrors ApplicationV2 normalizing nested position fields in-place.
+    const defaults = this.constructor.DEFAULT_OPTIONS;
     const merged = {
-      ...this.constructor.DEFAULT_OPTIONS,
+      ...defaults,
       ...options,
-      position: { ...this.constructor.DEFAULT_OPTIONS.position, ...(options.position ?? {}) }
+      position: options.position ?? defaults.position
     };
     Object.assign(merged.position, { minWidth: 200, minHeight: 120 });
     this.options = merged;
@@ -47,6 +48,12 @@ assert.doesNotThrow(() => new NexusDesignStudio(frozenMenuOptions));
 const instance = new NexusDesignStudio(frozenMenuOptions);
 assert.equal(instance.options.position.minWidth, 200);
 assert.equal(instance.options.position.width, 1024);
+assert.notEqual(instance.options.window, frozenMenuOptions.window,
+  "Nested submenu options must be deeply cloned before ApplicationV2 mutates them.");
+const firstDefaults = NexusDesignStudio.DEFAULT_OPTIONS;
+const secondDefaults = NexusDesignStudio.DEFAULT_OPTIONS;
+assert.notEqual(firstDefaults.position, secondDefaults.position,
+  "Each ApplicationV2 defaults access must receive a fresh mutable position object.");
 assert.equal(Object.isFrozen(NexusDesignStudio.DEFAULT_OPTIONS.position), false);
 assert.equal(NexusDesignStudio.DEFAULT_OPTIONS.position.minWidth, 360);
 assert.equal(NexusDesignStudio.DEFAULT_OPTIONS.position.minHeight, 420);

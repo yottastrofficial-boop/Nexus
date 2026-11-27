@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.134
+
+A revisão da Biblioteca Universal consolida o Grid em cartões determinados pelo conteúdo, com miniaturas efetivas de 32/64/128 CSS px, título de até três linhas e sem padding/bordas decorativas redundantes. Temas exibem amostras da própria paleta. O Inspector separa Prévia e Detalhes; fontes, fatos técnicos e metadados ficam na aba de detalhes. Pastas usam clique para seleção e duplo clique para navegação. O Estúdio de Aparência passa a fornecer opções ApplicationV2 mutáveis por instância e clonar opções recebidas do submenu. CI e empacotamento dependem da execução do workflow; a validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+
 ## Estado do código — 1.0.0.133
 
 A 1.0.0.133 atualiza a Biblioteca Universal com Grid adaptativo, prévias redimensionadas proporcionalmente para 32/64/128 CSS px, fallback por ícone, cartões Grid separados das linhas Lista, pastas fora das facetas, espécime tipográfico compacto e favoritos reposicionados. Os workflows de regressão, validação e empacotamento foram aprovados no PR #117; a release, o ZIP e o manifesto também foram confirmados. A release 1.0.0.133, o ZIP e o manifesto foram publicados e sincronizados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
