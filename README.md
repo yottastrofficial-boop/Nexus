@@ -16,7 +16,7 @@ A 1.0.0.131 refina as prévias de temas e fontes, amplia as famílias tipográfi
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão estável publicada:** 1.0.0.130. **Versão em preparação:** 1.0.0.131 (pré-vias refinadas de temas/fontes e filtros de lista). O manifesto estável permanece em 1.0.0.130 até a publicação do novo pacote.
+**Versão estável publicada:** 1.0.0.130. **Versão em preparação:** 1.0.0.131 (prévias refinadas de temas/fontes e filtros de lista). O manifesto estável permanece em 1.0.0.130 até a publicação do novo pacote.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
