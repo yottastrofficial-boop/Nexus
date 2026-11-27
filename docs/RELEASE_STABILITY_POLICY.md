@@ -1,6 +1,6 @@
-## Atualização em desenvolvimento — 1.0.0.136
+## Atualização em desenvolvimento — 1.0.0.137
 
-A versão 1.0.0.136 está na main em validação automatizada. A versão estável e o manifesto permanecem em 1.0.0.135 até o workflow validar o código, publicar o ZIP e sincronizar o manifesto. Não considerar a atualização instalada/validada no Foundry real antes dos testes manuais.
+A versão 1.0.0.137 está na main em validação automatizada. A versão estável e o manifesto permanecem em 1.0.0.136 até o workflow validar o código, publicar o ZIP e sincronizar o manifesto. Não considerar a atualização instalada/validada no Foundry real antes dos testes manuais.
 
 ## Estado de distribuição — 1.0.0.135 (publicada)
 
