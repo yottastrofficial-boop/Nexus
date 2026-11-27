@@ -641,6 +641,7 @@ export function createFoundryLibraryProvider({ documentBridge } = {}) {
     documentType: record.documentType ?? "",
     packLabel: record.packLabel ?? "",
     name: record.name,
+    modifiedAt: record.modifiedAt ?? "",
     description: "",
     tags: [record.type, record.isCompendium ? "compendium" : "world"],
     thumbnail: record.img,
