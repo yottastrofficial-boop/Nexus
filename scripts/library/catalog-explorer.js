@@ -453,10 +453,7 @@ function renderLibraryResourcePreview(resource, resolved) {
   if (!model || model.kind === "font") return null;
   const section = makeElement("section", "nexus-library-resource-preview");
   section.dataset.previewKind = model.kind;
-  if (model.kind !== "font") {
-    section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
-    section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
-  }
+
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
     const members = model.members;
     const bounds = {
@@ -892,7 +889,10 @@ export function createLibraryCatalogExplorer({
     const meta = makeElement("p", "nexus-library-summary-meta",
       [resource.kind, resource.type, resource.origin, resource.isCompendium ? "Compêndio" : ""].filter(Boolean).join(" · "));
     const description = makeElement("p", "nexus-library-resource-description", resource.description || "Sem descrição.");
-    const themeColors = resource.kind === "theme" ? getLibraryThemePreviewColors(resolved) : [];
+    const themeModel = resource.kind === "theme" ? getLibraryDesignProfilePreviewModel(resolved) : null;
+    const themeColors = resource.kind === "theme"
+      ? (themeModel?.palette?.map(color => ({ label: color.label, value: color.value })) ?? getLibraryThemePreviewColors(resolved))
+      : [];
     const previewModel = getLibraryResourcePreviewModel(resource, resolved);
     const fontPreview = renderLibraryFontPreview(resource, resolved);
     const resourcePreview = renderLibraryResourcePreview(resource, resolved);
