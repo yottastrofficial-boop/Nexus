@@ -1,8 +1,8 @@
 ## Estado do código — 1.0.0.137 (candidata)
 
-A candidata expõe a API pública de backup da Biblioteca: exportar, preparar e validar uma importação, apresentar a prévia e confirmar o commit. O manifesto estável continua na versão publicada até a confirmação do pacote pela pipeline. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
+A candidata revisa as prévias de fontes e temas, consolida o Grid em 64×64, reorganiza o Inspector com abas Padrão/Detalhes e remove regras visuais legadas que sobrepunham a apresentação. O manifesto estável continua na versão publicada até a confirmação do pacote pela pipeline. A validação visual/funcional no Foundry VTT 14 build 360 permanece pendente.
 
-## Estado do código — 1.0.0.135 (publicada)
+## Estado do código — 1.0.0.136 (publicada)
 
 A revisão do Inspector separa Padrão e Detalhes, coloca os tabs no topo, mantém nome/descrição/metadados resumidos na visualização padrão e move resumo técnico, fatos e tags para Detalhes. A prévia de fontes usa a família resolvida e uma amostra tipográfica; temas usam tokens hex dinâmicos e uma mini-interface com a paleta real. Cabeçalhos Nome/Categoria/Tipo ocupam a célula inteira, enquanto a Lista não usa bordas/outline de seleção. Selecionar recurso abre Padrão. CI, release, asset e manifesto foram aprovados/publicados; validação visual no Foundry VTT 14 build 360 também permanece necessária.
 
