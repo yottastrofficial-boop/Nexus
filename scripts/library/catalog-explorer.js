@@ -612,6 +612,23 @@ export function createLibraryCatalogExplorer({
     container.replaceChildren(makeElement("p", "nexus-library-empty", message));
   };
 
+  const renderFolderCard = (folder, preferences) => {
+    const children = preferences.folders.filter(item => item.parentId === folder.id).length;
+    const card = makeElement("article", "nexus-library-generic-card nexus-library-folder-card");
+    card.dataset.libraryFolderEntry = folder.id;
+    const button = makeElement("button", "nexus-library-folder-entry nexus-library-generic-item");
+    button.type = "button";
+    button.dataset.libraryOpenFolder = folder.id;
+    button.setAttribute("aria-label", "Abrir pasta " + folder.name);
+    const preview = makeElement("span", "nexus-library-generic-preview nexus-library-folder-preview");
+    preview.append(makeElement("i", "fa-solid fa-folder", ""));
+    const name = makeElement("strong", "", folder.name);
+    const meta = makeElement("small", "nexus-library-folder-meta", children ? countLabel(children, "subpasta") : "Pasta");
+    button.append(preview, name, meta);
+    card.append(button);
+    return card;
+  };
+
   const renderResourceCard = (resource, preferences) => {
     const key = resourceKey(resource);
     const card = makeElement("article", "nexus-library-generic-card");
@@ -1153,6 +1170,14 @@ export function createLibraryCatalogExplorer({
       }
       return compareText(left.name ?? left.title ?? left.label, right.name ?? right.title ?? right.label);
     });
+
+    const folderEntries = currentSmartView === "all" &&
+      (Boolean(currentFolder) || (currentKind === "all" && currentType === "all"))
+      ? preferences.folders
+        .filter(folder => (folder.parentId || "") === currentFolder)
+        .filter(folder => !currentQuery || folder.name.toLocaleLowerCase("pt-BR").includes(currentQuery.toLocaleLowerCase("pt-BR")))
+        .sort((left, right) => compareText(left.name, right.name))
+      : [];
 
     container.replaceChildren();
     for (const folder of folderEntries) container.append(renderFolderCard(folder, preferences));
