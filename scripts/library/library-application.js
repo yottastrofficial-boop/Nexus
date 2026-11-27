@@ -227,10 +227,31 @@ export function createLibraryApplicationClass({
       const sortControl = root.querySelector("[data-library-sort]");
       const listHeader = root.querySelector("[data-library-list-header]");
       const listColumnHandles = [...root.querySelectorAll("[data-library-column-resize]")];
+      const closeListFilterPopovers = () => root.querySelectorAll("[data-library-list-filter-popover]").forEach(popover => { popover.hidden = true; });
+      root.querySelectorAll("[data-library-open-list-filter]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const name = button.dataset.libraryOpenListFilter;
+          const popover = root.querySelector('[data-library-list-filter-popover="' + name + '"]');
+          const shouldOpen = Boolean(popover?.hidden);
+          closeListFilterPopovers();
+          if (popover && shouldOpen) {
+            popover.hidden = false;
+            popover.querySelector("input")?.focus();
+          }
+        });
+      });
+      root.addEventListener("click", event => {
+        if (!event.target.closest(".nexus-library-list-filter")) closeListFilterPopovers();
+      });
+      root.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeListFilterPopovers();
+      });
       const applyListColumnWidths = () => {
         const widths = this._libraryListColumnWidths;
-        if (!widths || widths.length < 4) return;
-        const template = widths.slice(0, 4).map(width => Math.round(width) + "px").join(" ") + " minmax(100px, 1fr)";
+        if (!widths || widths.length < 3) return;
+        const template = widths.slice(0, 3).map(width => Math.round(width) + "px").join(" ");
         listHeader?.style.setProperty("--nexus-library-list-columns", template);
         container.style.setProperty("--nexus-library-list-columns", template);
       };
@@ -241,12 +262,12 @@ export function createLibraryApplicationClass({
           event.preventDefault();
           if (!this._libraryListColumnWidths) {
             this._libraryListColumnWidths = [...(listHeader?.querySelectorAll("[data-library-list-column]") ?? [])]
-              .slice(0, 4).map((column, columnIndex) => Math.max([180, 100, 76, 100][columnIndex], column.getBoundingClientRect().width));
+              .slice(0, 3).map((column, columnIndex) => Math.max([180, 100, 110][columnIndex], column.getBoundingClientRect().width));
           }
           const widths = this._libraryListColumnWidths;
           const startX = event.clientX;
           const startWidth = widths[index];
-          const minWidth = [180, 100, 64, 84][index];
+          const minWidth = [180, 100, 100][index];
           const move = moveEvent => {
             widths[index] = Math.max(minWidth, startWidth + moveEvent.clientX - startX);
             applyListColumnWidths();
@@ -268,10 +289,10 @@ export function createLibraryApplicationClass({
           event.preventDefault();
           if (!this._libraryListColumnWidths) {
             this._libraryListColumnWidths = [...(listHeader?.querySelectorAll("[data-library-list-column]") ?? [])]
-              .slice(0, 4).map((column, columnIndex) => Math.max([180, 100, 76, 100][columnIndex], column.getBoundingClientRect().width));
+              .slice(0, 3).map((column, columnIndex) => Math.max([180, 100, 110][columnIndex], column.getBoundingClientRect().width));
           }
           const direction = event.key === "ArrowRight" ? 1 : -1;
-          this._libraryListColumnWidths[index] = Math.max([180, 100, 64, 84][index], this._libraryListColumnWidths[index] + direction * (event.shiftKey ? 24 : 8));
+          this._libraryListColumnWidths[index] = Math.max([180, 100, 100][index], this._libraryListColumnWidths[index] + direction * (event.shiftKey ? 24 : 8));
           applyListColumnWidths();
         });
       });
@@ -464,7 +485,7 @@ export function createLibraryApplicationClass({
           if (breadcrumbs.childElementCount) {
             const separator = document.createElement("span");
             separator.className = "nexus-library-breadcrumb-separator";
-            separator.textContent = "›";
+            separator.textContent = "/";
             separator.setAttribute("aria-hidden", "true");
             breadcrumbs.append(separator);
           }
