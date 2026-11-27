@@ -1,10 +1,11 @@
-## 1.0.0.137 — Correções visuais da Biblioteca (publicada)
+## 1.0.0.138 — Biblioteca: contrato visual unificado (em validação)
 
-- Prévia de fontes com família real e amostras Aa, Lorem Epsum e 12345 !@#$%.
-- Prévia de temas com mini-interface ampliada e paleta recolhida em dropdown.
-- Grid com visualização efetiva 64×64, título até três linhas, favoritos em estrela e estilos consolidados.
-- Inspector com tabs no topo; identidade e meta em Padrão; tags e resumo em Detalhes.
-- CI, pacote, release v1.0.0.137, asset e manifesto confirmados. Validação visual/funcional no Foundry VTT 14 build 360 pendente.
+- Reescreve a pesquisa em uma única regra compartilhada e responsiva; remove os estilos concorrentes da cascata legada.
+- Aplica a paleta real por chave semântica aos previews de tema da grade e do Inspector.
+- Reorganiza Padrão/Detalhes conforme o protótipo aprovado e move a paleta para abaixo da amostra.
+- Restaura a prévia de barra de recurso em temas e cartões de componentes.
+- CI, pacote e publicação estável serão confirmados pelo workflow. Teste visual no Foundry VTT 14 build 360 permanece manual.
+
 
 ## 1.0.0.136 — Prévia de recursos e Inspector organizado (publicada)
 
