@@ -360,6 +360,17 @@ export function getLibraryResourcePreviewModel(resource = {}, resolved = {}) {
       ]
     };
   }
+  if (reference.builtin === "font") {
+    const family = String(data.family ?? resource.fontFamily ?? "system-ui, sans-serif");
+    return {
+      kind: "font",
+      title: "Prévia tipográfica",
+      summary: family,
+      family,
+      sample: "Lorem ipsum dolor sit amet",
+      details: [["Família", family], ["Uso", String(data.category ?? "Tipografia")]]
+    };
+  }
   if (resource.kind === "style" || collection === "styles") {
     const tokens = data.tokens ?? data.palette ?? data.styles ?? {};
     const colors = Object.entries(tokens && typeof tokens === "object" && !Array.isArray(tokens) ? tokens : {})
@@ -410,6 +421,14 @@ function renderLibraryResourcePreview(resource, resolved) {
   section.dataset.previewKind = model.kind;
   section.append(makeElement("strong", "nexus-library-resource-preview-title", model.title));
   section.append(makeElement("p", "nexus-library-resource-preview-summary", model.summary));
+  if (model.kind === "font") {
+    const specimen = makeElement("div", "nexus-library-font-specimen");
+    specimen.style.fontFamily = model.family;
+    specimen.append(makeElement("strong", "", "Aa Bb Cc 0123"));
+    specimen.append(makeElement("p", "", "Lorem ipsum dolor sit amet, consectetur adipiscing elit."));
+    specimen.append(makeElement("small", "", "The quick brown fox · ÁÉÍÓÚ"));
+    section.append(specimen);
+  }
   if (model.kind === "composition" && Array.isArray(model.members) && model.members.length) {
     const members = model.members;
     const bounds = {
@@ -607,31 +626,47 @@ export function createLibraryCatalogExplorer({
 
     const preview = makeElement("span", "nexus-library-generic-preview");
     const thumbnail = text(resource.thumbnail).trim();
-    if (thumbnail) {
+    const builtin = resource.reference?.builtin;
+    if (builtin === "font") {
+      const families = {
+        inter: '"Inter", system-ui, sans-serif',
+        "system-ui": "system-ui, sans-serif",
+        arial: "Arial, Helvetica, sans-serif",
+        monospace: "ui-monospace, SFMono-Regular, Consolas, monospace"
+      };
+      preview.dataset.previewKind = "font";
+      preview.style.fontFamily = families[String(resource.reference?.key)] ?? "system-ui, sans-serif";
+      preview.append(makeElement("span", "nexus-library-font-sample", "Aa"));
+    } else if (resource.kind === "theme" && resource.previewColors?.length) {
+      preview.dataset.previewKind = "theme";
+      const colors = Object.fromEntries(resource.previewColors.map(color => [String(color.label).toLowerCase(), color.value]));
+      preview.style.setProperty("--nexus-theme-preview-panel", colors.panel ?? colors.surface ?? "#202e3e");
+      preview.style.setProperty("--nexus-theme-preview-accent", colors.accent ?? colors.highlight ?? "#78b7e8");
+      preview.style.setProperty("--nexus-theme-preview-text", colors.text ?? "#edf0f6");
+      const mock = makeElement("span", "nexus-library-theme-miniature");
+      mock.append(makeElement("strong", "", "Aa"));
+      const button = makeElement("i", "", "Botão");
+      const input = makeElement("small", "", "Campo de texto");
+      mock.append(button, input);
+      preview.append(mock);
+    } else if (thumbnail) {
       const image = document.createElement("img");
       image.src = thumbnail;
       image.alt = "";
       image.loading = "lazy";
       image.decoding = "async";
       preview.append(image);
-    } else if (resource.kind === "theme" && resource.previewColors?.length) {
-      preview.dataset.previewKind = "theme";
-      const palette = makeElement("span", "nexus-library-generic-theme-swatches");
-      for (const color of resource.previewColors.slice(0, 6)) {
-        const swatch = makeElement("i", "nexus-library-generic-theme-swatch");
-        swatch.style.backgroundColor = color.value;
-        swatch.title = color.label;
-        palette.append(swatch);
-      }
-      preview.append(palette);
     } else {
       const icon = makeElement("i", getLibraryResourceIcon(resource));
       icon.setAttribute("aria-hidden", "true");
       preview.append(icon);
     }
 
-    const title = makeElement("strong", "", resource.name);
-    const category = resource.documentType || resource.kind || resource.type;
+    const nameCell = makeElement("span", "nexus-library-list-name-cell");
+    nameCell.append(preview, makeElement("strong", "", resource.name));
+    const category = resource.kind === "theme" ? "Coleção visual"
+      : builtin === "font" ? "Fonte"
+        : resource.documentType || resource.kind || resource.type;
     const meta = makeElement("small", "nexus-library-resource-meta", [resource.documentType || resource.type, resource.packLabel, resource.origin].filter(Boolean).join(" · "));
     const categoryCell = makeElement("span", "nexus-library-list-category", category);
     const bytes = Number(resource.sizeBytes);
@@ -644,8 +679,8 @@ export function createLibraryCatalogExplorer({
       ? new Date(modified).toLocaleDateString("pt-BR")
       : "—");
     const tagsCell = makeElement("span", "nexus-library-list-tags", (resource.tags ?? []).join(", ") || "—");
-    select.append(preview, title, meta, categoryCell, sizeCell, modifiedCell, tagsCell);
-
+    select.append(nameCell, categoryCell, sizeCell, modifiedCell, tagsCell);
+    select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
     const isFavorite = preferences.favorites.includes(key);
     const favorite = makeElement("button", "nexus-library-favorite");
     favorite.type = "button";
@@ -985,7 +1020,7 @@ export function createLibraryCatalogExplorer({
     currentCompendiumIds = Array.isArray(compendiumIds) ? [...new Set(compendiumIds.map(String).filter(Boolean))].slice(0, 32) : [];
     currentViewMode = viewMode === "list" ? "list" : "grid";
     currentCardSize = ["small", "medium", "large"].includes(cardSize) ? cardSize : "medium";
-    currentSortMode = ["name-asc", "name-desc", "type-asc", "source-asc", "size-desc", "modified-desc", "tag-asc"].includes(sortMode) ? sortMode : "name-asc";
+    currentSortMode = ["name-asc", "name-desc", "type-asc", "type-desc", "source-asc", "source-desc", "size-desc", "size-asc", "modified-desc", "modified-asc", "tag-asc", "tag-desc"].includes(sortMode) ? sortMode : "name-asc";
     const version = ++renderRequestVersion;
     if (!append) {
       detailRequestVersion++;
@@ -1086,11 +1121,26 @@ export function createLibraryCatalogExplorer({
     const compareText = (left, right) => String(left ?? "").localeCompare(String(right ?? ""), "pt-BR", { sensitivity: "base", numeric: true });
     visible.sort((left, right) => {
       if (currentSortMode === "name-desc") return compareText(right.name ?? right.title ?? right.label, left.name ?? left.title ?? left.label);
-      if (currentSortMode === "type-asc") return compareText(left.kind ?? left.type, right.kind ?? right.type) || compareText(left.name ?? left.title, right.name ?? right.title);
-      if (currentSortMode === "source-asc") return compareText(left.origin ?? left.source ?? left.providerId, right.origin ?? right.source ?? right.providerId) || compareText(left.name ?? left.title, right.name ?? right.title);
-      if (currentSortMode === "size-desc") return (Number(right.sizeBytes) || -1) - (Number(left.sizeBytes) || -1) || compareText(left.name, right.name);
-      if (currentSortMode === "modified-desc") return (Date.parse(right.modifiedAt ?? "") || 0) - (Date.parse(left.modifiedAt ?? "") || 0) || compareText(left.name, right.name);
-      if (currentSortMode === "tag-asc") return compareText((left.tags ?? []).join(", "), (right.tags ?? []).join(", ")) || compareText(left.name, right.name);
+      if (currentSortMode === "type-asc" || currentSortMode === "type-desc") {
+        const order = compareText(left.kind ?? left.type, right.kind ?? right.type);
+        return (currentSortMode === "type-desc" ? -order : order) || compareText(left.name ?? left.title, right.name ?? right.title);
+      }
+      if (currentSortMode === "source-asc" || currentSortMode === "source-desc") {
+        const order = compareText(left.origin ?? left.source ?? left.providerId, right.origin ?? right.source ?? right.providerId);
+        return (currentSortMode === "source-desc" ? -order : order) || compareText(left.name ?? left.title, right.name ?? right.title);
+      }
+      if (currentSortMode === "size-desc" || currentSortMode === "size-asc") {
+        const order = (Number(left.sizeBytes) || 0) - (Number(right.sizeBytes) || 0);
+        return (currentSortMode === "size-desc" ? -order : order) || compareText(left.name, right.name);
+      }
+      if (currentSortMode === "modified-desc" || currentSortMode === "modified-asc") {
+        const order = (Date.parse(left.modifiedAt ?? "") || 0) - (Date.parse(right.modifiedAt ?? "") || 0);
+        return (currentSortMode === "modified-desc" ? -order : order) || compareText(left.name, right.name);
+      }
+      if (currentSortMode === "tag-asc" || currentSortMode === "tag-desc") {
+        const order = compareText((left.tags ?? []).join(", "), (right.tags ?? []).join(", "));
+        return (currentSortMode === "tag-desc" ? -order : order) || compareText(left.name, right.name);
+      }
       return compareText(left.name ?? left.title ?? left.label, right.name ?? right.title ?? right.label);
     });
 
