@@ -110,6 +110,15 @@ Hooks.once("init", () => {
     setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
     getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
   }));
+  // API pública de importação/exportação da Biblioteca. O serviço valida o pacote
+  // e separa a prévia do commit para evitar sobrescritas silenciosas.
+  game.nexus.library.exportBackup = () => game.nexus.library.backup.exportCode();
+  game.nexus.library.prepareBackupImport = (source, options) =>
+    game.nexus.library.backup.prepareImport(source, options);
+  game.nexus.library.commitBackupImport = plan =>
+    game.nexus.library.backup.commitImport(plan);
+  game.nexus.library.importBackup = (source, options) =>
+    game.nexus.library.backup.importCode(source, options);
   const LibraryApplication = registerService("library.applicationClass", ({ "library.registry": registry }) =>
     createLibraryApplicationClass({
       ApplicationV2: foundry.applications.api.ApplicationV2,
