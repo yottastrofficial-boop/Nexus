@@ -973,7 +973,7 @@ export function createLibraryCatalogExplorer({
     }
   };
 
-  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, sortMode = currentSortMode, append = false } = {}) => {
+  const render = async ({ query = currentQuery, smartView = currentSmartView, folder = currentFolder, collectionId = currentCollectionId, tag = currentTag, origin = currentOrigin, kind = currentKind, type = currentType, compendiumIds = currentCompendiumIds, viewMode = currentViewMode, cardSize = currentCardSize, sortMode = currentSortMode, folderFilter = null, append = false } = {}) => {
     currentQuery = text(query).trim();
     currentSmartView = smartView;
     currentFolder = folder;
@@ -1006,7 +1006,20 @@ export function createLibraryCatalogExplorer({
           : currentSmartView === "shortcut"
             ? [preferences.shortcuts.find(shortcut => shortcut.id === currentCollectionId)?.resourceKey].filter(Boolean)
             : currentFolder
-              ? Object.entries(preferences.assignments).filter(([, folderId]) => folderId === currentFolder).map(([key]) => key)
+              ? folderFilter ? null : (() => {
+                const folderIds = new Set([currentFolder]);
+                let changed = true;
+                while (changed) {
+                  changed = false;
+                  for (const item of preferences.folders) {
+                    if (item.parentId && folderIds.has(item.parentId) && !folderIds.has(item.id)) {
+                      folderIds.add(item.id);
+                      changed = true;
+                    }
+                  }
+                }
+                return Object.entries(preferences.assignments).filter(([, folderId]) => folderIds.has(folderId)).map(([key]) => key);
+              })()
               : null;
     let page;
     if (smartKeys) {
