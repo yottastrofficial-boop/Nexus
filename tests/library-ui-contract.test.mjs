@@ -223,8 +223,11 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
 assert.ok(catalogExplorer.includes("model.family") &&
   catalogExplorer.includes("nexus-library-font-specimen") &&
-  catalogExplorer.includes("fa-solid fa-font"),
-  "Font specimens use the resolved family in the Inspector while grid cards stay compact.");
+  catalogExplorer.includes("nexus-library-font-grid-specimen") &&
+  catalogExplorer.includes("resource.fontFamily") &&
+  catalogExplorer.includes('"Aa"') &&
+  catalogExplorer.includes("Lorem ipsum dolor sit amet."),
+  "Font cards render a compact Aa specimen in the resolved family and the Inspector keeps the short sample.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogExplorer.includes("nexus-library-theme-preview") &&
   catalogExplorer.includes("fa-solid fa-palette") &&
