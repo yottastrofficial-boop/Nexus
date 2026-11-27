@@ -167,9 +167,11 @@ assert.deepEqual(
     { key: "button", label: "Botão", value: "#77532c" }
   ]),
   {
-    canvas: "#171f2a", panel: "#282018", surface: "#3b2e20", card: "#273443",
-    input: "#111b27", border: "#3c5067", text: "#f0e3c7", muted: "#9aadc2",
-    accent: "#85663f", highlight: "#d7aa59", button: "#77532c", windowHeader: "#223246"
+    canvas: "#171f2a", panel: "#282018", surface: "#3b2e20", input: "#111b27",
+    border: "#3c5067", text: "#f0e3c7", muted: "#9aadc2", hover: "#2a3d52",
+    scroll: "#111923", windowHeader: "#223246", windowContent: "#192431", menu: "#202f40",
+    placeholder: "#91a6bd", resourceButton: "#315b7d", card: "#273443",
+    accent: "#85663f", highlight: "#d7aa59", button: "#77532c"
   },
   "Theme preview tokens must resolve by canonical palette key, not localized label or fallback."
 );
