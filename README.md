@@ -1,6 +1,6 @@
 ## Biblioteca 1.0.0.136 preparada para publicação
 
-A 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, validação/prévia de importação e confirmação. O pacote Foundry será publicado pelo workflow após a validação automatizada; o manifesto estável será sincronizado somente depois de confirmar o ZIP na Release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
+A versão 1.0.0.136 expõe a API pública de backup da Biblioteca, com exportação, validação/prévia de importação e confirmação. O pacote Foundry será publicado pelo workflow após a validação automatizada; o manifesto estável será sincronizado somente depois de confirmar o ZIP na Release. A validação visual/funcional no Foundry VTT 14 build 360 continua pendente.
 
 # NEXUS RPG
 
