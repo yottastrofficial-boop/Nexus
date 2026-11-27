@@ -1,13 +1,13 @@
-## 1.0.0.132 — Lista alinhada, previews compactos e organização de mídia
+## 1.0.0.133 — Grid adaptativo e prévias proporcionais da Biblioteca
 
-- Corrigir o grid da lista para usar exatamente Nome, Categoria e Tipo; pastas aparecem com o nome na primeira coluna e tipo "Pasta".
-- Cabeçalho Nome alterna A–Z/Z–A por clique; pastas acompanham a direção da ordenação.
-- Fontes e temas exibem somente ícone e nome no grid; as prévias detalhadas continuam no Inspector.
-- Descrição aparece abaixo da prévia do recurso no Inspector.
-- Ícone da Biblioteca fica no cabeçalho nativo; breadcrumb mostra apenas o caminho com /.
-- Movimentação entre pastas da Biblioteca altera a organização lógica, sem mover o arquivo original no storage.
-- Configurações pequenas ficam em registros JSON do libraryStore, sem criar um arquivo físico por ajuste.
-- Compatibilidade com Foundry VTT 14 build 360; validação visual/funcional no cliente real permanece pendente.
+- Grid adaptativo preenche a largura disponível, sem largura máxima fixa dos cartões.
+- Pequeno/Médio/Grande controla o tamanho de exibição das prévias em 32/64/128 CSS px; os arquivos originais mantêm suas dimensões e proporções.
+- Imagens são redimensionadas proporcionalmente e recebem ícone representativo quando não há miniatura disponível.
+- Cartões Grid mostram somente miniatura e nome; metadados de categoria/tipo permanecem na Lista e nos filtros.
+- Pastas são elementos de navegação e não participam das facetas de categoria/tipo.
+- Fontes mostram “Aa” no Grid e “Aa” + “Lorem ipsum dolor sit amet.” no Inspector.
+- Favoritos ficam no canto superior direito dos cartões.
+- CI, regressões e geração do pacote aprovadas no PR #117; validação visual/funcional no Foundry VTT 14 build 360 pendente.
 
 ## 1.0.0.129 — Refinamento visual e funcional do Explorer
 
