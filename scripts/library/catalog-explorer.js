@@ -284,7 +284,7 @@ export function getLibraryThemePreviewTokens(rawColors = []) {
       : [];
   const colors = new Map(entries
     .filter(item => item && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(item.value ?? "").trim()))
-    .map(item => [normalizeThemeColorKey(item.label), String(item.value).trim()]));
+    .map(item => [normalizeThemeColorKey(item.key ?? item.label), String(item.value).trim()]));
   const pick = (keys, fallback) => {
     for (const key of keys) {
       const value = colors.get(normalizeThemeColorKey(key));
