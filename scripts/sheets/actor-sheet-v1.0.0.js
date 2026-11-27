@@ -537,8 +537,10 @@ export class NexusActorSheet extends NexusActorSheetBase {
 
   static DEFAULT_OPTIONS = foundry.utils.mergeObject(ActorSheetV2.DEFAULT_OPTIONS, {
     classes: ["nexus", "sheet", "actor"],
-    position: { width: 800, height: 836 },
-    window: { resizable: false }
+    // Give the 800px default design canvas enough viewport to render at its
+    // configured scale instead of shrinking to fit the former narrow window.
+    position: { width: 1100, height: 920 },
+    window: { resizable: true }
   }, { inplace: false });
 
   static PARTS = {
@@ -2384,7 +2386,7 @@ export class NexusActorSheet extends NexusActorSheetBase {
       }
     }
     this._syncScopedThemeSurfaces(layout);
-    // The application window has fixed chrome dimensions (800 × 836).
+    // The sheet window is intentionally wider than the 800px default Canvas.
     // Canvas dimensions remain independent and are handled by its own viewport.
     const canvas = this.element?.querySelector(".nexus-canvas");
     if (canvas) {
