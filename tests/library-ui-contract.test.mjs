@@ -276,7 +276,7 @@ assert.match(styles, /data-card-size="medium"[\s\S]*?--nexus-library-preview-siz
   "Medium grid cards must use 64px square previews.");
 assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size:\s*128px/,
   "Large grid cards must use 128px square previews.");
-const finalGridFavorite = styles.slice(styles.lastIndexOf(".nexus-library-generic-items[data-view-mode=\"grid\"] .nexus-library-favorite"));
+const finalGridFavorite = styles.slice(styles.lastIndexOf(".nexus-library-generic-items[data-view-mode=\"grid\"] .nexus-library-favorite {"));
 assert.match(finalGridFavorite, /position:\s*static\s*!important/,
   "Grid favorites must no longer overlay the thumbnail corner.");
 assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
