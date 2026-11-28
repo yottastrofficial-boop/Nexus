@@ -159,7 +159,7 @@ export function createLibraryThemeSample({ name = "Tema", palette = [], typograp
   }
   const header = makeElement("header", "nexus-catalog-theme-sample__header");
   header.append(
-    makeElement("small", "nexus-catalog-theme-sample__eyebrow", "NEXUS · PRÉVIA"),
+    makeElement("small", "nexus-catalog-theme-sample__eyebrow", "NEXUS"),
     makeElement("strong", "nexus-catalog-theme-sample__brand", String(name).slice(0, compact ? 18 : 64))
   );
   const body = makeElement("div", "nexus-catalog-theme-sample__body");
@@ -168,7 +168,7 @@ export function createLibraryThemeSample({ name = "Tema", palette = [], typograp
   const panel = makeElement("section", "nexus-catalog-theme-sample__panel");
   panel.append(
     makeElement("small", "nexus-catalog-theme-sample__label", compact ? "PERSONAGEM" : "PERSONAGEM · EXEMPLO"),
-    makeElement("strong", "nexus-catalog-theme-sample__title", "Exemplo de interface"),
+    makeElement("strong", "nexus-catalog-theme-sample__title", "Ficha de personagem"),
     makeElement("span", "nexus-catalog-theme-sample__highlight", "Destaque selecionado")
   );
   const resource = makeElement("div", "nexus-catalog-theme-sample__resource");

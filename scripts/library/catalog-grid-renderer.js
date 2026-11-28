@@ -9,6 +9,7 @@ import {
   createLibraryThemeSample,
   getLibraryResourceBarCardPreviewModel,
   getLibraryResourcePreviewModel,
+  getLibraryThemePreviewTokens,
   safeFontFamily,
   safeMediaSource
 } from "./catalog-preview-renderers.js";
@@ -100,6 +101,28 @@ function createFontPreview(resource, size) {
   return preview;
 }
 
+function createThemePalettePreview(preview, palette) {
+  const tokens = getLibraryThemePreviewTokens(palette);
+  const roles = [
+    ["canvas", "Canvas"], ["panel", "Painel"], ["surface", "Superfície"],
+    ["accent", "Acento"], ["highlight", "Destaque"], ["button", "Botão"]
+  ];
+  preview.classList.add("is-palette-preview");
+  const grid = makeElement("span", "nexus-catalog-theme-palette");
+  grid.setAttribute("role", "img");
+  grid.setAttribute("aria-label", "Paleta do tema: " + roles.map(([key, label]) => label + " " + tokens[key]).join(", "));
+  for (const [key, label] of roles) {
+    const swatch = makeElement("span", "nexus-catalog-theme-chip");
+    swatch.dataset.paletteRole = key;
+    swatch.style.backgroundColor = tokens[key];
+    swatch.style.borderColor = tokens.border;
+    swatch.title = label + " · " + tokens[key];
+    swatch.setAttribute("aria-label", label + " · " + tokens[key]);
+    grid.append(swatch);
+  }
+  preview.append(grid);
+}
+
 function createThemePreview(resource, size) {
   const model = getLibraryDesignProfilePreviewModel(resource);
   const preview = makeElement("div", "nexus-catalog-preview nexus-catalog-preview--theme");
@@ -107,15 +130,17 @@ function createThemePreview(resource, size) {
   const palette = model?.palette ?? resource.previewColors ?? [];
   if (size === "small") {
     preview.classList.add("is-palette-chip");
-    const colors = palette
-      .filter(color => /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(color?.value ?? "")))
-      .slice(0, 4);
-    for (const color of colors) {
+    const tokens = getLibraryThemePreviewTokens(palette);
+    const colors = [tokens.canvas, tokens.panel, tokens.accent, tokens.highlight];
+    for (const value of colors) {
       const swatch = makeElement("span", "nexus-catalog-theme-chip");
-      swatch.style.backgroundColor = color.value;
+      swatch.style.backgroundColor = value;
       preview.append(swatch);
     }
-    if (!colors.length) preview.append(createIconPreview(resource));
+    return preview;
+  }
+  if (size === "medium") {
+    createThemePalettePreview(preview, palette);
     return preview;
   }
   const sample = createLibraryThemeSample({
@@ -124,7 +149,7 @@ function createThemePreview(resource, size) {
     typography: model?.typography ?? {},
     layout: { ...(model?.layout ?? {}), preset: model?.preset },
     components: model?.components ?? {},
-    compact: true
+    compact: false
   });
   sample.dataset.cardSize = size;
   preview.append(sample);

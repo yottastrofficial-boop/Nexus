@@ -1,3 +1,12 @@
+## Refinamento de tema — contrato v10 (1.0.0.148)
+
+- A grade de temas usa quatro cores do perfil em 32 px, seis tokens semânticos em 64 px e uma interface demonstrativa completa em 128 px.
+- A prévia de 64 px é uma paleta 3 × 2, não uma mini-interface verticalmente comprimida.
+- A amostra de 128 px aplica os estilos de componente definidos no perfil para botões, painéis, containers, destaques e campos.
+- A amostra não apresenta os rótulos “NEXUS · PRÉVIA” ou “Exemplo de interface”.
+- Favoritos permanecem exclusivamente no Inspector.
+- Pré-visualizações são inertes e usam somente tokens normalizados; conteúdo importado não é executado.
+
 ## Biblioteca visual — contrato v9 (1.0.0.147, em desenvolvimento)
 
 - O Explorer coordena o catálogo; renderizadores de cartão e prévia são módulos independentes.

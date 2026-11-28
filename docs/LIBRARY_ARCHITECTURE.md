@@ -1,3 +1,13 @@
+## Refinamento das prévias de tema — 1.0.0.148
+
+- Cartões de 32 px usam quatro cores de referência do perfil.
+- Cartões de 64 px mostram seis tokens semânticos em uma grade 3 × 2; não comprimem uma interface inteira em um espaço vertical insuficiente.
+- Cartões de 128 px mostram a amostra completa, com tipografia e elementos de interface.
+- A amostra completa aplica tokens próprios de botões, painéis, containers, destaques e campos, em vez de depender apenas dos tokens globais de paleta.
+- Os textos de demonstração evitam rótulos de “prévia” e títulos genéricos que competem com o nome do recurso.
+- Favoritos continuam no cabeçalho do Inspector, sem controles nos cartões.
+- A refatoração preserva schemas, IDs, referências, provedores, persistência, pastas e integração Foundry. A validação visual no Foundry VTT 14 build 360 permanece manual.
+
 ## Reestruturação da amostragem em grade — 1.0.0.147 (em desenvolvimento)
 
 A apresentação do catálogo foi separada do Explorer e organizada por contratos próprios:

@@ -631,3 +631,78 @@ html.nexus-design-system .nexus-library-application .nexus-library-theme-palette
   color: var(--nexus-panel-text, #e7edf5);
   font-size: 11px;
 }
+
+
+/* Medium theme cards show the semantic palette instead of compressing a UI into 64px. */
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--theme.is-palette-preview {
+  display: block;
+  padding: 3px;
+  background: var(--nexus-library-theme-canvas, #171f2a);
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  height: 100%;
+  gap: 3px;
+  overflow: hidden;
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-palette > .nexus-catalog-theme-chip {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px #00000012;
+}
+
+/* Apply component-specific theme tokens to the corresponding specimen surfaces. */
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__nav {
+  background: var(--nexus-library-theme-component-panels-background, var(--nexus-library-theme-panel, #182330));
+  color: var(--nexus-library-theme-component-panels-text, var(--nexus-library-theme-muted, #9aadc2));
+  border-color: var(--nexus-library-theme-component-panels-border, var(--nexus-library-theme-border, #3c5067));
+  border-style: var(--nexus-library-theme-component-panels-border-style, solid);
+  border-width: var(--nexus-library-theme-component-panels-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-panels-radius, var(--nexus-library-theme-radius, 8px));
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__panel {
+  background: var(--nexus-library-theme-component-panels-background, var(--nexus-library-theme-surface, #202e3e));
+  color: var(--nexus-library-theme-component-panels-text, var(--nexus-library-theme-text, #e7edf5));
+  border-color: var(--nexus-library-theme-component-panels-border, var(--nexus-library-theme-border, #3c5067));
+  border-style: var(--nexus-library-theme-component-panels-border-style, solid);
+  border-width: var(--nexus-library-theme-component-panels-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-panels-radius, var(--nexus-library-theme-radius, 8px));
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__highlight {
+  background: var(--nexus-library-theme-component-highlights-background, var(--nexus-library-theme-highlight, #78b7e8));
+  color: var(--nexus-library-theme-component-highlights-text, var(--nexus-library-theme-canvas, #171f2a));
+  border-color: var(--nexus-library-theme-component-highlights-border, var(--nexus-library-theme-highlight, #78b7e8));
+  border-style: var(--nexus-library-theme-component-highlights-border-style, solid);
+  border-width: var(--nexus-library-theme-component-highlights-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-highlights-radius, var(--nexus-library-theme-radius, 8px));
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__card {
+  background: var(--nexus-library-theme-component-containers-background, var(--nexus-library-theme-card, #273443));
+  color: var(--nexus-library-theme-component-containers-text, var(--nexus-library-theme-text, #e7edf5));
+  border-color: var(--nexus-library-theme-component-containers-border, var(--nexus-library-theme-border, #3c5067));
+  border-style: var(--nexus-library-theme-component-containers-border-style, solid);
+  border-width: var(--nexus-library-theme-component-containers-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-containers-radius, var(--nexus-library-theme-radius, 8px));
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__field {
+  background: var(--nexus-library-theme-component-fields-background, var(--nexus-library-theme-input, #111b27));
+  color: var(--nexus-library-theme-component-fields-text, var(--nexus-library-theme-text, #e7edf5));
+  border-color: var(--nexus-library-theme-component-fields-border, var(--nexus-library-theme-border, #3c5067));
+  border-style: var(--nexus-library-theme-component-fields-border-style, solid);
+  border-width: var(--nexus-library-theme-component-fields-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-fields-radius, var(--nexus-library-theme-radius, 8px));
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__button {
+  background: var(--nexus-library-theme-component-buttons-background, var(--nexus-library-theme-button, #315b7d));
+  color: var(--nexus-library-theme-component-buttons-text, var(--nexus-library-theme-text, #e7edf5));
+  border-color: var(--nexus-library-theme-component-buttons-border, var(--nexus-library-theme-border, #3c5067));
+  border-style: var(--nexus-library-theme-component-buttons-border-style, solid);
+  border-width: var(--nexus-library-theme-component-buttons-border-width, 1px);
+  border-radius: var(--nexus-library-theme-component-buttons-radius, var(--nexus-library-theme-radius, 8px));
+}

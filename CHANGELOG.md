@@ -1,3 +1,13 @@
+## 1.0.0.148 — Prévia de temas e tokens de componentes
+
+- Substitui a mini-interface comprimida dos cartões médios de tema por uma composição legível de seis cores semânticas: Canvas, Painel, Superfície, Acento, Destaque e Botão.
+- Mantém a miniatura de 32 px como paleta compacta e reserva a mini-interface completa para cartões de 128 px.
+- Aplica na amostra de tema os tokens específicos de botões, painéis, containers, destaques e campos, incluindo cor, borda e raio.
+- Remove a legenda literal “NEXUS · PRÉVIA” e o título “Exemplo de interface” da amostra.
+- Preserva a separação entre renderizador de cartões, renderizador de prévias e folha de estilos do catálogo.
+- Mantém favoritos no Inspector e não adiciona controles sobrepostos aos cartões.
+- A validação automatizada é executada pelo workflow de release. A validação visual/funcional no Foundry VTT 14 build 360 continua manual.
+
 ## 1.0.0.147 — Reestruturação da amostragem da Biblioteca
 
 - Separa a grade em `catalog-grid-renderer.js`, com cartões de recurso/pasta, ícones semânticos, labels, seleção e drag-and-drop.
