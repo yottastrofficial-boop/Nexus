@@ -118,14 +118,16 @@ function createThemePreview(resource, size) {
     if (!colors.length) preview.append(createIconPreview(resource));
     return preview;
   }
-  preview.append(createLibraryThemeSample({
+  const sample = createLibraryThemeSample({
     name: resource.name,
     palette,
     typography: model?.typography ?? {},
     layout: { ...(model?.layout ?? {}), preset: model?.preset },
     components: model?.components ?? {},
     compact: true
-  }));
+  });
+  sample.dataset.cardSize = size;
+  preview.append(sample);
   return preview;
 }
 
