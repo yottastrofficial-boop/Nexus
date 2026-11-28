@@ -1,6 +1,6 @@
 ## Estado de distribuição — 1.0.0.146 em preparação
 
-A branch candidata prepara a 1.0.0.146 com correções visuais na Biblioteca. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. A versão estável permanece na 1.0.0.145 até CI, pacote ZIP e release serem confirmados pelo workflow oficial. A validação visual no Foundry VTT 14 build 360 permanece manual.
+A revisão 1.0.0.146 está sendo preparada com correções visuais na Biblioteca. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. A versão estável permanece na 1.0.0.145 até CI, pacote ZIP e release serem confirmados pelo workflow oficial. A validação visual no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado de distribuição — 1.0.0.145 em preparação
 
