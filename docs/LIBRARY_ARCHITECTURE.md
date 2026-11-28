@@ -9,7 +9,7 @@ A apresentação do catálogo foi separada do Explorer e organizada por contrato
 
 A grade usa somente cartões com linhas independentes para prévia, título e etiqueta; os tamanhos disponíveis são 32, 64 e 128 px. Favoritos não são renderizados nos cartões e continuam no Inspector. Fontes usam um único espécime baseado na família registrada; temas usam um único renderizador de amostra, com versão compacta para a grade e quadrada para o Inspector. Em 32 px, a miniatura de tema vira uma composição de paleta, evitando texto ilegível.
 
-A folha antiga do Design System perdeu 677 linhas de regras duplicadas de grade, miniaturas e prévias de tema. A folha dedicada do catálogo agora controla esses elementos. O Universal Library stylesheet ainda contém regras históricas de classes de cartão não mais emitidas pelo renderer; sua remoção será feita após confirmar que nenhuma outra superfície da Biblioteca as consome.
+A folha antiga do Design System perdeu 677 linhas de regras duplicadas de grade, miniaturas e prévias de tema. O Universal Library stylesheet perdeu outras 1.018 linhas de seletores de cartão, fonte, tema, lista e pasta que deixaram de ser emitidos pelo renderer. A folha dedicada do catálogo agora controla esses elementos; shell, navegação, Inspector e prévias técnicas continuam nas camadas apropriadas.
 
 A refatoração não altera schemas, identificadores, referências, persistência, favoritos, pastas, provedores ou documentos Foundry. Conteúdo importado permanece inerte e as prévias usam DOM controlado e tokens validados. A validação automatizada e a conferência visual no Foundry VTT 14 build 360 são gates separados; esta branch não representa uma release estável.
 
