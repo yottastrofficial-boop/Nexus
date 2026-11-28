@@ -1042,7 +1042,7 @@ assert.match(changelog, /Grupos e camadas/, "O changelog deve documentar as melh
 assert.match(changelog, /Biblioteca de layouts completos/, "O changelog deve documentar o compartilhamento de layouts completos");
 assert.match(css, /nexus-library-saved-groups/);
 
-assert.match(entrypoint, /Hooks\.on\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
+assert.match(actorLifecycle, /register\("preUpdateActor"/, "A atualização do retrato deve preservar a distinção entre Actor e Token");
 assert.match(sheetCode, /classList\.toggle\("is-selected", selected\)/, "A seleção deve aplicar diretamente o estado visual final");
 assert.match(sheetCode, /classList\.toggle\("is-group-inspecting", memberSelected \|\| \(selected && !!relatedGroup\)\)/, "A inspeção de grupos deve acompanhar o estado final da seleção");
 assert.match(sheetCode, /const liveCanvas = sheet\.element\?\.querySelector\?\./, "Os atalhos devem consultar o Canvas atual");
