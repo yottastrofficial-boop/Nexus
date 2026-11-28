@@ -17,7 +17,7 @@
 - Unifica a amostra de tema: paleta compacta em 32 px, mini-interface em 64/128 px e variante quadrada completa no Inspector.
 - Unifica a amostra tipográfica e aplica a família real da fonte aos espécimes.
 - Cria `nexus-library-catalog.css` para geometria, dimensões, tipografia e estados dos cartões.
-- Remove 677 linhas de estilos duplicados de grade/miniaturas/prévias do final do Design System.
+- Remove 677 linhas de estilos duplicados de grade/miniaturas/prévias do final do Design System e 1.018 linhas de seletores de cartões/prévias legados do Universal Library stylesheet.
 - Preserva IDs, schemas, provedores, preferências, favoritos, pastas, referências e ações do catálogo.
 - A branch permanece em desenvolvimento; testes automatizados e inspeção visual no Foundry VTT 14 build 360 ainda precisam ser concluídos.
 
