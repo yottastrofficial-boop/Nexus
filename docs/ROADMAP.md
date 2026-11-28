@@ -1,6 +1,14 @@
-## Estado da main — candidata 1.0.0.147 (manifesto estável 1.0.0.146)
+## Estado da main — 1.0.0.148 (manifest estável em sincronização)
 
-A candidata 1.0.0.147 reestrutura os renderizadores da Biblioteca e remove estilos legados. O manifesto estável continua em 1.0.0.146 até o workflow publicar o pacote e sincronizar o manifesto. Corrige a cascata da Biblioteca mantendo o Design System como última folha de estilos e concentrando nele os contratos finais da grade e do Inspector. A grade deixa de renderizar estrelas de favorito; a gestão permanece no Inspector. Miniaturas usam 32/64/128 px, miniaturas de tema são reconstruídas e a prévia completa do tema passa a ser quadrada. A conferência visual e funcional dentro do Foundry VTT 14 build 360 permanece manual.
+A revisão 1.0.0.148 refina as prévias de temas da Biblioteca: cartões de 64 px mostram uma paleta semântica de seis cores, cartões de 128 px mostram a amostra completa e tokens de componentes são aplicados às superfícies correspondentes. Favoritos permanecem no Inspector. O workflow valida o pacote e sincroniza o manifesto somente após publicar o asset. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
+
+## 1.0.0.148 — Prévia de temas e tokens de componentes
+
+- Evita comprimir uma interface completa dentro de cartões de tema de 64 px.
+- Mostra Canvas, Painel, Superfície, Acento, Destaque e Botão na paleta.
+- Aplica estilos específicos de botões, painéis, containers, destaques e campos.
+- Mantém cartões grandes com amostra completa e cartões pequenos com paleta compacta.
+- CI e publicação de pacote/manifesto dependem do workflow de release; a validação visual no Foundry continua manual.
 
 ## 1.0.0.147 — Reestruturação da Biblioteca (candidata)\n\n- Separa cartões, prévias tipadas e estilos do catálogo em módulos próprios.\n- Elimina implementações concorrentes de miniaturas e estilos legados.\n- Mantém 32/64/128 px e os favoritos no Inspector.\n- CI e pacote Foundry serão confirmados antes da publicação; validação visual no Foundry permanece manual.\n\n## 1.0.0.144 — Biblioteca de temas curada (publicada)
 
