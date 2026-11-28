@@ -284,7 +284,12 @@ assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
 assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
 assert.match(catalogExplorer, /nexus-library-theme-miniature-copy", "NEXUS"/);
 assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
-assert.match(catalogExplorer, /active && currentSmartView === "favorites"[\\s\\S]*?await render\\(\\)/,
+const favoriteToggle = catalogExplorer.slice(
+  catalogExplorer.indexOf('detailFavorite.addEventListener("click"'),
+  catalogExplorer.indexOf("heading.append(detailFavorite)")
+);
+assert.ok(favoriteToggle.includes('if (active && currentSmartView === "favorites")') &&
+  favoriteToggle.includes("await render();"),
   "Removing a favorite from the Favorites view must remove it from the visible catalog.");
 assert.ok(designSystem.includes(".nexus-library-theme-miniature-copy") &&
   designSystem.includes("font-family: var(--nexus-library-theme-font"),
