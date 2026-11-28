@@ -5,7 +5,7 @@
 - Extrai defaults de Actor e sincronização de textura do Token de protótipo do bootstrap para `scripts/core/actor-document-lifecycle.js`, com dependências Foundry injetadas e disposer idempotente.
 - Adiciona testes unitários para defaults, preservação de textura personalizada, atualização de retrato e remoção de hooks.
 - Atualiza os contratos de validação do pacote para refletir a nova fronteira de lifecycle.
-- CI e pacote foram aprovados na validação da main; o workflow de release verificará e publicará o ZIP antes de sincronizar o manifesto. Teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+- CI, pacote, release v1.0.0.140, asset `nexus.zip` (500.214 bytes) e manifesto estável foram confirmados pelo workflow 46095904917. Teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.139 — Prévia fiel de temas e fontes
 
