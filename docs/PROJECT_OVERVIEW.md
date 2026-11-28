@@ -1,6 +1,6 @@
-## Estado da main — 1.0.0.146 em preparação
+## Estado da main — 1.0.0.146 publicada
 
-A revisão 1.0.0.146 corrige a cascata visual da Biblioteca sem alterar a ordem oficial das folhas de estilo: o Design System permanece por último e recebe os contratos finais da grade e do Inspector. Os cartões deixam de renderizar estrelas de favorito; o gerenciamento permanece no Inspector. Miniaturas de 32/64/128 px, espécimes tipográficos e prévia quadrada de temas são reorganizados. A CI valida contratos automatizados; a confirmação visual/funcional dentro do Foundry VTT 14 build 360 permanece manual.
+A versão estável 1.0.0.146 foi integrada e publicada pelo workflow oficial 46121574486. A revisão corrige a cascata visual da Biblioteca sem alterar a ordem oficial das folhas de estilo: o Design System permanece por último e recebe os contratos finais da grade e do Inspector. Os cartões deixam de renderizar estrelas de favorito; o gerenciamento permanece no Inspector. Miniaturas de 32/64/128 px, espécimes tipográficos e prévia quadrada de temas são reorganizados. CI, regressões, pacote ZIP, Release e manifesto foram confirmados; a confirmação visual/funcional dentro do Foundry VTT 14 build 360 permanece manual.
 
 ## Estado do código — 1.0.0.144 (publicada)
 
