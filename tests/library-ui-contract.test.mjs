@@ -222,8 +222,8 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
   libraryTemplate.includes("data-library-tag"),
   "Category and type filters remain searchable from list headers, and tags have a dedicated filter.");
-assert.ok(catalogPreviews.includes("nexus-library-theme-miniature") &&
-  catalogPreviews.includes("nexus-library-theme-card-preview") &&
+assert.ok(catalogPreviews.includes("nexus-catalog-theme-sample") &&
+  catalogPreviews.includes("nexus-catalog-theme-sample__header") &&
   catalogPreviews.includes("getLibraryThemePreviewTokens"),
   "Theme cards must use the shared, token-driven mini-interface preview.");
 assert.ok(libraryUiContract.includes("input.nexus-library-search:focus") && libraryUiContract.includes("border:0!important"),
@@ -253,7 +253,7 @@ assert.ok(catalogGrid.includes("nexus-catalog-font-glyph") &&
   "Font metadata stays out of the visual preview while the compact Aa card remains.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogExplorer.includes("nexus-library-theme-preview") &&
-  catalogPreviews.includes("nexus-library-theme-card-preview") &&
+  catalogPreviews.includes("nexus-catalog-theme-sample is-compact") &&
   catalogPreviews.includes("getLibraryThemePreviewTokens") &&
   catalogGrid.includes("getLibraryResourceBarCardPreviewModel") &&
   libraryUiContract.includes("nexus-library-theme-swatches"),
@@ -288,8 +288,8 @@ assert.doesNotMatch(styles, /nexus-library-theme-miniature/,
   "The Universal Library layer must not retain legacy theme-miniature selectors.");
 assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
   "No legacy favorite CSS may remain in either Library stylesheet.");
-assert.match(catalogPreviews, /nexus-library-theme-miniature-title", "Aa"/);
-assert.match(catalogPreviews, /nexus-library-theme-miniature-copy", "NEXUS"/);
+assert.match(catalogPreviews, /nexus-catalog-theme-sample__title/);
+assert.match(catalogPreviews, /nexus-catalog-theme-sample__brand/);
 assert.match(catalogPreviews, /--nexus-library-theme-font", family/);
 const favoriteToggle = catalogExplorer.slice(
   catalogExplorer.indexOf('detailFavorite.addEventListener("click"'),
@@ -298,12 +298,12 @@ const favoriteToggle = catalogExplorer.slice(
 assert.ok(favoriteToggle.includes('if (active && currentSmartView === "favorites")') &&
   favoriteToggle.includes("await render();"),
   "Removing a favorite from the Favorites view must remove it from the visible catalog.");
-assert.ok(designSystem.includes(".nexus-library-theme-miniature-copy") &&
-  designSystem.includes("font-family: var(--nexus-library-theme-font"),
+assert.ok(catalogStyles.includes(".nexus-catalog-theme-sample__brand") &&
+  catalogStyles.includes("font-family: var(--nexus-library-theme-display-font"),
   "Theme miniatures must visibly apply the selected body font.");
-assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
+assert.match(catalogStyles, /\.nexus-catalog-theme-sample\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
   "The full theme preview must use the theme's body font.");
-assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font-family:\s*var\(--nexus-library-theme-display-font/,
+assert.match(catalogStyles, /\.nexus-catalog-theme-sample__brand[\s\S]*?font-family:\s*var\(--nexus-library-theme-display-font/,
   "Theme headings must use the theme's display font.");
 
 
@@ -313,5 +313,5 @@ assert.match(catalogPreviews, /root\.dataset\.previewShape = compact \? "compact
   "The full Inspector preview must activate the square layout contract.");
 assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
-assert.match(catalogPreviews, /nexus-library-theme-miniature-sidebar/);
-assert.match(catalogPreviews, /nexus-library-theme-miniature-content/);
+assert.match(catalogPreviews, /nexus-catalog-theme-sample__nav/);
+assert.match(catalogPreviews, /nexus-catalog-theme-sample__panel/);
