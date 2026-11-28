@@ -124,3 +124,29 @@ test("dispose aguarda cleanup assíncrono antes de resolver para todos os chamad
   await Promise.all([first, second]);
   assert.equal(settled, true);
 });
+
+
+test("defineAccessor mantém a fachada pública e resolve serviço somente no primeiro acesso", () => {
+  let created = 0;
+  const registry = createNexusServiceRegistry();
+  const facade = {};
+  registry.register("core.lazy-facade", () => ({ id: ++created }));
+  registry.defineAccessor(facade, "service", "core.lazy-facade");
+
+  assert.equal(created, 0);
+  assert.equal(registry.list()[0].state, "registered");
+  assert.equal(facade.service.id, 1);
+  assert.equal(facade.service, facade.service);
+  assert.equal(created, 1);
+});
+
+test("defineAccessor permite publicar override antes da primeira resolução", () => {
+  const registry = createNexusServiceRegistry();
+  const facade = {};
+  const override = { source: "external" };
+  registry.register("core.overrideable", () => ({ source: "factory" }));
+  registry.defineAccessor(facade, "service", "core.overrideable");
+  facade.service = override;
+  assert.equal(facade.service, override);
+  assert.throws(() => { facade.service = {}; }, /substituir um serviço já inicializado/);
+});

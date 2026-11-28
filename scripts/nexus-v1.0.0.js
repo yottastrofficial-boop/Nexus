@@ -35,6 +35,12 @@ Hooks.once("init", () => {
     if (!game.nexus.services.has(name)) game.nexus.services.register(name, factory, options);
     return game.nexus.services.resolveSync(name);
   };
+  // Public facade properties can remain object-shaped while their factories
+  // resolve only when a subsystem actually accesses them.
+  const registerLazyService = (name, factory, target, property, options = {}) => {
+    if (!game.nexus.services.has(name)) game.nexus.services.register(name, factory, options);
+    game.nexus.services.defineAccessor(target, property, name);
+  };
   // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
   game.nexus.design = registerService("design", () => installNexusDesignSystem({
     gameRef: game,
@@ -70,7 +76,7 @@ Hooks.once("init", () => {
     return Promise.resolve(application.render({ force: true })).then(() => application);
   };
   // Gerencia objetos transitórios em RAM, sem duplicar o cache IndexedDB.
-  game.nexus.resources = registerService("resources", () => createResourceLifecycleManager());
+  registerLazyService("resources", () => createResourceLifecycleManager(), game.nexus, "resources");
   // Referências leves a documentos Foundry; nenhuma listagem é carregada no init.
   game.nexus.documents = registerService("documents", () => createFoundryDocumentBridge({ gameRef: game, fromUuidRef: globalThis.fromUuid }));
   // Um catálogo único agrega recursos NEXUS, lógica e documentos Foundry por provedores.
@@ -93,7 +99,7 @@ Hooks.once("init", () => {
     game.nexus.library.registry.executeAction(actionId, reference, resource, params);
   game.nexus.library.registerProvider = provider => game.nexus.library.registry.register(provider);
   game.nexus.library.getProviders = () => game.nexus.library.registry.getProviders();
-  game.nexus.library.transfers = registerService("library.transfers", () => createLibraryTransferRegistry());
+  registerLazyService("library.transfers", () => createLibraryTransferRegistry(), game.nexus.library, "transfers");
   game.nexus.library.registerSourceAdapter = adapter => game.nexus.library.transfers.registerSource(adapter);
   game.nexus.library.registerDestinationAdapter = adapter => game.nexus.library.transfers.registerDestination(adapter);
   game.nexus.library.prepareTransfer = options => game.nexus.library.transfers.prepare(options);
@@ -103,14 +109,14 @@ Hooks.once("init", () => {
     sources: game.nexus.library.transfers.listSources(),
     destinations: game.nexus.library.transfers.listDestinations()
   });
-  game.nexus.library.backup = registerService("library.backup", () => createLibraryBackupService({
+  registerLazyService("library.backup", () => createLibraryBackupService({
     getUser: () => game.user,
     getCatalog: () => NEXUS_LIBRARY_CATALOG,
     getThemePalettes: () => THEME_PALETTES,
     getWorldFlows: () => getInteractionLibrary(),
     setWorldFlows: entries => game.settings.set("nexus", "interactionLibrary", entries),
     getComponentTypes: () => Object.keys(NEXUS_COMPONENTS)
-  }));
+  }), game.nexus.library, "backup");
   // API pública de importação/exportação da Biblioteca. O serviço valida o pacote
   // e separa a prévia do commit para evitar sobrescritas silenciosas.
   game.nexus.library.exportBackup = () => game.nexus.library.backup.exportCode();
@@ -168,21 +174,21 @@ Hooks.once("init", () => {
     });
   }
   game.nexus.media ??= {};
-  game.nexus.media.formats = registerService("media.formats", () => createMediaFormatRegistry());
-  game.nexus.media.capabilities = registerService("media.capabilities", ({ "media.formats": registry }) =>
-    createMediaCapabilityService({ registry }), { dependencies: ["media.formats"] });
-  game.nexus.media.pipeline = registerService("media.pipeline", ({ "media.capabilities": capabilityService, resources }) =>
+  registerLazyService("media.formats", () => createMediaFormatRegistry(), game.nexus.media, "formats");
+  registerLazyService("media.capabilities", ({ "media.formats": registry }) =>
+    createMediaCapabilityService({ registry }), game.nexus.media, "capabilities", { dependencies: ["media.formats"] });
+  registerLazyService("media.pipeline", ({ "media.capabilities": capabilityService, resources }) =>
     createMediaProcessingPipeline({
       capabilityService,
       resourceManager: resources,
       adapters: [createBrowserMediaAdapter(capabilityService)]
-    }), { dependencies: ["media.capabilities", "resources"] });
-  game.nexus.media.storage = registerService("media.storage", () => createMediaStorageRouter([
+    }), game.nexus.media, "pipeline", { dependencies: ["media.capabilities", "resources"] });
+  registerLazyService("media.storage", () => createMediaStorageRouter([
     createFoundryMediaStorageAdapter({
       FilePicker: foundry.applications.apps.FilePicker,
       extensions: CONST.UPLOADABLE_FILE_EXTENSIONS
     })
-  ]));
+  ]), game.nexus.media, "storage");
   game.nexus.media.createWorkerAdapter = createWorkerMediaAdapter;
   game.nexus.media.installWorkerRuntime = installNexusMediaWorkerRuntime;
   game.nexus.media.createCacheKey = createMediaCacheKey;
@@ -192,8 +198,8 @@ Hooks.once("init", () => {
   }
 
   game.nexus.logic ??= {};
-  game.nexus.logic.registry = registerService("logic.registry", () => createLogicRegistry({ schemas: createNexusLogicSchemas() }));
-  game.nexus.logic.runtime = registerService("logic.runtime", ({ "logic.registry": registry }) => createLogicRuntime({ registry }), { dependencies: ["logic.registry"] });
+  registerLazyService("logic.registry", () => createLogicRegistry({ schemas: createNexusLogicSchemas() }), game.nexus.logic, "registry");
+  registerLazyService("logic.runtime", ({ "logic.registry": registry }) => createLogicRuntime({ registry }), game.nexus.logic, "runtime", { dependencies: ["logic.registry"] });
   if (!game.nexus.services.has("logic.foundryIntegration")) game.nexus.services.register("logic.foundryIntegration", ({ "logic.runtime": runtime }) => installFoundryLogicIntegration({ hooks: Hooks, runtime, gameRef: game, constRef: CONST }), { dependencies: ["logic.runtime"] });
   game.nexus.logic.setPermissionResolver = resolver => game.nexus.logic.runtime.setPermissionResolver(resolver);
   game.nexus.logic.registerAction = descriptor => game.nexus.logic.runtime.registerAction(descriptor);

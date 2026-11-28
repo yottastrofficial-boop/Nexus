@@ -63,6 +63,32 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     return entry?.state === "ready" ? entry.value : undefined;
   };
 
+  const defineAccessor = (target, property, name) => {
+    assertActive();
+    const key = assertName(name);
+    if (!definitions.has(key)) throw new Error("Serviço não registrado: " + key);
+    if (!target || (typeof target !== "object" && typeof target !== "function")) {
+      throw new TypeError("O alvo do accessor de serviço deve ser um objeto.");
+    }
+    Object.defineProperty(target, property, {
+      configurable: true,
+      enumerable: true,
+      get: () => resolveSync(key),
+      set: value => {
+        const entry = instances.get(key);
+        if (entry?.state === "ready") {
+          if (entry.value === value) return;
+          throw new Error("Não é permitido substituir um serviço já inicializado: " + key);
+        }
+        if (entry?.state === "initializing") {
+          throw new Error("Não é permitido substituir um serviço em inicialização: " + key);
+        }
+        publish(key, value, { replace: true });
+      }
+    });
+    return target;
+  };
+
   const resolve = async (name, ancestry = []) => {
     assertActive();
     const key = assertName(name);
@@ -200,6 +226,6 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     return disposalPromise;
   };
 
-  const api = Object.freeze({ register, publish, has, get, resolve, resolveSync, initialize, initializeSync, list, dispose, get disposed() { return disposed; } });
+  const api = Object.freeze({ register, publish, has, get, defineAccessor, resolve, resolveSync, initialize, initializeSync, list, dispose, get disposed() { return disposed; } });
   return api;
 }
