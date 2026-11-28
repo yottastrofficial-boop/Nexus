@@ -3,6 +3,7 @@ import { DESIGN_PROFILE_SCHEMA_VERSION, normalizeDesignProfile, exportDesignProf
 
 const MAX_PROFILES = 100;
 const cleanName = value => String(value ?? "").trim().slice(0, 64);
+const cleanTags = value => [...new Set((Array.isArray(value) ? value : []).map(tag => String(tag ?? "").trim().slice(0, 48)).filter(Boolean))].slice(0, 20);
 const clone = value => globalThis.foundry?.utils?.deepClone ? globalThis.foundry.utils.deepClone(value) : JSON.parse(JSON.stringify(value));
 
 /** Reusable profiles live in the canonical Library themes collection; active profiles remain Foundry settings. */
@@ -19,7 +20,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
   };
   const get = id => { const entry = readEntries().find(item => item.id === String(id ?? "")); return entry ? clone(entry) : null; };
   const list = () => readEntries().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }) || a.id.localeCompare(b.id));
-  const save = async (rawProfile, { id = "" } = {}) => {
+  const save = async (rawProfile, { id = "", tags = null } = {}) => {
     const user = getUser();
     if (!user) throw new Error("Não foi possível identificar o usuário da Biblioteca.");
     const profile = normalizeDesignProfile(rawProfile), requestedId = String(id ?? "").trim();
@@ -42,7 +43,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
       const previous = index >= 0 ? entries[index] : null;
       savedEntry = { ...(previous ?? {}), id: entryId, sourceId: "design-profile-" + entryId, kind: "design-profile",
         name: cleanName(profile.name) || "Aparência sem nome", description: "Perfil visual completo do NEXUS.",
-        tags: ["design", "theme"], palette: clone(profile.palette), profile: clone(profile),
+        tags: cleanTags(tags ?? previous?.tags ?? ["tema", "design", "theme", "pessoal"]), palette: clone(profile.palette), profile: clone(profile),
         createdAt: previous?.createdAt ?? new Date().toISOString(), updatedAt: new Date().toISOString() };
       if (index >= 0) entries[index] = savedEntry; else entries.push(savedEntry);
       return entries;
@@ -53,7 +54,7 @@ export function createDesignLibraryService({ getUser, design, createId } = {}) {
     const original = get(id);
     if (!original) throw new Error("O perfil selecionado não existe mais na Biblioteca.");
     const profile = clone(original.profile); profile.id = ""; profile.name = (cleanName(original.name) || "Aparência") + " (cópia)";
-    return save(profile);
+    return save(profile, { tags: original.tags });
   };
   const rename = async (id, name) => {
     const user = getUser(), nextName = cleanName(name);
