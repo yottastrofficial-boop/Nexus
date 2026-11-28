@@ -27,6 +27,7 @@ test("Inspector model previews the complete semantic palette and visual settings
   assert.equal(model.palette.length, 18);
   assert.equal(model.palette.find(color => color.key === "panel").value, profile.palette.panel);
   assert.equal(model.typography.family, "Georgia");
+  assert.equal(model.typography.displayFamily, "Cinzel");
   assert.equal(model.typography.baseSize, 15);
   assert.equal(model.layout.densityLabel, "Espaçosa");
   assert.equal(model.layout.radiusLabel, "Suave");
@@ -47,6 +48,7 @@ test("Inspector normalizes unsafe colors and out-of-range visual values before r
   assert.equal(model.supported, true);
   assert.match(model.palette.find(color => color.key === "panel").value, /^#[0-9a-f]{6}$/i);
   assert.equal(model.typography.family, "Inter");
+  assert.equal(model.typography.displayFamily, "Inter");
   assert.equal(model.typography.baseSize, 18);
   assert.equal(model.layout.controlHeight, 28);
   assert.ok(model.palette.every(color => /^#[0-9a-f]{6}$/i.test(color.value)));
