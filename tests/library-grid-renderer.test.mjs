@@ -56,7 +56,7 @@ test("resource meter card previews are typed and bounded", () => {
 });
 
 test("grid rendering has no favorite controls and keeps a single selection action", () => {
-  assert.match(grid, /data-library-resource/);
+  assert.match(grid, /dataset\.libraryResource/);
   assert.match(grid, /aria-pressed/);
   assert.doesNotMatch(grid, /nexus-library-favorite|data-library-resource-favorite|fa-star/);
   assert.match(grid, /createLibraryGridCard/);
