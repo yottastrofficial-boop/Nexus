@@ -140,7 +140,16 @@ function createThemePreview(resource, size) {
     return preview;
   }
   if (size === "medium") {
-    createThemePalettePreview(preview, palette);
+    const sample = createLibraryThemeSample({
+      name: resource.name, palette, typography: model?.typography ?? {},
+      layout: { ...(model?.layout ?? {}), preset: model?.preset },
+      components: model?.components ?? {}, compact: true
+    });
+    sample.dataset.cardSize = "medium";
+    preview.classList.add("is-theme-thumbnail");
+    sample.setAttribute("role", "img");
+    sample.setAttribute("aria-label", "Miniatura da interface com o tema " + String(resource.name ?? "selecionado"));
+    preview.append(sample);
     return preview;
   }
   const sample = createLibraryThemeSample({
