@@ -1,6 +1,7 @@
-## Estado da main — 1.0.0.148 (manifest estável em sincronização)
+## Estado da main — 1.0.0.149 (aguardando publicação estável)
 
-A revisão 1.0.0.148 refina as prévias de temas da Biblioteca: cartões de 64 px mostram uma paleta semântica de seis cores, cartões de 128 px mostram a amostra completa e tokens de componentes são aplicados às superfícies correspondentes. Favoritos permanecem no Inspector. O workflow valida o pacote e sincroniza o manifesto somente após publicar o asset. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
+A revisão 1.0.0.149 reduz o ruído visual da Biblioteca: borda apenas no item selecionado e miniaturas médias de tema baseadas na interface real, compactadas para funcionar como thumbnails. A publicação do pacote e a sincronização do manifesto dependem do workflow; a validação visual no Foundry permanece manual.
+
 
 ## 1.0.0.148 — Prévia de temas e tokens de componentes
 
