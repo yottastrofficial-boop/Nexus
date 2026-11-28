@@ -1,3 +1,10 @@
+## 1.0.0.140 — Revisão arquitetural inicial (em validação)
+
+- Mapa integrado dos subsistemas e contratos em `docs/ARCHITECTURE_MAP_2026-11-27.md`.
+- Extração de defaults de Actor e sincronização de token para `scripts/core/actor-document-lifecycle.js`.
+- Testes de lifecycle com dependências injetadas e cleanup idempotente.
+- CI/package validation em andamento; teste real no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.139 — Biblioteca: prévias de temas e fontes (publicada)
 
 - Reescreve a pesquisa em uma única regra compartilhada e responsiva; remove os estilos concorrentes da cascata legada.
