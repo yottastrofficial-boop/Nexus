@@ -1,9 +1,9 @@
-## Estado de distribuição — 1.0.0.144 (em validação)
+## Estado de distribuição — 1.0.0.144 (publicada)
 
-A versão 1.0.0.144 está preparada para validação. A publicação estável depende de CI, construção do ZIP, criação da release e confirmação do asset antes da sincronização final do manifesto.
+A versão estável atual é 1.0.0.144. CI, regressões, pacote ZIP, release, asset e manifesto estável foram confirmados pelo workflow oficial 46114908001.
 
-- `system.json` e `manifest.json` foram preparados para 1.0.0.144 e apontam para o ZIP correspondente.
-- O workflow oficial deverá confirmar o pacote e publicar o asset `nexus.zip`.
+- `system.json` e `manifest.json` declaram 1.0.0.144 e apontam para o mesmo ZIP.
+- Asset `nexus.zip` confirmado na release v1.0.0.144 (507.118 bytes).
 - O teste visual/funcional no Foundry VTT 14 build 360 permanece manual; último checkpoint funcional confirmado: 1.0.0.70.
 - A capa do livro de regras não estava disponível nos arquivos consultados; os temas usam provisoriamente a paleta-base NEXUS existente.
 
