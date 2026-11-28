@@ -1,11 +1,10 @@
-## Estado de distribuição — main 1.0.0.140 (em validação)
+## Estado de distribuição — 1.0.0.140 (publicada)
 
-A main contém a revisão arquitetural 1.0.0.140. A versão estável do manifesto permanece 1.0.0.139 até que CI, construção do pacote, publicação e confirmação do asset `nexus.zip` sejam concluídas pelo workflow oficial.
+A release estável 1.0.0.140 foi publicada pelo workflow oficial após CI, construção do pacote e confirmação do asset. O manifesto estável e o pacote da main estão sincronizados. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
-- `system.json` declara 1.0.0.140 e aponta para o pacote da versão em validação.
-- `manifest.json` permanece em 1.0.0.139 durante a validação.
-- A revisão estática e os testes automatizados não substituem a validação visual/funcional no Foundry VTT 14 build 360.
-- O último checkpoint funcional confirmado no Foundry permanece 1.0.0.70.
+- `system.json` e `manifest.json` declaram 1.0.0.140 e apontam para o ZIP correspondente.
+- Asset `nexus.zip` confirmado na release v1.0.0.140 (500.214 bytes).
+- O último checkpoint funcional confirmado dentro do Foundry permanece 1.0.0.70 até a validação manual.
 
 
 
