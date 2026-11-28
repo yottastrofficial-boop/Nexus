@@ -215,9 +215,9 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-open-list-filter="type"') &&
   libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') &&
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
-  !libraryTemplate.includes("data-library-tag"),
-  "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
-assert.ok(catalogExplorer.includes("nexus-library-theme-card-preview") &&
+  libraryTemplate.includes("data-library-tag"),
+  "Category and type filters remain searchable from list headers, and tags have a dedicated filter.");
+assert.ok(catalogExplorer.includes("nexus-library-theme-miniature") &&
   libraryUiContract.includes("nexus-library-theme-card-preview") &&
   catalogExplorer.includes("getLibraryThemePreviewTokens"),
   "Theme cards must use the shared, token-driven mini-interface preview.");
