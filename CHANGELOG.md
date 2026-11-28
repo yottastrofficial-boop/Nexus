@@ -1,3 +1,14 @@
+## 1.0.0.146 — Biblioteca: cascata CSS, cartões e Inspector quadrado
+
+- Corrige a cascata sem alterar a ordem oficial: o Design System continua como última folha e recebe um bloco final de regras da Biblioteca, que prevalece sobre os seletores antigos.
+- Remove os controles de favorito dos cartões da grade; a ação continua disponível no Inspector, eliminando estrelas residuais e conflitos de posicionamento.
+- Reconstrói a miniatura dos temas como uma interface compacta com cabeçalho, navegação, conteúdo, controles e amostras cromáticas.
+- Reconstrói o contrato da grade com linhas reservadas para miniatura, título e etiqueta, evitando sobreposição entre elementos.
+- Mantém miniaturas quadradas de 32 × 32, 64 × 64 e 128 × 128 px e dimensiona os espécimes tipográficos conforme a seleção.
+- Torna a demonstração completa do tema no Inspector quadrada e organiza navegação, painel, destaque, barra de recurso, cartão, campo e botões.
+- Atualiza testes e documentação para validar a cascata, a ausência de favoritos nos cartões e a proporção quadrada da prévia.
+- A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo um gate manual.
+
 ## 1.0.0.145 — Biblioteca: miniaturas, temas completos e tipografia
 
 - Corrige a cascata da grade: os três tamanhos configuráveis voltam a controlar miniaturas quadradas de 32 × 32, 64 × 64 e 128 × 128 px.

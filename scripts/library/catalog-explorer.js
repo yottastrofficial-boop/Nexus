@@ -344,26 +344,43 @@ function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
   const preview = makeElement("div", "nexus-library-theme-miniature");
   preview.setAttribute("aria-hidden", "true");
-  for (const [key, value] of Object.entries(tokens)) preview.style.setProperty("--nexus-library-theme-" + key, value);
-  const family = safeFontFamily(typography.displayFamily || typography.family) || "system-ui, sans-serif";
-  preview.style.setProperty("--nexus-library-theme-display-font", family);
-  preview.style.setProperty("font-family", family, "important");
-  const top = makeElement("span", "nexus-library-theme-miniature-top");
+  for (const [key, value] of Object.entries(tokens)) {
+    preview.style.setProperty("--nexus-library-theme-" + key, value);
+  }
+  const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
+  const displayFamily = safeFontFamily(typography.displayFamily) || family;
+  preview.style.setProperty("--nexus-library-theme-font", family);
+  preview.style.setProperty("--nexus-library-theme-display-font", displayFamily);
+
+  const header = makeElement("span", "nexus-library-theme-miniature-header");
+  const headerMark = makeElement("i", "nexus-library-theme-miniature-mark");
+  const headerLine = makeElement("i", "nexus-library-theme-miniature-header-line");
+  header.append(headerMark, headerLine);
+
   const body = makeElement("span", "nexus-library-theme-miniature-body");
-  const panel = makeElement("span", "nexus-library-theme-miniature-panel");
-  const title = makeElement("i", "nexus-library-theme-miniature-title");
-  const line = makeElement("i", "nexus-library-theme-miniature-line");
-  const button = makeElement("i", "nexus-library-theme-miniature-button");
-  const meter = makeElement("i", "nexus-library-theme-miniature-meter");
-  const swatches = makeElement("span", "nexus-library-theme-miniature-swatches");
+  const sidebar = makeElement("span", "nexus-library-theme-miniature-sidebar");
+  for (let index = 0; index < 3; index++) {
+    sidebar.append(makeElement("i", index === 0 ? "is-active" : ""));
+  }
+
+  const content = makeElement("span", "nexus-library-theme-miniature-content");
+  const title = makeElement("strong", "nexus-library-theme-miniature-title", "Aa");
+  const copy = makeElement("span", "nexus-library-theme-miniature-copy", "NEXUS");
+  const highlight = makeElement("i", "nexus-library-theme-miniature-highlight");
+  const controls = makeElement("span", "nexus-library-theme-miniature-controls");
+  controls.append(
+    makeElement("i", "nexus-library-theme-miniature-button"),
+    makeElement("i", "nexus-library-theme-miniature-field")
+  );
+  const paletteRow = makeElement("span", "nexus-library-theme-miniature-swatches");
   for (const key of ["accent", "highlight", "button", "surface"]) {
     const swatch = makeElement("i", "");
-    swatch.style.background = tokens[key];
-    swatches.append(swatch);
+    swatch.style.backgroundColor = tokens[key];
+    paletteRow.append(swatch);
   }
-  panel.append(title, line, button, meter);
-  body.append(panel, swatches);
-  preview.append(top, body);
+  content.append(title, copy, highlight, controls, paletteRow);
+  body.append(sidebar, content);
+  preview.append(header, body);
   return preview;
 }
 
@@ -373,6 +390,7 @@ function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}
     ? "nexus-library-theme-sample nexus-library-theme-card-preview"
     : "nexus-library-theme-sample nexus-library-theme-live-preview");
   root.dataset.previewSize = compact ? "compact" : "full";
+  root.dataset.previewShape = compact ? "compact" : "square";
   root.dataset.themePreset = String(layout.preset ?? "");
   for (const [key, value] of Object.entries(tokens)) root.style.setProperty("--nexus-library-theme-" + key, value);
   const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
@@ -852,7 +870,7 @@ export function createLibraryCatalogExplorer({
     return card;
   };
 
-  const renderResourceCard = (resource, preferences) => {
+  const renderResourceCard = resource => {
     const key = resourceKey(resource);
     const card = makeElement("article", "nexus-library-generic-card");
     card.dataset.libraryResourceKey = key;
@@ -934,16 +952,6 @@ export function createLibraryCatalogExplorer({
       }
     }
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
-    const isFavorite = preferences.favorites.includes(key);
-    const favorite = makeElement("button", "nexus-library-favorite");
-    favorite.type = "button";
-    favorite.dataset.libraryResourceFavorite = resource.id;
-    favorite.dataset.libraryProvider = resource.providerId;
-    favorite.classList.toggle("is-favorite", isFavorite);
-    favorite.setAttribute("aria-pressed", String(isFavorite));
-    favorite.setAttribute("aria-label", isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos");
-    favorite.title = isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos";
-    favorite.append(makeElement("i", isFavorite ? "fa-solid fa-star" : "fa-regular fa-star"));
     card.draggable = true;
     card.addEventListener("dragstart", event => {
       const separator = key.indexOf(":");
@@ -967,7 +975,7 @@ export function createLibraryCatalogExplorer({
       }
       event.dataTransfer.effectAllowed = "copyMove";
     });
-    card.append(select, favorite);
+    card.append(select);
     return card;
   };
 
@@ -1085,6 +1093,8 @@ export function createLibraryCatalogExplorer({
     heading.append(makeElement("strong", "nexus-library-detail-title", resource.name));
     const detailFavorite = makeElement("button", "nexus-library-detail-favorite");
     detailFavorite.type = "button";
+    detailFavorite.setAttribute("data-library-resource-favorite", resource.id);
+    detailFavorite.setAttribute("data-library-provider", resource.providerId);
     const favoriteKey = key;
     const favoriteIsActive = getPreferences().favorites.includes(favoriteKey);
     detailFavorite.classList.toggle("is-favorite", favoriteIsActive);
@@ -1099,21 +1109,16 @@ export function createLibraryCatalogExplorer({
         ? current.favorites.filter(item => item !== favoriteKey)
         : [favoriteKey, ...current.favorites].slice(0, 500);
       await savePreferences({ ...current, favorites });
+      if (active && currentSmartView === "favorites") {
+        selectedResourceKeys.delete(favoriteKey);
+        await render();
+        return;
+      }
       detailFavorite.classList.toggle("is-favorite", !active);
       detailFavorite.setAttribute("aria-pressed", String(!active));
       detailFavorite.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
       detailFavorite.title = detailFavorite.getAttribute("aria-label");
       detailFavorite.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
-      container.querySelectorAll("[data-library-resource-key]").forEach(card => {
-        if (card.dataset.libraryResourceKey !== favoriteKey) return;
-        const button = card.querySelector("[data-library-resource-favorite]");
-        if (!button) return;
-        button.classList.toggle("is-favorite", !active);
-        button.setAttribute("aria-pressed", String(!active));
-        button.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
-        button.title = button.getAttribute("aria-label");
-        button.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
-      });
     });
     heading.append(detailFavorite);
     const meta = makeElement("p", "nexus-library-summary-meta",
@@ -1143,6 +1148,7 @@ export function createLibraryCatalogExplorer({
         components: themeModel?.components ?? {},
         compact: false
       });
+      sample.dataset.previewShape = "square";
       themePreview.append(sample);
 
       const swatches = makeElement("div", "nexus-library-theme-swatches");
@@ -1611,7 +1617,7 @@ export function createLibraryCatalogExplorer({
 
     container.replaceChildren();
     for (const folder of folderEntries) container.append(renderFolderCard(folder, preferences));
-    for (const resource of visible) container.append(renderResourceCard(resource, preferences));
+    for (const resource of visible) container.append(renderResourceCard(resource));
     if (!visible.length && !folderEntries.length) {
       const message = page.errors?.length
         ? "Algumas fontes da Biblioteca não puderam ser consultadas."
@@ -1667,23 +1673,6 @@ export function createLibraryCatalogExplorer({
     if (loadMore && container.contains(loadMore)) {
       loadMore.remove();
       await render({ append: true });
-      return;
-    }
-    const favorite = target?.closest("[data-library-resource-favorite]");
-    if (favorite && container.contains(favorite)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const preferences = getPreferences();
-      const resource = currentResources.find(item =>
-        item.providerId === favorite.dataset.libraryProvider && item.id === favorite.dataset.libraryResourceFavorite
-      );
-      if (!resource) return;
-      const key = resourceKey(resource);
-      const favorites = preferences.favorites.includes(key)
-        ? preferences.favorites.filter(item => item !== key)
-        : [key, ...preferences.favorites].slice(0, 500);
-      await savePreferences({ ...preferences, favorites });
-      await render();
       return;
     }
     const selected = target?.closest("[data-library-resource]");

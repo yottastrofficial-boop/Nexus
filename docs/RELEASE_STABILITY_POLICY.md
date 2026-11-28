@@ -1,6 +1,6 @@
-## Estado de distribuição — 1.0.0.145 em preparação
+## Estado de distribuição — 1.0.0.146 em preparação
 
-A branch `main` está sendo preparada para a versão 1.0.0.145. A revisão atualiza a Biblioteca de Temas e Fontes, com miniaturas 32/64/128 px, paletas completas, favoritos reposicionados e tipografia aplicada às prévias. `system.json` aponta para o pacote candidato; `manifest.json` permanece na 1.0.0.144 até o workflow oficial aprovar os testes, publicar `nexus.zip` e sincronizar o manifesto. O último checkpoint funcional confirmado dentro do Foundry VTT continua sendo 1.0.0.70; a verificação visual/funcional da 1.0.0.145 no Foundry VTT 14 build 360 permanece pendente.
+A revisão 1.0.0.146 está sendo preparada com correções visuais na Biblioteca. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. A versão estável permanece na 1.0.0.145 até CI, pacote ZIP e release serem confirmados pelo workflow oficial. A validação visual no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado de distribuição — 1.0.0.144 (publicada)
 

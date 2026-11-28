@@ -276,11 +276,37 @@ assert.match(styles, /data-card-size="medium"[\s\S]*?--nexus-library-preview-siz
   "Medium grid cards must use 64px square previews.");
 assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size:\s*128px/,
   "Large grid cards must use 128px square previews.");
-const finalGridFavorite = styles.slice(styles.lastIndexOf(".nexus-library-generic-items[data-view-mode=\"grid\"] .nexus-library-favorite {"));
-assert.match(finalGridFavorite, /position:\s*static\s*!important/,
-  "Grid favorites must no longer overlay the thumbnail corner.");
+assert.doesNotMatch(catalogExplorer.slice(catalogExplorer.indexOf("const renderResourceCard"), catalogExplorer.indexOf("let currentInspectorTab")),
+  /nexus-library-favorite|data-library-resource-favorite/,
+  "Grid cards must not render favorite stars; the Inspector owns favorite management.");
+assert.doesNotMatch(styles, /nexus-library-theme-miniature/,
+  "The Universal Library layer must not retain legacy theme-miniature selectors.");
+assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
+  "No legacy favorite CSS may remain in either Library stylesheet.");
+assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
+assert.match(catalogExplorer, /nexus-library-theme-miniature-copy", "NEXUS"/);
+assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
+const favoriteToggle = catalogExplorer.slice(
+  catalogExplorer.indexOf('detailFavorite.addEventListener("click"'),
+  catalogExplorer.indexOf("heading.append(detailFavorite)")
+);
+assert.ok(favoriteToggle.includes('if (active && currentSmartView === "favorites")') &&
+  favoriteToggle.includes("await render();"),
+  "Removing a favorite from the Favorites view must remove it from the visible catalog.");
+assert.ok(designSystem.includes(".nexus-library-theme-miniature-copy") &&
+  designSystem.includes("font-family: var(--nexus-library-theme-font"),
+  "Theme miniatures must visibly apply the selected body font.");
 assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
   "The full theme preview must use the theme's body font.");
 assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font-family:\s*var\(--nexus-library-theme-display-font/,
   "Theme headings must use the theme's display font.");
 
+
+assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
+  "The Design System must remain the final stylesheet.");
+assert.match(catalogExplorer, /root\.dataset\.previewShape = compact \? "compact" : "square"/,
+  "The full Inspector preview must activate the square layout contract.");
+assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
+  "The full theme Inspector specimen must be a bounded square.");
+assert.match(catalogExplorer, /nexus-library-theme-miniature-sidebar/);
+assert.match(catalogExplorer, /nexus-library-theme-miniature-content/);

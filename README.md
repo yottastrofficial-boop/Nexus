@@ -1,12 +1,8 @@
-## Biblioteca de temas — 1.0.0.145
-
-A main inclui cache de mídia sob demanda e diagnóstico somente leitura dos serviços NEXUS. A publicação estável e o manifesto serão confirmados pelo workflow oficial após CI e pacote ZIP. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
-
 # NEXUS RPG
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão em preparação 1.0.0.145 · Foundry VTT 14
+  Projeto em desenvolvimento · Candidata 1.0.0.146 em revisão · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -16,7 +12,7 @@ A main inclui cache de mídia sob demanda e diagnóstico somente leitura dos ser
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.145 em preparação na main; versão 1.0.0.144 publicada (manifesto estável).** Esta revisão corrige a Biblioteca de Temas e Fontes. O manifesto estável só será sincronizado pelo workflow oficial após CI e confirmação do pacote ZIP. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+**Versão 1.0.0.145 publicada (manifesto estável).** A Versão 1.0.0.146 está em revisão e refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. A publicação estável depende da validação automatizada, da integridade do pacote e da conferência visual/funcional no Foundry VTT 14 build 360.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 

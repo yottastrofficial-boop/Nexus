@@ -1,3 +1,13 @@
+## Biblioteca visual — contrato v8 (1.0.0.146)
+
+- O Design System permanece como última folha de estilos. Os contratos finais e escopados da grade, cartões, miniaturas e Inspector ficam no bloco final do próprio Design System, após as regras-base.
+- A grade possui somente o controle de seleção do recurso. Favoritos são gerenciados pelo Inspector, sem estrelas sobrepostas ou controles residuais nos cartões.
+- Miniaturas permanecem quadradas e oferecem exclusivamente 32 × 32, 64 × 64 e 128 × 128 px. O tamanho escolhido controla dimensões da imagem, ícone e espécime tipográfico; o cartão reserva linhas independentes para miniatura, nome e etiqueta.
+- O nome tem largura limitada ao cartão, quebra de linha controlada e até três linhas; o conteúdo nunca invade o cartão vizinho.
+- Miniaturas de tema representam uma interface em miniatura com cabeçalho, navegação, painel, destaque, controles e amostras da paleta, usando somente tokens validados do próprio perfil.
+- A prévia completa do Inspector é quadrada e contém navegação, painel, hierarquia tipográfica, destaque, barra de recurso, cartão, campo e botões. As famílias de corpo e display são aplicadas separadamente.
+- Nenhuma prévia executa HTML, CSS, JavaScript ou conteúdo importado; os elementos são construídos por DOM controlado e tokens sanitizados.
+
 ## Biblioteca de temas e tipografia — contrato v7 (1.0.0.144)
 
 - A coleção de temas-base expõe exatamente doze presets: Padrão; sete paletas cromáticas (Vermelho, Laranja, Amarelo, Verde, Azul, Anil e Violeta); quatro estilos (Medieval, Futurista, Horror Cósmico e Super-heróis).
