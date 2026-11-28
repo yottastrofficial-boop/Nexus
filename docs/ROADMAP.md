@@ -1,3 +1,10 @@
+## 1.0.0.142 — Serviços sob demanda e fachada pública (em publicação)
+
+- Adiciona accessors de serviços no registry para preservar propriedades de objeto sem inicialização imediata.
+- Defer serviços puros da Biblioteca, mídia, recursos e runtime de lógica; mantém eager as dependências necessárias no `init`.
+- Preserva a API pública `game.nexus.*` e adiciona teste de contrato para a classificação.
+- CI do commit `c2fb816effce6bcd874f88eabf39d12df772b02a` aprovado; release/manifesto e teste real no Foundry VTT 14 build 360 serão confirmados separadamente.
+
 ## 1.0.0.141 — Lifecycle seguro do Service Registry (publicada)
 
 - Corrige race condition no encerramento do registro de serviços.

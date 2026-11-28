@@ -1,3 +1,11 @@
+## Estado de distribuição — 1.0.0.142 (em publicação)
+
+A main contém a otimização de inicialização eager/lazy do Service Registry. `system.json` declara 1.0.0.142 e aponta para seu ZIP; o manifesto estável permanece em 1.0.0.141 até CI, pacote e asset da 1.0.0.142 serem confirmados pelo workflow oficial.
+
+- CI do commit `c2fb816effce6bcd874f88eabf39d12df772b02a` aprovado.
+- O workflow de release deve confirmar o asset antes de sincronizar o manifesto.
+- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## Estado de distribuição — 1.0.0.141 (publicada)
 
 A correção de lifecycle do Service Registry foi publicada após CI, pacote e asset confirmados. `system.json` e `manifest.json` declaram 1.0.0.141 e apontam para o mesmo ZIP.

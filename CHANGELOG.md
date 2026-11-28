@@ -1,3 +1,12 @@
+## 1.0.0.142 — Serviços sob demanda e fachada pública estável
+
+- Introduz `defineAccessor()` no Service Registry para expor serviços como propriedades de objeto sem instanciá-los até o primeiro acesso.
+- Mantém a fachada pública `game.nexus.*` e permite substituir uma factory por uma instância antes da primeira resolução; após inicialização, substituição continua protegida.
+- Defer os serviços sem side effects de `resources`, transferências/backup da Biblioteca, registries/capabilities/pipeline/storage de mídia e registry/runtime de lógica.
+- Mantém eager os serviços necessários durante `init`, incluindo Design System, catálogo da Biblioteca e classes ApplicationV2.
+- Adiciona contrato de regressão para a classificação eager/lazy do bootstrap.
+- CI, pacote, release e manifesto serão confirmados pelo workflow oficial; teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.141 — Lifecycle seguro do Service Registry
 
 - Corrige o encerramento concorrente do registro de serviços: todas as chamadas simultâneas a `dispose()` compartilham a mesma Promise.

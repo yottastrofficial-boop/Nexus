@@ -1,4 +1,4 @@
-## Revisão arquitetural — 1.0.0.141
+## Revisão arquitetural — 1.0.0.142
 
 A versão candidata 1.0.0.141 registra o mapa integrado dos subsistemas e extrai o lifecycle de documentos Actor do bootstrap, com testes de regressão. A release estável anterior é 1.0.0.139; o manifesto será sincronizado somente após CI, pacote e asset confirmados. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
@@ -16,7 +16,7 @@ A versão candidata 1.0.0.141 registra o mapa integrado dos subsistemas e extrai
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.141 publicada (manifesto estável).** CI, pacote ZIP e manifesto foram confirmados pelo workflow; o teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+**Versão 1.0.0.142 em publicação (manifesto estável anterior 1.0.0.141).** CI, pacote ZIP e manifesto foram confirmados pelo workflow; o teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
