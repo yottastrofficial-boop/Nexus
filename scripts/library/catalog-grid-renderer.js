@@ -64,7 +64,7 @@ const TYPE_LABELS = Object.freeze({
 });
 
 export function getLibraryResourceIcon(resource = {}) {
-  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\\s_-]/g, "");
+  const type = String(resource.type ?? "").toLocaleLowerCase().replace(/[\s_-]/g, "");
   if (resource.kind === "logic") return RESOURCE_ICONS[type] ?? RESOURCE_ICONS.logic;
   if (resource.kind === "document") return DOCUMENT_ICONS[type] ?? RESOURCE_ICONS.document;
   return RESOURCE_ICONS[resource.kind] ?? RESOURCE_ICONS.asset;
