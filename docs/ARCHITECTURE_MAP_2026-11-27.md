@@ -4,8 +4,7 @@
 **Repositório:** `yottastrofficial-boop/Nexus`  
 **Branch de referência:** `main`  
 **Commit-base:** `89e60f6ac0b202bee57cba84dea3416a99f42df5`  
-**Versão estável anterior:** `1.0.0.139`  
-**Revisão em main:** `1.0.0.140` (em validação)  
+**Versão estável publicada:** `1.0.0.140`  
 **Alvo declarado:** Foundry VTT 14, build 360
 
 > Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release 1.0.0.139 permanece a referência estável até que uma nova versão passe pelos gates de pacote e publicação.
@@ -197,8 +196,8 @@ O grafo atual tem teste que verifica imports locais resolvidos e ausência de ci
 
 ## 7. Registro da primeira implementação
 
-- Main candidata: 1.0.0.140.
-- Manifesto estável continua em 1.0.0.139 até CI, pacote e asset confirmados.
+- Main e manifesto estável: 1.0.0.140 publicada.
+- CI, pacote ZIP, release e asset foram confirmados pelo workflow 46095904917.
 - A primeira extração é um passo de lifecycle/arquitetura, não uma refatoração concluída de toda a ficha.
 
 ## 8. Gates e definição de concluído
