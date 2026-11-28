@@ -1,0 +1,309 @@
+/*
+ * NEXUS Library — catalog grid contract.
+ * The catalog owns its card geometry, preview viewport and typography.
+ * No card-level action is rendered except resource selection and drag.
+ */
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)) !important;
+  align-content: start;
+  align-items: start;
+  gap: 14px 12px !important;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px !important;
+  overflow: auto;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__button {
+  display: grid;
+  grid-template-rows: var(--nexus-catalog-preview-size, 64px) minmax(2.4em, auto) auto;
+  justify-items: center;
+  align-content: start;
+  align-items: start;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--nexus-text-color, #e7edf5);
+  text-align: center;
+  white-space: normal;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__button:hover {
+  border-color: var(--nexus-panel-border, #3c5067);
+  background: var(--nexus-panel-hover, #2a3d52);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__button.is-selected,
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__button[aria-pressed="true"] {
+  border-color: var(--nexus-accent-color, #78b7e8);
+  background: color-mix(in srgb, var(--nexus-accent-color, #78b7e8) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nexus-accent-color, #78b7e8) 28%, transparent);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview {
+  display: grid;
+  place-items: center;
+  width: var(--nexus-catalog-preview-size, 64px);
+  height: var(--nexus-catalog-preview-size, 64px);
+  min-width: var(--nexus-catalog-preview-size, 64px);
+  min-height: var(--nexus-catalog-preview-size, 64px);
+  max-width: var(--nexus-catalog-preview-size, 64px);
+  max-height: var(--nexus-catalog-preview-size, 64px);
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid var(--nexus-panel-border, #3c5067);
+  border-radius: 7px;
+  background: var(--nexus-panel-surface, #202e3e);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  margin: 0;
+  padding: 3px;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--icon > i,
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--folder > i {
+  display: block;
+  margin: 0;
+  color: var(--nexus-muted-text, #9aadc2);
+  font-size: clamp(18px, calc(var(--nexus-catalog-preview-size, 64px) * .55), 56px);
+  line-height: 1;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__title {
+  display: -webkit-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.4em;
+  max-height: 3.6em;
+  margin: 0;
+  padding: 0 2px;
+  color: var(--nexus-text-color, #e7edf5);
+  font-family: var(--nexus-font-ui, system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 18px;
+  margin: 0;
+  padding: 1px 7px;
+  border: 1px solid var(--nexus-panel-border, #3c5067);
+  border-radius: 999px;
+  background: var(--nexus-panel-card, #26384b);
+  color: var(--nexus-muted-text, #9aadc2);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-card-size="small"] {
+  --nexus-catalog-preview-size: 32px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)) !important;
+  gap: 12px 10px !important;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-card-size="medium"] {
+  --nexus-catalog-preview-size: 64px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 132px), 1fr)) !important;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-card-size="large"] {
+  --nexus-catalog-preview-size: 128px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 164px), 1fr)) !important;
+  gap: 16px 14px !important;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--font {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  padding: 2px 4px;
+  color: var(--nexus-text-color, #e7edf5);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-font-glyph {
+  display: block;
+  max-width: 100%;
+  font-family: var(--nexus-catalog-font-family, system-ui, sans-serif) !important;
+  font-size: clamp(20px, calc(var(--nexus-catalog-preview-size, 64px) * .48), 58px);
+  font-weight: 600;
+  line-height: .95;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-font-sample {
+  display: block;
+  max-width: 100%;
+  color: var(--nexus-muted-text, #9aadc2);
+  font-family: var(--nexus-catalog-font-family, system-ui, sans-serif) !important;
+  font-size: clamp(7px, calc(var(--nexus-catalog-preview-size, 64px) * .11), 12px);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--theme {
+  padding: 0;
+  background: var(--nexus-library-theme-canvas, #171f2a);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--theme > .nexus-library-theme-sample {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--resource {
+  align-content: center;
+  gap: 5px;
+  padding: 7px;
+  color: var(--nexus-text-color, #e7edf5);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-resource-label {
+  display: block;
+  width: 100%;
+  font-size: 10px;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-resource-track {
+  display: block;
+  width: 100%;
+  height: 7px;
+  border: 1px solid var(--nexus-panel-border, #3c5067);
+  border-radius: 99px;
+  background: var(--nexus-panel-input, #111b27);
+  overflow: hidden;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-resource-track > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--nexus-accent-color, #78b7e8);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-resource-value {
+  font-size: 10px;
+  line-height: 1;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 2px !important;
+  padding: 6px !important;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-catalog-card__button {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(100px, 160px) minmax(100px, 160px);
+  grid-template-rows: 1fr;
+  justify-items: stretch;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-catalog-card__preview {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  margin: 0;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-catalog-card__title {
+  min-height: 0;
+  max-height: 2.4em;
+  text-align: left;
+  -webkit-line-clamp: 2;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__category,
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__type {
+  min-width: 0;
+  color: var(--nexus-muted-text, #9aadc2);
+  font-size: 11px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-catalog-card__button {
+    grid-template-columns: minmax(0, 1fr) minmax(72px, 100px);
+  }
+  html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-catalog-card__type {
+    display: none;
+  }
+}
