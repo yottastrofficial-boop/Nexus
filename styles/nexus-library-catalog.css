@@ -322,3 +322,245 @@ html.nexus-design-system .nexus-library-application .nexus-catalog-theme-chip {
   min-height: 0;
   border-radius: 3px;
 }
+
+/* Theme specimens use their own semantic structure; legacy miniature selectors are not reused. */
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample {
+  --nexus-library-theme-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--nexus-library-theme-gap, 8px);
+  width: min(100%, 360px);
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-canvas, #171f2a);
+  color: var(--nexus-library-theme-text, #e7edf5);
+  font-family: var(--nexus-library-theme-font, system-ui, sans-serif) !important;
+  font-size: var(--nexus-library-theme-font-size, 13px);
+  line-height: 1.25;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample.is-compact {
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  gap: 3px;
+  border: 0;
+  border-radius: 0;
+  font-size: 7px;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-windowHeader, #223246);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__eyebrow,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__label {
+  color: var(--nexus-library-theme-muted, #9aadc2);
+  font-size: .72em;
+  line-height: 1.15;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__brand,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__title {
+  min-width: 0;
+  color: var(--nexus-library-theme-text, #e7edf5);
+  font-family: var(--nexus-library-theme-display-font, var(--nexus-library-theme-font, system-ui, sans-serif)) !important;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__brand {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__body {
+  display: grid;
+  grid-template-columns: minmax(48px, .25fr) minmax(0, 1fr);
+  flex: 1 1 auto;
+  gap: var(--nexus-library-theme-gap, 8px);
+  min-width: 0;
+  min-height: 0;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px 5px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-panel, #182330);
+  color: var(--nexus-library-theme-muted, #9aadc2);
+  font-size: .8em;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__nav > span {
+  display: block;
+  padding: 4px;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__nav > .is-active {
+  background: var(--nexus-library-theme-highlight, #78b7e8);
+  color: var(--nexus-library-theme-canvas, #171f2a);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--nexus-library-theme-gap, 8px);
+  min-width: 0;
+  min-height: 0;
+  padding: 9px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-surface, #202e3e);
+  overflow: hidden;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__title {
+  font-size: 1.25em;
+  line-height: 1.12;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__highlight {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-highlight, #78b7e8);
+  color: var(--nexus-library-theme-canvas, #171f2a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__resource {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__track {
+  display: block;
+  width: 100%;
+  height: 9px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: 99px;
+  background: var(--nexus-library-theme-input, #111b27);
+  overflow: hidden;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__track > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--nexus-library-theme-accent, #52647b);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__card {
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-card, #273443);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__card > strong {
+  font-family: var(--nexus-library-theme-display-font, var(--nexus-library-theme-font, system-ui, sans-serif)) !important;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  min-width: 0;
+  margin-top: auto;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__field,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__button {
+  display: block;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--nexus-library-theme-border, #3c5067);
+  border-radius: var(--nexus-library-theme-radius);
+  background: var(--nexus-library-theme-input, #111b27);
+  color: var(--nexus-library-theme-text, #e7edf5);
+  font: inherit;
+  font-size: .8em;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__button {
+  background: var(--nexus-library-theme-button, #315b7d);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample__button.is-secondary {
+  background: var(--nexus-library-theme-surface, #202e3e);
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="small"] .nexus-catalog-theme-sample__eyebrow,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="small"] .nexus-catalog-theme-sample__brand,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="small"] .nexus-catalog-theme-sample__nav,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="small"] .nexus-catalog-theme-sample__panel > * {
+  display: none;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] {
+  padding: 2px;
+  gap: 2px;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__eyebrow,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__nav,
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__panel > .nexus-catalog-theme-sample__controls {
+  display: none;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__body {
+  grid-template-columns: 1fr;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__panel {
+  gap: 2px;
+  padding: 3px;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__title {
+  font-size: 1em;
+}
+
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[data-card-size="medium"] .nexus-catalog-theme-sample__highlight {
+  padding: 2px 3px;
+  font-size: .7em;
+}
+
