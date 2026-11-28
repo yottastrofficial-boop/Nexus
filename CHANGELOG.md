@@ -1,6 +1,6 @@
 ## 1.0.0.146 — Biblioteca: cascata CSS, cartões e Inspector quadrado
 
-- Corrige a ordem de carregamento das folhas de estilo: o Design System fornece os estilos-base e a camada Universal Library passa a ser carregada por último, conforme seu contrato.
+- Corrige a cascata sem alterar a ordem oficial: o Design System continua como última folha e recebe um bloco final de regras da Biblioteca, que prevalece sobre os seletores antigos.
 - Remove os controles de favorito dos cartões da grade; a ação continua disponível no Inspector, eliminando estrelas residuais e conflitos de posicionamento.
 - Reconstrói a miniatura dos temas como uma interface compacta com cabeçalho, navegação, conteúdo, controles e amostras cromáticas.
 - Reconstrói o contrato da grade com linhas reservadas para miniatura, título e etiqueta, evitando sobreposição entre elementos.
