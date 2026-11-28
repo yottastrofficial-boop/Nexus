@@ -1,10 +1,10 @@
-## Estado de distribuição — 1.0.0.142 (em publicação)
+## Estado de distribuição — 1.0.0.142 (publicada)
 
-A main contém a otimização de inicialização eager/lazy do Service Registry. `system.json` declara 1.0.0.142 e aponta para seu ZIP; o manifesto estável permanece em 1.0.0.141 até CI, pacote e asset da 1.0.0.142 serem confirmados pelo workflow oficial.
+A otimização de inicialização eager/lazy do Service Registry foi publicada após CI, pacote e asset confirmados. `system.json` e `manifest.json` declaram 1.0.0.142 e apontam para o mesmo ZIP.
 
-- CI do commit `c2fb816effce6bcd874f88eabf39d12df772b02a` aprovado.
-- O workflow de release deve confirmar o asset antes de sincronizar o manifesto.
-- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+- Workflow de release `46099909950` concluído com sucesso.
+- Asset `nexus.zip` confirmado (501.325 bytes).
+- Teste funcional no Foundry VTT 14 build 360 permanece manual; último checkpoint funcional confirmado: 1.0.0.70.
 
 ## Estado de distribuição — 1.0.0.141 (publicada)
 
