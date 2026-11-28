@@ -974,3 +974,12 @@
 ## Histórico anterior à versão 1.0.0.70
 
 As entradas anteriores foram movidas para [`docs/archive/CHANGELOG_PRE_1.0.0.70.md`](docs/archive/CHANGELOG_PRE_1.0.0.70.md) para manter este changelog focado nas versões recentes, sem descartar o registro histórico.
+
+
+## 1.0.0.149
+
+- Biblioteca: remove contornos permanentes dos cartões e das áreas de miniatura; a borda fica reservada ao recurso selecionado.
+- Temas: cartões médios exibem miniaturas compactas da interface real, com texto secundário suavizado, em vez de uma grade isolada de amostras.
+- Tipografia: impede quebra agressiva de palavras nos títulos dos recursos.
+- Favoritos: permanecem exclusivos do cabeçalho do Inspector, sem estrela sobre os ícones da grade.
+- Testes: atualiza os contratos de miniatura e de contorno de seleção.
