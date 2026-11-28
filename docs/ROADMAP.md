@@ -1,3 +1,11 @@
+## 1.0.0.143 — Cache lazy e diagnóstico de serviços (main)
+
+- O cache IndexedDB foi movido para resolução no primeiro acesso à fachada pública.
+- Adicionado snapshot somente leitura via `game.nexus.getDiagnostics()`, sem inicializar serviços.
+- Testes de diagnóstico e contrato lazy foram incluídos na suíte.
+- Release estável anterior: 1.0.0.142; pacote/manifesto 1.0.0.143 aguardam o workflow oficial.
+- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.142 — Serviços sob demanda e fachada pública (publicada)
 
 - Adiciona accessors de serviços no registry para preservar propriedades de objeto sem inicialização imediata.
