@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.141 (em publicação)
+## Estado do código — 1.0.0.141 (publicada)
 
-A main fortalece o lifecycle do Service Registry: shutdown compartilhado entre chamadas concorrentes, espera por factories em andamento e cleanup assíncrono inverso. Testes de regressão e CI passaram; o workflow de release ainda confirmará ZIP e manifesto. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+A main fortalece o lifecycle do Service Registry: shutdown compartilhado entre chamadas concorrentes, espera por factories em andamento e cleanup assíncrono inverso. Testes de regressão, CI, pacote ZIP, release e manifesto foram confirmados pelo workflow 46099498524. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado do código — 1.0.0.140 (publicada)
 
