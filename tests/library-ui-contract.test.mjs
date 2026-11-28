@@ -279,6 +279,8 @@ assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size
 assert.doesNotMatch(catalogExplorer.slice(catalogExplorer.indexOf("const renderResourceCard"), catalogExplorer.indexOf("let currentInspectorTab")),
   /nexus-library-favorite|data-library-resource-favorite/,
   "Grid cards must not render favorite stars; the Inspector owns favorite management.");
+assert.doesNotMatch(styles, /nexus-library-theme-miniature/,
+  "The Universal Library layer must not retain legacy theme-miniature selectors.");
 assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
   "No legacy favorite CSS may remain in either Library stylesheet.");
 assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
