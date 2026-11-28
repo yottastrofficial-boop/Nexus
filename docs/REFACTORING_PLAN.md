@@ -2,7 +2,7 @@
 
 ## Estado da revisão integrada — 2026-11-27
 
-A revisão está sendo conduzida sobre a main atual; a release estável é `1.0.0.141`, que acrescenta a correção de lifecycle do Service Registry. Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
+A revisão está sendo conduzida sobre a main atual; a release estável é `1.0.0.142`, que adiciona a fachada lazy para serviços puros após a correção de shutdown da 1.0.0.141. Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
 
 Esta é uma revisão estática remota. O teste funcional completo dentro do Foundry continua sendo um gate separado.
 
@@ -25,7 +25,7 @@ Esta é uma revisão estática remota. O teste funcional completo dentro do Foun
 | Etapa | Escopo | Estado |
 |---|---|---|
 | 0 | Baseline, mapa de arquitetura, inventário e riscos | Mapa inicial registrado; auditoria de consumidores/leitores/escritores continua |
-| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em andamento; shutdown concorrente corrigido e testado; próximo: classificar inicialização eager/lazy no bootstrap e preservar APIs `game.nexus.*` |
+| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em andamento; shutdown concorrente e lazy facade implementados/testados; próximo: auditar efeitos de init, abertura/fechamento e contratos de consumo |
 | 2 | Propriedades, fórmulas, regras, aliases, schemas e migrações | A iniciar após contratos P0 |
 | 3 | Componentes, instâncias, grupos e Canvas | A iniciar após baseline de dados |
 | 4 | Fichas, renderização, listeners, persistência e ficha NPC | A iniciar por extrações pequenas |
@@ -42,7 +42,7 @@ Esta é uma revisão estática remota. O teste funcional completo dentro do Foun
 3. Definir contrato de entrada/saída e ownership antes de mover código.
 4. Extrair funções puras primeiro; depois serviços/adapters; UI por último.
 5. Manter uma fachada compatível enquanto consumidores migram.
-5a. No bootstrap, não converter registros em lazy por regra geral: identificar serviços que instalam hooks, registram settings/classes ou são consumidos imediatamente; deferir somente factories sem side effects e provar com testes de ordem de init/ready.
+5a. A classificação inicial eager/lazy foi implementada: serviços puros da Biblioteca, mídia, recursos e lógica são resolvidos no primeiro acesso; Design System, Library registry e classes ApplicationV2 permanecem eager. Próximo: testar a ordem real de init/ready e auditar outros side effects de init no Foundry V14.
 6. Adicionar testes de comportamento e arquitetura, não apenas assertions textuais.
 7. Rodar sintaxe, suite, validação de pacote e CI.
 8. Para UI, persistência, permissões ou lifecycle, testar no Foundry V14 real.
