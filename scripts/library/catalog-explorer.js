@@ -344,26 +344,41 @@ function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
   const preview = makeElement("div", "nexus-library-theme-miniature");
   preview.setAttribute("aria-hidden", "true");
-  for (const [key, value] of Object.entries(tokens)) preview.style.setProperty("--nexus-library-theme-" + key, value);
+  for (const [key, value] of Object.entries(tokens)) {
+    preview.style.setProperty("--nexus-library-theme-" + key, value);
+  }
   const family = safeFontFamily(typography.displayFamily || typography.family) || "system-ui, sans-serif";
   preview.style.setProperty("--nexus-library-theme-display-font", family);
-  preview.style.setProperty("font-family", family, "important");
-  const top = makeElement("span", "nexus-library-theme-miniature-top");
+
+  const header = makeElement("span", "nexus-library-theme-miniature-header");
+  const headerMark = makeElement("i", "nexus-library-theme-miniature-mark");
+  const headerLine = makeElement("i", "nexus-library-theme-miniature-header-line");
+  header.append(headerMark, headerLine);
+
   const body = makeElement("span", "nexus-library-theme-miniature-body");
-  const panel = makeElement("span", "nexus-library-theme-miniature-panel");
+  const sidebar = makeElement("span", "nexus-library-theme-miniature-sidebar");
+  for (let index = 0; index < 3; index++) {
+    sidebar.append(makeElement("i", index === 0 ? "is-active" : ""));
+  }
+
+  const content = makeElement("span", "nexus-library-theme-miniature-content");
   const title = makeElement("i", "nexus-library-theme-miniature-title");
-  const line = makeElement("i", "nexus-library-theme-miniature-line");
-  const button = makeElement("i", "nexus-library-theme-miniature-button");
-  const meter = makeElement("i", "nexus-library-theme-miniature-meter");
-  const swatches = makeElement("span", "nexus-library-theme-miniature-swatches");
+  const copy = makeElement("i", "nexus-library-theme-miniature-copy");
+  const highlight = makeElement("i", "nexus-library-theme-miniature-highlight");
+  const controls = makeElement("span", "nexus-library-theme-miniature-controls");
+  controls.append(
+    makeElement("i", "nexus-library-theme-miniature-button"),
+    makeElement("i", "nexus-library-theme-miniature-field")
+  );
+  const paletteRow = makeElement("span", "nexus-library-theme-miniature-swatches");
   for (const key of ["accent", "highlight", "button", "surface"]) {
     const swatch = makeElement("i", "");
-    swatch.style.background = tokens[key];
-    swatches.append(swatch);
+    swatch.style.backgroundColor = tokens[key];
+    paletteRow.append(swatch);
   }
-  panel.append(title, line, button, meter);
-  body.append(panel, swatches);
-  preview.append(top, body);
+  content.append(title, copy, highlight, controls, paletteRow);
+  body.append(sidebar, content);
+  preview.append(header, body);
   return preview;
 }
 
