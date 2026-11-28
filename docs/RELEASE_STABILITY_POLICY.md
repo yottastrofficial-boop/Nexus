@@ -1,10 +1,10 @@
-## Estado de distribuição — 1.0.0.141 (em publicação)
+## Estado de distribuição — 1.0.0.141 (publicada)
 
-A main contém a correção de lifecycle do Service Registry. `system.json` declara 1.0.0.141 e aponta para seu ZIP; o manifesto estável permanece em 1.0.0.140 até CI, pacote e asset da 1.0.0.141 serem confirmados pelo workflow oficial.
+A correção de lifecycle do Service Registry foi publicada após CI, pacote e asset confirmados. `system.json` e `manifest.json` declaram 1.0.0.141 e apontam para o mesmo ZIP.
 
-- CI do commit de código `f58e04e1f93e32e019b852bdd2568204ee7ef62c` aprovado.
-- O workflow de release deve confirmar o asset antes de sincronizar o manifesto.
-- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+- Workflow de release `46099498524` concluído com sucesso.
+- Asset `nexus.zip` confirmado (500.688 bytes).
+- Teste funcional no Foundry VTT 14 build 360 permanece manual; último checkpoint funcional confirmado: 1.0.0.70.
 
 ## Estado de distribuição — 1.0.0.140 (publicada)
 
