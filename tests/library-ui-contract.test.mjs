@@ -86,9 +86,9 @@ assert.match(designSystem, /nexus-library-navigation-search \.nexus-library-sear
 
 assert.match(libraryTemplate, /aria-describedby="nexus-library-search-help"/,
   "The advanced search syntax must be discoverable to assistive technology.");
-assert.match(catalogExplorer, /application\/x-nexus-library-resource/,
+assert.match(catalogGrid, /application\/x-nexus-library-resource/,
   "Library cards must preserve the NEXUS transfer payload.");
-assert.match(catalogExplorer, /setData\("text\/plain", nativeData\)/,
+assert.match(catalogGrid, /setData\("text\/plain", nativeData\)/,
   "Native Foundry documents must use the standard UUID drag contract.");
 assert.match(actorListeners, /_addSavedLibraryComponent\(payload\.entryId, \{\}, position\)/,
   "Saved components must be insertable by dropping directly onto the Canvas.");
