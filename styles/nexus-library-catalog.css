@@ -564,3 +564,70 @@ html.nexus-design-system .nexus-library-application .nexus-catalog-theme-sample[
   font-size: .7em;
 }
 
+
+/* Inspector typography specimen and theme palette details. */
+html.nexus-design-system .nexus-library-application .nexus-library-font-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--nexus-panel-border, #40546b);
+  border-radius: 8px;
+  background: var(--nexus-panel-card, #26384b);
+  color: var(--nexus-panel-text, #e7edf5);
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-preview-samples {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  min-width: 0;
+  font-family: var(--nexus-library-preview-font, system-ui, sans-serif) !important;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-preview-aa {
+  display: block;
+  max-width: 100%;
+  font-family: var(--nexus-library-preview-font, system-ui, sans-serif) !important;
+  font-size: clamp(38px, 8vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-preview-lorem {
+  margin: 0;
+  font-family: var(--nexus-library-preview-font, system-ui, sans-serif) !important;
+  font-size: 16px;
+  line-height: 1.35;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-font-preview-glyphs {
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-family: var(--nexus-library-preview-font, system-ui, sans-serif) !important;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-swatch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--nexus-panel-muted, #a5b6c9);
+  font-size: 10px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-swatch > span {
+  display: block;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ffffff35;
+  border-radius: 5px;
+}
+html.nexus-design-system .nexus-library-application .nexus-library-theme-palette-details > summary {
+  cursor: pointer;
+  color: var(--nexus-panel-text, #e7edf5);
+  font-size: 11px;
+}
