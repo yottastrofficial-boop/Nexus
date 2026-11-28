@@ -1,3 +1,7 @@
+## Estado da main — 1.0.0.146 em preparação
+
+A revisão 1.0.0.146 corrige a cascata da Biblioteca mantendo o Design System como última folha de estilos e concentrando nele os contratos finais da grade e do Inspector. A grade deixa de renderizar estrelas de favorito; a gestão permanece no Inspector. Miniaturas usam 32/64/128 px, miniaturas de tema são reconstruídas e a prévia completa do tema passa a ser quadrada. A CI valida os contratos automatizados; a conferência visual e funcional dentro do Foundry VTT 14 build 360 permanece manual.
+
 ## Estado da main — 1.0.0.145 em preparação
 
 A revisão 1.0.0.145 concentra a atualização da Biblioteca de Temas e Fontes: miniaturas quadradas de 32/64/128 px, cartões com espaçamento adaptado, favoritos fora da sobreposição, paletas semânticas completas e aplicação correta das fontes na prévia. O manifesto estável permanece na 1.0.0.144 até o workflow confirmar CI, pacote ZIP e release. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
