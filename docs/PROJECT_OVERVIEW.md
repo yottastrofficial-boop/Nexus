@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.142 (em publicação)
+## Estado do código — 1.0.0.142 (publicada)
 
-A main adiciona accessors para resolução sob demanda de serviços puros sem alterar a forma de acesso da API pública `game.nexus.*`. Os serviços que instalam hooks, registram settings ou fornecem classes necessárias durante `init` permanecem eager. CI passou; o workflow confirmará ZIP e manifesto. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+A main adiciona accessors para resolução sob demanda de serviços puros sem alterar a forma de acesso da API pública `game.nexus.*`. Os serviços que instalam hooks, registram settings ou fornecem classes necessárias durante `init` permanecem eager. CI, pacote ZIP, release e manifesto foram confirmados pelo workflow 46099909950. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado do código — 1.0.0.141 (publicada)
 
