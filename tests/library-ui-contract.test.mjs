@@ -263,3 +263,24 @@ assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
   actorSheet.includes("window: { resizable: true }"),
   "The character sheet must provide enough default viewport for the 800px configured canvas.");
 console.log("NEXUS 1.0.0.130 folder, preview and canvas contracts: OK");
+
+assert.match(libraryTemplate, /<option value="small">32 × 32 px<\/option>/,
+  "The Library must expose the exact 32px preview size.");
+assert.match(libraryTemplate, /<option value="medium" selected>64 × 64 px<\/option>/,
+  "The Library must expose the exact 64px preview size as its default.");
+assert.match(libraryTemplate, /<option value="large">128 × 128 px<\/option>/,
+  "The Library must expose the exact 128px preview size.");
+assert.match(styles, /data-card-size="small"[\s\S]*?--nexus-library-preview-size:\s*32px/,
+  "Small grid cards must use 32px square previews.");
+assert.match(styles, /data-card-size="medium"[\s\S]*?--nexus-library-preview-size:\s*64px/,
+  "Medium grid cards must use 64px square previews.");
+assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size:\s*128px/,
+  "Large grid cards must use 128px square previews.");
+const finalGridFavorite = styles.slice(styles.lastIndexOf(".nexus-library-generic-items[data-view-mode=\"grid\"] .nexus-library-favorite {"));
+assert.match(finalGridFavorite, /position:\s*static\s*!important/,
+  "Grid favorites must no longer overlay the thumbnail corner.");
+assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
+  "The full theme preview must use the theme's body font.");
+assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font-family:\s*var\(--nexus-library-theme-display-font/,
+  "Theme headings must use the theme's display font.");
+

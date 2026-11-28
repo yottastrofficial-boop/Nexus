@@ -1,3 +1,7 @@
+## Estado da main — 1.0.0.145 em preparação
+
+A revisão 1.0.0.145 concentra a atualização da Biblioteca de Temas e Fontes: miniaturas quadradas de 32/64/128 px, cartões com espaçamento adaptado, favoritos fora da sobreposição, paletas semânticas completas e aplicação correta das fontes na prévia. O manifesto estável permanece na 1.0.0.144 até o workflow confirmar CI, pacote ZIP e release. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.144 — Biblioteca de temas curada (publicada)
 
 - Define 12 presets-base: Padrão, sete cores e quatro estilos.

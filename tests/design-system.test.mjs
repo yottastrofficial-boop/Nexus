@@ -46,6 +46,20 @@ test("theme typography uses its preset font unless a layout explicitly overrides
 
 
 
+test("chromatic theme presets define complete semantic palettes instead of recoloring buttons only", () => {
+  const paletteKeys = ["panel", "surface", "input", "border", "text", "muted", "hover", "scroll", "windowHeader", "windowContent", "menu", "placeholder", "resourceButton", "canvas", "card", "accent", "highlight", "button"];
+  const base = THEME_TOKENS["nexus-dark"];
+  const ids = ["color-red", "color-orange", "color-yellow", "color-green", "color-blue", "color-indigo", "color-violet"];
+  for (const id of ids) {
+    const theme = THEME_TOKENS[id];
+    assert.ok(theme, `Missing theme preset: ${id}`);
+    for (const key of paletteKeys) assert.match(theme[key], /^#[0-9a-f]{6}$/i, `${id} must define semantic token ${key}`);
+    for (const key of ["panel", "surface", "input", "border", "windowHeader", "windowContent", "menu", "canvas", "card"]) {
+      assert.notEqual(theme[key], base[key], `${id} must establish its own ${key} surface`);
+    }
+  }
+});
+
 test("theme renderer applies custom palette, density, spacing and accessibility tokens", () => {
   const values = new Map();
   const element = { style: { setProperty(key, value) { values.set(key, value); } }, dataset: {} };

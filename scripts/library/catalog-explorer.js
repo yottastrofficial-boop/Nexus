@@ -347,6 +347,7 @@ function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
   for (const [key, value] of Object.entries(tokens)) preview.style.setProperty("--nexus-library-theme-" + key, value);
   const family = safeFontFamily(typography.displayFamily || typography.family) || "system-ui, sans-serif";
   preview.style.setProperty("--nexus-library-theme-display-font", family);
+  preview.style.setProperty("font-family", family, "important");
   const top = makeElement("span", "nexus-library-theme-miniature-top");
   const body = makeElement("span", "nexus-library-theme-miniature-body");
   const panel = makeElement("span", "nexus-library-theme-miniature-panel");
