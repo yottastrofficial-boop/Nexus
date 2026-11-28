@@ -130,10 +130,10 @@ assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(styles, /nexus-library-font-preview-aa/);
 assert.match(styles, /nexus-library-font-preview-glyphs/);
-assert.match(libraryUiContract, /nexus-library-theme-live-preview/);
-assert.match(libraryUiContract, /nexus-library-theme-live-track/);
+assert.match(catalogStyles, /nexus-catalog-theme-sample/);
+assert.match(catalogStyles, /nexus-catalog-theme-sample__track/);
 assert.match(libraryUiContract, /nexus-library-inspector-tab-button\[aria-selected="true"\]/);
-assert.match(libraryUiContract, /nexus-library-theme-miniature/);
+assert.doesNotMatch(designSystem, /nexus-library-theme-miniature/);
 assert.match(catalogStyles, /nexus-library-catalog-card__preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
