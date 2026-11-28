@@ -1992,18 +1992,30 @@ html.nexus-design-system .nexus-library-application .nexus-library-theme-miniatu
   background: var(--nexus-library-theme-surface, #202e3e) !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-title {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
   width: 62% !important;
   min-width: 0 !important;
-  border-radius: 2px !important;
-  background: var(--nexus-library-theme-display-font-color, var(--nexus-library-theme-text, #e7edf5)) !important;
+  margin: 0 !important;
+  color: var(--nexus-library-theme-text, #e7edf5) !important;
+  background: transparent !important;
   font-family: var(--nexus-library-theme-display-font, inherit) !important;
+  font-size: clamp(5px, calc(var(--nexus-library-preview-size, 64px) * .17), 22px) !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-copy {
   display: block !important;
   width: 82% !important;
-  border-radius: 2px !important;
-  background: color-mix(in srgb, var(--nexus-library-theme-text, #e7edf5) 50%, transparent) !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--nexus-library-theme-muted, #9aadc2) !important;
+  font-family: var(--nexus-library-theme-font, system-ui, sans-serif) !important;
+  font-size: clamp(4px, calc(var(--nexus-library-preview-size, 64px) * .075), 10px) !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-highlight {
   display: block !important;
