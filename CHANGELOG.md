@@ -988,3 +988,8 @@ As entradas anteriores foram movidas para [`docs/archive/CHANGELOG_PRE_1.0.0.70.
 ## Validação 1.0.0.149
 
 - Publicação de teste após os contratos automatizados da Biblioteca.
+
+
+## Verificação de pacote 1.0.0.149
+
+- Executar validação completa e publicar pacote para teste no Foundry VTT 14.
