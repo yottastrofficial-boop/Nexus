@@ -1940,13 +1940,6 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   overflow: hidden;
 }
 
-html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-favorite:hover,
-
-html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="list"] .nexus-library-generic-item > strong {
-  font-size: 11px !important;
-  font-weight: 500;
-}
-
 
 /* 1.0.0.129 — precise Explorer polish: single search surface, aligned rows and adjustable columns. */
 
@@ -3786,27 +3779,6 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-}
-
-
-html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] .nexus-library-favorite:hover,
-
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature {
-  display: grid !important;
-  grid-template-rows: 10% minmax(0, 1fr) !important;
-  gap: 3% !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  padding: 4% !important;
-  overflow: hidden !important;
-  border: 1px solid color-mix(in srgb, var(--nexus-library-theme-border, #40546b) 85%, transparent) !important;
-  border-radius: clamp(2px, calc(var(--nexus-library-preview-size) * .07), 9px) !important;
-  background: var(--nexus-library-theme-panel, #182330) !important;
-  color: var(--nexus-library-theme-text, #e7edf5) !important;
-  font-family: var(--nexus-library-theme-display-font, inherit) !important;
-  box-sizing: border-box !important;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-top {
   display: block !important;
