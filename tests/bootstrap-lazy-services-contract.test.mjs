@@ -16,7 +16,7 @@ test("bootstrap defers pure services while keeping init-critical services eager"
     "media.formats", "media.capabilities", "media.pipeline", "media.storage",
     "logic.registry", "logic.runtime"
   ]) {
-    assert.match(bootstrap, new RegExp(`registerLazyService\\("${service.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}"`),
+    assert.ok(bootstrap.includes(`registerLazyService("${service}"`),
       `Service ${service} should resolve through the lazy public facade`);
   }
   assert.match(bootstrap, /services\.defineAccessor\(target, property, name\)/,
