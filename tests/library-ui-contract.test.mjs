@@ -8,6 +8,9 @@ const libraryUiContract = designSystem;
 const libraryTemplate = readFileSync(new URL("../templates/library/library.hbs", import.meta.url), "utf8");
 const libraryApplication = readFileSync(new URL("../scripts/library/library-application.js", import.meta.url), "utf8");
 const catalogExplorer = readFileSync(new URL("../scripts/library/catalog-explorer.js", import.meta.url), "utf8");
+const catalogGrid = readFileSync(new URL("../scripts/library/catalog-grid-renderer.js", import.meta.url), "utf8");
+const catalogPreviews = readFileSync(new URL("../scripts/library/catalog-preview-renderers.js", import.meta.url), "utf8");
+const catalogStyles = readFileSync(new URL("../styles/nexus-library-catalog.css", import.meta.url), "utf8");
 
 const actorSheet = readFileSync(new URL("../scripts/sheets/actor-sheet-v1.0.0.js", import.meta.url), "utf8");
 const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-listeners.js", import.meta.url), "utf8");
@@ -16,6 +19,8 @@ const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-br
 
 assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet and contain the shared Library contract.");
+assert.ok(manifest.styles.includes("styles/nexus-library-catalog.css"),
+  "A grade deve usar sua folha de estilos dedicada.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
 assert.match(styles, /\.nexus-library-application \.nexus-library-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) var\(--nexus-library-inspector-width\)/,
@@ -115,7 +120,7 @@ assert.match(libraryApplication, /showLibraryContextMenu/,
   "Folder and resource context menus should use an actual compact context menu.");
 assert.match(libraryApplication, /duplicateLibraryFolderTree/,
   "Copying a folder should duplicate only its organization tree.");
-assert.match(styles, /data-view-mode="list"[\s\S]*?\.nexus-library-generic-item\.is-selected[\s\S]*?border: 0 !important[\s\S]*?outline: 0 !important/,
+assert.match(catalogStyles, /nexus-library-catalog-card__button\.is-selected[\s\S]*?border-color/,
   "List rows must not use border or outline highlights; selection uses a restrained surface tint.");
 assert.match(styles, /nexus-library-list-name-header > \.nexus-library-list-sort[\s\S]*?width: 100% !important[\s\S]*?min-height: 34px/);
 assert.match(styles, /nexus-library-list-filter > button\[data-library-open-list-filter\][\s\S]*?flex: 1 1 auto[\s\S]*?width: 100% !important/);
@@ -129,7 +134,7 @@ assert.match(libraryUiContract, /nexus-library-theme-live-preview/);
 assert.match(libraryUiContract, /nexus-library-theme-live-track/);
 assert.match(libraryUiContract, /nexus-library-inspector-tab-button\[aria-selected="true"\]/);
 assert.match(libraryUiContract, /nexus-library-theme-miniature/);
-assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
+assert.match(catalogStyles, /nexus-library-catalog-card__preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
 assert.doesNotMatch(libraryTemplate, /data-library-folder-clear/, "The all-folders root is a heading, not a pseudo-folder item.");
@@ -217,9 +222,9 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
   libraryTemplate.includes("data-library-tag"),
   "Category and type filters remain searchable from list headers, and tags have a dedicated filter.");
-assert.ok(catalogExplorer.includes("nexus-library-theme-miniature") &&
-  libraryUiContract.includes("nexus-library-theme-card-preview") &&
-  catalogExplorer.includes("getLibraryThemePreviewTokens"),
+assert.ok(catalogPreviews.includes("nexus-library-theme-miniature") &&
+  catalogPreviews.includes("nexus-library-theme-card-preview") &&
+  catalogPreviews.includes("getLibraryThemePreviewTokens"),
   "Theme cards must use the shared, token-driven mini-interface preview.");
 assert.ok(libraryUiContract.includes("input.nexus-library-search:focus") && libraryUiContract.includes("border:0!important"),
   "The search input must not draw a second border inside its single wrapper.");
@@ -239,8 +244,8 @@ assert.ok(catalogExplorer.includes("data-library-open-folder") &&
 assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') === false &&
   libraryApplication.includes("folder: this._state.folder"),
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
-assert.ok(catalogExplorer.includes("nexus-library-font-grid-specimen") &&
-  catalogExplorer.includes("resource.fontFamily") &&
+assert.ok(catalogGrid.includes("nexus-catalog-font-glyph") &&
+  catalogGrid.includes("resource.fontFamily") &&
   catalogExplorer.includes('"Aa"') &&
   catalogExplorer.includes("Lorem ipsum dolor sit amet") &&
   !catalogExplorer.includes("nexus-library-font-specimen") &&
@@ -276,15 +281,15 @@ assert.match(styles, /data-card-size="medium"[\s\S]*?--nexus-library-preview-siz
   "Medium grid cards must use 64px square previews.");
 assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size:\s*128px/,
   "Large grid cards must use 128px square previews.");
-assert.doesNotMatch(catalogExplorer.slice(catalogExplorer.indexOf("const renderResourceCard"), catalogExplorer.indexOf("let currentInspectorTab")),
+assert.doesNotMatch(catalogGrid,
   /nexus-library-favorite|data-library-resource-favorite/,
   "Grid cards must not render favorite stars; the Inspector owns favorite management.");
 assert.doesNotMatch(styles, /nexus-library-theme-miniature/,
   "The Universal Library layer must not retain legacy theme-miniature selectors.");
 assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
   "No legacy favorite CSS may remain in either Library stylesheet.");
-assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
-assert.match(catalogExplorer, /nexus-library-theme-miniature-copy", "NEXUS"/);
+assert.match(catalogPreviews, /nexus-library-theme-miniature-title", "Aa"/);
+assert.match(catalogPreviews, /nexus-library-theme-miniature-copy", "NEXUS"/);
 assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
 const favoriteToggle = catalogExplorer.slice(
   catalogExplorer.indexOf('detailFavorite.addEventListener("click"'),
@@ -308,5 +313,5 @@ assert.match(catalogExplorer, /root\.dataset\.previewShape = compact \? "compact
   "The full Inspector preview must activate the square layout contract.");
 assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
-assert.match(catalogExplorer, /nexus-library-theme-miniature-sidebar/);
-assert.match(catalogExplorer, /nexus-library-theme-miniature-content/);
+assert.match(catalogPreviews, /nexus-library-theme-miniature-sidebar/);
+assert.match(catalogPreviews, /nexus-library-theme-miniature-content/);
