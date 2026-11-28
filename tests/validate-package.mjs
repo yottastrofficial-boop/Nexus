@@ -713,12 +713,14 @@ assert.ok(releasePublishIndex >= 0 && releaseAssetCheckIndex > releasePublishInd
 assert.match(releaseWorkflow, /STATE.*uploaded/);
 
 const entrypoint = await read("scripts/nexus-v1.0.0.js");
+const actorLifecycle = await read("scripts/core/actor-document-lifecycle.js");
 const libraryCatalog = await read("assets/library/catalog.js");
-assert.match(entrypoint, /Hooks\.on\("preCreateActor"/, "Criação de Actor NEXUS precisa configurar o token de protótipo");
-assert.match(entrypoint, /prototypeToken\.actorLink = true/, "Tokens de protótipo NEXUS devem ser vinculados por padrão");
-assert.match(entrypoint, /texture: \{ src: actor\.img \|\| DEFAULT_TOKEN_IMAGE \}/, "O token de protótipo precisa de uma imagem utilizável");
-assert.match(entrypoint, /Hooks\.on\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
-assert.match(entrypoint, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
+assert.match(entrypoint, /installNexusActorDocumentLifecycle\(/, "Bootstrap deve instalar o lifecycle de documentos Actor");
+assert.match(actorLifecycle, /register\("preCreateActor"/, "Criação de Actor NEXUS precisa configurar o token de protótipo");
+assert.match(actorLifecycle, /prototypeToken\.actorLink = true/, "Tokens de protótipo NEXUS devem ser vinculados por padrão");
+assert.match(actorLifecycle, /texture: \{ src: actor\.img \|\| defaultTokenImage \}/, "O token de protótipo precisa de uma imagem utilizável");
+assert.match(actorLifecycle, /register\("preCreateToken"/, "Criação de Token NEXUS precisa preservar o vínculo com o Actor");
+assert.match(actorLifecycle, /token\.updateSource\(changes\)/, "A criação do Token deve aplicar os dados corrigidos");
 assert.equal(libraryCatalog.match(/type: "sheet-resource"/g)?.length, 1, "A biblioteca deve conter apenas a barra de vida");
 assert.match(libraryCatalog, /label: "Barra de recurso"/, "A biblioteca deve manter a barra de recurso sem rótulo visual");
 assert.match(libraryCatalog, /currentPath: ""/, "A barra neutra não deve vincular automaticamente o recurso PV");
