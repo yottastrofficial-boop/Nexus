@@ -1138,6 +1138,7 @@ export function createLibraryCatalogExplorer({
         components: themeModel?.components ?? {},
         compact: false
       });
+      sample.dataset.previewShape = "square";
       themePreview.append(sample);
 
       const swatches = makeElement("div", "nexus-library-theme-swatches");
