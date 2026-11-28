@@ -370,6 +370,8 @@ const canvasPlayInteractions = await read("scripts/sheets/canvas-play-interactio
 const themeModule = await read("scripts/core/theme.js");
 const libraryApplication = await read("scripts/library/library-application.js");
 const libraryCatalogExplorer = await read("scripts/library/catalog-explorer.js");
+const libraryCatalogGridRenderer = await read("scripts/library/catalog-grid-renderer.js");
+const libraryCatalogPreviewRenderers = await read("scripts/library/catalog-preview-renderers.js");
 const libraryPreferences = await read("scripts/core/library-preferences.js");
 const libraryStore = await read("scripts/core/library-store.js");
 const universalLibraryTemplate = await read("templates/library/library.hbs");
@@ -1085,8 +1087,8 @@ assert.match(sheetCode, /rollAliases/, "As sugestões devem incluir aliases curt
 assert.match(sheetCode, /popover="manual"/, "O seletor de cores deve evitar fechamento automático durante ajustes");
 assert.match(sheetCode, /this\._outsideAttached/, "O seletor deve restaurar o detector externo ao reconectar");
 assert.match(sheetCode, /keyboardMoveAllElements/, "A atualização dos limites de grupos deve reutilizar os nós já consultados");
-assert.match(libraryCatalogExplorer, /gridMode = members\.length > 8 \|\| scale < 0\.12/, "Composições grandes ou muito dispersas devem usar miniatura em grade");
-assert.match(libraryCatalogExplorer, /renderLibraryResourcePreview/, "As prévias devem ser renderizadas pelo Explorer compartilhado");
+assert.match(libraryCatalogPreviewRenderers, /gridMode = members\.length > 8 \|\| scale < 0\.12/, "Composições grandes ou muito dispersas devem usar miniatura em grade");
+assert.match(libraryCatalogPreviewRenderers, /renderLibraryResourcePreview/, "As prévias devem ser renderizadas pelo Explorer compartilhado");
 console.log("NEXUS 1.0.0.7: regressões de Inspector, fórmulas, interação e biblioteca verificadas.");
 
 assert.match(sheetCode, /getNexusRollAliasEntries/, "Atalhos podem ser derivados do nome exibido quando não houver abreviação explícita");
@@ -1095,7 +1097,7 @@ assert.match(actorPropertyPickerListeners, /focusin\$\{inspectorNamespace\}/, "O
 assert.match(actorPropertyPickerListeners, /formulaExpression\?\.\[1\]/, "O filtro de fórmula deve reconhecer expressões {{propriedade}} sob o cursor");
 assert.match(sheetCode, /root \+ "\.value"/, "Aliases de atributos e recursos devem resolver o valor numérico, não o objeto inteiro");
 assert.match(canvasInteractions, /const applyKeyboardMoveFrame = \(\) => \{[\s\S]*?syncGroupBounds\(false\)/, "O movimento por teclado deve adiar o cálculo das conexões de cantos durante cada quadro");
-assert.match(libraryCatalogExplorer, /scale < 0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
+assert.match(libraryCatalogPreviewRenderers, /scale < 0\.12/, "Grupos muito espalhados devem alternar para uma miniatura em grade legível");
 
 assert.match(sheetCode, /getNexusSkillRows\(this\.actor\)/, "O grupo deve usar perícias oficiais calculadas");
 assert.match(sheetCode, /async _ensureNexusRulesData\(\)/, "Actors existentes devem receber os novos campos sem perder dados");
