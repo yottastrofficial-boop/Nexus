@@ -71,12 +71,21 @@ const nexusProvider = createNexusLibraryProvider({
 
 const nexusPage = await nexusProvider.list({ limit: 2 });
 assert.equal(nexusPage.items.length, 2);
-assert.equal(nexusPage.total, 23, "A listagem inclui coleções pessoais, catálogo de componentes, temas e nove pilhas de fontes nativas.");
+assert.equal(nexusPage.total, 34, "A listagem inclui coleções pessoais, catálogo, doze temas e dezesseis pilhas de fontes.");
 assert.equal(nexusPage.hasMore, true);
 assert.equal(nexusPage.nextCursor, 2);
 assert.ok(nexusPage.items.every(item => !Object.hasOwn(item, "payload")),
   "A listagem deve expor metadados, não payloads completos.");
 const themePage = await nexusProvider.list({ type: "theme", limit: 20 });
+assert.equal(themePage.total, 13, "A Biblioteca deve expor doze temas-base e preservar temas pessoais.");
+const colorThemes = await nexusProvider.list({ type: "theme", tags: ["categoria:cores"] });
+assert.equal(colorThemes.total, 7, "A tag de categoria filtra somente os sete temas cromáticos.");
+const futuristicTheme = themePage.items.find(item => item.reference?.key === "futuristic");
+assert.ok(futuristicTheme?.tags.includes("categoria:estilos"));
+const resolvedFuturisticTheme = await nexusProvider.resolve(futuristicTheme.reference);
+assert.equal(resolvedFuturisticTheme.kind, "design-profile", "Temas-base devem resolver como perfis aplicáveis pelo Design System.");
+assert.equal(resolvedFuturisticTheme.profile.typography.family, "Space Grotesk");
+assert.equal(resolvedFuturisticTheme.profile.typography.displayFamily, "Orbitron");
 const customThemeResource = themePage.items.find(item => item.reference?.collection === "themes" && item.reference?.id === "theme-preview");
 assert.equal(customThemeResource?.themePreview?.typography?.family, "Georgia");
 assert.equal(customThemeResource?.themePreview?.components?.buttons?.background, "#123456");
@@ -85,7 +94,7 @@ assert.equal(Object.hasOwn(customThemeResource.themePreview, "customCss"), false
   "Theme preview metadata must exclude custom CSS so previewing a theme never executes imported styles.");
 
 const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
-assert.equal(fontsPage.total, 9, "The Library exposes the native font stacks used by the NEXUS UI.");
+assert.equal(fontsPage.total, 16, "The Library exposes system and curated display font stacks used by NEXUS themes.");
 const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
 assert.ok(interFont && interFont.kind === "style" && interFont.tags.includes("fonte"));
 assert.equal(interFont.folder, "assets-fontes",
@@ -99,6 +108,8 @@ const displayFont = await nexusProvider.resolve({ providerId: "nexus-library", b
 assert.match(displayFont.family, /Impact/);
 const blockFont = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "block" });
 assert.match(blockFont.family, /Arial Black/);
+const orbitronFont = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "orbitron" });
+assert.equal(orbitronFont.name, "Orbitron");
 const resolvedInter = await nexusProvider.resolve({ providerId: "nexus-library", builtin: "font", key: "inter" });
 assert.equal(resolvedInter.family, '"Inter", system-ui, sans-serif', "Font resources resolve to their documented CSS family stack.");
 
