@@ -284,9 +284,9 @@ assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
 assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
 assert.match(catalogExplorer, /nexus-library-theme-miniature-copy", "NEXUS"/);
 assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
-assert.match(designSystem, /nexus-library-theme-miniature-copy[\\s\\S]*?font-family: var\\(--nexus-library-theme-font/);
-assert.match(designSystem, /\.nexus-library-generic-card > \.nexus-library-favorite\s*\{[\s\S]*?display:\s*none\s*!important/,
-  "Legacy favorite controls must be suppressed inside grid cards.");
+assert.ok(designSystem.includes(".nexus-library-theme-miniature-copy") &&
+  designSystem.includes("font-family: var(--nexus-library-theme-font"),
+  "Theme miniatures must visibly apply the selected body font.");
 assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
   "The full theme preview must use the theme's body font.");
 assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font-family:\s*var\(--nexus-library-theme-display-font/,
