@@ -246,16 +246,16 @@ assert.ok(libraryApplication.includes('"assets-globais": { kind: "asset" }') ===
   "Assets global must behave as a parent directory instead of a file-type filter that hides child folders.");
 assert.ok(catalogGrid.includes("nexus-catalog-font-glyph") &&
   catalogGrid.includes("resource.fontFamily") &&
-  catalogExplorer.includes('"Aa"') &&
-  catalogExplorer.includes("Lorem ipsum dolor sit amet") &&
-  !catalogExplorer.includes("nexus-library-font-specimen") &&
-  !catalogExplorer.includes("nexus-library-resource-preview-facts"),
+  catalogGrid.includes('"Aa"') &&
+  catalogPreviews.includes("Lorem ipsum dolor sit amet") &&
+  !catalogPreviews.includes("nexus-library-font-specimen") &&
+  !catalogPreviews.includes("nexus-library-resource-preview-facts"),
   "Font metadata stays out of the visual preview while the compact Aa card remains.");
 assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogExplorer.includes("nexus-library-theme-preview") &&
-  catalogExplorer.includes("nexus-library-theme-card-preview") &&
-  catalogExplorer.includes("getLibraryThemePreviewTokens") &&
-  catalogExplorer.includes("getLibraryResourceBarCardPreviewModel") &&
+  catalogPreviews.includes("nexus-library-theme-card-preview") &&
+  catalogPreviews.includes("getLibraryThemePreviewTokens") &&
+  catalogGrid.includes("getLibraryResourceBarCardPreviewModel") &&
   libraryUiContract.includes("nexus-library-theme-swatches"),
   "Theme cards and Inspector share token-driven previews, and resource-meter cards have a visible preview.");
 assert.ok(styles.includes("nexus-library-folder-card") &&
@@ -290,7 +290,7 @@ assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
   "No legacy favorite CSS may remain in either Library stylesheet.");
 assert.match(catalogPreviews, /nexus-library-theme-miniature-title", "Aa"/);
 assert.match(catalogPreviews, /nexus-library-theme-miniature-copy", "NEXUS"/);
-assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
+assert.match(catalogPreviews, /--nexus-library-theme-font", family/);
 const favoriteToggle = catalogExplorer.slice(
   catalogExplorer.indexOf('detailFavorite.addEventListener("click"'),
   catalogExplorer.indexOf("heading.append(detailFavorite)")
@@ -309,7 +309,7 @@ assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font
 
 assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet.");
-assert.match(catalogExplorer, /root\.dataset\.previewShape = compact \? "compact" : "square"/,
+assert.match(catalogPreviews, /root\.dataset\.previewShape = compact \? "compact" : "square"/,
   "The full Inspector preview must activate the square layout contract.");
 assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
