@@ -1,3 +1,14 @@
+## 1.0.0.147 — Reestruturação da amostragem da Biblioteca
+
+- Separa a grade em `catalog-grid-renderer.js`, com cartões de recurso/pasta, ícones semânticos, labels, seleção e drag-and-drop.
+- Extrai as prévias tipadas para `catalog-preview-renderers.js`, compartilhadas pelo Grid e Inspector.
+- Unifica a amostra de tema: paleta compacta em 32 px, mini-interface em 64/128 px e variante quadrada completa no Inspector.
+- Unifica a amostra tipográfica e aplica a família real da fonte aos espécimes.
+- Cria `nexus-library-catalog.css` para geometria, dimensões, tipografia e estados dos cartões.
+- Remove 677 linhas de estilos duplicados de grade/miniaturas/prévias do final do Design System e 1.018 linhas de seletores de cartões/prévias legados do Universal Library stylesheet.
+- Preserva IDs, schemas, provedores, preferências, favoritos, pastas, referências e ações do catálogo.
+- CI e validação do pacote Foundry aprovados na branch de release. A conferência visual final deve ser feita na instância Foundry após instalar o pacote publicado.
+
 ## 1.0.0.146 — Biblioteca: cascata CSS, cartões e Inspector quadrado
 
 - Corrige a cascata sem alterar a ordem oficial: o Design System continua como última folha e recebe um bloco final de regras da Biblioteca, que prevalece sobre os seletores antigos.
@@ -9,17 +20,6 @@
 - Atualiza testes e documentação para validar a cascata, a ausência de favoritos nos cartões e a proporção quadrada da prévia.
 - CI, regressões, pacote ZIP íntegro, Release v1.0.0.146, asset `nexus.zip` (509.981 bytes) e manifesto estável foram confirmados pelo workflow 46121574486.
 - A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo um gate manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
-
-## 1.0.0.147 — Reestruturação da amostragem da Biblioteca
-
-- Separa a grade em `catalog-grid-renderer.js`, com cartões de recurso/pasta, ícones semânticos, labels, seleção e drag-and-drop.
-- Extrai as prévias tipadas para `catalog-preview-renderers.js`, compartilhadas pelo Grid e Inspector.
-- Unifica a amostra de tema: paleta compacta em 32 px, mini-interface em 64/128 px e variante quadrada completa no Inspector.
-- Unifica a amostra tipográfica e aplica a família real da fonte aos espécimes.
-- Cria `nexus-library-catalog.css` para geometria, dimensões, tipografia e estados dos cartões.
-- Remove 677 linhas de estilos duplicados de grade/miniaturas/prévias do final do Design System e 1.018 linhas de seletores de cartões/prévias legados do Universal Library stylesheet.
-- Preserva IDs, schemas, provedores, preferências, favoritos, pastas, referências e ações do catálogo.
-- CI e validação do pacote Foundry aprovados na branch de release. A conferência visual final deve ser feita na instância Foundry após instalar o pacote publicado.
 
 ## 1.0.0.145 — Biblioteca: miniaturas, temas completos e tipografia
 
