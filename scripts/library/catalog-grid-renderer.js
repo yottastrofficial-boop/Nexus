@@ -100,13 +100,27 @@ function createFontPreview(resource, size) {
   return preview;
 }
 
-function createThemePreview(resource) {
+function createThemePreview(resource, size) {
   const model = getLibraryDesignProfilePreviewModel(resource);
   const preview = makeElement("div", "nexus-catalog-preview nexus-catalog-preview--theme");
   preview.dataset.previewKind = "theme";
+  const palette = model?.palette ?? resource.previewColors ?? [];
+  if (size === "small") {
+    preview.classList.add("is-palette-chip");
+    const colors = palette
+      .filter(color => /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(color?.value ?? "")))
+      .slice(0, 4);
+    for (const color of colors) {
+      const swatch = makeElement("span", "nexus-catalog-theme-chip");
+      swatch.style.backgroundColor = color.value;
+      preview.append(swatch);
+    }
+    if (!colors.length) preview.append(createIconPreview(resource));
+    return preview;
+  }
   preview.append(createLibraryThemeSample({
     name: resource.name,
-    palette: model?.palette ?? resource.previewColors ?? [],
+    palette,
     typography: model?.typography ?? {},
     layout: { ...(model?.layout ?? {}), preset: model?.preset },
     components: model?.components ?? {},
@@ -164,7 +178,7 @@ function createDefaultPreview(resource) {
 
 function createPreview(resource, size) {
   if (resource.reference?.builtin === "font") return createFontPreview(resource, size);
-  if (resource.kind === "theme") return createThemePreview(resource);
+  if (resource.kind === "theme") return createThemePreview(resource, size);
   return createResourceBarPreview(resource)
     ?? createThumbnailPreview(resource)
     ?? createDefaultPreview(resource);
