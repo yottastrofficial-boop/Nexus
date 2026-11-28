@@ -16,8 +16,11 @@ const PALETTE_LABELS = Object.freeze({
 });
 
 const PRESET_LABELS = Object.freeze({
-  "nexus-dark": "NEXUS Escuro", midnight: "Meia-noite", light: "Claro",
-  steam: "Steam", linux: "Linux", medieval: "Medieval", "pixel-art": "Pixel Art"
+  "nexus-dark": "Padrão", "color-red": "Vermelho", "color-orange": "Laranja",
+  "color-yellow": "Amarelo", "color-green": "Verde", "color-blue": "Azul",
+  "color-indigo": "Anil", "color-violet": "Violeta", medieval: "Medieval",
+  futuristic: "Futurista", "cosmic-horror": "Horror Cósmico", superheroes: "Super-heróis",
+  midnight: "Meia-noite", light: "Claro", steam: "Steam", linux: "Linux", "pixel-art": "Pixel Art"
 });
 const DENSITY_LABELS = Object.freeze({ compact: "Compacta", comfortable: "Confortável", spacious: "Espaçosa" });
 const RADIUS_LABELS = Object.freeze({ sharp: "Angular", soft: "Suave", rounded: "Arredondada" });

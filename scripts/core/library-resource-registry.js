@@ -1,5 +1,5 @@
-import { THEME_PALETTES } from "./theme.js";
-import { DESIGN_PROFILE_SCHEMA_VERSION } from "./design-profile.js";
+import { LIBRARY_THEME_PRESETS } from "./theme.js";
+import { DESIGN_PROFILE_SCHEMA_VERSION, createDefaultDesignProfile } from "./design-profile.js";
 import {
   NEXUS_LIBRARY_COLLECTIONS,
   getLegacyNexusLibraryFlags,
@@ -33,7 +33,7 @@ const COLLECTION_TYPES = Object.freeze({
   functions: "function"
 });
 const THEME_LABELS = Object.freeze({
-  "nexus-dark": "NEXUS Escuro",
+  "nexus-dark": "Padrão",
   foundry: "Foundry VTT",
   midnight: "Meia-noite",
   light: "Claro",
@@ -42,6 +42,16 @@ const THEME_LABELS = Object.freeze({
   medieval: "Medieval",
   "pixel-art": "Pixel Art"
 });
+const getBuiltInThemes = catalog => [
+  ...LIBRARY_THEME_PRESETS.map(preset => {
+    const profile = createDefaultDesignProfile(preset.id);
+    profile.id = preset.id;
+    profile.name = preset.name;
+    return { ...preset, palette: profile.palette, profile };
+  }),
+  ...(Array.isArray(catalog?.themes) ? catalog.themes : [])
+];
+
 const COLLECTION_KINDS = Object.freeze({
   components: "component",
   groups: "composition",
@@ -110,6 +120,8 @@ function normalizeThemePreview(raw) {
   const typography = isPlainObject(source.typography) ? source.typography : {};
   const family = cleanText(typography.family, 180);
   const safeFamily = family && /^[\w\s'",.-]+$/.test(family) ? family : "";
+  const displayFamily = cleanText(typography.displayFamily, 180);
+  const safeDisplayFamily = displayFamily && /^[\w\s'",.-]+$/.test(displayFamily) ? displayFamily : safeFamily;
   const layoutSource = isPlainObject(source.layout) ? source.layout : {};
   const layout = {
     density: ["compact", "comfortable", "spacious"].includes(layoutSource.density) ? layoutSource.density : "comfortable",
@@ -136,7 +148,7 @@ function normalizeThemePreview(raw) {
     preset: cleanText(source.preset ?? source.id, 48),
     name: cleanText(source.name, 120),
     palette: Object.freeze(palette),
-    typography: Object.freeze({ family: safeFamily, baseSize: Math.min(18, Math.max(10, Number(typography.baseSize) || 13)) }),
+    typography: Object.freeze({ family: safeFamily, displayFamily: safeDisplayFamily, baseSize: Math.min(18, Math.max(10, Number(typography.baseSize) || 13)) }),
     layout: Object.freeze(layout),
     components: Object.freeze(Object.fromEntries(Object.entries(components).map(([key, value]) => [key, Object.freeze(value)])))
   });
@@ -425,10 +437,7 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         capabilities: ["resolve"]
       }, "nexus-library"));
     }
-    const builtInThemes = [
-      ...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })),
-      ...(Array.isArray(catalog.themes) ? catalog.themes : [])
-    ];
+    const builtInThemes = getBuiltInThemes(catalog);
     for (const theme of builtInThemes) {
       resources.push(normalizeResource({
         id: "builtin-theme:" + String(theme.id ?? theme.key),
@@ -454,7 +463,14 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       { id: "block", name: "Arial Black", family: '"Arial Black", Impact, sans-serif', description: "Sans-serif de peso alto e desenho compacto para títulos e chamadas.", tags: ["fonte", "tipografia", "display", "negrito"] },
       { id: "script", name: "Segoe Script", family: '"Segoe Script", "Brush Script MT", cursive', description: "Pilha cursiva do sistema, com fallback cursive.", tags: ["fonte", "tipografia", "cursiva", "script"] },
       { id: "georgia", name: "Georgia", family: 'Georgia, "Times New Roman", serif', description: "Serifada de leitura, com contraste visível em títulos e parágrafos.", tags: ["fonte", "tipografia", "serifada"] },
-      { id: "monospace", name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", description: "Pilha monoespaçada usada em campos e trechos técnicos.", tags: ["fonte", "tipografia", "monoespaçada", "código"] }
+      { id: "monospace", name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", description: "Pilha monoespaçada usada em campos e trechos técnicos.", tags: ["fonte", "tipografia", "monoespaçada", "código"] },
+      { id: "cinzel", name: "Cinzel", family: '"Cinzel", Georgia, serif', description: "Serifada inspirada em inscrições clássicas; adequada a títulos de fantasia e medieval.", tags: ["fonte", "tipografia", "serifada", "medieval", "display"] },
+      { id: "cormorant-garamond", name: "Cormorant Garamond", family: '"Cormorant Garamond", Georgia, serif', description: "Serifada literária de contraste elegante para leitura e atmosferas góticas.", tags: ["fonte", "tipografia", "serifada", "literária", "horror"] },
+      { id: "orbitron", name: "Orbitron", family: '"Orbitron", sans-serif', description: "Geométrica de ficção científica para títulos tecnológicos e interfaces futuristas.", tags: ["fonte", "tipografia", "futurista", "display", "sci-fi"] },
+      { id: "space-grotesk", name: "Space Grotesk", family: '"Space Grotesk", system-ui, sans-serif', description: "Sans-serif contemporânea com caráter técnico para textos e interface futurista.", tags: ["fonte", "tipografia", "futurista", "interface", "sci-fi"] },
+      { id: "im-fell-english-sc", name: "IM Fell English SC", family: '"IM Fell English SC", Georgia, serif', description: "Serifada histórica com textura editorial para títulos de horror cósmico.", tags: ["fonte", "tipografia", "histórica", "horror", "display"] },
+      { id: "barlow-condensed", name: "Barlow Condensed", family: '"Barlow Condensed", Impact, sans-serif', description: "Sans-serif condensada e expressiva para títulos fortes e interfaces de ação.", tags: ["fonte", "tipografia", "condensada", "quadrinhos", "super-heróis"] },
+      { id: "bangers", name: "Bangers", family: '"Bangers", Impact, sans-serif', description: "Display inspirada em letreiramento de quadrinhos; indicada para chamadas curtas.", tags: ["fonte", "tipografia", "quadrinhos", "super-heróis", "display"] }
     ];
     for (const font of builtInFonts) {
       resources.push(normalizeResource({
@@ -656,7 +672,8 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       return (catalog.assets ?? []).find(item => String(item.key) === String(reference.key)) ?? null;
     }
     if (reference?.builtin === "theme") {
-      return [...Object.entries(THEME_PALETTES).map(([id, palette]) => ({ id, name: id, palette })), ...(catalog.themes ?? [])].find(item => String(item.id ?? item.key) === String(reference.key)) ?? null;
+      const theme = getBuiltInThemes(catalog).find(item => String(item.id ?? item.key) === String(reference.key));
+      return theme?.profile ? { kind: "design-profile", profile: theme.profile } : theme ?? null;
     }
     if (reference?.builtin === "font") {
       const fonts = {
@@ -668,7 +685,14 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
         block: { name: "Arial Black", family: '"Arial Black", Impact, sans-serif', category: "Display" },
         script: { name: "Segoe Script", family: '"Segoe Script", "Brush Script MT", cursive', category: "Cursiva" },
         georgia: { name: "Georgia", family: 'Georgia, "Times New Roman", serif', category: "Serifada" },
-        monospace: { name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", category: "Código" }
+        monospace: { name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", category: "Código" },
+        cinzel: { name: "Cinzel", family: '"Cinzel", Georgia, serif', category: "Medieval" },
+        "cormorant-garamond": { name: "Cormorant Garamond", family: '"Cormorant Garamond", Georgia, serif', category: "Literária" },
+        orbitron: { name: "Orbitron", family: '"Orbitron", sans-serif', category: "Futurista" },
+        "space-grotesk": { name: "Space Grotesk", family: '"Space Grotesk", system-ui, sans-serif', category: "Futurista" },
+        "im-fell-english-sc": { name: "IM Fell English SC", family: '"IM Fell English SC", Georgia, serif', category: "Horror cósmico" },
+        "barlow-condensed": { name: "Barlow Condensed", family: '"Barlow Condensed", Impact, sans-serif', category: "Quadrinhos" },
+        bangers: { name: "Bangers", family: '"Bangers", Impact, sans-serif', category: "Quadrinhos" }
       };
       return fonts[String(reference.key)] ?? null;
     }

@@ -28,7 +28,10 @@ export const DESIGN_FONT_CHOICES = Object.freeze({
   "Trebuchet MS": "Trebuchet MS",
   Verdana: "Verdana",
   "system-ui": "Padrão do sistema",
-  monospace: "Monoespaçada"
+  monospace: "Monoespaçada",
+  Cinzel: "Cinzel", "Cormorant Garamond": "Cormorant Garamond",
+  Orbitron: "Orbitron", "Space Grotesk": "Space Grotesk",
+  "IM Fell English SC": "IM Fell English SC", "Barlow Condensed": "Barlow Condensed", Bangers: "Bangers"
 });
 
 export const DESIGN_DENSITY_CHOICES = Object.freeze({
@@ -83,6 +86,7 @@ export function createDefaultDesignProfile(themeId = DEFAULT_DESIGN_THEME) {
     customCss: Object.fromEntries(Object.keys(DESIGN_COMPONENT_CATEGORIES).map(key => [key, ""])),
     typography: {
       family: theme.fontFamily ?? (safeThemeId === "steam" ? "Arial" : safeThemeId === "pixel-art" ? "monospace" : "Inter"),
+      displayFamily: theme.displayFontFamily ?? theme.fontFamily ?? "Inter",
       baseSize: 13,
       secondarySize: 11,
       valueSize: 20,
@@ -130,6 +134,9 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
   const family = Object.hasOwn(DESIGN_FONT_CHOICES, typographySource.family)
     ? typographySource.family
     : defaults.typography.family;
+  const displayFamily = Object.hasOwn(DESIGN_FONT_CHOICES, typographySource.displayFamily)
+    ? typographySource.displayFamily
+    : defaults.typography.displayFamily;
 
   return {
     schemaVersion: DESIGN_PROFILE_SCHEMA_VERSION,
@@ -143,6 +150,7 @@ export function normalizeDesignProfile(raw, { fallbackPreset = DEFAULT_DESIGN_TH
     customCss,
     typography: {
       family,
+      displayFamily,
       baseSize: clamp(typographySource.baseSize, 11, 18, defaults.typography.baseSize),
       secondarySize: clamp(typographySource.secondarySize, 9, 16, defaults.typography.secondarySize),
       valueSize: clamp(typographySource.valueSize, 14, 28, defaults.typography.valueSize),
@@ -233,6 +241,7 @@ export function profileToThemeLayout(raw) {
     menuColor: palette.menu,
     placeholderColor: palette.placeholder,
     fontFamily: typography.family,
+    displayFontFamily: typography.displayFamily,
     fontSize: typography.baseSize,
     secondaryFontSize: typography.secondarySize,
     valueFontSize: typography.valueSize,

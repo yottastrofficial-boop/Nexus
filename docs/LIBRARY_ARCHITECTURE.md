@@ -1,3 +1,9 @@
+## Biblioteca de temas curada — 1.0.0.144
+
+A coleção de temas-base é composta por doze presets categorizados por etiquetas: Padrão, sete cores e quatro estilos. A coleção usa IDs estáveis e metadados de tema; os temas antigos continuam disponíveis como tokens de compatibilidade, mas não são listados como presets novos. O filtro de etiquetas é resolvido pelo índice do Universal Library Resource Registry, em conjunto com os demais filtros.
+
+A aplicação de um tema-base resolve um perfil visual completo e utiliza o adaptador de aplicação já existente, respeitando os escopos de campanha/usuário e as permissões do Design System. Perfis pessoais preservam etiquetas ao salvar e duplicar. A camada visual permanece separada das mecânicas e do formato dos componentes.
+
 # Arquitetura da Biblioteca NEXUS
 
 ## Princípio

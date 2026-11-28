@@ -128,7 +128,7 @@ assert.match(styles, /nexus-library-font-preview-glyphs/);
 assert.match(libraryUiContract, /nexus-library-theme-live-preview/);
 assert.match(libraryUiContract, /nexus-library-theme-live-track/);
 assert.match(libraryUiContract, /nexus-library-inspector-tab-button\[aria-selected="true"\]/);
-assert.match(libraryUiContract, /nexus-library-theme-card-preview/);
+assert.match(libraryUiContract, /nexus-library-theme-miniature/);
 assert.match(styles, /nexus-library-generic-preview[\s\S]*?aspect-ratio: 1 \/ 1/,
   "Resource previews should use a consistent square aspect ratio.");
 assert.match(libraryTemplate, /nexus-library-folder-root-label[^>]*>Todas as pastas/);
@@ -136,7 +136,7 @@ assert.doesNotMatch(libraryTemplate, /data-library-folder-clear/, "The all-folde
 assert.match(libraryTemplate, /data-library-list-header[\s\S]*?Nome[\s\S]*?Categoria[\s\S]*?Tipo/, "List view exposes the compact Name, Category and Type columns.");
 assert.doesNotMatch(libraryTemplate, /data-library-list-column="(?:size|modified|tags)"/, "Size, modification date and tags are not list columns.");
 assert.doesNotMatch(libraryTemplate, /data-library-create-collection/, "Empty collections must not be advertised as a permanent sidebar destination.");
-assert.doesNotMatch(libraryTemplate, /data-library-tag|nexus-library-tag-options/, "Tags are not exposed as a dedicated filter; they remain searchable through the global query.");
+assert.match(libraryTemplate, /data-library-tag/, "Tags must be available as a dedicated, working filter in the Library.");
 assert.match(libraryApplication, /data-library-resize[\s\S]*?pointerdown[\s\S]*?setPointerCapture/, "Sidebar and Inspector resize hit areas must work with pointer input.");
 assert.match(libraryApplication, /defaultFolderFilters[\s\S]*?assets-fontes[\s\S]*?nexus-temas/, "Default folders must query relevant native catalog resources.");
 assert.match(libraryApplication, /Criar coleção com[\s\S]*?selectedKeys\.slice\(0, 500\)/, "Right-clicking a multi-selection creates a collection of the selected resource references.");
@@ -215,9 +215,9 @@ assert.ok(libraryTemplate.includes('data-library-open-list-filter="category"') &
   libraryTemplate.includes('data-library-open-list-filter="type"') &&
   libraryTemplate.includes('data-library-kind list="nexus-library-category-options"') &&
   libraryTemplate.includes('data-library-type list="nexus-library-type-options"') &&
-  !libraryTemplate.includes("data-library-tag"),
-  "Category and type filters must be searchable from list headers; tags remain searchable only through global search.");
-assert.ok(catalogExplorer.includes("nexus-library-theme-card-preview") &&
+  libraryTemplate.includes("data-library-tag"),
+  "Category and type filters remain searchable from list headers, and tags have a dedicated filter.");
+assert.ok(catalogExplorer.includes("nexus-library-theme-miniature") &&
   libraryUiContract.includes("nexus-library-theme-card-preview") &&
   catalogExplorer.includes("getLibraryThemePreviewTokens"),
   "Theme cards must use the shared, token-driven mini-interface preview.");

@@ -5,17 +5,46 @@ export const DEFAULT_LAYOUT = {
   components: [], links: []
 };
 
+const NEXUS_BASE_THEME = { panel: "#182330", surface: "#202e3e", input: "#111b27", border: "#3c5067", text: "#e7edf5", muted: "#9aadc2", hover: "#2a3d52", scroll: "#111923", windowHeader: "#223246", windowContent: "#192431", menu: "#202f40", placeholder: "#91a6bd", resourceButton: "#315b7d", canvas: "#171f2a", card: "#273443", accent: "#52647b", highlight: "#78b7e8", button: "#315b7d" };
+
 export const THEME_TOKENS = {
-  "nexus-dark": { panel: "#182330", surface: "#202e3e", input: "#111b27", border: "#3c5067", text: "#e7edf5", muted: "#9aadc2", hover: "#2a3d52", scroll: "#111923", windowHeader: "#223246", windowContent: "#192431", menu: "#202f40", placeholder: "#91a6bd", resourceButton: "#315b7d", canvas: "#171f2a", card: "#273443", accent: "#52647b", highlight: "#78b7e8", button: "#315b7d" },
+  "nexus-dark": NEXUS_BASE_THEME,
   foundry: { panel: "#191813", surface: "#25241f", input: "#11110f", border: "#4c4a43", text: "#e5e4d9", muted: "#a6a497", hover: "#333129", scroll: "#12120f", windowHeader: "#26251f", windowContent: "#1c1b17", menu: "#26251f", placeholder: "#8d8b7d", resourceButton: "#3f463c", canvas: "#191813", card: "#24231e", accent: "#6c6a5e", highlight: "#c9a64b", button: "#3f463c" },
   midnight: { panel: "#101a2b", surface: "#18283d", input: "#0b1422", border: "#304a68", text: "#e6f0fc", muted: "#91a9c5", hover: "#223c5a", scroll: "#0b1422", windowHeader: "#18283d", windowContent: "#101a2b", menu: "#18283d", placeholder: "#91a9c5", resourceButton: "#244c78", canvas: "#0c1220", card: "#18253a", accent: "#355477", highlight: "#80c8ff", button: "#244c78" },
   light: { panel: "#e8edf3", surface: "#ffffff", input: "#f5f7fa", border: "#aab8c8", text: "#243247", muted: "#586b80", hover: "#dce6f0", scroll: "#dce6f0", windowHeader: "#ffffff", windowContent: "#e8edf3", menu: "#ffffff", placeholder: "#718096", resourceButton: "#d7e8f7", canvas: "#e8edf3", card: "#ffffff", accent: "#8797aa", highlight: "#276fa8", button: "#d7e8f7" },
   steam: { panel: "#101b2b", surface: "#1b2d42", input: "#0b1624", border: "#31516b", text: "#e7f1fb", muted: "#9ab4cc", hover: "#263f58", scroll: "#0b1624", windowHeader: "#16283b", windowContent: "#101b2b", menu: "#1b2d42", placeholder: "#88a8c4", resourceButton: "#1769a6", canvas: "#0c1725", card: "#1b2d42", accent: "#367ba8", highlight: "#66c0f4", button: "#1769a6" },
   linux: { panel: "#191724", surface: "#262338", input: "#11101a", border: "#51466b", text: "#eeeaf7", muted: "#b0a5c8", hover: "#39334f", scroll: "#11101a", windowHeader: "#242036", windowContent: "#191724", menu: "#262338", placeholder: "#a89cbe", resourceButton: "#6554a3", canvas: "#14121e", card: "#262338", accent: "#6554a3", highlight: "#8bd5ca", button: "#6554a3" },
-  medieval: { panel: "#282018", surface: "#3b2e20", input: "#1c1712", border: "#80633d", text: "#f0e3c7", muted: "#bda981", hover: "#4a3926", scroll: "#1c1712", windowHeader: "#3b2e20", windowContent: "#282018", menu: "#302519", placeholder: "#b39d75", resourceButton: "#77532c", canvas: "#1b1712", card: "#30251b", accent: "#85663f", highlight: "#d7aa59", button: "#77532c", fontFamily: "Georgia" },
-  "pixel-art": { panel: "#17152b", surface: "#29264a", input: "#100f20", border: "#5a568a", text: "#f4f0ff", muted: "#b8b2d8", hover: "#39345f", scroll: "#100f20", windowHeader: "#29264a", windowContent: "#17152b", menu: "#29264a", placeholder: "#aaa3d2", resourceButton: "#6b5bd2", canvas: "#100f20", card: "#29264a", accent: "#7569d9", highlight: "#ffcf70", button: "#6b5bd2", fontFamily: "monospace" }
+  medieval: { panel: "#282018", surface: "#3b2e20", input: "#1c1712", border: "#80633d", text: "#f0e3c7", muted: "#bda981", hover: "#4a3926", scroll: "#1c1712", windowHeader: "#3b2e20", windowContent: "#282018", menu: "#302519", placeholder: "#b39d75", resourceButton: "#77532c", canvas: "#1b1712", card: "#30251b", accent: "#85663f", highlight: "#d7aa59", button: "#77532c", fontFamily: "Cormorant Garamond", displayFontFamily: "Cinzel" },
+  "pixel-art": { panel: "#17152b", surface: "#29264a", input: "#100f20", border: "#5a568a", text: "#f4f0ff", muted: "#b8b2d8", hover: "#39345f", scroll: "#100f20", windowHeader: "#29264a", windowContent: "#17152b", menu: "#29264a", placeholder: "#aaa3d2", resourceButton: "#6b5bd2", canvas: "#100f20", card: "#29264a", accent: "#7569d9", highlight: "#ffcf70", button: "#6b5bd2", fontFamily: "monospace" },
+  "color-red": { ...NEXUS_BASE_THEME, accent: "#8f3548", highlight: "#f07882", button: "#8f3548", resourceButton: "#8f3548" },
+  "color-orange": { ...NEXUS_BASE_THEME, accent: "#a9502e", highlight: "#f29a58", button: "#a9502e", resourceButton: "#a9502e" },
+  "color-yellow": { ...NEXUS_BASE_THEME, accent: "#8a6b25", highlight: "#e8c66b", button: "#8a6b25", resourceButton: "#8a6b25" },
+  "color-green": { ...NEXUS_BASE_THEME, accent: "#286b50", highlight: "#69c99b", button: "#286b50", resourceButton: "#286b50" },
+  "color-blue": { ...NEXUS_BASE_THEME, accent: "#285f91", highlight: "#70baff", button: "#285f91", resourceButton: "#285f91" },
+  "color-indigo": { ...NEXUS_BASE_THEME, accent: "#414c9a", highlight: "#8b9bff", button: "#414c9a", resourceButton: "#414c9a" },
+  "color-violet": { ...NEXUS_BASE_THEME, accent: "#68459b", highlight: "#bd91f5", button: "#68459b", resourceButton: "#68459b" },
+  futuristic: { panel: "#101b2b", surface: "#1a2c40", input: "#091421", border: "#28516a", text: "#e7f5ff", muted: "#93b5c9", hover: "#203f56", scroll: "#091421", windowHeader: "#15283b", windowContent: "#101b2b", menu: "#1a2c40", placeholder: "#80a9c2", resourceButton: "#087f9e", canvas: "#081522", card: "#172b3e", accent: "#087f9e", highlight: "#55e2f2", button: "#087f9e", fontFamily: "Space Grotesk", displayFontFamily: "Orbitron" },
+  "cosmic-horror": { panel: "#171522", surface: "#252236", input: "#100f1b", border: "#554b69", text: "#e9e2ee", muted: "#b1a5bc", hover: "#342d45", scroll: "#100f1b", windowHeader: "#242035", windowContent: "#171522", menu: "#252236", placeholder: "#a99ab5", resourceButton: "#4f6b55", canvas: "#100f18", card: "#211d30", accent: "#536c58", highlight: "#9b80b8", button: "#4f6b55", fontFamily: "Cormorant Garamond", displayFontFamily: "IM Fell English SC" },
+  superheroes: { panel: "#101b32", surface: "#1b2b49", input: "#0b1428", border: "#3a5278", text: "#f5f4ed", muted: "#b2c0d6", hover: "#293f64", scroll: "#0b1428", windowHeader: "#1b2b49", windowContent: "#101b32", menu: "#1b2b49", placeholder: "#a9b8ce", resourceButton: "#b8323e", canvas: "#0b1428", card: "#1b2b49", accent: "#b8323e", highlight: "#f1c84b", button: "#b8323e", fontFamily: "Barlow Condensed", displayFontFamily: "Bangers" }
 };
 
+export const LIBRARY_THEME_PRESETS = Object.freeze([
+  { id: "nexus-dark", name: "Padrão", description: "Identidade-base NEXUS: interface escura, azul sóbrio e contraste equilibrado.", category: "padrao", tags: ["tema", "categoria:padrao", "padrao", "nexus", "escuro"] },
+  { id: "color-red", name: "Vermelho", description: "Paleta rubi para uma interface intensa e objetiva.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:vermelho", "vermelho"] },
+  { id: "color-orange", name: "Laranja", description: "Paleta âmbar e cobre com energia acolhedora.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:laranja", "laranja"] },
+  { id: "color-yellow", name: "Amarelo", description: "Paleta dourada de alta visibilidade e calor.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:amarelo", "amarelo"] },
+  { id: "color-green", name: "Verde", description: "Paleta esmeralda equilibrada e natural.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:verde", "verde"] },
+  { id: "color-blue", name: "Azul", description: "Paleta azul clássica, técnica e serena.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:azul", "azul"] },
+  { id: "color-indigo", name: "Anil", description: "Paleta anil profunda com destaque frio.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:anil", "anil"] },
+  { id: "color-violet", name: "Violeta", description: "Paleta violeta com contraste elegante.", category: "cores", tags: ["tema", "categoria:cores", "cores", "cor:violeta", "violeta"] },
+  { id: "medieval", name: "Medieval", description: "Texturas visuais sugeridas por pergaminho, metal antigo e tipografia clássica.", category: "estilos", tags: ["tema", "categoria:estilos", "estilos", "estilo:medieval", "medieval", "fantasia"] },
+  { id: "futuristic", name: "Futurista", description: "Geometria tecnológica, acentos luminosos e tipografia de ficção científica.", category: "estilos", tags: ["tema", "categoria:estilos", "estilos", "estilo:futurista", "futurista", "sci-fi"] },
+  { id: "cosmic-horror", name: "Horror Cósmico", description: "Sombras profundas, tons orgânicos e tipografia literária inquietante.", category: "estilos", tags: ["tema", "categoria:estilos", "estilos", "estilo:horror-cosmico", "horror cósmico", "horror", "sombrio"] },
+  { id: "superheroes", name: "Super-heróis", description: "Contraste gráfico, cores primárias e tipografia de impacto.", category: "estilos", tags: ["tema", "categoria:estilos", "estilos", "estilo:super-herois", "super-heróis", "quadrinhos", "comic"] }
+]);
+
+// Keep every historical token palette available for saved settings and migration paths.
+// The Library itself uses LIBRARY_THEME_PRESETS as the curated, user-facing collection.
 export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).map(([id, theme]) => [id, {
   canvasColor: theme.canvas, cardColor: theme.card, accentColor: theme.accent,
   highlightColor: theme.highlight, buttonColor: theme.button, scrollColor: theme.scroll,
@@ -26,7 +55,7 @@ export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).ma
 export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
   if (!element?.style) return;
   const theme = THEME_TOKENS[layout.theme] ?? THEME_TOKENS["nexus-dark"];
-  const allowedFonts = new Set(["Inter", "Arial", "Georgia", "Trebuchet MS", "Verdana", "system-ui", "monospace"]);
+  const allowedFonts = new Set(["Inter", "Arial", "Georgia", "Trebuchet MS", "Verdana", "system-ui", "monospace", "Cinzel", "Cormorant Garamond", "Orbitron", "Space Grotesk", "IM Fell English SC", "Barlow Condensed", "Bangers"]);
   const fallbackFont = theme.fontFamily ?? (layout.theme === "steam" ? "Arial" : layout.theme === "pixel-art" ? "monospace" : "Inter");
   const requestedFont = String(layout.fontFamily ?? fallbackFont);
   const fontFamily = allowedFonts.has(requestedFont) ? requestedFont : fallbackFont;
@@ -36,6 +65,9 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     return Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : fallback;
   };
   const fontFamilyToken = ["monospace", "serif", "sans-serif", "system-ui", "cursive", "fantasy"].includes(fontFamily) ? fontFamily : `"${fontFamily}"`;
+  const displayFont = String(layout.displayFontFamily ?? theme.displayFontFamily ?? fontFamily);
+  const displayFontFamily = allowedFonts.has(displayFont) ? displayFont : fontFamily;
+  const displayFontToken = `"${displayFontFamily}"`;
   const palette = layout.palette && typeof layout.palette === "object" ? layout.palette : {};
   const safeColor = (value, fallback) => {
     const candidate = String(value ?? "").toLowerCase();
@@ -111,6 +143,7 @@ export const applyThemeTokens = (element, layout = {}, beforeApply = null) => {
     "--nexus-highlight-color": layoutColors.highlight,
     "--nexus-button-color": layoutColors.button,
     "--nexus-font-family": `${fontFamilyToken}, sans-serif`,
+    "--nexus-font-display": `${displayFontToken}, ${fontFamilyToken}, sans-serif`,
     "--nexus-control-bg": theme.input, "--nexus-control-text": theme.text,
     "--nexus-control-border": theme.border, "--nexus-control-hover": theme.hover,
     "--nexus-tab-bg": color("panel", theme.panel), "--nexus-tab-active": color("accent", theme.accent),

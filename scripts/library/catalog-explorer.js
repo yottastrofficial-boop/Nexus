@@ -340,6 +340,32 @@ function createLibraryResourceBarCardPreview(resource) {
   return preview;
 }
 
+function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
+  const tokens = getLibraryThemePreviewTokens(palette);
+  const preview = makeElement("div", "nexus-library-theme-miniature");
+  preview.setAttribute("aria-hidden", "true");
+  for (const [key, value] of Object.entries(tokens)) preview.style.setProperty("--nexus-library-theme-" + key, value);
+  const family = safeFontFamily(typography.displayFamily || typography.family) || "system-ui, sans-serif";
+  preview.style.setProperty("--nexus-library-theme-display-font", family);
+  const top = makeElement("span", "nexus-library-theme-miniature-top");
+  const body = makeElement("span", "nexus-library-theme-miniature-body");
+  const panel = makeElement("span", "nexus-library-theme-miniature-panel");
+  const title = makeElement("i", "nexus-library-theme-miniature-title");
+  const line = makeElement("i", "nexus-library-theme-miniature-line");
+  const button = makeElement("i", "nexus-library-theme-miniature-button");
+  const meter = makeElement("i", "nexus-library-theme-miniature-meter");
+  const swatches = makeElement("span", "nexus-library-theme-miniature-swatches");
+  for (const key of ["accent", "highlight", "button", "surface"]) {
+    const swatch = makeElement("i", "");
+    swatch.style.background = tokens[key];
+    swatches.append(swatch);
+  }
+  panel.append(title, line, button, meter);
+  body.append(panel, swatches);
+  preview.append(top, body);
+  return preview;
+}
+
 function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}, layout = {}, components = {}, compact = false } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
   const root = makeElement("div", compact
@@ -350,6 +376,7 @@ function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}
   for (const [key, value] of Object.entries(tokens)) root.style.setProperty("--nexus-library-theme-" + key, value);
   const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
   root.style.setProperty("--nexus-library-theme-font", family);
+  root.style.setProperty("--nexus-library-theme-display-font", safeFontFamily(typography.displayFamily) || family);
   root.style.setProperty("--nexus-library-theme-font-size", (compact ? 7 : Number(typography.baseSize) || 13) + "px");
   root.style.setProperty("--nexus-library-theme-radius", layout.radius === "sharp" ? "0px" : layout.radius === "soft" ? "4px" : compact ? "5px" : "8px");
   root.style.setProperty("--nexus-library-theme-control-height", (compact ? 12 : Math.max(28, Math.min(44, Number(layout.controlHeight) || 34))) + "px");
@@ -850,13 +877,9 @@ export function createLibraryCatalogExplorer({
       preview.dataset.previewKind = "theme";
       const themeModel = getLibraryDesignProfilePreviewModel(resource);
       const themeColors = themeModel?.palette ?? (Array.isArray(resource.previewColors) ? resource.previewColors : []);
-      preview.append(createLibraryThemeSample({
-        name: resource.name,
+      preview.append(createLibraryThemeCardPreview({
         palette: themeColors,
-        typography: themeModel?.typography ?? {},
-        layout: { ...(themeModel?.layout ?? {}), preset: themeModel?.preset },
-        components: themeModel?.components ?? {},
-        compact: true
+        typography: themeModel?.typography ?? {}
       }));
     } else if (getLibraryResourceBarCardPreviewModel(resource)) {
       preview.dataset.previewKind = "resource-bar";
@@ -903,6 +926,11 @@ export function createLibraryCatalogExplorer({
       select.append(nameCell, categoryCell, typeCell);
     } else {
       select.append(preview, name);
+      if (resource.kind === "theme") {
+        const categoryTag = resource.tags.find(tag => String(tag).startsWith("categoria:"));
+        const categoryLabels = { "categoria:padrao": "Padrão", "categoria:cores": "Cores", "categoria:estilos": "Estilos" };
+        if (categoryTag) select.append(makeElement("small", "nexus-library-card-category-tag", categoryLabels[categoryTag] ?? categoryTag));
+      }
     }
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
     const isFavorite = preferences.favorites.includes(key);
@@ -1482,6 +1510,21 @@ export function createLibraryCatalogExplorer({
         option.value = tag;
         return option;
       }));
+    }
+    const tagSelect = container.closest(".nexus-library-panel")?.querySelector("[data-library-tag]");
+    if (tagSelect) {
+      const knownTags = new Set([...tagSelect.options].map(option => option.value));
+      const availableTags = [...new Set(currentResources.flatMap(resource => Array.isArray(resource.tags) ? resource.tags : []))]
+        .sort((left, right) => String(left).localeCompare(String(right), "pt-BR", { sensitivity: "base" }));
+      for (const tag of availableTags) {
+        if (knownTags.has(tag)) continue;
+        const option = document.createElement("option");
+        option.value = tag;
+        option.textContent = tag;
+        tagSelect.append(option);
+        knownTags.add(tag);
+      }
+      if (tagSelect.value !== currentTag && [...tagSelect.options].some(option => option.value === currentTag)) tagSelect.value = currentTag;
     }
     const categoryOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-category-options");
     const typeOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-type-options");

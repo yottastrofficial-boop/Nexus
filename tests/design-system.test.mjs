@@ -26,8 +26,9 @@ test("theme typography uses its preset font unless a layout explicitly overrides
     dataset: {}
   };
   applyThemeTokens(element, { theme: "medieval" });
-  assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
-  assert.equal(values.get("--nexus-font-ui"), '"Georgia", sans-serif');
+  assert.equal(values.get("--nexus-font-family"), '"Cormorant Garamond", sans-serif');
+  assert.equal(values.get("--nexus-font-display"), '"Cinzel", "Cormorant Garamond", sans-serif');
+  assert.equal(values.get("--nexus-font-ui"), '"Cormorant Garamond", sans-serif');
   assert.equal(values.get("--nexus-font-data"), "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
 
   applyThemeTokens(element, { theme: "pixel-art" });
@@ -40,7 +41,7 @@ test("theme typography uses its preset font unless a layout explicitly overrides
   assert.equal(values.get("--nexus-font-family"), '"Inter", sans-serif');
 
   applyThemeTokens(element, { theme: "medieval", fontFamily: "Inter; color: red" });
-  assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
+  assert.equal(values.get("--nexus-font-family"), '"Cormorant Garamond", sans-serif');
 });
 
 
@@ -139,7 +140,7 @@ test("design profiles normalize values, reject unsafe CSS payloads and preserve 
   assert.equal(profile.name, "Minha campanha");
   assert.equal(profile.palette.panel, THEME_TOKENS.medieval.panel);
   assert.equal(profile.palette.text, "#ffffff");
-  assert.equal(profile.typography.family, "Georgia");
+  assert.equal(profile.typography.family, "Cormorant Garamond");
   assert.equal(profile.typography.baseSize, 18);
   assert.equal(profile.typography.secondarySize, 11);
   assert.equal(profile.typography.lineHeight, 1.2);

@@ -1,3 +1,14 @@
+## 1.0.0.144 — Biblioteca de temas curada (em validação)
+
+- Define 12 presets-base: Padrão, sete cores e quatro estilos.
+- Adiciona etiquetas categorizadas e filtro dinâmico na Biblioteca.
+- Resolve temas internos como perfis completos aplicáveis pelo Design System.
+- Adiciona pares tipográficos com fallbacks locais e fontes web opcionais.
+- Separa a miniatura compacta da grade do viewer completo do Inspector.
+- Preserva temas legados, configurações salvas e o schema atual dos perfis.
+- CI, pacote e release serão confirmados pelo workflow. A referência da capa do livro de regras não estava disponível nos arquivos consultados; as cores partem da paleta-base NEXUS.
+- Teste visual no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.143 — Cache lazy e diagnóstico de serviços (publicada)
 
 - O cache IndexedDB foi movido para resolução no primeiro acesso à fachada pública.
