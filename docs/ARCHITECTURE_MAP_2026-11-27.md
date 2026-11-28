@@ -4,7 +4,7 @@
 - `system.diagnostics` é serviço lazy e expõe `game.nexus.getDiagnostics()`.
 - Diagnóstico lê apenas o estado do registry; não inicializa dependências, não lê dados de usuário e não altera documentos.
 - Testes adicionados para estado, contagens e imutabilidade do snapshot.
-- Release/manifesto serão confirmados após workflow; teste funcional no Foundry continua manual.
+- CI, release e manifesto foram confirmados pelo workflow 46100665229; teste funcional no Foundry continua manual.
 
 # NEXUS — Mapa arquitetural e plano integrado de revisão
 
@@ -12,7 +12,7 @@
 **Repositório:** `yottastrofficial-boop/Nexus`  
 **Branch de referência:** `main`  
 **Commit-base:** `89e60f6ac0b202bee57cba84dea3416a99f42df5`  
-**Versão em main:** `1.0.0.143` (release workflow em validação)  
+**Versão estável publicada:** `1.0.0.143`  
 **Alvo declarado:** Foundry VTT 14, build 360
 
 > Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release estável anterior é 1.0.0.142; o teste funcional dentro do Foundry VTT 14 build 360 permanece pendente.
