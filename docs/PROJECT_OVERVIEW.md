@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.143 (main em validação)
+
+A main torna o cache IndexedDB lazy e adiciona `game.nexus.getDiagnostics()`, um snapshot somente leitura de versões, readiness e estados/dependências do registry. A consulta não resolve factories nem instancia serviços. CI e pacote serão confirmados pelo workflow; o manifesto estável anterior é 1.0.0.142. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## Estado do código — 1.0.0.142 (publicada)
 
 A main adiciona accessors para resolução sob demanda de serviços puros sem alterar a forma de acesso da API pública `game.nexus.*`. Os serviços que instalam hooks, registram settings ou fornecem classes necessárias durante `init` permanecem eager. CI, pacote ZIP, release e manifesto foram confirmados pelo workflow 46099909950. Teste funcional no Foundry VTT 14 build 360 permanece manual.
