@@ -983,3 +983,8 @@ As entradas anteriores foram movidas para [`docs/archive/CHANGELOG_PRE_1.0.0.70.
 - Tipografia: impede quebra agressiva de palavras nos títulos dos recursos.
 - Favoritos: permanecem exclusivos do cabeçalho do Inspector, sem estrela sobre os ícones da grade.
 - Testes: atualiza os contratos de miniatura e de contorno de seleção.
+
+
+## Validação 1.0.0.149
+
+- Publicação de teste após os contratos automatizados da Biblioteca.
