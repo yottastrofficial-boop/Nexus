@@ -1,3 +1,11 @@
+## Estado de distribuição — 1.0.0.141 (em publicação)
+
+A main contém a correção de lifecycle do Service Registry. `system.json` declara 1.0.0.141 e aponta para seu ZIP; o manifesto estável permanece em 1.0.0.140 até CI, pacote e asset da 1.0.0.141 serem confirmados pelo workflow oficial.
+
+- CI do commit de código `f58e04e1f93e32e019b852bdd2568204ee7ef62c` aprovado.
+- O workflow de release deve confirmar o asset antes de sincronizar o manifesto.
+- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## Estado de distribuição — 1.0.0.140 (publicada)
 
 A release estável 1.0.0.140 foi publicada pelo workflow oficial após CI, construção do pacote e confirmação do asset. O manifesto estável e o pacote da main estão sincronizados. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.

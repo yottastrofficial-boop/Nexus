@@ -1,3 +1,11 @@
+## 1.0.0.141 — Lifecycle seguro do Service Registry (em publicação)
+
+- Corrige race condition no encerramento do registro de serviços.
+- Bloqueia novas resoluções/registros enquanto o registry está encerrando.
+- Aguarda factories em andamento e executa cleanup inverso, incluindo disposers assíncronos.
+- Testes de regressão adicionados; CI passou no commit `f58e04e1f93e32e019b852bdd2568204ee7ef62c`.
+- Release/manifesto e teste real no Foundry VTT 14 build 360 serão confirmados separadamente.
+
 ## 1.0.0.140 — Revisão arquitetural inicial (publicada)
 
 - Mapa integrado dos subsistemas e contratos em `docs/ARCHITECTURE_MAP_2026-11-27.md`.
