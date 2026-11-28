@@ -44,7 +44,9 @@ export const LIBRARY_THEME_PRESETS = Object.freeze([
   { id: "superheroes", name: "Super-heróis", description: "Contraste gráfico, cores primárias e tipografia de impacto.", category: "estilos", tags: ["tema", "categoria:estilos", "estilos", "estilo:super-herois", "super-heróis", "quadrinhos", "comic"] }
 ]);
 
-export const THEME_PALETTES = Object.fromEntries(LIBRARY_THEME_PRESETS.map(({ id }) => [id, THEME_TOKENS[id]]).map(([id, theme]) => [id, {
+// Keep every historical token palette available for saved settings and migration paths.
+// The Library itself uses LIBRARY_THEME_PRESETS as the curated, user-facing collection.
+export const THEME_PALETTES = Object.fromEntries(Object.entries(THEME_TOKENS).map(([id, theme]) => [id, {
   canvasColor: theme.canvas, cardColor: theme.card, accentColor: theme.accent,
   highlightColor: theme.highlight, buttonColor: theme.button, scrollColor: theme.scroll,
   windowHeaderColor: theme.windowHeader, windowContentColor: theme.windowContent,
