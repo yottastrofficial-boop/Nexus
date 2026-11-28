@@ -949,16 +949,6 @@ export function createLibraryCatalogExplorer({
       }
     }
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
-    const isFavorite = preferences.favorites.includes(key);
-    const favorite = makeElement("button", "nexus-library-favorite");
-    favorite.type = "button";
-    favorite.dataset.libraryResourceFavorite = resource.id;
-    favorite.dataset.libraryProvider = resource.providerId;
-    favorite.classList.toggle("is-favorite", isFavorite);
-    favorite.setAttribute("aria-pressed", String(isFavorite));
-    favorite.setAttribute("aria-label", isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos");
-    favorite.title = isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos";
-    favorite.append(makeElement("i", isFavorite ? "fa-solid fa-star" : "fa-regular fa-star"));
     card.draggable = true;
     card.addEventListener("dragstart", event => {
       const separator = key.indexOf(":");
@@ -982,7 +972,7 @@ export function createLibraryCatalogExplorer({
       }
       event.dataTransfer.effectAllowed = "copyMove";
     });
-    card.append(select, favorite);
+    card.append(select);
     return card;
   };
 
@@ -1119,16 +1109,6 @@ export function createLibraryCatalogExplorer({
       detailFavorite.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
       detailFavorite.title = detailFavorite.getAttribute("aria-label");
       detailFavorite.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
-      container.querySelectorAll("[data-library-resource-key]").forEach(card => {
-        if (card.dataset.libraryResourceKey !== favoriteKey) return;
-        const button = card.querySelector("[data-library-resource-favorite]");
-        if (!button) return;
-        button.classList.toggle("is-favorite", !active);
-        button.setAttribute("aria-pressed", String(!active));
-        button.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
-        button.title = button.getAttribute("aria-label");
-        button.replaceChildren(makeElement("i", active ? "fa-regular fa-star" : "fa-solid fa-star"));
-      });
     });
     heading.append(detailFavorite);
     const meta = makeElement("p", "nexus-library-summary-meta",
@@ -1682,23 +1662,6 @@ export function createLibraryCatalogExplorer({
     if (loadMore && container.contains(loadMore)) {
       loadMore.remove();
       await render({ append: true });
-      return;
-    }
-    const favorite = target?.closest("[data-library-resource-favorite]");
-    if (favorite && container.contains(favorite)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const preferences = getPreferences();
-      const resource = currentResources.find(item =>
-        item.providerId === favorite.dataset.libraryProvider && item.id === favorite.dataset.libraryResourceFavorite
-      );
-      if (!resource) return;
-      const key = resourceKey(resource);
-      const favorites = preferences.favorites.includes(key)
-        ? preferences.favorites.filter(item => item !== key)
-        : [key, ...preferences.favorites].slice(0, 500);
-      await savePreferences({ ...preferences, favorites });
-      await render();
       return;
     }
     const selected = target?.closest("[data-library-resource]");
