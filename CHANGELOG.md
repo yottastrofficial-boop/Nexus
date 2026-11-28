@@ -1,3 +1,12 @@
+## 1.0.0.140 — Revisão arquitetural inicial e lifecycle de Actor
+
+- Registra o mapa integrado dos subsistemas, contratos de comunicação, hotspots, etapas de refatoração e ferramentas de validação em `docs/ARCHITECTURE_MAP_2026-11-27.md`.
+- Atualiza o plano estrutural para uma revisão por domínios, preservando dados, IDs, APIs e ownership.
+- Extrai defaults de Actor e sincronização de textura do Token de protótipo do bootstrap para `scripts/core/actor-document-lifecycle.js`, com dependências Foundry injetadas e disposer idempotente.
+- Adiciona testes unitários para defaults, preservação de textura personalizada, atualização de retrato e remoção de hooks.
+- Atualiza os contratos de validação do pacote para refletir a nova fronteira de lifecycle.
+- CI e pacote serão confirmados pelo workflow. Teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.139 — Prévia fiel de temas e fontes
 
 - Resolve o preset e o perfil visual do próprio tema selecionado, em vez de normalizar temas legados como o preset global NEXUS Escuro.
