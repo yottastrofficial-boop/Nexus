@@ -18,5 +18,6 @@ test("a amostra aplica tokens individuais de componentes", () => {
 test("somente o item selecionado mantém contorno visível", () => {
   assert.match(styles, /catalog-card__button:hover[\s\S]*?border-color:\s*transparent\s*!important/);
   assert.match(styles, /catalog-card__button\.is-selected[\s\S]*?border:\s*1px solid/);
-  assert.match(polish, /catalog-card__preview \\{\\s*border: 0 !important/);
+  const previewRule = polish.indexOf("nexus-library-catalog-card__preview {");
+  assert.ok(previewRule >= 0 && polish.slice(previewRule, previewRule + 180).includes("border: 0 !important;"));
 });
