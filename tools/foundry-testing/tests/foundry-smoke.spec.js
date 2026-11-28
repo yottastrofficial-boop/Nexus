@@ -128,6 +128,7 @@ test("Biblioteca mantém miniaturas quadradas, tipografia de tema e ausência de
   const themePreview = app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first();
   await expect(themePreview).toBeVisible();
 
+  const previewMeasurements = [];
   for (const [size, expected] of [["small", 32], ["medium", 64], ["large", 128]]) {
     await sizeControl.selectOption(size);
     await expect.poll(async () => {
@@ -138,6 +139,8 @@ test("Biblioteca mantém miniaturas quadradas, tipografia de tema e ausência de
       const box = await app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first().boundingBox();
       return box ? Math.round(box.height) : 0;
     }).toBe(expected);
+    const box = await app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first().boundingBox();
+    previewMeasurements.push({ size, expected, width: box?.width ?? null, height: box?.height ?? null });
   }
 
   await expect(app.locator(".nexus-library-generic-card .nexus-library-favorite")).toHaveCount(0);
@@ -158,4 +161,12 @@ test("Biblioteca mantém miniaturas quadradas, tipografia de tema e ausência de
   expect(typography.body).toBeTruthy();
   expect(typography.display).toBeTruthy();
   await expect(app.locator(".nexus-library-detail-favorite")).toHaveCount(1);
+  await test.info().attach("nexus-library-preview-measurements.json", {
+    body: Buffer.from(JSON.stringify({ previewMeasurements, squarePreview: square, typography }, null, 2)),
+    contentType: "application/json"
+  });
+  await test.info().attach("nexus-library-preview.png", {
+    body: await app.screenshot(),
+    contentType: "image/png"
+  });
 });
