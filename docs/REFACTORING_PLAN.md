@@ -2,7 +2,7 @@
 
 ## Estado da revisão integrada — 2026-11-27
 
-A revisão está sendo conduzida sobre a main atual; a release estável é `1.0.0.142`, que adiciona a fachada lazy para serviços puros após a correção de shutdown da 1.0.0.141. Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
+A revisão está sendo conduzida sobre a main atual; a versão em main é `1.0.0.143`, que torna o cache de mídia lazy e adiciona diagnóstico somente leitura sobre o registry após a fachada lazy da 1.0.0.142. Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
 
 Esta é uma revisão estática remota. O teste funcional completo dentro do Foundry continua sendo um gate separado.
 
@@ -25,7 +25,7 @@ Esta é uma revisão estática remota. O teste funcional completo dentro do Foun
 | Etapa | Escopo | Estado |
 |---|---|---|
 | 0 | Baseline, mapa de arquitetura, inventário e riscos | Mapa inicial registrado; auditoria de consumidores/leitores/escritores continua |
-| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em andamento; shutdown concorrente e lazy facade implementados/testados; próximo: auditar efeitos de init, abertura/fechamento e contratos de consumo |
+| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em andamento; shutdown concorrente, fachada lazy, cache de mídia sob demanda e diagnóstico de serviços implementados/testados. Próximo: auditar ordem real de init/ready, APIs de consumo e teardown de subsistemas |
 | 2 | Propriedades, fórmulas, regras, aliases, schemas e migrações | A iniciar após contratos P0 |
 | 3 | Componentes, instâncias, grupos e Canvas | A iniciar após baseline de dados |
 | 4 | Fichas, renderização, listeners, persistência e ficha NPC | A iniciar por extrações pequenas |
@@ -34,6 +34,14 @@ Esta é uma revisão estática remota. O teste funcional completo dentro do Foun
 | 7 | Design System, temas, mídia e armazenamento | Revisar tokens, preview isolado e adapters |
 | 8 | CSS, templates, acessibilidade e layering | Consolidar cascata por domínio, sem reescrita global |
 | 9 | Testes, Testing Bridge, instalação/atualização e release | Gate obrigatório antes de declarar estabilidade |
+
+## Implementação incremental — 1.0.0.143
+
+- Cache IndexedDB registrado como serviço lazy, preservando `game.nexus.media.cache`; o objeto só é criado no primeiro acesso.
+- `game.nexus.getDiagnostics()` fornece snapshot de versões, readiness, serviços, dependências e estados.
+- Snapshot é read-only e usa apenas `registry.list()`; não resolve factories.
+- Testes cobrem imutabilidade, estados e ausência de instanciação acidental.
+- CI e pacote serão confirmados pelo workflow; Foundry VTT 14 build 360 permanece validação manual.
 
 ## Como cada etapa será executada
 
