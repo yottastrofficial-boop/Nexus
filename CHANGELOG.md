@@ -7,7 +7,8 @@
 - Mantém miniaturas quadradas de 32 × 32, 64 × 64 e 128 × 128 px e dimensiona os espécimes tipográficos conforme a seleção.
 - Torna a demonstração completa do tema no Inspector quadrada e organiza navegação, painel, destaque, barra de recurso, cartão, campo e botões.
 - Atualiza testes e documentação para validar a cascata, a ausência de favoritos nos cartões e a proporção quadrada da prévia.
-- A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo um gate manual.
+- CI, regressões, pacote ZIP íntegro, Release v1.0.0.146, asset `nexus.zip` (509.981 bytes) e manifesto estável foram confirmados pelo workflow 46121574486.
+- A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo um gate manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
 ## 1.0.0.145 — Biblioteca: miniaturas, temas completos e tipografia
 
