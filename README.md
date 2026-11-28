@@ -2,21 +2,21 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Candidata 1.0.0.146 em revisão · Foundry VTT 14
+  Projeto em desenvolvimento · Versão estável 1.0.0.146 · Foundry VTT 14
 </p>
 
 <p align="center">
-  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.145-6750A4">
+  <img alt="Versão" src="https://img.shields.io/badge/vers%C3%A3o-1.0.0.146-6750A4">
   <img alt="Foundry VTT" src="https://img.shields.io/badge/Foundry%20VTT-v14-orange">
   <img alt="Idioma" src="https://img.shields.io/badge/idioma-pt--BR-009739">
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.145 publicada (manifesto estável).** A Versão 1.0.0.146 está em revisão e refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. A publicação estável depende da validação automatizada, da integridade do pacote e da conferência visual/funcional no Foundry VTT 14 build 360.
+**Versão estável 1.0.0.146 publicada.** A revisão refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. CI, suíte de regressão, pacote ZIP, Release e manifesto estável foram confirmados pelo workflow 46121574486. A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo uma etapa manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
-**Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua pendente; o último checkpoint funcional confirmado permanece na 1.0.0.70.
+**Distribuição:** o manifesto original `manifest.json` é a única fonte de instalação e atualização. O workflow só o atualiza depois de validar o pacote e confirmar o `nexus.zip` na release correspondente. A validação funcional e visual no Foundry VTT 14 build 360 continua sendo manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
 **Revisão estrutural:** a 1.0.0.125 introduz um registro de serviços compartilhados, contratos de eventos desacoplados e guardrails de integridade do grafo de módulos. A migração do restante do sistema continuará por etapas para preservar dados e compatibilidade.
 
