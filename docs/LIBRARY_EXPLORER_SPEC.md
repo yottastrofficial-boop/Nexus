@@ -1,12 +1,17 @@
-## Biblioteca visual — contrato v8 (1.0.0.146)
+## Biblioteca visual — contrato v9 (1.0.0.147, em desenvolvimento)
 
-- O Design System permanece como última folha de estilos. Os contratos finais e escopados da grade, cartões, miniaturas e Inspector ficam no bloco final do próprio Design System, após as regras-base.
-- A grade possui somente o controle de seleção do recurso. Favoritos são gerenciados pelo Inspector, sem estrelas sobrepostas ou controles residuais nos cartões.
-- Miniaturas permanecem quadradas e oferecem exclusivamente 32 × 32, 64 × 64 e 128 × 128 px. O tamanho escolhido controla dimensões da imagem, ícone e espécime tipográfico; o cartão reserva linhas independentes para miniatura, nome e etiqueta.
-- O nome tem largura limitada ao cartão, quebra de linha controlada e até três linhas; o conteúdo nunca invade o cartão vizinho.
-- Miniaturas de tema representam uma interface em miniatura com cabeçalho, navegação, painel, destaque, controles e amostras da paleta, usando somente tokens validados do próprio perfil.
-- A prévia completa do Inspector é quadrada e contém navegação, painel, hierarquia tipográfica, destaque, barra de recurso, cartão, campo e botões. As famílias de corpo e display são aplicadas separadamente.
-- Nenhuma prévia executa HTML, CSS, JavaScript ou conteúdo importado; os elementos são construídos por DOM controlado e tokens sanitizados.
+- O Explorer coordena o catálogo; renderizadores de cartão e prévia são módulos independentes.
+- `catalog-grid-renderer.js` é responsável por cartão, pasta, ícone semântico, título, etiqueta, seleção e payload de drag-and-drop. Não possui favoritos, persistência ou chamadas ao registro.
+- `catalog-preview-renderers.js` é responsável por normalização e amostras tipadas. Não lê preferências nem controla seleção.
+- `nexus-library-catalog.css` é a única folha que define geometria de cartões, tamanhos de prévia, espécimes de fonte e amostras de tema. O Design System permanece como última folha do manifesto, sem uma segunda grade concorrente.
+- Os únicos tamanhos de miniatura são 32 × 32, 64 × 64 e 128 × 128 px. Cada cartão reserva linhas independentes para prévia, título e etiqueta; o nome pode ocupar até três linhas.
+- Favoritos não aparecem nos cartões. A ação e o estado continuam disponíveis no Inspector.
+- Fontes exibem a família real do recurso, com espécime `Aa` e amostra complementar quando o tamanho permite.
+- Temas usam um único renderizador: composição de paleta em 32 px e interface compacta em 64/128 px; o Inspector usa a variante quadrada completa.
+- O Inspector demonstra navegação, painel, hierarquia tipográfica, destaque, barra de recurso, cartão, campo e botões; fontes de corpo e display são aplicadas separadamente.
+- Todas as prévias são construídas por DOM controlado, tokens validados e dados inertes; nunca executam HTML, CSS, JavaScript ou payloads importados.
+- A refatoração preserva schemas, IDs, referências, provedores, persistência, favoritos, pastas e integração Foundry.
+- CI e validação visual no Foundry VTT 14 build 360 são gates distintos; a branch não é release estável.
 
 ## Biblioteca de temas e tipografia — contrato v7 (1.0.0.144)
 
