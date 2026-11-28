@@ -307,3 +307,18 @@ html.nexus-design-system .nexus-library-application .nexus-library-catalog-card_
     display: none;
   }
 }
+
+html.nexus-design-system .nexus-library-application .nexus-library-catalog-card__preview--theme.is-palette-chip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2px;
+  padding: 4px;
+  background: var(--nexus-panel-surface, #202e3e);
+}
+html.nexus-design-system .nexus-library-application .nexus-catalog-theme-chip {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 3px;
+}
