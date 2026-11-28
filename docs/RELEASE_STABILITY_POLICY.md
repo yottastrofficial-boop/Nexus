@@ -1,3 +1,12 @@
+## Estado da main — 1.0.0.143
+
+A main contém a melhoria de inicialização do cache de mídia e o snapshot público de diagnóstico. A publicação estável e a sincronização do manifesto dependem do workflow oficial confirmar CI, ZIP e asset.
+
+- `system.json` declara 1.0.0.143 e aponta para o ZIP correspondente.
+- `manifest.json` permanece na última versão estável até o workflow validar o pacote.
+- O snapshot diagnóstico não instancia serviços.
+- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## Estado de distribuição — 1.0.0.142 (publicada)
 
 A otimização de inicialização eager/lazy do Service Registry foi publicada após CI, pacote e asset confirmados. `system.json` e `manifest.json` declaram 1.0.0.142 e apontam para o mesmo ZIP.
