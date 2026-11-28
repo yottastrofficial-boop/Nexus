@@ -258,11 +258,11 @@ assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogGrid.includes("getLibraryResourceBarCardPreviewModel") &&
   catalogStyles.includes("nexus-library-theme-swatches"),
   "Theme cards and Inspector share token-driven previews, and resource-meter cards have a visible preview.");
-assert.ok(styles.includes("nexus-library-folder-card") &&
-  styles.includes("nexus-library-folder-preview") &&
-  styles.includes("--nexus-library-preview-size: 64px") &&
-  styles.includes("-webkit-line-clamp: 3") &&
-  styles.includes("nexus-library-inspector-tabs"),
+assert.ok(catalogGrid.includes("nexus-library-catalog-card--folder") &&
+  catalogStyles.includes("nexus-library-catalog-card__preview--folder") &&
+  catalogStyles.includes("--nexus-catalog-preview-size: 64px") &&
+  catalogStyles.includes("-webkit-line-clamp: 3") &&
+  designSystem.includes("nexus-library-inspector-tabs"),
   "Grid uses a true 64px preview, up to three title lines, and a separate Inspector Details tab.");
 assert.ok(actorSheet.includes("position: { width: 1100, height: 920 }") &&
   actorSheet.includes("window: { resizable: true }"),
