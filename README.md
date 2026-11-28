@@ -1,6 +1,6 @@
-## Revisão arquitetural — 1.0.0.142
+## Revisão arquitetural — 1.0.0.143
 
-A versão candidata 1.0.0.141 registra o mapa integrado dos subsistemas e extrai o lifecycle de documentos Actor do bootstrap, com testes de regressão. A release estável anterior é 1.0.0.139; o manifesto será sincronizado somente após CI, pacote e asset confirmados. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+A main inclui cache de mídia sob demanda e diagnóstico somente leitura dos serviços NEXUS. A publicação estável e o manifesto serão confirmados pelo workflow oficial após CI e pacote ZIP. A validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
 # NEXUS RPG
 
