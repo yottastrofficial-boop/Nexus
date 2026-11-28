@@ -286,6 +286,12 @@ assert.doesNotMatch(catalogGrid,
   "Grid cards must not render favorite stars; the Inspector owns favorite management.");
 assert.doesNotMatch(styles, /nexus-library-theme-miniature/,
   "The Universal Library layer must not retain legacy theme-miniature selectors.");
+assert.doesNotMatch(styles, /\\.nexus-library-(?:generic-card|generic-item|generic-preview|folder-card|folder-preview|list-name-cell|list-category|list-type|card-name|font-grid-specimen|theme-live-preview|theme-miniature)\\b/,
+  "The Universal Library layer must not retain the retired grid-card and theme-preview selectors.");
+assert.doesNotMatch(designSystem, /\\.nexus-library-(?:generic-card|generic-item|generic-preview|font-grid-specimen|theme-live-preview|theme-miniature)\\b/,
+  "The Design System must not duplicate the retired catalog grid implementation.");
+assert.doesNotMatch(catalogPreviews, /selectedResourceKeys|detailFavorite|library-preferences/,
+  "Preview renderers must remain independent from catalog selection and preferences.");
 assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
   "No legacy favorite CSS may remain in either Library stylesheet.");
 assert.match(catalogPreviews, /nexus-catalog-theme-sample__title/);
