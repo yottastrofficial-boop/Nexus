@@ -18,5 +18,5 @@ test("a amostra aplica tokens individuais de componentes", () => {
 test("somente o item selecionado mantém contorno visível", () => {
   assert.match(styles, /catalog-card__button:hover[\s\S]*?border-color:\s*transparent\s*!important/);
   assert.match(styles, /catalog-card__button\.is-selected[\s\S]*?border:\s*1px solid/);
-  assert.match(styles, /catalog-card__preview \{[\s\S]*?border:\s*0\s*!important/);
+  assert.match(polish, /catalog-card__preview \\{\\s*border: 0 !important/);
 });
