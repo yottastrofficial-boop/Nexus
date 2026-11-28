@@ -1,6 +1,6 @@
 ## Refinamento visual da Biblioteca — 1.0.0.146
 
-A camada visual complementar deve ser carregada após o Design System: `nexus-universal-library.css` é a última folha de estilos declarada no manifesto do sistema. Isso evita que regras-base antigas sobrescrevam a grade e o Inspector. A grade não renderiza estrelas de favoritos; o estado e a ação permanecem disponíveis no Inspector, sem controles sobrepostos nos cartões. Miniaturas usam dimensões quadradas de 32, 64 ou 128 px, com linhas reservadas para imagem, nome e etiqueta. A amostra de tema no Inspector é quadrada e demonstra os elementos HTML comuns do perfil usando tokens validados, tipografia de corpo e display separadas e sem executar conteúdo importado.
+O Design System permanece como a última folha de estilos declarada no manifesto. Como ele é carregado depois de `nexus-universal-library.css`, os contratos finais e escopados da Biblioteca ficam no bloco final do próprio Design System, evitando que regras-base antigas sobrescrevam a grade e o Inspector. A grade não renderiza estrelas de favoritos; o estado e a ação permanecem disponíveis no Inspector, sem controles sobrepostos nos cartões. Miniaturas usam dimensões quadradas de 32, 64 ou 128 px, com linhas reservadas para imagem, nome e etiqueta. A amostra de tema no Inspector é quadrada e demonstra os elementos HTML comuns do perfil usando tokens validados, tipografia de corpo e display separadas e sem executar conteúdo importado.
 
 ## Biblioteca de temas curada — 1.0.0.144
 
