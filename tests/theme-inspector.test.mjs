@@ -174,7 +174,8 @@ test("built-in theme preview resolves its own preset, typography, full palette a
   });
   assert.equal(model.supported, true);
   assert.equal(model.preset, "medieval");
-  assert.equal(model.typography.family, "Georgia");
+  assert.equal(model.typography.family, "Cormorant Garamond");
+  assert.equal(model.typography.displayFamily, "Cinzel");
   assert.equal(model.palette.find(color => color.key === "canvas").value, "#1b1712");
   assert.equal(model.palette.length, 18);
   assert.equal(model.components.panels.background, model.palette.find(color => color.key === "surface").value);
