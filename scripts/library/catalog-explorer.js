@@ -869,7 +869,7 @@ export function createLibraryCatalogExplorer({
     return card;
   };
 
-  const renderResourceCard = (resource, preferences) => {
+  const renderResourceCard = resource => {
     const key = resourceKey(resource);
     const card = makeElement("article", "nexus-library-generic-card");
     card.dataset.libraryResourceKey = key;
@@ -1108,6 +1108,11 @@ export function createLibraryCatalogExplorer({
         ? current.favorites.filter(item => item !== favoriteKey)
         : [favoriteKey, ...current.favorites].slice(0, 500);
       await savePreferences({ ...current, favorites });
+      if (active && currentSmartView === "favorites") {
+        selectedResourceKeys.delete(favoriteKey);
+        await render();
+        return;
+      }
       detailFavorite.classList.toggle("is-favorite", !active);
       detailFavorite.setAttribute("aria-pressed", String(!active));
       detailFavorite.setAttribute("aria-label", active ? "Adicionar aos favoritos" : "Remover dos favoritos");
@@ -1611,7 +1616,7 @@ export function createLibraryCatalogExplorer({
 
     container.replaceChildren();
     for (const folder of folderEntries) container.append(renderFolderCard(folder, preferences));
-    for (const resource of visible) container.append(renderResourceCard(resource, preferences));
+    for (const resource of visible) container.append(renderResourceCard(resource));
     if (!visible.length && !folderEntries.length) {
       const message = page.errors?.length
         ? "Algumas fontes da Biblioteca não puderam ser consultadas."
