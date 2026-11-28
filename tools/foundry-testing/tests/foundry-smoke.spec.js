@@ -122,7 +122,9 @@ test("Biblioteca mantém miniaturas quadradas, tipografia de tema e ausência de
   const app = page.locator(".nexus-library-standalone");
   await expect(app).toBeVisible();
 
+  await app.locator("[data-library-toggle-filters]").click();
   const sizeControl = app.locator("[data-library-card-size]");
+  await expect(sizeControl).toBeVisible();
   const themePreview = app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first();
   await expect(themePreview).toBeVisible();
 
