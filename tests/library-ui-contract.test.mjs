@@ -304,6 +304,8 @@ assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font
 
 assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet.");
+assert.match(catalogExplorer, /root\.dataset\.previewShape = compact \? "compact" : "square"/,
+  "The full Inspector preview must activate the square layout contract.");
 assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
 assert.match(catalogExplorer, /nexus-library-theme-miniature-sidebar/);
