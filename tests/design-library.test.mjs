@@ -20,6 +20,7 @@ test("salva perfis completos na coleção themes canônica", async () => {
   const saved = await library.save(profile);
   assert.equal(saved.id, "theme-1"); assert.equal(saved.kind, "design-profile");
   assert.equal(saved.profile.palette.panel, "#123456"); assert.equal(saved.profile.typography.baseSize, 16);
+  assert.deepEqual(saved.tags, ["tema", "design", "theme", "pessoal"]);
   assert.equal(saved.profile.layout.density, "spacious"); assert.equal(saved.profile.accessibility.reducedMotion, true);
   assert.equal(library.list().length, 1); assert.equal(readNexusLibraryStore(user).store.collections.themes.length, 1);
   assert.equal(user.flags.get("libraryThemes").length, 1, "o flag legado deve acompanhar a coleção canônica");
@@ -29,6 +30,7 @@ test("duplica, renomeia, aplica e exclui sem alterar o perfil ativo implicitamen
   const library = createDesignLibraryService({ getUser: () => user, design, createId: () => "copy-1" });
   const saved = await library.save(createDefaultDesignProfile("midnight")), copy = await library.duplicate(saved.id);
   assert.notEqual(copy.id, saved.id); assert.match(copy.name, /cópia/);
+  assert.deepEqual(copy.tags, saved.tags, "A duplicação deve preservar as etiquetas do tema.");
   const renamed = await library.rename(copy.id, "Noite de Inverno"); assert.equal(renamed.name, "Noite de Inverno");
   const applied = await library.apply(copy.id, "world");
   assert.equal(applied.applied, true); assert.equal(design.applied[0].scope, "world");
