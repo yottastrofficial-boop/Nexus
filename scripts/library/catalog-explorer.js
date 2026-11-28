@@ -926,6 +926,11 @@ export function createLibraryCatalogExplorer({
       select.append(nameCell, categoryCell, typeCell);
     } else {
       select.append(preview, name);
+      if (resource.kind === "theme") {
+        const categoryTag = resource.tags.find(tag => String(tag).startsWith("categoria:"));
+        const categoryLabels = { "categoria:padrao": "Padrão", "categoria:cores": "Cores", "categoria:estilos": "Estilos" };
+        if (categoryTag) select.append(makeElement("small", "nexus-library-card-category-tag", categoryLabels[categoryTag] ?? categoryTag));
+      }
     }
     select.dataset.resourceCategory = resource.kind === "theme" ? "visual-collection" : builtin === "font" ? "font" : String(resource.kind ?? resource.type);
     const isFavorite = preferences.favorites.includes(key);
