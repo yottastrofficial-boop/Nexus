@@ -1,11 +1,12 @@
-## Estado da main — 1.0.0.143
+## Estado de distribuição — 1.0.0.143 (publicada)
 
-A main contém a melhoria de inicialização do cache de mídia e o snapshot público de diagnóstico. A publicação estável e a sincronização do manifesto dependem do workflow oficial confirmar CI, ZIP e asset.
+A melhoria de cache lazy e diagnóstico de serviços foi publicada após CI, construção do pacote, confirmação do asset e sincronização do manifesto.
 
-- `system.json` declara 1.0.0.143 e aponta para o ZIP correspondente.
-- `manifest.json` permanece na última versão estável até o workflow validar o pacote.
+- Workflow 46100665229 concluído com sucesso.
+- `system.json` e `manifest.json` declaram 1.0.0.143 e apontam para o mesmo ZIP.
+- Asset `nexus.zip` confirmado (502.627 bytes).
 - O snapshot diagnóstico não instancia serviços.
-- Teste funcional no Foundry VTT 14 build 360 permanece manual.
+- Teste funcional no Foundry VTT 14 build 360 permanece manual; último checkpoint funcional confirmado: 1.0.0.70.
 
 ## Estado de distribuição — 1.0.0.142 (publicada)
 
