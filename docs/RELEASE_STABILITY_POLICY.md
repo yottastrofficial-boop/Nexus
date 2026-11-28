@@ -1,6 +1,11 @@
-## Estado de distribuição — 1.0.0.146 em preparação
+## Estado de distribuição — 1.0.0.146 (publicada)
 
-A revisão 1.0.0.146 está sendo preparada com correções visuais na Biblioteca. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. A versão estável permanece na 1.0.0.145 até CI, pacote ZIP e release serem confirmados pelo workflow oficial. A validação visual no Foundry VTT 14 build 360 permanece manual.
+A versão estável 1.0.0.146 foi integrada à `main` e publicada pelo workflow oficial 46121574486. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. Os cartões não renderizam controles de favorito; a gestão permanece no Inspector. As miniaturas usam 32/64/128 px e a prévia completa do tema é quadrada.
+
+- `system.json` e `manifest.json` declaram 1.0.0.146 e apontam para `v1.0.0.146/nexus.zip`.
+- Release `v1.0.0.146` publicada; asset `nexus.zip` confirmado (509.981 bytes).
+- CI: 73/73 arquivos JavaScript verificados e 55/55 arquivos de teste aprovados; pacote ZIP íntegro.
+- Validação visual/funcional dentro do Foundry VTT 14 build 360 continua manual; último checkpoint funcional confirmado: 1.0.0.70.
 
 ## Estado de distribuição — 1.0.0.144 (publicada)
 
