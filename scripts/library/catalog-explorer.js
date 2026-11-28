@@ -18,16 +18,15 @@ import {
   renderLibraryFontPreview,
   renderLibraryResourcePreview
 } from "./catalog-preview-renderers.js";
-import { getLibraryResourceIcon, createLibraryGridCard, createLibraryFolderGridCard } from "./catalog-grid-renderer.js";
+import { createLibraryGridCard, createLibraryFolderGridCard } from "./catalog-grid-renderer.js";
 export {
   getLibraryMediaInsertionSource,
   getLibraryResourceBarCardPreviewModel,
-  getLibraryResourceIcon,
   getLibraryResourcePreviewModel,
   getLibraryThemePreviewColors,
   getLibraryThemePreviewTokens
 } from "./catalog-preview-renderers.js";
-export { getLibraryResourceIcon as getLibraryCatalogResourceIcon } from "./catalog-grid-renderer.js";
+export { getLibraryResourceIcon } from "./catalog-grid-renderer.js";
 
 const PAGE_SIZE = 30;
 const LEGACY_COLLECTIONS = new Set(["components", "groups", "layouts", "templates", "assets", "media", "themes", "styles", "properties", "rules", "behaviors", "flows", "functions", "world-flows"]);
