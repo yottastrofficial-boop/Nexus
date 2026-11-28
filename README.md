@@ -12,7 +12,7 @@
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.145 publicada (manifesto estável).** A candidata 1.0.0.146 refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. A publicação estável depende da validação automatizada, da integridade do pacote e da conferência visual/funcional no Foundry VTT 14 build 360.
+**Versão 1.0.0.145 publicada (manifesto estável).** A Versão 1.0.0.146 está em revisão e refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. A publicação estável depende da validação automatizada, da integridade do pacote e da conferência visual/funcional no Foundry VTT 14 build 360.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
