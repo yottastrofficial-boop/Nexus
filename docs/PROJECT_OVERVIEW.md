@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.144 (em validação)
+## Estado do código — 1.0.0.144 (publicada)
 
-A Biblioteca apresenta uma coleção-base curada com doze temas, etiquetas funcionais e filtros. Cada tema interno resolve para um perfil completo do Design System, com tipografia de interface e display. A grade usa uma miniatura independente do viewer completo do Inspector. Temas legados permanecem disponíveis internamente para preservar configurações antigas. CI e pacote estão em validação; o teste visual/funcional no Foundry VTT 14 build 360 permanece manual. A capa do livro de regras não foi localizada entre os arquivos consultados, então as paletas partem da identidade-base já presente no código.
+A Biblioteca apresenta uma coleção-base curada com doze temas, etiquetas funcionais e filtros. Cada tema interno resolve para um perfil completo do Design System, com tipografia de interface e display. A grade usa uma miniatura independente do viewer completo do Inspector. Temas legados permanecem disponíveis internamente para preservar configurações antigas. CI, regressões, pacote ZIP, release, asset `nexus.zip` (507.118 bytes) e manifesto estável foram confirmados pelo workflow 46114908001. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual. A capa do livro de regras não foi localizada entre os arquivos consultados, então as paletas partem da identidade-base já presente no código.
 
 ## Estado do código — 1.0.0.143 (publicada)
 
