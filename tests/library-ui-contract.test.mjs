@@ -14,8 +14,8 @@ const actorListeners = readFileSync(new URL("../scripts/sheets/actor-sheet-liste
 const documentBridge = readFileSync(new URL("../scripts/core/foundry-document-bridge.js", import.meta.url), "utf8");
 
 
-assert.equal(manifest.styles.at(-1), "styles/nexus-universal-library.css",
-  "The Universal Library layer must load after the Design System so its scoped layout contracts are authoritative.");
+assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
+  "The Design System must remain the final stylesheet and contain the shared Library contract.");
 assert.ok(manifest.styles.includes("styles/nexus-universal-library.css"),
   "A camada complementar deve ser carregada depois do stylesheet legado.");
 assert.match(styles, /\.nexus-library-application \.nexus-library-workspace[\s\S]*?grid-template-columns: minmax\(0, 1fr\) var\(--nexus-library-inspector-width\)/,
@@ -279,7 +279,7 @@ assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size
 assert.doesNotMatch(catalogExplorer.slice(catalogExplorer.indexOf("const renderResourceCard"), catalogExplorer.indexOf("let currentInspectorTab")),
   /nexus-library-favorite|data-library-resource-favorite/,
   "Grid cards must not render favorite stars; the Inspector owns favorite management.");
-assert.match(styles, /\.nexus-library-generic-card > \.nexus-library-favorite\s*\{[\s\S]*?display:\s*none\s*!important/,
+assert.match(designSystem, /\.nexus-library-generic-card > \.nexus-library-favorite\s*\{[\s\S]*?display:\s*none\s*!important/,
   "Legacy favorite controls must be suppressed inside grid cards.");
 assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
   "The full theme preview must use the theme's body font.");
@@ -287,9 +287,9 @@ assert.match(styles, /\.nexus-library-theme-live-header\s*>\s*strong[\s\S]*?font
   "Theme headings must use the theme's display font.");
 
 
-assert.match(manifest.styles.join(","), /nexus-design-system\.css,nexus-universal-library\.css$/,
-  "The Universal Library stylesheet must follow the Design System.");
-assert.match(styles, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
+assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
+  "The Design System must remain the final stylesheet.");
+assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
 assert.match(catalogExplorer, /nexus-library-theme-miniature-sidebar/);
 assert.match(catalogExplorer, /nexus-library-theme-miniature-content/);
