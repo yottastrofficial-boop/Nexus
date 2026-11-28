@@ -1,3 +1,11 @@
+## 1.0.0.149 — Refinamento visual da Biblioteca
+
+- Remove bordas permanentes dos cartões; o contorno fica reservado ao item selecionado.
+- Usa miniaturas compactas da interface real nos cartões médios de tema, com detalhes textuais suavizados.
+- Reduz ruído visual nas prévias e evita quebra agressiva dos nomes dos recursos.
+- Favoritos permanecem no cabeçalho do Inspector, sem estrela sobre os ícones da grade.
+- Publicação condicionada à validação automatizada e à confirmação do ZIP.
+
 ## 1.0.0.148 — Prévia de temas e tokens de componentes
 
 - Substitui a mini-interface comprimida dos cartões médios de tema por uma composição legível de seis cores semânticas: Canvas, Painel, Superfície, Acento, Destaque e Botão.
@@ -976,7 +984,7 @@
 As entradas anteriores foram movidas para [`docs/archive/CHANGELOG_PRE_1.0.0.70.md`](docs/archive/CHANGELOG_PRE_1.0.0.70.md) para manter este changelog focado nas versões recentes, sem descartar o registro histórico.
 
 
-## 1.0.0.149
+
 
 - Biblioteca: remove contornos permanentes dos cartões e das áreas de miniatura; a borda fica reservada ao recurso selecionado.
 - Temas: cartões médios exibem miniaturas compactas da interface real, com texto secundário suavizado, em vez de uma grade isolada de amostras.
@@ -985,11 +993,11 @@ As entradas anteriores foram movidas para [`docs/archive/CHANGELOG_PRE_1.0.0.70.
 - Testes: atualiza os contratos de miniatura e de contorno de seleção.
 
 
-## Validação 1.0.0.149
+
 
 - Publicação de teste após os contratos automatizados da Biblioteca.
 
 
-## Verificação de pacote 1.0.0.149
+
 
 - Executar validação completa e publicar pacote para teste no Foundry VTT 14.
