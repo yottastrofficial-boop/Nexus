@@ -110,3 +110,50 @@ test("cria, renderiza e remove uma ficha temporária NEXUS", async ({ page }) =>
     }
   }
 });
+
+test("Biblioteca mantém miniaturas quadradas, tipografia de tema e ausência de estrelas nos cartões", async ({ page }) => {
+  await page.evaluate(async () => {
+    if (typeof game.nexus?.library?.open !== "function") {
+      throw new Error("A API pública de abertura da Biblioteca não está disponível.");
+    }
+    await game.nexus.library.open({ source: "foundry-smoke" });
+  });
+
+  const app = page.locator(".nexus-library-standalone");
+  await expect(app).toBeVisible();
+
+  const sizeControl = app.locator("[data-library-card-size]");
+  const themePreview = app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first();
+  await expect(themePreview).toBeVisible();
+
+  for (const [size, expected] of [["small", 32], ["medium", 64], ["large", 128]]) {
+    await sizeControl.selectOption(size);
+    await expect.poll(async () => {
+      const box = await app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first().boundingBox();
+      return box ? Math.round(box.width) : 0;
+    }).toBe(expected);
+    await expect.poll(async () => {
+      const box = await app.locator('.nexus-library-generic-preview[data-preview-kind="theme"]').first().boundingBox();
+      return box ? Math.round(box.height) : 0;
+    }).toBe(expected);
+  }
+
+  await expect(app.locator(".nexus-library-generic-card .nexus-library-favorite")).toHaveCount(0);
+
+  const themeItem = app.locator('.nexus-library-generic-item:has(.nexus-library-generic-preview[data-preview-kind="theme"])').first();
+  await themeItem.click();
+  const fullPreview = app.locator('.nexus-library-theme-live-preview[data-preview-shape="square"]');
+  await expect(fullPreview).toBeVisible();
+
+  const square = await fullPreview.boundingBox();
+  expect(square).not.toBeNull();
+  expect(Math.abs(square.width - square.height)).toBeLessThanOrEqual(1.5);
+
+  const typography = await fullPreview.evaluate(element => ({
+    body: getComputedStyle(element).fontFamily,
+    display: getComputedStyle(element.querySelector(".nexus-library-theme-live-panel > strong")).fontFamily
+  }));
+  expect(typography.body).toBeTruthy();
+  expect(typography.display).toBeTruthy();
+  await expect(app.locator(".nexus-library-detail-favorite")).toHaveCount(1);
+});
