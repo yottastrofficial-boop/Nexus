@@ -1,3 +1,7 @@
+## Estado do código — 1.0.0.140 (em validação)
+
+A revisão integrada registra o mapa atual dos subsistemas e contratos em `ARCHITECTURE_MAP_2026-11-27.md`. O bootstrap agora delega defaults de Actor e sincronização de textura do Token de protótipo ao adaptador `scripts/core/actor-document-lifecycle.js`, com dependências explícitas e disposer idempotente. Foram adicionados testes de regressão e atualizados os contratos do pacote. CI e pacote serão confirmados pelo workflow; teste funcional no Foundry VTT 14 build 360 permanece manual. Manifesto estável anterior: 1.0.0.139.
+
 ## Estado do código — 1.0.0.139 (publicada)
 
 A revisão resolve temas pelo preset próprio, preserva tokens seguros de temas pessoais, inclui estilos de componentes e usa o mesmo modelo no Grid e Inspector. As amostras aplicam diretamente a família de fonte e isolam o CSS do tema global. CI, pacote, release, asset ZIP e manifesto estável foram confirmados pelo workflow. Teste visual no Foundry VTT 14 build 360 permanece manual.
