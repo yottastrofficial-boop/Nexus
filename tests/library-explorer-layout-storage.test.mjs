@@ -37,7 +37,7 @@ test("font and theme cards stay compact in grid while Inspector retains the full
   assert.match(previewRenderers, /nexus-library-font-preview-samples/);
   assert.match(previewRenderers, /nexus-library-font-preview-aa/);
   assert.match(previewRenderers, /nexus-library-font-preview-glyphs/);
-  assert.match(previewRenderers, /nexus-library-theme-live-preview/);
+  assert.match(previewRenderers, /nexus-catalog-theme-sample/);
   assert.match(explorer, /nexus-library-inspector-tabs/);
   assert.match(explorer, /nexus-library-design-preview/);
 });
@@ -57,7 +57,7 @@ test("Inspector starts on Padrão, places identity in Padrão and technical meta
   assert.match(previewRenderers, /nexus-library-font-preview-aa/);
   assert.match(previewRenderers, /nexus-library-font-preview-glyphs/);
   assert.match(explorer, /themeModel\?\.palette/);
-  assert.match(previewRenderers, /nexus-library-theme-live-preview/);
+  assert.match(previewRenderers, /nexus-catalog-theme-sample/);
   assert.match(explorer, /currentInspectorTab = "preview"/);
   assert.match(explorer, /await renderDetails\(resource\)/);
 });
