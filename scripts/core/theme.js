@@ -5,7 +5,6 @@ export const DEFAULT_LAYOUT = {
   components: [], links: []
 };
 
-export const THEME_TOKENS = {
 const NEXUS_BASE_THEME = { panel: "#182330", surface: "#202e3e", input: "#111b27", border: "#3c5067", text: "#e7edf5", muted: "#9aadc2", hover: "#2a3d52", scroll: "#111923", windowHeader: "#223246", windowContent: "#192431", menu: "#202f40", placeholder: "#91a6bd", resourceButton: "#315b7d", canvas: "#171f2a", card: "#273443", accent: "#52647b", highlight: "#78b7e8", button: "#315b7d" };
 
 export const THEME_TOKENS = {
