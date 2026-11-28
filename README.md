@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Uma base modular para fichas de RPG no Foundry Virtual Tabletop.</strong><br>
-  Projeto em desenvolvimento · Versão estável 1.0.0.146 · Foundry VTT 14
+  Projeto em desenvolvimento · main candidata 1.0.0.147 · estável 1.0.0.146 · Foundry VTT 14
 </p>
 
 <p align="center">
@@ -12,7 +12,7 @@
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão 1.0.0.146 publicada (estável).** A revisão refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. CI, suíte de regressão, pacote ZIP, Release e manifesto estável foram confirmados pelo workflow 46121574486. A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo uma etapa manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
+**Versão 1.0.0.147 em preparação para a main; versão estável publicada: 1.0.0.146.** A refatoração da Biblioteca separa renderizadores de cartões e prévias, remove 1.695 linhas de estilos legados e mantém a miniatura nos tamanhos 32/64/128 px. A validação automatizada da candidata está em andamento; a versão estável permanece 1.0.0.146 até a release 1.0.0.147 e a sincronização automática do manifesto. A revisão refatora a Biblioteca: remove a implementação de favoritos dos cartões, elimina estilos legados, corrige a cascata do Design System e aprimora miniaturas e prévias quadradas com tipografia real. CI, suíte de regressão, pacote ZIP, Release e manifesto estável foram confirmados pelo workflow 46121574486. A validação visual/funcional dentro do Foundry VTT 14 build 360 continua sendo uma etapa manual; o último checkpoint funcional confirmado permanece na 1.0.0.70.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 

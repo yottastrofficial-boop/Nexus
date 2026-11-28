@@ -7,6 +7,9 @@ import { createFoundryMediaStorageAdapter } from "../scripts/core/media-storage.
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const application = read("../scripts/library/library-application.js");
 const explorer = read("../scripts/library/catalog-explorer.js");
+const gridRenderer = read("../scripts/library/catalog-grid-renderer.js");
+const previewRenderers = read("../scripts/library/catalog-preview-renderers.js");
+const catalogStyles = read("../styles/nexus-library-catalog.css");
 const template = read("../templates/library/library.hbs");
 const styles = read("../styles/nexus-universal-library.css");
 const libraryArchitecture = read("../docs/LIBRARY_ARCHITECTURE.md");
@@ -21,19 +24,20 @@ test("Library Name header toggles alphabetical direction", () => {
 
 test("list rows use exactly Name, Category and Type, including folders", () => {
   assert.match(template, /data-library-list-column="name"[\s\S]*?data-library-list-column="category"[\s\S]*?data-library-list-column="type"/);
-  assert.match(explorer, /if \(currentViewMode === "list"\)[\s\S]*?nexus-library-list-name-cell[\s\S]*?nexus-library-list-category[\s\S]*?nexus-library-list-type/);
-  assert.match(styles, /grid-template-columns: var\(--nexus-library-list-columns/);
-  assert.match(styles, /grid-template-columns: var\(--nexus-library-list-columns/);
+  assert.match(explorer, /createLibraryGridCard[\s\S]*?viewMode: currentViewMode/);
+  assert.match(gridRenderer, /nexus-library-catalog-card__name-cell[\s\S]*?nexus-library-catalog-card__category[\s\S]*?nexus-library-catalog-card__type/);
+  assert.match(catalogStyles, /data-view-mode="list"[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
 });
 
 test("font and theme cards stay compact in grid while Inspector retains the full preview", () => {
-  assert.match(explorer, /if \(builtin === "font"\)/);
-  assert.match(explorer, /nexus-library-font-grid-specimen/);
-  assert.match(explorer, /resource\.fontFamily/);
-  assert.match(explorer, /fa-solid fa-palette/);
-  assert.doesNotMatch(explorer, /nexus-library-font-specimen|nexus-library-resource-preview-facts/);
-  assert.match(explorer, /nexus-library-theme-card-preview/);
-  assert.match(explorer, /nexus-library-resource-meter-card-preview/);
+  assert.match(gridRenderer, /createFontPreview[\s\S]*?resource\.fontFamily/);
+  assert.match(gridRenderer, /createThemePreview[\s\S]*?createLibraryThemeSample/);
+  assert.match(gridRenderer, /createResourceBarPreview[\s\S]*?nexus-catalog-resource-track/);
+  assert.doesNotMatch(gridRenderer, /nexus-library-favorite|data-library-resource-favorite/);
+  assert.match(previewRenderers, /nexus-library-font-preview-samples/);
+  assert.match(previewRenderers, /nexus-library-font-preview-aa/);
+  assert.match(previewRenderers, /nexus-library-font-preview-glyphs/);
+  assert.match(previewRenderers, /nexus-catalog-theme-sample/);
   assert.match(explorer, /nexus-library-inspector-tabs/);
   assert.match(explorer, /nexus-library-design-preview/);
 });
@@ -48,12 +52,12 @@ test("Inspector starts on Padrão, places identity in Padrão and technical meta
   assert.match(explorer, /\["Etiquetas", resource\.tags\.join\(", "\) \|\| "—"\]/);
   assert.match(explorer, /nexus-library-resource-preview-summary/);
   assert.doesNotMatch(explorer, /nexus-library-resource-preview-title/);
-  assert.match(explorer, /function renderLibraryFontPreview/);
-  assert.match(explorer, /nexus-library-font-preview-samples/);
-  assert.match(explorer, /nexus-library-font-preview-aa/);
-  assert.match(explorer, /nexus-library-font-preview-glyphs/);
+  assert.match(previewRenderers, /function renderLibraryFontPreview/);
+  assert.match(previewRenderers, /nexus-library-font-preview-samples/);
+  assert.match(previewRenderers, /nexus-library-font-preview-aa/);
+  assert.match(previewRenderers, /nexus-library-font-preview-glyphs/);
   assert.match(explorer, /themeModel\?\.palette/);
-  assert.match(explorer, /nexus-library-theme-live-preview/);
+  assert.match(previewRenderers, /nexus-catalog-theme-sample/);
   assert.match(explorer, /currentInspectorTab = "preview"/);
   assert.match(explorer, /await renderDetails\(resource\)/);
 });

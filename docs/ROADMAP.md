@@ -1,8 +1,8 @@
-## Estado da main — 1.0.0.146 publicada
+## Estado da main — candidata 1.0.0.147 (manifesto estável 1.0.0.146)
 
-A versão estável 1.0.0.146 foi publicada após integração, CI, regressões, pacote ZIP íntegro e sincronização do manifesto pelo workflow 46121574486. Corrige a cascata da Biblioteca mantendo o Design System como última folha de estilos e concentrando nele os contratos finais da grade e do Inspector. A grade deixa de renderizar estrelas de favorito; a gestão permanece no Inspector. Miniaturas usam 32/64/128 px, miniaturas de tema são reconstruídas e a prévia completa do tema passa a ser quadrada. A conferência visual e funcional dentro do Foundry VTT 14 build 360 permanece manual.
+A candidata 1.0.0.147 reestrutura os renderizadores da Biblioteca e remove estilos legados. O manifesto estável continua em 1.0.0.146 até o workflow publicar o pacote e sincronizar o manifesto. Corrige a cascata da Biblioteca mantendo o Design System como última folha de estilos e concentrando nele os contratos finais da grade e do Inspector. A grade deixa de renderizar estrelas de favorito; a gestão permanece no Inspector. Miniaturas usam 32/64/128 px, miniaturas de tema são reconstruídas e a prévia completa do tema passa a ser quadrada. A conferência visual e funcional dentro do Foundry VTT 14 build 360 permanece manual.
 
-## 1.0.0.144 — Biblioteca de temas curada (publicada)
+## 1.0.0.147 — Reestruturação da Biblioteca (candidata)\n\n- Separa cartões, prévias tipadas e estilos do catálogo em módulos próprios.\n- Elimina implementações concorrentes de miniaturas e estilos legados.\n- Mantém 32/64/128 px e os favoritos no Inspector.\n- CI e pacote Foundry serão confirmados antes da publicação; validação visual no Foundry permanece manual.\n\n## 1.0.0.144 — Biblioteca de temas curada (publicada)
 
 - Define 12 presets-base: Padrão, sete cores e quatro estilos.
 - Adiciona etiquetas categorizadas e filtro dinâmico na Biblioteca.

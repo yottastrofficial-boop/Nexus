@@ -1,4 +1,4 @@
-## Estado de distribuição — 1.0.0.146 (publicada)
+## Estado de distribuição — 1.0.0.147 em preparação (manifesto estável 1.0.0.146)\n\nA main está sendo preparada para a versão 1.0.0.147. A publicação oficial exige CI aprovado e commit de release com marcador [release]; o workflow constrói e verifica nexus.zip, cria a release/tag e só então sincroniza manifest.json. Até essa confirmação, o manifesto de instalação permanece em 1.0.0.146. A validação visual no Foundry VTT 14 build 360 continua manual.\n\n## Estado de distribuição — 1.0.0.146 (publicada)
 
 A versão estável 1.0.0.146 foi integrada à `main` e publicada pelo workflow oficial 46121574486. O Design System continua como última folha de estilos e concentra os contratos finais da grade e do Inspector. Os cartões não renderizam controles de favorito; a gestão permanece no Inspector. As miniaturas usam 32/64/128 px e a prévia completa do tema é quadrada.
 

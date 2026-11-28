@@ -1,6 +1,17 @@
-## Refinamento visual da Biblioteca — 1.0.0.146
+## Reestruturação da amostragem em grade — 1.0.0.147 (em desenvolvimento)
 
-O Design System permanece como a última folha de estilos declarada no manifesto. Como ele é carregado depois de `nexus-universal-library.css`, os contratos finais e escopados da Biblioteca ficam no bloco final do próprio Design System, evitando que regras-base antigas sobrescrevam a grade e o Inspector. A grade não renderiza estrelas de favoritos; o estado e a ação permanecem disponíveis no Inspector, sem controles sobrepostos nos cartões. Miniaturas usam dimensões quadradas de 32, 64 ou 128 px, com linhas reservadas para imagem, nome e etiqueta. A amostra de tema no Inspector é quadrada e demonstra os elementos HTML comuns do perfil usando tokens validados, tipografia de corpo e display separadas e sem executar conteúdo importado.
+A apresentação do catálogo foi separada do Explorer e organizada por contratos próprios:
+
+- `scripts/library/catalog-grid-renderer.js`: cartões de recurso/pasta, ícones semânticos, labels de categoria/tipo, espécimes compactos de fonte/tema, seleção e drag-and-drop.
+- `scripts/library/catalog-preview-renderers.js`: normalização de dados e prévias tipadas compartilhadas pelo Grid e Inspector. Não possui estado de seleção, preferências ou acesso ao catálogo.
+- `styles/nexus-library-catalog.css`: geometria, tipografia e estados dos cartões, miniaturas e amostras. O Design System continua como última folha, mas deixa de conter uma segunda implementação da grade.
+- `scripts/library/catalog-explorer.js`: coordena busca, paginação, seleção, Inspector e callbacks; não constrói mais cartões nem mantém mapas visuais de tipos.
+
+A grade usa somente cartões com linhas independentes para prévia, título e etiqueta; os tamanhos disponíveis são 32, 64 e 128 px. Favoritos não são renderizados nos cartões e continuam no Inspector. Fontes usam um único espécime baseado na família registrada; temas usam um único renderizador de amostra, com versão compacta para a grade e quadrada para o Inspector. Em 32 px, a miniatura de tema vira uma composição de paleta, evitando texto ilegível.
+
+A folha antiga do Design System perdeu 677 linhas de regras duplicadas de grade, miniaturas e prévias de tema. O Universal Library stylesheet perdeu outras 1.018 linhas de seletores de cartão, fonte, tema, lista e pasta que deixaram de ser emitidos pelo renderer. A folha dedicada do catálogo agora controla esses elementos; shell, navegação, Inspector e prévias técnicas continuam nas camadas apropriadas.
+
+A refatoração não altera schemas, identificadores, referências, persistência, favoritos, pastas, provedores ou documentos Foundry. Conteúdo importado permanece inerte e as prévias usam DOM controlado e tokens validados. A validação automatizada e a conferência visual no Foundry VTT 14 build 360 são gates separados; esta branch não representa uma release estável.
 
 ## Biblioteca de temas curada — 1.0.0.144
 
