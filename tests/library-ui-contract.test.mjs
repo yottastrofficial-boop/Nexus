@@ -275,11 +275,11 @@ assert.match(libraryTemplate, /<option value="medium" selected>64 × 64 px<\/opt
   "The Library must expose the exact 64px preview size as its default.");
 assert.match(libraryTemplate, /<option value="large">128 × 128 px<\/option>/,
   "The Library must expose the exact 128px preview size.");
-assert.match(styles, /data-card-size="small"[\s\S]*?--nexus-library-preview-size:\s*32px/,
+assert.match(catalogStyles, /data-card-size="small"[\s\S]*?--nexus-catalog-preview-size:\s*32px/,
   "Small grid cards must use 32px square previews.");
-assert.match(styles, /data-card-size="medium"[\s\S]*?--nexus-library-preview-size:\s*64px/,
+assert.match(catalogStyles, /data-card-size="medium"[\s\S]*?--nexus-catalog-preview-size:\s*64px/,
   "Medium grid cards must use 64px square previews.");
-assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size:\s*128px/,
+assert.match(catalogStyles, /data-card-size="large"[\s\S]*?--nexus-catalog-preview-size:\s*128px/,
   "Large grid cards must use 128px square previews.");
 assert.doesNotMatch(catalogGrid,
   /nexus-library-favorite|data-library-resource-favorite/,
@@ -311,7 +311,7 @@ assert.equal(manifest.styles.at(-1), "styles/nexus-design-system.css",
   "The Design System must remain the final stylesheet.");
 assert.match(catalogPreviews, /root\.dataset\.previewShape = compact \? "compact" : "square"/,
   "The full Inspector preview must activate the square layout contract.");
-assert.match(designSystem, /data-preview-shape="square"[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
+assert.match(catalogStyles, /\.nexus-catalog-theme-sample\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/,
   "The full theme Inspector specimen must be a bounded square.");
 assert.match(catalogPreviews, /nexus-catalog-theme-sample__nav/);
 assert.match(catalogPreviews, /nexus-catalog-theme-sample__panel/);
