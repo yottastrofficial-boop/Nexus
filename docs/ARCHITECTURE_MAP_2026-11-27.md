@@ -4,10 +4,10 @@
 **Repositório:** `yottastrofficial-boop/Nexus`  
 **Branch de referência:** `main`  
 **Commit-base:** `89e60f6ac0b202bee57cba84dea3416a99f42df5`  
-**Versão estável publicada:** `1.0.0.141`  
+**Versão estável publicada:** `1.0.0.142`  
 **Alvo declarado:** Foundry VTT 14, build 360
 
-> Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release estável atual é 1.0.0.141; o teste funcional dentro do Foundry VTT 14 build 360 permanece pendente.
+> Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release estável atual é 1.0.0.142; o teste funcional dentro do Foundry VTT 14 build 360 permanece pendente.
 
 ## 1. Intenção central que orienta a revisão
 
@@ -194,13 +194,15 @@ O grafo atual tem teste que verifica imports locais resolvidos e ausência de ci
 - **System development/manifest:** https://foundryvtt.com/article/system-development/
 - **Release API:** https://foundryvtt.com/article/package-release-api/
 
-## 7. Registro das implementações 1.0.0.140–1.0.0.141
+## 7. Registro das implementações 1.0.0.140–1.0.0.142
 
-- Main e manifesto estável: 1.0.0.141 publicada.
-- CI, pacote ZIP, release e asset foram confirmados pelo workflow 46099498524.
+- Main e manifesto estável: 1.0.0.142 publicada.
+- CI, pacote ZIP, release e asset foram confirmados pelo workflow 46099909950.
 - 1.0.0.140 extraiu o lifecycle de Actor para adapter com dependências injetadas.
-- 1.0.0.141 corrigiu shutdown concorrente do Service Registry, espera por factories em andamento e cleanup assíncrono em ordem inversa; testes isolados passaram.
-- Achado para a próxima subetapa: o helper `registerService()` do bootstrap chama `resolveSync()` imediatamente. Assim, os serviços registrados por esse helper são instanciados durante `init`, mesmo que o registry suporte lazy resolution. Antes de alterar isso, classificar cada serviço como eager-required (hooks/settings/classes) ou safe-to-defer (serviços sem side effects), mapear consumidores e preservar a API `game.nexus.*`.
+- 1.0.0.141 corrigiu shutdown concorrente do Service Registry, espera por factories em andamento e cleanup assíncrono em ordem inversa.
+- 1.0.0.142 adicionou `defineAccessor()` e deferiu serviços puros de recursos, Biblioteca, mídia e lógica, preservando propriedades object-shaped em `game.nexus.*`. Design System, registry da Biblioteca e classes de janela continuam eager por exigirem disponibilidade durante `init`.
+- Testes cobrem shutdown concorrente, factories em andamento, cleanup assíncrono, resolução sob demanda e contrato de classificação eager/lazy.
+- Próxima subetapa: auditar outros efeitos de init e a abertura/fechamento de janelas; depois avançar para ownership de dados de Propriedades/Regras.
 - Essas implementações são passos de lifecycle/arquitetura, não uma refatoração concluída de toda a ficha.
 
 ## 8. Gates e definição de concluído
