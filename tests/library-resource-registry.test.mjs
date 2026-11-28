@@ -93,7 +93,7 @@ assert.equal(customThemeResource?.themePreview?.components?.buttons?.borderStyle
 assert.equal(Object.hasOwn(customThemeResource.themePreview, "customCss"), false,
   "Theme preview metadata must exclude custom CSS so previewing a theme never executes imported styles.");
 
-const fontsPage = await nexusProvider.list({ type: "font", limit: 10 });
+const fontsPage = await nexusProvider.list({ type: "font", limit: 20 });
 assert.equal(fontsPage.total, 16, "The Library exposes system and curated display font stacks used by NEXUS themes.");
 const interFont = fontsPage.items.find(item => item.id === "builtin-font:inter");
 assert.ok(interFont && interFont.kind === "style" && interFont.tags.includes("fonte"));
