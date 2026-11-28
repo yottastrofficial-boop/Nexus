@@ -1,4 +1,5 @@
 import { createNexusServiceRegistry } from "./core/service-registry.js";
+import { createNexusDiagnostics } from "./core/system-diagnostics.js";
 import { NexusActorSheet } from "./sheets/actor-sheet-v1.0.0.js";
 import { NEXUS_SKILLS } from "./core/skills.js";
 import { installNexusActorDocumentLifecycle } from "./core/actor-document-lifecycle.js";
@@ -41,6 +42,14 @@ Hooks.once("init", () => {
     if (!game.nexus.services.has(name)) game.nexus.services.register(name, factory, options);
     game.nexus.services.defineAccessor(target, property, name);
   };
+  // Diagnóstico público somente leitura; não resolve serviços lazy ao inspecionar.
+  registerLazyService("system.diagnostics", () => createNexusDiagnostics({
+    registry: game.nexus.services,
+    getSystemVersion: () => game.system?.version,
+    getFoundryVersion: () => game.version ?? game.release?.version,
+    isReady: () => game.ready === true
+  }), game.nexus, "diagnostics");
+  game.nexus.getDiagnostics = () => game.nexus.diagnostics.snapshot();
   // O Design System aplica o tema efetivo à interface NEXUS e às áreas nativas suportadas do Foundry.
   game.nexus.design = registerService("design", () => installNexusDesignSystem({
     gameRef: game,
@@ -192,9 +201,9 @@ Hooks.once("init", () => {
   game.nexus.media.createWorkerAdapter = createWorkerMediaAdapter;
   game.nexus.media.installWorkerRuntime = installNexusMediaWorkerRuntime;
   game.nexus.media.createCacheKey = createMediaCacheKey;
+  // Cache IndexedDB é instanciado apenas quando algum consumidor acessa .cache.
   if (globalThis.indexedDB?.open) {
-    try { game.nexus.media.cache = createIndexedDbMediaCache(); }
-    catch (error) { console.warn("NEXUS | Cache local de mídia indisponível.", error); }
+    registerLazyService("media.cache", () => createIndexedDbMediaCache(), game.nexus.media, "cache");
   }
 
   game.nexus.logic ??= {};
