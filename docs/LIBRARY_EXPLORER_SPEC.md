@@ -1,6 +1,6 @@
 ## Biblioteca visual — contrato v8 (1.0.0.146)
 
-- O stylesheet da Biblioteca Universal é carregado depois do Design System. A camada complementar define os contratos finais e escopados da grade, cartões, miniaturas e Inspector; regras-base do Design System não podem sobrescrever esses contratos.
+- O Design System permanece como última folha de estilos. Os contratos finais e escopados da grade, cartões, miniaturas e Inspector ficam no bloco final do próprio Design System, após as regras-base.
 - A grade possui somente o controle de seleção do recurso. Favoritos são gerenciados pelo Inspector, sem estrelas sobrepostas ou controles residuais nos cartões.
 - Miniaturas permanecem quadradas e oferecem exclusivamente 32 × 32, 64 × 64 e 128 × 128 px. O tamanho escolhido controla dimensões da imagem, ícone e espécime tipográfico; o cartão reserva linhas independentes para miniatura, nome e etiqueta.
 - O nome tem largura limitada ao cartão, quebra de linha controlada e até três linhas; o conteúdo nunca invade o cartão vizinho.
