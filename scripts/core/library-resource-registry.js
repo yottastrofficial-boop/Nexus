@@ -33,7 +33,7 @@ const COLLECTION_TYPES = Object.freeze({
   functions: "function"
 });
 const THEME_LABELS = Object.freeze({
-  "nexus-dark": "NEXUS Escuro",
+  "nexus-dark": "Padrão",
   foundry: "Foundry VTT",
   midnight: "Meia-noite",
   light: "Claro",
@@ -45,6 +45,7 @@ const THEME_LABELS = Object.freeze({
 const getBuiltInThemes = catalog => [
   ...LIBRARY_THEME_PRESETS.map(preset => {
     const profile = createDefaultDesignProfile(preset.id);
+    profile.id = preset.id;
     profile.name = preset.name;
     return { ...preset, palette: profile.palette, profile };
   }),
