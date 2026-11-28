@@ -347,8 +347,10 @@ function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
   for (const [key, value] of Object.entries(tokens)) {
     preview.style.setProperty("--nexus-library-theme-" + key, value);
   }
-  const family = safeFontFamily(typography.displayFamily || typography.family) || "system-ui, sans-serif";
-  preview.style.setProperty("--nexus-library-theme-display-font", family);
+  const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
+  const displayFamily = safeFontFamily(typography.displayFamily) || family;
+  preview.style.setProperty("--nexus-library-theme-font", family);
+  preview.style.setProperty("--nexus-library-theme-display-font", displayFamily);
 
   const header = makeElement("span", "nexus-library-theme-miniature-header");
   const headerMark = makeElement("i", "nexus-library-theme-miniature-mark");
@@ -362,8 +364,8 @@ function createLibraryThemeCardPreview({ palette = [], typography = {} } = {}) {
   }
 
   const content = makeElement("span", "nexus-library-theme-miniature-content");
-  const title = makeElement("i", "nexus-library-theme-miniature-title");
-  const copy = makeElement("i", "nexus-library-theme-miniature-copy");
+  const title = makeElement("strong", "nexus-library-theme-miniature-title", "Aa");
+  const copy = makeElement("span", "nexus-library-theme-miniature-copy", "NEXUS");
   const highlight = makeElement("i", "nexus-library-theme-miniature-highlight");
   const controls = makeElement("span", "nexus-library-theme-miniature-controls");
   controls.append(
