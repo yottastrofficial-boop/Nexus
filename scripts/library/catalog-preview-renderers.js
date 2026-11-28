@@ -136,16 +136,15 @@ function createLibraryResourceBarCardPreview(resource) {
 
 export function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}, layout = {}, components = {}, compact = false } = {}) {
   const tokens = getLibraryThemePreviewTokens(palette);
-  const root = makeElement("div", compact
-    ? "nexus-library-theme-sample nexus-library-theme-card-preview"
-    : "nexus-library-theme-sample nexus-library-theme-live-preview");
+  const root = makeElement("div", compact ? "nexus-catalog-theme-sample is-compact" : "nexus-catalog-theme-sample");
   root.dataset.previewSize = compact ? "compact" : "full";
   root.dataset.previewShape = compact ? "compact" : "square";
   root.dataset.themePreset = String(layout.preset ?? "");
   for (const [key, value] of Object.entries(tokens)) root.style.setProperty("--nexus-library-theme-" + key, value);
   const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
+  const displayFamily = safeFontFamily(typography.displayFamily) || family;
   root.style.setProperty("--nexus-library-theme-font", family);
-  root.style.setProperty("--nexus-library-theme-display-font", safeFontFamily(typography.displayFamily) || family);
+  root.style.setProperty("--nexus-library-theme-display-font", displayFamily);
   root.style.setProperty("--nexus-library-theme-font-size", (compact ? 7 : Number(typography.baseSize) || 13) + "px");
   root.style.setProperty("--nexus-library-theme-radius", layout.radius === "sharp" ? "0px" : layout.radius === "soft" ? "4px" : compact ? "5px" : "8px");
   root.style.setProperty("--nexus-library-theme-control-height", (compact ? 12 : Math.max(28, Math.min(44, Number(layout.controlHeight) || 34))) + "px");
@@ -158,45 +157,40 @@ export function createLibraryThemeSample({ name = "Tema", palette = [], typograp
       if (value !== undefined && value !== null && value !== "") root.style.setProperty(prefix + token, String(value));
     }
   }
-
-  const header = makeElement("header", "nexus-library-theme-live-header");
-  header.append(makeElement("small", "", compact ? "NEXUS · PRÉVIA" : "NEXUS · PRÉVIA"),
-    makeElement("strong", "", String(name).slice(0, compact ? 18 : 64)));
-  root.append(header);
-
-  const body = makeElement("div", "nexus-library-theme-live-body");
-  const nav = makeElement("nav", "nexus-library-theme-live-nav");
-  nav.append(makeElement("span", "is-active", "Ficha"),
-    makeElement("span", "", compact ? "Atrib." : "Atributos"),
-    makeElement("span", "", "Efeitos"));
-  body.append(nav);
-
-  const panel = makeElement("section", "nexus-library-theme-live-panel");
-  panel.append(makeElement("small", "", compact ? "PERSONAGEM" : "PERSONAGEM · EXEMPLO"));
-  panel.append(makeElement("strong", "", compact ? "Exemplo de interface" : "Exemplo de interface"));
-  panel.append(makeElement("span", "nexus-library-theme-live-highlight", compact ? "Destaque selecionado" : "Destaque selecionado"));
-
-  const resource = makeElement("div", "nexus-library-theme-live-resource");
-  resource.append(makeElement("small", "", compact ? "PV · 32 / 40" : "PV · 32 / 40"));
-  const track = makeElement("span", "nexus-library-theme-live-track");
+  const header = makeElement("header", "nexus-catalog-theme-sample__header");
+  header.append(
+    makeElement("small", "nexus-catalog-theme-sample__eyebrow", "NEXUS · PRÉVIA"),
+    makeElement("strong", "nexus-catalog-theme-sample__brand", String(name).slice(0, compact ? 18 : 64))
+  );
+  const body = makeElement("div", "nexus-catalog-theme-sample__body");
+  const nav = makeElement("nav", "nexus-catalog-theme-sample__nav");
+  nav.append(makeElement("span", "is-active", "Ficha"), makeElement("span", "", compact ? "Atrib." : "Atributos"), makeElement("span", "", "Efeitos"));
+  const panel = makeElement("section", "nexus-catalog-theme-sample__panel");
+  panel.append(
+    makeElement("small", "nexus-catalog-theme-sample__label", compact ? "PERSONAGEM" : "PERSONAGEM · EXEMPLO"),
+    makeElement("strong", "nexus-catalog-theme-sample__title", "Exemplo de interface"),
+    makeElement("span", "nexus-catalog-theme-sample__highlight", "Destaque selecionado")
+  );
+  const resource = makeElement("div", "nexus-catalog-theme-sample__resource");
+  resource.append(makeElement("small", "nexus-catalog-theme-sample__label", "PV · 32 / 40"));
+  const track = makeElement("span", "nexus-catalog-theme-sample__track");
   const fill = makeElement("i", "");
   fill.style.width = "68%";
   track.append(fill);
   resource.append(track);
   panel.append(resource);
-
-  const card = makeElement("div", "nexus-library-theme-live-card");
-  card.append(makeElement("small", "", "ATRIBUTO"), makeElement("strong", "", "FOR 16"));
+  const card = makeElement("div", "nexus-catalog-theme-sample__card");
+  card.append(makeElement("small", "nexus-catalog-theme-sample__label", "ATRIBUTO"), makeElement("strong", "", "FOR 16"));
   panel.append(card);
-
-  const field = makeElement("span", "nexus-library-theme-live-field", compact ? "Campo de exemplo" : "Campo de exemplo");
-  const controls = makeElement("div", "nexus-library-theme-live-controls");
-  controls.append(field,
-    makeElement("button", "nexus-library-theme-live-button", compact ? "Ação" : "Ação"),
-    makeElement("button", "nexus-library-theme-live-button is-secondary", "Secundário"));
+  const controls = makeElement("div", "nexus-catalog-theme-sample__controls");
+  controls.append(
+    makeElement("span", "nexus-catalog-theme-sample__field", "Campo de exemplo"),
+    makeElement("button", "nexus-catalog-theme-sample__button", "Ação"),
+    makeElement("button", "nexus-catalog-theme-sample__button is-secondary", "Secundário")
+  );
   panel.append(controls);
-  body.append(panel);
-  root.append(body);
+  body.append(nav, panel);
+  root.append(header, body);
   return root;
 }
 
