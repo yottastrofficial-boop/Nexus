@@ -2,7 +2,7 @@
 
 A main contém a revisão arquitetural 1.0.0.140. A versão estável do manifesto permanece 1.0.0.139 até que CI, construção do pacote, publicação e confirmação do asset `nexus.zip` sejam concluídas pelo workflow oficial.
 
-- `system.json` declara 1.0.0.140 e aponta para o pacote da versão candidata.
+- `system.json` declara 1.0.0.140 e aponta para o pacote da versão em validação.
 - `manifest.json` permanece em 1.0.0.139 durante a validação.
 - A revisão estática e os testes automatizados não substituem a validação visual/funcional no Foundry VTT 14 build 360.
 - O último checkpoint funcional confirmado no Foundry permanece 1.0.0.70.
