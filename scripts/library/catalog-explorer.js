@@ -9,11 +9,8 @@ import { toggleLibraryCollectionResource } from "../core/library-preferences.js"
 import { getLibraryDesignProfilePreviewModel } from "./theme-inspector.js";
 import {
   createLibraryThemeSample,
-  getLibraryMediaInsertionSource,
-  getLibraryResourceBarCardPreviewModel,
   getLibraryResourcePreviewModel,
   getLibraryThemePreviewColors,
-  getLibraryThemePreviewTokens,
   renderGenericLibraryPreview,
   renderLibraryFontPreview,
   renderLibraryResourcePreview
