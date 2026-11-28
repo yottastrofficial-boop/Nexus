@@ -14,6 +14,7 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
   const resolving = new Set();
   const creationOrder = [];
   let disposed = false;
+  let disposalPromise = null;
 
   const assertName = name => {
     const key = String(name ?? "").trim();
@@ -22,7 +23,7 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
   };
 
   const assertActive = () => {
-    if (disposed) throw new Error("O registro de serviços NEXUS já foi encerrado.");
+    if (disposed || disposalPromise) throw new Error("O registro de serviços NEXUS está encerrando ou já foi encerrado.");
   };
 
   const register = (name, factory, { dependencies = [], dispose = null, replace = false } = {}) => {
@@ -161,29 +162,42 @@ export function createNexusServiceRegistry({ context = {}, logger = console } = 
     });
   });
 
-  const dispose = async () => {
-    if (disposed) return;
-    disposed = true;
-    const errors = [];
-    for (const name of [...creationOrder].reverse()) {
-      const entry = instances.get(name);
-      const definition = definitions.get(name);
-      if (!entry || entry.state !== "ready") continue;
-      try {
-        const cleanup = definition?.dispose
-          ?? entry.value?.dispose
-          ?? entry.value?.close
-          ?? entry.value?.destroy;
-        if (typeof cleanup === "function") await cleanup.call(entry.value, entry.value);
-      } catch (error) {
-        errors.push({ name, error });
-        logger?.error?.("NEXUS | Falha ao encerrar serviço " + name, error);
+  const dispose = () => {
+    // Return the same in-flight promise to every caller. Mark the registry as
+    // closing immediately so no new service can begin while current factories
+    // settle, then dispose every successfully created instance in reverse order.
+    if (disposalPromise) return disposalPromise;
+
+    disposalPromise = (async () => {
+      const pending = [...instances.values()]
+        .filter(entry => entry.state === "initializing" && entry.promise)
+        .map(entry => entry.promise);
+      await Promise.allSettled(pending);
+      disposed = true;
+
+      const errors = [];
+      for (const name of [...creationOrder].reverse()) {
+        const entry = instances.get(name);
+        const definition = definitions.get(name);
+        if (!entry || entry.state !== "ready") continue;
+        try {
+          const cleanup = definition?.dispose
+            ?? entry.value?.dispose
+            ?? entry.value?.close
+            ?? entry.value?.destroy;
+          if (typeof cleanup === "function") await cleanup.call(entry.value, entry.value);
+        } catch (error) {
+          errors.push({ name, error });
+          logger?.error?.("NEXUS | Falha ao encerrar serviço " + name, error);
+        }
       }
-    }
-    instances.clear();
-    definitions.clear();
-    creationOrder.length = 0;
-    return { disposed: true, errors };
+      instances.clear();
+      definitions.clear();
+      creationOrder.length = 0;
+      return { disposed: true, errors };
+    })();
+
+    return disposalPromise;
   };
 
   const api = Object.freeze({ register, publish, has, get, resolve, resolveSync, initialize, initializeSync, list, dispose, get disposed() { return disposed; } });

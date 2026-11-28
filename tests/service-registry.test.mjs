@@ -80,3 +80,47 @@ test("resolveSync rejeita fábricas assíncronas com orientação explícita", (
   registry.register("core.async-only", async () => ({ ready: true }));
   assert.throws(() => registry.resolveSync("core.async-only"), /use resolve\(\)/);
 });
+
+
+test("dispose aguarda factories em andamento e encerra o serviço recém-criado", async () => {
+  let releaseFactory;
+  let cleaned = 0;
+  const registry = createNexusServiceRegistry();
+  registry.register("core.pending", () => new Promise(resolve => {
+    releaseFactory = () => resolve({ dispose: () => { cleaned += 1; } });
+  }));
+
+  const creating = registry.resolve("core.pending");
+  await Promise.resolve();
+  const firstDispose = registry.dispose();
+  const secondDispose = registry.dispose();
+  assert.equal(firstDispose, secondDispose, "chamadas concorrentes devem compartilhar a mesma promise");
+  assert.throws(() => registry.register("core.late", () => ({})), /encerrando/);
+  await assert.rejects(registry.resolve("core.late"), /encerrando/);
+
+  await Promise.resolve();
+  assert.equal(cleaned, 0, "não deve descartar antes de a factory terminar");
+  releaseFactory();
+  await Promise.all([creating, firstDispose, secondDispose]);
+  assert.equal(cleaned, 1);
+  assert.equal(registry.disposed, true);
+});
+
+test("dispose aguarda cleanup assíncrono antes de resolver para todos os chamadores", async () => {
+  let releaseCleanup;
+  const registry = createNexusServiceRegistry();
+  registry.register("core.async-cleanup", () => ({
+    dispose: () => new Promise(resolve => { releaseCleanup = resolve; })
+  }));
+  await registry.resolve("core.async-cleanup");
+
+  const first = registry.dispose();
+  const second = registry.dispose();
+  let settled = false;
+  Promise.all([first, second]).then(() => { settled = true; });
+  await Promise.resolve();
+  assert.equal(settled, false);
+  releaseCleanup();
+  await Promise.all([first, second]);
+  assert.equal(settled, true);
+});
