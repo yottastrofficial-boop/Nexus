@@ -459,40 +459,13 @@ html.nexus-design-system .nexus-sheet .nexus-component .nexus-resource-actions b
 }
 
 /* Favorites are a clean glyph control, not a circular badge or text character. */
-html.nexus-design-system .nexus-library-generic-card .nexus-library-favorite {
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  display: grid !important;
-  place-items: center !important;
-  width: 28px !important;
-  min-width: 28px !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 6px !important;
-  color: var(--nexus-ui-muted) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  font-size: 14px !important;
-}
 
-html.nexus-design-system .nexus-library-generic-card .nexus-library-favorite:hover {
-  color: var(--nexus-ui-text) !important;
-  background: var(--nexus-ui-surface-hover) !important;
-}
 
-html.nexus-design-system .nexus-library-generic-card .nexus-library-favorite.is-favorite {
-  color: #e5c36e !important;
-}
 
-html.nexus-design-system .nexus-library-generic-card .nexus-library-favorite i {
-  display: block;
-  font-size: 14px;
-  line-height: 1;
-}
+
+
+
+
 
 /* Component previews show the shape of the resource, not only a generic file glyph. */
 html.nexus-design-system .nexus-library-component-preview {
@@ -1772,50 +1745,6 @@ html.nexus-design-system .nexus-library-application .nexus-library-font-preview 
 
 
 
-/* Independent, token-driven miniature for the theme grid. */
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature {
-  box-sizing:border-box!important; display:grid!important; grid-template-rows:7px minmax(0,1fr)!important;
-  gap:7px!important; width:100%!important; height:100%!important; min-width:0!important; min-height:0!important;
-  padding:9px!important; overflow:hidden!important; border:1px solid var(--nexus-library-theme-border,#3c5067)!important;
-  border-radius:8px!important; background:var(--nexus-library-theme-canvas,#171f2a)!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-top {
-  display:block!important; border-radius:3px!important; background:var(--nexus-library-theme-windowHeader,var(--nexus-library-theme-accent))!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-body {
-  display:grid!important; grid-template-columns:minmax(0,1fr) 22px!important; gap:6px!important; min-height:0!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-panel {
-  display:grid!important; grid-template-rows:5px 3px 12px 4px!important; align-content:space-between!important;
-  min-width:0!important; padding:7px!important; border:1px solid var(--nexus-library-theme-border)!important;
-  border-radius:5px!important; background:var(--nexus-library-theme-surface)!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-title {
-  display:block!important; width:54%!important; border-radius:2px!important; background:var(--nexus-library-theme-text)!important;
-  opacity:.9!important; font-family:var(--nexus-library-theme-display-font,var(--nexus-library-theme-font))!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-line {
-  display:block!important; width:82%!important; border-radius:2px!important; background:var(--nexus-library-theme-muted)!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-button {
-  display:block!important; width:58%!important; border:1px solid var(--nexus-library-theme-highlight)!important;
-  border-radius:3px!important; background:var(--nexus-library-theme-button)!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-meter {
-  display:block!important; width:76%!important; border-radius:4px!important; background:var(--nexus-library-theme-accent)!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-swatches {
-  display:flex!important; flex-direction:column!important; gap:4px!important; min-height:0!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-swatches > i {
-  display:block!important; flex:1 1 0!important; min-height:4px!important; border:1px solid #ffffff33!important; border-radius:3px!important;
-}
-html.nexus-design-system .nexus-library-application .nexus-library-theme-live-header > strong,
-html.nexus-design-system .nexus-library-application .nexus-library-theme-live-panel > strong {
-  font-family:var(--nexus-library-theme-display-font,var(--nexus-library-theme-font))!important;
-}
-
-
 /* Compact category label for curated theme cards. */
 html.nexus-design-system .nexus-library-application .nexus-library-card-category-tag {
   display:inline-flex!important; align-items:center!important; justify-self:start!important; width:max-content!important;
@@ -1824,8 +1753,8 @@ html.nexus-design-system .nexus-library-application .nexus-library-card-category
   font-size:10px!important; font-weight:600!important; line-height:1.3!important; letter-spacing:.02em!important;
 }
 
-/* 1.0.0.146 — single authoritative Library grid and square theme Inspector.
-   This stylesheet is loaded after the Design System so its scoped layout contracts win. */
+/* 1.0.0.146 — authoritative Library grid and square theme Inspector contracts.
+   These rules live at the end of the final Design System stylesheet, after its legacy selectors. */
 html.nexus-design-system .nexus-library-application .nexus-library-generic-items[data-view-mode="grid"] {
   --nexus-library-preview-size: 64px;
   --nexus-library-card-min-width: 112px;
@@ -1983,9 +1912,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   white-space: nowrap !important;
 }
 /* Grid favorites are intentionally absent. Favorite management stays in the Inspector. */
-html.nexus-design-system .nexus-library-application .nexus-library-generic-card > .nexus-library-favorite {
-  display: none !important;
-}
+
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature {
   display: grid !important;
   grid-template-rows: 16% minmax(0, 1fr) !important;
