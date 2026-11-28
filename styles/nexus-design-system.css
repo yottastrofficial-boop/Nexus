@@ -1911,7 +1911,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-generic-items
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
-/* Grid favorites are intentionally absent. Favorite management stays in the Inspector. */
+/* Theme miniature: token-driven square UI specimen with visible typography. */
 
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature {
   display: grid !important;
