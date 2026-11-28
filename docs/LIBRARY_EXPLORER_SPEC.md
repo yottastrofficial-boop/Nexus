@@ -231,3 +231,14 @@ A Biblioteca mantém uma única camada de contrato visual, carregada após os es
 - O estado visual selecionado é explícito e consistente: a aba ativa usa o tratamento de destaque; a inativa usa superfície neutra.
 
 Esta hierarquia e os tokens da prévia são contratos para futuras adições, evitando que cada recurso redefina a pesquisa, as abas, o espaçamento ou a estrutura de apresentação.
+
+### Fontes consultadas
+
+- [Cinzel](https://fonts.google.com/specimen/Cinzel) — títulos de inspiração clássica/medieval.
+- [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond) — serifada editorial para leitura e atmosferas góticas.
+- [Orbitron](https://fonts.google.com/specimen/Orbitron) e [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) — par de display geométrica e sans-serif contemporânea para futurismo.
+- [IM Fell English SC](https://fonts.google.com/specimen/IM+Fell+English+SC) — display histórica para horror cósmico.
+- [Bangers](https://fonts.google.com/specimen/Bangers) e [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) — par de quadrinhos e títulos de ação; Bangers foi desenhada com referências ao letreiramento de capas de quadrinhos de super-heróis.
+- [Política de licenciamento do Google Fonts](https://googlefonts.github.io/gf-guide/license-file) — o catálogo Google Fonts aceita famílias sob SIL Open Font License 1.1.
+
+As famílias são carregadas sob demanda pelo CSS do Google Fonts; as pilhas de fallback continuam disponíveis sem rede. Nenhum arquivo de fonte é redistribuído pelo pacote NEXUS.
