@@ -1,4 +1,4 @@
-## 1.0.0.144 — Biblioteca de temas curada (em validação)
+## 1.0.0.144 — Biblioteca de temas curada (publicada)
 
 - Define 12 presets-base: Padrão, sete cores e quatro estilos.
 - Adiciona etiquetas categorizadas e filtro dinâmico na Biblioteca.
@@ -6,7 +6,7 @@
 - Adiciona pares tipográficos com fallbacks locais e fontes web opcionais.
 - Separa a miniatura compacta da grade do viewer completo do Inspector.
 - Preserva temas legados, configurações salvas e o schema atual dos perfis.
-- CI, pacote e release serão confirmados pelo workflow. A referência da capa do livro de regras não estava disponível nos arquivos consultados; as cores partem da paleta-base NEXUS.
+- CI, pacote, release, asset `nexus.zip` (507.118 bytes) e manifesto estável foram confirmados pelo workflow 46114908001. A referência da capa do livro de regras não estava disponível nos arquivos consultados; as cores partem da paleta-base NEXUS.
 - Teste visual no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.143 — Cache lazy e diagnóstico de serviços (publicada)
