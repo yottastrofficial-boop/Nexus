@@ -256,7 +256,7 @@ assert.ok(catalogExplorer.includes("nexus-library-design-preview") &&
   catalogPreviews.includes("nexus-catalog-theme-sample is-compact") &&
   catalogPreviews.includes("getLibraryThemePreviewTokens") &&
   catalogGrid.includes("getLibraryResourceBarCardPreviewModel") &&
-  libraryUiContract.includes("nexus-library-theme-swatches"),
+  catalogStyles.includes("nexus-library-theme-swatches"),
   "Theme cards and Inspector share token-driven previews, and resource-meter cards have a visible preview.");
 assert.ok(styles.includes("nexus-library-folder-card") &&
   styles.includes("nexus-library-folder-preview") &&
