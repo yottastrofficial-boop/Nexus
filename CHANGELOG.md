@@ -1,3 +1,13 @@
+## 1.0.0.145 — Biblioteca: miniaturas, temas completos e tipografia
+
+- Corrige a cascata da grade: os três tamanhos configuráveis voltam a controlar miniaturas quadradas de 32 × 32, 64 × 64 e 128 × 128 px.
+- Ajusta a largura mínima dos cartões conforme o tamanho da miniatura, com espaçamento consistente e sem comprimir nomes.
+- Remove a sobreposição absoluta dos controles de favoritos; as estrelas passam a ocupar uma linha própria no cartão, preservando a ação e seu estado.
+- Substitui os presets cromáticos parciais por paletas semânticas completas, incluindo superfícies, campos, bordas, cabeçalhos, cartões, acentos e botões.
+- Corrige a aplicação de fontes na prévia: a família de corpo e a família de títulos passam a ser consumidas pelos componentes da amostra; as miniaturas de fontes continuam usando a família registrada.
+- Adiciona contratos automatizados para os três tamanhos, posicionamento dos favoritos e cobertura das paletas.
+- Validação automatizada e publicação do pacote serão registradas pelo workflow desta versão. Teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.144 — Biblioteca de temas curada e tipografia (em validação)
 
 - Reorganiza a coleção de temas-base em 12 opções: Padrão, sete cores e quatro estilos.
