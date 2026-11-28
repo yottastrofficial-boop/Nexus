@@ -1,45 +1,68 @@
 # NEXUS — Plano de modernização estrutural
 
-## Estado da revisão 2026-11-26
+## Estado da revisão integrada — 2026-11-27
 
-A auditoria de ponta a ponta está registrada em [ARCHITECTURE_REVIEW_2026-11-26.md](ARCHITECTURE_REVIEW_2026-11-26.md). A fase de inventário e guardrails está concluída; a fundação de serviços e contratos de eventos foi implementada na branch de revisão. A base existente já é modular em várias áreas, portanto a modernização deve migrar consumidores gradualmente, não criar uma segunda implementação nem reescrever a ficha inteira.
+A revisão da main foi reiniciada sobre o commit `89e60f6ac0b202bee57cba84dea3416a99f42df5`, versão estável `1.0.0.139`, Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
 
-- **Concluído nesta etapa:** registro de serviços compartilhados `game.nexus.services`, contratos de eventos `logic-events.js`, teste de grafo de imports (resolução e ciclos) e testes do registro.
-- **Próximo:** dividir o bootstrap em módulos por subsistema e fazer factories consumirem dependências do registro.
-- **Depois:** extração da resolução de propriedades, listeners/lifecycle, Explorer/Inspector da Biblioteca, CSS por domínio, partials de template e validadores por domínio.
-- **Gate:** testes automatizados e validação do pacote; teste real no Foundry V14 para fluxos que afetam UI, persistência, permissões ou lifecycle.
+Esta é uma revisão estática remota. O teste funcional completo dentro do Foundry continua sendo um gate separado.
 
-## Diretrizes
+## Diretrizes invariáveis
 
-- Interface, documentação e experiência do usuário em português do Brasil; código e identificadores internos em inglês.
-- Reconstrução por domínios e contratos explícitos, sem manter duas implementações completas em paralelo.
-- Biblioteca como Explorador de Conteúdo com navegação, conteúdo e Inspector contextual.
-- Regras, propriedades, comportamentos, fluxos e funções em uma área Lógica, preservando schemas e editores especializados.
-- Compatibilidade de mídia independente do Foundry na identificação/decodificação, com adaptadores para limites de armazenamento.
-- Preservar dados, IDs e referências; remover código antigo somente após migração e validação.
-- Commits pequenos na main; release/manifesto estável somente após pacote validado.
+- Interface/documentação em português; código e identificadores internos em inglês.
+- GitHub `main` é a fonte oficial; verificar seu HEAD antes de cada conjunto de alterações.
+- Refatorar por domínios e contratos, não reescrever toda a ficha ou CSS de uma vez.
+- Não manter duas implementações completas em paralelo.
+- Biblioteca é Explorador Universal; a ficha é consumidora/adaptadora, não dona do catálogo.
+- Regras, propriedades, componentes, instâncias, grupos, aparência e mídia têm ownership separado.
+- Preservar IDs, schemas, flags, dados persistidos e APIs públicas; qualquer alteração incompatível exige migração explícita.
+- Preparação/renderização não realiza gravações persistentes.
+- Cada controlador/serviço possui lifecycle e cleanup idempotentes.
+- Preferir APIs públicas documentadas do Foundry V14.
+- Manifesto estável só é sincronizado após pacote ZIP publicado e confirmado.
 
-## Sequência
+## Etapas de trabalho
 
-1. Auditoria integral: árvore, imports, persistência, schemas, dependências, templates, CSS, testes e documentação.
-2. Fundação: inicialização, ciclo de vida, serviços, validação, logs, schemas e migrações.
-3. Dados e lógica: propriedades, aliases, expressões, fórmulas, regras e registro unificado.
-4. Componentes e grupos: definições, instâncias, renderizadores, layouts e dependências.
-5. Fichas/Canvas: coordenação, edição, painéis, eventos, histórico e persistência.
-6. Biblioteca: Explorer, pastas, filtros, cards, Inspector, editores e importação/exportação.
-7. Mídia: registry, WASM, workers, cache, storage adapters e previews.
-8. Design System: tokens, temas, estilos, CSS por domínio e templates.
-9. Migração final e remoção do legado após validação.
-10. Testes, instalação limpa, atualização, Foundry V14 real e release.
+| Etapa | Escopo | Estado |
+|---|---|---|
+| 0 | Baseline, mapa de arquitetura, inventário e riscos | Mapa inicial registrado; auditoria de consumidores/leitores/escritores continua |
+| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em revisão; preservar APIs `game.nexus.*` |
+| 2 | Propriedades, fórmulas, regras, aliases, schemas e migrações | A iniciar após contratos P0 |
+| 3 | Componentes, instâncias, grupos e Canvas | A iniciar após baseline de dados |
+| 4 | Fichas, renderização, listeners, persistência e ficha NPC | A iniciar por extrações pequenas |
+| 5 | Biblioteca Universal: providers, Explorer, Inspector, Grid/List e transfer | A iniciar com ownership UI separado |
+| 6 | Cards/documentos/compêndios e adaptadores Foundry | Revisar por tipo e UUID/API nativa |
+| 7 | Design System, temas, mídia e armazenamento | Revisar tokens, preview isolado e adapters |
+| 8 | CSS, templates, acessibilidade e layering | Consolidar cascata por domínio, sem reescrita global |
+| 9 | Testes, Testing Bridge, instalação/atualização e release | Gate obrigatório antes de declarar estabilidade |
 
-## Regras de segurança de refatoração
+## Como cada etapa será executada
 
-- Não reescrever a ficha de 260 KB em um único passo.
-- Extrair funções puras/contratos primeiro; depois serviços e controladores.
-- Não alterar mecânicas dos livros sem revisão dos documentos oficiais.
-- Não gravar dados em preparação de contexto/renderização.
-- Não apagar flags/campos/arquivos antes de mapear leitores e escritores.
-- Priorizar APIs públicas do Foundry.
-- Testes automatizados não equivalem a teste funcional real.
-- Manifesto estável só aponta para release cujo ZIP foi construído e confirmado.
-- Cada módulo novo precisa de contrato claro, teste e proprietário do lifecycle.
+1. Confirmar o HEAD da main e as alterações recentes.
+2. Mapear consumidores, produtores, leitores/escritores e lifecycle da área.
+3. Definir contrato de entrada/saída e ownership antes de mover código.
+4. Extrair funções puras primeiro; depois serviços/adapters; UI por último.
+5. Manter uma fachada compatível enquanto consumidores migram.
+6. Adicionar testes de comportamento e arquitetura, não apenas assertions textuais.
+7. Rodar sintaxe, suite, validação de pacote e CI.
+8. Para UI, persistência, permissões ou lifecycle, testar no Foundry V14 real.
+9. Atualizar mapa, overview e changelog com o estado verdadeiro.
+
+## Ferramentas
+
+- GitHub Actions: `.github/workflows/validate.yml` e `release.yml`.
+- Test runner: `tests/run-all.mjs`, que descobre testes `tests/*.mjs`.
+- Grafo estático: `tests/module-graph-contract.test.mjs` verifica imports locais e ciclos.
+- Foundry Testing Bridge/Playwright: `tools/foundry-testing/`; exige instalação local, mundo descartável, sessão GM e `FOUNDRY_TEST_WORLD_ID`.
+- Documentação oficial V14: https://foundryvtt.com/api/v14/
+- ApplicationV2: https://foundryvtt.com/api/v14/classes/foundry.applications.api.ApplicationV2.html
+- Hooks: https://foundryvtt.com/api/v14/modules/hookEvents.html
+
+## Restrições de segurança da refatoração
+
+- Não reescrever a classe da ficha ou a folha CSS global em um único passo.
+- Não remover arquivos, campos, flags, IDs ou listeners sem mapear consumidores e migrar.
+- Não alterar mecânicas dos livros durante uma refatoração de UI/arquitetura.
+- Não transformar tema ou layout em dado de Actor.
+- Não executar conteúdo importado como código confiável.
+- Não declarar teste real no Foundry com base apenas no CI.
+- Não publicar uma versão estável enquanto o pacote/manifesto não estiverem alinhados e confirmados.
