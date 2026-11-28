@@ -4,10 +4,10 @@
 **Repositório:** `yottastrofficial-boop/Nexus`  
 **Branch de referência:** `main`  
 **Commit-base:** `89e60f6ac0b202bee57cba84dea3416a99f42df5`  
-**Versão estável publicada:** `1.0.0.140`  
+**Versão estável publicada:** `1.0.0.141`  
 **Alvo declarado:** Foundry VTT 14, build 360
 
-> Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release 1.0.0.139 permanece a referência estável até que uma nova versão passe pelos gates de pacote e publicação.
+> Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release estável atual é 1.0.0.141; o teste funcional dentro do Foundry VTT 14 build 360 permanece pendente.
 
 ## 1. Intenção central que orienta a revisão
 
@@ -33,7 +33,7 @@ Princípios invariáveis:
 | Área | Arquivos centrais | Responsabilidade/contrato |
 |---|---|---|
 | Bootstrap | `scripts/nexus-v1.0.0.js` | Registra serviços, settings, documentos, fichas e API pública `game.nexus`. |
-| Service registry | `scripts/core/service-registry.js` | Fábricas, dependências, resolução sync/async, diagnóstico e disposal. |
+| Service registry | `scripts/core/service-registry.js` | Fábricas, dependências, resolução sync/async, diagnóstico e shutdown concorrente; espera por factories e cleanup assíncrono inverso. |
 | Lifecycle | `scripts/core/resource-lifecycle.js`, `listener-scope.js`, `actor-document-lifecycle.js` | Ownership e encerramento de recursos/listeners; defaults Actor e hooks de token agora isolados com dependências injetadas. |
 | Document bridge | `scripts/core/foundry-document-bridge.js` | Índice leve e resolução sob demanda de documentos Foundry. |
 | Migrations | `scripts/core/migration-manager.js` | Compatibilidade e migração de dados persistidos. |
@@ -194,11 +194,14 @@ O grafo atual tem teste que verifica imports locais resolvidos e ausência de ci
 - **System development/manifest:** https://foundryvtt.com/article/system-development/
 - **Release API:** https://foundryvtt.com/article/package-release-api/
 
-## 7. Registro da primeira implementação
+## 7. Registro das implementações 1.0.0.140–1.0.0.141
 
-- Main e manifesto estável: 1.0.0.140 publicada.
-- CI, pacote ZIP, release e asset foram confirmados pelo workflow 46095904917.
-- A primeira extração é um passo de lifecycle/arquitetura, não uma refatoração concluída de toda a ficha.
+- Main e manifesto estável: 1.0.0.141 publicada.
+- CI, pacote ZIP, release e asset foram confirmados pelo workflow 46099498524.
+- 1.0.0.140 extraiu o lifecycle de Actor para adapter com dependências injetadas.
+- 1.0.0.141 corrigiu shutdown concorrente do Service Registry, espera por factories em andamento e cleanup assíncrono em ordem inversa; testes isolados passaram.
+- Achado para a próxima subetapa: o helper `registerService()` do bootstrap chama `resolveSync()` imediatamente. Assim, os serviços registrados por esse helper são instanciados durante `init`, mesmo que o registry suporte lazy resolution. Antes de alterar isso, classificar cada serviço como eager-required (hooks/settings/classes) ou safe-to-defer (serviços sem side effects), mapear consumidores e preservar a API `game.nexus.*`.
+- Essas implementações são passos de lifecycle/arquitetura, não uma refatoração concluída de toda a ficha.
 
 ## 8. Gates e definição de concluído
 
