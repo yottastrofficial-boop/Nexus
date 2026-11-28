@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 const grid = readFileSync(new URL("../scripts/library/catalog-grid-renderer.js", import.meta.url), "utf8");
 const previews = readFileSync(new URL("../scripts/library/catalog-preview-renderers.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../styles/nexus-library-catalog.css", import.meta.url), "utf8");
+const polish = styles.slice(styles.lastIndexOf("1.0.0.149 — visual polish"));
 test("miniaturas médias de tema usam versão compacta da interface real", () => {
   assert.match(grid, /size === "medium"[\s\S]*?createLibraryThemeSample\([\s\S]*?compact: true[\s\S]*?is-theme-thumbnail/);
   assert.match(styles, /is-theme-thumbnail[\s\S]*?nexus-catalog-theme-sample/);
