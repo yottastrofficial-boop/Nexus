@@ -3901,7 +3901,7 @@ html.nexus-design-system .nexus-library-application .nexus-library-theme-miniatu
   display: block !important;
   min-width: 0 !important;
   border-radius: 2px !important;
-  background: var(--nexus-library-theme-display-font, var(--nexus-library-theme-accent, #52647b)) !important;
+  background: var(--nexus-library-theme-accent, #52647b) !important;
   opacity: .9;
 }
 html.nexus-design-system .nexus-library-application .nexus-library-theme-miniature-line {
