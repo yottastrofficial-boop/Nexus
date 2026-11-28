@@ -16,7 +16,7 @@ A main inclui cache de mídia sob demanda e diagnóstico somente leitura dos ser
   <img alt="Status" src="https://img.shields.io/badge/status-em%20desenvolvimento-blue">
 </p>
 
-**Versão em preparação 1.0.0.145.** Esta revisão corrige a Biblioteca de Temas e Fontes. O manifesto estável só será sincronizado pelo workflow oficial após CI e confirmação do pacote ZIP. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
+**Versão 1.0.0.144 publicada (manifesto estável); versão 1.0.0.145 em preparação na main.** Esta revisão corrige a Biblioteca de Temas e Fontes. O manifesto estável só será sincronizado pelo workflow oficial após CI e confirmação do pacote ZIP. O teste visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
 O **NEXUS** é um projeto de RPG que também busca oferecer uma experiência flexível de criação e utilização de fichas. Este repositório contém a implementação do sistema para **Foundry VTT**, com foco atual em uma ficha Canvas modular, componentes configuráveis e uma biblioteca de elementos.
 
