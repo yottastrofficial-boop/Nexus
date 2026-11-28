@@ -1090,8 +1090,8 @@ export function createLibraryCatalogExplorer({
     heading.append(makeElement("strong", "nexus-library-detail-title", resource.name));
     const detailFavorite = makeElement("button", "nexus-library-detail-favorite");
     detailFavorite.type = "button";
-    detailFavorite.dataset.libraryResourceFavorite = resource.id;
-    detailFavorite.dataset.libraryProvider = resource.providerId;
+    detailFavorite.setAttribute("data-library-resource-favorite", resource.id);
+    detailFavorite.setAttribute("data-library-provider", resource.providerId);
     const favoriteKey = key;
     const favoriteIsActive = getPreferences().favorites.includes(favoriteKey);
     detailFavorite.classList.toggle("is-favorite", favoriteIsActive);
