@@ -279,6 +279,12 @@ assert.match(styles, /data-card-size="large"[\s\S]*?--nexus-library-preview-size
 assert.doesNotMatch(catalogExplorer.slice(catalogExplorer.indexOf("const renderResourceCard"), catalogExplorer.indexOf("let currentInspectorTab")),
   /nexus-library-favorite|data-library-resource-favorite/,
   "Grid cards must not render favorite stars; the Inspector owns favorite management.");
+assert.doesNotMatch(styles + designSystem, /nexus-library-favorite/,
+  "No legacy favorite CSS may remain in either Library stylesheet.");
+assert.match(catalogExplorer, /nexus-library-theme-miniature-title", "Aa"/);
+assert.match(catalogExplorer, /nexus-library-theme-miniature-copy", "NEXUS"/);
+assert.match(catalogExplorer, /--nexus-library-theme-font", family/);
+assert.match(designSystem, /nexus-library-theme-miniature-copy[\\s\\S]*?font-family: var\\(--nexus-library-theme-font/);
 assert.match(designSystem, /\.nexus-library-generic-card > \.nexus-library-favorite\s*\{[\s\S]*?display:\s*none\s*!important/,
   "Legacy favorite controls must be suppressed inside grid cards.");
 assert.match(styles, /\.nexus-library-theme-live-preview\s*\{[\s\S]*?font-family:\s*var\(--nexus-library-theme-font/,
