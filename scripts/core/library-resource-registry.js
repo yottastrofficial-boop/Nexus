@@ -119,6 +119,8 @@ function normalizeThemePreview(raw) {
   const typography = isPlainObject(source.typography) ? source.typography : {};
   const family = cleanText(typography.family, 180);
   const safeFamily = family && /^[\w\s'",.-]+$/.test(family) ? family : "";
+  const displayFamily = cleanText(typography.displayFamily, 180);
+  const safeDisplayFamily = displayFamily && /^[\w\s'",.-]+$/.test(displayFamily) ? displayFamily : safeFamily;
   const layoutSource = isPlainObject(source.layout) ? source.layout : {};
   const layout = {
     density: ["compact", "comfortable", "spacious"].includes(layoutSource.density) ? layoutSource.density : "comfortable",
@@ -145,7 +147,7 @@ function normalizeThemePreview(raw) {
     preset: cleanText(source.preset ?? source.id, 48),
     name: cleanText(source.name, 120),
     palette: Object.freeze(palette),
-    typography: Object.freeze({ family: safeFamily, baseSize: Math.min(18, Math.max(10, Number(typography.baseSize) || 13)) }),
+    typography: Object.freeze({ family: safeFamily, displayFamily: safeDisplayFamily, baseSize: Math.min(18, Math.max(10, Number(typography.baseSize) || 13)) }),
     layout: Object.freeze(layout),
     components: Object.freeze(Object.fromEntries(Object.entries(components).map(([key, value]) => [key, Object.freeze(value)])))
   });
