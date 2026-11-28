@@ -390,6 +390,7 @@ function createLibraryThemeSample({ name = "Tema", palette = [], typography = {}
     ? "nexus-library-theme-sample nexus-library-theme-card-preview"
     : "nexus-library-theme-sample nexus-library-theme-live-preview");
   root.dataset.previewSize = compact ? "compact" : "full";
+  root.dataset.previewShape = compact ? "compact" : "square";
   root.dataset.themePreset = String(layout.preset ?? "");
   for (const [key, value] of Object.entries(tokens)) root.style.setProperty("--nexus-library-theme-" + key, value);
   const family = safeFontFamily(typography.family) || "system-ui, sans-serif";
