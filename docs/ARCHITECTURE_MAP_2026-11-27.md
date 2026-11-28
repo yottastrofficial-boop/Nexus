@@ -4,7 +4,8 @@
 **Repositório:** `yottastrofficial-boop/Nexus`  
 **Branch de referência:** `main`  
 **Commit-base:** `89e60f6ac0b202bee57cba84dea3416a99f42df5`  
-**Versão estável:** `1.0.0.139`  
+**Versão estável anterior:** `1.0.0.139`  
+**Revisão em main:** `1.0.0.140` (em validação)  
 **Alvo declarado:** Foundry VTT 14, build 360
 
 > Esta é uma revisão estática do estado remoto da main e dos contratos/documentos do projeto. Não representa teste funcional dentro do Foundry. A release 1.0.0.139 permanece a referência estável até que uma nova versão passe pelos gates de pacote e publicação.
@@ -34,7 +35,7 @@ Princípios invariáveis:
 |---|---|---|
 | Bootstrap | `scripts/nexus-v1.0.0.js` | Registra serviços, settings, documentos, fichas e API pública `game.nexus`. |
 | Service registry | `scripts/core/service-registry.js` | Fábricas, dependências, resolução sync/async, diagnóstico e disposal. |
-| Lifecycle | `scripts/core/resource-lifecycle.js`, `listener-scope.js` | Ownership e encerramento de recursos/listeners. |
+| Lifecycle | `scripts/core/resource-lifecycle.js`, `listener-scope.js`, `actor-document-lifecycle.js` | Ownership e encerramento de recursos/listeners; defaults Actor e hooks de token agora isolados com dependências injetadas. |
 | Document bridge | `scripts/core/foundry-document-bridge.js` | Índice leve e resolução sob demanda de documentos Foundry. |
 | Migrations | `scripts/core/migration-manager.js` | Compatibilidade e migração de dados persistidos. |
 
@@ -125,11 +126,12 @@ O grafo atual tem teste que verifica imports locais resolvidos e ausência de ci
 - Inventariar imports, APIs públicas, stores, flags, schemas e consumidores.
 - Rodar CI e registrar os limites do teste estático.
 
-### Etapa 1 — Contratos e comunicação (P0)
+### Etapa 1 — Contratos e comunicação (P0; iniciada)
 - Revisar service registry e bootstrap por subsistema.
 - Definir API pública, ownership, lifecycle e eventos de cada serviço.
-- Adicionar testes de fronteiras entre camadas e contratos de disposal.
-- Reduzir dependências cruzadas sem criar serviços duplicados.
+- Extração inicial concluída: `actor-document-lifecycle.js` concentra defaults de Actor e sincronização de textura de token; o bootstrap instala o adapter e o disposer remove hooks de forma idempotente.
+- Testes cobrem defaults, preservação de textura personalizada, mudança de retrato e cleanup; contratos de pacote atualizados.
+- Próximo: auditar e migrar bootstrap por subsistema e adicionar regras de direção de dependências após inventariar todos os imports.
 
 ### Etapa 2 — Propriedades e Lógica
 - Auditar leitores/escritores, fórmulas, aliases, schemas e migrações.
@@ -193,7 +195,13 @@ O grafo atual tem teste que verifica imports locais resolvidos e ausência de ci
 - **System development/manifest:** https://foundryvtt.com/article/system-development/
 - **Release API:** https://foundryvtt.com/article/package-release-api/
 
-## 7. Gates e definição de concluído
+## 7. Registro da primeira implementação
+
+- Main candidata: 1.0.0.140.
+- Manifesto estável continua em 1.0.0.139 até CI, pacote e asset confirmados.
+- A primeira extração é um passo de lifecycle/arquitetura, não uma refatoração concluída de toda a ficha.
+
+## 8. Gates e definição de concluído
 
 Uma etapa só está concluída quando:
 1. O contrato e ownership estão documentados.
