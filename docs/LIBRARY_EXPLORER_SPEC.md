@@ -1,4 +1,16 @@
-## Prévia de temas e fontes — contrato v6 (1.0.0.139)
+## Biblioteca de temas e tipografia — contrato v7 (1.0.0.144)
+
+- A coleção de temas-base expõe exatamente doze presets: Padrão; sete paletas cromáticas (Vermelho, Laranja, Amarelo, Verde, Azul, Anil e Violeta); quatro estilos (Medieval, Futurista, Horror Cósmico e Super-heróis).
+- Temas antigos permanecem reconhecíveis no Design System para compatibilidade de configurações e perfis existentes, mas não aparecem como presets na coleção curada da Biblioteca.
+- Cada tema-base possui ID estável, descrição, paleta semântica, par tipográfico e etiquetas de categoria/estilo/cor. A pasta canônica continua sendo `nexus-temas`.
+- Filtros de etiqueta usam os mesmos metadados indexados pelo Universal Library Resource Registry; as etiquetas são combináveis com busca, origem, tipo e pasta.
+- Temas-base resolvem para perfis NEXUS completos e podem ser aplicados pelo adaptador de tema, respeitando escopo e permissões. Perfis pessoais preservam etiquetas ao salvar e duplicar.
+- A grade usa uma miniatura independente e compacta; o Inspector mantém a demonstração completa. Ambos derivam dos tokens do próprio tema, sem executar CSS importado ou componentes.
+- Fontes recomendadas: Cinzel + Cormorant Garamond (Medieval); Orbitron + Space Grotesk (Futurista); IM Fell English SC + Cormorant Garamond (Horror Cósmico); Bangers + Barlow Condensed (Super-heróis). As famílias web são opcionais via Google Fonts e têm fallback local para instalações offline.
+- As fontes abertas são servidas pela API CSS do Google Fonts; a aplicação não redistribui arquivos de fonte. O sistema continua funcional com os fallbacks quando a rede não estiver disponível.
+- A seleção de aparência continua independente da funcionalidade e do formato dos componentes; tema altera apresentação, nunca mecânica.
+
+## Histórico anterior — contrato v6 (1.0.0.139)
 
 - A prévia de tema no Grid e no Inspector deve derivar do perfil do próprio recurso selecionado, nunca do perfil global atualmente aplicado ao Foundry ou ao NEXUS.
 - O resolver aceita perfis atuais e entradas legadas. Para temas internos, usa a chave estável do preset; não usa o ID `builtin-theme:<preset>` como preset.
