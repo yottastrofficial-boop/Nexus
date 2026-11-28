@@ -1511,6 +1511,21 @@ export function createLibraryCatalogExplorer({
         return option;
       }));
     }
+    const tagSelect = container.closest(".nexus-library-panel")?.querySelector("[data-library-tag]");
+    if (tagSelect) {
+      const knownTags = new Set([...tagSelect.options].map(option => option.value));
+      const availableTags = [...new Set(currentResources.flatMap(resource => Array.isArray(resource.tags) ? resource.tags : []))]
+        .sort((left, right) => String(left).localeCompare(String(right), "pt-BR", { sensitivity: "base" }));
+      for (const tag of availableTags) {
+        if (knownTags.has(tag)) continue;
+        const option = document.createElement("option");
+        option.value = tag;
+        option.textContent = tag;
+        tagSelect.append(option);
+        knownTags.add(tag);
+      }
+      if (tagSelect.value !== currentTag && [...tagSelect.options].some(option => option.value === currentTag)) tagSelect.value = currentTag;
+    }
     const categoryOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-category-options");
     const typeOptions = container.closest(".nexus-library-panel")?.querySelector("#nexus-library-type-options");
     const categoryLabels = {
