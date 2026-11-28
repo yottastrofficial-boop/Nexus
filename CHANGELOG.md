@@ -5,7 +5,7 @@
 - O snapshot usa somente `serviceRegistry.list()`; consultar diagnóstico não resolve nem instancia serviços lazy.
 - Adiciona testes unitários para contagem de estados, imutabilidade, validação e ausência de efeitos de resolução.
 - Expande o contrato de bootstrap para garantir cache e diagnóstico lazy.
-- Suíte de regressão e validação do pacote passaram na main; o workflow de release confirmará e publicará o ZIP antes de sincronizar o manifesto. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+- Suíte de regressão, validação do pacote, release v1.0.0.143, asset `nexus.zip` (502.627 bytes) e manifesto estável foram confirmados pelo workflow 46100665229. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.142 — Serviços sob demanda e fachada pública estável
 
