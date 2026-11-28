@@ -1,8 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Bangers&family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@400;500;600;700&family=IM+Fell+English+SC&family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 /*
  * NEXUS Design System — global structural layer.
  * Loaded last so generic Foundry/NEXUS controls inherit the active NEXUS tokens.
  * This styles presentation only; native Foundry placement, handlers and document behavior remain intact.
  */
+
+html.nexus-design-system :is(.application.nexus-themed-application, .window-app.nexus-themed-application, .nexus-sheet) :is(.window-title, h1, h2, h3, h4, h5, h6, .nexus-heading, .nexus-section-title) {
+  font-family: var(--nexus-font-display, var(--nexus-font-family, system-ui, sans-serif)) !important;
+}
 
 html.nexus-design-system {
   --nexus-ui-control-size: clamp(30px, var(--nexus-control-height, 34px), 44px);
