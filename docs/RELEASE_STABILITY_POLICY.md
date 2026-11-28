@@ -1,3 +1,7 @@
+## Estado de distribuição — 1.0.0.145 em preparação
+
+A branch `main` está sendo preparada para a versão 1.0.0.145. A revisão atualiza a Biblioteca de Temas e Fontes, com miniaturas 32/64/128 px, paletas completas, favoritos reposicionados e tipografia aplicada às prévias. `system.json` aponta para o pacote candidato; `manifest.json` permanece na 1.0.0.144 até o workflow oficial aprovar os testes, publicar `nexus.zip` e sincronizar o manifesto. O último checkpoint funcional confirmado dentro do Foundry VTT continua sendo 1.0.0.70; a verificação visual/funcional da 1.0.0.145 no Foundry VTT 14 build 360 permanece pendente.
+
 ## Estado de distribuição — 1.0.0.144 (publicada)
 
 A versão estável atual é 1.0.0.144. CI, regressões, pacote ZIP, release, asset e manifesto estável foram confirmados pelo workflow oficial 46114908001.
