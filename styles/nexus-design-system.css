@@ -1814,3 +1814,12 @@ html.nexus-design-system .nexus-library-application .nexus-library-theme-live-he
 html.nexus-design-system .nexus-library-application .nexus-library-theme-live-panel > strong {
   font-family:var(--nexus-library-theme-display-font,var(--nexus-library-theme-font))!important;
 }
+
+
+/* Compact category label for curated theme cards. */
+html.nexus-design-system .nexus-library-application .nexus-library-card-category-tag {
+  display:inline-flex!important; align-items:center!important; justify-self:start!important; width:max-content!important;
+  max-width:100%!important; margin:2px 0 0!important; padding:2px 7px!important; border:1px solid var(--nexus-panel-border)!important;
+  border-radius:999px!important; color:var(--nexus-panel-muted)!important; background:var(--nexus-panel-surface)!important;
+  font-size:10px!important; font-weight:600!important; line-height:1.3!important; letter-spacing:.02em!important;
+}
