@@ -26,8 +26,9 @@ test("theme typography uses its preset font unless a layout explicitly overrides
     dataset: {}
   };
   applyThemeTokens(element, { theme: "medieval" });
-  assert.equal(values.get("--nexus-font-family"), '"Georgia", sans-serif');
-  assert.equal(values.get("--nexus-font-ui"), '"Georgia", sans-serif');
+  assert.equal(values.get("--nexus-font-family"), '"Cormorant Garamond", sans-serif');
+  assert.equal(values.get("--nexus-font-display"), '"Cinzel", "Cormorant Garamond", sans-serif');
+  assert.equal(values.get("--nexus-font-ui"), '"Cormorant Garamond", sans-serif');
   assert.equal(values.get("--nexus-font-data"), "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace");
 
   applyThemeTokens(element, { theme: "pixel-art" });
