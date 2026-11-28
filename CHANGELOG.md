@@ -1,3 +1,12 @@
+## 1.0.0.143 — Diagnóstico do sistema e cache de mídia sob demanda
+
+- Move a criação do objeto de cache IndexedDB para o primeiro acesso a `game.nexus.media.cache`; o bootstrap mantém a compatibilidade da fachada e não instancia o cache durante `init`.
+- Adiciona `game.nexus.getDiagnostics()`, snapshot somente leitura de versão NEXUS/Foundry, readiness e estados/dependências dos serviços.
+- O snapshot usa somente `serviceRegistry.list()`; consultar diagnóstico não resolve nem instancia serviços lazy.
+- Adiciona testes unitários para contagem de estados, imutabilidade, validação e ausência de efeitos de resolução.
+- Expande o contrato de bootstrap para garantir cache e diagnóstico lazy.
+- CI, pacote, release e manifesto serão confirmados pelo workflow. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.142 — Serviços sob demanda e fachada pública estável
 
 - Introduz `defineAccessor()` no Service Registry para expor serviços como propriedades de objeto sem instanciá-los até o primeiro acesso.
