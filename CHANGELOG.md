@@ -1,3 +1,12 @@
+## 1.0.0.141 — Lifecycle seguro do Service Registry
+
+- Corrige o encerramento concorrente do registro de serviços: todas as chamadas simultâneas a `dispose()` compartilham a mesma Promise.
+- Bloqueia novos registros e resoluções assim que o registry entra em encerramento.
+- Aguarda factories já iniciadas terminarem antes de descartar as instâncias prontas.
+- Executa o cleanup em ordem inversa de criação e aguarda também os cleanups assíncronos.
+- Adiciona testes de regressão para factory em andamento, chamadas concorrentes, bloqueio durante encerramento e cleanup assíncrono.
+- CI passou; pacote, release e manifesto serão confirmados pelo workflow oficial. Validação funcional no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.140 — Revisão arquitetural inicial e lifecycle de Actor
 
 - Registra o mapa integrado dos subsistemas, contratos de comunicação, hotspots, etapas de refatoração e ferramentas de validação em `docs/ARCHITECTURE_MAP_2026-11-27.md`.

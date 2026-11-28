@@ -2,7 +2,7 @@
 
 ## Estado da revisão integrada — 2026-11-27
 
-A revisão da main foi reiniciada sobre o commit `89e60f6ac0b202bee57cba84dea3416a99f42df5`, versão estável `1.0.0.139`, Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
+A revisão está sendo conduzida sobre a main atual; a release estável anterior é `1.0.0.140`, e a versão `1.0.0.141` acrescenta a correção de lifecycle do Service Registry. Foundry VTT 14 build 360. O mapa atual, ownership dos subsistemas, contratos de comunicação, hotspots, ferramentas e plano por etapas estão em [ARCHITECTURE_MAP_2026-11-27.md](ARCHITECTURE_MAP_2026-11-27.md).
 
 Esta é uma revisão estática remota. O teste funcional completo dentro do Foundry continua sendo um gate separado.
 
@@ -25,7 +25,7 @@ Esta é uma revisão estática remota. O teste funcional completo dentro do Foun
 | Etapa | Escopo | Estado |
 |---|---|---|
 | 0 | Baseline, mapa de arquitetura, inventário e riscos | Mapa inicial registrado; auditoria de consumidores/leitores/escritores continua |
-| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em revisão; preservar APIs `game.nexus.*` |
+| 1 | Bootstrap, service registry, contratos entre serviços e lifecycle | Em andamento; lifecycle de shutdown corrigido e testado; preservar APIs `game.nexus.*` |
 | 2 | Propriedades, fórmulas, regras, aliases, schemas e migrações | A iniciar após contratos P0 |
 | 3 | Componentes, instâncias, grupos e Canvas | A iniciar após baseline de dados |
 | 4 | Fichas, renderização, listeners, persistência e ficha NPC | A iniciar por extrações pequenas |
