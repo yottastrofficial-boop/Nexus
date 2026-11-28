@@ -8,7 +8,7 @@
 - Separa a miniatura da grade do viewer completo do Inspector e mantém os dois derivados dos tokens do tema.
 - Preserva tokens legados e o schema atual dos perfis; `displayFamily` é opcional e normalizado.
 - A capa do livro de regras não estava disponível entre os arquivos do projeto consultados; as paletas desta versão partem da identidade-base NEXUS e podem receber ajuste fino com a capa.
-- CI e pacote serão confirmados pelo workflow de release. Teste visual real no Foundry VTT 14 build 360 permanece manual.
+- CI, regressões, pacote ZIP, release v1.0.0.144, asset `nexus.zip` (507.118 bytes) e manifesto estável foram confirmados pelo workflow 46114908001. Teste visual real no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.143 — Diagnóstico do sistema e cache de mídia sob demanda
 
