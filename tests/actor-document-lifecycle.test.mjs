@@ -38,15 +38,16 @@ function setup() {
   const hooks = createHooks();
   const foundryRef = { utils: { deepClone: value => structuredClone(value), mergeObject } };
   const actorTypes = ["player-character", "npc", "character"];
+  const gameRef = { actors: new Map() };
   const dispose = installNexusActorDocumentLifecycle({
     hooks,
     foundryRef,
-    gameRef: { actors: new Map() },
+    gameRef,
     actorTypes,
     skills: [{ key: "stealth" }, { key: "insight" }],
     defaultTokenImage: "icons/svg/mystery-man.svg"
   });
-  return { hooks, dispose };
+  return { hooks, gameRef, dispose };
 }
 
 test("Actor lifecycle adds defaults while preserving existing system values and custom token texture", () => {
@@ -86,8 +87,9 @@ test("portrait changes update only inherited prototype token images", () => {
 });
 
 test("new linked tokens inherit the prototype texture but preserve an explicit token texture", () => {
-  const { hooks, dispose } = setup();
+  const { hooks, gameRef, dispose } = setup();
   const actor = { id: "actor-1", type: "character", img: "portrait.webp", prototypeToken: { texture: { src: "prototype.webp" } } };
+  gameRef.actors.set(actor.id, actor);
   const created = { actorId: "actor-1", updateSource(source) { Object.assign(this, source); } };
   hooks.call("preCreateToken", created, { actorId: "actor-1" });
   assert.equal(created.actorLink, true);
