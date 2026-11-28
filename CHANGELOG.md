@@ -1,3 +1,15 @@
+## 1.0.0.144 — Biblioteca de temas curada e tipografia (em validação)
+
+- Reorganiza a coleção de temas-base em 12 opções: Padrão, sete cores e quatro estilos.
+- Adiciona etiquetas de categoria, cor e estilo; o filtro da Biblioteca combina etiquetas com busca, origem, tipo e pasta.
+- Faz temas internos resolverem para perfis visuais completos aplicáveis pelo Design System.
+- Adiciona pares tipográficos: Cinzel/Cormorant Garamond (Medieval), Orbitron/Space Grotesk (Futurista), IM Fell English SC/Cormorant Garamond (Horror Cósmico) e Bangers/Barlow Condensed (Super-heróis).
+- Mantém fallbacks locais quando as fontes web não estiverem disponíveis.
+- Separa a miniatura da grade do viewer completo do Inspector e mantém os dois derivados dos tokens do tema.
+- Preserva tokens legados e o schema atual dos perfis; `displayFamily` é opcional e normalizado.
+- A capa do livro de regras não estava disponível entre os arquivos do projeto consultados; as paletas desta versão partem da identidade-base NEXUS e podem receber ajuste fino com a capa.
+- CI e pacote serão confirmados pelo workflow de release. Teste visual real no Foundry VTT 14 build 360 permanece manual.
+
 ## 1.0.0.143 — Diagnóstico do sistema e cache de mídia sob demanda
 
 - Move a criação do objeto de cache IndexedDB para o primeiro acesso a `game.nexus.media.cache`; o bootstrap mantém a compatibilidade da fachada e não instancia o cache durante `init`.
