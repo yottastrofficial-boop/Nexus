@@ -1,6 +1,6 @@
-## Estado do código — 1.0.0.143 (main em validação)
+## Estado do código — 1.0.0.143 (publicada)
 
-A main torna o cache IndexedDB lazy e adiciona `game.nexus.getDiagnostics()`, um snapshot somente leitura de versões, readiness e estados/dependências do registry. A consulta não resolve factories nem instancia serviços. CI e pacote serão confirmados pelo workflow; o manifesto estável anterior é 1.0.0.142. Teste funcional no Foundry VTT 14 build 360 permanece manual.
+A main torna o cache IndexedDB lazy e adiciona `game.nexus.getDiagnostics()`, um snapshot somente leitura de versões, readiness e estados/dependências do registry. A consulta não resolve factories nem instancia serviços. CI, pacote ZIP, release e manifesto estável foram confirmados pelo workflow 46100665229; asset `nexus.zip` de 502.627 bytes. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## Estado do código — 1.0.0.142 (publicada)
 
