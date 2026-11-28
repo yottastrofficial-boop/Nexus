@@ -1,10 +1,12 @@
-## Estado da main — 1.0.0.148 (manifesto em sincronização)
+## Estado da main — 1.0.0.149 (aguardando publicação)
 
-A versão 1.0.0.148 refina as prévias de tema: cartões médios mostram seis tokens semânticos em uma paleta 3 × 2, cartões grandes mostram a interface demonstrativa completa e os estilos de componentes aplicam seus tokens próprios. Favoritos permanecem no Inspector, sem estrelas nos cartões. A validação automatizada e a publicação do pacote/manifesto são gates do workflow; a validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
+A versão 1.0.0.149 refina a Biblioteca: contornos apenas no recurso selecionado, miniaturas médias de tema com interface real compactada e sem estrela nos cartões. CI e publicação do pacote/manifesto são gates do workflow; a validação visual/funcional no Foundry VTT 14 build 360 permanece manual.
 
-## Estado do código — 1.0.0.148
 
-A Biblioteca separa cartões, prévias tipadas e estilos do catálogo. A prévia de tema evita conteúdo comprimido em miniaturas de 64 px e aplica tokens específicos de botões, painéis, containers, destaques e campos. A release depende da aprovação do workflow e da publicação do pacote.
+## Estado do código — 1.0.0.149
+
+A Biblioteca remove contornos permanentes dos cartões e usa miniaturas compactas da própria amostra de tema. O favorito continua exclusivo do Inspector. A publicação depende da aprovação do workflow.
+
 
 ## Estado do código — 1.0.0.147 (candidata)\n\nA Biblioteca foi reorganizada em renderizadores de grade, renderizadores de prévia e uma folha de estilos dedicada. A refatoração preserva os contratos de dados e os tamanhos 32/64/128 px. CI de release e teste visual no Foundry são gates distintos; a validação visual permanece manual.\n\n## Estado do código — 1.0.0.144 (publicada)
 
