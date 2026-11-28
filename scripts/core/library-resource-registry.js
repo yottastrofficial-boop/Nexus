@@ -51,6 +51,15 @@ const getBuiltInThemes = catalog => [
   ...(Array.isArray(catalog?.themes) ? catalog.themes : [])
 ];
 
+const getBuiltInThemes = catalog => [
+  ...LIBRARY_THEME_PRESETS.map(preset => {
+    const profile = createDefaultDesignProfile(preset.id);
+    profile.name = preset.name;
+    return { ...preset, palette: profile.palette, profile };
+  }),
+  ...(Array.isArray(catalog?.themes) ? catalog.themes : [])
+];
+
 const COLLECTION_KINDS = Object.freeze({
   components: "component",
   groups: "composition",
@@ -461,6 +470,13 @@ export function createNexusLibraryProvider({ getUser, getWorldFlows = () => [], 
       { id: "script", name: "Segoe Script", family: '"Segoe Script", "Brush Script MT", cursive', description: "Pilha cursiva do sistema, com fallback cursive.", tags: ["fonte", "tipografia", "cursiva", "script"] },
       { id: "georgia", name: "Georgia", family: 'Georgia, "Times New Roman", serif', description: "Serifada de leitura, com contraste visível em títulos e parágrafos.", tags: ["fonte", "tipografia", "serifada"] },
       { id: "monospace", name: "Monospace", family: "ui-monospace, SFMono-Regular, Consolas, monospace", description: "Pilha monoespaçada usada em campos e trechos técnicos.", tags: ["fonte", "tipografia", "monoespaçada", "código"] },
+      { id: "cinzel", name: "Cinzel", family: '"Cinzel", Georgia, serif', description: "Serifada inspirada em inscrições clássicas; adequada a títulos de fantasia e medieval.", tags: ["fonte", "tipografia", "serifada", "medieval", "display"] },
+      { id: "cormorant-garamond", name: "Cormorant Garamond", family: '"Cormorant Garamond", Georgia, serif', description: "Serifada literária de contraste elegante para leitura e atmosferas góticas.", tags: ["fonte", "tipografia", "serifada", "literária", "horror"] },
+      { id: "orbitron", name: "Orbitron", family: '"Orbitron", sans-serif', description: "Geométrica de ficção científica para títulos tecnológicos e interfaces futuristas.", tags: ["fonte", "tipografia", "futurista", "display", "sci-fi"] },
+      { id: "space-grotesk", name: "Space Grotesk", family: '"Space Grotesk", system-ui, sans-serif', description: "Sans-serif contemporânea com caráter técnico para textos e interface futurista.", tags: ["fonte", "tipografia", "futurista", "interface", "sci-fi"] },
+      { id: "im-fell-english-sc", name: "IM Fell English SC", family: '"IM Fell English SC", Georgia, serif', description: "Serifada histórica com textura editorial para títulos de horror cósmico.", tags: ["fonte", "tipografia", "histórica", "horror", "display"] },
+      { id: "barlow-condensed", name: "Barlow Condensed", family: '"Barlow Condensed", Impact, sans-serif', description: "Sans-serif condensada e expressiva para títulos fortes e interfaces de ação.", tags: ["fonte", "tipografia", "condensada", "quadrinhos", "super-heróis"] },
+      { id: "bangers", name: "Bangers", family: '"Bangers", Impact, sans-serif', description: "Display inspirada em letreiramento de quadrinhos; indicada para chamadas curtas.", tags: ["fonte", "tipografia", "quadrinhos", "super-heróis", "display"] }
       { id: "cinzel", name: "Cinzel", family: '"Cinzel", Georgia, serif', description: "Serifada inspirada em inscrições clássicas; adequada a títulos de fantasia e medieval.", tags: ["fonte", "tipografia", "serifada", "medieval", "display"] },
       { id: "cormorant-garamond", name: "Cormorant Garamond", family: '"Cormorant Garamond", Georgia, serif', description: "Serifada literária de contraste elegante para leitura e atmosferas góticas.", tags: ["fonte", "tipografia", "serifada", "literária", "horror"] },
       { id: "orbitron", name: "Orbitron", family: '"Orbitron", sans-serif', description: "Geométrica de ficção científica para títulos tecnológicos e interfaces futuristas.", tags: ["fonte", "tipografia", "futurista", "display", "sci-fi"] },
