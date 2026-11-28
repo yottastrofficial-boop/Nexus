@@ -5,7 +5,7 @@
 - Defer os serviços sem side effects de `resources`, transferências/backup da Biblioteca, registries/capabilities/pipeline/storage de mídia e registry/runtime de lógica.
 - Mantém eager os serviços necessários durante `init`, incluindo Design System, catálogo da Biblioteca e classes ApplicationV2.
 - Adiciona contrato de regressão para a classificação eager/lazy do bootstrap.
-- CI, pacote, release e manifesto serão confirmados pelo workflow oficial; teste funcional no Foundry VTT 14 build 360 permanece manual.
+- CI e suíte de regressão passaram na main; o workflow estável publicará e verificará o asset antes de sincronizar o manifesto. Teste funcional no Foundry VTT 14 build 360 permanece manual.
 
 ## 1.0.0.141 — Lifecycle seguro do Service Registry
 
